@@ -1,115 +1,156 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Suivi Performance (Tracking) V2
-// Input = variation (%) → auto-compute level
+// STRUCTBOARD — Suivi Performance V3 — CLAIR & ACTIONNABLE
+// Warnings lisibles, impact rendement, pas de jargon
 // ═══════════════════════════════════════════════════════════════
 
 function getTrackingStatus(p) {
   const t = p.tracking;
   if (!t || t.level == null) return null;
   const level = parseFloat(t.level);
+  const variation = level - 100;
   const barrier = parseFloat(p.capitalProtection?.barrier) || 0;
   const autocallTrigger = parseFloat(p.earlyRedemption?.trigger) || 100;
   const couponTrigger = parseFloat(p.coupon?.trigger) || autocallTrigger;
-  const distAutocall = autocallTrigger - level;
-  const distBarrier = level - barrier;
-  const couponEligible = level >= couponTrigger;
-  let status, color, icon;
-  if (level >= autocallTrigger) { status = 'Autocall probable'; color = 'var(--green)'; icon = '\u2705'; }
-  else if (level >= couponTrigger) { status = 'Coupon éligible'; color = 'var(--green)'; icon = '\ud83d\udfe2'; }
-  else if (barrier > 0 && distBarrier <= 10) { status = 'Proche barrière'; color = 'var(--red)'; icon = '\ud83d\udd34'; }
-  else if (barrier > 0 && distBarrier <= 20) { status = 'Sous surveillance'; color = 'var(--orange)'; icon = '\ud83d\udfe0'; }
-  else if (level < 100) { status = 'Sous le strike'; color = 'var(--orange)'; icon = '\ud83d\udfe1'; }
-  else { status = 'Au-dessus du strike'; color = 'var(--green)'; icon = '\ud83d\udfe2'; }
+  const distBarrier = barrier > 0 ? level - barrier : 999;
+  const couponOK = level >= couponTrigger;
+  const autocallOK = level >= autocallTrigger;
+  const annualYield = typeof getAnnualizedRate === 'function' ? getAnnualizedRate(p) : (parseFloat(p.coupon?.rate) || 0);
+  const amount = parseFloat(p.investedAmount) || 0;
+  const couponAmount = Math.round(amount * annualYield / 100);
   const daysAgo = t.date ? Math.floor((Date.now() - new Date(t.date).getTime()) / 86400000) : null;
-  return { level, barrier, autocallTrigger, couponTrigger, distAutocall, distBarrier, couponEligible, status, color, icon, date: t.date, daysAgo, note: t.note };
+  return { level, variation, barrier, autocallTrigger, couponTrigger, distBarrier, couponOK, autocallOK, annualYield, amount, couponAmount, date: t.date, daysAgo, note: t.note };
 }
 
+// ═══ CARD: simple one-line status ═══════════════════════════
 function renderTrackingGauge(p) {
   const s = getTrackingStatus(p); if (!s) return '';
-  const variation = s.level - 100;
-  const varText = variation >= 0 ? '+' + variation.toFixed(1) + '%' : variation.toFixed(1) + '%';
-  const min = Math.min(s.barrier - 10, s.level - 10, 40);
-  const max = Math.max(s.autocallTrigger + 10, s.level + 10, 120);
-  const range = max - min;
-  const levelPct = ((s.level - min) / range * 100).toFixed(1);
-  const barrierPct = s.barrier > 0 ? ((s.barrier - min) / range * 100).toFixed(1) : 0;
-  const autocallPct = ((s.autocallTrigger - min) / range * 100).toFixed(1);
-  return `<div style="margin-top:6px;padding:4px 0" title="Niveau: ${s.level}% (${varText}) | Barrière: ${s.barrier}% | Autocall: ${s.autocallTrigger}%">
-    <div style="display:flex;align-items:center;gap:4px;font-size:10px;margin-bottom:2px">
-      <span>${s.icon}</span>
-      <span style="color:${s.color};font-weight:600">${varText}</span>
-      <span style="color:var(--text-dim)">${s.status}</span>
-    </div>
-    <div style="position:relative;height:6px;background:var(--surface);border-radius:3px;overflow:visible">
-      ${s.barrier > 0 ? `<div style="position:absolute;left:${barrierPct}%;top:-1px;bottom:-1px;width:2px;background:var(--red);border-radius:1px"></div>` : ''}
-      <div style="position:absolute;left:${autocallPct}%;top:-1px;bottom:-1px;width:2px;background:var(--green);border-radius:1px"></div>
-      <div style="position:absolute;left:${levelPct}%;top:-2px;width:8px;height:10px;background:${s.color};border-radius:2px;transform:translateX(-4px)"></div>
-      <div style="position:absolute;left:0;top:0;width:${levelPct}%;height:100%;background:${s.color}22;border-radius:3px 0 0 3px"></div>
-    </div>
-  </div>`;
+  const varStr = (s.variation >= 0 ? '+' : '') + s.variation.toFixed(1) + '%';
+  let bgColor, textColor, message;
+
+  if (s.barrier > 0 && s.distBarrier <= 10) {
+    bgColor = 'rgba(229,57,53,0.15)'; textColor = '#E53935';
+    message = `\ud83d\udd34 ${varStr} \u2014 DANGER capital (${s.distBarrier.toFixed(0)}% avant barri\u00e8re)`;
+  } else if (!s.couponOK) {
+    bgColor = 'rgba(255,183,77,0.15)'; textColor = '#FFB74D';
+    message = `\u26a0\ufe0f ${varStr} \u2014 Coupon perdu (manque ${(s.couponTrigger - s.level).toFixed(0)}%)`;
+  } else if (s.autocallOK) {
+    bgColor = 'rgba(76,175,80,0.15)'; textColor = '#4CAF50';
+    message = `\u2705 ${varStr} \u2014 Autocall probable + coupon OK`;
+  } else {
+    bgColor = 'rgba(76,175,80,0.1)'; textColor = '#81C784';
+    message = `\ud83d\udfe2 ${varStr} \u2014 Coupon OK`;
+  }
+
+  return `<div style="margin-top:6px;padding:5px 8px;background:${bgColor};border-radius:4px;font-size:10px;font-weight:600;color:${textColor}">${message}</div>`;
 }
 
+// ═══ FICHE: clear warning boxes ═════════════════════════════
 function renderTrackingSection(p) {
   const s = getTrackingStatus(p);
   const t = p.tracking || {};
-  const variation = s ? (s.level - 100) : 0;
-  const varText = s ? (variation >= 0 ? '+' + variation.toFixed(1) + '%' : variation.toFixed(1) + '%') : '';
+
+  // History with coupon status per year
   const historyHTML = (t.history || []).map(h => {
     const v = h.level - 100;
-    const vt = v >= 0 ? '+' + v.toFixed(1) + '%' : v.toFixed(1) + '%';
+    const vStr = (v >= 0 ? '+' : '') + v.toFixed(1) + '%';
+    const couponTrigger = parseFloat(p.coupon?.trigger) || parseFloat(p.earlyRedemption?.trigger) || 100;
+    const gotCoupon = h.level >= couponTrigger;
     return `<tr style="border-bottom:1px solid var(--border)">
-      <td style="padding:4px 6px;color:var(--text-muted);font-size:11px">Année ${h.year}</td>
-      <td style="padding:4px 6px;font-size:11px">${new Date(h.date).toLocaleDateString('fr-FR')}</td>
-      <td style="padding:4px 6px;font-weight:600;color:${h.level >= 100 ? 'var(--green)' : h.level >= (parseFloat(p.capitalProtection?.barrier)||60) ? 'var(--orange)' : 'var(--red)'}">${vt}</td>
-      <td style="padding:4px 6px;color:var(--text-dim);font-size:10px">(${h.level}%)</td>
+      <td style="padding:6px 8px;font-weight:500">Ann\u00e9e ${h.year}</td>
+      <td style="padding:6px 8px;color:var(--text-muted)">${new Date(h.date).toLocaleDateString('fr-FR')}</td>
+      <td style="padding:6px 8px;font-weight:700;color:${v >= 0 ? 'var(--green)' : v > -20 ? 'var(--orange)' : 'var(--red)'}">${vStr}</td>
+      <td style="padding:6px 8px">${gotCoupon ? '<span style="color:var(--green)">\u2705 Coupon vers\u00e9</span>' : '<span style="color:var(--red)">\u274c Coupon perdu</span>'}</td>
     </tr>`;
   }).join('');
+
+  // Count lost coupons
+  const couponTrigger = parseFloat(p.coupon?.trigger) || parseFloat(p.earlyRedemption?.trigger) || 100;
+  const lostCoupons = (t.history || []).filter(h => h.level < couponTrigger).length;
+  const totalYears = (t.history || []).length;
+  const annualYield = typeof getAnnualizedRate === 'function' ? getAnnualizedRate(p) : (parseFloat(p.coupon?.rate) || 0);
+  const amount = parseFloat(p.investedAmount) || 0;
+  const couponPerYear = Math.round(amount * annualYield / 100);
+  const totalLost = lostCoupons * couponPerYear;
 
   return `<div class="fiche-section">
     <div class="fiche-section-header"><span class="fiche-section-icon">\ud83d\udccd</span><span class="fiche-section-title">Suivi Performance</span></div>
     <div class="fiche-section-body">
       ${s ? `
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px">
-          <div style="background:var(--surface);border-radius:var(--radius-sm);padding:12px;text-align:center">
-            <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;margin-bottom:4px">Variation sous-jacent</div>
-            <div style="font-size:28px;font-weight:700;color:${s.color}">${varText}</div>
-            <div style="font-size:10px;color:var(--text-dim)">${s.icon} ${s.status} (${s.level}% du strike)</div>
+        <!-- SITUATION ACTUELLE — Warning box style -->
+        ${s.barrier > 0 && s.distBarrier <= 10 ? `
+          <div class="fiche-info-box red" style="margin-bottom:12px">
+            <div class="fiche-info-box-title">\ud83d\udd34 DANGER \u2014 Capital menac\u00e9</div>
+            <div class="fiche-info-box-text">Le sous-jacent est \u00e0 <strong>${s.variation >= 0 ? '+' : ''}${s.variation.toFixed(1)}%</strong> du niveau initial.<br>
+            Il ne reste que <strong>${s.distBarrier.toFixed(0)}%</strong> de marge avant la barri\u00e8re de protection (${s.barrier}%).<br>
+            Si le sous-jacent baisse encore de ${s.distBarrier.toFixed(0)}%, <strong>risque de perte en capital</strong>.</div>
           </div>
-          <div style="background:var(--surface);border-radius:var(--radius-sm);padding:12px;text-align:center">
-            <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;margin-bottom:4px">Distance autocall</div>
-            <div style="font-size:24px;font-weight:700;color:${s.distAutocall <= 0 ? 'var(--green)' : 'var(--text)'}">${s.distAutocall <= 0 ? '\u2705' : '+' + s.distAutocall.toFixed(0) + '%'}</div>
-            <div style="font-size:10px;color:var(--text-dim)">Seuil ${s.autocallTrigger}%</div>
+        ` : s.barrier > 0 && s.distBarrier <= 20 ? `
+          <div class="fiche-info-box orange" style="margin-bottom:12px">
+            <div class="fiche-info-box-title">\u26a0\ufe0f VIGILANCE \u2014 Barri\u00e8re en approche</div>
+            <div class="fiche-info-box-text">Le sous-jacent est \u00e0 <strong>${s.variation >= 0 ? '+' : ''}${s.variation.toFixed(1)}%</strong>. Marge restante: <strong>${s.distBarrier.toFixed(0)}%</strong> avant la barri\u00e8re (${s.barrier}%).</div>
           </div>
-          <div style="background:var(--surface);border-radius:var(--radius-sm);padding:12px;text-align:center">
-            <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;margin-bottom:4px">Marge barrière</div>
-            <div style="font-size:24px;font-weight:700;color:${s.distBarrier > 20 ? 'var(--green)' : s.distBarrier > 10 ? 'var(--orange)' : 'var(--red)'}">${s.barrier > 0 ? s.distBarrier.toFixed(0) + '%' : 'N/A'}</div>
-            <div style="font-size:10px;color:var(--text-dim)">${s.barrier > 0 ? 'Barrière ' + s.barrier + '%' : 'Pas de barrière'}</div>
+        ` : ''}
+
+        ${!s.couponOK ? `
+          <div class="fiche-info-box orange" style="margin-bottom:12px">
+            <div class="fiche-info-box-title">\u26a0\ufe0f Coupon NON vers\u00e9 cette ann\u00e9e</div>
+            <div class="fiche-info-box-text">Le sous-jacent est \u00e0 <strong>${s.level.toFixed(1)}%</strong> du strike, mais il faut <strong>${s.couponTrigger}%</strong> pour toucher le coupon.<br>
+            Il manque <strong>${(s.couponTrigger - s.level).toFixed(1)}%</strong> de hausse. ${couponPerYear > 0 ? `<strong>Manque \u00e0 gagner: ${formatNumber(couponPerYear)}\u20ac</strong> cette ann\u00e9e.` : ''}<br>
+            ${p.coupon?.memory ? '\ud83d\udccc <strong>Effet m\u00e9moire</strong>: le coupon sera rattrap\u00e9 si le seuil est atteint plus tard.' : '\u274c Pas d\'effet m\u00e9moire \u2014 ce coupon est d\u00e9finitivement perdu.'}</div>
+          </div>
+        ` : s.autocallOK ? `
+          <div class="fiche-info-box green" style="margin-bottom:12px">
+            <div class="fiche-info-box-title">\u2705 Autocall probable + Coupon vers\u00e9</div>
+            <div class="fiche-info-box-text">Le sous-jacent est \u00e0 <strong>${s.variation >= 0 ? '+' : ''}${s.variation.toFixed(1)}%</strong> du strike, au-dessus du seuil d'autocall (${s.autocallTrigger}%).<br>
+            Le produit devrait \u00eatre rembours\u00e9 anticip\u00e9ment avec le coupon de <strong>${couponPerYear > 0 ? formatNumber(couponPerYear) + '\u20ac' : ''}</strong>.</div>
+          </div>
+        ` : `
+          <div class="fiche-info-box green" style="margin-bottom:12px">
+            <div class="fiche-info-box-title">\ud83d\udfe2 Coupon vers\u00e9 \u2014 Situation normale</div>
+            <div class="fiche-info-box-text">Le sous-jacent est \u00e0 <strong>${s.variation >= 0 ? '+' : ''}${s.variation.toFixed(1)}%</strong>, au-dessus du seuil coupon (${s.couponTrigger}%).<br>
+            Coupon de <strong>${couponPerYear > 0 ? formatNumber(couponPerYear) + '\u20ac' : ''}</strong> vers\u00e9 pour cette p\u00e9riode.
+            ${s.barrier > 0 ? ` Marge de s\u00e9curit\u00e9: <strong>${s.distBarrier.toFixed(0)}%</strong> avant barri\u00e8re.` : ''}</div>
+          </div>
+        `}
+
+        <!-- Résumé chiffré -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
+          <div style="background:var(--surface);border-radius:var(--radius-sm);padding:10px;text-align:center">
+            <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase">Variation</div>
+            <div style="font-size:20px;font-weight:700;color:${s.variation >= 0 ? 'var(--green)' : 'var(--orange)'}">${s.variation >= 0 ? '+' : ''}${s.variation.toFixed(1)}%</div>
+          </div>
+          <div style="background:var(--surface);border-radius:var(--radius-sm);padding:10px;text-align:center">
+            <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase">Coupon</div>
+            <div style="font-size:20px;font-weight:700;color:${s.couponOK ? 'var(--green)' : 'var(--red)'}">${s.couponOK ? '\u2705' : '\u274c'}</div>
+          </div>
+          <div style="background:var(--surface);border-radius:var(--radius-sm);padding:10px;text-align:center">
+            <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase">${s.barrier > 0 ? 'Marge barri\u00e8re' : 'Capital'}</div>
+            <div style="font-size:20px;font-weight:700;color:${s.distBarrier > 20 ? 'var(--green)' : s.distBarrier > 10 ? 'var(--orange)' : 'var(--red)'}">${s.barrier > 0 ? s.distBarrier.toFixed(0) + '%' : '\u2705'}</div>
           </div>
         </div>
-        <div style="position:relative;height:20px;background:var(--surface);border-radius:10px;margin-bottom:12px;overflow:visible">
-          ${s.barrier > 0 ? `<div style="position:absolute;left:${((s.barrier-40)/80*100).toFixed(1)}%;top:0;bottom:0;width:3px;background:var(--red);border-radius:2px;z-index:2"><span style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--red);white-space:nowrap">${s.barrier}%</span></div>` : ''}
-          <div style="position:absolute;left:${((s.autocallTrigger-40)/80*100).toFixed(1)}%;top:0;bottom:0;width:3px;background:var(--green);border-radius:2px;z-index:2"><span style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--green);white-space:nowrap">${s.autocallTrigger}%</span></div>
-          <div style="position:absolute;left:${((s.level-40)/80*100).toFixed(1)}%;top:50%;transform:translate(-50%,-50%);width:16px;height:16px;background:${s.color};border-radius:50%;border:2px solid var(--bg);z-index:3"></div>
-          <div style="position:absolute;left:0;top:0;width:${((s.level-40)/80*100).toFixed(1)}%;height:100%;background:${s.color}33;border-radius:10px 0 0 10px"></div>
+
+        ${lostCoupons > 0 ? `
+          <div class="fiche-alert warn" style="margin-bottom:12px">
+            \u26a0\ufe0f <strong>${lostCoupons} coupon${lostCoupons > 1 ? 's' : ''} perdu${lostCoupons > 1 ? 's' : ''}</strong> sur ${totalYears} ann\u00e9e${totalYears > 1 ? 's' : ''} \u2014 Manque \u00e0 gagner cumul\u00e9: <strong>${formatNumber(totalLost)}\u20ac</strong>
+          </div>
+        ` : ''}
+
+        <div style="font-size:10px;color:var(--text-dim);margin-bottom:12px">
+          \ud83d\udcc5 Derni\u00e8re valorisation: ${new Date(s.date).toLocaleDateString('fr-FR')} ${s.daysAgo > 0 ? '(il y a ' + s.daysAgo + ' jour' + (s.daysAgo > 1 ? 's' : '') + ')' : ''}
         </div>
-        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-dim);margin-bottom:12px">
-          <span>\ud83d\udcc5 Valorisation du ${new Date(s.date).toLocaleDateString('fr-FR')}</span>
-          <span>${s.daysAgo != null ? 'il y a ' + s.daysAgo + ' jour' + (s.daysAgo > 1 ? 's' : '') : ''}</span>
-          <span>${s.couponEligible ? '\u2705 Coupon éligible' : '\u274c Coupon non éligible'}</span>
-        </div>
-      ` : `<div style="text-align:center;padding:20px;color:var(--text-dim)">Aucune valorisation enregistrée</div>`}
-      <div style="display:flex;gap:8px;margin-bottom:12px">
-        <button class="btn primary" style="flex:1" onclick="showTrackingModal()">\ud83d\udccd Mettre à jour</button>
-      </div>
+      ` : `<div style="text-align:center;padding:16px;color:var(--text-dim)">Aucune valorisation. Cliquez ci-dessous pour enregistrer le niveau du sous-jacent.</div>`}
+
+      <button class="btn primary" style="width:100%" onclick="showTrackingModal()">\ud83d\udccd ${s ? 'Mettre \u00e0 jour la valorisation' : 'Enregistrer une valorisation'}</button>
+
       ${(t.history || []).length > 0 ? `
-        <div style="margin-top:8px">
-          <div style="font-size:11px;font-weight:600;color:var(--text-muted);margin-bottom:6px">Historique annuel</div>
+        <div style="margin-top:16px">
+          <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:8px">Historique des coupons</div>
           <table style="width:100%;font-size:12px;border-collapse:collapse">
-            <thead><tr style="border-bottom:1px solid var(--border)">
-              <th style="padding:4px 6px;text-align:left;color:var(--text-dim);font-size:10px">Période</th>
-              <th style="padding:4px 6px;text-align:left;color:var(--text-dim);font-size:10px">Date</th>
-              <th style="padding:4px 6px;text-align:left;color:var(--text-dim);font-size:10px">Variation</th>
-              <th style="padding:4px 6px;text-align:left;color:var(--text-dim);font-size:10px">Niveau</th>
+            <thead><tr style="border-bottom:2px solid var(--border)">
+              <th style="padding:6px 8px;text-align:left;color:var(--text-dim);font-size:10px;text-transform:uppercase">P\u00e9riode</th>
+              <th style="padding:6px 8px;text-align:left;color:var(--text-dim);font-size:10px;text-transform:uppercase">Date</th>
+              <th style="padding:6px 8px;text-align:left;color:var(--text-dim);font-size:10px;text-transform:uppercase">Variation</th>
+              <th style="padding:6px 8px;text-align:left;color:var(--text-dim);font-size:10px;text-transform:uppercase">Coupon</th>
             </tr></thead>
             <tbody>${historyHTML}</tbody>
           </table>
@@ -119,41 +160,28 @@ function renderTrackingSection(p) {
   </div>`;
 }
 
-// ═══ MODAL — Enter variation (e.g. -12, +5) instead of absolute level ═══
+// ═══ MODAL ═══════════════════════════════════════════════════
 function showTrackingModal() {
   const p = app.state.currentProduct; if (!p) return;
   const t = p.tracking || {};
-  // Convert current level to variation for pre-fill
   const currentVariation = t.level != null ? (parseFloat(t.level) - 100) : '';
   const currentVarStr = currentVariation !== '' ? (currentVariation >= 0 ? '+' + currentVariation : currentVariation.toString()) : '';
   const barrier = parseFloat(p.capitalProtection?.barrier) || 0;
-  const autocall = parseFloat(p.earlyRedemption?.trigger) || 100;
-  const couponTrigger = parseFloat(p.coupon?.trigger) || autocall;
+  const couponTrigger = parseFloat(p.coupon?.trigger) || parseFloat(p.earlyRedemption?.trigger) || 100;
 
   const modal = document.getElementById('modal');
   modal.innerHTML = `<div class="modal-overlay" onclick="closeModal()"><div class="modal-content" onclick="event.stopPropagation()">
     <h2 class="modal-title">\ud83d\udccd Valorisation du sous-jacent</h2>
     <div style="color:var(--text-muted);font-size:12px;margin-bottom:16px">${p.name || 'Produit'}</div>
     <div class="form-grid">
-      <div class="form-field"><label>Variation par rapport au niveau initial (%)</label>
-        <div style="display:flex;gap:8px;align-items:center">
-          <input id="f-track-var" type="number" step="0.1" value="${currentVarStr}" placeholder="Ex: -12 ou +5" autofocus style="flex:1"
-            oninput="document.getElementById('f-track-preview').textContent = 'Niveau: ' + (100 + parseFloat(this.value || 0)).toFixed(1) + '% du strike'">
-        </div>
-        <div id="f-track-preview" style="font-size:11px;color:var(--text-muted);margin-top:4px">${currentVariation !== '' ? 'Niveau: ' + (100 + currentVariation).toFixed(1) + '% du strike' : 'Ex: -12 → 88% du strike | +5 → 105%'}</div>
+      <div class="form-field"><label>Hausse ou baisse depuis le niveau initial (%)</label>
+        <input id="f-track-var" type="number" step="0.1" value="${currentVarStr}" placeholder="Ex: -12 ou +5" autofocus
+          oninput="updateTrackingPreview()">
+        <div id="f-track-preview" style="font-size:11px;margin-top:6px;padding:8px;background:var(--surface);border-radius:var(--radius-sm)"></div>
       </div>
       <div class="form-field"><label>Date de valorisation</label>
         <input id="f-track-date" type="date" value="${t.date || new Date().toISOString().split('T')[0]}">
       </div>
-      <div class="form-field full"><label>Note (optionnel)</label>
-        <input id="f-track-note" value="${t.note || ''}" placeholder="Ex: Date de constatation annuelle">
-      </div>
-    </div>
-    <div style="background:var(--surface);border-radius:var(--radius-sm);padding:10px;margin:12px 0;font-size:11px;color:var(--text-muted)">
-      <strong>Repères:</strong>
-      Autocall à ${autocall > 0 ? (autocall-100 >= 0 ? '+' : '') + (autocall-100) + '%' : '?'}
-      | Coupon à ${couponTrigger > 0 ? (couponTrigger-100 >= 0 ? '+' : '') + (couponTrigger-100) + '%' : '?'}
-      ${barrier > 0 ? '| Barrière à ' + (barrier-100) + '%' : ''}
     </div>
     <div class="modal-actions">
       <button class="btn" onclick="closeModal()">Annuler</button>
@@ -161,66 +189,87 @@ function showTrackingModal() {
     </div>
   </div></div>`;
   modal.classList.add('visible');
+
+  // Inject preview function
+  window.updateTrackingPreview = function() {
+    const val = parseFloat(document.getElementById('f-track-var')?.value || 0);
+    const level = 100 + val;
+    const preview = document.getElementById('f-track-preview');
+    if (!preview) return;
+    let html = '';
+    if (level >= couponTrigger) {
+      html += '<span style="color:var(--green)">\u2705 Coupon vers\u00e9</span>';
+    } else {
+      html += '<span style="color:var(--red)">\u274c Coupon perdu \u2014 il manque ' + (couponTrigger - level).toFixed(1) + '% pour atteindre le seuil</span>';
+    }
+    if (barrier > 0) {
+      const dist = level - barrier;
+      if (dist <= 10) html += '<br><span style="color:var(--red)">\ud83d\udd34 DANGER: seulement ' + dist.toFixed(0) + '% avant la barri\u00e8re de ' + barrier + '%</span>';
+      else html += '<br><span style="color:var(--text-dim)">\ud83d\udee1\ufe0f Marge avant barri\u00e8re: ' + dist.toFixed(0) + '%</span>';
+    }
+    preview.innerHTML = html;
+  };
+  window.updateTrackingPreview();
 }
 
 async function handleSaveTracking() {
   const p = app.state.currentProduct; if (!p) return;
   const variation = parseFloat(document.getElementById('f-track-var')?.value);
   const date = document.getElementById('f-track-date')?.value;
-  const note = document.getElementById('f-track-note')?.value || '';
-
-  if (isNaN(variation) || variation < -99 || variation > 200) { showToast('Variation invalide (entre -99 et +200)', 'error'); return; }
+  if (isNaN(variation) || variation < -99 || variation > 200) { showToast('Variation invalide', 'error'); return; }
   if (!date) { showToast('Date requise', 'error'); return; }
-
-  const level = 100 + variation; // -12 → 88, +5 → 105
-
+  const level = 100 + variation;
   if (!p.tracking) p.tracking = { history: [] };
   if (!p.tracking.history) p.tracking.history = [];
-
   const subDate = p.subscriptionDate ? new Date(p.subscriptionDate) : new Date(p.addedDate || Date.now());
-  const obsDate = new Date(date);
-  const yearNum = Math.max(1, Math.ceil((obsDate - subDate) / (365.25 * 86400000)));
-
-  const existingIdx = p.tracking.history.findIndex(h => h.year === yearNum);
+  const yearNum = Math.max(1, Math.ceil((new Date(date) - subDate) / (365.25 * 86400000)));
+  const idx = p.tracking.history.findIndex(h => h.year === yearNum);
   const entry = { date, level, year: yearNum };
-  if (existingIdx >= 0) { p.tracking.history[existingIdx] = entry; }
+  if (idx >= 0) p.tracking.history[idx] = entry;
   else { p.tracking.history.push(entry); p.tracking.history.sort((a, b) => a.year - b.year); }
-
-  p.tracking.level = level;
-  p.tracking.date = date;
-  p.tracking.note = note;
+  p.tracking.level = level; p.tracking.date = date;
   closeModal();
-
   const inPortfolio = app.state.portfolio.find(x => x.id === p.id);
   if (inPortfolio) {
-    inPortfolio.tracking = { ...p.tracking };
-    await github.writeFile(`${CONFIG.DATA_PATH}/portfolio.json`, app.state.portfolio, `[StructBoard] Tracking: ${p.name} = ${variation >= 0 ? '+' : ''}${variation}%`);
+    inPortfolio.tracking = JSON.parse(JSON.stringify(p.tracking));
+    await github.writeFile(`${CONFIG.DATA_PATH}/portfolio.json`, app.state.portfolio, `[StructBoard] ${p.name}: ${variation >= 0 ? '+' : ''}${variation}%`);
   }
   const bankId = p.bankId || _resolveBankId(p.id, p.bankId);
   if (bankId) await app._saveProductFile(bankId, p);
-
-  showToast(`Enregistré: ${variation >= 0 ? '+' : ''}${variation}% (niveau ${level}%)`, 'success');
+  showToast(`Enregistr\u00e9: ${variation >= 0 ? '+' : ''}${variation}%`, 'success');
   app.openProduct(p);
 }
 
+// ═══ DASHBOARD ALERTS — plain French ═══════════════════════
 function getPortfolioAlerts(portfolio) {
   const alerts = [];
   (portfolio || []).forEach(p => {
     const s = getTrackingStatus(p); if (!s) return;
     const name = (p.name || 'Produit').substring(0, 30);
-    const v = s.level - 100;
-    const vt = v >= 0 ? '+' + v.toFixed(0) + '%' : v.toFixed(0) + '%';
+    const varStr = (s.variation >= 0 ? '+' : '') + s.variation.toFixed(0) + '%';
+
     if (s.barrier > 0 && s.distBarrier <= 10) {
-      alerts.push({ type: 'danger', icon: '\ud83d\udd34', text: `${name}: ${vt} — à ${s.distBarrier.toFixed(0)}% de la barrière (${s.barrier}%)`, productId: p.id, bankId: p.bankId });
-    } else if (s.barrier > 0 && s.distBarrier <= 20) {
-      alerts.push({ type: 'warn', icon: '\ud83d\udfe0', text: `${name}: ${vt} — marge ${s.distBarrier.toFixed(0)}% avant barrière`, productId: p.id, bankId: p.bankId });
+      alerts.push({ type: 'danger', icon: '\ud83d\udd34', text: `${name}: ${varStr} \u2014 DANGER capital, ${s.distBarrier.toFixed(0)}% avant barri\u00e8re`, productId: p.id, bankId: p.bankId });
     }
-    if (s.level >= s.autocallTrigger) {
-      alerts.push({ type: 'success', icon: '\u2705', text: `${name}: ${vt} — autocall probable (seuil ${s.autocallTrigger}%)`, productId: p.id, bankId: p.bankId });
+    if (!s.couponOK) {
+      const loss = s.couponAmount > 0 ? ` (${formatNumber(s.couponAmount)}\u20ac perdu)` : '';
+      alerts.push({ type: 'warn', icon: '\u26a0\ufe0f', text: `${name}: ${varStr} \u2014 Coupon perdu cette ann\u00e9e${loss}`, productId: p.id, bankId: p.bankId });
+    }
+    if (s.autocallOK) {
+      alerts.push({ type: 'success', icon: '\u2705', text: `${name}: ${varStr} \u2014 Autocall probable, coupon OK`, productId: p.id, bankId: p.bankId });
     }
     if (s.daysAgo > 90) {
-      alerts.push({ type: 'info', icon: '\u23f0', text: `${name}: dernière valorisation il y a ${s.daysAgo} jours`, productId: p.id, bankId: p.bankId });
+      alerts.push({ type: 'info', icon: '\u23f0', text: `${name}: valorisation obsol\u00e8te (${s.daysAgo}j) \u2014 mettre \u00e0 jour`, productId: p.id, bankId: p.bankId });
     }
   });
   return alerts;
+}
+
+// ═══ Adjusted yield (takes into account lost coupons) ═══════
+function getAdjustedAnnualYield(p) {
+  const s = getTrackingStatus(p);
+  if (!s) return typeof calcProductAnnualYield === 'function' ? calcProductAnnualYield(p) : 0;
+  // If coupon not eligible this year, yield = 0 for this product (unless memory effect)
+  if (!s.couponOK && !p.coupon?.memory) return 0;
+  return s.couponAmount;
 }
