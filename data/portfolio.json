@@ -141,7 +141,7 @@
   {
     "id": "sp_mmxh3jcm_zxdaa",
     "name": "Bond 12M un compartiment de Swiss Life Funds (LUX) (EUR) R - Cap",
-    "bankId": "",
+    "bankId": "swiss-life",
     "type": "autre",
     "underlyingType": "credit",
     "underlyings": [
@@ -279,7 +279,10 @@
     "sourceFile": "Swiss Life (LUX) Bond 12M R EUR Acc.pdf",
     "investedAmount": 109000,
     "addedDate": "2026-03-19",
-    "status": "active"
+    "status": "active",
+    "bankName": "Swiss Life",
+    "subscriptionDate": "2025-12-05",
+    "integrationNotes": ""
   },
   {
     "id": "sp_mmxhg4us_3x9ic",
