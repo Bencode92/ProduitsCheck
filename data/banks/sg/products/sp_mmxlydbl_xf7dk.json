@@ -133,5 +133,16 @@
   "subscriptionDate": "2026-03-19",
   "integrationNotes": "",
   "addedDate": "2026-03-19",
-  "status": "active"
+  "status": "archived",
+  "archived": {
+    "date": "2026-03-19",
+    "reason": "autocall",
+    "reasonLabel": "Autocall déclenché",
+    "capitalReturned": 50000,
+    "capitalGain": 0,
+    "lastCouponReceived": true,
+    "totalCouponsReceived": 0,
+    "gainTotal": 0,
+    "notes": ""
+  }
 }
