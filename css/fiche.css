@@ -1,0 +1,87 @@
+/* ═══ FICHE PRODUIT — Style StudyForge ═══ */
+
+.fiche-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px; }
+.fiche-title-block { flex:1; }
+.fiche-title { font-size:22px; font-weight:800; color:var(--text-bright); line-height:1.2; margin-bottom:6px; letter-spacing:-0.5px; }
+.fiche-subtitle { font-size:12px; color:var(--text-muted); display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.fiche-tag { display:inline-block; padding:3px 10px; border-radius:4px; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.5px; }
+.fiche-tag.bank { border:1px solid; }
+.fiche-tag.type { background:var(--bg-elevated); color:var(--text-muted); }
+.fiche-tag.status { border-radius:20px; }
+
+/* Key metrics row */
+.fiche-metrics { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-bottom:24px; }
+.fiche-metric { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px; text-align:center; position:relative; overflow:hidden; }
+.fiche-metric::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; }
+.fiche-metric.green::before { background:var(--green); }
+.fiche-metric.blue::before { background:var(--accent); }
+.fiche-metric.orange::before { background:var(--orange); }
+.fiche-metric.red::before { background:var(--red); }
+.fiche-metric.purple::before { background:var(--purple); }
+.fiche-metric-label { font-size:9px; text-transform:uppercase; letter-spacing:1px; color:var(--text-dim); font-weight:600; margin-bottom:4px; }
+.fiche-metric-value { font-family:var(--mono); font-size:18px; font-weight:700; color:var(--text-bright); }
+.fiche-metric-sub { font-size:10px; color:var(--text-muted); margin-top:2px; }
+
+/* Section blocks (like StudyForge) */
+.fiche-section { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-lg); margin-bottom:14px; overflow:hidden; }
+.fiche-section-header { padding:16px 20px 14px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:8px; }
+.fiche-section-icon { font-size:16px; }
+.fiche-section-title { font-size:14px; font-weight:700; color:var(--text-bright); }
+.fiche-section-body { padding:16px 20px 20px; }
+
+/* Info box inside sections */
+.fiche-info-box { padding:14px 16px; border-radius:var(--radius-sm); margin-bottom:10px; border-left:3px solid; }
+.fiche-info-box:last-child { margin-bottom:0; }
+.fiche-info-box.green { border-color:var(--green); background:var(--green-dim); }
+.fiche-info-box.blue { border-color:var(--accent); background:var(--accent-glow); }
+.fiche-info-box.orange { border-color:var(--orange); background:var(--orange-dim); }
+.fiche-info-box.red { border-color:var(--red); background:var(--red-dim); }
+.fiche-info-box.purple { border-color:var(--purple); background:var(--purple-dim); }
+.fiche-info-box.neutral { border-color:var(--border-light); background:var(--bg-elevated); }
+.fiche-info-box-title { font-size:12px; font-weight:700; color:var(--text-bright); margin-bottom:4px; }
+.fiche-info-box-text { font-size:12px; line-height:1.6; color:var(--text); }
+.fiche-info-box-text strong { color:var(--text-bright); }
+
+/* Key-value pairs */
+.fiche-kv-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.fiche-kv { display:flex; flex-direction:column; gap:2px; }
+.fiche-kv-label { font-size:9px; text-transform:uppercase; letter-spacing:.8px; color:var(--text-dim); font-weight:600; }
+.fiche-kv-value { font-size:13px; color:var(--text); font-weight:500; }
+.fiche-kv-value.highlight { color:var(--green); font-family:var(--mono); font-weight:600; }
+.fiche-kv-value.warn { color:var(--orange); }
+.fiche-kv-value.danger { color:var(--red); }
+
+/* Scenario cards */
+.fiche-scenarios { display:flex; flex-direction:column; gap:8px; }
+.fiche-scenario { padding:14px 16px; border-radius:var(--radius-sm); border-left:4px solid; }
+.fiche-scenario.good { border-color:var(--green); background:var(--green-dim); }
+.fiche-scenario.mid { border-color:var(--orange); background:var(--orange-dim); }
+.fiche-scenario.bad { border-color:var(--red); background:var(--red-dim); }
+.fiche-scenario-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.8px; margin-bottom:4px; }
+.fiche-scenario.good .fiche-scenario-label { color:var(--green); }
+.fiche-scenario.mid .fiche-scenario-label { color:var(--orange); }
+.fiche-scenario.bad .fiche-scenario-label { color:var(--red); }
+.fiche-scenario-text { font-size:12px; line-height:1.5; color:var(--text); }
+
+/* Risk items */
+.fiche-risks { display:flex; flex-direction:column; gap:6px; }
+.fiche-risk { display:flex; align-items:flex-start; gap:8px; padding:10px 14px; background:var(--red-dim); border-radius:var(--radius-sm); border-left:3px solid var(--red); font-size:12px; line-height:1.5; color:var(--text); }
+.fiche-risk-icon { color:var(--red); flex-shrink:0; margin-top:1px; }
+
+/* Warning/alert boxes */
+.fiche-alert { padding:12px 16px; border-radius:var(--radius-sm); font-size:12px; line-height:1.5; display:flex; align-items:flex-start; gap:8px; margin-bottom:10px; }
+.fiche-alert.warn { background:var(--orange-dim); border:1px solid rgba(251,191,36,.2); color:var(--orange); }
+.fiche-alert.info { background:var(--accent-glow); border:1px solid rgba(59,130,246,.2); color:var(--accent); }
+.fiche-alert.success { background:var(--green-dim); border:1px solid rgba(52,211,153,.2); color:var(--green); }
+
+/* AI Summary — formatted like StudyForge */
+.fiche-ai-summary { font-size:13px; line-height:1.7; color:var(--text); }
+.fiche-ai-summary h2 { font-size:13px; font-weight:700; color:var(--text-bright); text-transform:uppercase; letter-spacing:.5px; margin:16px 0 8px; padding-bottom:6px; border-bottom:1px solid var(--border); }
+.fiche-ai-summary h2:first-child { margin-top:0; }
+.fiche-ai-summary strong { color:var(--text-bright); font-weight:600; }
+.fiche-ai-summary p { margin-bottom:8px; }
+
+@media (max-width:768px) {
+  .fiche-metrics { grid-template-columns:1fr 1fr; }
+  .fiche-kv-grid { grid-template-columns:1fr; }
+}
