@@ -9,9 +9,8 @@ const CONFIG = {
   DATA_PATH: 'data',
   BRANCH: 'main',
 
-  // Cloudflare Worker endpoint for Claude API
-  // À remplacer par ton URL Cloudflare Worker
-  AI_ENDPOINT: 'https://your-worker.your-subdomain.workers.dev/api/chat',
+  // Cloudflare Worker proxy (clé Claude + GitHub déjà configurées côté worker)
+  AI_ENDPOINT: 'https://studyforge-proxy.benoit-comas.workers.dev',
 
   // PDF.js CDN
   PDFJS_CDN: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174',
