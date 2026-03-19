@@ -1,0 +1,146 @@
+{
+  "id": "sp_mmxh3jcm_zxdaa",
+  "name": "Bond 12M un compartiment de Swiss Life Funds (LUX) (EUR) R - Cap",
+  "bankId": "swiss-life",
+  "type": "autre",
+  "underlyingType": "credit",
+  "underlyings": [
+    "Titres de créance à taux fixe et variable",
+    "Titres de créance à court terme",
+    "Instruments du marché monétaire"
+  ],
+  "currency": "EUR",
+  "maturity": "Pas de durée définie",
+  "maturityDate": null,
+  "strikeDate": null,
+  "coupon": {
+    "rate": null,
+    "type": "fixe",
+    "frequency": "Non spécifié",
+    "trigger": null,
+    "triggerDetail": "Rendement adéquat sur période glissante de 12 mois",
+    "memory": false,
+    "maxReturn": null,
+    "totalReturn": null
+  },
+  "capitalProtection": {
+    "protected": false,
+    "level": 0,
+    "type": "aucune",
+    "barrier": null,
+    "barrierType": null,
+    "barrierObservation": null,
+    "inLifeRisk": "Aucune garantie de capital - possibilité de perdre une partie ou la totalité de l'investissement"
+  },
+  "earlyRedemption": {
+    "possible": true,
+    "type": "none",
+    "trigger": null,
+    "triggerDetail": "Rachat possible chaque jour sur demande",
+    "frequency": "quotidien",
+    "startYear": null,
+    "stepDown": false,
+    "stepDownDetail": null
+  },
+  "scenarios": {
+    "favorable": "Rendement annuel moyen de 0,5% - Pour 10 000 EUR investis, obtention de 10 050 EUR après 1 an (scénario observé entre septembre 2023 et septembre 2024)",
+    "median": "Rendement annuel moyen de -5,0% - Pour 10 000 EUR investis, obtention de 9 500 EUR après 1 an (scénario observé entre novembre 2016 et novembre 2017)",
+    "defavorable": "Rendement annuel moyen de -10,8% - Pour 10 000 EUR investis, obtention de 8 920 EUR après 1 an (scénario observé entre septembre 2021 et septembre 2022)"
+  },
+  "risks": [
+    "Perte partielle ou totale de l'investissement",
+    "Risque de change",
+    "Risques opérationnels",
+    "Risque de dépôt",
+    "Risque de solvabilité",
+    "Risque de marché",
+    "Risque de crédit",
+    "Absence de garantie de capital"
+  ],
+  "rawText": "--- PAGE 1 ---\nDocument d’informations clés  Objectif  Le   présent   document   contient   des   informations   essentielles   sur   le   produit   d’investissement.   Il   ne   s’agit   pas   d’un   document   à   caractè  commercial.   Ces informations vous sont fournies conformément à une obligation légale, afin de vous aider à comprendre en quoi consiste ce  produit   et quels risques, coûts, gains et pertes potentiels y sont associés, et de vous aider à le comparer à d’autres produits.  Produit  Bond 12M  un compartiment de Swiss Life Funds (LUX)  (EUR) R - Cap (ISIN : LU2182441571)  Ce PRIIP est agréé au Luxembourg.  Ce produit est géré par Swiss Life Asset Managers Luxembourg, qui fait partie de Swiss Life Group, agréé au Luxembourg et réglementé par la  Commission   de Surveillance du Secteur Financier (CSSF). La CSSF est chargée du contrôle de Swiss Life Asset Managers Luxembourg en ce  qui   concerne ce Document d’informations clés.  Pour plus d’informations sur ce produit, veuillez consulter le site https://invest.swisslife-am.com/ ou appeler le +352 26 75 85 0.  Ce Document d’informations clés est daté du 17 février 2026.  En quoi consiste ce produit ?  Type :   Le   fonds   est   un   compartiment   du   fonds   à   compartiments   multiples   Swiss Life Funds (LUX),   une   société   d’investissement   à   ca  variable   enregistrée au Luxembourg en tant qu’organisme de placement collectif en valeurs mobilières (OPCVM).  Durée :   Ce produit n’a pas de date d’échéance spécifique.  Swiss Life Asset Managers Luxembourg est en droit de résilier le contrat unilatéralement. La Société se réserve le droit de racheter tou  action   qui est ou devient détenue, directement ou indirectement, par des ressortissants des États-Unis, ou si la détention de cette action par  une   personne est illégale ou préjudiciable aux intérêts de la Société, ou autrement interdite en vertu des Statuts.  Objectifs  Le compartiment vise à obtenir un rendement adéquat (brut de frais) sur une période glissante de 12 mois grâce à des investissements axés  sur   les critères ESG.  Le compartiment publie des informations conformément à l’Article 8 du règlement sur la publication d’informations en matière de durabili  dans   le secteur des services financiers (SFDR). Le compartiment investit dans et/ou est exposé à un portefeuille diversifié à l’échelle mondiale  de   titres de créance à taux fixe et variable, de titres de créance à court terme et d’instruments du marché monétaire.  Ces titres sont principalement émis par des emprunteurs libellés en euros et de premier ordre.  Les investissements dans d’autres devises que la devise du compartiment doivent être couverts. Le compartiment investit au moins deux tiers  de   ses actifs conformément à ces dispositions.  Le   compartiment   n’investit   pas   dans   des   actions.   Les   investissements   dans   d’autres   compartiments   sont   limités   à   10 %   des   actifs  investissements   dans des titres convertibles et des titres de créance de qualité inférieure à « Investment Grade » au moment de l'achat sont  respectivement   limités à 10 % et 20 % des actifs. Pour atteindre son objectif, le compartiment peut utiliser des instruments financiers dont les  prix   dépendent de la performance d’autres instruments financiers (dérivés). Afin d’assurer une gestion efficace des actifs, le compartiment peut  prêter   des   titres   à   des   tiers   et   recourt   à   cet   effet   à   différentes   techniques.   Le   compartiment   peut   contracter   des   prêts   dans   c  circonstances,   mais il ne peut emprunter plus de 10 % de ses actifs.  Le compartiment est activement géré (le gestionnaire de portefeuille a un pouvoir discrétionnaire sur la composition de son portefeuille, sous  réserve   des objectifs, politiques et restrictions d’investissement énoncés) mais non géré en référence à un indice de référence.  Vous pouvez demander la vente de votre produit chaque jour. Les dividendes ne sont pas prévus d’être distribués. Tout revenu tiré du produit  est   réinvesti.  Investisseurs de détail visés :   Les investisseurs cibles prévus identifiés par l’initiateur du produit d’investissement packagé de détail et fondé  sur   l’assurance (PRIIP) sont tous des investisseurs, y compris des investisseurs de base, qui ont une connaissance de base des instruments  financiers   pertinents et sans expérience de l’industrie financière, c’est-à-dire des investisseurs novices. Un investisseur de base peut prendre  une   décision d’investissement en connaissance de cause sur la base des documents d’offre réglementés et autorisés ou à l’aide des  informations   de base fournies par le point de vente. L’investisseur cible prévu doit être en mesure de supporter des pertes, car le compartiment  n’offre   aucune garantie de capital et l’horizon temporel d’investissement est de court terme (égal ou inférieur à 3 ans).  Informations supplémentaires sur le produit  Dépositaire du produit :   Sociét",
+  "aiParsed": {
+    "name": "Bond 12M un compartiment de Swiss Life Funds (LUX) (EUR) R - Cap",
+    "type": "autre",
+    "emitter": "Swiss Life Asset Managers Luxembourg",
+    "guarantor": null,
+    "distributor": "Swiss Life Asset Managers Luxembourg",
+    "isin": "LU2182441571",
+    "underlyings": [
+      "Titres de créance à taux fixe et variable",
+      "Titres de créance à court terme",
+      "Instruments du marché monétaire"
+    ],
+    "underlyingType": "credit",
+    "currency": "EUR",
+    "maturity": "Pas de durée définie",
+    "maturityDate": null,
+    "strikeDate": null,
+    "nominal": "Non spécifié",
+    "coupon": {
+      "rate": null,
+      "type": "fixe",
+      "frequency": "Non spécifié",
+      "trigger": null,
+      "triggerDetail": "Rendement adéquat sur période glissante de 12 mois",
+      "memory": false,
+      "maxReturn": null,
+      "totalReturn": null
+    },
+    "capitalProtection": {
+      "protected": false,
+      "level": 0,
+      "type": "aucune",
+      "barrier": null,
+      "barrierType": null,
+      "barrierObservation": null,
+      "inLifeRisk": "Aucune garantie de capital - possibilité de perdre une partie ou la totalité de l'investissement"
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "none",
+      "trigger": null,
+      "triggerDetail": "Rachat possible chaque jour sur demande",
+      "frequency": "quotidien",
+      "startYear": null,
+      "stepDown": false,
+      "stepDownDetail": null
+    },
+    "scenarios": {
+      "favorable": "Rendement annuel moyen de 0,5% - Pour 10 000 EUR investis, obtention de 10 050 EUR après 1 an (scénario observé entre septembre 2023 et septembre 2024)",
+      "median": "Rendement annuel moyen de -5,0% - Pour 10 000 EUR investis, obtention de 9 500 EUR après 1 an (scénario observé entre novembre 2016 et novembre 2017)",
+      "defavorable": "Rendement annuel moyen de -10,8% - Pour 10 000 EUR investis, obtention de 8 920 EUR après 1 an (scénario observé entre septembre 2021 et septembre 2022)"
+    },
+    "advantages": [
+      "Investissement axé sur les critères ESG",
+      "Diversification mondiale",
+      "Gestion active",
+      "Liquidité quotidienne",
+      "Émetteurs de premier ordre",
+      "Couverture de change"
+    ],
+    "risks": [
+      "Perte partielle ou totale de l'investissement",
+      "Risque de change",
+      "Risques opérationnels",
+      "Risque de dépôt",
+      "Risque de solvabilité",
+      "Risque de marché",
+      "Risque de crédit",
+      "Absence de garantie de capital"
+    ],
+    "keyDates": [
+      "17 février 2026 (date du document)"
+    ],
+    "ratings": null,
+    "eligibility": "Investisseurs de détail y compris novices avec horizon court terme (≤ 3 ans) et capacité à supporter des pertes",
+    "summary": "Fonds OPCVM luxembourgeois investissant dans un portefeuille diversifié de titres de créance libellés en euros émis par des emprunteurs de premier ordre. Vise un rendement adéquat sur 12 mois avec critères ESG, sans garantie de capital. Rachat quotidien possible avec risque de perte totale. Classé risque 2/7 avec horizon recommandé de 1 an."
+  },
+  "aiSummary": "## 1. DESCRIPTION\nFonds OPCVM luxembourgeois émis par Swiss Life Asset Managers investissant dans des titres de créance à taux fixe et variable, instruments du marché monétaire libellés en euros. Durée indéterminée avec possibilité de rachat quotidien, visant un rendement adéquat sur période glissante de 12 mois.\n\n## 2. RENDEMENT & COUPONS\nAucun taux de coupon garanti - rendement dépend de la performance du portefeuille obligataire sous-jacent. Objectif : rendement \"adéquat\" sur 12 mois glissants sans précision de seuil ni de plafonnement. Distribution non spécifiée, version capitalisation.\n\n## 3. PROTECTION DU CAPITAL\n**AUCUNE PROTECTION** - Capital non garanti avec possibilité de perdre une partie ou la totalité de l'investissement. Pas de barrière de protection ni de mécanisme de sauvegarde du capital initial.\n\n## 4. REMBOURSEMENT ANTICIPÉ\nRachat possible **quotidiennement** sur simple demande - pas de mécanisme d'autocall. Liquidité quotidienne sans contrainte de durée minimum ni de seuil de déclenchement automatique.\n\n## 5. SCÉNARIOS\n**Favorable:** Rendement annuel de +0,5% - pour 10 000 EUR investis = 10 050 EUR après 1 an\n**Médian:** Rendement annuel de -5,0% - pour 10 000 EUR investis = 9 500 EUR après 1 an  \n**Défavorable:** Rendement annuel de -10,8% - pour 10 000 EUR investis = 8 920 EUR après 1 an\n\n## 6. POINTS D'ATTENTION\n• **Perte en capital** : Aucune garantie, possibilité de perdre jusqu'à 100% de l'investissement\n• **Risque de crédit** : Exposition directe à la solvabilité des émetteurs obligataires du portefeuille\n• **Performance décevante** : Scénario médian à -5% annuel montre la volatilité possible\n• **Absence de coupon garanti** : Rendement entièrement dépendant des conditions de marché\n• **Risque de change résiduel** malgré la couverture annoncée",
+  "sourceFile": "Swiss Life (LUX) Bond 12M R EUR Acc.pdf",
+  "investedAmount": 109000,
+  "addedDate": "2026-03-19",
+  "status": "active",
+  "bankName": "Swiss Life",
+  "subscriptionDate": "2025-12-05",
+  "integrationNotes": ""
+}
