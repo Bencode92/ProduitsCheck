@@ -11,13 +11,11 @@ const CONFIG = {
   PDFJS_CDN: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174',
 };
 
-// Mes entreprises (séparé des banques)
 const MY_ENTITIES = [
   { id: 'bycam', name: 'ByCam', color: '#06D6A0', icon: '🏢' },
   { id: 'cameleons', name: 'Caméleons', color: '#8338EC', icon: '🦎' },
 ];
 
-// Banques / émetteurs / distributeurs
 const BANKS_LIST = [
   { id: 'swiss-life', name: 'Swiss Life', color: '#E63946' },
   { id: 'sg', name: 'Société Générale', color: '#FF006E' },
@@ -35,10 +33,8 @@ const BANKS_LIST = [
   { id: 'vontobel', name: 'Vontobel', color: '#4361EE' },
 ];
 
-// BANKS = juste les banques (pour compatibilité avec le code existant)
 const BANKS = BANKS_LIST;
 
-// Types de produits structurés
 const PRODUCT_TYPES = [
   { id: 'autocall', name: 'Autocall / Phoenix', category: 'conditionnel' },
   { id: 'reverse-convertible', name: 'Reverse Convertible', category: 'conditionnel' },
@@ -54,7 +50,6 @@ const PRODUCT_TYPES = [
   { id: 'autre', name: 'Autre', category: 'autre' },
 ];
 
-// Sous-jacents
 const UNDERLYINGS = [
   { id: 'eurostoxx50', name: 'Eurostoxx 50', class: 'indices-eu', correlation_group: 'eu-equity' },
   { id: 'cac40', name: 'CAC 40', class: 'indices-eu', correlation_group: 'eu-equity' },
@@ -72,7 +67,6 @@ const UNDERLYINGS = [
   { id: 'autre', name: 'Autre', class: 'autre', correlation_group: 'autre' },
 ];
 
-// Corrélations implicites
 const CORRELATION_MATRIX = {
   'eu-equity':     { 'eu-equity': 1.0, 'uk-equity': 0.85, 'us-equity': 0.75, 'asia-equity': 0.55, 'global-equity': 0.85, 'rates': -0.2, 'credit': 0.4, 'commodities': 0.3 },
   'uk-equity':     { 'eu-equity': 0.85, 'uk-equity': 1.0, 'us-equity': 0.7, 'asia-equity': 0.5, 'global-equity': 0.8, 'rates': -0.15, 'credit': 0.35, 'commodities': 0.3 },
@@ -84,26 +78,18 @@ const CORRELATION_MATRIX = {
   'commodities':   { 'eu-equity': 0.3, 'uk-equity': 0.3, 'us-equity': 0.25, 'asia-equity': 0.35, 'global-equity': 0.3, 'rates': 0.1, 'credit': 0.15, 'commodities': 1.0 },
 };
 
-// Statuts des propositions
 const PROPOSAL_STATUS = {
   received:    { label: 'Reçue',       color: '#64B5F6', icon: '📥' },
   analyzing:   { label: 'En analyse',  color: '#FFB74D', icon: '🔍' },
   shortlisted: { label: 'Shortlistée', color: '#AED581', icon: '⭐' },
   rejected:    { label: 'Rejetée',     color: '#E57373', icon: '❌' },
   subscribed:  { label: 'Souscrite',   color: '#81C784', icon: '✅' },
+  archived:    { label: 'Archivé',     color: '#94A3B8', icon: '📦' },
 };
 
-// Poids du scoring
 const SCORING_WEIGHTS = {
-  SAME_UNDERLYING:       35,
-  CORRELATED_UNDERLYING: 20,
-  SAME_PRODUCT_TYPE:     20,
-  SAME_BANK:             10,
-  OVERLAPPING_MATURITY:  15,
-  NEW_UNDERLYING:        25,
-  NEW_PRODUCT_TYPE:      20,
-  NEW_BANK:              15,
-  FILLS_MATURITY_GAP:    15,
-  BETTER_YIELD_RISK:     15,
-  DECORRELATION_BONUS:   10,
+  SAME_UNDERLYING: 35, CORRELATED_UNDERLYING: 20, SAME_PRODUCT_TYPE: 20,
+  SAME_BANK: 10, OVERLAPPING_MATURITY: 15, NEW_UNDERLYING: 25,
+  NEW_PRODUCT_TYPE: 20, NEW_BANK: 15, FILLS_MATURITY_GAP: 15,
+  BETTER_YIELD_RISK: 15, DECORRELATION_BONUS: 10,
 };
