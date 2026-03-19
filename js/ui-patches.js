@@ -1,8 +1,8 @@
-// ═══ PATCHES V7 — Fixed modal timing bug ═══
+// ═══ PATCHES V8 — ByCam/Caméleons entities + optgroups ═══
 
 let _pendingProduct = null;
 
-// ─── Override processUploadedFile — FIXED: delay before showing new modal ──
+// ─── Override processUploadedFile ────────────────────────────
 const _origProcessUploadedFile = processUploadedFile;
 processUploadedFile = async function(file, context, bankId) {
   const progress = document.getElementById('upload-progress');
@@ -12,14 +12,11 @@ processUploadedFile = async function(file, context, bankId) {
     if (status) status.textContent = 'Extraction du texte PDF...';
     const product = await app.handlePDFUpload(file, bankId);
     if (status) status.textContent = 'Analyse terminée !';
-
     if (context === 'portfolio') {
       _pendingProduct = product;
-      // FIX: Don't use closeModal + showModal — replace content directly
       const modal = document.getElementById('modal');
       modal.classList.remove('visible');
       modal.innerHTML = '';
-      // Wait for transition then show new modal
       setTimeout(() => showDirectAddModal(product, bankId), 350);
     } else {
       closeModal();
@@ -32,7 +29,7 @@ processUploadedFile = async function(file, context, bankId) {
   }
 };
 
-// ─── Override handleManualSave — same fix ────────────────────
+// ─── Override handleManualSave ───────────────────────────────
 const _origHandleManualSave = handleManualSave;
 handleManualSave = function(context, bankId) {
   const product = {
@@ -58,7 +55,7 @@ handleManualSave = function(context, bankId) {
   }
 };
 
-// ─── Modal for direct add to portfolio ──────────────────────
+// ─── Modal: direct add to portfolio ─────────────────────────
 function showDirectAddModal(product, bankId) {
   const currentBank = product?.bankId || bankId || '';
   const detectedBank = product?.aiParsed?.distributor || product?.aiParsed?.emitter || '';
@@ -70,10 +67,7 @@ function showDirectAddModal(product, bankId) {
       ${detectedBank ? '<br><strong>Émetteur/Distributeur:</strong> ' + detectedBank : ''}
     </div>
     <div class="form-grid">
-      <div class="form-field"><label>Banque qui te l'a proposé</label><select id="f-direct-bank">
-        <option value="">Sélectionner...</option>
-        ${BANKS.map(b=>`<option value="${b.id}" ${b.id===currentBank || (detectedBank && b.name.toLowerCase().includes(detectedBank.toLowerCase().substring(0,4))) ? 'selected' : ''}>${b.name}</option>`).join('')}
-        <option value="autre">Autre</option></select></div>
+      <div class="form-field"><label>Entreprise / Banque source</label><select id="f-direct-bank">${bankOptionsHTML(currentBank)}</select></div>
       <div class="form-field"><label>Montant investi (€)</label><input id="f-direct-amount" type="number" placeholder="50000" autofocus></div>
       <div class="form-field"><label>Date de souscription réelle</label><input id="f-direct-date" type="date" value="${new Date().toISOString().split('T')[0]}"></div>
       <div class="form-field"><label>Notes</label><input id="f-direct-notes" placeholder="Ex: Via AV SwissLife..."></div>
@@ -96,6 +90,7 @@ async function handleDirectAdd() {
   if (selectedBank && selectedBank !== 'autre') {
     _pendingProduct.bankId = selectedBank;
     _pendingProduct.bankName = BANKS.find(b => b.id === selectedBank)?.name || selectedBank;
+    _pendingProduct.entity = MY_ENTITIES.find(e => e.id === selectedBank)?.name || null;
   }
   if (realDate) _pendingProduct.subscriptionDate = realDate;
   if (notes) _pendingProduct.integrationNotes = notes;
@@ -105,7 +100,7 @@ async function handleDirectAdd() {
   app.render();
 }
 
-// ─── Override showIntegrateModal ─────────────────────────────
+// ─── Modal: integrate proposal ──────────────────────────────
 const _origShowIntegrateModal = showIntegrateModal;
 showIntegrateModal = function(productId, bankId) {
   const product = app._findProduct(productId, bankId);
@@ -114,10 +109,7 @@ showIntegrateModal = function(productId, bankId) {
   modal.innerHTML = `<div class="modal-overlay" onclick="closeModal()"><div class="modal-content" onclick="event.stopPropagation()">
     <h2 class="modal-title">Intégrer au portefeuille</h2>
     <div class="form-grid">
-      <div class="form-field"><label>Banque / Source</label><select id="f-integrate-bank">
-        <option value="">Sélectionner...</option>
-        ${BANKS.map(b=>`<option value="${b.id}" ${b.id===currentBank?'selected':''}>${b.name}</option>`).join('')}
-        <option value="autre">Autre</option></select></div>
+      <div class="form-field"><label>Entreprise / Banque source</label><select id="f-integrate-bank">${bankOptionsHTML(currentBank)}</select></div>
       <div class="form-field"><label>Montant investi (€)</label><input id="f-integrate-amount" type="number" placeholder="50000"></div>
       <div class="form-field"><label>Date de souscription</label><input id="f-integrate-date" type="date" value="${new Date().toISOString().split('T')[0]}"></div>
       <div class="form-field"><label>Notes</label><input id="f-integrate-notes" placeholder="Ex: Via AV SwissLife..."></div>
@@ -135,7 +127,11 @@ handleIntegrate = async function(productId, bankId) {
   const notes = document.getElementById('f-integrate-notes')?.value;
   const product = app._findProduct(productId, bankId);
   if (!product) { showToast('Produit introuvable', 'error'); return; }
-  if (selectedBank && selectedBank !== 'autre') { product.bankId = selectedBank; product.bankName = BANKS.find(b => b.id === selectedBank)?.name || selectedBank; }
+  if (selectedBank && selectedBank !== 'autre') {
+    product.bankId = selectedBank;
+    product.bankName = BANKS.find(b => b.id === selectedBank)?.name || selectedBank;
+    product.entity = MY_ENTITIES.find(e => e.id === selectedBank)?.name || null;
+  }
   if (realDate) product.subscriptionDate = realDate;
   if (notes) product.integrationNotes = notes;
   closeModal();
@@ -147,18 +143,14 @@ handleIntegrate = async function(productId, bankId) {
 
 // ═══ EDIT METADATA MODAL ═══
 function showEditMetadataModal() {
-  const p = app.state.currentProduct;
-  if (!p) return;
+  const p = app.state.currentProduct; if (!p) return;
   const currentBank = p.bankId || '';
   const modal = document.getElementById('modal');
   modal.innerHTML = `<div class="modal-overlay" onclick="closeModal()"><div class="modal-content" onclick="event.stopPropagation()">
     <h2 class="modal-title">✏️ Modifier les informations</h2>
     <div style="color:var(--text-muted);font-size:12px;margin-bottom:16px">${p.name || 'Produit'}</div>
     <div class="form-grid">
-      <div class="form-field"><label>Banque / Source</label><select id="f-edit-bank">
-        <option value="">Non assigné</option>
-        ${BANKS.map(b=>`<option value="${b.id}" ${b.id===currentBank?'selected':''}>${b.name}</option>`).join('')}
-        <option value="autre">Autre</option></select></div>
+      <div class="form-field"><label>Entreprise / Banque source</label><select id="f-edit-bank">${bankOptionsHTML(currentBank)}</select></div>
       <div class="form-field"><label>Montant investi (€)</label><input id="f-edit-amount" type="number" value="${p.investedAmount || ''}" placeholder="50000"></div>
       <div class="form-field"><label>Date de souscription</label><input id="f-edit-date" type="date" value="${p.subscriptionDate || p.addedDate || ''}"></div>
       <div class="form-field"><label>Notes</label><input id="f-edit-notes" value="${p.integrationNotes || ''}" placeholder="Ex: Via AV SwissLife..."></div>
@@ -177,15 +169,18 @@ async function handleEditMetadata() {
   const amount = document.getElementById('f-edit-amount')?.value;
   const realDate = document.getElementById('f-edit-date')?.value;
   const notes = document.getElementById('f-edit-notes')?.value;
-  if (selectedBank && selectedBank !== 'autre') { p.bankId = selectedBank; p.bankName = BANKS.find(b => b.id === selectedBank)?.name || selectedBank; }
-  else if (!selectedBank) { p.bankId = ''; p.bankName = ''; }
+  if (selectedBank && selectedBank !== 'autre') {
+    p.bankId = selectedBank;
+    p.bankName = BANKS.find(b => b.id === selectedBank)?.name || selectedBank;
+    p.entity = MY_ENTITIES.find(e => e.id === selectedBank)?.name || null;
+  } else if (!selectedBank) { p.bankId = ''; p.bankName = ''; p.entity = null; }
   if (amount) p.investedAmount = parseFloat(amount);
   if (realDate) p.subscriptionDate = realDate;
   p.integrationNotes = notes || '';
   closeModal();
   const inPortfolio = app.state.portfolio.find(x => x.id === p.id);
   if (inPortfolio) {
-    Object.assign(inPortfolio, { bankId: p.bankId, bankName: p.bankName, investedAmount: p.investedAmount, subscriptionDate: p.subscriptionDate, integrationNotes: p.integrationNotes });
+    Object.assign(inPortfolio, { bankId: p.bankId, bankName: p.bankName, entity: p.entity, investedAmount: p.investedAmount, subscriptionDate: p.subscriptionDate, integrationNotes: p.integrationNotes });
     await github.writeFile(`${CONFIG.DATA_PATH}/portfolio.json`, app.state.portfolio, `[StructBoard] Update: ${p.name || p.id}`);
   }
   const resolvedBankId = p.bankId || _resolveBankId(p.id, p.bankId);
@@ -213,13 +208,16 @@ renderProductSheet = function(container, state) {
     subtitleEl.querySelectorAll('.fiche-tag.bank').forEach(tag => {
       const txt = tag.textContent.trim();
       if (txt === '\u2014' || txt.toUpperCase() === 'UNDEFINED' || txt === '') {
-        tag.textContent = '\u270f\ufe0f Assigner une banque';
+        tag.textContent = '\u270f\ufe0f Assigner entreprise / banque';
         tag.style.color = 'var(--accent)';
         tag.style.borderColor = 'var(--accent)';
         tag.style.cursor = 'pointer';
       } else {
         tag.style.cursor = 'pointer';
         tag.title = 'Cliquer pour modifier';
+        // Add entity icon if it's an entity
+        const entity = MY_ENTITIES.find(e => e.id === p.bankId);
+        if (entity) { tag.textContent = (entity.icon || '\ud83c\udfe2') + ' ' + tag.textContent; }
       }
       tag.onclick = (e) => { e.stopPropagation(); showEditMetadataModal(); };
     });
@@ -240,7 +238,7 @@ renderProductSheet = function(container, state) {
     if (!p.subscriptionDate && !p.integrationNotes) {
       const editSpan = document.createElement('span');
       editSpan.style.cssText = 'color:var(--accent);font-size:11px;cursor:pointer;text-decoration:underline';
-      editSpan.textContent = '\u270f\ufe0f Ajouter banque / date / notes';
+      editSpan.textContent = '\u270f\ufe0f Ajouter entreprise / date / notes';
       editSpan.onclick = (e) => { e.stopPropagation(); showEditMetadataModal(); };
       subtitleEl.appendChild(editSpan);
     }
@@ -251,7 +249,7 @@ renderProductSheet = function(container, state) {
     const editBtn = document.createElement('button');
     editBtn.className = 'btn lg';
     editBtn.style.cssText = 'width:100%';
-    editBtn.innerHTML = '\u270f\ufe0f Modifier banque / date / notes';
+    editBtn.innerHTML = '\u270f\ufe0f Modifier entreprise / date / notes';
     editBtn.onclick = () => showEditMetadataModal();
     sidebar.insertBefore(editBtn, sidebar.firstChild);
   }
@@ -260,8 +258,10 @@ renderProductSheet = function(container, state) {
     const notice = container.querySelector('.integrated-notice');
     if (notice) {
       const rd = p.subscriptionDate ? new Date(p.subscriptionDate).toLocaleDateString('fr-FR') : formatDate(p.addedDate);
-      const bi = p.bankId ? (BANKS.find(b => b.id === p.bankId)?.name || p.bankId) : '';
-      notice.innerHTML = `\u2705 Intégré le ${rd}${bi ? '<br>Source: ' + bi : ''}<br>Montant: ${formatNumber(p.investedAmount)}\u20ac${p.integrationNotes ? '<br><span style="color:var(--text-dim);font-size:11px">' + p.integrationNotes + '</span>' : ''}`;
+      const bankInfo = p.bankId ? (BANKS.find(b => b.id === p.bankId)?.name || p.bankId) : '';
+      const entityInfo = MY_ENTITIES.find(e => e.id === p.bankId);
+      const sourceLabel = entityInfo ? (entityInfo.icon + ' ' + entityInfo.name) : bankInfo;
+      notice.innerHTML = `\u2705 Intégré le ${rd}${sourceLabel ? '<br>Source: ' + sourceLabel : ''}<br>Montant: ${formatNumber(p.investedAmount)}\u20ac${p.integrationNotes ? '<br><span style="color:var(--text-dim);font-size:11px">' + p.integrationNotes + '</span>' : ''}`;
     }
   }
 };
