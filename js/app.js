@@ -1,5 +1,6 @@
 // ═══════════════════════════════════════════════════════════════
 // STRUCTBOARD — Main Application
+// Pas de token à saisir : le proxy Cloudflare gère tout
 // ═══════════════════════════════════════════════════════════════
 
 class StructBoard {
@@ -13,7 +14,6 @@ class StructBoard {
   _notify() { this.listeners.forEach(fn => fn(this.state)); }
 
   async init() {
-    if (!github.isAuthenticated()) { this._showTokenModal(); return; }
     this.setState({ loading: true });
     try {
       const portfolio = await github.readFile(`${CONFIG.DATA_PATH}/portfolio.json`);
@@ -30,15 +30,6 @@ class StructBoard {
       this.setState({ loading: false });
       showToast('Erreur de chargement des données', 'error');
     }
-  }
-
-  _showTokenModal() { const m = document.getElementById('token-modal'); if (m) m.classList.add('visible'); }
-
-  async validateAndSetToken(token) {
-    github.setToken(token);
-    const valid = await github.validateToken();
-    if (valid) { document.getElementById('token-modal')?.classList.remove('visible'); await this.init(); return true; }
-    else { github.logout(); showToast('Token GitHub invalide', 'error'); return false; }
   }
 
   async addToPortfolio(product, investedAmount) {
