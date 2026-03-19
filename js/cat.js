@@ -1,7 +1,29 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Module Comptes à Terme (CAT)
-// Gestion, suivi, simulation et optimisation de placement
+// STRUCTBOARD — Module Épargne (CAT + Parts Sociales)
+// Gestion, suivi, extraction PDF, simulation, optimisation
+// Tout sauvegardé sur GitHub via Cloudflare Worker
 // ═══════════════════════════════════════════════════════════════
+
+const PLACEMENT_TYPES = [
+  { id: 'cat', name: 'Compte à Terme', icon: '🏦', color: 'var(--green)' },
+  { id: 'parts-sociales', name: 'Parts Sociales', icon: '🤝', color: 'var(--purple)' },
+];
+
+const EXIT_CONDITIONS = [
+  { id: 'maturity', name: 'À maturité' },
+  { id: 'monthly', name: 'Sortie mensuelle' },
+  { id: 'quarterly', name: 'Sortie trimestrielle' },
+  { id: 'annual', name: 'Sortie annuelle' },
+  { id: 'anytime', name: 'Libre à tout moment' },
+  { id: 'notice', name: 'Avec préavis' },
+];
+
+const INTEREST_PAYMENTS = [
+  { id: 'maturity', name: 'À maturité' },
+  { id: 'monthly', name: 'Mensuel' },
+  { id: 'quarterly', name: 'Trimestriel' },
+  { id: 'annual', name: 'Annuel' },
+];
 
 class CATManager {
   constructor() {
@@ -10,7 +32,6 @@ class CATManager {
     this.objectives = { monthlyNeed: 0, liquidityReserve: 0, maxPerBank: 100000, horizon: 'mixed', notes: '' };
   }
 
-  // ─── Chargement depuis GitHub ─────────────────────────────
   async load() {
     const [deposits, rates, objectives] = await Promise.all([
       github.readFile(`${CONFIG.DATA_PATH}/cat/deposits.json`),
@@ -22,28 +43,18 @@ class CATManager {
     if (objectives) this.objectives = objectives;
   }
 
-  // ─── Sauvegardes ──────────────────────────────────────────
-  async saveDeposits() {
-    await github.writeFile(`${CONFIG.DATA_PATH}/cat/deposits.json`, this.deposits, '[StructBoard] Update CAT deposits');
-  }
-  async saveRates() {
-    await github.writeFile(`${CONFIG.DATA_PATH}/cat/rates.json`, this.rates, '[StructBoard] Update CAT rates');
-  }
-  async saveObjectives() {
-    await github.writeFile(`${CONFIG.DATA_PATH}/cat/objectives.json`, this.objectives, '[StructBoard] Update CAT objectives');
-  }
+  async saveDeposits() { await github.writeFile(`${CONFIG.DATA_PATH}/cat/deposits.json`, this.deposits, '[StructBoard] Update placements'); }
+  async saveRates() { await github.writeFile(`${CONFIG.DATA_PATH}/cat/rates.json`, this.rates, '[StructBoard] Update taux'); }
+  async saveObjectives() { await github.writeFile(`${CONFIG.DATA_PATH}/cat/objectives.json`, this.objectives, '[StructBoard] Update objectifs'); }
 
-  // ─── CRUD Dépôts ─────────────────────────────────────────
   addDeposit(deposit) {
-    deposit.id = deposit.id || 'cat_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 5);
+    deposit.id = deposit.id || 'pl_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 5);
     deposit.createdDate = new Date().toISOString().split('T')[0];
-    // Calculer la date de maturité si pas fournie
-    if (!deposit.maturityDate && deposit.startDate && deposit.durationMonths) {
+    if (!deposit.maturityDate && deposit.startDate && deposit.durationMonths && deposit.durationMonths > 0) {
       const start = new Date(deposit.startDate);
       start.setMonth(start.getMonth() + parseInt(deposit.durationMonths));
       deposit.maturityDate = start.toISOString().split('T')[0];
     }
-    // Calculer les intérêts estimés
     deposit.estimatedInterest = this._calcInterest(deposit);
     this.deposits.push(deposit);
     return deposit;
@@ -57,11 +68,8 @@ class CATManager {
     return this.deposits[idx];
   }
 
-  removeDeposit(id) {
-    this.deposits = this.deposits.filter(d => d.id !== id);
-  }
+  removeDeposit(id) { this.deposits = this.deposits.filter(d => d.id !== id); }
 
-  // ─── Calcul intérêts ─────────────────────────────────────
   _calcInterest(deposit) {
     const amount = parseFloat(deposit.amount) || 0;
     const rate = parseFloat(deposit.rate) || 0;
@@ -69,67 +77,99 @@ class CATManager {
     return Math.round(amount * (rate / 100) * (months / 12) * 100) / 100;
   }
 
+  // ─── PDF Parsing pour conditions CAT/PS ───────────────────
+  async parsePDFConditions(file) {
+    const rawText = await pdfExtractor.extractText(file);
+    if (!rawText || rawText.trim().length < 30) throw new Error('PDF vide ou illisible');
+
+    const prompt = `Tu es un analyste financier. Extrais les informations d'un document de conditions pour un Compte à Terme ou Parts Sociales.
+
+TEXTE DU DOCUMENT:
+---
+${rawText.substring(0, 6000)}
+---
+
+Réponds UNIQUEMENT en JSON valide (pas de markdown):
+{
+  "productType": "cat ou parts-sociales",
+  "productName": "Nom du produit",
+  "emitter": "Banque ou organisme",
+  "rate": "Taux annuel en % (nombre)",
+  "rateType": "fixe/variable/progressif",
+  "rateDetails": "Détails du taux si progressif ou variable",
+  "minAmount": "Montant minimum (nombre ou null)",
+  "maxAmount": "Montant maximum (nombre ou null)",
+  "durationMonths": "Durée en mois (nombre ou null pour indéterminé)",
+  "entryCondition": "monthly/quarterly/annual/anytime/specific",
+  "exitCondition": "maturity/monthly/quarterly/annual/anytime/notice",
+  "exitNotice": "Délai de préavis si applicable",
+  "exitPenalty": "Pénalité de sortie anticipée si applicable",
+  "interestPayment": "maturity/monthly/quarterly/annual",
+  "autoRenew": "true/false",
+  "capitalGuarantee": "true/false",
+  "fiscality": "Description fiscalité si mentionnée",
+  "conditions": ["Liste des conditions particulières"],
+  "summary": "Résumé en 2-3 phrases"
+}`;
+
+    const res = await fetch(CONFIG.AI_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1500, messages: [{ role: 'user', content: prompt }] }),
+    });
+    if (!res.ok) throw new Error('Erreur IA: ' + res.status);
+    const data = await res.json();
+    let text = data.content?.map(b => b.text || '').join('') || '';
+    text = text.replace(/^```json?\s*/i, '').replace(/\s*```$/i, '').trim();
+    return { parsed: JSON.parse(text), rawText: rawText.substring(0, 3000) };
+  }
+
   // ─── Taux du marché ───────────────────────────────────────
-  addRate(bankId, bankName, durationMonths, rate, date) {
-    // Retirer l'ancien taux pour cette banque/durée
-    this.rates.rates = this.rates.rates.filter(r => !(r.bankId === bankId && r.durationMonths === durationMonths));
-    this.rates.rates.push({ bankId, bankName, durationMonths, rate: parseFloat(rate), date: date || new Date().toISOString().split('T')[0] });
+  addRate(bankId, bankName, durationMonths, rate, productType, date) {
+    this.rates.rates = this.rates.rates.filter(r => !(r.bankId === bankId && r.durationMonths === durationMonths && r.productType === productType));
+    this.rates.rates.push({ bankId, bankName, durationMonths, rate: parseFloat(rate), productType: productType || 'cat', date: date || new Date().toISOString().split('T')[0] });
     this.rates.lastUpdated = new Date().toISOString();
   }
 
-  getBestRates(durationMonths) {
+  getBestRates(durationMonths, productType) {
     return this.rates.rates
-      .filter(r => r.durationMonths === durationMonths)
+      .filter(r => r.durationMonths === durationMonths && (!productType || r.productType === productType))
       .sort((a, b) => b.rate - a.rate);
   }
 
   // ─── Statistiques ─────────────────────────────────────────
   getStats() {
     const active = this.deposits.filter(d => d.status === 'active');
+    const cats = active.filter(d => d.productType === 'cat');
+    const ps = active.filter(d => d.productType === 'parts-sociales');
     const totalInvested = active.reduce((s, d) => s + (parseFloat(d.amount) || 0), 0);
     const totalInterest = active.reduce((s, d) => s + (d.estimatedInterest || 0), 0);
-    const avgRate = active.length > 0
-      ? active.reduce((s, d) => s + (parseFloat(d.rate) || 0), 0) / active.length : 0;
-    const weightedRate = totalInvested > 0
-      ? active.reduce((s, d) => s + (parseFloat(d.rate) || 0) * (parseFloat(d.amount) || 0), 0) / totalInvested : 0;
+    const weightedRate = totalInvested > 0 ? active.reduce((s, d) => s + (parseFloat(d.rate) || 0) * (parseFloat(d.amount) || 0), 0) / totalInvested : 0;
 
-    // Par banque
     const byBank = {};
     active.forEach(d => {
-      if (!byBank[d.bankId]) byBank[d.bankId] = { name: d.bankName || d.bankId, total: 0, count: 0 };
+      if (!byBank[d.bankId]) byBank[d.bankId] = { name: d.bankName || d.bankId, total: 0, count: 0, cats: 0, ps: 0 };
       byBank[d.bankId].total += parseFloat(d.amount) || 0;
       byBank[d.bankId].count++;
+      if (d.productType === 'parts-sociales') byBank[d.bankId].ps++; else byBank[d.bankId].cats++;
     });
 
-    // Maturités à venir (prochains 12 mois)
     const now = new Date();
     const in12m = new Date(); in12m.setMonth(in12m.getMonth() + 12);
-    const upcoming = active
-      .filter(d => d.maturityDate && new Date(d.maturityDate) >= now && new Date(d.maturityDate) <= in12m)
+    const upcoming = active.filter(d => d.maturityDate && new Date(d.maturityDate) >= now && new Date(d.maturityDate) <= in12m)
       .sort((a, b) => new Date(a.maturityDate) - new Date(b.maturityDate));
-
-    // Alerte FGDR (>100k€ par banque)
     const fgdrAlerts = Object.entries(byBank).filter(([, v]) => v.total > this.objectives.maxPerBank);
 
-    return {
-      totalDeposits: active.length,
-      totalInvested,
-      totalInterest,
-      avgRate,
-      weightedRate,
-      byBank,
-      upcoming,
-      fgdrAlerts,
-      maturedCount: this.deposits.filter(d => d.status === 'matured').length,
-    };
+    return { totalDeposits: active.length, catCount: cats.length, psCount: ps.length, totalInvested, totalInterest, weightedRate, byBank, upcoming, fgdrAlerts,
+      catTotal: cats.reduce((s, d) => s + (parseFloat(d.amount) || 0), 0),
+      psTotal: ps.reduce((s, d) => s + (parseFloat(d.amount) || 0), 0) };
   }
 
-  // ─── Timeline des maturités ───────────────────────────────
   getMaturityTimeline() {
     const active = this.deposits.filter(d => d.status === 'active' && d.maturityDate);
     const months = {};
     active.forEach(d => {
-      const key = d.maturityDate.substring(0, 7); // YYYY-MM
+      const key = d.maturityDate.substring(0, 7);
       if (!months[key]) months[key] = { month: key, total: 0, deposits: [] };
       months[key].total += parseFloat(d.amount) || 0;
       months[key].deposits.push(d);
@@ -137,31 +177,14 @@ class CATManager {
     return Object.values(months).sort((a, b) => a.month.localeCompare(b.month));
   }
 
-  // ═══════════════════════════════════════════════════════════
-  // SIMULATEUR / OPTIMISEUR
-  // ═══════════════════════════════════════════════════════════
-
-  // Optimise la répartition d'un montant total selon :
-  // - Besoin mensuel (monthlyNeed)
-  // - Réserve de liquidité
-  // - Taux disponibles
-  // - Plafond FGDR par banque
-  // Stratégie: échelle de maturités (ladder) + maximisation du rendement
+  // ─── Simulateur ───────────────────────────────────────────
   simulate(totalAmount, options = {}) {
-    const monthlyNeed = options.monthlyNeed || this.objectives.monthlyNeed || 0;
     const reserve = options.liquidityReserve || this.objectives.liquidityReserve || 0;
     const maxPerBank = options.maxPerBank || this.objectives.maxPerBank || 100000;
     const horizonMonths = options.horizonMonths || 36;
-
     let available = totalAmount - reserve;
-    if (available <= 0) {
-      return {
-        error: 'Le montant disponible après réserve de liquidité est insuffisant.',
-        totalAmount, reserve, available: 0, allocations: [], monthlyIncome: 0, totalInterest: 0, avgRate: 0,
-      };
-    }
+    if (available <= 0) return { error: 'Montant insuffisant après réserve.', totalAmount, reserve, allocations: [], totalInterest: 0, weightedRate: 0 };
 
-    // Récupérer les meilleurs taux par durée
     const durations = [1, 3, 6, 12, 18, 24, 36].filter(d => d <= horizonMonths);
     const ratesByDuration = {};
     durations.forEach(d => {
@@ -170,103 +193,39 @@ class CATManager {
     });
 
     const allocations = [];
-
-    // 1. Couverture du besoin mensuel: placer en échelons courts (1-12 mois)
-    if (monthlyNeed > 0) {
-      const monthsToCover = Math.min(12, horizonMonths);
-      for (let m = 1; m <= monthsToCover && available > 0; m++) {
-        const amount = Math.min(monthlyNeed, available);
-        const duration = m;
-        const closestDuration = durations.reduce((prev, curr) => Math.abs(curr - duration) < Math.abs(prev - duration) ? curr : prev);
-        const bestRate = ratesByDuration[closestDuration]?.[0];
-
-        if (bestRate && amount > 0) {
-          // Vérifier le plafond FGDR
-          const bankAlloc = allocations.filter(a => a.bankId === bestRate.bankId).reduce((s, a) => s + a.amount, 0);
-          let allocBank = bestRate;
-          if (bankAlloc + amount > maxPerBank && ratesByDuration[closestDuration]?.length > 1) {
-            allocBank = ratesByDuration[closestDuration][1]; // fallback sur la 2ème banque
-          }
-
+    // Maximiser le rendement: du plus long au plus court
+    const sortedDurations = [...durations].reverse();
+    for (const dur of sortedDurations) {
+      if (available <= 0) break;
+      const rates = ratesByDuration[dur] || [];
+      for (const rateInfo of rates) {
+        if (available <= 0) break;
+        const bankAlloc = allocations.filter(a => a.bankId === rateInfo.bankId).reduce((s, a) => s + a.amount, 0);
+        const maxForBank = Math.max(0, maxPerBank - bankAlloc);
+        const amount = Math.min(available, maxForBank);
+        if (amount > 1000) {
           allocations.push({
-            purpose: 'mensuel',
-            month: m,
-            amount: Math.round(amount),
-            durationMonths: closestDuration,
-            bankId: allocBank.bankId,
-            bankName: allocBank.bankName,
-            rate: allocBank.rate,
-            maturityMonth: m,
-            interest: Math.round(amount * (allocBank.rate / 100) * (closestDuration / 12) * 100) / 100,
+            amount: Math.round(amount), durationMonths: dur, bankId: rateInfo.bankId, bankName: rateInfo.bankName,
+            rate: rateInfo.rate, interest: Math.round(amount * (rateInfo.rate / 100) * (dur / 12) * 100) / 100,
           });
           available -= amount;
         }
       }
     }
 
-    // 2. Le reste: maximiser le rendement en long terme
-    if (available > 0) {
-      const longDurations = durations.filter(d => d >= 12).reverse(); // du plus long au plus court
-      if (longDurations.length === 0) longDurations.push(durations[durations.length - 1]);
-
-      for (const dur of longDurations) {
-        if (available <= 0) break;
-        const rates = ratesByDuration[dur] || [];
-        for (const rateInfo of rates) {
-          if (available <= 0) break;
-          const bankAlloc = allocations.filter(a => a.bankId === rateInfo.bankId).reduce((s, a) => s + a.amount, 0);
-          const maxForBank = Math.max(0, maxPerBank - bankAlloc);
-          const amount = Math.min(available, maxForBank);
-          if (amount > 0) {
-            allocations.push({
-              purpose: 'rendement',
-              amount: Math.round(amount),
-              durationMonths: dur,
-              bankId: rateInfo.bankId,
-              bankName: rateInfo.bankName,
-              rate: rateInfo.rate,
-              interest: Math.round(amount * (rateInfo.rate / 100) * (dur / 12) * 100) / 100,
-            });
-            available -= amount;
-          }
-        }
-      }
-    }
-
-    // Résultats
     const totalInterest = allocations.reduce((s, a) => s + (a.interest || 0), 0);
-    const monthlyIncome = monthlyNeed > 0 ? allocations.filter(a => a.purpose === 'mensuel').reduce((s, a) => s + a.amount, 0) / 12 : 0;
-    const weightedRate = totalAmount > 0
-      ? allocations.reduce((s, a) => s + a.rate * a.amount, 0) / allocations.reduce((s, a) => s + a.amount, 0) : 0;
-
-    return {
-      totalAmount,
-      reserve,
-      allocated: allocations.reduce((s, a) => s + a.amount, 0),
-      remaining: Math.round(available),
-      allocations,
-      totalInterest: Math.round(totalInterest),
-      monthlyIncome: Math.round(monthlyIncome),
-      weightedRate: Math.round(weightedRate * 100) / 100,
-      horizonMonths,
-    };
+    const allocated = allocations.reduce((s, a) => s + a.amount, 0);
+    const weightedRate = allocated > 0 ? allocations.reduce((s, a) => s + a.rate * a.amount, 0) / allocated : 0;
+    return { totalAmount, reserve, allocated, remaining: Math.round(available), allocations, totalInterest: Math.round(totalInterest), weightedRate: Math.round(weightedRate * 100) / 100, horizonMonths };
   }
 
-  _estimateRate(months) {
-    // Estimation grossière si pas de taux renseigné
-    if (months <= 1) return 2.5;
-    if (months <= 3) return 2.8;
-    if (months <= 6) return 3.0;
-    if (months <= 12) return 3.2;
-    if (months <= 24) return 3.0;
-    return 2.8;
-  }
+  _estimateRate(m) { if (m<=1) return 2.5; if (m<=3) return 2.8; if (m<=6) return 3.0; if (m<=12) return 3.2; if (m<=24) return 3.0; return 2.8; }
 }
 
 const catManager = new CATManager();
 
 // ═══════════════════════════════════════════════════════════════
-// CAT UI Rendering
+// UI RENDERING — CAT + Parts Sociales
 // ═══════════════════════════════════════════════════════════════
 
 function renderCAT(container) {
@@ -274,170 +233,285 @@ function renderCAT(container) {
   const timeline = catManager.getMaturityTimeline();
 
   container.innerHTML = `
-    <!-- CAT Stats -->
     <div class="stats-row">
-      <div class="stat-card blue"><div class="stat-label">CAT Actifs</div><div class="stat-value">${stats.totalDeposits}</div><div class="stat-sub">${Object.keys(stats.byBank).length} banques</div></div>
-      <div class="stat-card green"><div class="stat-label">Total Placé</div><div class="stat-value">${formatNumber(stats.totalInvested)}€</div><div class="stat-sub">Intérêts: ${formatNumber(stats.totalInterest)}€</div></div>
-      <div class="stat-card orange"><div class="stat-label">Taux Moyen Pondéré</div><div class="stat-value">${stats.weightedRate ? formatPct(stats.weightedRate) : '—'}</div><div class="stat-sub">Simple: ${stats.avgRate ? formatPct(stats.avgRate) : '—'}</div></div>
-      <div class="stat-card purple"><div class="stat-label">Prochaine Échéance</div><div class="stat-value">${stats.upcoming.length > 0 ? formatDate(stats.upcoming[0].maturityDate) : '—'}</div>
-        <div class="stat-sub">${stats.upcoming.length > 0 ? formatNumber(stats.upcoming[0].amount)+'€' : 'Aucune'}</div></div>
-      <div class="stat-card cyan"><div class="stat-label">Objectif Mensuel</div><div class="stat-value">${catManager.objectives.monthlyNeed ? formatNumber(catManager.objectives.monthlyNeed)+'€' : '—'}</div><div class="stat-sub">Réserve: ${formatNumber(catManager.objectives.liquidityReserve)}€</div></div>
+      <div class="stat-card blue"><div class="stat-label">Total Placements</div><div class="stat-value">${stats.totalDeposits}</div><div class="stat-sub">${stats.catCount} CAT · ${stats.psCount} Parts Sociales</div></div>
+      <div class="stat-card green"><div class="stat-label">Total Placé</div><div class="stat-value">${formatNumber(stats.totalInvested)}€</div><div class="stat-sub">Intérêts: +${formatNumber(stats.totalInterest)}€</div></div>
+      <div class="stat-card orange"><div class="stat-label">Taux Pondéré</div><div class="stat-value">${stats.weightedRate ? formatPct(stats.weightedRate) : '—'}</div><div class="stat-sub">Sur ${Object.keys(stats.byBank).length} banques</div></div>
+      <div class="stat-card purple"><div class="stat-label">Parts Sociales</div><div class="stat-value">${formatNumber(stats.psTotal)}€</div><div class="stat-sub">${stats.psCount} placement${stats.psCount > 1 ? 's' : ''}</div></div>
+      <div class="stat-card cyan"><div class="stat-label">Prochaine Échéance</div><div class="stat-value">${stats.upcoming.length > 0 ? formatDate(stats.upcoming[0].maturityDate) : '—'}</div>
+        <div class="stat-sub">${stats.upcoming.length > 0 ? formatNumber(stats.upcoming[0].amount) + '€' : 'Aucune'}</div></div>
     </div>
 
-    ${stats.fgdrAlerts.length > 0 ? `<div class="alert-bar"><span>⚠️</span><span>Alerte FGDR: ${stats.fgdrAlerts.map(([,v])=>`<strong>${v.name}</strong> (${formatNumber(v.total)}€ > ${formatNumber(catManager.objectives.maxPerBank)}€)`).join(', ')}</span></div>` : ''}
+    ${stats.fgdrAlerts.length > 0 ? `<div class="alert-bar"><span>⚠️</span><span>Alerte FGDR: ${stats.fgdrAlerts.map(([, v]) => `<strong>${v.name}</strong> (${formatNumber(v.total)}€)`).join(', ')}</span></div>` : ''}
 
-    <!-- Boutons d'action -->
     <div class="section">
       <div class="section-header">
-        <div class="section-title"><span class="dot" style="background:var(--green)"></span>Mes Comptes à Terme</div>
-        <div style="display:flex;gap:8px">
+        <div class="section-title"><span class="dot" style="background:var(--green)"></span>Mes Placements</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
           <button class="btn" onclick="showCATObjectivesModal()">🎯 Objectifs</button>
           <button class="btn" onclick="showCATRatesModal()">📊 Taux marché</button>
-          <button class="btn ai-glow" onclick="showCATSimulator()">⚡ Simulateur</button>
-          <button class="btn primary" onclick="showAddCATModal()">+ Nouveau CAT</button>
+          <button class="btn ai-glow" onclick="showCATSimulator()">⚡ Optimiser</button>
+          <button class="btn primary" onclick="showAddPlacementModal()">+ Nouveau placement</button>
         </div>
       </div>
 
-      ${catManager.deposits.length === 0 ? `
-        <div class="empty-state"><div class="empty-icon">🏦</div><div class="empty-text">Aucun compte à terme enregistré</div>
-          <div class="empty-sub">Ajoutez vos CAT pour suivre vos placements et optimiser vos rendements</div></div>
-      ` : `
-        <!-- Par banque -->
-        ${renderCATByBank(stats)}
-      `}
+      ${catManager.deposits.filter(d => d.status === 'active').length === 0 ? `
+        <div class="empty-state"><div class="empty-icon">🏦</div><div class="empty-text">Aucun placement enregistré</div>
+          <div class="empty-sub">Ajoutez vos CAT et Parts Sociales — par upload PDF ou saisie manuelle</div></div>
+      ` : renderPlacementsByBank(stats)}
     </div>
 
-    <!-- Timeline des maturités -->
     ${timeline.length > 0 ? `
     <div class="section">
-      <div class="section-header"><div class="section-title"><span class="dot" style="background:var(--orange)"></span>Échéancier des Maturités</div></div>
+      <div class="section-header"><div class="section-title"><span class="dot" style="background:var(--orange)"></span>Échéancier</div></div>
       <div class="cat-timeline">${timeline.map(m => `
         <div class="cat-timeline-item">
           <div class="cat-timeline-month">${m.month}</div>
-          <div class="cat-timeline-bar" style="width:${Math.min(100, (m.total / stats.totalInvested) * 100 * 3)}%">
-            <span class="cat-timeline-amount">${formatNumber(m.total)}€</span>
-          </div>
-          <div class="cat-timeline-count">${m.deposits.length} CAT</div>
-        </div>`).join('')}
-      </div>
+          <div class="cat-timeline-bar" style="width:${Math.min(100, (m.total / Math.max(stats.totalInvested, 1)) * 100 * 3)}%">
+            <span class="cat-timeline-amount">${formatNumber(m.total)}€</span></div>
+          <div class="cat-timeline-count">${m.deposits.length} placement${m.deposits.length > 1 ? 's' : ''}</div>
+        </div>`).join('')}</div>
     </div>` : ''}
   `;
 }
 
-function renderCATByBank(stats) {
-  const bankGroups = {};
+function renderPlacementsByBank(stats) {
+  const groups = {};
   catManager.deposits.filter(d => d.status === 'active').forEach(d => {
     const key = d.bankId || 'autre';
-    if (!bankGroups[key]) bankGroups[key] = { name: d.bankName || key, deposits: [] };
-    bankGroups[key].deposits.push(d);
+    if (!groups[key]) groups[key] = { name: d.bankName || key, deposits: [] };
+    groups[key].deposits.push(d);
   });
 
-  return Object.entries(bankGroups).map(([bankId, group]) => `
+  return Object.entries(groups).map(([bankId, group]) => {
+    const bankColor = BANKS.find(b => b.id === bankId)?.color || 'var(--accent)';
+    const total = group.deposits.reduce((s, d) => s + (parseFloat(d.amount) || 0), 0);
+    return `
     <div class="bank-section expanded">
       <div class="bank-header" style="cursor:default">
         <div class="bank-header-left">
-          <span class="bank-dot" style="background:${BANKS.find(b=>b.id===bankId)?.color || 'var(--accent)'}"></span>
+          <span class="bank-dot" style="background:${bankColor}"></span>
           <span class="bank-name">${group.name}</span>
-          <span class="bank-count">${group.deposits.length} CAT — ${formatNumber(group.deposits.reduce((s,d)=>s+(parseFloat(d.amount)||0),0))}€</span>
+          <span class="bank-count">${group.deposits.length} placement${group.deposits.length > 1 ? 's' : ''} — ${formatNumber(total)}€</span>
         </div>
       </div>
-      <div class="bank-products">
-        ${group.deposits.map(d => `
-          <div class="product-card" onclick="showCATDetail('${d.id}')">
-            <div class="product-card-header">
-              <div class="product-card-name">${d.productName || 'CAT ' + d.durationMonths + ' mois'}</div>
-              <div class="product-card-bank" style="color:var(--green);border-color:rgba(52,211,153,0.3);background:rgba(52,211,153,0.08)">${d.rate}%</div>
-            </div>
-            <div class="product-card-grid">
-              <div class="product-card-field"><span class="label">Montant</span><span class="value">${formatNumber(d.amount)}€</span></div>
-              <div class="product-card-field"><span class="label">Durée</span><span class="value">${d.durationMonths} mois</span></div>
-              <div class="product-card-field"><span class="label">Échéance</span><span class="value">${formatDate(d.maturityDate)}</span></div>
-              <div class="product-card-field"><span class="label">Intérêts</span><span class="value green">${formatNumber(d.estimatedInterest)}€</span></div>
-            </div>
-            <div class="product-card-footer">
-              <span class="status-badge" style="--badge-color:var(--green)">Actif</span>
-              ${d.autoRenew ? '<span class="status-badge" style="--badge-color:var(--cyan)">↻ Auto</span>' : ''}
-            </div>
-          </div>
-        `).join('')}
-      </div>
-    </div>
-  `).join('');
+      <div class="bank-products">${group.deposits.map(d => renderPlacementCard(d)).join('')}</div>
+    </div>`;
+  }).join('');
 }
 
-// ─── Modals CAT ─────────────────────────────────────────────
-function showAddCATModal(editId) {
-  const existing = editId ? catManager.deposits.find(d => d.id === editId) : null;
+function renderPlacementCard(d) {
+  const typeInfo = PLACEMENT_TYPES.find(t => t.id === d.productType) || PLACEMENT_TYPES[0];
+  const exitInfo = EXIT_CONDITIONS.find(e => e.id === d.exitCondition);
+  return `
+    <div class="product-card" onclick="showEditPlacementModal('${d.id}')">
+      <div class="product-card-header">
+        <div class="product-card-name">${d.productName || typeInfo.name}</div>
+        <div class="product-card-bank" style="color:${typeInfo.color};border-color:${typeInfo.color}44;background:${typeInfo.color}11">${d.rate}%</div>
+      </div>
+      <div class="product-card-type">${typeInfo.icon} ${typeInfo.name}${exitInfo ? ' · ' + exitInfo.name : ''}</div>
+      <div class="product-card-grid">
+        <div class="product-card-field"><span class="label">Montant</span><span class="value">${formatNumber(d.amount)}€</span></div>
+        <div class="product-card-field"><span class="label">Durée</span><span class="value">${d.durationMonths ? d.durationMonths + ' mois' : 'Indéterminée'}</span></div>
+        <div class="product-card-field"><span class="label">Échéance</span><span class="value">${d.maturityDate ? formatDate(d.maturityDate) : '—'}</span></div>
+        <div class="product-card-field"><span class="label">Intérêts</span><span class="value green">+${formatNumber(d.estimatedInterest)}€</span></div>
+      </div>
+      <div class="product-card-footer">
+        <span class="status-badge" style="--badge-color:${typeInfo.color}">${typeInfo.icon} ${typeInfo.name}</span>
+        ${d.autoRenew ? '<span class="status-badge" style="--badge-color:var(--cyan)">↻ Auto</span>' : ''}
+        ${d.aiSummary ? '<span class="status-badge" style="--badge-color:var(--accent)">🤖 IA</span>' : ''}
+      </div>
+    </div>`;
+}
+
+// ═══ MODALS ═══
+
+function showAddPlacementModal() {
   const modal = document.getElementById('modal');
-  modal.innerHTML = `<div class="modal-overlay" onclick="closeModal()"><div class="modal-content modal-large" onclick="event.stopPropagation()">
-    <h2 class="modal-title">${existing ? 'Modifier le CAT' : 'Nouveau Compte à Terme'}</h2>
-    <div class="form-grid">
-      <div class="form-field"><label>Banque</label><select id="cat-bank">
-        <option value="">Sélectionner...</option>
-        ${BANKS.map(b=>`<option value="${b.id}" ${existing?.bankId===b.id?'selected':''}>${b.name}</option>`).join('')}
-        <option value="autre">Autre</option></select></div>
-      <div class="form-field"><label>Nom du produit</label><input id="cat-name" value="${existing?.productName||''}" placeholder="Ex: CAT 12 mois Promo"></div>
-      <div class="form-field"><label>Montant (€)</label><input id="cat-amount" type="number" value="${existing?.amount||''}" placeholder="50000"></div>
-      <div class="form-field"><label>Taux annuel (%)</label><input id="cat-rate" type="number" step="0.01" value="${existing?.rate||''}" placeholder="3.50"></div>
-      <div class="form-field"><label>Durée (mois)</label><select id="cat-duration">
-        ${[1,3,6,9,12,18,24,36,48,60].map(d=>`<option value="${d}" ${existing?.durationMonths==d?'selected':''}>${d} mois${d>=12?' ('+(d/12)+' an'+(d>12?'s':'')+')':''}</option>`).join('')}</select></div>
-      <div class="form-field"><label>Date de souscription</label><input id="cat-start" type="date" value="${existing?.startDate||new Date().toISOString().split('T')[0]}"></div>
-      <div class="form-field"><label>Versement intérêts</label><select id="cat-interest">
-        <option value="maturity" ${existing?.interestPayment==='maturity'?'selected':''}>À maturité</option>
-        <option value="monthly" ${existing?.interestPayment==='monthly'?'selected':''}>Mensuel</option>
-        <option value="quarterly" ${existing?.interestPayment==='quarterly'?'selected':''}>Trimestriel</option>
-        <option value="annual" ${existing?.interestPayment==='annual'?'selected':''}>Annuel</option></select></div>
-      <div class="form-field"><label>Renouvellement auto</label><select id="cat-renew">
-        <option value="false" ${!existing?.autoRenew?'selected':''}>Non</option>
-        <option value="true" ${existing?.autoRenew?'selected':''}>Oui</option></select></div>
+  modal.innerHTML = `<div class="modal-overlay" onclick="closeModal()"><div class="modal-content" onclick="event.stopPropagation()">
+    <h2 class="modal-title">Nouveau Placement</h2>
+    <p style="color:var(--text-muted);font-size:12px;margin-bottom:16px">Choisissez le type de placement puis uploadez le PDF des conditions ou saisissez manuellement.</p>
+    <div style="display:flex;gap:10px;margin-bottom:20px">
+      ${PLACEMENT_TYPES.map(t => `<button class="btn lg" style="flex:1;justify-content:center;gap:8px" onclick="showPlacementUpload('${t.id}')">
+        <span style="font-size:20px">${t.icon}</span>${t.name}</button>`).join('')}
     </div>
-    <div class="modal-actions"><button class="btn" onclick="closeModal()">Annuler</button>
-      ${existing?`<button class="btn danger" onclick="deleteCATDeposit('${editId}')">Supprimer</button>`:''}
-      <button class="btn primary" onclick="saveCATDeposit('${editId||''}')">${existing?'Modifier':'Ajouter'}</button></div>
+    <div class="modal-actions"><button class="btn" onclick="closeModal()">Annuler</button></div>
   </div></div>`;
   modal.classList.add('visible');
 }
 
-async function saveCATDeposit(editId) {
-  const bankId = document.getElementById('cat-bank').value;
+function showPlacementUpload(productType) {
+  const typeInfo = PLACEMENT_TYPES.find(t => t.id === productType);
+  const modal = document.getElementById('modal');
+  modal.innerHTML = `<div class="modal-overlay" onclick="closeModal()"><div class="modal-content" onclick="event.stopPropagation()">
+    <h2 class="modal-title">${typeInfo.icon} ${typeInfo.name}</h2>
+    <div class="upload-zone" ondragover="event.preventDefault();this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')" ondrop="handlePlacementDrop(event,'${productType}')">
+      <div class="upload-icon">📄</div><div class="upload-text">Glisser le PDF des conditions ici</div>
+      <div class="upload-sub">Claude extraira automatiquement les informations</div>
+      <input type="file" accept=".pdf" id="placement-file" style="display:none" onchange="handlePlacementFile(event,'${productType}')">
+    </div>
+    <button class="btn" style="width:100%;margin-top:12px" onclick="document.getElementById('placement-file').click()">Choisir un PDF</button>
+    <div class="upload-divider"><span>ou</span></div>
+    <button class="btn ghost" style="width:100%" onclick="showManualPlacementModal('${productType}')">✏️ Saisie manuelle</button>
+    <div id="placement-progress" class="upload-progress hidden"><div class="spinner"></div><span id="placement-status">Extraction...</span></div>
+    <div class="modal-actions"><button class="btn" onclick="closeModal()">Annuler</button></div>
+  </div></div>`;
+  modal.classList.add('visible');
+}
+
+async function handlePlacementDrop(e, productType) { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) await processPlacementPDF(f, productType); }
+async function handlePlacementFile(e, productType) { const f = e.target.files[0]; if (f) await processPlacementPDF(f, productType); }
+
+async function processPlacementPDF(file, productType) {
+  const progress = document.getElementById('placement-progress');
+  const status = document.getElementById('placement-status');
+  if (progress) progress.classList.remove('hidden');
+  try {
+    if (status) status.textContent = 'Extraction du texte...';
+    const { parsed, rawText } = await catManager.parsePDFConditions(file);
+    if (status) status.textContent = 'Analyse terminée !';
+    closeModal();
+    // Pré-remplir le formulaire avec les données extraites
+    showManualPlacementModal(productType, parsed, rawText, file.name);
+  } catch (e) {
+    if (status) status.textContent = 'Erreur: ' + e.message;
+    if (progress) progress.classList.add('error');
+  }
+}
+
+function showManualPlacementModal(productType, prefill, rawText, sourceFile) {
+  const p = prefill || {};
+  const modal = document.getElementById('modal');
+  modal.innerHTML = `<div class="modal-overlay" onclick="closeModal()"><div class="modal-content modal-large" onclick="event.stopPropagation()">
+    <h2 class="modal-title">${p.productName ? '🤖 Données extraites — Vérifiez et validez' : 'Saisie manuelle'}</h2>
+    ${p.summary ? `<div style="background:var(--accent-glow);border:1px solid rgba(59,130,246,0.2);border-radius:var(--radius-sm);padding:12px;margin-bottom:16px;font-size:12px;color:var(--text);line-height:1.5"><strong style="color:var(--accent)">🤖 Résumé IA:</strong> ${p.summary}</div>` : ''}
+    <div class="form-grid">
+      <div class="form-field"><label>Type</label><select id="pl-type">
+        ${PLACEMENT_TYPES.map(t => `<option value="${t.id}" ${(p.productType || productType) === t.id ? 'selected' : ''}>${t.icon} ${t.name}</option>`).join('')}</select></div>
+      <div class="form-field"><label>Banque</label><select id="pl-bank">
+        <option value="">Sélectionner...</option>
+        ${BANKS.map(b => `<option value="${b.id}" ${p.emitter && b.name.toLowerCase().includes((p.emitter||'').toLowerCase().substring(0,4)) ? 'selected' : ''}>${b.name}</option>`).join('')}
+        <option value="autre">Autre</option></select></div>
+      <div class="form-field full"><label>Nom du produit</label><input id="pl-name" value="${p.productName || ''}" placeholder="Ex: CAT 24 mois Promo / Parts Sociales Crédit Mutuel"></div>
+      <div class="form-field"><label>Montant (€)</label><input id="pl-amount" type="number" value="${p.minAmount || ''}" placeholder="50000"></div>
+      <div class="form-field"><label>Taux annuel (%)</label><input id="pl-rate" type="number" step="0.01" value="${p.rate || ''}" placeholder="3.50"></div>
+      <div class="form-field"><label>Type de taux</label><select id="pl-rate-type">
+        <option value="fixe" ${p.rateType === 'fixe' ? 'selected' : ''}>Fixe</option>
+        <option value="variable" ${p.rateType === 'variable' ? 'selected' : ''}>Variable</option>
+        <option value="progressif" ${p.rateType === 'progressif' ? 'selected' : ''}>Progressif</option></select></div>
+      <div class="form-field"><label>Durée (mois) — 0 si indéterminée</label><input id="pl-duration" type="number" value="${p.durationMonths || ''}" placeholder="24"></div>
+      <div class="form-field"><label>Date de souscription</label><input id="pl-start" type="date" value="${new Date().toISOString().split('T')[0]}"></div>
+      <div class="form-field"><label>Versement intérêts</label><select id="pl-interest">
+        ${INTEREST_PAYMENTS.map(i => `<option value="${i.id}" ${p.interestPayment === i.id ? 'selected' : ''}>${i.name}</option>`).join('')}</select></div>
+      <div class="form-field"><label>Condition de sortie</label><select id="pl-exit">
+        ${EXIT_CONDITIONS.map(e => `<option value="${e.id}" ${p.exitCondition === e.id ? 'selected' : ''}>${e.name}</option>`).join('')}</select></div>
+      <div class="form-field"><label>Pénalité sortie anticipée</label><input id="pl-penalty" value="${p.exitPenalty || ''}" placeholder="Ex: Perte 3 mois d'intérêts"></div>
+      <div class="form-field"><label>Renouvellement auto</label><select id="pl-renew">
+        <option value="false" ${!p.autoRenew ? 'selected' : ''}>Non</option>
+        <option value="true" ${p.autoRenew === true || p.autoRenew === 'true' ? 'selected' : ''}>Oui</option></select></div>
+      ${p.rateDetails ? `<div class="form-field full"><label>Détails taux</label><input id="pl-rate-details" value="${p.rateDetails}" readonly style="color:var(--text-muted)"></div>` : ''}
+      ${p.conditions && p.conditions.length > 0 ? `<div class="form-field full"><label>Conditions extraites</label><div style="font-size:11px;color:var(--text-muted);line-height:1.5">${p.conditions.join(' · ')}</div></div>` : ''}
+    </div>
+    <input type="hidden" id="pl-raw-text" value="${rawText ? encodeURIComponent(rawText) : ''}">
+    <input type="hidden" id="pl-source-file" value="${sourceFile || ''}">
+    <input type="hidden" id="pl-ai-summary" value="${p.summary ? encodeURIComponent(p.summary) : ''}">
+    <div class="modal-actions"><button class="btn" onclick="closeModal()">Annuler</button>
+      <button class="btn primary" onclick="savePlacement()">Enregistrer</button></div>
+  </div></div>`;
+  modal.classList.add('visible');
+}
+
+function showEditPlacementModal(id) {
+  const d = catManager.deposits.find(x => x.id === id);
+  if (!d) return;
+  const modal = document.getElementById('modal');
+  modal.innerHTML = `<div class="modal-overlay" onclick="closeModal()"><div class="modal-content modal-large" onclick="event.stopPropagation()">
+    <h2 class="modal-title">Modifier le placement</h2>
+    ${d.aiSummary ? `<div style="background:var(--accent-glow);border:1px solid rgba(59,130,246,0.2);border-radius:var(--radius-sm);padding:12px;margin-bottom:16px;font-size:12px;color:var(--text);line-height:1.5"><strong style="color:var(--accent)">🤖 Résumé:</strong> ${d.aiSummary}</div>` : ''}
+    <div class="form-grid">
+      <div class="form-field"><label>Type</label><select id="pl-type">
+        ${PLACEMENT_TYPES.map(t => `<option value="${t.id}" ${d.productType === t.id ? 'selected' : ''}>${t.icon} ${t.name}</option>`).join('')}</select></div>
+      <div class="form-field"><label>Banque</label><select id="pl-bank">
+        ${BANKS.map(b => `<option value="${b.id}" ${d.bankId === b.id ? 'selected' : ''}>${b.name}</option>`).join('')}
+        <option value="autre">Autre</option></select></div>
+      <div class="form-field full"><label>Nom</label><input id="pl-name" value="${d.productName || ''}"></div>
+      <div class="form-field"><label>Montant (€)</label><input id="pl-amount" type="number" value="${d.amount || ''}"></div>
+      <div class="form-field"><label>Taux (%)</label><input id="pl-rate" type="number" step="0.01" value="${d.rate || ''}"></div>
+      <div class="form-field"><label>Type de taux</label><select id="pl-rate-type">
+        <option value="fixe" ${d.rateType === 'fixe' ? 'selected' : ''}>Fixe</option>
+        <option value="variable" ${d.rateType === 'variable' ? 'selected' : ''}>Variable</option>
+        <option value="progressif" ${d.rateType === 'progressif' ? 'selected' : ''}>Progressif</option></select></div>
+      <div class="form-field"><label>Durée (mois)</label><input id="pl-duration" type="number" value="${d.durationMonths || ''}"></div>
+      <div class="form-field"><label>Date souscription</label><input id="pl-start" type="date" value="${d.startDate || ''}"></div>
+      <div class="form-field"><label>Versement intérêts</label><select id="pl-interest">
+        ${INTEREST_PAYMENTS.map(i => `<option value="${i.id}" ${d.interestPayment === i.id ? 'selected' : ''}>${i.name}</option>`).join('')}</select></div>
+      <div class="form-field"><label>Condition de sortie</label><select id="pl-exit">
+        ${EXIT_CONDITIONS.map(e => `<option value="${e.id}" ${d.exitCondition === e.id ? 'selected' : ''}>${e.name}</option>`).join('')}</select></div>
+      <div class="form-field"><label>Pénalité sortie</label><input id="pl-penalty" value="${d.exitPenalty || ''}"></div>
+      <div class="form-field"><label>Renouvellement auto</label><select id="pl-renew">
+        <option value="false" ${!d.autoRenew ? 'selected' : ''}>Non</option>
+        <option value="true" ${d.autoRenew ? 'selected' : ''}>Oui</option></select></div>
+    </div>
+    <input type="hidden" id="pl-edit-id" value="${d.id}">
+    <div class="modal-actions"><button class="btn" onclick="closeModal()">Annuler</button>
+      <button class="btn danger" onclick="deletePlacement('${d.id}')">Supprimer</button>
+      <button class="btn primary" onclick="savePlacement('${d.id}')">Enregistrer</button></div>
+  </div></div>`;
+  modal.classList.add('visible');
+}
+
+async function savePlacement(editId) {
+  const bankId = document.getElementById('pl-bank').value;
   const bank = BANKS.find(b => b.id === bankId);
   const deposit = {
+    productType: document.getElementById('pl-type').value,
     bankId, bankName: bank?.name || bankId,
-    productName: document.getElementById('cat-name').value,
-    amount: parseFloat(document.getElementById('cat-amount').value) || 0,
-    rate: parseFloat(document.getElementById('cat-rate').value) || 0,
-    durationMonths: parseInt(document.getElementById('cat-duration').value) || 12,
-    startDate: document.getElementById('cat-start').value,
-    interestPayment: document.getElementById('cat-interest').value,
-    autoRenew: document.getElementById('cat-renew').value === 'true',
+    productName: document.getElementById('pl-name').value,
+    amount: parseFloat(document.getElementById('pl-amount').value) || 0,
+    rate: parseFloat(document.getElementById('pl-rate').value) || 0,
+    rateType: document.getElementById('pl-rate-type').value,
+    durationMonths: parseInt(document.getElementById('pl-duration').value) || 0,
+    startDate: document.getElementById('pl-start').value,
+    interestPayment: document.getElementById('pl-interest').value,
+    exitCondition: document.getElementById('pl-exit').value,
+    exitPenalty: document.getElementById('pl-penalty')?.value || '',
+    autoRenew: document.getElementById('pl-renew').value === 'true',
     status: 'active',
   };
-  if (editId) { catManager.updateDeposit(editId, deposit); }
-  else { catManager.addDeposit(deposit); }
+  // Données IA si upload PDF
+  const rawEl = document.getElementById('pl-raw-text');
+  const summaryEl = document.getElementById('pl-ai-summary');
+  const sourceEl = document.getElementById('pl-source-file');
+  if (rawEl?.value) deposit.rawText = decodeURIComponent(rawEl.value);
+  if (summaryEl?.value) deposit.aiSummary = decodeURIComponent(summaryEl.value);
+  if (sourceEl?.value) deposit.sourceFile = sourceEl.value;
+
+  if (editId) catManager.updateDeposit(editId, deposit);
+  else catManager.addDeposit(deposit);
+
   closeModal(); await catManager.saveDeposits();
-  showToast(editId ? 'CAT modifié' : 'CAT ajouté', 'success');
-  app.render();
+  showToast(editId ? 'Placement modifié' : 'Placement ajouté', 'success');
+  app.setState({ view: 'cat' }); renderCAT(document.getElementById('main-content'));
 }
 
-async function deleteCATDeposit(id) {
-  if (!confirm('Supprimer ce CAT ?')) return;
+async function deletePlacement(id) {
+  if (!confirm('Supprimer ce placement ?')) return;
   catManager.removeDeposit(id); closeModal();
-  await catManager.saveDeposits(); showToast('CAT supprimé', 'success'); app.render();
+  await catManager.saveDeposits(); showToast('Supprimé', 'success');
+  app.setState({ view: 'cat' }); renderCAT(document.getElementById('main-content'));
 }
-
-function showCATDetail(id) { showAddCATModal(id); }
 
 // ─── Objectifs ──────────────────────────────────────────────
 function showCATObjectivesModal() {
   const obj = catManager.objectives;
   const modal = document.getElementById('modal');
   modal.innerHTML = `<div class="modal-overlay" onclick="closeModal()"><div class="modal-content" onclick="event.stopPropagation()">
-    <h2 class="modal-title">🎯 Mes Objectifs de Placement</h2>
+    <h2 class="modal-title">🎯 Objectifs</h2>
     <div class="form-grid">
-      <div class="form-field"><label>Besoin mensuel (€)</label><input id="obj-monthly" type="number" value="${obj.monthlyNeed}" placeholder="5000"></div>
-      <div class="form-field"><label>Réserve liquidité (€)</label><input id="obj-reserve" type="number" value="${obj.liquidityReserve}" placeholder="20000"></div>
-      <div class="form-field"><label>Plafond par banque (€)</label><input id="obj-maxbank" type="number" value="${obj.maxPerBank}" placeholder="100000"></div>
-      <div class="form-field full"><label>Notes</label><textarea id="obj-notes" placeholder="Objectifs, contraintes...">${obj.notes||''}</textarea></div>
+      <div class="form-field"><label>Besoin mensuel (€)</label><input id="obj-monthly" type="number" value="${obj.monthlyNeed}" placeholder="0"></div>
+      <div class="form-field"><label>Réserve liquidité (€)</label><input id="obj-reserve" type="number" value="${obj.liquidityReserve}" placeholder="0"></div>
+      <div class="form-field"><label>Plafond FGDR par banque (€)</label><input id="obj-maxbank" type="number" value="${obj.maxPerBank}" placeholder="100000"></div>
+      <div class="form-field full"><label>Notes</label><textarea id="obj-notes">${obj.notes || ''}</textarea></div>
     </div>
     <div class="modal-actions"><button class="btn" onclick="closeModal()">Annuler</button>
       <button class="btn primary" onclick="saveCATObjectives()">Enregistrer</button></div>
@@ -446,54 +520,56 @@ function showCATObjectivesModal() {
 }
 
 async function saveCATObjectives() {
-  catManager.objectives.monthlyNeed = parseFloat(document.getElementById('obj-monthly').value) || 0;
-  catManager.objectives.liquidityReserve = parseFloat(document.getElementById('obj-reserve').value) || 0;
-  catManager.objectives.maxPerBank = parseFloat(document.getElementById('obj-maxbank').value) || 100000;
-  catManager.objectives.notes = document.getElementById('obj-notes').value;
+  catManager.objectives = {
+    monthlyNeed: parseFloat(document.getElementById('obj-monthly').value) || 0,
+    liquidityReserve: parseFloat(document.getElementById('obj-reserve').value) || 0,
+    maxPerBank: parseFloat(document.getElementById('obj-maxbank').value) || 100000,
+    notes: document.getElementById('obj-notes').value,
+  };
   closeModal(); await catManager.saveObjectives();
-  showToast('Objectifs enregistrés', 'success'); app.render();
+  showToast('Objectifs sauvegardés', 'success');
+  app.setState({ view: 'cat' }); renderCAT(document.getElementById('main-content'));
 }
 
-// ─── Taux du marché ─────────────────────────────────────────
+// ─── Taux marché ────────────────────────────────────────────
 function showCATRatesModal() {
   const modal = document.getElementById('modal');
-  const durations = [1, 3, 6, 12, 18, 24, 36];
+  const durations = [1, 3, 6, 12, 18, 24, 36, 48, 60];
   modal.innerHTML = `<div class="modal-overlay" onclick="closeModal()"><div class="modal-content modal-large" onclick="event.stopPropagation()">
     <h2 class="modal-title">📊 Taux du Marché</h2>
-    <p style="color:var(--text-muted);font-size:12px;margin-bottom:16px">Renseignez les taux proposés par chaque banque pour comparer et optimiser.</p>
-    <div id="rates-form">
-      <div class="form-grid">
-        <div class="form-field"><label>Banque</label><select id="rate-bank">
-          ${BANKS.map(b=>`<option value="${b.id}">${b.name}</option>`).join('')}</select></div>
-        <div class="form-field"><label>Durée</label><select id="rate-duration">
-          ${durations.map(d=>`<option value="${d}">${d} mois</option>`).join('')}</select></div>
-        <div class="form-field"><label>Taux (%)</label><input id="rate-value" type="number" step="0.01" placeholder="3.50"></div>
-        <div class="form-field" style="align-self:end"><button class="btn primary" onclick="addMarketRate()">Ajouter</button></div>
-      </div>
+    <div class="form-grid">
+      <div class="form-field"><label>Banque</label><select id="rate-bank">
+        ${BANKS.map(b => `<option value="${b.id}">${b.name}</option>`).join('')}</select></div>
+      <div class="form-field"><label>Type</label><select id="rate-type">
+        ${PLACEMENT_TYPES.map(t => `<option value="${t.id}">${t.name}</option>`).join('')}</select></div>
+      <div class="form-field"><label>Durée</label><select id="rate-duration">
+        ${durations.map(d => `<option value="${d}">${d} mois</option>`).join('')}</select></div>
+      <div class="form-field"><label>Taux (%)</label><input id="rate-value" type="number" step="0.01" placeholder="3.50"></div>
     </div>
-    <div style="margin-top:16px">
-      <h3 style="font-size:12px;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px">Taux enregistrés</h3>
-      <div id="rates-list">${renderRatesList()}</div>
-    </div>
+    <button class="btn primary" style="width:100%;margin-top:12px" onclick="addMarketRate()">Ajouter ce taux</button>
+    <div style="margin-top:16px"><h3 style="font-size:11px;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px">Taux enregistrés</h3>
+      <div id="rates-list">${renderRatesList()}</div></div>
     <div class="modal-actions"><button class="btn" onclick="closeModal()">Fermer</button></div>
   </div></div>`;
   modal.classList.add('visible');
 }
 
 function renderRatesList() {
-  if (catManager.rates.rates.length === 0) return '<div style="color:var(--text-dim);font-size:12px">Aucun taux enregistré</div>';
-  const sorted = [...catManager.rates.rates].sort((a,b) => a.durationMonths - b.durationMonths || b.rate - a.rate);
-  return sorted.map(r => `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px">
-    <span>${r.bankName} — ${r.durationMonths} mois</span><span style="color:var(--green);font-family:var(--mono)">${r.rate}%</span></div>`).join('');
+  if (catManager.rates.rates.length === 0) return '<div style="color:var(--text-dim);font-size:12px">Aucun taux</div>';
+  return [...catManager.rates.rates].sort((a, b) => a.durationMonths - b.durationMonths || b.rate - a.rate).map(r => {
+    const typeIcon = r.productType === 'parts-sociales' ? '🤝' : '🏦';
+    return `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px">
+      <span>${typeIcon} ${r.bankName} · ${r.durationMonths} mois</span><span style="color:var(--green);font-family:var(--mono)">${r.rate}%</span></div>`;
+  }).join('');
 }
 
 async function addMarketRate() {
   const bankId = document.getElementById('rate-bank').value;
   const bank = BANKS.find(b => b.id === bankId);
-  const duration = parseInt(document.getElementById('rate-duration').value);
   const rate = document.getElementById('rate-value').value;
   if (!rate) { showToast('Taux requis', 'error'); return; }
-  catManager.addRate(bankId, bank?.name || bankId, duration, rate);
+  catManager.addRate(bankId, bank?.name || bankId, parseInt(document.getElementById('rate-duration').value),
+    rate, document.getElementById('rate-type').value);
   await catManager.saveRates();
   document.getElementById('rates-list').innerHTML = renderRatesList();
   document.getElementById('rate-value').value = '';
@@ -503,17 +579,18 @@ async function addMarketRate() {
 // ─── Simulateur ─────────────────────────────────────────────
 function showCATSimulator() {
   const modal = document.getElementById('modal');
+  const currentTotal = catManager.deposits.filter(d => d.status === 'active').reduce((s, d) => s + (parseFloat(d.amount) || 0), 0);
   modal.innerHTML = `<div class="modal-overlay" onclick="closeModal()"><div class="modal-content modal-large" onclick="event.stopPropagation()">
-    <h2 class="modal-title">⚡ Simulateur d'Optimisation</h2>
-    <p style="color:var(--text-muted);font-size:12px;margin-bottom:16px">Entrez le montant total à placer. Le simulateur optimise la répartition selon vos objectifs (besoin mensuel, réserve, plafond FGDR) et les meilleurs taux disponibles.</p>
+    <h2 class="modal-title">⚡ Optimiseur de Rendement</h2>
+    <p style="color:var(--text-muted);font-size:12px;margin-bottom:16px">Simule la meilleure répartition selon les taux du marché, en respectant le plafond FGDR par banque.</p>
     <div class="form-grid">
-      <div class="form-field"><label>Montant total à placer (€)</label><input id="sim-amount" type="number" placeholder="200000"></div>
-      <div class="form-field"><label>Besoin mensuel (€)</label><input id="sim-monthly" type="number" value="${catManager.objectives.monthlyNeed}" placeholder="5000"></div>
-      <div class="form-field"><label>Réserve liquidité (€)</label><input id="sim-reserve" type="number" value="${catManager.objectives.liquidityReserve}" placeholder="20000"></div>
-      <div class="form-field"><label>Horizon max (mois)</label><select id="sim-horizon">
+      <div class="form-field"><label>Montant à placer (€)</label><input id="sim-amount" type="number" value="${currentTotal || ''}" placeholder="200000"></div>
+      <div class="form-field"><label>Réserve liquidité (€)</label><input id="sim-reserve" type="number" value="${catManager.objectives.liquidityReserve}" placeholder="0"></div>
+      <div class="form-field"><label>Plafond FGDR/banque (€)</label><input id="sim-max" type="number" value="${catManager.objectives.maxPerBank}" placeholder="100000"></div>
+      <div class="form-field"><label>Horizon max</label><select id="sim-horizon">
         <option value="12">12 mois</option><option value="24">24 mois</option><option value="36" selected>36 mois</option><option value="60">60 mois</option></select></div>
     </div>
-    <button class="btn ai-glow lg" style="width:100%;margin-top:16px" onclick="runSimulation()">🚀 Lancer la simulation</button>
+    <button class="btn ai-glow lg" style="width:100%;margin-top:16px" onclick="runSimulation()">🚀 Optimiser</button>
     <div id="sim-results" style="margin-top:20px"></div>
     <div class="modal-actions"><button class="btn" onclick="closeModal()">Fermer</button></div>
   </div></div>`;
@@ -521,39 +598,24 @@ function showCATSimulator() {
 }
 
 function runSimulation() {
-  const result = catManager.simulate(
-    parseFloat(document.getElementById('sim-amount').value) || 0,
-    {
-      monthlyNeed: parseFloat(document.getElementById('sim-monthly').value) || 0,
-      liquidityReserve: parseFloat(document.getElementById('sim-reserve').value) || 0,
-      horizonMonths: parseInt(document.getElementById('sim-horizon').value) || 36,
-    }
-  );
-
-  const container = document.getElementById('sim-results');
-  if (result.error) { container.innerHTML = `<div class="alert-bar"><span>⚠️</span>${result.error}</div>`; return; }
-
-  container.innerHTML = `
+  const result = catManager.simulate(parseFloat(document.getElementById('sim-amount').value) || 0, {
+    liquidityReserve: parseFloat(document.getElementById('sim-reserve').value) || 0,
+    maxPerBank: parseFloat(document.getElementById('sim-max').value) || 100000,
+    horizonMonths: parseInt(document.getElementById('sim-horizon').value) || 36,
+  });
+  const c = document.getElementById('sim-results');
+  if (result.error) { c.innerHTML = `<div class="alert-bar"><span>⚠️</span>${result.error}</div>`; return; }
+  c.innerHTML = `
     <div class="stats-row" style="margin-bottom:16px">
-      <div class="stat-card green"><div class="stat-label">Rendement Total</div><div class="stat-value">${formatNumber(result.totalInterest)}€</div></div>
-      <div class="stat-card blue"><div class="stat-label">Taux Moyen Pondéré</div><div class="stat-value">${formatPct(result.weightedRate)}</div></div>
+      <div class="stat-card green"><div class="stat-label">Rendement</div><div class="stat-value">+${formatNumber(result.totalInterest)}€</div></div>
+      <div class="stat-card blue"><div class="stat-label">Taux Pondéré</div><div class="stat-value">${formatPct(result.weightedRate)}</div></div>
       <div class="stat-card orange"><div class="stat-label">Placé</div><div class="stat-value">${formatNumber(result.allocated)}€</div></div>
-      <div class="stat-card purple"><div class="stat-label">Réserve</div><div class="stat-value">${formatNumber(result.reserve)}€</div></div>
     </div>
-    <h3 style="font-size:12px;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px">Répartition optimisée</h3>
     ${result.allocations.map(a => `
       <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--bg-elevated);border-radius:var(--radius-sm);margin-bottom:4px;font-size:12px">
-        <div style="display:flex;align-items:center;gap:10px">
-          <span style="color:${a.purpose==='mensuel'?'var(--orange)':'var(--green)'}">${a.purpose==='mensuel'?'📅 Mensuel':'📈 Rendement'}</span>
-          <strong style="color:var(--text-bright)">${a.bankName}</strong>
-          <span>${a.durationMonths} mois</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:16px">
-          <span style="font-family:var(--mono)">${formatNumber(a.amount)}€</span>
+        <div><strong style="color:var(--text-bright)">${a.bankName}</strong> · ${a.durationMonths} mois</div>
+        <div style="display:flex;gap:14px"><span style="font-family:var(--mono)">${formatNumber(a.amount)}€</span>
           <span style="color:var(--green);font-family:var(--mono)">${a.rate}%</span>
-          <span style="color:var(--text-muted)">→ ${formatNumber(a.interest)}€</span>
-        </div>
-      </div>
-    `).join('')}
-  `;
+          <span style="color:var(--text-muted)">→ +${formatNumber(a.interest)}€</span></div>
+      </div>`).join('')}`;
 }
