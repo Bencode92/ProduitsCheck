@@ -1,6 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
 // STRUCTBOARD — Main Application
-// Pas de token à saisir : le proxy Cloudflare gère tout
 // ═══════════════════════════════════════════════════════════════
 
 class StructBoard {
@@ -16,6 +15,7 @@ class StructBoard {
   async init() {
     this.setState({ loading: true });
     try {
+      // Charger produits structurés
       const portfolio = await github.readFile(`${CONFIG.DATA_PATH}/portfolio.json`);
       this.state.portfolio = portfolio || [];
       const proposals = {};
@@ -23,6 +23,9 @@ class StructBoard {
         const bankData = await github.readFile(`${CONFIG.DATA_PATH}/banks/${bank.id}/index.json`);
         if (bankData && bankData.products && bankData.products.length > 0) proposals[bank.id] = bankData.products;
       }
+      // Charger CAT
+      await catManager.load();
+
       this.setState({ proposals, loading: false, initialized: true });
       this.render();
     } catch (e) {
@@ -126,7 +129,13 @@ class StructBoard {
   openProduct(product) { this.setState({ view: 'product-sheet', currentProduct: product }); this.render(); }
   openChat(product) { this.setState({ view: 'chat', currentProduct: product, currentChat: product.conversation || [] }); this.render(); }
   goToDashboard() { this.setState({ view: 'dashboard', currentProduct: null, currentChat: [] }); this.render(); }
-  render() { if (typeof renderApp === 'function') renderApp(this.state); }
+
+  render() {
+    const main = document.getElementById('main-content');
+    if (!main) return;
+    if (this.state.view === 'cat') { renderCAT(main); return; }
+    if (typeof renderApp === 'function') renderApp(this.state);
+  }
 
   _uid() { return 'sp_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 7); }
   _matchType(t) { if (!t) return 'autre'; const l = t.toLowerCase(); const m = PRODUCT_TYPES.find(x => l.includes(x.id) || x.name.toLowerCase().includes(l)); return m ? m.id : 'autre'; }
