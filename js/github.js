@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — GitHub API Integration
-// Lecture: direct sur repo public (pas d'auth)
-// Écriture: via Cloudflare Worker proxy (token GitHub côté serveur)
+// STRUCTBOARD — GitHub API Integration (V2 — No rate limit)
+// Lecture: raw.githubusercontent.com (pas de rate limit)
+// Écriture: via Cloudflare Worker proxy (token côté serveur)
 // ═══════════════════════════════════════════════════════════════
 
 class GitHubAPI {
@@ -10,44 +10,31 @@ class GitHubAPI {
     this.repo = CONFIG.REPO_NAME;
     this.branch = CONFIG.BRANCH;
     this.apiURL = 'https://api.github.com';
-    this.proxyURL = CONFIG.AI_ENDPOINT; // Cloudflare Worker qui a le token GitHub
-    this.cache = new Map();
+    this.rawURL = `https://raw.githubusercontent.com/${CONFIG.REPO_OWNER}/${CONFIG.REPO_NAME}/${CONFIG.BRANCH}`;
+    this.proxyURL = CONFIG.AI_ENDPOINT;
+    this.cache = new Map(); // path → sha
   }
 
-  // ─── LECTURE (direct GitHub API, repo public) ─────────────
+  // ─── LECTURE via raw.githubusercontent.com (NO rate limit) ─
   async readFile(path) {
     try {
-      const url = `${this.apiURL}/repos/${this.owner}/${this.repo}/contents/${path}?ref=${this.branch}&_t=${Date.now()}`;
-      const res = await fetch(url, { headers: { 'Accept': 'application/vnd.github.v3+json' } });
+      // raw.githubusercontent.com sert le contenu directement, pas de base64
+      const url = `${this.rawURL}/${path}?_t=${Date.now()}`;
+      const res = await fetch(url);
       if (res.status === 404) return null;
-      if (!res.ok) throw new Error(`GitHub GET ${res.status}`);
-      const data = await res.json();
-      this.cache.set(path, data.sha);
-      const content = atob(data.content.replace(/\n/g, ''));
-      const bytes = new Uint8Array(content.split('').map(c => c.charCodeAt(0)));
-      return JSON.parse(new TextDecoder('utf-8').decode(bytes));
+      if (!res.ok) throw new Error(`Raw GET ${res.status}`);
+      const text = await res.text();
+      if (!text || text.trim().length === 0) return null;
+      return JSON.parse(text);
     } catch (e) {
+      // Si le fichier n'existe pas (404) on retourne null silencieusement
+      if (e.message?.includes('404')) return null;
       console.error(`Erreur lecture ${path}:`, e);
       return null;
     }
   }
 
-  async listDirectory(path) {
-    try {
-      const url = `${this.apiURL}/repos/${this.owner}/${this.repo}/contents/${path}?ref=${this.branch}`;
-      const res = await fetch(url, { headers: { 'Accept': 'application/vnd.github.v3+json' } });
-      if (res.status === 404) return [];
-      if (!res.ok) throw new Error(`GitHub LIST ${res.status}`);
-      const items = await res.json();
-      if (!Array.isArray(items)) return [];
-      return items.map(item => ({ name: item.name, path: item.path, type: item.type, sha: item.sha }));
-    } catch (e) {
-      console.error(`Erreur listage ${path}:`, e);
-      return [];
-    }
-  }
-
-  // ─── ÉCRITURE (via Cloudflare Worker proxy) ───────────────
+  // ─── ÉCRITURE via Cloudflare Worker proxy ─────────────────
   async writeFile(path, data, message) {
     try {
       const content = JSON.stringify(data, null, 2);
@@ -57,7 +44,7 @@ class GitHubAPI {
         content: encoded,
         branch: this.branch,
       };
-      // Récupérer le SHA si le fichier existe (nécessaire pour update)
+      // Récupérer le SHA (nécessaire pour update d'un fichier existant)
       const sha = this.cache.get(path) || await this._getSHA(path);
       if (sha) body.sha = sha;
 
@@ -94,14 +81,16 @@ class GitHubAPI {
     }
   }
 
+  // SHA lookup via Worker proxy (avoid API rate limit)
   async _getSHA(path) {
     try {
-      const url = `${this.apiURL}/repos/${this.owner}/${this.repo}/contents/${path}?ref=${this.branch}`;
-      const res = await fetch(url, { headers: { 'Accept': 'application/vnd.github.v3+json' } });
+      // Route through worker to avoid rate limit on api.github.com
+      const url = `${this.proxyURL}/github/${this.owner}/${this.repo}/contents/${path}?ref=${this.branch}`;
+      const res = await fetch(url, { method: 'GET', headers: { 'Accept': 'application/vnd.github.v3+json' } });
       if (!res.ok) return null;
       const data = await res.json();
-      this.cache.set(path, data.sha);
-      return data.sha;
+      if (data.sha) this.cache.set(path, data.sha);
+      return data.sha || null;
     } catch { return null; }
   }
 }
