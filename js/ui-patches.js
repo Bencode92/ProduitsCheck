@@ -130,14 +130,10 @@ async function handleEditMetadata() {
   showToast('Informations mises à jour', 'success'); app.openProduct(p);
 }
 
-// ═══════════════════════════════════════════════════════════════
-// FIX renderProductCard — entity badge + ANNUALIZED coupon
-// ═══════════════════════════════════════════════════════════════
+// ═══ FIX renderProductCard — entity badge + ANNUALIZED coupon ═══
 const _origRenderProductCard = renderProductCard;
 renderProductCard = function(product, context) {
   if (!product.bankId || product.bankId === 'undefined' || product.bankId === 'null') product.bankId = '';
-
-  // Pre-fix: temporarily swap coupon rate to annualized for the render
   const origRate = product.coupon?.rate;
   if (product.coupon && typeof getAnnualizedRate === 'function') {
     const annualized = getAnnualizedRate(product);
@@ -146,16 +142,11 @@ renderProductCard = function(product, context) {
       product.coupon.rate = annualized;
     }
   }
-
   let html = _origRenderProductCard(product, context);
-
-  // Restore original rate
   if (product.coupon?._origRate !== undefined) {
     product.coupon.rate = product.coupon._origRate;
     delete product.coupon._origRate;
   }
-
-  // Inject entity badge
   if (product.entity) {
     const entityInfo = MY_ENTITIES.find(e => e.id === product.entity);
     if (entityInfo) {
@@ -166,46 +157,68 @@ renderProductCard = function(product, context) {
   return html;
 };
 
-// ═══ FIX renderDashboard — smart annual yield ════════════════
+// ═══ FIX renderDashboard — smart annual yield + fix Coupon Moyen ═══
 const _origRenderDashboard = renderDashboard;
 renderDashboard = function(container, state) {
   _origRenderDashboard(container, state);
 
   const portfolio = state.portfolio || [];
   let annualYield = 0;
+  let totalWeightedRate = 0;
+  let totalInvested = 0;
+
   portfolio.forEach(p => {
-    if (typeof calcProductAnnualYield === 'function') {
-      annualYield += calcProductAnnualYield(p);
+    const amount = parseFloat(p.investedAmount) || 0;
+    totalInvested += amount;
+    if (typeof getAnnualizedRate === 'function') {
+      const annRate = getAnnualizedRate(p);
+      totalWeightedRate += amount * annRate;
+      annualYield += Math.round(amount * annRate / 100);
     } else {
-      annualYield += Math.round((parseFloat(p.investedAmount)||0) * (parseFloat(p.coupon?.rate)||0) / 100);
+      const rate = parseFloat(p.coupon?.rate) || 0;
+      totalWeightedRate += amount * rate;
+      annualYield += Math.round(amount * rate / 100);
     }
   });
-  const totalInvested = portfolio.reduce((s, p) => s + (parseFloat(p.investedAmount) || 0), 0);
-  const avgYieldPct = totalInvested > 0 ? (annualYield / totalInvested * 100).toFixed(2).replace('.', ',') : '0';
 
+  const avgYieldPct = totalInvested > 0 ? (totalWeightedRate / totalInvested) : 0;
+
+  // Fix the "Coupon Moyen" card (orange) — replace raw with annualized
+  const statCards = container.querySelectorAll('.stat-card.orange');
+  statCards.forEach(card => {
+    const label = card.querySelector('.stat-label');
+    if (label && label.textContent.includes('Coupon')) {
+      const valueEl = card.querySelector('.stat-value');
+      const subEl = card.querySelector('.stat-sub');
+      if (valueEl) valueEl.textContent = avgYieldPct.toFixed(2).replace('.', ',') + '%';
+      if (subEl) subEl.textContent = 'annualisé pondéré';
+    }
+  });
+
+  // Add the Rendement Annuel card
   const statsRow = container.querySelector('.stats-row');
   if (statsRow) {
     const yieldCard = document.createElement('div');
     yieldCard.className = 'stat-card green';
-    yieldCard.innerHTML = `<div class="stat-label">Rendement Annuel</div><div class="stat-value">${formatNumber(annualYield)}€</div><div class="stat-sub">${avgYieldPct}% moyen pondéré</div>`;
+    yieldCard.innerHTML = `<div class="stat-label">Rendement Annuel</div><div class="stat-value">${formatNumber(annualYield)}€</div><div class="stat-sub">${avgYieldPct.toFixed(2).replace('.',',')}% moyen pondéré</div>`;
     statsRow.appendChild(yieldCard);
   }
 };
 
-// ═══ FIX renderProductSheet — entity + subscription ══════════
+// ═══ FIX renderProductSheet — entity + subscription + annualized coupon ═══
 const _origRenderProductSheet = renderProductSheet;
 renderProductSheet = function(container, state) {
   const p = state.currentProduct;
   if (p && (!p.bankId || p.bankId === 'undefined' || p.bankId === 'null')) p.bankId = '';
   _origRenderProductSheet(container, state);
 
-  // Fix coupon display on fiche to show annualized
+  // Fix coupon display to show annualized
   if (typeof getAnnualizedRate === 'function' && p.coupon?.rate) {
     const annualized = getAnnualizedRate(p);
     const raw = parseFloat(p.coupon.rate) || 0;
     if (annualized !== raw && annualized > 0) {
       const couponMetric = container.querySelector('.fiche-metric.green .fiche-metric-value');
-      if (couponMetric && couponMetric.textContent.includes(formatPct(raw))) {
+      if (couponMetric) {
         couponMetric.innerHTML = formatPct(annualized) + ' <span style="font-size:10px;color:var(--text-dim)">(' + formatPct(raw) + '/' + (p.coupon.frequency || 'période') + ')</span>';
       }
     }
