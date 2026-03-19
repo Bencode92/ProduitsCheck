@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — UI Rendering (V2 — StudyForge-style fiche)
+// STRUCTBOARD — UI Rendering (V3 — Fixed reject/delete)
 // ═══════════════════════════════════════════════════════════════
 
 function renderApp(state) { const main = document.getElementById('main-content'); if (!main) return; switch(state.view) { case 'dashboard': renderDashboard(main,state); break; case 'product-sheet': renderProductSheet(main,state); break; case 'chat': renderChat(main,state); break; } }
@@ -34,7 +34,9 @@ function renderProductCard(product, context) {
   const typeName = PRODUCT_TYPES.find(t => t.id === product.type)?.name || product.type || '—';
   const scoreHTML = product.score ? `<div class="card-score ${product.score.score >= 65 ? 'good' : product.score.score >= 40 ? 'medium' : 'low'}">${product.score.score}</div>` : '';
   const statusBadge = product.status && PROPOSAL_STATUS[product.status] ? `<span class="status-badge" style="--badge-color:${PROPOSAL_STATUS[product.status].color}">${PROPOSAL_STATUS[product.status].icon} ${PROPOSAL_STATUS[product.status].label}</span>` : '';
-  return `<div class="product-card" onclick="app.openProduct(app._findProduct('${product.id}','${product.bankId||''}'))">
+  // Use safe bankId (never 'undefined' or 'null' string)
+  const safeBankId = product.bankId || '';
+  return `<div class="product-card" onclick="app.openProduct(app._findProduct('${product.id}','${safeBankId}'))">
     <div class="product-card-header"><div class="product-card-name">${product.name||typeName}</div><div class="product-card-bank" style="color:${bankColor};border-color:${bankColor}33;background:${bankColor}12">${bankName}</div></div>
     <div class="product-card-type">${typeName}</div>
     <div class="product-card-grid">
@@ -74,21 +76,22 @@ function renderProductSheet(container, state) {
   const isProtected = p.capitalProtection?.protected === true || p.capitalProtection?.protected === 'true';
   const hasAutocall = p.earlyRedemption?.possible === true || p.earlyRedemption?.possible === 'true';
   const hasMem = p.coupon?.memory === true || p.coupon?.memory === 'true';
+  // Safe bankId for onclick handlers
+  const safeBankId = p.bankId || '';
 
   container.innerHTML = `
-    <!-- Navigation -->
     <div class="sheet-nav">
       <button class="btn ghost" onclick="app.goToDashboard()">← Retour</button>
       <div class="sheet-nav-actions">
         <button class="btn ai-glow" onclick="app.openChat(app.state.currentProduct)">💬 Discuter avec Claude</button>
         ${p.status !== 'subscribed' ? `
-          <button class="btn success" onclick="showIntegrateModal('${p.id}','${p.bankId}')">✅ Intégrer</button>
-          <button class="btn danger" onclick="handleReject('${p.id}','${p.bankId}')">❌ Rejeter</button>
+          <button class="btn success" onclick="showIntegrateModal('${p.id}','${safeBankId}')">✅ Intégrer</button>
+          <button class="btn danger" onclick="handleReject('${p.id}','${safeBankId}')">❌ Rejeter</button>
+          <button class="btn ghost" style="color:var(--red)" onclick="handleDelete('${p.id}','${safeBankId}')">🗑 Supprimer</button>
         ` : ''}
       </div>
     </div>
 
-    <!-- Header -->
     <div class="fiche-header">
       <div class="fiche-title-block">
         <h1 class="fiche-title">${p.name || 'Produit sans nom'}</h1>
@@ -102,7 +105,6 @@ function renderProductSheet(container, state) {
       ${p.score ? renderScoreWidget(p.score) : ''}
     </div>
 
-    <!-- Métriques clés -->
     <div class="fiche-metrics">
       <div class="fiche-metric green"><div class="fiche-metric-label">Coupon</div><div class="fiche-metric-value">${couponRate ? formatPct(couponRate) : '—'}</div><div class="fiche-metric-sub">${p.coupon?.type || 'conditionnel'}${hasMem ? ' · mémoire' : ''}</div></div>
       <div class="fiche-metric ${barrier && barrier < 65 ? 'red' : 'orange'}"><div class="fiche-metric-label">Barrière Capital</div><div class="fiche-metric-value">${barrier ? barrier + '%' : '—'}</div><div class="fiche-metric-sub">${p.capitalProtection?.barrierType || '—'}</div></div>
@@ -114,160 +116,71 @@ function renderProductSheet(container, state) {
 
     <div class="sheet-layout">
       <div class="sheet-main">
-
-        <!-- Résumé IA -->
-        ${p.aiSummary ? `
-        <div class="fiche-section">
-          <div class="fiche-section-header"><span class="fiche-section-icon">🤖</span><span class="fiche-section-title">Résumé IA</span></div>
-          <div class="fiche-section-body"><div class="fiche-ai-summary">${formatAISummary(p.aiSummary)}</div></div>
-        </div>` : ''}
-
-        <!-- Mécanisme des Coupons -->
-        <div class="fiche-section">
-          <div class="fiche-section-header"><span class="fiche-section-icon">💰</span><span class="fiche-section-title">Mécanisme des Coupons</span></div>
-          <div class="fiche-section-body">
-            <div class="fiche-info-box ${couponRate && couponRate >= 5 ? 'green' : 'blue'}">
-              <div class="fiche-info-box-title">Coupon ${p.coupon?.type || ''} — ${couponRate ? formatPct(couponRate) : 'N/A'}</div>
-              <div class="fiche-info-box-text">
-                ${p.coupon?.frequency ? `<strong>Fréquence:</strong> ${p.coupon.frequency}` : ''}
-                ${p.coupon?.trigger ? ` · <strong>Seuil:</strong> ${p.coupon.trigger}% du niveau initial` : ''}
-                ${hasMem ? ' · <strong>Effet mémoire:</strong> Oui — les coupons non versés sont reportés' : ''}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Protection du Capital -->
-        <div class="fiche-section">
-          <div class="fiche-section-header"><span class="fiche-section-icon">🛡️</span><span class="fiche-section-title">Protection du Capital</span></div>
-          <div class="fiche-section-body">
-            <div class="fiche-info-box ${isProtected ? 'green' : 'orange'}">
-              <div class="fiche-info-box-title">${isProtected ? '✓ Capital protégé' : '⚠️ Capital non protégé'} ${p.capitalProtection?.level ? '— ' + p.capitalProtection.level + '%' : ''}</div>
-              <div class="fiche-info-box-text">
-                ${p.capitalProtection?.type ? `<strong>Type:</strong> ${p.capitalProtection.type}` : ''}
-                ${barrier ? ` · <strong>Barrière:</strong> ${barrier}% (${p.capitalProtection?.barrierType || 'européenne'})` : ''}
-                ${p.capitalProtection?.barrierObservation ? `<br><strong>Observation:</strong> ${p.capitalProtection.barrierObservation}` : ''}
-              </div>
-            </div>
-            ${barrier && barrier < 70 ? `<div class="fiche-alert warn">⚠️ Barrière basse (${barrier}%) — risque de perte en capital significatif si le sous-jacent chute de plus de ${100-barrier}%</div>` : ''}
-          </div>
-        </div>
-
-        <!-- Remboursement Anticipé -->
-        <div class="fiche-section">
-          <div class="fiche-section-header"><span class="fiche-section-icon">⏩</span><span class="fiche-section-title">Remboursement Anticipé</span></div>
-          <div class="fiche-section-body">
-            <div class="fiche-info-box ${hasAutocall ? 'purple' : 'neutral'}">
-              <div class="fiche-info-box-title">${hasAutocall ? '✓ Rappel anticipé possible' : '✕ Pas de remboursement anticipé'}</div>
-              <div class="fiche-info-box-text">
-                ${p.earlyRedemption?.type ? `<strong>Type:</strong> ${p.earlyRedemption.type}` : ''}
-                ${p.earlyRedemption?.trigger ? ` · <strong>Seuil:</strong> ${p.earlyRedemption.trigger}%` : ''}
-                ${p.earlyRedemption?.frequency ? ` · <strong>Fréquence:</strong> ${p.earlyRedemption.frequency}` : ''}
-                ${p.earlyRedemption?.stepDown === true || p.earlyRedemption?.stepDown === 'true' ? `<br><strong>Step-down:</strong> Oui — ${p.earlyRedemption.stepDownDetail || 'seuil dégressif'}` : ''}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Caractéristiques -->
-        <div class="fiche-section">
-          <div class="fiche-section-header"><span class="fiche-section-icon">📊</span><span class="fiche-section-title">Caractéristiques</span></div>
-          <div class="fiche-section-body">
-            <div class="fiche-kv-grid">
-              <div class="fiche-kv"><span class="fiche-kv-label">Sous-jacent(s)</span><span class="fiche-kv-value">${(p.underlyings||[]).join(', ') || '—'}</span></div>
-              <div class="fiche-kv"><span class="fiche-kv-label">Type</span><span class="fiche-kv-value">${typeName}</span></div>
-              <div class="fiche-kv"><span class="fiche-kv-label">Maturité</span><span class="fiche-kv-value">${p.maturity || '—'}</span></div>
-              <div class="fiche-kv"><span class="fiche-kv-label">Devise</span><span class="fiche-kv-value">${p.currency || 'EUR'}</span></div>
-              <div class="fiche-kv"><span class="fiche-kv-label">Date de strike</span><span class="fiche-kv-value">${formatDate(p.strikeDate)}</span></div>
-              <div class="fiche-kv"><span class="fiche-kv-label">Date maturité</span><span class="fiche-kv-value">${formatDate(p.maturityDate)}</span></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Scénarios -->
+        ${p.aiSummary ? `<div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">🤖</span><span class="fiche-section-title">Résumé IA</span></div><div class="fiche-section-body"><div class="fiche-ai-summary">${formatAISummary(p.aiSummary)}</div></div></div>` : ''}
+        <div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">💰</span><span class="fiche-section-title">Mécanisme des Coupons</span></div><div class="fiche-section-body">
+          <div class="fiche-info-box ${couponRate && couponRate >= 5 ? 'green' : 'blue'}"><div class="fiche-info-box-title">Coupon ${p.coupon?.type || ''} — ${couponRate ? formatPct(couponRate) : 'N/A'}</div><div class="fiche-info-box-text">${p.coupon?.frequency ? `<strong>Fréquence:</strong> ${p.coupon.frequency}` : ''}${p.coupon?.trigger ? ` · <strong>Seuil:</strong> ${p.coupon.trigger}% du niveau initial` : ''}${hasMem ? ' · <strong>Effet mémoire:</strong> Oui' : ''}</div></div></div></div>
+        <div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">🛡️</span><span class="fiche-section-title">Protection du Capital</span></div><div class="fiche-section-body">
+          <div class="fiche-info-box ${isProtected ? 'green' : 'orange'}"><div class="fiche-info-box-title">${isProtected ? '✓ Capital protégé' : '⚠️ Capital non protégé'} ${p.capitalProtection?.level ? '— ' + p.capitalProtection.level + '%' : ''}</div><div class="fiche-info-box-text">${p.capitalProtection?.type ? `<strong>Type:</strong> ${p.capitalProtection.type}` : ''}${barrier ? ` · <strong>Barrière:</strong> ${barrier}% (${p.capitalProtection?.barrierType || 'européenne'})` : ''}${p.capitalProtection?.barrierObservation ? `<br><strong>Observation:</strong> ${p.capitalProtection.barrierObservation}` : ''}</div></div>
+          ${barrier && barrier < 70 ? `<div class="fiche-alert warn">⚠️ Barrière basse (${barrier}%)</div>` : ''}</div></div>
+        <div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">⏩</span><span class="fiche-section-title">Remboursement Anticipé</span></div><div class="fiche-section-body">
+          <div class="fiche-info-box ${hasAutocall ? 'purple' : 'neutral'}"><div class="fiche-info-box-title">${hasAutocall ? '✓ Rappel anticipé possible' : '✕ Pas de remboursement anticipé'}</div><div class="fiche-info-box-text">${p.earlyRedemption?.type ? `<strong>Type:</strong> ${p.earlyRedemption.type}` : ''}${p.earlyRedemption?.trigger ? ` · <strong>Seuil:</strong> ${p.earlyRedemption.trigger}%` : ''}${p.earlyRedemption?.frequency ? ` · <strong>Fréquence:</strong> ${p.earlyRedemption.frequency}` : ''}${p.earlyRedemption?.stepDown === true || p.earlyRedemption?.stepDown === 'true' ? `<br><strong>Step-down:</strong> Oui — ${p.earlyRedemption.stepDownDetail || 'seuil dégressif'}` : ''}</div></div></div></div>
+        <div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">📊</span><span class="fiche-section-title">Caractéristiques</span></div><div class="fiche-section-body"><div class="fiche-kv-grid">
+          <div class="fiche-kv"><span class="fiche-kv-label">Sous-jacent(s)</span><span class="fiche-kv-value">${(p.underlyings||[]).join(', ') || '—'}</span></div>
+          <div class="fiche-kv"><span class="fiche-kv-label">Type</span><span class="fiche-kv-value">${typeName}</span></div>
+          <div class="fiche-kv"><span class="fiche-kv-label">Maturité</span><span class="fiche-kv-value">${p.maturity || '—'}</span></div>
+          <div class="fiche-kv"><span class="fiche-kv-label">Devise</span><span class="fiche-kv-value">${p.currency || 'EUR'}</span></div>
+          <div class="fiche-kv"><span class="fiche-kv-label">Date de strike</span><span class="fiche-kv-value">${formatDate(p.strikeDate)}</span></div>
+          <div class="fiche-kv"><span class="fiche-kv-label">Date maturité</span><span class="fiche-kv-value">${formatDate(p.maturityDate)}</span></div>
+        </div></div></div>
         ${p.scenarios && (p.scenarios.favorable || p.scenarios.median || p.scenarios.defavorable) ? `
-        <div class="fiche-section">
-          <div class="fiche-section-header"><span class="fiche-section-icon">🎯</span><span class="fiche-section-title">Scénarios de Performance</span></div>
-          <div class="fiche-section-body">
-            <div class="fiche-scenarios">
-              ${p.scenarios.favorable ? `<div class="fiche-scenario good"><div class="fiche-scenario-label">✅ Scénario Favorable</div><div class="fiche-scenario-text">${p.scenarios.favorable}</div></div>` : ''}
-              ${p.scenarios.median ? `<div class="fiche-scenario mid"><div class="fiche-scenario-label">⚖️ Scénario Médian</div><div class="fiche-scenario-text">${p.scenarios.median}</div></div>` : ''}
-              ${p.scenarios.defavorable ? `<div class="fiche-scenario bad"><div class="fiche-scenario-label">❌ Scénario Défavorable</div><div class="fiche-scenario-text">${p.scenarios.defavorable}</div></div>` : ''}
-            </div>
-          </div>
-        </div>` : ''}
-
-        <!-- Risques -->
+        <div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">🎯</span><span class="fiche-section-title">Scénarios</span></div><div class="fiche-section-body"><div class="fiche-scenarios">
+          ${p.scenarios.favorable ? `<div class="fiche-scenario good"><div class="fiche-scenario-label">✅ Favorable</div><div class="fiche-scenario-text">${p.scenarios.favorable}</div></div>` : ''}
+          ${p.scenarios.median ? `<div class="fiche-scenario mid"><div class="fiche-scenario-label">⚖️ Médian</div><div class="fiche-scenario-text">${p.scenarios.median}</div></div>` : ''}
+          ${p.scenarios.defavorable ? `<div class="fiche-scenario bad"><div class="fiche-scenario-label">❌ Défavorable</div><div class="fiche-scenario-text">${p.scenarios.defavorable}</div></div>` : ''}
+        </div></div></div>` : ''}
         ${p.risks && p.risks.length > 0 ? `
-        <div class="fiche-section">
-          <div class="fiche-section-header"><span class="fiche-section-icon">⚠️</span><span class="fiche-section-title">Points d'Attention</span></div>
-          <div class="fiche-section-body">
-            <div class="fiche-risks">
-              ${p.risks.map(r => `<div class="fiche-risk"><span class="fiche-risk-icon">▸</span><span>${r}</span></div>`).join('')}
-            </div>
-          </div>
-        </div>` : ''}
-
-        <!-- Résumé discussion -->
-        ${p.conversationSummary ? `
-        <div class="fiche-section">
-          <div class="fiche-section-header"><span class="fiche-section-icon">📝</span><span class="fiche-section-title">Résumé Discussion & Décision</span></div>
-          <div class="fiche-section-body">
-            <div class="fiche-ai-summary">${formatAISummary(p.conversationSummary)}</div>
-            ${p.decision ? `<div class="fiche-alert ${p.decision === 'subscribed' ? 'success' : 'warn'}">Décision: <strong>${PROPOSAL_STATUS[p.decision]?.label || p.decision}</strong></div>` : ''}
-          </div>
-        </div>` : ''}
+        <div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">⚠️</span><span class="fiche-section-title">Points d'Attention</span></div><div class="fiche-section-body"><div class="fiche-risks">
+          ${p.risks.map(r => `<div class="fiche-risk"><span class="fiche-risk-icon">▸</span><span>${r}</span></div>`).join('')}
+        </div></div></div>` : ''}
+        ${p.conversationSummary ? `<div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">📝</span><span class="fiche-section-title">Résumé Discussion</span></div><div class="fiche-section-body"><div class="fiche-ai-summary">${formatAISummary(p.conversationSummary)}</div>${p.decision ? `<div class="fiche-alert ${p.decision === 'subscribed' ? 'success' : 'warn'}">Décision: <strong>${PROPOSAL_STATUS[p.decision]?.label || p.decision}</strong></div>` : ''}</div></div>` : ''}
       </div>
-
-      <!-- Sidebar -->
       <div class="sheet-sidebar">
         ${p.score ? renderScorePanel(p.score) : ''}
-        <div class="sheet-card">
-          <h3 class="sheet-card-title">Actions</h3>
-          <div class="action-buttons">
-            <button class="btn ai-glow lg" style="width:100%" onclick="app.openChat(app.state.currentProduct)">💬 Discuter avec Claude</button>
-            ${p.status !== 'subscribed' ? `
-              <button class="btn success lg" style="width:100%" onclick="showIntegrateModal('${p.id}','${p.bankId}')">✅ Intégrer au portefeuille</button>
-              <button class="btn danger lg" style="width:100%" onclick="handleReject('${p.id}','${p.bankId}')">❌ Rejeter</button>
-            ` : `<div class="integrated-notice">✅ Intégré le ${formatDate(p.addedDate)}<br>Montant: ${formatNumber(p.investedAmount)}€</div>`}
-          </div>
-        </div>
+        <div class="sheet-card"><h3 class="sheet-card-title">Actions</h3><div class="action-buttons">
+          <button class="btn ai-glow lg" style="width:100%" onclick="app.openChat(app.state.currentProduct)">💬 Discuter avec Claude</button>
+          ${p.status !== 'subscribed' ? `
+            <button class="btn success lg" style="width:100%" onclick="showIntegrateModal('${p.id}','${safeBankId}')">✅ Intégrer</button>
+            <button class="btn danger lg" style="width:100%" onclick="handleReject('${p.id}','${safeBankId}')">❌ Rejeter</button>
+            <button class="btn ghost lg" style="width:100%;color:var(--red)" onclick="handleDelete('${p.id}','${safeBankId}')">🗑 Supprimer définitivement</button>
+          ` : `<div class="integrated-notice">✅ Intégré le ${formatDate(p.addedDate)}<br>Montant: ${formatNumber(p.investedAmount)}€</div>`}
+        </div></div>
       </div>
-    </div>
-  `;
+    </div>`;
 }
 
-// ─── Format AI Summary (StudyForge-style) ───────────────────
+// ─── Format helpers ─────────────────────────────────────────
 function formatAISummary(text) {
   if (!text) return '';
   let html = escapeHTML(text);
-  // Headings: ## or numbered sections like "1." or "# "
   html = html.replace(/^##\s*(\d+)\.\s*(.+)$/gm, '<h2>$1. $2</h2>');
   html = html.replace(/^##\s*(.+)$/gm, '<h2>$1</h2>');
   html = html.replace(/^#\s*(.+)$/gm, '<h2>$1</h2>');
   html = html.replace(/^(\d+)\.\s*\*\*(.+?)\*\*\s*[—–-]\s*/gm, '<h2>$1. $2</h2>');
   html = html.replace(/^(\d+)\.\s*\*\*(.+?)\*\*/gm, '<h2>$1. $2</h2>');
-  // Bold
   html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-  // Line breaks
   html = html.replace(/\n\n/g, '</p><p>');
   html = html.replace(/\n/g, '<br>');
-  // Wrap in paragraphs
   if (!html.startsWith('<h2>') && !html.startsWith('<p>')) html = '<p>' + html + '</p>';
   return html;
 }
 
-// ─── Score Widgets ──────────────────────────────────────────
 function renderScoreWidget(score) {
   const color = score.score>=65?'var(--green)':score.score>=40?'var(--orange)':'var(--red)';
-  return `<div class="score-widget"><svg viewBox="0 0 80 80" class="score-ring"><circle cx="40" cy="40" r="34" fill="none" stroke="var(--border)" stroke-width="4"/>
-    <circle cx="40" cy="40" r="34" fill="none" stroke="${color}" stroke-width="4" stroke-dasharray="${2*Math.PI*34}" stroke-dashoffset="${2*Math.PI*34*(1-score.score/100)}" stroke-linecap="round" transform="rotate(-90 40 40)"/></svg>
-    <div class="score-number" style="color:${color}">${score.score}</div></div>`;
+  return `<div class="score-widget"><svg viewBox="0 0 80 80" class="score-ring"><circle cx="40" cy="40" r="34" fill="none" stroke="var(--border)" stroke-width="4"/><circle cx="40" cy="40" r="34" fill="none" stroke="${color}" stroke-width="4" stroke-dasharray="${2*Math.PI*34}" stroke-dashoffset="${2*Math.PI*34*(1-score.score/100)}" stroke-linecap="round" transform="rotate(-90 40 40)"/></svg><div class="score-number" style="color:${color}">${score.score}</div></div>`;
 }
 
 function renderScorePanel(score) {
-  return `<div class="sheet-card score-panel"><h3 class="sheet-card-title">Score de Compatibilité</h3><div class="score-big">${renderScoreWidget(score)}</div>
-    <div class="score-verdict">${score.verdict}</div><div class="score-details">${score.details.map(d=>`<div class="score-detail ${d.type}"><span class="score-detail-icon">${d.icon}</span><span class="score-detail-text">${d.text}</span></div>`).join('')}</div></div>`;
+  return `<div class="sheet-card score-panel"><h3 class="sheet-card-title">Score de Compatibilité</h3><div class="score-big">${renderScoreWidget(score)}</div><div class="score-verdict">${score.verdict}</div><div class="score-details">${score.details.map(d=>`<div class="score-detail ${d.type}"><span class="score-detail-icon">${d.icon}</span><span class="score-detail-text">${d.text}</span></div>`).join('')}</div></div>`;
 }
 
 // ═══ CHAT ═══
@@ -279,16 +192,15 @@ function renderChat(container, state) {
       <div class="chat-header-actions"><button class="btn sm success" onclick="handleSummarizeAndDecide('subscribed')">✅ Résumer & Intégrer</button>
         <button class="btn sm danger" onclick="handleSummarizeAndDecide('rejected')">❌ Résumer & Rejeter</button></div></div>
     <div class="chat-messages" id="chat-messages">
-      <div class="chat-msg system"><div class="chat-msg-content">💡 Discussion sur <strong>${p.name||'ce produit'}</strong>. Claude a accès à la fiche et à votre portefeuille.</div></div>
+      <div class="chat-msg system"><div class="chat-msg-content">💡 Discussion sur <strong>${p.name||'ce produit'}</strong>.</div></div>
       ${messages.map(m=>`<div class="chat-msg ${m.role}"><div class="chat-msg-avatar">${m.role==='user'?'👤':'🤖'}</div><div class="chat-msg-content">${m.role==='assistant'?formatAIText(m.content):escapeHTML(m.content)}</div></div>`).join('')}</div>
-    <div class="chat-input-area"><textarea id="chat-input" class="chat-input" placeholder="Posez une question sur ce produit..." onkeydown="handleChatKeydown(event)"></textarea>
+    <div class="chat-input-area"><textarea id="chat-input" class="chat-input" placeholder="Posez une question..." onkeydown="handleChatKeydown(event)"></textarea>
       <button class="btn primary" onclick="handleSendChat()" id="chat-send-btn">Envoyer</button></div></div>`;
   const el = document.getElementById('chat-messages'); if (el) el.scrollTop = el.scrollHeight;
 }
 
 // ═══ MODALS ═══
 function showAddPortfolioModal() { showUploadModal('portfolio', null); }
-
 function showAddProposalModal() {
   const modal = document.getElementById('modal');
   modal.innerHTML = `<div class="modal-overlay" onclick="closeModal()"><div class="modal-content" onclick="event.stopPropagation()">
@@ -297,22 +209,20 @@ function showAddProposalModal() {
     <div class="modal-actions"><button class="btn" onclick="closeModal()">Annuler</button></div></div></div>`;
   modal.classList.add('visible');
 }
-
 function showUploadModal(context, bankId) {
   const modal = document.getElementById('modal'); const bank = BANKS.find(b => b.id === bankId);
   modal.innerHTML = `<div class="modal-overlay" onclick="closeModal()"><div class="modal-content" onclick="event.stopPropagation()">
     <h2 class="modal-title">${context==='portfolio'?'Ajouter au portefeuille':`Proposition — ${bank?.name||''}`}</h2>
-    <div class="upload-zone" ondragover="event.preventDefault();this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')" ondrop="handleFileDrop(event,'${context}','${bankId}')">
+    <div class="upload-zone" ondragover="event.preventDefault();this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')" ondrop="handleFileDrop(event,'${context}','${bankId||''}')">
       <div class="upload-icon">📄</div><div class="upload-text">Glisser le PDF ici</div><div class="upload-sub">ou cliquer pour sélectionner</div>
-      <input type="file" accept=".pdf" id="file-input" style="display:none" onchange="handleFileSelect(event,'${context}','${bankId}')"></div>
+      <input type="file" accept=".pdf" id="file-input" style="display:none" onchange="handleFileSelect(event,'${context}','${bankId||''}')"></div>
     <button class="btn" style="width:100%;margin-top:12px" onclick="document.getElementById('file-input').click()">Choisir un fichier PDF</button>
     <div class="upload-divider"><span>ou</span></div>
-    <button class="btn ghost" style="width:100%" onclick="showManualEntryModal('${context}','${bankId}')">✏️ Saisie manuelle</button>
+    <button class="btn ghost" style="width:100%" onclick="showManualEntryModal('${context}','${bankId||''}')">✏️ Saisie manuelle</button>
     <div id="upload-progress" class="upload-progress hidden"><div class="spinner"></div><span id="upload-status">Extraction...</span></div>
     <div class="modal-actions"><button class="btn" onclick="closeModal()">Annuler</button></div></div></div>`;
   modal.classList.add('visible');
 }
-
 function showManualEntryModal(context, bankId) {
   const modal = document.getElementById('modal');
   modal.innerHTML = `<div class="modal-overlay" onclick="closeModal()"><div class="modal-content modal-large" onclick="event.stopPropagation()">
@@ -329,9 +239,8 @@ function showManualEntryModal(context, bankId) {
       <div class="form-field"><label>Autocall</label><select id="f-autocall"><option value="true">Oui</option><option value="false">Non</option></select></div>
       ${context==='portfolio'?`<div class="form-field"><label>Montant investi (€)</label><input id="f-invested" type="number" placeholder="50000"></div>`:''}
       <div class="form-field full"><label>Notes</label><textarea id="f-notes" placeholder="Détails..."></textarea></div></div>
-    <div class="modal-actions"><button class="btn" onclick="closeModal()">Annuler</button><button class="btn primary" onclick="handleManualSave('${context}','${bankId}')">Enregistrer</button></div></div></div>`;
+    <div class="modal-actions"><button class="btn" onclick="closeModal()">Annuler</button><button class="btn primary" onclick="handleManualSave('${context}','${bankId||''}')">Enregistrer</button></div></div></div>`;
 }
-
 function showIntegrateModal(productId, bankId) {
   const modal = document.getElementById('modal');
   modal.innerHTML = `<div class="modal-overlay" onclick="closeModal()"><div class="modal-content" onclick="event.stopPropagation()">
@@ -340,12 +249,10 @@ function showIntegrateModal(productId, bankId) {
     <div class="modal-actions"><button class="btn" onclick="closeModal()">Annuler</button><button class="btn success" onclick="handleIntegrate('${productId}','${bankId}')">✅ Confirmer</button></div></div></div>`;
   modal.classList.add('visible');
 }
-
 function closeModal() { const m = document.getElementById('modal'); m.classList.remove('visible'); setTimeout(()=>{m.innerHTML='';},300); }
 
 // ═══ EVENT HANDLERS ═══
 function toggleBankSection(bankId) { app.state.bankSections[bankId] = app.state.bankSections[bankId]===false; app.render(); }
-
 async function handleFileDrop(event, context, bankId) { event.preventDefault(); const file = event.dataTransfer.files[0]; if (file && file.type === 'application/pdf') await processUploadedFile(file, context, bankId); }
 async function handleFileSelect(event, context, bankId) { const file = event.target.files[0]; if (file) await processUploadedFile(file, context, bankId); }
 
@@ -381,11 +288,55 @@ async function handleIntegrate(productId, bankId) {
   await app.updateProposalStatus(bankId, productId, 'subscribed'); await app.addToPortfolio({...product}, amount); app.goToDashboard();
 }
 
+// ─── REJETER: change le statut mais garde le produit ────────
 async function handleReject(productId, bankId) {
   if (!confirm('Rejeter cette proposition ?')) return;
-  const product = app._findProduct(productId, bankId);
-  if (product?.conversation?.length > 0) { showToast('Résumé en cours...','info'); await app.summarizeAndDecide(productId, bankId, 'rejected'); }
-  await app.updateProposalStatus(bankId, productId, 'rejected', 'Rejeté manuellement'); app.goToDashboard();
+  try {
+    // Trouver le vrai bankId si pas fourni
+    const resolvedBankId = _resolveBankId(productId, bankId);
+    if (!resolvedBankId) { showToast('Erreur: banque introuvable pour ce produit', 'error'); return; }
+
+    const product = app._findProduct(productId, resolvedBankId);
+    if (product?.conversation?.length > 0) {
+      showToast('Résumé en cours...','info');
+      await app.summarizeAndDecide(productId, resolvedBankId, 'rejected');
+    }
+    await app.updateProposalStatus(resolvedBankId, productId, 'rejected', 'Rejeté manuellement');
+    showToast('Proposition rejetée', 'success');
+    app.goToDashboard();
+  } catch (e) { showToast('Erreur: ' + e.message, 'error'); console.error(e); }
+}
+
+// ─── SUPPRIMER: retire complètement le produit ──────────────
+async function handleDelete(productId, bankId) {
+  if (!confirm('Supprimer définitivement cette proposition ? Cette action est irréversible.')) return;
+  try {
+    const resolvedBankId = _resolveBankId(productId, bankId);
+    if (resolvedBankId) {
+      await app.removeProposal(resolvedBankId, productId);
+    }
+    // Aussi retirer du portfolio si présent
+    const inPortfolio = app.state.portfolio.find(p => p.id === productId);
+    if (inPortfolio) {
+      await app.removeFromPortfolio(productId);
+    }
+    showToast('Produit supprimé', 'success');
+    app.goToDashboard();
+  } catch (e) { showToast('Erreur: ' + e.message, 'error'); console.error(e); }
+}
+
+// ─── Résoudre le bankId même s'il est vide/undefined ────────
+function _resolveBankId(productId, bankId) {
+  // Si bankId est valide et le produit existe dans cette banque
+  if (bankId && bankId !== 'undefined' && bankId !== 'null' && app.state.proposals[bankId]) {
+    const found = app.state.proposals[bankId].find(p => p.id === productId);
+    if (found) return bankId;
+  }
+  // Sinon chercher dans toutes les banques
+  for (const [bId, proposals] of Object.entries(app.state.proposals)) {
+    if (proposals.find(p => p.id === productId)) return bId;
+  }
+  return null;
 }
 
 async function handleSendChat() {
@@ -394,7 +345,6 @@ async function handleSendChat() {
   try { const p = app.state.currentProduct; await app.sendChatMessage(p.id, p.bankId, message); renderChat(document.getElementById('main-content'), app.state); }
   catch (e) { showToast('Erreur: '+e.message,'error'); } btn.disabled = false; btn.textContent = 'Envoyer';
 }
-
 function handleChatKeydown(event) { if (event.key==='Enter'&&!event.shiftKey) { event.preventDefault(); handleSendChat(); } }
 
 async function handleSummarizeAndDecide(decision) {
@@ -407,7 +357,6 @@ async function handleSummarizeAndDecide(decision) {
   } catch(e) { showToast('Erreur: '+e.message,'error'); }
 }
 
-// ─── Helpers ────────────────────────────────────────────────
 function renderSpec(label, value) { return `<div class="spec-item"><span class="spec-label">${label}</span><span class="spec-value">${value}</span></div>`; }
 function formatAIText(text) { if (!text) return ''; return escapeHTML(text).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>'); }
 function escapeHTML(str) { const d=document.createElement('div'); d.textContent=str; return d.innerHTML; }
