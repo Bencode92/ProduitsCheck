@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Main Application
+// STRUCTBOARD — Main Application (V2 — Fixed product loading)
 // ═══════════════════════════════════════════════════════════════
 
 class StructBoard {
@@ -15,14 +15,36 @@ class StructBoard {
   async init() {
     this.setState({ loading: true });
     try {
-      // Charger produits structurés
+      // Charger portfolio
       const portfolio = await github.readFile(`${CONFIG.DATA_PATH}/portfolio.json`);
       this.state.portfolio = portfolio || [];
+
+      // Charger propositions — LIRE LES FICHES COMPLÈTES, pas juste l'index
       const proposals = {};
       for (const bank of BANKS) {
         const bankData = await github.readFile(`${CONFIG.DATA_PATH}/banks/${bank.id}/index.json`);
-        if (bankData && bankData.products && bankData.products.length > 0) proposals[bank.id] = bankData.products;
+        if (bankData && bankData.products && bankData.products.length > 0) {
+          const fullProducts = [];
+          for (const summary of bankData.products) {
+            try {
+              // Charger la fiche complète depuis products/{id}.json
+              const fullProduct = await github.readFile(`${CONFIG.DATA_PATH}/banks/${bank.id}/products/${summary.id}.json`);
+              if (fullProduct && fullProduct.id) {
+                fullProducts.push(fullProduct);
+              } else {
+                // Fallback: utiliser le résumé de l'index (pas idéal mais évite la perte)
+                console.warn(`Fiche complète introuvable pour ${summary.id}, utilisation du résumé`);
+                fullProducts.push({ ...summary, bankId: bank.id });
+              }
+            } catch (e) {
+              console.warn(`Erreur chargement produit ${summary.id}:`, e);
+              fullProducts.push({ ...summary, bankId: bank.id });
+            }
+          }
+          if (fullProducts.length > 0) proposals[bank.id] = fullProducts;
+        }
       }
+
       // Charger CAT
       await catManager.load();
 
@@ -66,9 +88,28 @@ class StructBoard {
   async updateProposalStatus(bankId, productId, status, reason) {
     const proposals = this.state.proposals[bankId]; if (!proposals) return;
     const idx = proposals.findIndex(p => p.id === productId); if (idx === -1) return;
-    proposals[idx].status = status; proposals[idx].decision = status; proposals[idx].decisionReason = reason || null;
-    await this._saveBankIndex(bankId); await this._saveProductFile(bankId, proposals[idx]);
+    proposals[idx].status = status;
+    proposals[idx].decision = status;
+    proposals[idx].decisionReason = reason || null;
+
+    // Sauvegarder l'index ET la fiche complète
+    await this._saveBankIndex(bankId);
+    await this._saveProductFile(bankId, proposals[idx]);
     this.setState({ proposals: { ...this.state.proposals } });
+  }
+
+  async removeProposal(bankId, productId) {
+    const proposals = this.state.proposals[bankId]; if (!proposals) return;
+    // Retirer uniquement CE produit
+    this.state.proposals[bankId] = proposals.filter(p => p.id !== productId);
+    // Si plus aucune proposition pour cette banque, supprimer l'entrée
+    if (this.state.proposals[bankId].length === 0) {
+      delete this.state.proposals[bankId];
+    }
+    // Mettre à jour l'index (sans le produit supprimé)
+    await this._saveBankIndex(bankId);
+    this.setState({ proposals: { ...this.state.proposals } });
+    showToast('Proposition supprimée', 'success');
   }
 
   async handlePDFUpload(file, bankId) {
@@ -117,12 +158,28 @@ class StructBoard {
   }
 
   async _saveBankIndex(bankId) {
-    const proposals = this.state.proposals[bankId] || []; const bankConfig = BANKS.find(b => b.id === bankId);
-    const index = { bankId, bankName: bankConfig?.name || bankId, lastUpdated: new Date().toISOString(), products: proposals.map(p => ({ id: p.id, name: p.name, type: p.type, status: p.status, score: p.score?.score || null, receivedDate: p.receivedDate })) };
+    const proposals = this.state.proposals[bankId] || [];
+    const bankConfig = BANKS.find(b => b.id === bankId);
+    const index = {
+      bankId,
+      bankName: bankConfig?.name || bankId,
+      lastUpdated: new Date().toISOString(),
+      // L'index ne contient que les RÉSUMÉS — les données complètes sont dans products/{id}.json
+      products: proposals.map(p => ({
+        id: p.id,
+        name: p.name,
+        type: p.type,
+        status: p.status,
+        score: p.score?.score || null,
+        receivedDate: p.receivedDate,
+      })),
+    };
     await github.writeFile(`${CONFIG.DATA_PATH}/banks/${bankId}/index.json`, index, `[StructBoard] Update ${bankConfig?.name || bankId}`);
   }
 
   async _saveProductFile(bankId, product) {
+    // Ne sauvegarder que si le produit a des données substantielles (pas un résumé d'index)
+    if (!product || !product.id) return;
     await github.writeFile(`${CONFIG.DATA_PATH}/banks/${bankId}/products/${product.id}.json`, product, `[StructBoard] Save ${product.id}`);
   }
 
