@@ -280,5 +280,144 @@
     "investedAmount": 109000,
     "addedDate": "2026-03-19",
     "status": "active"
+  },
+  {
+    "id": "sp_mmxhg4us_3x9ic",
+    "name": "Oxygène Objectif Mars 2026",
+    "bankId": "",
+    "type": "autocall",
+    "underlyingType": "basket",
+    "underlyings": [
+      "Banca Monte dei Paschi di Siena SpA",
+      "Enel SpA",
+      "Novo Nordisk A",
+      "UniCredit SpA",
+      "Veolia Environnement SA"
+    ],
+    "currency": "EUR",
+    "maturity": "10 ans",
+    "maturityDate": "2036-03-20",
+    "strikeDate": "2026-03-20",
+    "coupon": {
+      "rate": 7,
+      "type": "conditionnel",
+      "frequency": "annuel",
+      "trigger": 68,
+      "triggerDetail": "panier équipondéré supérieur ou égal à 68% du niveau initial à l'échéance",
+      "memory": false,
+      "maxReturn": "6,81%",
+      "totalReturn": "70% sur 10 ans maximum"
+    },
+    "capitalProtection": {
+      "protected": false,
+      "level": 60,
+      "type": "conditionnelle-barriere",
+      "barrier": 60,
+      "barrierType": "europeenne",
+      "barrierObservation": "barrière de 60% du niveau initial observée à l'échéance finale",
+      "inLifeRisk": "risque de perte totale du capital en cas de revente avant échéance"
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "autocall",
+      "trigger": 100,
+      "triggerDetail": "panier équipondéré supérieur ou égal à 100% du niveau initial",
+      "frequency": "annuel",
+      "startYear": 1,
+      "stepDown": false
+    },
+    "scenarios": {
+      "favorable": "Remboursement automatique anticipé avec 7% par année écoulée si panier ≥ 100% du niveau initial",
+      "median": "Gain de 7% par année écoulée si panier entre 68% et 100% du niveau initial à l'échéance",
+      "defavorable": "Perte en capital égale à la baisse du panier si celui-ci < 60% du niveau initial à l'échéance"
+    },
+    "risks": [
+      "Risque de perte en capital partielle ou totale",
+      "Risque de défaut de l'émetteur Morgan Stanley",
+      "Pas de réinvestissement des dividendes",
+      "Gains plafonnés à 6,81% par an",
+      "Risque de liquidité en cas de revente anticipée"
+    ],
+    "rawText": "--- PAGE 1 ---\n‒   Durée   d ’ investissement   conseillée   :   10   ans   (hors   cas   de   remboursement   automatique  anticipé ( 3 ) ) .   En   cas   de   revente   avant   la   date   d ’ échéance ( 2 )   ou   de   remboursement  automatique   anticipé ( 2 ) ,   l ’ investisseur   prend   un   risque   de   perte   en   capital   non   mesurable  a   priori .  ‒   É ligibilité   :   compte - titres,   unité   de   compte   d ’ un   contrat   d ’ assurance - vie   ou   de  capitalisation .  ‒   Période   de   commercialisation   :   du   29   décembre   2025   au   20   mars   2026 ( 4 ) .  ‒   Code   ISIN   :   FRIP 00001 Z 65 .  ‒   Produit   émis   par   Morgan   Stanley   &   Co   International   Plc ( 5 )   (l ’   «   émetteur   ») .  L’investisseur   est   soumis   au   risque   de   défaut,   de   faillite   ou   de   mise   en   résolution   de  l’émetteur .  ‒   Dans   le   cadre   d ’ un   contrat   d ’ assurance - vie   ou   de   capitalisation,   l ’ assureur   s ’ engage  exclusivement   sur   le   nombre   d ’ unités   de   compte   mais   non   sur   leur   valeur,   qu ’ il   ne   garantit  pas .   Il   est   précisé   que   l ’ assureur   d ’ une   part   et   l ’ émetteur   d ’ autre   part,   sont   des   entités  juridiques   distinctes .   Ce   document   n ’ a   pas   été   rédigé   par   l ’ assureur .  ‒   Il   est   recommandé   aux   investisseurs   de   consulter   le   Prospectus   de   Base   pour   y   trouver   une  description   détaillée   des   titres   et,   en   particulier,   revoir   les   Facteurs   de   Risque   associés   à   ces  titres .  ‒   Ces   titres   sont   destinés   uniquement   à   des   investisseurs   avertis,   prêts   à   prendre   certains  risques .   Il   est   vivement   recommandé   aux   investisseurs   potentiels   de   prendre   conseil   auprès  de   leurs   conseils   juridiques,   fiscaux,   et   comptables   au   sujet   de   tout   investissement   envisagé  ou   réel   dans   ces   titres .  ( 1 )   L ’ investisseur   prend   un   risque   de   perte   en   capital   non   mesurable   a  priori   si   les   titres   de   créance   sont   revendus   avant   la   date  d ’ échéance ( 2 )   ou   de   remboursement   automatique   anticipé ( 2 ) .  L ’ investisseur   supporte   le   risque   de   défaut   de   paiement,   de   faillite   et  de   mise   en   résolution   de   l ’ émetteur .   Pour   les   autres   risques   de   perte  en   capital,   voir   pages   suivantes .  ( 2 )   Veuillez - vous   référer   au   tableau   récapitulant   les   principales  caractéristiques   financières   en   page   9   pour   le   détail   des   dates   et   des  barrières .  ( 3 )   Le   remboursement   automatique   anticipé   ne   pourra   se   faire,   en  tout   état   de   cause,   avant   la   fin   de   la   première   année   suivant   la   date  de   constatation   initiale   ( 20   mars   2026 ) .  ( 4 )   Une   fois   le   montant   de   l ’ enveloppe   atteint,   la   commercialisation  du   titre   «   Oxygène   Objectif   Mars   2026   »   peut   cesser   à   tout   moment  sans   préavis,   avant   le   20   mars   2026   ce   dont   vous   serez   informé(e),   le  cas   échéant,   par   le   distributeur .  ( 5 )   Morgan   Stanley   &   Co   International   Plc .   :   l   ’ émetteur   n ’ a   sollicité   ou  obtenu   aucune   notation   des   principales   agences   de   notation  ( Standard   &   Poor ’ s   A+,   Moody ’ s   Aa 3 ,   Fitch   AA - ) .   Notations   en  vigueur   au   mom e nt   de   la   rédaction   de   la   présente  brochure   le   12   décembre   2025 .   Ces   notations   peuvent   être  révisées   à   tout   mome nt   par   les   agences   de   notation   et   ne  sont   pas   une   garantie   de   solvabilité   de   l ’ émetteur .   Elles   ne  sauraient   constituer   un   argument   de   souscription   au   titre   de  créance .  Communication à caractère promotionnel  Titre de créance de droit français présentant un risque de perte en capital partielle ou totale en cours de vie (1)   et à  la date d ’ échéance (2)   (ci - après désigné le «   titre   », le «   titre de créance   » ou le «   produit   »). Produit de placement  risqué alternatif à un investissement dynamique risqué de type « actions ».  Oxygène Objectif  Mars 2026  Vous   êtes   sur   le   point   d ’ acheter   un   produit   qui   n ’ est   pas   simple   et   qui   peut   être   difficile   à   comprendre .\n--- PAGE 2 ---\n2  Oxygène Objectif Mars 2026 est un titre de créance complexe présentant un risque de perte en  capital partielle ou totale proposant aux investisseurs de s ’ exposer pour une durée de 1 à 10  années à l ’ évolution du niveau d ’ un panier équipondéré (ci - après le « panier équipondéré »)  composé des actions suivantes   :   Banca Monte dei Paschi di Siena SpA , Enel   SpA , Novo   Nordisk  A,   UniCredit   SpA   et Veolia Environnement SA. Le remboursement est donc conditionné à  l ’ évolution de ce panier d ’ ",
+    "aiParsed": {
+      "name": "Oxygène Objectif Mars 2026",
+      "type": "autocall",
+      "emitter": "Morgan Stanley & Co International Plc",
+      "guarantor": "Morgan Stanley & Co International Plc",
+      "distributor": "Swiss Life",
+      "isin": "FRIP00001Z65",
+      "underlyings": [
+        "Banca Monte dei Paschi di Siena SpA",
+        "Enel SpA",
+        "Novo Nordisk A",
+        "UniCredit SpA",
+        "Veolia Environnement SA"
+      ],
+      "underlyingType": "basket",
+      "currency": "EUR",
+      "maturity": "10 ans",
+      "maturityDate": "2036-03-20",
+      "strikeDate": "2026-03-20",
+      "nominal": "1000 EUR",
+      "coupon": {
+        "rate": 7,
+        "type": "conditionnel",
+        "frequency": "annuel",
+        "trigger": 68,
+        "triggerDetail": "panier équipondéré supérieur ou égal à 68% du niveau initial à l'échéance",
+        "memory": false,
+        "maxReturn": "6,81%",
+        "totalReturn": "70% sur 10 ans maximum"
+      },
+      "capitalProtection": {
+        "protected": false,
+        "level": 60,
+        "type": "conditionnelle-barriere",
+        "barrier": 60,
+        "barrierType": "europeenne",
+        "barrierObservation": "barrière de 60% du niveau initial observée à l'échéance finale",
+        "inLifeRisk": "risque de perte totale du capital en cas de revente avant échéance"
+      },
+      "earlyRedemption": {
+        "possible": true,
+        "type": "autocall",
+        "trigger": 100,
+        "triggerDetail": "panier équipondéré supérieur ou égal à 100% du niveau initial",
+        "frequency": "annuel",
+        "startYear": 1,
+        "stepDown": false
+      },
+      "scenarios": {
+        "favorable": "Remboursement automatique anticipé avec 7% par année écoulée si panier ≥ 100% du niveau initial",
+        "median": "Gain de 7% par année écoulée si panier entre 68% et 100% du niveau initial à l'échéance",
+        "defavorable": "Perte en capital égale à la baisse du panier si celui-ci < 60% du niveau initial à l'échéance"
+      },
+      "advantages": [
+        "Mécanisme de remboursement automatique anticipé dès la première année",
+        "Objectif de gain de 7% par année écoulée",
+        "Exposition à un panier diversifié de 5 actions européennes"
+      ],
+      "risks": [
+        "Risque de perte en capital partielle ou totale",
+        "Risque de défaut de l'émetteur Morgan Stanley",
+        "Pas de réinvestissement des dividendes",
+        "Gains plafonnés à 6,81% par an",
+        "Risque de liquidité en cas de revente anticipée"
+      ],
+      "keyDates": [
+        "2025-12-29: Début commercialisation",
+        "2026-03-20: Fin commercialisation et constatation initiale",
+        "2027-03-19: Première date de remboursement automatique anticipé possible",
+        "2036-03-20: Échéance finale"
+      ],
+      "ratings": "S&P: A+, Moody's: Aa3, Fitch: AA-",
+      "eligibility": "compte-titres, unité de compte d'assurance-vie ou de capitalisation",
+      "summary": "Titre de créance autocall de 10 ans sur panier équipondéré de 5 actions européennes avec objectif de gain de 7% par an. Remboursement automatique anticipé possible dès la première année si le panier dépasse son niveau initial. Risque de perte en capital si le panier termine sous 60% de son niveau initial à l'échéance."
+    },
+    "aiSummary": "## 1. DESCRIPTION\nProduit autocall de 10 ans émis par Morgan Stanley & Co International Plc (notations S&P: A+, Moody's: Aa3, Fitch: AA-). Sous-jacent : panier équipondéré de 5 actions (Banca Monte dei Paschi, Enel, Novo Nordisk, UniCredit, Veolia Environnement).\n\n## 2. RENDEMENT & COUPONS\nCoupon conditionnel de 7% annuel si le panier ≥ 68% du niveau initial à l'échéance. Gain maximum plafonné à 6,81% par an, soit 70% sur 10 ans maximum.\n\n## 3. PROTECTION DU CAPITAL\nProtection conditionnelle avec barrière européenne à 60% du niveau initial observée uniquement à l'échéance finale. Risque de perte totale en cas de revente avant échéance.\n\n## 4. REMBOURSEMENT ANTICIPÉ\nRemboursement automatique (autocall) annuel dès la 1ère année si le panier ≥ 100% du niveau initial. Paiement de 7% par année écoulée lors du remboursement anticipé.\n\n## 5. SCÉNARIOS\n**Favorable :** Remboursement automatique anticipé avec 7% par année écoulée si panier ≥ 100%\n**Médian :** Gain de 7% par année écoulée si panier entre 68% et 100% à l'échéance  \n**Défavorable :** Perte en capital égale à la baisse du panier si < 60% à l'échéance\n\n## 6. POINTS D'ATTENTION\n• Risque de perte partielle ou totale du capital si barrière franchie\n• Risque de défaut émetteur Morgan Stanley  \n• Gains plafonnés à 6,81% par an maximum\n• Pas de réinvestissement des dividendes des actions\n• Risque de liquidité important en cas de revente anticipée",
+    "sourceFile": "Brochure OXYGENE OBJECTIF MARS 2026 (1).pdf",
+    "investedAmount": 30000,
+    "addedDate": "2026-03-19",
+    "status": "active"
   }
 ]
