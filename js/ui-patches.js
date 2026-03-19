@@ -1,4 +1,4 @@
-// ═══ PATCHES V12b — Fix archive button visibility ═══
+// ═══ PATCHES V12b — SAFE card injection (no regex) ═══
 
 let _pendingProduct = null;
 
@@ -21,9 +21,14 @@ function applyMetadata(product, meta) {
   if (meta.date) product.subscriptionDate = meta.date;
   product.integrationNotes = meta.notes || '';
 }
-
-// Helper: is product in portfolio?
 function _isInPortfolio(p) { return !!(app.state.portfolio || []).find(x => x.id === p.id); }
+
+// Safe inject before last </div> of card HTML
+function _injectBeforeLastDiv(html, content) {
+  const idx = html.lastIndexOf('</div>');
+  if (idx < 0) return html + content;
+  return html.substring(0, idx) + content + html.substring(idx);
+}
 
 const _origProcessUploadedFile = processUploadedFile;
 processUploadedFile = async function(file, context, bankId) {
@@ -53,24 +58,43 @@ showIntegrateModal = function(pid, bid) { const p = app._findProduct(pid, bid); 
 const _origHandleIntegrate = handleIntegrate;
 handleIntegrate = async function(pid, bid) { const meta = readMetadataForm(); if (!meta.amount) { showToast('Montant requis','error'); return; } const p = app._findProduct(pid, bid); if (!p) return; applyMetadata(p, meta); closeModal(); const rb = _resolveBankId(pid, bid); if (rb) await app.updateProposalStatus(rb, pid, 'subscribed'); await app.addToPortfolio({...p}, meta.amount); app.goToDashboard(); };
 
-// ═══ EDIT METADATA ═══
 function showEditMetadataModal() { const p = app.state.currentProduct; if (!p) return; const modal = document.getElementById('modal'); modal.innerHTML = `<div class="modal-overlay" onclick="closeModal()"><div class="modal-content" onclick="event.stopPropagation()"><h2 class="modal-title">✏️ Modifier</h2><div style="color:var(--text-muted);font-size:12px;margin-bottom:16px">${p.name||''}</div><div class="form-grid">${metadataFieldsHTML(p)}</div><div class="modal-actions"><button class="btn" onclick="closeModal()">Annuler</button><button class="btn primary" onclick="handleEditMetadata()">💾 Enregistrer</button></div></div></div>`; modal.classList.add('visible'); }
 async function handleEditMetadata() { const p = app.state.currentProduct; if (!p) return; const meta = readMetadataForm(); applyMetadata(p, meta); if (!meta.entity) { p.entity=''; p.entityName=''; } if (!meta.bankId) { p.bankId=''; p.bankName=''; } closeModal(); const ip = app.state.portfolio.find(x => x.id === p.id); if (ip) { Object.assign(ip, {entity:p.entity,entityName:p.entityName,bankId:p.bankId,bankName:p.bankName,investedAmount:p.investedAmount,subscriptionDate:p.subscriptionDate,integrationNotes:p.integrationNotes}); await github.writeFile(`${CONFIG.DATA_PATH}/portfolio.json`, app.state.portfolio, `[StructBoard] Update: ${p.name||p.id}`); } if (p.bankId) await app._saveProductFile(p.bankId, p); showToast('OK','success'); app.openProduct(p); }
 
-// ═══ renderProductCard ═══
+// ═══ renderProductCard — SAFE entity + annualized + tracking/archive ═══
 const _origRenderProductCard = renderProductCard;
 renderProductCard = function(product, context) {
   if (!product.bankId || product.bankId === 'undefined' || product.bankId === 'null') product.bankId = '';
+  // Annualized coupon swap
   const origRate = product.coupon?.rate;
   if (product.coupon && typeof getAnnualizedRate === 'function') { const ann = getAnnualizedRate(product); if (ann !== origRate && ann > 0) { product.coupon._origRate = origRate; product.coupon.rate = ann; } }
   let html = _origRenderProductCard(product, context);
   if (product.coupon?._origRate !== undefined) { product.coupon.rate = product.coupon._origRate; delete product.coupon._origRate; }
-  if (product.entity) { const ei = MY_ENTITIES.find(e => e.id === product.entity); if (ei) { html = html.replace('</div></div>\n    <div class="product-card-type">', `<div class="product-card-bank" style="color:${ei.color};border-color:${ei.color}33;background:${ei.color}12;margin-left:4px">${ei.icon} ${ei.name}</div></div>\n    <div class="product-card-type">`); } }
-  if (product.archived && typeof renderArchiveBadge === 'function') {
-    html = html.replace(/<\/div>$/, renderArchiveBadge(product) + '</div>');
-  } else if (product.tracking?.level != null && typeof renderTrackingGauge === 'function') {
-    html = html.replace(/<\/div>$/, renderTrackingGauge(product) + '</div>');
+
+  // Entity badge — inject after bank badge in header using indexOf
+  if (product.entity) {
+    const ei = MY_ENTITIES.find(e => e.id === product.entity);
+    if (ei) {
+      const badge = `<div class="product-card-bank" style="color:${ei.color};border-color:${ei.color}33;background:${ei.color}12;margin-left:4px">${ei.icon} ${ei.name}</div>`;
+      // Find the header closing and inject before it
+      const headerEnd = html.indexOf('</div></div>');
+      if (headerEnd >= 0) {
+        html = html.substring(0, headerEnd) + badge + html.substring(headerEnd);
+      }
+    }
   }
+
+  // Tracking gauge or Archive badge — inject before LAST </div>
+  let extraContent = '';
+  if (product.archived && typeof renderArchiveBadge === 'function') {
+    extraContent = renderArchiveBadge(product);
+  } else if (product.tracking?.level != null && typeof renderTrackingGauge === 'function') {
+    extraContent = renderTrackingGauge(product);
+  }
+  if (extraContent) {
+    html = _injectBeforeLastDiv(html, extraContent);
+  }
+
   return html;
 };
 
@@ -111,12 +135,10 @@ renderProductSheet = function(container, state) {
   const p = state.currentProduct;
   if (p && (!p.bankId || p.bankId === 'undefined' || p.bankId === 'null')) p.bankId = '';
   _origRenderProductSheet(container, state);
-
   if (typeof getAnnualizedRate === 'function' && p.coupon?.rate) {
     const ann = getAnnualizedRate(p), raw = parseFloat(p.coupon.rate)||0;
     if (ann !== raw && ann > 0) { const cm = container.querySelector('.fiche-metric.green .fiche-metric-value'); if (cm) cm.innerHTML = formatPct(ann) + ' <span style="font-size:10px;color:var(--text-dim)">(' + formatPct(raw) + '/' + (p.coupon.frequency||'période') + ')</span>'; }
   }
-
   if (p.archived && typeof renderArchiveSection === 'function') {
     const sheetMain = container.querySelector('.sheet-main');
     if (sheetMain) { const ad = document.createElement('div'); ad.innerHTML = renderArchiveSection(p); sheetMain.insertBefore(ad.firstElementChild, sheetMain.firstChild); }
@@ -125,34 +147,23 @@ renderProductSheet = function(container, state) {
     const sheetMain = container.querySelector('.sheet-main');
     if (sheetMain) { const td = document.createElement('div'); td.innerHTML = renderTrackingSection(p); const fs = sheetMain.querySelector('.fiche-section'); if (fs) sheetMain.insertBefore(td.firstElementChild, fs); else sheetMain.appendChild(td.firstElementChild); }
   }
-
   const subtitleEl = container.querySelector('.fiche-subtitle');
   if (subtitleEl) {
-    subtitleEl.querySelectorAll('.fiche-tag.bank').forEach(tag => {
-      const txt = tag.textContent.trim();
-      if (txt === '\u2014' || txt.toUpperCase() === 'UNDEFINED' || txt === '') { tag.textContent = '\u270f\ufe0f Assigner'; tag.style.color = 'var(--accent)'; tag.style.borderColor = 'var(--accent)'; }
-      tag.style.cursor = 'pointer'; tag.onclick = (e) => { e.stopPropagation(); showEditMetadataModal(); };
-    });
+    subtitleEl.querySelectorAll('.fiche-tag.bank').forEach(tag => { const txt = tag.textContent.trim(); if (txt === '\u2014' || txt.toUpperCase() === 'UNDEFINED' || txt === '') { tag.textContent = '\u270f\ufe0f Assigner'; tag.style.color = 'var(--accent)'; tag.style.borderColor = 'var(--accent)'; } tag.style.cursor = 'pointer'; tag.onclick = (e) => { e.stopPropagation(); showEditMetadataModal(); }; });
     if (p.entity) { const ei = MY_ENTITIES.find(e => e.id === p.entity); if (ei) { const et = document.createElement('span'); et.className = 'fiche-tag bank'; et.style.cssText = `color:${ei.color};border-color:${ei.color};cursor:pointer`; et.textContent = `${ei.icon} ${ei.name}`; et.onclick = (e) => { e.stopPropagation(); showEditMetadataModal(); }; subtitleEl.insertBefore(et, subtitleEl.firstChild); } }
     if (p.archived) { const ab = document.createElement('span'); ab.className = 'fiche-tag'; ab.style.cssText = 'color:#94A3B8;border-color:#94A3B8;background:rgba(148,163,184,0.1)'; ab.textContent = '\ud83d\udce6 Archivé'; subtitleEl.appendChild(ab); }
     if (p.subscriptionDate) { const d = document.createElement('span'); d.style.cssText = 'color:var(--text-muted);font-size:11px;cursor:pointer'; d.textContent = `\ud83d\udcc5 Souscrit le ${new Date(p.subscriptionDate).toLocaleDateString('fr-FR')}`; d.onclick = (e) => { e.stopPropagation(); showEditMetadataModal(); }; subtitleEl.appendChild(d); }
     if (p.integrationNotes) { const n = document.createElement('span'); n.style.cssText = 'color:var(--text-dim);font-size:11px;cursor:pointer'; n.textContent = `\ud83d\udcac ${p.integrationNotes}`; n.onclick = (e) => { e.stopPropagation(); showEditMetadataModal(); }; subtitleEl.appendChild(n); }
     if (!p.entity && !p.subscriptionDate && !p.archived) { const es = document.createElement('span'); es.style.cssText = 'color:var(--accent);font-size:11px;cursor:pointer;text-decoration:underline'; es.textContent = '\u270f\ufe0f Compléter'; es.onclick = (e) => { e.stopPropagation(); showEditMetadataModal(); }; subtitleEl.appendChild(es); }
   }
-
-  // ─── SIDEBAR BUTTONS ──────────────────────────────────────
   const sidebar = container.querySelector('.sheet-sidebar .action-buttons');
   if (sidebar) {
     const editBtn = document.createElement('button'); editBtn.className = 'btn lg'; editBtn.style.cssText = 'width:100%';
     editBtn.innerHTML = '\u270f\ufe0f Modifier infos'; editBtn.onclick = () => showEditMetadataModal();
     sidebar.insertBefore(editBtn, sidebar.firstChild);
-
     if (!p.archived) {
       if (typeof showTrackingModal === 'function') { const tb = document.createElement('button'); tb.className = 'btn lg'; tb.style.cssText = 'width:100%;background:var(--surface);border:1px solid var(--border)'; tb.innerHTML = '\ud83d\udccd Valorisation'; tb.onclick = () => showTrackingModal(); sidebar.insertBefore(tb, sidebar.children[1]||null); }
-
-      // ─── ARCHIVE BUTTON: show for ANY product in portfolio ──
-      const inPortfolio = _isInPortfolio(p);
-      if (inPortfolio && typeof showArchiveModal === 'function') {
+      if (_isInPortfolio(p) && typeof showArchiveModal === 'function') {
         const archBtn = document.createElement('button'); archBtn.className = 'btn lg';
         archBtn.style.cssText = 'width:100%;background:rgba(148,163,184,0.1);border:1px solid #94A3B8;color:#94A3B8';
         archBtn.innerHTML = '\ud83d\udce6 Archiver (produit terminé)';
@@ -161,8 +172,7 @@ renderProductSheet = function(container, state) {
       }
     }
   }
-
-  if ((p.status === 'subscribed' || _isInPortfolio(p)) && !p.archived) {
+  if (_isInPortfolio(p) && !p.archived) {
     const notice = container.querySelector('.integrated-notice');
     if (notice) {
       const rd = p.subscriptionDate ? new Date(p.subscriptionDate).toLocaleDateString('fr-FR') : formatDate(p.addedDate);
