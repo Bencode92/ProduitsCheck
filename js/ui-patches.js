@@ -1,6 +1,57 @@
-// ═══ PATCHES V8 — ByCam/Caméleons entities + optgroups ═══
+// ═══ PATCHES V9 — Separate Entity + Bank fields ═══
 
 let _pendingProduct = null;
+
+// Helper: entity dropdown HTML
+function entityOptionsHTML(selected) {
+  return `<option value="">Sélectionner...</option>${MY_ENTITIES.map(e => `<option value="${e.id}" ${e.id === selected ? 'selected' : ''}>${e.icon} ${e.name}</option>`).join('')}`;
+}
+
+// Helper: bank-only dropdown HTML
+function bankOnlyOptionsHTML(selected) {
+  return `<option value="">Sélectionner...</option>${BANKS_LIST.map(b => `<option value="${b.id}" ${b.id === selected ? 'selected' : ''}>${b.name}</option>`).join('')}<option value="autre">Autre</option>`;
+}
+
+// Helper: form fields for entity + bank + amount + date + notes
+function metadataFieldsHTML(p) {
+  const entity = p?.entity || '';
+  const bank = p?.bankId || '';
+  const amount = p?.investedAmount || '';
+  const date = p?.subscriptionDate || new Date().toISOString().split('T')[0];
+  const notes = p?.integrationNotes || '';
+  return `
+    <div class="form-field"><label>🏢 Entreprise</label><select id="f-meta-entity">${entityOptionsHTML(entity)}</select></div>
+    <div class="form-field"><label>🏦 Banque source</label><select id="f-meta-bank">${bankOnlyOptionsHTML(bank)}</select></div>
+    <div class="form-field"><label>Montant investi (€)</label><input id="f-meta-amount" type="number" value="${amount}" placeholder="50000"></div>
+    <div class="form-field"><label>Date de souscription</label><input id="f-meta-date" type="date" value="${date}"></div>
+    <div class="form-field full"><label>Notes</label><input id="f-meta-notes" value="${notes}" placeholder="Ex: Via AV SwissLife, Compte-titres CIC..."></div>`;
+}
+
+// Helper: read form values
+function readMetadataForm() {
+  return {
+    entity: document.getElementById('f-meta-entity')?.value || '',
+    bankId: document.getElementById('f-meta-bank')?.value || '',
+    amount: document.getElementById('f-meta-amount')?.value || '',
+    date: document.getElementById('f-meta-date')?.value || '',
+    notes: document.getElementById('f-meta-notes')?.value || '',
+  };
+}
+
+// Helper: apply metadata to product
+function applyMetadata(product, meta) {
+  if (meta.entity) {
+    product.entity = meta.entity;
+    product.entityName = MY_ENTITIES.find(e => e.id === meta.entity)?.name || meta.entity;
+  }
+  if (meta.bankId && meta.bankId !== 'autre') {
+    product.bankId = meta.bankId;
+    product.bankName = BANKS_LIST.find(b => b.id === meta.bankId)?.name || meta.bankId;
+  }
+  if (meta.amount) product.investedAmount = parseFloat(meta.amount);
+  if (meta.date) product.subscriptionDate = meta.date;
+  product.integrationNotes = meta.notes || '';
+}
 
 // ─── Override processUploadedFile ────────────────────────────
 const _origProcessUploadedFile = processUploadedFile;
@@ -49,29 +100,21 @@ handleManualSave = function(context, bankId) {
     modal.classList.remove('visible');
     modal.innerHTML = '';
     setTimeout(() => showDirectAddModal(product, bankId), 350);
-  } else {
-    closeModal();
-    app.addProposal(bankId, product);
-  }
+  } else { closeModal(); app.addProposal(bankId, product); }
 };
 
 // ─── Modal: direct add to portfolio ─────────────────────────
 function showDirectAddModal(product, bankId) {
-  const currentBank = product?.bankId || bankId || '';
   const detectedBank = product?.aiParsed?.distributor || product?.aiParsed?.emitter || '';
+  product.bankId = product.bankId || bankId || '';
   const modal = document.getElementById('modal');
   modal.innerHTML = `<div class="modal-overlay" onclick="closeModal()"><div class="modal-content" onclick="event.stopPropagation()">
     <h2 class="modal-title">Ajouter au portefeuille</h2>
     <div style="background:var(--accent-glow);border:1px solid rgba(59,130,246,0.2);border-radius:var(--radius-sm);padding:12px;margin-bottom:16px;font-size:12px;color:var(--text)">
       <strong style="color:var(--accent)">Produit:</strong> ${product.name || 'Sans nom'}
-      ${detectedBank ? '<br><strong>Émetteur/Distributeur:</strong> ' + detectedBank : ''}
+      ${detectedBank ? '<br><strong>Distributeur:</strong> ' + detectedBank : ''}
     </div>
-    <div class="form-grid">
-      <div class="form-field"><label>Entreprise / Banque source</label><select id="f-direct-bank">${bankOptionsHTML(currentBank)}</select></div>
-      <div class="form-field"><label>Montant investi (€)</label><input id="f-direct-amount" type="number" placeholder="50000" autofocus></div>
-      <div class="form-field"><label>Date de souscription réelle</label><input id="f-direct-date" type="date" value="${new Date().toISOString().split('T')[0]}"></div>
-      <div class="form-field"><label>Notes</label><input id="f-direct-notes" placeholder="Ex: Via AV SwissLife..."></div>
-    </div>
+    <div class="form-grid">${metadataFieldsHTML(product)}</div>
     <div class="modal-actions">
       <button class="btn" onclick="closeModal(); _pendingProduct=null;">Annuler</button>
       <button class="btn success" onclick="handleDirectAdd()">✅ Ajouter</button>
@@ -82,20 +125,11 @@ function showDirectAddModal(product, bankId) {
 
 async function handleDirectAdd() {
   if (!_pendingProduct) { showToast('Aucun produit en attente', 'error'); return; }
-  const amount = document.getElementById('f-direct-amount')?.value;
-  if (!amount) { showToast('Montant requis', 'error'); return; }
-  const selectedBank = document.getElementById('f-direct-bank')?.value;
-  const realDate = document.getElementById('f-direct-date')?.value;
-  const notes = document.getElementById('f-direct-notes')?.value;
-  if (selectedBank && selectedBank !== 'autre') {
-    _pendingProduct.bankId = selectedBank;
-    _pendingProduct.bankName = BANKS.find(b => b.id === selectedBank)?.name || selectedBank;
-    _pendingProduct.entity = MY_ENTITIES.find(e => e.id === selectedBank)?.name || null;
-  }
-  if (realDate) _pendingProduct.subscriptionDate = realDate;
-  if (notes) _pendingProduct.integrationNotes = notes;
+  const meta = readMetadataForm();
+  if (!meta.amount) { showToast('Montant requis', 'error'); return; }
+  applyMetadata(_pendingProduct, meta);
   closeModal();
-  await app.addToPortfolio(_pendingProduct, amount);
+  await app.addToPortfolio(_pendingProduct, meta.amount);
   _pendingProduct = null;
   app.render();
 }
@@ -104,57 +138,38 @@ async function handleDirectAdd() {
 const _origShowIntegrateModal = showIntegrateModal;
 showIntegrateModal = function(productId, bankId) {
   const product = app._findProduct(productId, bankId);
-  const currentBank = product?.bankId || bankId || '';
+  if (!product) return;
+  product.bankId = product.bankId || bankId || '';
   const modal = document.getElementById('modal');
   modal.innerHTML = `<div class="modal-overlay" onclick="closeModal()"><div class="modal-content" onclick="event.stopPropagation()">
     <h2 class="modal-title">Intégrer au portefeuille</h2>
-    <div class="form-grid">
-      <div class="form-field"><label>Entreprise / Banque source</label><select id="f-integrate-bank">${bankOptionsHTML(currentBank)}</select></div>
-      <div class="form-field"><label>Montant investi (€)</label><input id="f-integrate-amount" type="number" placeholder="50000"></div>
-      <div class="form-field"><label>Date de souscription</label><input id="f-integrate-date" type="date" value="${new Date().toISOString().split('T')[0]}"></div>
-      <div class="form-field"><label>Notes</label><input id="f-integrate-notes" placeholder="Ex: Via AV SwissLife..."></div>
-    </div>
+    <div class="form-grid">${metadataFieldsHTML(product)}</div>
     <div class="modal-actions"><button class="btn" onclick="closeModal()">Annuler</button><button class="btn success" onclick="handleIntegrate('${productId}','${bankId}')">✅ Confirmer</button></div></div></div>`;
   modal.classList.add('visible');
 };
 
 const _origHandleIntegrate = handleIntegrate;
 handleIntegrate = async function(productId, bankId) {
-  const amount = document.getElementById('f-integrate-amount')?.value;
-  if (!amount) { showToast('Montant requis', 'error'); return; }
-  const selectedBank = document.getElementById('f-integrate-bank')?.value;
-  const realDate = document.getElementById('f-integrate-date')?.value;
-  const notes = document.getElementById('f-integrate-notes')?.value;
+  const meta = readMetadataForm();
+  if (!meta.amount) { showToast('Montant requis', 'error'); return; }
   const product = app._findProduct(productId, bankId);
   if (!product) { showToast('Produit introuvable', 'error'); return; }
-  if (selectedBank && selectedBank !== 'autre') {
-    product.bankId = selectedBank;
-    product.bankName = BANKS.find(b => b.id === selectedBank)?.name || selectedBank;
-    product.entity = MY_ENTITIES.find(e => e.id === selectedBank)?.name || null;
-  }
-  if (realDate) product.subscriptionDate = realDate;
-  if (notes) product.integrationNotes = notes;
+  applyMetadata(product, meta);
   closeModal();
   const resolvedBankId = _resolveBankId(productId, bankId);
   if (resolvedBankId) await app.updateProposalStatus(resolvedBankId, productId, 'subscribed');
-  await app.addToPortfolio({ ...product }, amount);
+  await app.addToPortfolio({ ...product }, meta.amount);
   app.goToDashboard();
 };
 
 // ═══ EDIT METADATA MODAL ═══
 function showEditMetadataModal() {
   const p = app.state.currentProduct; if (!p) return;
-  const currentBank = p.bankId || '';
   const modal = document.getElementById('modal');
   modal.innerHTML = `<div class="modal-overlay" onclick="closeModal()"><div class="modal-content" onclick="event.stopPropagation()">
     <h2 class="modal-title">✏️ Modifier les informations</h2>
     <div style="color:var(--text-muted);font-size:12px;margin-bottom:16px">${p.name || 'Produit'}</div>
-    <div class="form-grid">
-      <div class="form-field"><label>Entreprise / Banque source</label><select id="f-edit-bank">${bankOptionsHTML(currentBank)}</select></div>
-      <div class="form-field"><label>Montant investi (€)</label><input id="f-edit-amount" type="number" value="${p.investedAmount || ''}" placeholder="50000"></div>
-      <div class="form-field"><label>Date de souscription</label><input id="f-edit-date" type="date" value="${p.subscriptionDate || p.addedDate || ''}"></div>
-      <div class="form-field"><label>Notes</label><input id="f-edit-notes" value="${p.integrationNotes || ''}" placeholder="Ex: Via AV SwissLife..."></div>
-    </div>
+    <div class="form-grid">${metadataFieldsHTML(p)}</div>
     <div class="modal-actions">
       <button class="btn" onclick="closeModal()">Annuler</button>
       <button class="btn primary" onclick="handleEditMetadata()">💾 Enregistrer</button>
@@ -165,26 +180,17 @@ function showEditMetadataModal() {
 
 async function handleEditMetadata() {
   const p = app.state.currentProduct; if (!p) return;
-  const selectedBank = document.getElementById('f-edit-bank')?.value;
-  const amount = document.getElementById('f-edit-amount')?.value;
-  const realDate = document.getElementById('f-edit-date')?.value;
-  const notes = document.getElementById('f-edit-notes')?.value;
-  if (selectedBank && selectedBank !== 'autre') {
-    p.bankId = selectedBank;
-    p.bankName = BANKS.find(b => b.id === selectedBank)?.name || selectedBank;
-    p.entity = MY_ENTITIES.find(e => e.id === selectedBank)?.name || null;
-  } else if (!selectedBank) { p.bankId = ''; p.bankName = ''; p.entity = null; }
-  if (amount) p.investedAmount = parseFloat(amount);
-  if (realDate) p.subscriptionDate = realDate;
-  p.integrationNotes = notes || '';
+  const meta = readMetadataForm();
+  applyMetadata(p, meta);
+  if (!meta.entity) { p.entity = ''; p.entityName = ''; }
+  if (!meta.bankId) { p.bankId = ''; p.bankName = ''; }
   closeModal();
   const inPortfolio = app.state.portfolio.find(x => x.id === p.id);
   if (inPortfolio) {
-    Object.assign(inPortfolio, { bankId: p.bankId, bankName: p.bankName, entity: p.entity, investedAmount: p.investedAmount, subscriptionDate: p.subscriptionDate, integrationNotes: p.integrationNotes });
+    Object.assign(inPortfolio, { entity: p.entity, entityName: p.entityName, bankId: p.bankId, bankName: p.bankName, investedAmount: p.investedAmount, subscriptionDate: p.subscriptionDate, integrationNotes: p.integrationNotes });
     await github.writeFile(`${CONFIG.DATA_PATH}/portfolio.json`, app.state.portfolio, `[StructBoard] Update: ${p.name || p.id}`);
   }
-  const resolvedBankId = p.bankId || _resolveBankId(p.id, p.bankId);
-  if (resolvedBankId) await app._saveProductFile(resolvedBankId, p);
+  if (p.bankId) await app._saveProductFile(p.bankId, p);
   showToast('Informations mises à jour', 'success');
   app.openProduct(p);
 }
@@ -196,7 +202,7 @@ renderProductCard = function(product, context) {
   return _origRenderProductCard(product, context);
 };
 
-// ─── Fix renderProductSheet ──────────────────────────────────
+// ─── Fix renderProductSheet — show entity + bank + subscription info ──
 const _origRenderProductSheet = renderProductSheet;
 renderProductSheet = function(container, state) {
   const p = state.currentProduct;
@@ -205,22 +211,32 @@ renderProductSheet = function(container, state) {
 
   const subtitleEl = container.querySelector('.fiche-subtitle');
   if (subtitleEl) {
+    // Fix bank tag
     subtitleEl.querySelectorAll('.fiche-tag.bank').forEach(tag => {
       const txt = tag.textContent.trim();
       if (txt === '\u2014' || txt.toUpperCase() === 'UNDEFINED' || txt === '') {
-        tag.textContent = '\u270f\ufe0f Assigner entreprise / banque';
+        tag.textContent = '\u270f\ufe0f Assigner';
         tag.style.color = 'var(--accent)';
         tag.style.borderColor = 'var(--accent)';
-        tag.style.cursor = 'pointer';
-      } else {
-        tag.style.cursor = 'pointer';
-        tag.title = 'Cliquer pour modifier';
-        // Add entity icon if it's an entity
-        const entity = MY_ENTITIES.find(e => e.id === p.bankId);
-        if (entity) { tag.textContent = (entity.icon || '\ud83c\udfe2') + ' ' + tag.textContent; }
       }
+      tag.style.cursor = 'pointer';
       tag.onclick = (e) => { e.stopPropagation(); showEditMetadataModal(); };
     });
+
+    // Add entity tag if set
+    if (p.entity) {
+      const entityInfo = MY_ENTITIES.find(e => e.id === p.entity);
+      if (entityInfo) {
+        const entityTag = document.createElement('span');
+        entityTag.className = 'fiche-tag bank';
+        entityTag.style.cssText = `color:${entityInfo.color};border-color:${entityInfo.color};cursor:pointer`;
+        entityTag.textContent = `${entityInfo.icon} ${entityInfo.name}`;
+        entityTag.onclick = (e) => { e.stopPropagation(); showEditMetadataModal(); };
+        subtitleEl.insertBefore(entityTag, subtitleEl.firstChild);
+      }
+    }
+
+    // Show subscription date
     if (p.subscriptionDate) {
       const d = document.createElement('span');
       d.style.cssText = 'color:var(--text-muted);font-size:11px;cursor:pointer';
@@ -235,33 +251,34 @@ renderProductSheet = function(container, state) {
       n.onclick = (e) => { e.stopPropagation(); showEditMetadataModal(); };
       subtitleEl.appendChild(n);
     }
-    if (!p.subscriptionDate && !p.integrationNotes) {
+    if (!p.entity && !p.subscriptionDate) {
       const editSpan = document.createElement('span');
       editSpan.style.cssText = 'color:var(--accent);font-size:11px;cursor:pointer;text-decoration:underline';
-      editSpan.textContent = '\u270f\ufe0f Ajouter entreprise / date / notes';
+      editSpan.textContent = '\u270f\ufe0f Compléter entreprise / date';
       editSpan.onclick = (e) => { e.stopPropagation(); showEditMetadataModal(); };
       subtitleEl.appendChild(editSpan);
     }
   }
 
+  // Add edit button in sidebar
   const sidebar = container.querySelector('.sheet-sidebar .action-buttons');
   if (sidebar) {
     const editBtn = document.createElement('button');
     editBtn.className = 'btn lg';
     editBtn.style.cssText = 'width:100%';
-    editBtn.innerHTML = '\u270f\ufe0f Modifier entreprise / date / notes';
+    editBtn.innerHTML = '\u270f\ufe0f Modifier infos';
     editBtn.onclick = () => showEditMetadataModal();
     sidebar.insertBefore(editBtn, sidebar.firstChild);
   }
 
+  // Fix integrated notice
   if (p.status === 'subscribed') {
     const notice = container.querySelector('.integrated-notice');
     if (notice) {
       const rd = p.subscriptionDate ? new Date(p.subscriptionDate).toLocaleDateString('fr-FR') : formatDate(p.addedDate);
-      const bankInfo = p.bankId ? (BANKS.find(b => b.id === p.bankId)?.name || p.bankId) : '';
-      const entityInfo = MY_ENTITIES.find(e => e.id === p.bankId);
-      const sourceLabel = entityInfo ? (entityInfo.icon + ' ' + entityInfo.name) : bankInfo;
-      notice.innerHTML = `\u2705 Intégré le ${rd}${sourceLabel ? '<br>Source: ' + sourceLabel : ''}<br>Montant: ${formatNumber(p.investedAmount)}\u20ac${p.integrationNotes ? '<br><span style="color:var(--text-dim);font-size:11px">' + p.integrationNotes + '</span>' : ''}`;
+      const entityLabel = p.entity ? (MY_ENTITIES.find(e => e.id === p.entity)?.name || '') : '';
+      const bankLabel = p.bankId ? (BANKS_LIST.find(b => b.id === p.bankId)?.name || p.bankId) : '';
+      notice.innerHTML = `\u2705 Intégré le ${rd}${entityLabel ? '<br>\ud83c\udfe2 ' + entityLabel : ''}${bankLabel ? '<br>\ud83c\udfe6 ' + bankLabel : ''}<br>Montant: ${formatNumber(p.investedAmount)}\u20ac${p.integrationNotes ? '<br><span style="color:var(--text-dim);font-size:11px">' + p.integrationNotes + '</span>' : ''}`;
     }
   }
 };
