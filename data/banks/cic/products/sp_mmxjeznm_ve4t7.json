@@ -1,0 +1,135 @@
+{
+  "id": "sp_mmxjeznm_ve4t7",
+  "name": "TARN TEC 10 Décembre 2035 B",
+  "bankId": "cic",
+  "type": "autocall",
+  "underlyingType": "rates",
+  "underlyings": [
+    "Indice TEC 10"
+  ],
+  "currency": "EUR",
+  "maturity": "10 ans",
+  "maturityDate": "2035-12-17",
+  "strikeDate": "2025-12-19",
+  "coupon": {
+    "rate": 6,
+    "type": "conditionnel",
+    "frequency": "annuel",
+    "trigger": 4.4,
+    "triggerDetail": "Coupon de 6% si TEC 10 ≤ 4,40%",
+    "memory": false,
+    "maxReturn": "6% par an",
+    "totalReturn": "60% sur 10 ans maximum"
+  },
+  "capitalProtection": {
+    "protected": true,
+    "level": 100,
+    "type": "inconditionnelle-a-echeance",
+    "barrier": null,
+    "barrierType": "Non applicable",
+    "barrierObservation": "Garantie en capital à l'échéance uniquement",
+    "inLifeRisk": "Risque de perte partielle ou totale en cas de sortie anticipée"
+  },
+  "earlyRedemption": {
+    "possible": true,
+    "type": "autocall",
+    "trigger": 24,
+    "triggerDetail": "Remboursement automatique si somme des coupons cumulés ≥ 24%",
+    "frequency": "annuel",
+    "startYear": 1,
+    "stepDown": false
+  },
+  "scenarios": {
+    "favorable": "Coupons garantis années 1-2 (12%), puis coupons conditionnels si TEC 10 ≤ 4,40%",
+    "median": "Remboursement automatique anticipé dès que coupons cumulés ≥ 24%",
+    "defavorable": "Pas de coupons si TEC 10 > 4,40%, capital garanti à échéance uniquement"
+  },
+  "risks": [
+    "Risque de perte partielle ou totale en cas de sortie anticipée",
+    "Plafonnement du gain potentiel à 6% par an",
+    "Durée d'investissement incertaine (remboursement automatique)",
+    "Risque d'inflation non couvert",
+    "Risque de crédit de l'émetteur"
+  ],
+  "rawText": "--- PAGE 1 ---\n1  TARN TEC 10 Décembre 2035 B  Titre de créance de droit anglais présentant une garantie en capital à l’échéance du produit.  Communication à caractère promotionnel  Produit de placement risqué alternatif à un   investissement dynamique de type « taux »  Émetteur   :   Crédit Industriel et Commercial (1) .  Période de détention recommandée   :   10   ans .  Eligibilité   :   Compte - titres ordinaire.  Période de souscription   :   du   3   décembre   2025 au   19   décembre   2025 , dans la   limite de l'enveloppe disponible  en l'absence de clôture anticipée et sans préavis de la part de l'Emetteur.  Ce produit est un instrument de diversification, ne pouvant constituer l’intégralité d’un portefeuille  d’investissement. L’investisseur prend un   risque de perte en capital non mesurable à priori s’il décide de  revendre les titres de créance avant l’échéance.  Les investisseurs ne sont pas protégés contre l’effet de l’inflation dans le temps. Le rendement corrigé de  l’inflation peut par conséquent ê tre négatif.  (1)   Notations de crédit : Standard & Poor’s A+ ( 1 9 /09/2025 ), Moody’s A 1   ( 02 / 10 /202 5 ), Fitch Ratings AA -   ( 29 / 10 /2025 ) . Ces notations peuvent  être révisées à tout moment et ne sont pas une garantie de solvabilité de l’Émetteur. Elles ne   sauraient constituer un argument de  souscription au produit. Les agences de notation peuvent les modifier à tout moment.  Crédit Industriel et Commercial   -   CIC   -   Banque régie par les articles L.511 - 1 et suivants du Code Monétaire et Financier   -   SA au capit al de 611  858 064 € .  Siège social: 6, avenue de Provence 75009 Paris   -   Adresse postale : 75452 Paris cedex 09   -   tél 01 45 96 96 96   -   Code swift: CMCIFRPP   -  www.cic.fr   -   542 016 381 RCS Paris   -   TVA intracommunautaire : FR34542016381\n--- PAGE 2 ---\n2  Présentation du pr oduit  L’EMTN   TARN TEC 10 Décembre 2035 B   est un produit de placement risqué alternatif à un investissement  dynamique de type «taux», présentant un risque de perte partielle (1)   ou totale en capital en cours de vie  mais une garantie en capital à l'échéance du produit, d’une durée maximale de   10   ans et offrant aux  investisseurs :  •   De l’année 1 à   2 , à   la   Date de   Paiement   Annuelle (2)   :  ▪   Le versement d’un coupon de   6, 0 0 % brut de la   Valeur Nominale (1) .  •   De l’année 3   à   9 , à chaque Date de Constatation   Annuelle (2)   :  ▪   Le versement d’un coupon de   6, 0 0 % brut de la Valeur Nominale (1)   si   l’Indice TEC   10   est   i nférieur   ou égal   à   4, 4 0% .  •   Un remboursement automatique anticipé possible ,   d ès que la somme des coupons cumulés est   supérieure ou égale   à  24, 0 0 % .  •   A l’échéance des 10   ans (2)   :  ▪   Un remboursement de l’intégralité du capital investi (1) .  ▪   Le versement d’un coupon de   6,00%   brut de la Valeur Nominale (1)   si   l’Indice   TEC   10   est   inférieur   ou égal   à   4,40% .  Le produit s’inscrit dans le cadre de la diversification du portefeuille financier des investisseurs et n’est pas destiné à e n  constituer la totalité.  AVANTAGES  •   De l’année 1 à l’année 2,   des coupons annuels garantis de   6,00%   brut de la Valeur Nominale (1)  •   Objectif de gain   de   6,00%   par   an,   si   l’Indice TEC   10   est inférieur   ou égal   à   4,40% .  •   L’EMTN peut être remboursé automatiquement de manière anticipée ,   d ès que la somme des   coupons cumu lés est  supérieure ou égale à 24, 0 0% .  •   A l’échéance des   10   ans (2)   :  ▪   Un remboursement de l’intégralité du capital investi (1) .  ▪   Le versement d’un coupon de   6,00%   brut de la Valeur   Nominale (1)   si l’Indice TEC   10   est   inférieur   ou égal   à   4,40% .  INCONVENIENTS  ▪   Risque de perte partielle (1)   ou totale en capital   :  -   En cours de vie :   en cas de sortie avant l’échéance à l’initiative de l’investisseur –   dans ce cas, la formule de  remboursement présentée ici ne s’applique pas et le prix de vente dépend de s conditions de marché en  vigueur, au moment de la sortie.  -   Dans le cadre du contrat d’assurance - vie ou de capitalisation, le produit est proposé comme actif  représentatif d’une unité de compte. L’investisseur est alors soumis à   un risque de perte de valeur   en capital  investi   en cas de rachat, d’arbitrage en sortie du support, de transfert vers un autre contrat ou de décès avant  l’échéance .  ▪   Plafonnement du gain potentiel   :   le gain potentiel est fixé à   6,00%   brut de la Valeur Nominale par   année  ▪   L’investisseur ne connait pas à l’avance la durée exacte de son investissement   :   le produit peut être remboursé  automatiquement   d ès que la somme des coupons cumulés est supérieure ou égale à   24,00% .  ▪   Une   inflation élevée dans la durée aura un impact négatif sur le rendement réel du produit.   Les investisseurs ne  sont pas protégés contre l’érosion du capital initial liée à l’inflation. L’inflation aura égale",
+  "aiParsed": {
+    "name": "TARN TEC 10 Décembre 2035 B",
+    "type": "autocall",
+    "emitter": "Crédit Industriel et Commercial (CIC)",
+    "guarantor": "Crédit Industriel et Commercial (CIC)",
+    "distributor": "Crédit Industriel et Commercial (CIC)",
+    "isin": "Non spécifié",
+    "underlyings": [
+      "Indice TEC 10"
+    ],
+    "underlyingType": "indice-taux",
+    "currency": "EUR",
+    "maturity": "10 ans",
+    "maturityDate": "2035-12-17",
+    "strikeDate": "2025-12-19",
+    "nominal": "100000 EUR",
+    "coupon": {
+      "rate": 6,
+      "type": "conditionnel",
+      "frequency": "annuel",
+      "trigger": 4.4,
+      "triggerDetail": "Coupon de 6% si TEC 10 ≤ 4,40%",
+      "memory": false,
+      "maxReturn": "6% par an",
+      "totalReturn": "60% sur 10 ans maximum"
+    },
+    "capitalProtection": {
+      "protected": true,
+      "level": 100,
+      "type": "inconditionnelle-a-echeance",
+      "barrier": null,
+      "barrierType": "Non applicable",
+      "barrierObservation": "Garantie en capital à l'échéance uniquement",
+      "inLifeRisk": "Risque de perte partielle ou totale en cas de sortie anticipée"
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "autocall",
+      "trigger": 24,
+      "triggerDetail": "Remboursement automatique si somme des coupons cumulés ≥ 24%",
+      "frequency": "annuel",
+      "startYear": 1,
+      "stepDown": false
+    },
+    "scenarios": {
+      "favorable": "Coupons garantis années 1-2 (12%), puis coupons conditionnels si TEC 10 ≤ 4,40%",
+      "median": "Remboursement automatique anticipé dès que coupons cumulés ≥ 24%",
+      "defavorable": "Pas de coupons si TEC 10 > 4,40%, capital garanti à échéance uniquement"
+    },
+    "advantages": [
+      "Coupons annuels garantis de 6% années 1-2",
+      "Objectif de gain de 6% par an si TEC 10 ≤ 4,40%",
+      "Remboursement automatique anticipé possible dès 24% de coupons cumulés",
+      "Garantie du capital à l'échéance"
+    ],
+    "risks": [
+      "Risque de perte partielle ou totale en cas de sortie anticipée",
+      "Plafonnement du gain potentiel à 6% par an",
+      "Durée d'investissement incertaine (remboursement automatique)",
+      "Risque d'inflation non couvert",
+      "Risque de crédit de l'émetteur"
+    ],
+    "keyDates": [
+      "Période de souscription: 3 décembre 2025 au 19 décembre 2025",
+      "Date de constatation finale: 17 décembre 2035"
+    ],
+    "ratings": "S&P: A+ (19/09/2025) / Moody's: A1 (02/10/2025) / Fitch: AA- (29/10/2025)",
+    "eligibility": "Compte-titres ordinaire",
+    "summary": "Produit structuré de 10 ans sur l'indice TEC 10 offrant des coupons garantis de 6% les 2 premières années, puis conditionnels si TEC 10 ≤ 4,40%. Remboursement automatique anticipé possible dès 24% de coupons cumulés. Capital garanti à l'échéance mais risque de perte en cas de sortie anticipée."
+  },
+  "aiSummary": "## 1. DESCRIPTION\nProduit structuré autocall émis par le Crédit Industriel et Commercial (CIC) indexé sur l'indice TEC 10. Durée maximale de 10 ans avec échéance au 10 décembre 2035.\n\n## 2. RENDEMENT & COUPONS\nCoupon conditionnel de 6% par an si TEC 10 ≤ 4,40%, versement annuel sans effet mémoire. Gain maximum plafonné à 60% sur 10 ans (6% × 10 ans).\n\n## 3. PROTECTION DU CAPITAL\nProtection intégrale du capital (100%) garantie de manière inconditionnelle à l'échéance uniquement. Risque de perte partielle ou totale en cas de sortie anticipée avant terme.\n\n## 4. REMBOURSEMENT ANTICIPÉ\nRemboursement automatique (autocall) dès la première année si la somme des coupons cumulés atteint ou dépasse 24%. Observation annuelle à chaque date anniversaire.\n\n## 5. SCÉNARIOS\n**Favorable:** Coupons garantis années 1-2 (12% cumulé), puis coupons conditionnels jusqu'à 60% maximum\n**Médian:** Remboursement automatique anticipé dès que coupons cumulés ≥ 24% (probablement année 4)\n**Défavorable:** Aucun coupon si TEC 10 > 4,40%, capital récupéré à 100% uniquement à l'échéance\n\n## 6. POINTS D'ATTENTION\n- Risque de perte totale en cas de sortie anticipée avant échéance\n- Rendement plafonné à 6% par an maximum\n- Durée d'investissement imprévisible due au mécanisme d'autocall\n- Risque d'inflation non couvert sur une période de 10 ans\n- Risque de crédit émetteur (notations : S&P A+, Moody's A1, Fitch AA-)",
+  "sourceFile": "Brochure - TARN TEC 10 Decembre 2035 B.pdf",
+  "entity": "cameleons",
+  "entityName": "Caméleons",
+  "bankName": "CIC",
+  "investedAmount": 100000,
+  "subscriptionDate": "2025-12-05",
+  "integrationNotes": "",
+  "addedDate": "2026-03-19",
+  "status": "active"
+}
