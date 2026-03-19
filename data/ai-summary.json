@@ -1,8 +1,6 @@
 {
-  "text": "## ANALYSE DU PORTEFEUILLE - 299 000€\n\n### 1. SITUATION GLOBALE\nPortefeuille de 5 produits structurés générant 12 060€/an (4% de rendement moyen). Performance actuelle correcte avec 4 produits sur 5 versant leurs coupons. Le fonds Bond 12M (109 000€) ne génère aucun revenu et tire la rentabilité globale vers le bas.\n\n### 2. POINTS D'ATTENTION\n- **Produit improductif** : Bond 12M (109k€) = 36% du portefeuille sans rendement\n- **Risque de barrière** : Phoenix Mémoire à 33,3% de marge (barrière 60%) - surveillance nécessaire\n- **Concentration** : 70% chez Swiss Life, manque de diversification des émetteurs\n- **Échéances courtes** : 3 produits arrivent à maturité en 2025-2026\n\n### 3. RECOMMANDATIONS\n- **Arbitrer le Bond 12M** : réinvestir les 109k€ dans un produit à coupon (gain potentiel +6-7k€/an)\n- **Diversifier les émetteurs** : réduire l'exposition Swiss Life lors des prochains arbitrages\n- **Surveiller Phoenix Mémoire** : préparer une sortie si la marge de sécurité se dégrade davantage",
+  "insights": "▸ Portefeuille de 299 000€ en produits structurés avec rendements théoriques attractifs (5,7% à 7,5%) mais performances actuelles mitigées<br><br>▸ Forte concentration sur des produits complexes avec barrières de protection pouvant entraîner des pertes importantes si les sous-jacents chutent<br><br>▸ Diversifier vers des actifs plus liquides et transparents, notamment réduire l'exposition aux produits à capital non garanti",
   "date": "19/03/2026",
-  "time": "16:42",
-  "timestamp": "2026-03-19T15:42:36.365Z",
-  "productsCount": 5,
-  "totalInvested": 299000
+  "time": "16:43",
+  "timestamp": "2026-03-19T15:43:57.810Z"
 }
