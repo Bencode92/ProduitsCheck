@@ -1,6 +1,15 @@
 {
   "bankId": "cic",
   "bankName": "CIC",
-  "lastUpdated": null,
-  "products": []
+  "lastUpdated": "2026-03-19T16:30:15.288Z",
+  "products": [
+    {
+      "id": "sp_mmxorr72_kjbo5",
+      "name": "EMTN Digitale WO LVMH Crédit Agricole Avril 2029",
+      "type": "capital-protege",
+      "status": "analyzing",
+      "score": 56,
+      "receivedDate": "2026-03-19"
+    }
+  ]
 }
