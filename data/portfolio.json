@@ -301,7 +301,19 @@
     "subscriptionDate": "2025-12-05",
     "integrationNotes": "",
     "entity": "cameleons",
-    "entityName": "Caméleons"
+    "entityName": "Caméleons",
+    "tracking": {
+      "history": [
+        {
+          "date": "2026-03-18",
+          "level": 99.79,
+          "year": 1
+        }
+      ],
+      "level": 99.79,
+      "date": "2026-03-18",
+      "note": ""
+    }
   },
   {
     "id": "sp_mmxhg4us_3x9ic",
