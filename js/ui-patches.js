@@ -1,4 +1,4 @@
-// ═══ PATCHES V10 — Entity visible on cards + annualized coupon ═══
+// ═══ PATCHES V11 — Tracking integration (gauges, alerts, sheet section) ═══
 
 let _pendingProduct = null;
 
@@ -45,7 +45,6 @@ processUploadedFile = async function(file, context, bankId) {
     } else { closeModal(); await app.addProposal(bankId, product); app.render(); }
   } catch (e) { if (status) status.textContent = 'Erreur: ' + e.message; if (progress) progress.classList.add('error'); }
 };
-
 const _origHandleManualSave = handleManualSave;
 handleManualSave = function(context, bankId) {
   const product = { id: app._uid(), name: document.getElementById('f-name')?.value || '', bankId: bankId || document.getElementById('f-bank')?.value || '',
@@ -60,7 +59,6 @@ handleManualSave = function(context, bankId) {
     setTimeout(() => showDirectAddModal(product, bankId), 350);
   } else { closeModal(); app.addProposal(bankId, product); }
 };
-
 function showDirectAddModal(product, bankId) {
   const detectedBank = product?.aiParsed?.distributor || product?.aiParsed?.emitter || '';
   product.bankId = product.bankId || bankId || '';
@@ -81,7 +79,6 @@ async function handleDirectAdd() {
   applyMetadata(_pendingProduct, meta); closeModal();
   await app.addToPortfolio(_pendingProduct, meta.amount); _pendingProduct = null; app.render();
 }
-
 const _origShowIntegrateModal = showIntegrateModal;
 showIntegrateModal = function(productId, bankId) {
   const product = app._findProduct(productId, bankId); if (!product) return;
@@ -130,159 +127,187 @@ async function handleEditMetadata() {
   showToast('Informations mises à jour', 'success'); app.openProduct(p);
 }
 
-// ═══ FIX renderProductCard — entity badge + ANNUALIZED coupon ═══
+// ═══════════════════════════════════════════════════════════════
+// renderProductCard — entity badge + annualized coupon + TRACKING GAUGE
+// ═══════════════════════════════════════════════════════════════
 const _origRenderProductCard = renderProductCard;
 renderProductCard = function(product, context) {
   if (!product.bankId || product.bankId === 'undefined' || product.bankId === 'null') product.bankId = '';
+  // Swap coupon to annualized
   const origRate = product.coupon?.rate;
   if (product.coupon && typeof getAnnualizedRate === 'function') {
-    const annualized = getAnnualizedRate(product);
-    if (annualized !== origRate && annualized > 0) {
-      product.coupon._origRate = origRate;
-      product.coupon.rate = annualized;
-    }
+    const ann = getAnnualizedRate(product);
+    if (ann !== origRate && ann > 0) { product.coupon._origRate = origRate; product.coupon.rate = ann; }
   }
   let html = _origRenderProductCard(product, context);
-  if (product.coupon?._origRate !== undefined) {
-    product.coupon.rate = product.coupon._origRate;
-    delete product.coupon._origRate;
-  }
+  // Restore
+  if (product.coupon?._origRate !== undefined) { product.coupon.rate = product.coupon._origRate; delete product.coupon._origRate; }
+
+  // Inject entity badge
   if (product.entity) {
-    const entityInfo = MY_ENTITIES.find(e => e.id === product.entity);
-    if (entityInfo) {
-      const entityBadge = `<div class="product-card-bank" style="color:${entityInfo.color};border-color:${entityInfo.color}33;background:${entityInfo.color}12;margin-left:4px">${entityInfo.icon} ${entityInfo.name}</div>`;
-      html = html.replace('</div></div>\n    <div class="product-card-type">', `${entityBadge}</div></div>\n    <div class="product-card-type">`);
+    const ei = MY_ENTITIES.find(e => e.id === product.entity);
+    if (ei) {
+      const badge = `<div class="product-card-bank" style="color:${ei.color};border-color:${ei.color}33;background:${ei.color}12;margin-left:4px">${ei.icon} ${ei.name}</div>`;
+      html = html.replace('</div></div>\n    <div class="product-card-type">', `${badge}</div></div>\n    <div class="product-card-type">`);
     }
   }
+
+  // Inject tracking gauge before closing </div> of the card
+  if (product.tracking?.level != null && typeof renderTrackingGauge === 'function') {
+    const gauge = renderTrackingGauge(product);
+    html = html.replace(/<\/div>$/, gauge + '</div>');
+  }
+
   return html;
 };
 
-// ═══ FIX renderDashboard — smart annual yield + fix Coupon Moyen ═══
+// ═══════════════════════════════════════════════════════════════
+// renderDashboard — yield card + coupon fix + TRACKING ALERTS
+// ═══════════════════════════════════════════════════════════════
 const _origRenderDashboard = renderDashboard;
 renderDashboard = function(container, state) {
   _origRenderDashboard(container, state);
 
   const portfolio = state.portfolio || [];
-  let annualYield = 0;
-  let totalWeightedRate = 0;
-  let totalInvested = 0;
-
+  let annualYield = 0, totalWeightedRate = 0, totalInvested = 0;
   portfolio.forEach(p => {
     const amount = parseFloat(p.investedAmount) || 0;
     totalInvested += amount;
-    if (typeof getAnnualizedRate === 'function') {
-      const annRate = getAnnualizedRate(p);
-      totalWeightedRate += amount * annRate;
-      annualYield += Math.round(amount * annRate / 100);
-    } else {
-      const rate = parseFloat(p.coupon?.rate) || 0;
-      totalWeightedRate += amount * rate;
-      annualYield += Math.round(amount * rate / 100);
-    }
+    const annRate = typeof getAnnualizedRate === 'function' ? getAnnualizedRate(p) : (parseFloat(p.coupon?.rate) || 0);
+    totalWeightedRate += amount * annRate;
+    annualYield += Math.round(amount * annRate / 100);
   });
-
   const avgYieldPct = totalInvested > 0 ? (totalWeightedRate / totalInvested) : 0;
 
-  // Fix the "Coupon Moyen" card (orange) — replace raw with annualized
-  const statCards = container.querySelectorAll('.stat-card.orange');
-  statCards.forEach(card => {
+  // Fix Coupon Moyen card
+  container.querySelectorAll('.stat-card.orange').forEach(card => {
     const label = card.querySelector('.stat-label');
     if (label && label.textContent.includes('Coupon')) {
-      const valueEl = card.querySelector('.stat-value');
-      const subEl = card.querySelector('.stat-sub');
-      if (valueEl) valueEl.textContent = avgYieldPct.toFixed(2).replace('.', ',') + '%';
-      if (subEl) subEl.textContent = 'annualisé pondéré';
+      const v = card.querySelector('.stat-value'), s = card.querySelector('.stat-sub');
+      if (v) v.textContent = avgYieldPct.toFixed(2).replace('.', ',') + '%';
+      if (s) s.textContent = 'annualisé pondéré';
     }
   });
 
-  // Add the Rendement Annuel card
+  // Add Rendement Annuel card
   const statsRow = container.querySelector('.stats-row');
   if (statsRow) {
-    const yieldCard = document.createElement('div');
-    yieldCard.className = 'stat-card green';
-    yieldCard.innerHTML = `<div class="stat-label">Rendement Annuel</div><div class="stat-value">${formatNumber(annualYield)}€</div><div class="stat-sub">${avgYieldPct.toFixed(2).replace('.',',')}% moyen pondéré</div>`;
-    statsRow.appendChild(yieldCard);
+    const yc = document.createElement('div'); yc.className = 'stat-card green';
+    yc.innerHTML = `<div class="stat-label">Rendement Annuel</div><div class="stat-value">${formatNumber(annualYield)}€</div><div class="stat-sub">${avgYieldPct.toFixed(2).replace('.',',')}% moyen pondéré</div>`;
+    statsRow.appendChild(yc);
+  }
+
+  // ─── TRACKING ALERTS ──────────────────────────────────────
+  if (typeof getPortfolioAlerts === 'function') {
+    const alerts = getPortfolioAlerts(portfolio);
+    if (alerts.length > 0) {
+      const alertColors = { danger: 'rgba(229,57,53,0.15)', warn: 'rgba(255,183,77,0.15)', success: 'rgba(76,175,80,0.15)', info: 'rgba(100,181,246,0.15)' };
+      const alertBorders = { danger: '#E53935', warn: '#FFB74D', success: '#4CAF50', info: '#64B5F6' };
+      const alertsHTML = alerts.map(a => `<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:${alertColors[a.type]};border-left:3px solid ${alertBorders[a.type]};border-radius:0 var(--radius-sm) var(--radius-sm) 0;cursor:pointer" onclick="app.openProduct(app._findProduct('${a.productId}','${a.bankId||''}'))">
+        <span>${a.icon}</span><span style="font-size:12px;color:var(--text)">${a.text}</span></div>`).join('');
+
+      // Insert after concentrations alert or after stats row
+      const existingAlert = container.querySelector('.alert-bar');
+      const trackingAlerts = document.createElement('div');
+      trackingAlerts.style.cssText = 'display:flex;flex-direction:column;gap:4px;margin-bottom:16px';
+      trackingAlerts.innerHTML = `<div style="font-size:11px;font-weight:600;color:var(--text-dim);margin-bottom:4px">📍 SUIVI POSITIONS</div>${alertsHTML}`;
+      if (existingAlert) { existingAlert.after(trackingAlerts); }
+      else { statsRow?.after(trackingAlerts); }
+    }
   }
 };
 
-// ═══ FIX renderProductSheet — entity + subscription + annualized coupon ═══
+// ═══════════════════════════════════════════════════════════════
+// renderProductSheet — entity + subscription + annualized + TRACKING
+// ═══════════════════════════════════════════════════════════════
 const _origRenderProductSheet = renderProductSheet;
 renderProductSheet = function(container, state) {
   const p = state.currentProduct;
   if (p && (!p.bankId || p.bankId === 'undefined' || p.bankId === 'null')) p.bankId = '';
   _origRenderProductSheet(container, state);
 
-  // Fix coupon display to show annualized
+  // Fix coupon to annualized
   if (typeof getAnnualizedRate === 'function' && p.coupon?.rate) {
-    const annualized = getAnnualizedRate(p);
-    const raw = parseFloat(p.coupon.rate) || 0;
-    if (annualized !== raw && annualized > 0) {
-      const couponMetric = container.querySelector('.fiche-metric.green .fiche-metric-value');
-      if (couponMetric) {
-        couponMetric.innerHTML = formatPct(annualized) + ' <span style="font-size:10px;color:var(--text-dim)">(' + formatPct(raw) + '/' + (p.coupon.frequency || 'période') + ')</span>';
-      }
+    const ann = getAnnualizedRate(p), raw = parseFloat(p.coupon.rate) || 0;
+    if (ann !== raw && ann > 0) {
+      const cm = container.querySelector('.fiche-metric.green .fiche-metric-value');
+      if (cm) cm.innerHTML = formatPct(ann) + ' <span style="font-size:10px;color:var(--text-dim)">(' + formatPct(raw) + '/' + (p.coupon.frequency || 'période') + ')</span>';
     }
   }
 
+  // ─── Inject TRACKING SECTION into sheet-main ──────────────
+  if (typeof renderTrackingSection === 'function') {
+    const sheetMain = container.querySelector('.sheet-main');
+    if (sheetMain) {
+      const trackDiv = document.createElement('div');
+      trackDiv.innerHTML = renderTrackingSection(p);
+      // Insert after métriques, before résumé IA
+      const firstSection = sheetMain.querySelector('.fiche-section');
+      if (firstSection) { sheetMain.insertBefore(trackDiv.firstElementChild, firstSection); }
+      else { sheetMain.appendChild(trackDiv.firstElementChild); }
+    }
+  }
+
+  // ─── Subtitle tags (entity, bank, dates) ──────────────────
   const subtitleEl = container.querySelector('.fiche-subtitle');
   if (subtitleEl) {
     subtitleEl.querySelectorAll('.fiche-tag.bank').forEach(tag => {
       const txt = tag.textContent.trim();
       if (txt === '\u2014' || txt.toUpperCase() === 'UNDEFINED' || txt === '') {
-        tag.textContent = '\u270f\ufe0f Assigner';
-        tag.style.color = 'var(--accent)'; tag.style.borderColor = 'var(--accent)';
+        tag.textContent = '\u270f\ufe0f Assigner'; tag.style.color = 'var(--accent)'; tag.style.borderColor = 'var(--accent)';
       }
       tag.style.cursor = 'pointer';
       tag.onclick = (e) => { e.stopPropagation(); showEditMetadataModal(); };
     });
     if (p.entity) {
-      const entityInfo = MY_ENTITIES.find(e => e.id === p.entity);
-      if (entityInfo) {
-        const entityTag = document.createElement('span');
-        entityTag.className = 'fiche-tag bank';
-        entityTag.style.cssText = `color:${entityInfo.color};border-color:${entityInfo.color};cursor:pointer`;
-        entityTag.textContent = `${entityInfo.icon} ${entityInfo.name}`;
-        entityTag.onclick = (e) => { e.stopPropagation(); showEditMetadataModal(); };
-        subtitleEl.insertBefore(entityTag, subtitleEl.firstChild);
+      const ei = MY_ENTITIES.find(e => e.id === p.entity);
+      if (ei) {
+        const et = document.createElement('span'); et.className = 'fiche-tag bank';
+        et.style.cssText = `color:${ei.color};border-color:${ei.color};cursor:pointer`;
+        et.textContent = `${ei.icon} ${ei.name}`;
+        et.onclick = (e) => { e.stopPropagation(); showEditMetadataModal(); };
+        subtitleEl.insertBefore(et, subtitleEl.firstChild);
       }
     }
     if (p.subscriptionDate) {
-      const d = document.createElement('span');
-      d.style.cssText = 'color:var(--text-muted);font-size:11px;cursor:pointer';
+      const d = document.createElement('span'); d.style.cssText = 'color:var(--text-muted);font-size:11px;cursor:pointer';
       d.textContent = `\ud83d\udcc5 Souscrit le ${new Date(p.subscriptionDate).toLocaleDateString('fr-FR')}`;
-      d.onclick = (e) => { e.stopPropagation(); showEditMetadataModal(); };
-      subtitleEl.appendChild(d);
+      d.onclick = (e) => { e.stopPropagation(); showEditMetadataModal(); }; subtitleEl.appendChild(d);
     }
     if (p.integrationNotes) {
-      const n = document.createElement('span');
-      n.style.cssText = 'color:var(--text-dim);font-size:11px;cursor:pointer';
+      const n = document.createElement('span'); n.style.cssText = 'color:var(--text-dim);font-size:11px;cursor:pointer';
       n.textContent = `\ud83d\udcac ${p.integrationNotes}`;
-      n.onclick = (e) => { e.stopPropagation(); showEditMetadataModal(); };
-      subtitleEl.appendChild(n);
+      n.onclick = (e) => { e.stopPropagation(); showEditMetadataModal(); }; subtitleEl.appendChild(n);
     }
     if (!p.entity && !p.subscriptionDate) {
-      const editSpan = document.createElement('span');
-      editSpan.style.cssText = 'color:var(--accent);font-size:11px;cursor:pointer;text-decoration:underline';
-      editSpan.textContent = '\u270f\ufe0f Compléter';
-      editSpan.onclick = (e) => { e.stopPropagation(); showEditMetadataModal(); };
-      subtitleEl.appendChild(editSpan);
+      const es = document.createElement('span'); es.style.cssText = 'color:var(--accent);font-size:11px;cursor:pointer;text-decoration:underline';
+      es.textContent = '\u270f\ufe0f Compléter'; es.onclick = (e) => { e.stopPropagation(); showEditMetadataModal(); }; subtitleEl.appendChild(es);
     }
   }
+
+  // ─── Sidebar buttons ──────────────────────────────────────
   const sidebar = container.querySelector('.sheet-sidebar .action-buttons');
   if (sidebar) {
-    const editBtn = document.createElement('button');
-    editBtn.className = 'btn lg'; editBtn.style.cssText = 'width:100%';
-    editBtn.innerHTML = '\u270f\ufe0f Modifier infos';
-    editBtn.onclick = () => showEditMetadataModal();
+    // Edit button
+    const editBtn = document.createElement('button'); editBtn.className = 'btn lg'; editBtn.style.cssText = 'width:100%';
+    editBtn.innerHTML = '\u270f\ufe0f Modifier infos'; editBtn.onclick = () => showEditMetadataModal();
     sidebar.insertBefore(editBtn, sidebar.firstChild);
+    // Tracking button
+    if (typeof showTrackingModal === 'function') {
+      const trackBtn = document.createElement('button'); trackBtn.className = 'btn lg'; trackBtn.style.cssText = 'width:100%;background:var(--surface);border:1px solid var(--border)';
+      trackBtn.innerHTML = '\ud83d\udccd Valorisation sous-jacent'; trackBtn.onclick = () => showTrackingModal();
+      sidebar.insertBefore(trackBtn, sidebar.children[1] || null);
+    }
   }
+
+  // Fix integrated notice
   if (p.status === 'subscribed') {
     const notice = container.querySelector('.integrated-notice');
     if (notice) {
       const rd = p.subscriptionDate ? new Date(p.subscriptionDate).toLocaleDateString('fr-FR') : formatDate(p.addedDate);
-      const entityLabel = p.entity ? (MY_ENTITIES.find(e => e.id === p.entity)?.name || '') : '';
-      const bankLabel = p.bankId ? (BANKS_LIST.find(b => b.id === p.bankId)?.name || p.bankId) : '';
-      notice.innerHTML = `\u2705 Intégré le ${rd}${entityLabel ? '<br>\ud83c\udfe2 ' + entityLabel : ''}${bankLabel ? '<br>\ud83c\udfe6 ' + bankLabel : ''}<br>Montant: ${formatNumber(p.investedAmount)}\u20ac${p.integrationNotes ? '<br><span style="color:var(--text-dim);font-size:11px">' + p.integrationNotes + '</span>' : ''}`;
+      const el = p.entity ? (MY_ENTITIES.find(e => e.id === p.entity)?.name || '') : '';
+      const bl = p.bankId ? (BANKS_LIST.find(b => b.id === p.bankId)?.name || p.bankId) : '';
+      notice.innerHTML = `\u2705 Intégré le ${rd}${el ? '<br>\ud83c\udfe2 ' + el : ''}${bl ? '<br>\ud83c\udfe6 ' + bl : ''}<br>Montant: ${formatNumber(p.investedAmount)}\u20ac${p.integrationNotes ? '<br><span style="color:var(--text-dim);font-size:11px">' + p.integrationNotes + '</span>' : ''}`;
     }
   }
 };
