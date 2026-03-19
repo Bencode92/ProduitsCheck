@@ -284,7 +284,7 @@
   {
     "id": "sp_mmxhg4us_3x9ic",
     "name": "Oxygène Objectif Mars 2026",
-    "bankId": "",
+    "bankId": "swiss-life",
     "type": "autocall",
     "underlyingType": "basket",
     "underlyings": [
@@ -418,6 +418,9 @@
     "sourceFile": "Brochure OXYGENE OBJECTIF MARS 2026 (1).pdf",
     "investedAmount": 30000,
     "addedDate": "2026-03-19",
-    "status": "active"
+    "status": "active",
+    "bankName": "Swiss Life",
+    "subscriptionDate": "2025-12-05",
+    "integrationNotes": ""
   }
 ]
