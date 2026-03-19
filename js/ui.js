@@ -1,9 +1,10 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — UI Rendering
+// STRUCTBOARD — UI Rendering (V2 — StudyForge-style fiche)
 // ═══════════════════════════════════════════════════════════════
 
 function renderApp(state) { const main = document.getElementById('main-content'); if (!main) return; switch(state.view) { case 'dashboard': renderDashboard(main,state); break; case 'product-sheet': renderProductSheet(main,state); break; case 'chat': renderChat(main,state); break; } }
 
+// ═══ DASHBOARD ═══
 function renderDashboard(container, state) {
   const stats = scoring.getPortfolioStats(state.portfolio);
   const allProposalsCount = Object.values(state.proposals).reduce((s, arr) => s + arr.length, 0);
@@ -19,18 +20,17 @@ function renderDashboard(container, state) {
     ${stats.concentrations.length > 0 ? `<div class="alert-bar"><span>⚠️</span><span>Concentrations: ${stats.concentrations.map(c=>`<strong>${c.name}</strong> (${c.pct}%)`).join(', ')}</span></div>` : ''}
     <div class="section">
       <div class="section-header"><div class="section-title"><span class="dot" style="background:var(--accent)"></span>Mon Portefeuille</div><button class="btn primary" onclick="showAddPortfolioModal()">+ Ajouter un produit</button></div>
-      ${state.portfolio.length === 0 ? `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">Aucun produit en portefeuille</div><div class="empty-sub">Ajoutez votre premier produit structuré en uploadant la brochure PDF</div></div>` : `<div class="portfolio-grid">${state.portfolio.map(p => renderProductCard(p,'portfolio')).join('')}</div>`}
+      ${state.portfolio.length === 0 ? `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">Aucun produit en portefeuille</div><div class="empty-sub">Ajoutez votre premier produit structuré</div></div>` : `<div class="portfolio-grid">${state.portfolio.map(p => renderProductCard(p,'portfolio')).join('')}</div>`}
     </div>
     <div class="section">
-      <div class="section-header"><div class="section-title"><span class="dot" style="background:var(--orange)"></span>Propositions Reçues par Banque</div><button class="btn primary" onclick="showAddProposalModal()">+ Nouvelle proposition</button></div>
+      <div class="section-header"><div class="section-title"><span class="dot" style="background:var(--orange)"></span>Propositions par Banque</div><button class="btn primary" onclick="showAddProposalModal()">+ Nouvelle proposition</button></div>
       <div class="banks-container">${renderBankSections(state)}</div>
-      ${Object.keys(state.proposals).length === 0 ? `<div class="empty-state"><div class="empty-icon">📨</div><div class="empty-text">Aucune proposition reçue</div><div class="empty-sub">Ajoutez les offres reçues des banques pour les analyser</div></div>` : ''}
+      ${Object.keys(state.proposals).length === 0 ? `<div class="empty-state"><div class="empty-icon">📨</div><div class="empty-text">Aucune proposition</div><div class="empty-sub">Ajoutez les offres des banques</div></div>` : ''}
     </div>`;
 }
 
 function renderProductCard(product, context) {
   const bank = BANKS.find(b => b.id === product.bankId); const bankName = bank?.name || product.bankId || '—'; const bankColor = bank?.color || 'var(--text-muted)';
-  const couponRate = product.coupon?.rate; const barrier = product.capitalProtection?.barrier;
   const typeName = PRODUCT_TYPES.find(t => t.id === product.type)?.name || product.type || '—';
   const scoreHTML = product.score ? `<div class="card-score ${product.score.score >= 65 ? 'good' : product.score.score >= 40 ? 'medium' : 'low'}">${product.score.score}</div>` : '';
   const statusBadge = product.status && PROPOSAL_STATUS[product.status] ? `<span class="status-badge" style="--badge-color:${PROPOSAL_STATUS[product.status].color}">${PROPOSAL_STATUS[product.status].icon} ${PROPOSAL_STATUS[product.status].label}</span>` : '';
@@ -39,8 +39,8 @@ function renderProductCard(product, context) {
     <div class="product-card-type">${typeName}</div>
     <div class="product-card-grid">
       <div class="product-card-field"><span class="label">Nominal</span><span class="value">${product.investedAmount ? formatNumber(product.investedAmount)+'€' : '—'}</span></div>
-      <div class="product-card-field"><span class="label">Coupon</span><span class="value green">${couponRate ? formatPct(couponRate) : '—'}</span></div>
-      <div class="product-card-field"><span class="label">Barrière</span><span class="value ${barrier&&barrier<70?'red':''}">${barrier ? barrier+'%' : '—'}</span></div>
+      <div class="product-card-field"><span class="label">Coupon</span><span class="value green">${product.coupon?.rate ? formatPct(product.coupon.rate) : '—'}</span></div>
+      <div class="product-card-field"><span class="label">Barrière</span><span class="value ${product.capitalProtection?.barrier&&product.capitalProtection.barrier<70?'red':''}">${product.capitalProtection?.barrier ? product.capitalProtection.barrier+'%' : '—'}</span></div>
       <div class="product-card-field"><span class="label">Maturité</span><span class="value">${product.maturity||'—'}</span></div>
     </div>
     <div class="product-card-footer">${scoreHTML}${statusBadge}</div></div>`;
@@ -60,46 +60,204 @@ function renderBankSections(state) {
   }).join('');
 }
 
+// ═══════════════════════════════════════════════════════════════
+// FICHE PRODUIT — Style StudyForge
+// ═══════════════════════════════════════════════════════════════
 function renderProductSheet(container, state) {
   const p = state.currentProduct; if (!p) return;
-  const bank = BANKS.find(b => b.id === p.bankId); const typeName = PRODUCT_TYPES.find(t => t.id === p.type)?.name || p.type || '—';
+  const bank = BANKS.find(b => b.id === p.bankId);
+  const bankName = bank?.name || p.bankId || '—';
+  const bankColor = bank?.color || 'var(--text-muted)';
+  const typeName = PRODUCT_TYPES.find(t => t.id === p.type)?.name || p.type || '—';
+  const couponRate = p.coupon?.rate;
+  const barrier = p.capitalProtection?.barrier;
+  const isProtected = p.capitalProtection?.protected === true || p.capitalProtection?.protected === 'true';
+  const hasAutocall = p.earlyRedemption?.possible === true || p.earlyRedemption?.possible === 'true';
+  const hasMem = p.coupon?.memory === true || p.coupon?.memory === 'true';
+
   container.innerHTML = `
-    <div class="sheet-nav"><button class="btn ghost" onclick="app.goToDashboard()">← Retour</button><div class="sheet-nav-title">${p.name||typeName}</div>
-      <div class="sheet-nav-actions"><button class="btn ai-glow" onclick="app.openChat(app.state.currentProduct)">💬 Discuter avec Claude</button></div></div>
-    <div class="sheet-layout"><div class="sheet-main">
-      <div class="sheet-card"><div class="sheet-product-header"><div><h2 class="sheet-product-name">${p.name||'Produit sans nom'}</h2>
-        <div class="sheet-product-meta"><span class="sheet-bank" style="color:${bank?.color||'var(--text-muted)'}">${bank?.name||p.bankId||'—'}</span><span class="sheet-type">${typeName}</span>
-        ${p.status?`<span class="status-badge" style="--badge-color:${PROPOSAL_STATUS[p.status]?.color||'var(--text-muted)'}">${PROPOSAL_STATUS[p.status]?.label||p.status}</span>`:''}</div></div>
-        ${p.score?renderScoreWidget(p.score):''}</div></div>
-      ${p.aiSummary?`<div class="sheet-card"><h3 class="sheet-card-title"><span class="card-icon">🤖</span> Résumé IA</h3><div class="ai-summary">${formatAIText(p.aiSummary)}</div></div>`:''}
-      <div class="sheet-card"><h3 class="sheet-card-title"><span class="card-icon">📊</span> Caractéristiques</h3><div class="specs-grid">
-        ${renderSpec('Sous-jacent(s)',(p.underlyings||[]).join(', ')||'—')}${renderSpec('Type',typeName)}${renderSpec('Maturité',p.maturity||'—')}
-        ${renderSpec('Date de strike',formatDate(p.strikeDate))}${renderSpec('Date maturité',formatDate(p.maturityDate))}${renderSpec('Devise',p.currency||'EUR')}</div></div>
-      <div class="sheet-card"><h3 class="sheet-card-title"><span class="card-icon">💰</span> Mécanisme des Coupons</h3><div class="specs-grid">
-        ${renderSpec('Taux',p.coupon?.rate?formatPct(p.coupon.rate):'—')}${renderSpec('Type',p.coupon?.type||'—')}${renderSpec('Fréquence',p.coupon?.frequency||'—')}
-        ${renderSpec('Seuil',p.coupon?.trigger?p.coupon.trigger+'%':'—')}${renderSpec('Effet mémoire',p.coupon?.memory===true||p.coupon?.memory==='true'?'Oui':'Non')}</div></div>
-      <div class="sheet-card"><h3 class="sheet-card-title"><span class="card-icon">🛡️</span> Protection du Capital</h3><div class="specs-grid">
-        ${renderSpec('Protégé',p.capitalProtection?.protected===true||p.capitalProtection?.protected==='true'?'Oui':'Non')}${renderSpec('Niveau',p.capitalProtection?.level?p.capitalProtection.level+'%':'—')}
-        ${renderSpec('Type',p.capitalProtection?.type||'—')}${renderSpec('Barrière',p.capitalProtection?.barrier?p.capitalProtection.barrier+'%':'—')}
-        ${renderSpec('Type barrière',p.capitalProtection?.barrierType||'—')}${renderSpec('Observation',p.capitalProtection?.barrierObservation||'—')}</div></div>
-      <div class="sheet-card"><h3 class="sheet-card-title"><span class="card-icon">⏩</span> Remboursement Anticipé</h3><div class="specs-grid">
-        ${renderSpec('Possible',p.earlyRedemption?.possible===true||p.earlyRedemption?.possible==='true'?'Oui':'Non')}${renderSpec('Type',p.earlyRedemption?.type||'—')}
-        ${renderSpec('Seuil',p.earlyRedemption?.trigger?p.earlyRedemption.trigger+'%':'—')}${renderSpec('Fréquence',p.earlyRedemption?.frequency||'—')}
-        ${renderSpec('Step-down',p.earlyRedemption?.stepDown===true||p.earlyRedemption?.stepDown==='true'?'Oui':'Non')}${renderSpec('Détail',p.earlyRedemption?.stepDownDetail||'—')}</div></div>
-      ${p.scenarios?`<div class="sheet-card"><h3 class="sheet-card-title"><span class="card-icon">🎯</span> Scénarios</h3><div class="scenarios">
-        ${p.scenarios.favorable?`<div class="scenario favorable"><div class="scenario-label">Favorable</div><div class="scenario-text">${p.scenarios.favorable}</div></div>`:''}
-        ${p.scenarios.median?`<div class="scenario median"><div class="scenario-label">Médian</div><div class="scenario-text">${p.scenarios.median}</div></div>`:''}
-        ${p.scenarios.defavorable?`<div class="scenario defavorable"><div class="scenario-label">Défavorable</div><div class="scenario-text">${p.scenarios.defavorable}</div></div>`:''}</div></div>`:''}
-      ${p.risks&&p.risks.length>0?`<div class="sheet-card"><h3 class="sheet-card-title"><span class="card-icon">⚠️</span> Risques</h3><ul class="risk-list">${p.risks.map(r=>`<li>${r}</li>`).join('')}</ul></div>`:''}
-      ${p.conversationSummary?`<div class="sheet-card"><h3 class="sheet-card-title"><span class="card-icon">📝</span> Résumé Discussion</h3><div class="ai-summary">${formatAIText(p.conversationSummary)}</div>
-        ${p.decision?`<div class="decision-badge ${p.decision}">Décision: ${PROPOSAL_STATUS[p.decision]?.label||p.decision}</div>`:''}</div>`:''}</div>
-      <div class="sheet-sidebar">${p.score?renderScorePanel(p.score):''}
-        <div class="sheet-card"><h3 class="sheet-card-title">Actions</h3><div class="action-buttons">
-          <button class="btn ai-glow lg" style="width:100%" onclick="app.openChat(app.state.currentProduct)">💬 Discuter avec Claude</button>
-          ${p.status!=='subscribed'?`<button class="btn success lg" style="width:100%" onclick="showIntegrateModal('${p.id}','${p.bankId}')">✅ Intégrer au portefeuille</button>
-          <button class="btn danger lg" style="width:100%" onclick="handleReject('${p.id}','${p.bankId}')">❌ Rejeter</button>`:`<div class="integrated-notice">✅ Intégré le ${formatDate(p.addedDate)}<br>Montant: ${formatNumber(p.investedAmount)}€</div>`}</div></div></div></div>`;
+    <!-- Navigation -->
+    <div class="sheet-nav">
+      <button class="btn ghost" onclick="app.goToDashboard()">← Retour</button>
+      <div class="sheet-nav-actions">
+        <button class="btn ai-glow" onclick="app.openChat(app.state.currentProduct)">💬 Discuter avec Claude</button>
+        ${p.status !== 'subscribed' ? `
+          <button class="btn success" onclick="showIntegrateModal('${p.id}','${p.bankId}')">✅ Intégrer</button>
+          <button class="btn danger" onclick="handleReject('${p.id}','${p.bankId}')">❌ Rejeter</button>
+        ` : ''}
+      </div>
+    </div>
+
+    <!-- Header -->
+    <div class="fiche-header">
+      <div class="fiche-title-block">
+        <h1 class="fiche-title">${p.name || 'Produit sans nom'}</h1>
+        <div class="fiche-subtitle">
+          <span class="fiche-tag bank" style="color:${bankColor};border-color:${bankColor}">${bankName}</span>
+          <span class="fiche-tag type">${typeName}</span>
+          ${p.status ? `<span class="fiche-tag status" style="color:${PROPOSAL_STATUS[p.status]?.color};background:${PROPOSAL_STATUS[p.status]?.color}18;border:1px solid ${PROPOSAL_STATUS[p.status]?.color}33">${PROPOSAL_STATUS[p.status]?.label}</span>` : ''}
+          ${p.sourceFile ? `<span style="color:var(--text-dim);font-size:11px">📄 ${p.sourceFile}</span>` : ''}
+        </div>
+      </div>
+      ${p.score ? renderScoreWidget(p.score) : ''}
+    </div>
+
+    <!-- Métriques clés -->
+    <div class="fiche-metrics">
+      <div class="fiche-metric green"><div class="fiche-metric-label">Coupon</div><div class="fiche-metric-value">${couponRate ? formatPct(couponRate) : '—'}</div><div class="fiche-metric-sub">${p.coupon?.type || 'conditionnel'}${hasMem ? ' · mémoire' : ''}</div></div>
+      <div class="fiche-metric ${barrier && barrier < 65 ? 'red' : 'orange'}"><div class="fiche-metric-label">Barrière Capital</div><div class="fiche-metric-value">${barrier ? barrier + '%' : '—'}</div><div class="fiche-metric-sub">${p.capitalProtection?.barrierType || '—'}</div></div>
+      <div class="fiche-metric blue"><div class="fiche-metric-label">Maturité</div><div class="fiche-metric-value">${p.maturity || '—'}</div><div class="fiche-metric-sub">${p.maturityDate ? formatDate(p.maturityDate) : ''}</div></div>
+      <div class="fiche-metric ${isProtected ? 'green' : 'red'}"><div class="fiche-metric-label">Capital</div><div class="fiche-metric-value">${isProtected ? '✓ Protégé' : '✕ Non protégé'}</div><div class="fiche-metric-sub">${p.capitalProtection?.level ? p.capitalProtection.level + '%' : '—'}</div></div>
+      <div class="fiche-metric ${hasAutocall ? 'purple' : 'blue'}"><div class="fiche-metric-label">Autocall</div><div class="fiche-metric-value">${hasAutocall ? '✓ Oui' : '✕ Non'}</div><div class="fiche-metric-sub">${p.earlyRedemption?.trigger ? 'Seuil ' + p.earlyRedemption.trigger + '%' : '—'}</div></div>
+      ${p.investedAmount ? `<div class="fiche-metric blue"><div class="fiche-metric-label">Montant Investi</div><div class="fiche-metric-value">${formatNumber(p.investedAmount)}€</div></div>` : ''}
+    </div>
+
+    <div class="sheet-layout">
+      <div class="sheet-main">
+
+        <!-- Résumé IA -->
+        ${p.aiSummary ? `
+        <div class="fiche-section">
+          <div class="fiche-section-header"><span class="fiche-section-icon">🤖</span><span class="fiche-section-title">Résumé IA</span></div>
+          <div class="fiche-section-body"><div class="fiche-ai-summary">${formatAISummary(p.aiSummary)}</div></div>
+        </div>` : ''}
+
+        <!-- Mécanisme des Coupons -->
+        <div class="fiche-section">
+          <div class="fiche-section-header"><span class="fiche-section-icon">💰</span><span class="fiche-section-title">Mécanisme des Coupons</span></div>
+          <div class="fiche-section-body">
+            <div class="fiche-info-box ${couponRate && couponRate >= 5 ? 'green' : 'blue'}">
+              <div class="fiche-info-box-title">Coupon ${p.coupon?.type || ''} — ${couponRate ? formatPct(couponRate) : 'N/A'}</div>
+              <div class="fiche-info-box-text">
+                ${p.coupon?.frequency ? `<strong>Fréquence:</strong> ${p.coupon.frequency}` : ''}
+                ${p.coupon?.trigger ? ` · <strong>Seuil:</strong> ${p.coupon.trigger}% du niveau initial` : ''}
+                ${hasMem ? ' · <strong>Effet mémoire:</strong> Oui — les coupons non versés sont reportés' : ''}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Protection du Capital -->
+        <div class="fiche-section">
+          <div class="fiche-section-header"><span class="fiche-section-icon">🛡️</span><span class="fiche-section-title">Protection du Capital</span></div>
+          <div class="fiche-section-body">
+            <div class="fiche-info-box ${isProtected ? 'green' : 'orange'}">
+              <div class="fiche-info-box-title">${isProtected ? '✓ Capital protégé' : '⚠️ Capital non protégé'} ${p.capitalProtection?.level ? '— ' + p.capitalProtection.level + '%' : ''}</div>
+              <div class="fiche-info-box-text">
+                ${p.capitalProtection?.type ? `<strong>Type:</strong> ${p.capitalProtection.type}` : ''}
+                ${barrier ? ` · <strong>Barrière:</strong> ${barrier}% (${p.capitalProtection?.barrierType || 'européenne'})` : ''}
+                ${p.capitalProtection?.barrierObservation ? `<br><strong>Observation:</strong> ${p.capitalProtection.barrierObservation}` : ''}
+              </div>
+            </div>
+            ${barrier && barrier < 70 ? `<div class="fiche-alert warn">⚠️ Barrière basse (${barrier}%) — risque de perte en capital significatif si le sous-jacent chute de plus de ${100-barrier}%</div>` : ''}
+          </div>
+        </div>
+
+        <!-- Remboursement Anticipé -->
+        <div class="fiche-section">
+          <div class="fiche-section-header"><span class="fiche-section-icon">⏩</span><span class="fiche-section-title">Remboursement Anticipé</span></div>
+          <div class="fiche-section-body">
+            <div class="fiche-info-box ${hasAutocall ? 'purple' : 'neutral'}">
+              <div class="fiche-info-box-title">${hasAutocall ? '✓ Rappel anticipé possible' : '✕ Pas de remboursement anticipé'}</div>
+              <div class="fiche-info-box-text">
+                ${p.earlyRedemption?.type ? `<strong>Type:</strong> ${p.earlyRedemption.type}` : ''}
+                ${p.earlyRedemption?.trigger ? ` · <strong>Seuil:</strong> ${p.earlyRedemption.trigger}%` : ''}
+                ${p.earlyRedemption?.frequency ? ` · <strong>Fréquence:</strong> ${p.earlyRedemption.frequency}` : ''}
+                ${p.earlyRedemption?.stepDown === true || p.earlyRedemption?.stepDown === 'true' ? `<br><strong>Step-down:</strong> Oui — ${p.earlyRedemption.stepDownDetail || 'seuil dégressif'}` : ''}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Caractéristiques -->
+        <div class="fiche-section">
+          <div class="fiche-section-header"><span class="fiche-section-icon">📊</span><span class="fiche-section-title">Caractéristiques</span></div>
+          <div class="fiche-section-body">
+            <div class="fiche-kv-grid">
+              <div class="fiche-kv"><span class="fiche-kv-label">Sous-jacent(s)</span><span class="fiche-kv-value">${(p.underlyings||[]).join(', ') || '—'}</span></div>
+              <div class="fiche-kv"><span class="fiche-kv-label">Type</span><span class="fiche-kv-value">${typeName}</span></div>
+              <div class="fiche-kv"><span class="fiche-kv-label">Maturité</span><span class="fiche-kv-value">${p.maturity || '—'}</span></div>
+              <div class="fiche-kv"><span class="fiche-kv-label">Devise</span><span class="fiche-kv-value">${p.currency || 'EUR'}</span></div>
+              <div class="fiche-kv"><span class="fiche-kv-label">Date de strike</span><span class="fiche-kv-value">${formatDate(p.strikeDate)}</span></div>
+              <div class="fiche-kv"><span class="fiche-kv-label">Date maturité</span><span class="fiche-kv-value">${formatDate(p.maturityDate)}</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scénarios -->
+        ${p.scenarios && (p.scenarios.favorable || p.scenarios.median || p.scenarios.defavorable) ? `
+        <div class="fiche-section">
+          <div class="fiche-section-header"><span class="fiche-section-icon">🎯</span><span class="fiche-section-title">Scénarios de Performance</span></div>
+          <div class="fiche-section-body">
+            <div class="fiche-scenarios">
+              ${p.scenarios.favorable ? `<div class="fiche-scenario good"><div class="fiche-scenario-label">✅ Scénario Favorable</div><div class="fiche-scenario-text">${p.scenarios.favorable}</div></div>` : ''}
+              ${p.scenarios.median ? `<div class="fiche-scenario mid"><div class="fiche-scenario-label">⚖️ Scénario Médian</div><div class="fiche-scenario-text">${p.scenarios.median}</div></div>` : ''}
+              ${p.scenarios.defavorable ? `<div class="fiche-scenario bad"><div class="fiche-scenario-label">❌ Scénario Défavorable</div><div class="fiche-scenario-text">${p.scenarios.defavorable}</div></div>` : ''}
+            </div>
+          </div>
+        </div>` : ''}
+
+        <!-- Risques -->
+        ${p.risks && p.risks.length > 0 ? `
+        <div class="fiche-section">
+          <div class="fiche-section-header"><span class="fiche-section-icon">⚠️</span><span class="fiche-section-title">Points d'Attention</span></div>
+          <div class="fiche-section-body">
+            <div class="fiche-risks">
+              ${p.risks.map(r => `<div class="fiche-risk"><span class="fiche-risk-icon">▸</span><span>${r}</span></div>`).join('')}
+            </div>
+          </div>
+        </div>` : ''}
+
+        <!-- Résumé discussion -->
+        ${p.conversationSummary ? `
+        <div class="fiche-section">
+          <div class="fiche-section-header"><span class="fiche-section-icon">📝</span><span class="fiche-section-title">Résumé Discussion & Décision</span></div>
+          <div class="fiche-section-body">
+            <div class="fiche-ai-summary">${formatAISummary(p.conversationSummary)}</div>
+            ${p.decision ? `<div class="fiche-alert ${p.decision === 'subscribed' ? 'success' : 'warn'}">Décision: <strong>${PROPOSAL_STATUS[p.decision]?.label || p.decision}</strong></div>` : ''}
+          </div>
+        </div>` : ''}
+      </div>
+
+      <!-- Sidebar -->
+      <div class="sheet-sidebar">
+        ${p.score ? renderScorePanel(p.score) : ''}
+        <div class="sheet-card">
+          <h3 class="sheet-card-title">Actions</h3>
+          <div class="action-buttons">
+            <button class="btn ai-glow lg" style="width:100%" onclick="app.openChat(app.state.currentProduct)">💬 Discuter avec Claude</button>
+            ${p.status !== 'subscribed' ? `
+              <button class="btn success lg" style="width:100%" onclick="showIntegrateModal('${p.id}','${p.bankId}')">✅ Intégrer au portefeuille</button>
+              <button class="btn danger lg" style="width:100%" onclick="handleReject('${p.id}','${p.bankId}')">❌ Rejeter</button>
+            ` : `<div class="integrated-notice">✅ Intégré le ${formatDate(p.addedDate)}<br>Montant: ${formatNumber(p.investedAmount)}€</div>`}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
+// ─── Format AI Summary (StudyForge-style) ───────────────────
+function formatAISummary(text) {
+  if (!text) return '';
+  let html = escapeHTML(text);
+  // Headings: ## or numbered sections like "1." or "# "
+  html = html.replace(/^##\s*(\d+)\.\s*(.+)$/gm, '<h2>$1. $2</h2>');
+  html = html.replace(/^##\s*(.+)$/gm, '<h2>$1</h2>');
+  html = html.replace(/^#\s*(.+)$/gm, '<h2>$1</h2>');
+  html = html.replace(/^(\d+)\.\s*\*\*(.+?)\*\*\s*[—–-]\s*/gm, '<h2>$1. $2</h2>');
+  html = html.replace(/^(\d+)\.\s*\*\*(.+?)\*\*/gm, '<h2>$1. $2</h2>');
+  // Bold
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  // Line breaks
+  html = html.replace(/\n\n/g, '</p><p>');
+  html = html.replace(/\n/g, '<br>');
+  // Wrap in paragraphs
+  if (!html.startsWith('<h2>') && !html.startsWith('<p>')) html = '<p>' + html + '</p>';
+  return html;
+}
+
+// ─── Score Widgets ──────────────────────────────────────────
 function renderScoreWidget(score) {
   const color = score.score>=65?'var(--green)':score.score>=40?'var(--orange)':'var(--red)';
   return `<div class="score-widget"><svg viewBox="0 0 80 80" class="score-ring"><circle cx="40" cy="40" r="34" fill="none" stroke="var(--border)" stroke-width="4"/>
@@ -112,6 +270,7 @@ function renderScorePanel(score) {
     <div class="score-verdict">${score.verdict}</div><div class="score-details">${score.details.map(d=>`<div class="score-detail ${d.type}"><span class="score-detail-icon">${d.icon}</span><span class="score-detail-text">${d.text}</span></div>`).join('')}</div></div>`;
 }
 
+// ═══ CHAT ═══
 function renderChat(container, state) {
   const p = state.currentProduct; if (!p) return; const messages = p.conversation||[]; const bank = BANKS.find(b => b.id === p.bankId);
   container.innerHTML = `<div class="chat-layout">
@@ -143,13 +302,13 @@ function showUploadModal(context, bankId) {
   const modal = document.getElementById('modal'); const bank = BANKS.find(b => b.id === bankId);
   modal.innerHTML = `<div class="modal-overlay" onclick="closeModal()"><div class="modal-content" onclick="event.stopPropagation()">
     <h2 class="modal-title">${context==='portfolio'?'Ajouter au portefeuille':`Proposition — ${bank?.name||''}`}</h2>
-    <div class="upload-zone" id="upload-zone" ondragover="event.preventDefault();this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')" ondrop="handleFileDrop(event,'${context}','${bankId}')">
-      <div class="upload-icon">📄</div><div class="upload-text">Glisser le PDF de la brochure ici</div><div class="upload-sub">ou cliquer pour sélectionner</div>
+    <div class="upload-zone" ondragover="event.preventDefault();this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')" ondrop="handleFileDrop(event,'${context}','${bankId}')">
+      <div class="upload-icon">📄</div><div class="upload-text">Glisser le PDF ici</div><div class="upload-sub">ou cliquer pour sélectionner</div>
       <input type="file" accept=".pdf" id="file-input" style="display:none" onchange="handleFileSelect(event,'${context}','${bankId}')"></div>
     <button class="btn" style="width:100%;margin-top:12px" onclick="document.getElementById('file-input').click()">Choisir un fichier PDF</button>
-    <div class="upload-divider"><span>ou saisie manuelle</span></div>
-    <button class="btn ghost" style="width:100%" onclick="showManualEntryModal('${context}','${bankId}')">✏️ Saisir manuellement</button>
-    <div id="upload-progress" class="upload-progress hidden"><div class="spinner"></div><span id="upload-status">Extraction en cours...</span></div>
+    <div class="upload-divider"><span>ou</span></div>
+    <button class="btn ghost" style="width:100%" onclick="showManualEntryModal('${context}','${bankId}')">✏️ Saisie manuelle</button>
+    <div id="upload-progress" class="upload-progress hidden"><div class="spinner"></div><span id="upload-status">Extraction...</span></div>
     <div class="modal-actions"><button class="btn" onclick="closeModal()">Annuler</button></div></div></div>`;
   modal.classList.add('visible');
 }
@@ -165,8 +324,8 @@ function showManualEntryModal(context, bankId) {
       <div class="form-field"><label>Maturité</label><input id="f-maturity" placeholder="Ex: 5 ans"></div>
       <div class="form-field"><label>Coupon (%)</label><input id="f-coupon" type="number" step="0.01" placeholder="8.5"></div>
       <div class="form-field"><label>Type coupon</label><select id="f-coupon-type"><option value="conditionnel">Conditionnel</option><option value="fixe">Fixe</option><option value="memoire">Mémoire</option></select></div>
-      <div class="form-field"><label>Barrière capital (%)</label><input id="f-barrier" type="number" step="0.1" placeholder="60"></div>
-      <div class="form-field"><label>Protection capital (%)</label><input id="f-protection" type="number" step="0.1" placeholder="100"></div>
+      <div class="form-field"><label>Barrière (%)</label><input id="f-barrier" type="number" step="0.1" placeholder="60"></div>
+      <div class="form-field"><label>Protection (%)</label><input id="f-protection" type="number" step="0.1" placeholder="100"></div>
       <div class="form-field"><label>Autocall</label><select id="f-autocall"><option value="true">Oui</option><option value="false">Non</option></select></div>
       ${context==='portfolio'?`<div class="form-field"><label>Montant investi (€)</label><input id="f-invested" type="number" placeholder="50000"></div>`:''}
       <div class="form-field full"><label>Notes</label><textarea id="f-notes" placeholder="Détails..."></textarea></div></div>
@@ -248,6 +407,7 @@ async function handleSummarizeAndDecide(decision) {
   } catch(e) { showToast('Erreur: '+e.message,'error'); }
 }
 
+// ─── Helpers ────────────────────────────────────────────────
 function renderSpec(label, value) { return `<div class="spec-item"><span class="spec-label">${label}</span><span class="spec-value">${value}</span></div>`; }
 function formatAIText(text) { if (!text) return ''; return escapeHTML(text).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>'); }
 function escapeHTML(str) { const d=document.createElement('div'); d.textContent=str; return d.innerHTML; }
