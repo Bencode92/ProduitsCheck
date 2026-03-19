@@ -137,17 +137,42 @@ const _origRenderProductCard = renderProductCard;
 renderProductCard = function(product, context) {
   if (!product.bankId || product.bankId === 'undefined' || product.bankId === 'null') product.bankId = '';
   let html = _origRenderProductCard(product, context);
-
-  // Inject entity badge into the card header (after the bank badge)
   if (product.entity) {
     const entityInfo = MY_ENTITIES.find(e => e.id === product.entity);
     if (entityInfo) {
       const entityBadge = `<div class="product-card-bank" style="color:${entityInfo.color};border-color:${entityInfo.color}33;background:${entityInfo.color}12;margin-left:4px">${entityInfo.icon} ${entityInfo.name}</div>`;
-      // Insert before the closing </div> of the header
       html = html.replace('</div></div>\n    <div class="product-card-type">', `${entityBadge}</div></div>\n    <div class="product-card-type">`);
     }
   }
   return html;
+};
+
+// ═══════════════════════════════════════════════════════════════
+// FIX renderDashboard — add annual yield stat card
+// ═══════════════════════════════════════════════════════════════
+const _origRenderDashboard = renderDashboard;
+renderDashboard = function(container, state) {
+  _origRenderDashboard(container, state);
+
+  // Calculate annual yield
+  const portfolio = state.portfolio || [];
+  let annualYield = 0;
+  portfolio.forEach(p => {
+    const amount = parseFloat(p.investedAmount) || 0;
+    const coupon = parseFloat(p.coupon?.rate) || 0;
+    annualYield += Math.round(amount * coupon / 100);
+  });
+  const totalInvested = portfolio.reduce((s, p) => s + (parseFloat(p.investedAmount) || 0), 0);
+  const avgYieldPct = totalInvested > 0 ? (annualYield / totalInvested * 100).toFixed(2).replace('.', ',') : '0';
+
+  // Inject into stats row
+  const statsRow = container.querySelector('.stats-row');
+  if (statsRow) {
+    const yieldCard = document.createElement('div');
+    yieldCard.className = 'stat-card green';
+    yieldCard.innerHTML = `<div class="stat-label">Rendement Annuel</div><div class="stat-value">${formatNumber(annualYield)}€</div><div class="stat-sub">${avgYieldPct}% moyen pondéré</div>`;
+    statsRow.appendChild(yieldCard);
+  }
 };
 
 // ═══════════════════════════════════════════════════════════════
@@ -170,7 +195,6 @@ renderProductSheet = function(container, state) {
       tag.style.cursor = 'pointer';
       tag.onclick = (e) => { e.stopPropagation(); showEditMetadataModal(); };
     });
-    // Entity tag
     if (p.entity) {
       const entityInfo = MY_ENTITIES.find(e => e.id === p.entity);
       if (entityInfo) {
