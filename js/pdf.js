@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — PDF Extraction & AI Parsing
-// Extraction texte via pdf.js + parsing IA via Claude
+// STRUCTBOARD — PDF Extraction & AI Parsing (V2)
+// Extraction texte complète + parsing IA optimisé pour brochures FR
 // ═══════════════════════════════════════════════════════════════
 
 class PDFExtractor {
@@ -27,7 +27,7 @@ class PDFExtractor {
             const page = await pdf.getPage(i);
             const content = await page.getTextContent();
             const pageText = content.items.map(item => item.str).join(' ');
-            fullText += pageText + '\n\n';
+            fullText += `\n--- PAGE ${i} ---\n` + pageText;
           }
           resolve(fullText.trim());
         } catch (err) { reject(new Error('Erreur extraction PDF: ' + err.message)); }
@@ -42,62 +42,87 @@ class AIParser {
   constructor() { this.endpoint = CONFIG.AI_ENDPOINT; }
 
   async parseBrochure(rawText) {
-    const prompt = `Tu es un analyste expert en produits structurés. Analyse ce texte de brochure et extrais les informations clés au format JSON strict.
+    // Envoyer TOUT le texte (jusqu'à 12000 chars) pour couvrir les pages clés
+    const textToSend = rawText.substring(0, 12000);
 
-TEXTE DE LA BROCHURE:
+    const prompt = `Tu es un analyste EXPERT en produits structurés français (autocall, phoenix, reverse convertible, capital protégé, EMTN). Tu DOIS extraire TOUTES les informations de cette brochure.
+
+TEXTE COMPLET DE LA BROCHURE:
 ---
-${rawText.substring(0, 6000)}
+${textToSend}
 ---
 
-Réponds UNIQUEMENT avec un JSON valide (pas de markdown, pas de backticks), avec cette structure exacte:
+INSTRUCTIONS CRITIQUES:
+- Lis TOUT le texte attentivement, les infos sont réparties sur plusieurs pages
+- Le "gain" ou "objectif de gain" = c'est le COUPON (ex: "gain de 5,7% par année" → coupon = 5.7%)
+- "remboursement automatique anticipé" = AUTOCALL
+- Cherche les % précis: taux, barrières, seuils, rendements
+- Les scénarios sont TOUJOURS décrits: favorable (hausse), médian (neutre), défavorable (baisse)
+- La protection du capital peut être à l'échéance seulement
+- Cherche le code ISIN, l'émetteur, le garant, le distributeur
+- Cherche les dates: émission, constatation initiale, constatation finale, échéance
+
+Réponds UNIQUEMENT en JSON valide (pas de markdown, pas de \`\`\`):
 {
-  "name": "Nom complet du produit",
-  "type": "Type (autocall/phoenix/reverse-convertible/capital-protege/participation/range-accrual/cln/emtn/autre)",
-  "emitter": "Nom de l'émetteur/banque",
-  "underlyings": ["Liste des sous-jacents"],
-  "underlyingType": "Type de sous-jacent (eurostoxx50/cac40/sp500/single-stock/basket/rates/credit/etc)",
-  "currency": "EUR/USD/etc",
-  "maturity": "Durée en texte (ex: 10 ans)",
-  "maturityDate": "Date de maturité si mentionnée (YYYY-MM-DD ou null)",
-  "strikeDate": "Date de constatation initiale si mentionnée (YYYY-MM-DD ou null)",
-  "nominal": "Nominal ou valeur nominale si mentionné",
+  "name": "Nom COMPLET du produit (ex: SL - ATHENA PRIVILEGE ENI DECEMBRE 2025)",
+  "type": "autocall ou phoenix ou reverse-convertible ou capital-protege ou participation ou range-accrual ou cln ou emtn ou autre",
+  "emitter": "Émetteur (la société qui émet, ex: Goldman Sachs Finance Corp International Ltd)",
+  "guarantor": "Garant si différent de l'émetteur",
+  "distributor": "Distributeur (ex: SwissLife Banque Privée)",
+  "isin": "Code ISIN si trouvé",
+  "underlyings": ["Liste exacte des sous-jacents (noms complets)"],
+  "underlyingType": "single-stock ou eurostoxx50 ou cac40 ou sp500 ou basket ou rates ou credit ou autre",
+  "currency": "EUR",
+  "maturity": "Durée (ex: 12 ans)",
+  "maturityDate": "Date d'échéance YYYY-MM-DD ou null",
+  "strikeDate": "Date de constatation initiale YYYY-MM-DD ou null",
+  "nominal": "Valeur nominale (ex: 1000 EUR)",
   "coupon": {
-    "rate": "Taux du coupon en % (nombre)",
-    "type": "fixe/conditionnel/memoire",
-    "frequency": "annuel/semestriel/trimestriel/mensuel",
-    "trigger": "Seuil de déclenchement du coupon en % si conditionnel (nombre ou null)",
-    "memory": "true/false - effet mémoire sur les coupons"
+    "rate": 5.7,
+    "type": "conditionnel ou fixe ou memoire",
+    "frequency": "annuel ou semestriel ou trimestriel ou mensuel",
+    "trigger": 100,
+    "triggerDetail": "Description du seuil (ex: 100% du Niveau Initial de l'action)",
+    "memory": false,
+    "maxReturn": "Rendement max par an en % si plafonné",
+    "totalReturn": "Gain total max en % si mentionné (ex: 68.4% sur 12 ans)"
   },
   "capitalProtection": {
-    "protected": "true/false",
-    "level": "Niveau de protection en % (100 = total, 90 = 90%, etc)",
-    "type": "inconditionnelle/conditionnelle-barriere/aucune",
-    "barrier": "Niveau de barrière de protection du capital en % (nombre ou null)",
-    "barrierType": "europeenne/americaine/continue/discrete",
-    "barrierObservation": "Description de l'observation (à maturité, continue, dates fixes)"
+    "protected": true,
+    "level": 100,
+    "type": "inconditionnelle-a-echeance ou conditionnelle-barriere ou aucune",
+    "barrier": null,
+    "barrierType": "europeenne ou americaine ou continue ou discrete",
+    "barrierObservation": "Description (ex: à maturité, observation continue)",
+    "inLifeRisk": "Description du risque en cours de vie (ex: perte totale possible si revente avant échéance)"
   },
   "earlyRedemption": {
-    "possible": "true/false",
-    "type": "autocall/issuer-call/none",
-    "trigger": "Seuil de rappel anticipé en % (nombre ou null)",
-    "frequency": "Fréquence d'observation autocall",
-    "stepDown": "true/false - trigger dégressif",
-    "stepDownDetail": "Détail de la dégressivité si applicable"
+    "possible": true,
+    "type": "autocall ou issuer-call ou none",
+    "trigger": 100,
+    "triggerDetail": "Description (ex: si l'action clôture >= 100% du Niveau Initial)",
+    "frequency": "annuel ou semestriel ou trimestriel",
+    "startYear": 1,
+    "stepDown": false,
+    "stepDownDetail": "Si dégressif, détail"
   },
   "scenarios": {
-    "favorable": "Description du scénario favorable avec rendement",
-    "median": "Description du scénario médian",
-    "defavorable": "Description du scénario défavorable avec perte max"
+    "favorable": "DÉTAILLÉ: ce qui se passe, rendement en %, TRA, exemple chiffré",
+    "median": "DÉTAILLÉ: ce qui se passe, rendement en %, TRA, exemple chiffré",
+    "defavorable": "DÉTAILLÉ: ce qui se passe, perte en %, exemple chiffré"
   },
-  "risks": ["Liste des risques principaux identifiés"],
-  "keyDates": ["Dates clés identifiées"],
-  "summary": "Résumé en 3-4 phrases du produit, son fonctionnement et ses caractéristiques principales"
+  "advantages": ["Liste des avantages mentionnés dans la brochure"],
+  "risks": ["Liste COMPLÈTE des risques: perte en capital, crédit, liquidité, marché, inflation, etc."],
+  "keyDates": ["Toutes les dates importantes trouvées"],
+  "ratings": "Notations de l'émetteur/garant (S&P, Moody's, Fitch)",
+  "eligibility": "Éligibilité (compte-titres, assurance-vie, etc.)",
+  "summary": "Résumé COMPLET en 4-5 phrases: type de produit, sous-jacent, coupon/gain, protection, autocall, durée"
 }
 
-Si une information n'est pas trouvée dans le texte, mets null. Sois précis sur les chiffres.`;
+IMPORTANT: Pour chaque champ, si tu trouves l'info dans le texte, REMPLIS-LE. Ne mets null que si l'info est VRAIMENT absente. Cherche bien dans TOUTES les pages.`;
 
     try {
-      const response = await this._callAI(prompt);
+      const response = await this._callAI(prompt, 3000);
       let cleaned = response.trim();
       cleaned = cleaned.replace(/^```json?\s*/i, '').replace(/\s*```$/i, '');
       return JSON.parse(cleaned);
@@ -108,38 +133,59 @@ Si une information n'est pas trouvée dans le texte, mets null. Sois précis sur
   }
 
   async generateSummary(productData) {
-    const prompt = `Tu es un analyste senior en produits structurés. Génère un résumé clair et structuré de ce produit.
+    const prompt = `Tu es un analyste senior en produits structurés. Génère un résumé LISIBLE et STRUCTURÉ de ce produit.
 
-DONNÉES DU PRODUIT:
+DONNÉES EXTRAITES:
 ${JSON.stringify(productData, null, 2)}
 
-Génère un résumé en français, structuré ainsi:
-1. DESCRIPTION — Ce que c'est en 2 phrases simples
-2. MÉCANISME DES COUPONS — Comment et quand on est payé
-3. PROTECTION DU CAPITAL — Quel niveau, quelle condition
-4. REMBOURSEMENT ANTICIPÉ — Si possible, comment
-5. SCÉNARIOS — Résumé des 3 scénarios avec chiffres
-6. POINTS D'ATTENTION — 2-3 risques clés
+CONSIGNES:
+- Utilise le format markdown avec des ## pour les sections
+- Sois PRÉCIS avec les CHIFFRES (taux, %, dates, seuils)
+- Chaque section doit contenir des informations CONCRÈTES, pas "non disponible"
 
-Sois direct, précis, pas de langue de bois.`;
-    return await this._callAI(prompt);
+Format EXACT à suivre:
+
+## 1. DESCRIPTION
+[Type de produit, émetteur, sous-jacent, durée — 2 phrases max]
+
+## 2. RENDEMENT & COUPONS
+[Taux du gain/coupon, fréquence, conditions de versement, seuil de déclenchement, gain max plafonné — avec les chiffres]
+
+## 3. PROTECTION DU CAPITAL
+[Protégé ou non, à quel niveau, quelle condition, barrière si applicable — en cours de vie vs à échéance]
+
+## 4. REMBOURSEMENT ANTICIPÉ
+[Autocall oui/non, à partir de quand, seuil de déclenchement, fréquence d'observation]
+
+## 5. SCÉNARIOS
+**Favorable:** [description avec chiffres]
+**Médian:** [description avec chiffres]
+**Défavorable:** [description avec chiffres]
+
+## 6. POINTS D'ATTENTION
+[3-5 risques/points clés à surveiller — perte en capital, risque émetteur, dividendes non réinvestis, etc.]
+
+Sois direct, précis, PAS DE LANGUE DE BOIS.`;
+
+    return await this._callAI(prompt, 2500);
   }
 
   async chat(messages, productContext, portfolioContext) {
-    const systemPrompt = `Tu es un analyste expert en produits structurés. Tu discutes avec un investisseur/conseiller à propos d'un produit spécifique.
+    const systemPrompt = `Tu es un analyste expert en produits structurés. Tu discutes avec un investisseur/conseiller.
 
 PRODUIT EN DISCUSSION:
 ${JSON.stringify(productContext, null, 2)}
 
-PORTEFEUILLE ACTUEL DE L'INVESTISSEUR:
+PORTEFEUILLE ACTUEL:
 ${JSON.stringify(portfolioContext, null, 2)}
 
 Règles:
 - Sois direct, précis, evidence-based
+- Cite les CHIFFRES du produit (coupon, barrière, seuils, dates)
 - Challenge les hypothèses si nécessaire
 - Mentionne les risques (drawdown, corrélation, queues de distribution)
-- Si on te demande un avis, donne-le franchement avec les pour ET les contre
-- Quand tu résumes une décision, sois factuel et actionnable`;
+- Compare avec le marché quand pertinent
+- Donne ton avis franchement avec pour ET contre`;
 
     try {
       return await this._callAIWithHistory(systemPrompt, messages);
@@ -155,20 +201,20 @@ ${chatText}
 
 DÉCISION FINALE: ${decision || 'Non encore décidée'}
 
-Format du résumé:
+Format:
 - Points principaux discutés
 - Arguments pour/contre
 - Conclusion/décision et raison`;
-    return await this._callAI(prompt);
+    return await this._callAI(prompt, 1500);
   }
 
-  async _callAI(prompt) {
+  async _callAI(prompt, maxTokens) {
     const res = await fetch(this.endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 2000,
+        max_tokens: maxTokens || 2000,
         messages: [{ role: 'user', content: prompt }],
       }),
     });
