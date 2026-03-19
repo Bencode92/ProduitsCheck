@@ -1,4 +1,4 @@
-// ═══ PATCHES V12b — SAFE card injection (no regex) ═══
+// ═══ PATCHES V12c — AI Portfolio Summary button ═══
 
 let _pendingProduct = null;
 
@@ -22,13 +22,7 @@ function applyMetadata(product, meta) {
   product.integrationNotes = meta.notes || '';
 }
 function _isInPortfolio(p) { return !!(app.state.portfolio || []).find(x => x.id === p.id); }
-
-// Safe inject before last </div> of card HTML
-function _injectBeforeLastDiv(html, content) {
-  const idx = html.lastIndexOf('</div>');
-  if (idx < 0) return html + content;
-  return html.substring(0, idx) + content + html.substring(idx);
-}
+function _injectBeforeLastDiv(html, content) { const idx = html.lastIndexOf('</div>'); if (idx < 0) return html + content; return html.substring(0, idx) + content + html.substring(idx); }
 
 const _origProcessUploadedFile = processUploadedFile;
 processUploadedFile = async function(file, context, bankId) {
@@ -61,44 +55,113 @@ handleIntegrate = async function(pid, bid) { const meta = readMetadataForm(); if
 function showEditMetadataModal() { const p = app.state.currentProduct; if (!p) return; const modal = document.getElementById('modal'); modal.innerHTML = `<div class="modal-overlay" onclick="closeModal()"><div class="modal-content" onclick="event.stopPropagation()"><h2 class="modal-title">✏️ Modifier</h2><div style="color:var(--text-muted);font-size:12px;margin-bottom:16px">${p.name||''}</div><div class="form-grid">${metadataFieldsHTML(p)}</div><div class="modal-actions"><button class="btn" onclick="closeModal()">Annuler</button><button class="btn primary" onclick="handleEditMetadata()">💾 Enregistrer</button></div></div></div>`; modal.classList.add('visible'); }
 async function handleEditMetadata() { const p = app.state.currentProduct; if (!p) return; const meta = readMetadataForm(); applyMetadata(p, meta); if (!meta.entity) { p.entity=''; p.entityName=''; } if (!meta.bankId) { p.bankId=''; p.bankName=''; } closeModal(); const ip = app.state.portfolio.find(x => x.id === p.id); if (ip) { Object.assign(ip, {entity:p.entity,entityName:p.entityName,bankId:p.bankId,bankName:p.bankName,investedAmount:p.investedAmount,subscriptionDate:p.subscriptionDate,integrationNotes:p.integrationNotes}); await github.writeFile(`${CONFIG.DATA_PATH}/portfolio.json`, app.state.portfolio, `[StructBoard] Update: ${p.name||p.id}`); } if (p.bankId) await app._saveProductFile(p.bankId, p); showToast('OK','success'); app.openProduct(p); }
 
-// ═══ renderProductCard — SAFE entity + annualized + tracking/archive ═══
+// ═══════════════════════════════════════════════════════════════
+// AI PORTFOLIO SUMMARY
+// ═══════════════════════════════════════════════════════════════
+async function generatePortfolioSummary() {
+  const btn = document.getElementById('ai-summary-btn');
+  const box = document.getElementById('ai-summary-box');
+  if (!btn || !box) return;
+  btn.disabled = true; btn.innerHTML = '⏳ Analyse en cours...';
+  box.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)"><div class="spinner" style="margin:0 auto 8px"></div>Claude analyse votre portefeuille...</div>';
+  box.style.display = 'block';
+
+  const portfolio = (app.state.portfolio || []).filter(p => !p.archived);
+  const archived = (app.state.portfolio || []).filter(p => p.archived);
+
+  // Build compact portfolio data for the prompt
+  const productsData = portfolio.map(p => {
+    const annRate = typeof getAnnualizedRate === 'function' ? getAnnualizedRate(p) : (parseFloat(p.coupon?.rate) || 0);
+    const s = typeof getTrackingStatus === 'function' ? getTrackingStatus(p) : null;
+    return {
+      nom: (p.name || '').substring(0, 50),
+      montant: parseFloat(p.investedAmount) || 0,
+      coupon_annualise: annRate + '%',
+      rendement_annuel: Math.round((parseFloat(p.investedAmount) || 0) * annRate / 100) + '€',
+      barriere: p.capitalProtection?.barrier ? p.capitalProtection.barrier + '%' : 'N/A',
+      maturite: p.maturity || 'N/A',
+      autocall: p.earlyRedemption?.possible ? 'oui' : 'non',
+      memoire: p.coupon?.memory ? 'oui' : 'non',
+      entite: p.entity ? (MY_ENTITIES.find(e => e.id === p.entity)?.name || '') : '',
+      banque: BANKS_LIST.find(b => b.id === p.bankId)?.name || '',
+      tracking: s ? {
+        variation: (s.variation >= 0 ? '+' : '') + s.variation.toFixed(1) + '%',
+        coupon_ok: s.couponOK,
+        marge_barriere: s.margeRestante ? s.margeRestante.toFixed(1) + '%' : 'N/A',
+        date: s.date
+      } : null
+    };
+  });
+
+  const totalInvested = portfolio.reduce((s, p) => s + (parseFloat(p.investedAmount) || 0), 0);
+  const totalYield = portfolio.reduce((s, p) => {
+    const annRate = typeof getAnnualizedRate === 'function' ? getAnnualizedRate(p) : (parseFloat(p.coupon?.rate) || 0);
+    return s + Math.round((parseFloat(p.investedAmount) || 0) * annRate / 100);
+  }, 0);
+
+  const prompt = `Tu es un conseiller financier spécialisé en produits structurés. Analyse ce portefeuille et donne un résumé clair et actionnable en français.
+
+PORTEFEUILLE ACTIF (${portfolio.length} produits, ${formatNumber(totalInvested)}€ investis, rendement estimé ${formatNumber(totalYield)}€/an):
+
+${JSON.stringify(productsData, null, 1)}
+
+${archived.length > 0 ? `PRODUITS ARCHIVÉS: ${archived.length} produits, gain total: ${formatNumber(archived.reduce((s,p) => s + (p.archived?.gainTotal||0), 0))}€` : ''}
+
+Réponds en 3 sections courtes:
+1. **SITUATION GLOBALE** (2-3 phrases max): résumé chiffré de la situation actuelle
+2. **POINTS D'ATTENTION** (liste courte): risques, coupons perdus, produits proches des barrières, concentrations
+3. **RECOMMANDATIONS** (2-3 max): actions concrètes à prendre maintenant
+
+Sois direct, pas de jargon inutile. Utilise les chiffres du portefeuille. Si un coupon est perdu ou une barrière proche, dis-le clairement avec le montant impacté.`;
+
+  try {
+    const resp = await fetch(CONFIG.AI_ENDPOINT, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1500,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await resp.json();
+    const text = data.content?.[0]?.text || data.error?.message || 'Erreur';
+    // Format markdown-like text to HTML
+    let html = text
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/^### (.+)$/gm, '<h3 style="color:var(--accent);margin:12px 0 6px;font-size:14px">$1</h3>')
+      .replace(/^## (.+)$/gm, '<h3 style="color:var(--accent);margin:12px 0 6px;font-size:14px">$1</h3>')
+      .replace(/^\d+\.\s*\*\*(.+?)\*\*/gm, '<h3 style="color:var(--accent);margin:12px 0 6px;font-size:14px">$1</h3>')
+      .replace(/^- (.+)$/gm, '<div style="display:flex;gap:6px;margin:4px 0"><span>▸</span><span>$1</span></div>')
+      .replace(/\n\n/g, '<br><br>')
+      .replace(/\n/g, '<br>');
+    box.innerHTML = `<div style="font-size:13px;line-height:1.6;color:var(--text)">${html}</div>
+      <div style="font-size:10px;color:var(--text-dim);margin-top:12px;text-align:right">Généré le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'})}</div>`;
+  } catch (e) {
+    box.innerHTML = `<div style="color:var(--red);padding:12px">Erreur: ${e.message}</div>`;
+  }
+  btn.disabled = false; btn.innerHTML = '🤖 Résumé IA du portefeuille';
+}
+
+// ═══ renderProductCard ═══
 const _origRenderProductCard = renderProductCard;
 renderProductCard = function(product, context) {
   if (!product.bankId || product.bankId === 'undefined' || product.bankId === 'null') product.bankId = '';
-  // Annualized coupon swap
   const origRate = product.coupon?.rate;
   if (product.coupon && typeof getAnnualizedRate === 'function') { const ann = getAnnualizedRate(product); if (ann !== origRate && ann > 0) { product.coupon._origRate = origRate; product.coupon.rate = ann; } }
   let html = _origRenderProductCard(product, context);
   if (product.coupon?._origRate !== undefined) { product.coupon.rate = product.coupon._origRate; delete product.coupon._origRate; }
-
-  // Entity badge — inject after bank badge in header using indexOf
   if (product.entity) {
     const ei = MY_ENTITIES.find(e => e.id === product.entity);
-    if (ei) {
-      const badge = `<div class="product-card-bank" style="color:${ei.color};border-color:${ei.color}33;background:${ei.color}12;margin-left:4px">${ei.icon} ${ei.name}</div>`;
-      // Find the header closing and inject before it
-      const headerEnd = html.indexOf('</div></div>');
-      if (headerEnd >= 0) {
-        html = html.substring(0, headerEnd) + badge + html.substring(headerEnd);
-      }
-    }
+    if (ei) { const badge = `<div class="product-card-bank" style="color:${ei.color};border-color:${ei.color}33;background:${ei.color}12;margin-left:4px">${ei.icon} ${ei.name}</div>`; const headerEnd = html.indexOf('</div></div>'); if (headerEnd >= 0) html = html.substring(0, headerEnd) + badge + html.substring(headerEnd); }
   }
-
-  // Tracking gauge or Archive badge — inject before LAST </div>
-  let extraContent = '';
-  if (product.archived && typeof renderArchiveBadge === 'function') {
-    extraContent = renderArchiveBadge(product);
-  } else if (product.tracking?.level != null && typeof renderTrackingGauge === 'function') {
-    extraContent = renderTrackingGauge(product);
-  }
-  if (extraContent) {
-    html = _injectBeforeLastDiv(html, extraContent);
-  }
-
+  let extra = '';
+  if (product.archived && typeof renderArchiveBadge === 'function') extra = renderArchiveBadge(product);
+  else if (product.tracking?.level != null && typeof renderTrackingGauge === 'function') extra = renderTrackingGauge(product);
+  if (extra) html = _injectBeforeLastDiv(html, extra);
   return html;
 };
 
-// ═══ renderDashboard ═══
+// ═══ renderDashboard — with AI SUMMARY button ═══
 const _origRenderDashboard = renderDashboard;
 renderDashboard = function(container, state) {
   _origRenderDashboard(container, state);
@@ -111,16 +174,33 @@ renderDashboard = function(container, state) {
   container.querySelectorAll('.stat-card.orange').forEach(card => { const label = card.querySelector('.stat-label'); if (label && label.textContent.includes('Coupon')) { const v = card.querySelector('.stat-value'), s = card.querySelector('.stat-sub'); if (v) v.textContent = avgYieldPct.toFixed(2).replace('.',',')+'%'; if (s) s.textContent = 'annualisé pondéré'; } });
   const statsRow = container.querySelector('.stats-row');
   if (statsRow) { const yc = document.createElement('div'); yc.className = 'stat-card green'; yc.innerHTML = `<div class="stat-label">Rendement Annuel</div><div class="stat-value">${formatNumber(annualYield)}€</div><div class="stat-sub">${avgYieldPct.toFixed(2).replace('.',',')}% pondéré</div>`; statsRow.appendChild(yc); }
+
+  // ─── AI SUMMARY BUTTON + BOX (after stats) ────────────────
+  if (active.length > 0) {
+    const aiDiv = document.createElement('div');
+    aiDiv.style.cssText = 'margin-bottom:16px';
+    aiDiv.innerHTML = `<div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+      <button id="ai-summary-btn" class="btn ai-glow" onclick="generatePortfolioSummary()" style="white-space:nowrap">🤖 Résumé IA du portefeuille</button>
+      <span style="font-size:11px;color:var(--text-dim)">Analyse complète de vos positions par Claude</span>
+    </div>
+    <div id="ai-summary-box" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px"></div>`;
+    const alertBar = container.querySelector('.alert-bar');
+    if (alertBar) alertBar.after(aiDiv);
+    else if (statsRow) statsRow.after(aiDiv);
+  }
+
+  // Tracking alerts
   if (typeof getPortfolioAlerts === 'function') {
     const alerts = getPortfolioAlerts(active);
     if (alerts.length > 0) {
       const ac = { danger:'rgba(229,57,53,0.15)', warn:'rgba(255,183,77,0.15)', success:'rgba(76,175,80,0.15)', info:'rgba(100,181,246,0.15)' };
       const ab = { danger:'#E53935', warn:'#FFB74D', success:'#4CAF50', info:'#64B5F6' };
       const ah = alerts.map(a => `<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:${ac[a.type]};border-left:3px solid ${ab[a.type]};border-radius:0 var(--radius-sm) var(--radius-sm) 0;cursor:pointer" onclick="app.openProduct(app._findProduct('${a.productId}','${a.bankId||''}'))"><span>${a.icon}</span><span style="font-size:12px">${a.text}</span></div>`).join('');
-      const ea = container.querySelector('.alert-bar');
+      const aiBox = document.getElementById('ai-summary-box');
+      const insertAfter = aiBox?.parentElement || container.querySelector('.alert-bar') || statsRow;
       const ta = document.createElement('div'); ta.style.cssText = 'display:flex;flex-direction:column;gap:4px;margin-bottom:16px';
       ta.innerHTML = `<div style="font-size:11px;font-weight:600;color:var(--text-dim);margin-bottom:4px">📍 SUIVI POSITIONS</div>${ah}`;
-      if (ea) ea.after(ta); else statsRow?.after(ta);
+      if (insertAfter) insertAfter.after(ta);
     }
   }
   if (archived.length > 0 && typeof renderArchivedSection === 'function') {
@@ -139,14 +219,8 @@ renderProductSheet = function(container, state) {
     const ann = getAnnualizedRate(p), raw = parseFloat(p.coupon.rate)||0;
     if (ann !== raw && ann > 0) { const cm = container.querySelector('.fiche-metric.green .fiche-metric-value'); if (cm) cm.innerHTML = formatPct(ann) + ' <span style="font-size:10px;color:var(--text-dim)">(' + formatPct(raw) + '/' + (p.coupon.frequency||'période') + ')</span>'; }
   }
-  if (p.archived && typeof renderArchiveSection === 'function') {
-    const sheetMain = container.querySelector('.sheet-main');
-    if (sheetMain) { const ad = document.createElement('div'); ad.innerHTML = renderArchiveSection(p); sheetMain.insertBefore(ad.firstElementChild, sheetMain.firstChild); }
-  }
-  if (typeof renderTrackingSection === 'function' && !p.archived) {
-    const sheetMain = container.querySelector('.sheet-main');
-    if (sheetMain) { const td = document.createElement('div'); td.innerHTML = renderTrackingSection(p); const fs = sheetMain.querySelector('.fiche-section'); if (fs) sheetMain.insertBefore(td.firstElementChild, fs); else sheetMain.appendChild(td.firstElementChild); }
-  }
+  if (p.archived && typeof renderArchiveSection === 'function') { const sm = container.querySelector('.sheet-main'); if (sm) { const ad = document.createElement('div'); ad.innerHTML = renderArchiveSection(p); sm.insertBefore(ad.firstElementChild, sm.firstChild); } }
+  if (typeof renderTrackingSection === 'function' && !p.archived) { const sm = container.querySelector('.sheet-main'); if (sm) { const td = document.createElement('div'); td.innerHTML = renderTrackingSection(p); const fs = sm.querySelector('.fiche-section'); if (fs) sm.insertBefore(td.firstElementChild, fs); else sm.appendChild(td.firstElementChild); } }
   const subtitleEl = container.querySelector('.fiche-subtitle');
   if (subtitleEl) {
     subtitleEl.querySelectorAll('.fiche-tag.bank').forEach(tag => { const txt = tag.textContent.trim(); if (txt === '\u2014' || txt.toUpperCase() === 'UNDEFINED' || txt === '') { tag.textContent = '\u270f\ufe0f Assigner'; tag.style.color = 'var(--accent)'; tag.style.borderColor = 'var(--accent)'; } tag.style.cursor = 'pointer'; tag.onclick = (e) => { e.stopPropagation(); showEditMetadataModal(); }; });
