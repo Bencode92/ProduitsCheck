@@ -1,4 +1,4 @@
-// ═══ PATCHES V12 — Archive integration ═══
+// ═══ PATCHES V12b — Fix archive button visibility ═══
 
 let _pendingProduct = null;
 
@@ -22,7 +22,9 @@ function applyMetadata(product, meta) {
   product.integrationNotes = meta.notes || '';
 }
 
-// ─── File upload / manual save / integrate (unchanged) ──────
+// Helper: is product in portfolio?
+function _isInPortfolio(p) { return !!(app.state.portfolio || []).find(x => x.id === p.id); }
+
 const _origProcessUploadedFile = processUploadedFile;
 processUploadedFile = async function(file, context, bankId) {
   const progress = document.getElementById('upload-progress'), status = document.getElementById('upload-status');
@@ -55,18 +57,15 @@ handleIntegrate = async function(pid, bid) { const meta = readMetadataForm(); if
 function showEditMetadataModal() { const p = app.state.currentProduct; if (!p) return; const modal = document.getElementById('modal'); modal.innerHTML = `<div class="modal-overlay" onclick="closeModal()"><div class="modal-content" onclick="event.stopPropagation()"><h2 class="modal-title">✏️ Modifier</h2><div style="color:var(--text-muted);font-size:12px;margin-bottom:16px">${p.name||''}</div><div class="form-grid">${metadataFieldsHTML(p)}</div><div class="modal-actions"><button class="btn" onclick="closeModal()">Annuler</button><button class="btn primary" onclick="handleEditMetadata()">💾 Enregistrer</button></div></div></div>`; modal.classList.add('visible'); }
 async function handleEditMetadata() { const p = app.state.currentProduct; if (!p) return; const meta = readMetadataForm(); applyMetadata(p, meta); if (!meta.entity) { p.entity=''; p.entityName=''; } if (!meta.bankId) { p.bankId=''; p.bankName=''; } closeModal(); const ip = app.state.portfolio.find(x => x.id === p.id); if (ip) { Object.assign(ip, {entity:p.entity,entityName:p.entityName,bankId:p.bankId,bankName:p.bankName,investedAmount:p.investedAmount,subscriptionDate:p.subscriptionDate,integrationNotes:p.integrationNotes}); await github.writeFile(`${CONFIG.DATA_PATH}/portfolio.json`, app.state.portfolio, `[StructBoard] Update: ${p.name||p.id}`); } if (p.bankId) await app._saveProductFile(p.bankId, p); showToast('OK','success'); app.openProduct(p); }
 
-// ═══ renderProductCard — entity + annualized + tracking + ARCHIVE badge ═══
+// ═══ renderProductCard ═══
 const _origRenderProductCard = renderProductCard;
 renderProductCard = function(product, context) {
   if (!product.bankId || product.bankId === 'undefined' || product.bankId === 'null') product.bankId = '';
-  // Annualized coupon swap
   const origRate = product.coupon?.rate;
   if (product.coupon && typeof getAnnualizedRate === 'function') { const ann = getAnnualizedRate(product); if (ann !== origRate && ann > 0) { product.coupon._origRate = origRate; product.coupon.rate = ann; } }
   let html = _origRenderProductCard(product, context);
   if (product.coupon?._origRate !== undefined) { product.coupon.rate = product.coupon._origRate; delete product.coupon._origRate; }
-  // Entity badge
-  if (product.entity) { const ei = MY_ENTITIES.find(e => e.id === product.entity); if (ei) { html = html.replace('</div></div>\n    <div class="product-card-type">', `<div class="product-card-bank" style="color:${ei.color};border-color:${ei.color}33;background:${ei.color}12;margin-left:4px">${ei.icon} ${ei.name}</div></div></div>\n    <div class="product-card-type">`); } }
-  // Tracking gauge OR Archive badge (not both)
+  if (product.entity) { const ei = MY_ENTITIES.find(e => e.id === product.entity); if (ei) { html = html.replace('</div></div>\n    <div class="product-card-type">', `<div class="product-card-bank" style="color:${ei.color};border-color:${ei.color}33;background:${ei.color}12;margin-left:4px">${ei.icon} ${ei.name}</div></div>\n    <div class="product-card-type">`); } }
   if (product.archived && typeof renderArchiveBadge === 'function') {
     html = html.replace(/<\/div>$/, renderArchiveBadge(product) + '</div>');
   } else if (product.tracking?.level != null && typeof renderTrackingGauge === 'function') {
@@ -75,36 +74,19 @@ renderProductCard = function(product, context) {
   return html;
 };
 
-// ═══ renderDashboard — yield + coupon fix + alerts + ARCHIVES SECTION ═══
+// ═══ renderDashboard ═══
 const _origRenderDashboard = renderDashboard;
 renderDashboard = function(container, state) {
   _origRenderDashboard(container, state);
-
-  // Separate active vs archived
   const allPortfolio = state.portfolio || [];
   const active = allPortfolio.filter(p => !p.archived);
   const archived = allPortfolio.filter(p => p.archived);
-
   let annualYield = 0, totalWeightedRate = 0, totalInvested = 0;
-  active.forEach(p => {
-    const amount = parseFloat(p.investedAmount)||0; totalInvested += amount;
-    const annRate = typeof getAnnualizedRate === 'function' ? getAnnualizedRate(p) : (parseFloat(p.coupon?.rate)||0);
-    totalWeightedRate += amount * annRate;
-    annualYield += Math.round(amount * annRate / 100);
-  });
+  active.forEach(p => { const amount = parseFloat(p.investedAmount)||0; totalInvested += amount; const annRate = typeof getAnnualizedRate === 'function' ? getAnnualizedRate(p) : (parseFloat(p.coupon?.rate)||0); totalWeightedRate += amount * annRate; annualYield += Math.round(amount * annRate / 100); });
   const avgYieldPct = totalInvested > 0 ? (totalWeightedRate / totalInvested) : 0;
-
-  // Fix Coupon Moyen
-  container.querySelectorAll('.stat-card.orange').forEach(card => {
-    const label = card.querySelector('.stat-label');
-    if (label && label.textContent.includes('Coupon')) { const v = card.querySelector('.stat-value'), s = card.querySelector('.stat-sub'); if (v) v.textContent = avgYieldPct.toFixed(2).replace('.',',')+  '%'; if (s) s.textContent = 'annualisé pondéré'; }
-  });
-
-  // Rendement Annuel card
+  container.querySelectorAll('.stat-card.orange').forEach(card => { const label = card.querySelector('.stat-label'); if (label && label.textContent.includes('Coupon')) { const v = card.querySelector('.stat-value'), s = card.querySelector('.stat-sub'); if (v) v.textContent = avgYieldPct.toFixed(2).replace('.',',')+'%'; if (s) s.textContent = 'annualisé pondéré'; } });
   const statsRow = container.querySelector('.stats-row');
   if (statsRow) { const yc = document.createElement('div'); yc.className = 'stat-card green'; yc.innerHTML = `<div class="stat-label">Rendement Annuel</div><div class="stat-value">${formatNumber(annualYield)}€</div><div class="stat-sub">${avgYieldPct.toFixed(2).replace('.',',')}% pondéré</div>`; statsRow.appendChild(yc); }
-
-  // Tracking alerts
   if (typeof getPortfolioAlerts === 'function') {
     const alerts = getPortfolioAlerts(active);
     if (alerts.length > 0) {
@@ -117,45 +99,33 @@ renderDashboard = function(container, state) {
       if (ea) ea.after(ta); else statsRow?.after(ta);
     }
   }
-
-  // ─── ARCHIVES SECTION ─────────────────────────────────────
   if (archived.length > 0 && typeof renderArchivedSection === 'function') {
-    const main = container;
     const archHTML = renderArchivedSection(state);
-    if (archHTML) {
-      const archDiv = document.createElement('div');
-      archDiv.innerHTML = archHTML;
-      main.appendChild(archDiv);
-    }
+    if (archHTML) { const archDiv = document.createElement('div'); archDiv.innerHTML = archHTML; container.appendChild(archDiv); }
   }
 };
 
-// ═══ renderProductSheet — all features + ARCHIVE ═══
+// ═══ renderProductSheet ═══
 const _origRenderProductSheet = renderProductSheet;
 renderProductSheet = function(container, state) {
   const p = state.currentProduct;
   if (p && (!p.bankId || p.bankId === 'undefined' || p.bankId === 'null')) p.bankId = '';
   _origRenderProductSheet(container, state);
 
-  // Annualized coupon
   if (typeof getAnnualizedRate === 'function' && p.coupon?.rate) {
     const ann = getAnnualizedRate(p), raw = parseFloat(p.coupon.rate)||0;
     if (ann !== raw && ann > 0) { const cm = container.querySelector('.fiche-metric.green .fiche-metric-value'); if (cm) cm.innerHTML = formatPct(ann) + ' <span style="font-size:10px;color:var(--text-dim)">(' + formatPct(raw) + '/' + (p.coupon.frequency||'période') + ')</span>'; }
   }
 
-  // Archive section (top of sheet-main if archived)
   if (p.archived && typeof renderArchiveSection === 'function') {
     const sheetMain = container.querySelector('.sheet-main');
     if (sheetMain) { const ad = document.createElement('div'); ad.innerHTML = renderArchiveSection(p); sheetMain.insertBefore(ad.firstElementChild, sheetMain.firstChild); }
   }
-
-  // Tracking section (after archive or at top)
   if (typeof renderTrackingSection === 'function' && !p.archived) {
     const sheetMain = container.querySelector('.sheet-main');
     if (sheetMain) { const td = document.createElement('div'); td.innerHTML = renderTrackingSection(p); const fs = sheetMain.querySelector('.fiche-section'); if (fs) sheetMain.insertBefore(td.firstElementChild, fs); else sheetMain.appendChild(td.firstElementChild); }
   }
 
-  // Subtitle tags
   const subtitleEl = container.querySelector('.fiche-subtitle');
   if (subtitleEl) {
     subtitleEl.querySelectorAll('.fiche-tag.bank').forEach(tag => {
@@ -164,14 +134,13 @@ renderProductSheet = function(container, state) {
       tag.style.cursor = 'pointer'; tag.onclick = (e) => { e.stopPropagation(); showEditMetadataModal(); };
     });
     if (p.entity) { const ei = MY_ENTITIES.find(e => e.id === p.entity); if (ei) { const et = document.createElement('span'); et.className = 'fiche-tag bank'; et.style.cssText = `color:${ei.color};border-color:${ei.color};cursor:pointer`; et.textContent = `${ei.icon} ${ei.name}`; et.onclick = (e) => { e.stopPropagation(); showEditMetadataModal(); }; subtitleEl.insertBefore(et, subtitleEl.firstChild); } }
-    // Archived badge in subtitle
     if (p.archived) { const ab = document.createElement('span'); ab.className = 'fiche-tag'; ab.style.cssText = 'color:#94A3B8;border-color:#94A3B8;background:rgba(148,163,184,0.1)'; ab.textContent = '\ud83d\udce6 Archivé'; subtitleEl.appendChild(ab); }
     if (p.subscriptionDate) { const d = document.createElement('span'); d.style.cssText = 'color:var(--text-muted);font-size:11px;cursor:pointer'; d.textContent = `\ud83d\udcc5 Souscrit le ${new Date(p.subscriptionDate).toLocaleDateString('fr-FR')}`; d.onclick = (e) => { e.stopPropagation(); showEditMetadataModal(); }; subtitleEl.appendChild(d); }
     if (p.integrationNotes) { const n = document.createElement('span'); n.style.cssText = 'color:var(--text-dim);font-size:11px;cursor:pointer'; n.textContent = `\ud83d\udcac ${p.integrationNotes}`; n.onclick = (e) => { e.stopPropagation(); showEditMetadataModal(); }; subtitleEl.appendChild(n); }
     if (!p.entity && !p.subscriptionDate && !p.archived) { const es = document.createElement('span'); es.style.cssText = 'color:var(--accent);font-size:11px;cursor:pointer;text-decoration:underline'; es.textContent = '\u270f\ufe0f Compléter'; es.onclick = (e) => { e.stopPropagation(); showEditMetadataModal(); }; subtitleEl.appendChild(es); }
   }
 
-  // Sidebar buttons
+  // ─── SIDEBAR BUTTONS ──────────────────────────────────────
   const sidebar = container.querySelector('.sheet-sidebar .action-buttons');
   if (sidebar) {
     const editBtn = document.createElement('button'); editBtn.className = 'btn lg'; editBtn.style.cssText = 'width:100%';
@@ -179,19 +148,21 @@ renderProductSheet = function(container, state) {
     sidebar.insertBefore(editBtn, sidebar.firstChild);
 
     if (!p.archived) {
-      // Tracking button
       if (typeof showTrackingModal === 'function') { const tb = document.createElement('button'); tb.className = 'btn lg'; tb.style.cssText = 'width:100%;background:var(--surface);border:1px solid var(--border)'; tb.innerHTML = '\ud83d\udccd Valorisation'; tb.onclick = () => showTrackingModal(); sidebar.insertBefore(tb, sidebar.children[1]||null); }
-      // Archive button (for subscribed products)
-      if (p.status === 'subscribed' && typeof showArchiveModal === 'function') {
-        const archBtn = document.createElement('button'); archBtn.className = 'btn lg'; archBtn.style.cssText = 'width:100%;background:rgba(148,163,184,0.1);border:1px solid #94A3B8;color:#94A3B8';
-        archBtn.innerHTML = '\ud83d\udce6 Archiver (produit terminé)'; archBtn.onclick = () => showArchiveModal();
+
+      // ─── ARCHIVE BUTTON: show for ANY product in portfolio ──
+      const inPortfolio = _isInPortfolio(p);
+      if (inPortfolio && typeof showArchiveModal === 'function') {
+        const archBtn = document.createElement('button'); archBtn.className = 'btn lg';
+        archBtn.style.cssText = 'width:100%;background:rgba(148,163,184,0.1);border:1px solid #94A3B8;color:#94A3B8';
+        archBtn.innerHTML = '\ud83d\udce6 Archiver (produit terminé)';
+        archBtn.onclick = () => showArchiveModal();
         sidebar.appendChild(archBtn);
       }
     }
   }
 
-  // Integrated notice
-  if (p.status === 'subscribed' && !p.archived) {
+  if ((p.status === 'subscribed' || _isInPortfolio(p)) && !p.archived) {
     const notice = container.querySelector('.integrated-notice');
     if (notice) {
       const rd = p.subscriptionDate ? new Date(p.subscriptionDate).toLocaleDateString('fr-FR') : formatDate(p.addedDate);
