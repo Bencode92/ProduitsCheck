@@ -287,7 +287,9 @@
     "status": "active",
     "bankName": "Swiss Life",
     "subscriptionDate": "2025-12-05",
-    "integrationNotes": ""
+    "integrationNotes": "",
+    "entity": "cameleons",
+    "entityName": "Caméleons"
   },
   {
     "id": "sp_mmxhg4us_3x9ic",
