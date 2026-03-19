@@ -3,21 +3,22 @@
 // ═══════════════════════════════════════════════════════════════
 
 const CONFIG = {
-  // GitHub
   REPO_OWNER: 'Bencode92',
   REPO_NAME: 'ProduitsCheck',
   DATA_PATH: 'data',
   BRANCH: 'main',
-
-  // Cloudflare Worker proxy (clé Claude + GitHub déjà configurées côté worker)
   AI_ENDPOINT: 'https://studyforge-proxy.benoit-comas.workers.dev',
-
-  // PDF.js CDN
   PDFJS_CDN: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174',
 };
 
-// Banques disponibles
-const BANKS = [
+// Mes entreprises (pour associer les produits)
+const MY_ENTITIES = [
+  { id: 'bycam', name: 'ByCam', color: '#06D6A0', icon: '🏢' },
+  { id: 'cameleons', name: 'Caméleons', color: '#8338EC', icon: '🦎' },
+];
+
+// Banques / émetteurs / distributeurs
+const BANKS_LIST = [
   { id: 'swiss-life', name: 'Swiss Life', color: '#E63946' },
   { id: 'sg', name: 'Société Générale', color: '#FF006E' },
   { id: 'cic', name: 'CIC', color: '#3A86FF' },
@@ -33,6 +34,23 @@ const BANKS = [
   { id: 'leonteq', name: 'Leonteq', color: '#7209B7' },
   { id: 'vontobel', name: 'Vontobel', color: '#4361EE' },
 ];
+
+// BANKS = tout combiné (entreprises + banques) pour compatibilité avec le code existant
+const BANKS = [
+  ...MY_ENTITIES.map(e => ({ ...e, isEntity: true })),
+  ...BANKS_LIST,
+];
+
+// Helper pour générer les <option> avec optgroup
+function bankOptionsHTML(selectedId) {
+  let html = '<option value="">Sélectionner...</option>';
+  html += '<optgroup label="🏢 Mes entreprises">';
+  MY_ENTITIES.forEach(e => { html += `<option value="${e.id}" ${e.id === selectedId ? 'selected' : ''}>${e.icon || '🏢'} ${e.name}</option>`; });
+  html += '</optgroup><optgroup label="🏦 Banques">';
+  BANKS_LIST.forEach(b => { html += `<option value="${b.id}" ${b.id === selectedId ? 'selected' : ''}>${b.name}</option>`; });
+  html += '</optgroup><option value="autre">Autre</option>';
+  return html;
+}
 
 // Types de produits structurés
 const PRODUCT_TYPES = [
@@ -68,7 +86,7 @@ const UNDERLYINGS = [
   { id: 'autre', name: 'Autre', class: 'autre', correlation_group: 'autre' },
 ];
 
-// Corrélations implicites entre groupes de sous-jacents
+// Corrélations implicites
 const CORRELATION_MATRIX = {
   'eu-equity':     { 'eu-equity': 1.0, 'uk-equity': 0.85, 'us-equity': 0.75, 'asia-equity': 0.55, 'global-equity': 0.85, 'rates': -0.2, 'credit': 0.4, 'commodities': 0.3 },
   'uk-equity':     { 'eu-equity': 0.85, 'uk-equity': 1.0, 'us-equity': 0.7, 'asia-equity': 0.5, 'global-equity': 0.8, 'rates': -0.15, 'credit': 0.35, 'commodities': 0.3 },
