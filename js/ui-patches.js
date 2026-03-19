@@ -1,4 +1,4 @@
-// ═══ PATCHES V10 — Entity visible on cards ═══
+// ═══ PATCHES V10 — Entity visible on cards + annualized coupon ═══
 
 let _pendingProduct = null;
 
@@ -130,11 +130,32 @@ async function handleEditMetadata() {
   showToast('Informations mises à jour', 'success'); app.openProduct(p);
 }
 
-// ═══ FIX renderProductCard — entity badge ════════════════════
+// ═══════════════════════════════════════════════════════════════
+// FIX renderProductCard — entity badge + ANNUALIZED coupon
+// ═══════════════════════════════════════════════════════════════
 const _origRenderProductCard = renderProductCard;
 renderProductCard = function(product, context) {
   if (!product.bankId || product.bankId === 'undefined' || product.bankId === 'null') product.bankId = '';
+
+  // Pre-fix: temporarily swap coupon rate to annualized for the render
+  const origRate = product.coupon?.rate;
+  if (product.coupon && typeof getAnnualizedRate === 'function') {
+    const annualized = getAnnualizedRate(product);
+    if (annualized !== origRate && annualized > 0) {
+      product.coupon._origRate = origRate;
+      product.coupon.rate = annualized;
+    }
+  }
+
   let html = _origRenderProductCard(product, context);
+
+  // Restore original rate
+  if (product.coupon?._origRate !== undefined) {
+    product.coupon.rate = product.coupon._origRate;
+    delete product.coupon._origRate;
+  }
+
+  // Inject entity badge
   if (product.entity) {
     const entityInfo = MY_ENTITIES.find(e => e.id === product.entity);
     if (entityInfo) {
@@ -150,15 +171,12 @@ const _origRenderDashboard = renderDashboard;
 renderDashboard = function(container, state) {
   _origRenderDashboard(container, state);
 
-  // Use smart annualization from analytics.js (trimestriel ×4, semestriel ×2, etc.)
   const portfolio = state.portfolio || [];
   let annualYield = 0;
   portfolio.forEach(p => {
-    // Use calcProductAnnualYield from analytics.js if available
     if (typeof calcProductAnnualYield === 'function') {
       annualYield += calcProductAnnualYield(p);
     } else {
-      // Fallback: simple calculation
       annualYield += Math.round((parseFloat(p.investedAmount)||0) * (parseFloat(p.coupon?.rate)||0) / 100);
     }
   });
@@ -180,6 +198,18 @@ renderProductSheet = function(container, state) {
   const p = state.currentProduct;
   if (p && (!p.bankId || p.bankId === 'undefined' || p.bankId === 'null')) p.bankId = '';
   _origRenderProductSheet(container, state);
+
+  // Fix coupon display on fiche to show annualized
+  if (typeof getAnnualizedRate === 'function' && p.coupon?.rate) {
+    const annualized = getAnnualizedRate(p);
+    const raw = parseFloat(p.coupon.rate) || 0;
+    if (annualized !== raw && annualized > 0) {
+      const couponMetric = container.querySelector('.fiche-metric.green .fiche-metric-value');
+      if (couponMetric && couponMetric.textContent.includes(formatPct(raw))) {
+        couponMetric.innerHTML = formatPct(annualized) + ' <span style="font-size:10px;color:var(--text-dim)">(' + formatPct(raw) + '/' + (p.coupon.frequency || 'période') + ')</span>';
+      }
+    }
+  }
 
   const subtitleEl = container.querySelector('.fiche-subtitle');
   if (subtitleEl) {
