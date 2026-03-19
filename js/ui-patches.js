@@ -130,9 +130,7 @@ async function handleEditMetadata() {
   showToast('Informations mises à jour', 'success'); app.openProduct(p);
 }
 
-// ═══════════════════════════════════════════════════════════════
-// FIX renderProductCard — show ENTITY badge on cards
-// ═══════════════════════════════════════════════════════════════
+// ═══ FIX renderProductCard — entity badge ════════════════════
 const _origRenderProductCard = renderProductCard;
 renderProductCard = function(product, context) {
   if (!product.bankId || product.bankId === 'undefined' || product.bankId === 'null') product.bankId = '';
@@ -147,25 +145,26 @@ renderProductCard = function(product, context) {
   return html;
 };
 
-// ═══════════════════════════════════════════════════════════════
-// FIX renderDashboard — add annual yield stat card
-// ═══════════════════════════════════════════════════════════════
+// ═══ FIX renderDashboard — smart annual yield ════════════════
 const _origRenderDashboard = renderDashboard;
 renderDashboard = function(container, state) {
   _origRenderDashboard(container, state);
 
-  // Calculate annual yield
+  // Use smart annualization from analytics.js (trimestriel ×4, semestriel ×2, etc.)
   const portfolio = state.portfolio || [];
   let annualYield = 0;
   portfolio.forEach(p => {
-    const amount = parseFloat(p.investedAmount) || 0;
-    const coupon = parseFloat(p.coupon?.rate) || 0;
-    annualYield += Math.round(amount * coupon / 100);
+    // Use calcProductAnnualYield from analytics.js if available
+    if (typeof calcProductAnnualYield === 'function') {
+      annualYield += calcProductAnnualYield(p);
+    } else {
+      // Fallback: simple calculation
+      annualYield += Math.round((parseFloat(p.investedAmount)||0) * (parseFloat(p.coupon?.rate)||0) / 100);
+    }
   });
   const totalInvested = portfolio.reduce((s, p) => s + (parseFloat(p.investedAmount) || 0), 0);
   const avgYieldPct = totalInvested > 0 ? (annualYield / totalInvested * 100).toFixed(2).replace('.', ',') : '0';
 
-  // Inject into stats row
   const statsRow = container.querySelector('.stats-row');
   if (statsRow) {
     const yieldCard = document.createElement('div');
@@ -175,9 +174,7 @@ renderDashboard = function(container, state) {
   }
 };
 
-// ═══════════════════════════════════════════════════════════════
-// FIX renderProductSheet — entity tag + subscription info
-// ═══════════════════════════════════════════════════════════════
+// ═══ FIX renderProductSheet — entity + subscription ══════════
 const _origRenderProductSheet = renderProductSheet;
 renderProductSheet = function(container, state) {
   const p = state.currentProduct;
