@@ -11,7 +11,7 @@ const CONFIG = {
   PDFJS_CDN: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174',
 };
 
-// Mes entreprises (pour associer les produits)
+// Mes entreprises (séparé des banques)
 const MY_ENTITIES = [
   { id: 'bycam', name: 'ByCam', color: '#06D6A0', icon: '🏢' },
   { id: 'cameleons', name: 'Caméleons', color: '#8338EC', icon: '🦎' },
@@ -35,22 +35,8 @@ const BANKS_LIST = [
   { id: 'vontobel', name: 'Vontobel', color: '#4361EE' },
 ];
 
-// BANKS = tout combiné (entreprises + banques) pour compatibilité avec le code existant
-const BANKS = [
-  ...MY_ENTITIES.map(e => ({ ...e, isEntity: true })),
-  ...BANKS_LIST,
-];
-
-// Helper pour générer les <option> avec optgroup
-function bankOptionsHTML(selectedId) {
-  let html = '<option value="">Sélectionner...</option>';
-  html += '<optgroup label="🏢 Mes entreprises">';
-  MY_ENTITIES.forEach(e => { html += `<option value="${e.id}" ${e.id === selectedId ? 'selected' : ''}>${e.icon || '🏢'} ${e.name}</option>`; });
-  html += '</optgroup><optgroup label="🏦 Banques">';
-  BANKS_LIST.forEach(b => { html += `<option value="${b.id}" ${b.id === selectedId ? 'selected' : ''}>${b.name}</option>`; });
-  html += '</optgroup><option value="autre">Autre</option>';
-  return html;
-}
+// BANKS = juste les banques (pour compatibilité avec le code existant)
+const BANKS = BANKS_LIST;
 
 // Types de produits structurés
 const PRODUCT_TYPES = [
