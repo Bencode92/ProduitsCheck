@@ -566,6 +566,9 @@
     "subscriptionDate": "2025-12-05",
     "investedAmount": 30000,
     "addedDate": "2026-03-19",
-    "status": "active"
+    "status": "active",
+    "entity": "cameleons",
+    "entityName": "Caméleons",
+    "integrationNotes": ""
   }
 ]
