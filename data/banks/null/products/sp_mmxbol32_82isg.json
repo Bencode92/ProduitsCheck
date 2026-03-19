@@ -106,5 +106,17 @@
   "sourceFile": "Swiss Life (LUX) Bond 12M R EUR Acc.pdf",
   "investedAmount": 109500,
   "addedDate": "2026-03-19",
-  "status": "active"
+  "status": "active",
+  "conversation": [
+    {
+      "role": "user",
+      "content": "POURQUOI TU N'A PAS LES TAUX DE RENDMEENT E",
+      "timestamp": 1773916025837
+    },
+    {
+      "role": "assistant",
+      "content": "Je comprends votre frustration. Effectivement, je n'ai pas les données de rendement pour ce fonds Bond 12M Swiss Life, et c'est problématique pour une analyse sérieuse.\n\n**Ce qui manque dans mes données :**\n- Rendement historique (1 an, 3 ans, 5 ans)\n- Performance depuis lancement\n- Volatilité historique\n- Tracking error vs benchmark\n- Ratio de Sharpe\n- Drawdown maximum\n\n**Pourquoi c'est critique :**\nSans ces métriques, impossible d'évaluer si ce fonds délivre effectivement son objectif de \"rendement adéquat sur 12 mois glissants\". Un fonds obligataire court terme EUR devrait typiquement viser 2-4% annuel actuellement.\n\n**Ce que je peux vous dire :**\n- Fonds OPCVM liquide (rachats quotidiens)\n- Exposition crédit investment grade EUR\n- Pas de garantie de capital\n- Frais de gestion non communiqués (autre point noir)\n\n**Ma recommandation :**\nAvant tout investissement ou ajustement, récupérez le DICI/KID avec les performances nettes de frais sur différentes périodes. Sans ça, vous investissez à l'aveugle.\n\nVoulez-vous que je vous aide à identifier les bonnes questions à poser à votre interlocutaire pour obtenir ces données manquantes ?",
+      "timestamp": 1773916036281
+    }
+  ]
 }
