@@ -740,6 +740,18 @@
     "subscriptionDate": "2025-12-05",
     "integrationNotes": "",
     "addedDate": "2026-03-19",
-    "status": "active"
+    "status": "active",
+    "tracking": {
+      "history": [
+        {
+          "date": "2026-03-19",
+          "level": 96.26,
+          "year": 1
+        }
+      ],
+      "level": 96.26,
+      "date": "2026-03-19",
+      "note": ""
+    }
   }
 ]
