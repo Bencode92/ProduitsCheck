@@ -1,8 +1,8 @@
-// ═══ PATCHES V6 — Edit metadata from sheet + all add flows ═══
+// ═══ PATCHES V7 — Fixed modal timing bug ═══
 
 let _pendingProduct = null;
 
-// ─── Override processUploadedFile ────────────────────────────
+// ─── Override processUploadedFile — FIXED: delay before showing new modal ──
 const _origProcessUploadedFile = processUploadedFile;
 processUploadedFile = async function(file, context, bankId) {
   const progress = document.getElementById('upload-progress');
@@ -12,11 +12,17 @@ processUploadedFile = async function(file, context, bankId) {
     if (status) status.textContent = 'Extraction du texte PDF...';
     const product = await app.handlePDFUpload(file, bankId);
     if (status) status.textContent = 'Analyse terminée !';
-    closeModal();
+
     if (context === 'portfolio') {
       _pendingProduct = product;
-      showDirectAddModal(product, bankId);
+      // FIX: Don't use closeModal + showModal — replace content directly
+      const modal = document.getElementById('modal');
+      modal.classList.remove('visible');
+      modal.innerHTML = '';
+      // Wait for transition then show new modal
+      setTimeout(() => showDirectAddModal(product, bankId), 350);
     } else {
+      closeModal();
       await app.addProposal(bankId, product);
       app.render();
     }
@@ -26,7 +32,7 @@ processUploadedFile = async function(file, context, bankId) {
   }
 };
 
-// ─── Override handleManualSave ───────────────────────────────
+// ─── Override handleManualSave — same fix ────────────────────
 const _origHandleManualSave = handleManualSave;
 handleManualSave = function(context, bankId) {
   const product = {
@@ -40,9 +46,16 @@ handleManualSave = function(context, bankId) {
     earlyRedemption: { possible: document.getElementById('f-autocall')?.value === 'true', type: document.getElementById('f-autocall')?.value === 'true' ? 'autocall' : 'none' },
     notes: document.getElementById('f-notes')?.value || '',
   };
-  closeModal();
-  if (context === 'portfolio') { _pendingProduct = product; showDirectAddModal(product, bankId); }
-  else { app.addProposal(bankId, product); }
+  if (context === 'portfolio') {
+    _pendingProduct = product;
+    const modal = document.getElementById('modal');
+    modal.classList.remove('visible');
+    modal.innerHTML = '';
+    setTimeout(() => showDirectAddModal(product, bankId), 350);
+  } else {
+    closeModal();
+    app.addProposal(bankId, product);
+  }
 };
 
 // ─── Modal for direct add to portfolio ──────────────────────
@@ -132,11 +145,7 @@ handleIntegrate = async function(productId, bankId) {
   app.goToDashboard();
 };
 
-// ═══════════════════════════════════════════════════════════════
-// EDIT METADATA MODAL — Accessible from the product sheet
-// Change bank, date, amount, notes at any time
-// ═══════════════════════════════════════════════════════════════
-
+// ═══ EDIT METADATA MODAL ═══
 function showEditMetadataModal() {
   const p = app.state.currentProduct;
   if (!p) return;
@@ -163,86 +172,60 @@ function showEditMetadataModal() {
 }
 
 async function handleEditMetadata() {
-  const p = app.state.currentProduct;
-  if (!p) return;
-
+  const p = app.state.currentProduct; if (!p) return;
   const selectedBank = document.getElementById('f-edit-bank')?.value;
   const amount = document.getElementById('f-edit-amount')?.value;
   const realDate = document.getElementById('f-edit-date')?.value;
   const notes = document.getElementById('f-edit-notes')?.value;
-
-  // Update bank
-  if (selectedBank && selectedBank !== 'autre') {
-    p.bankId = selectedBank;
-    p.bankName = BANKS.find(b => b.id === selectedBank)?.name || selectedBank;
-  } else if (!selectedBank) {
-    p.bankId = '';
-    p.bankName = '';
-  }
-
-  // Update metadata
+  if (selectedBank && selectedBank !== 'autre') { p.bankId = selectedBank; p.bankName = BANKS.find(b => b.id === selectedBank)?.name || selectedBank; }
+  else if (!selectedBank) { p.bankId = ''; p.bankName = ''; }
   if (amount) p.investedAmount = parseFloat(amount);
   if (realDate) p.subscriptionDate = realDate;
   p.integrationNotes = notes || '';
-
   closeModal();
-
-  // Save to GitHub — update both portfolio and product file
   const inPortfolio = app.state.portfolio.find(x => x.id === p.id);
   if (inPortfolio) {
     Object.assign(inPortfolio, { bankId: p.bankId, bankName: p.bankName, investedAmount: p.investedAmount, subscriptionDate: p.subscriptionDate, integrationNotes: p.integrationNotes });
-    await github.writeFile(`${CONFIG.DATA_PATH}/portfolio.json`, app.state.portfolio, `[StructBoard] Update metadata: ${p.name || p.id}`);
+    await github.writeFile(`${CONFIG.DATA_PATH}/portfolio.json`, app.state.portfolio, `[StructBoard] Update: ${p.name || p.id}`);
   }
-
-  // Save product file if it has a bankId
   const resolvedBankId = p.bankId || _resolveBankId(p.id, p.bankId);
-  if (resolvedBankId) {
-    await app._saveProductFile(resolvedBankId, p);
-  }
-
+  if (resolvedBankId) await app._saveProductFile(resolvedBankId, p);
   showToast('Informations mises à jour', 'success');
-  // Re-render the sheet
   app.openProduct(p);
 }
 
-// ─── Fix renderProductCard — no UNDEFINED ────────────────────
+// ─── Fix renderProductCard ───────────────────────────────────
 const _origRenderProductCard = renderProductCard;
 renderProductCard = function(product, context) {
   if (!product.bankId || product.bankId === 'undefined' || product.bankId === 'null') product.bankId = '';
   return _origRenderProductCard(product, context);
 };
 
-// ─── Fix renderProductSheet — add edit button + fix tags ─────
+// ─── Fix renderProductSheet ──────────────────────────────────
 const _origRenderProductSheet = renderProductSheet;
 renderProductSheet = function(container, state) {
   const p = state.currentProduct;
   if (p && (!p.bankId || p.bankId === 'undefined' || p.bankId === 'null')) p.bankId = '';
   _origRenderProductSheet(container, state);
 
-  // Fix subtitle tags
   const subtitleEl = container.querySelector('.fiche-subtitle');
   if (subtitleEl) {
-    // Make bank tag clickable to edit
     subtitleEl.querySelectorAll('.fiche-tag.bank').forEach(tag => {
       const txt = tag.textContent.trim();
       if (txt === '\u2014' || txt.toUpperCase() === 'UNDEFINED' || txt === '') {
-        tag.textContent = '✏️ Assigner une banque';
+        tag.textContent = '\u270f\ufe0f Assigner une banque';
         tag.style.color = 'var(--accent)';
         tag.style.borderColor = 'var(--accent)';
         tag.style.cursor = 'pointer';
       } else {
-        // Even existing bank tag is clickable to change
         tag.style.cursor = 'pointer';
         tag.title = 'Cliquer pour modifier';
       }
       tag.onclick = (e) => { e.stopPropagation(); showEditMetadataModal(); };
     });
-
-    // Show subscription date
     if (p.subscriptionDate) {
       const d = document.createElement('span');
       d.style.cssText = 'color:var(--text-muted);font-size:11px;cursor:pointer';
-      d.title = 'Cliquer pour modifier';
       d.textContent = `\ud83d\udcc5 Souscrit le ${new Date(p.subscriptionDate).toLocaleDateString('fr-FR')}`;
       d.onclick = (e) => { e.stopPropagation(); showEditMetadataModal(); };
       subtitleEl.appendChild(d);
@@ -250,35 +233,29 @@ renderProductSheet = function(container, state) {
     if (p.integrationNotes) {
       const n = document.createElement('span');
       n.style.cssText = 'color:var(--text-dim);font-size:11px;cursor:pointer';
-      n.title = 'Cliquer pour modifier';
       n.textContent = `\ud83d\udcac ${p.integrationNotes}`;
       n.onclick = (e) => { e.stopPropagation(); showEditMetadataModal(); };
       subtitleEl.appendChild(n);
     }
-
-    // Add edit button if no date/notes visible
     if (!p.subscriptionDate && !p.integrationNotes) {
       const editSpan = document.createElement('span');
       editSpan.style.cssText = 'color:var(--accent);font-size:11px;cursor:pointer;text-decoration:underline';
-      editSpan.textContent = '✏️ Ajouter banque / date / notes';
+      editSpan.textContent = '\u270f\ufe0f Ajouter banque / date / notes';
       editSpan.onclick = (e) => { e.stopPropagation(); showEditMetadataModal(); };
       subtitleEl.appendChild(editSpan);
     }
   }
 
-  // Add edit button in sidebar
   const sidebar = container.querySelector('.sheet-sidebar .action-buttons');
   if (sidebar) {
     const editBtn = document.createElement('button');
     editBtn.className = 'btn lg';
     editBtn.style.cssText = 'width:100%';
-    editBtn.innerHTML = '✏️ Modifier banque / date / notes';
+    editBtn.innerHTML = '\u270f\ufe0f Modifier banque / date / notes';
     editBtn.onclick = () => showEditMetadataModal();
-    // Insert at the top of actions
     sidebar.insertBefore(editBtn, sidebar.firstChild);
   }
 
-  // Fix integrated notice
   if (p.status === 'subscribed') {
     const notice = container.querySelector('.integrated-notice');
     if (notice) {
