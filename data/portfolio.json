@@ -593,7 +593,19 @@
     "status": "active",
     "entity": "cameleons",
     "entityName": "Caméleons",
-    "integrationNotes": ""
+    "integrationNotes": "",
+    "tracking": {
+      "history": [
+        {
+          "date": "2026-03-18",
+          "level": 93.27,
+          "year": 1
+        }
+      ],
+      "level": 93.27,
+      "date": "2026-03-18",
+      "note": ""
+    }
   },
   {
     "id": "sp_mmxjeznm_ve4t7",
