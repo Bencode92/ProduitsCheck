@@ -2,7 +2,7 @@
   {
     "id": "sp_mmxgwg72_2ec84",
     "name": "SL - ATHENA PRIVILEGE ENI DECEMBRE 2025",
-    "bankId": "",
+    "bankId": "swiss-life",
     "type": "autocall",
     "underlyingType": "autre",
     "underlyings": [
@@ -136,7 +136,10 @@
     "sourceFile": "Brochure ATHENA PRIVILEGE ENI DECEMBRE 2025 (2).pdf",
     "investedAmount": 30000,
     "addedDate": "2026-03-19",
-    "status": "active"
+    "status": "active",
+    "bankName": "Swiss Life",
+    "subscriptionDate": "2025-12-05",
+    "integrationNotes": ""
   },
   {
     "id": "sp_mmxh3jcm_zxdaa",
