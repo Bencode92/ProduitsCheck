@@ -1,0 +1,133 @@
+{
+  "id": "sp_mmxib83f_9qosf",
+  "name": "SL - PHOENIX MEMOIRE TRIMESTRIEL BNP JANVIER 2026",
+  "bankId": "swiss-life",
+  "type": "autocall",
+  "underlyingType": "autre",
+  "underlyings": [
+    "Action BNP Paribas (FR0000131104)"
+  ],
+  "currency": "EUR",
+  "maturity": "8 ans",
+  "maturityDate": "2034-01-09",
+  "strikeDate": "2026-01-09",
+  "coupon": {
+    "rate": 1.875,
+    "type": "memoire",
+    "frequency": "trimestriel",
+    "trigger": 77,
+    "triggerDetail": "Cours BNP Paribas >= 77% du niveau initial",
+    "memory": true,
+    "maxReturn": "7.68% brut annuel (6.88% net)",
+    "totalReturn": "1.875% par trimestre écoulé"
+  },
+  "capitalProtection": {
+    "protected": false,
+    "level": 60,
+    "type": "conditionnelle-barriere",
+    "barrier": 60,
+    "barrierType": "europeenne",
+    "barrierObservation": "Capital intégralement remboursé si baisse <= 40% à l'échéance",
+    "inLifeRisk": "Risque de perte partielle ou totale en cours de vie"
+  },
+  "earlyRedemption": {
+    "possible": true,
+    "type": "autocall",
+    "trigger": 100,
+    "triggerDetail": "Cours BNP Paribas >= 100% du niveau initial aux dates trimestrielles",
+    "frequency": "trimestriel",
+    "startYear": 1,
+    "stepDown": false
+  },
+  "scenarios": {
+    "favorable": "Remboursement automatique anticipé avec gain de 1.875% par trimestre écoulé si BNP >= 100%",
+    "median": "Versement coupons trimestriels 1.875% si BNP >= 77%, capital protégé si baisse <= 40%",
+    "defavorable": "Perte en capital proportionnelle à la baisse de BNP si chute > 40%"
+  },
+  "risks": [
+    "Risque de crédit de l'émetteur CIC",
+    "Risque de perte partielle ou totale en capital",
+    "Risque de défaut de paiement, faillite ou mise en résolution de l'émetteur",
+    "Pas de protection contre l'inflation",
+    "Risque de liquidité en cas de sortie anticipée"
+  ],
+  "rawText": "--- PAGE 1 ---\nCOMMUNICATION   À   CARACTÈRE   PROMOTIONNEL  Code   ISIN   :   XS 3238166899  Émetteur   :   Crédit   Industriel   et   Commercial ( 1 )   (CIC)  L’investisseur   supporte   le   risque   de   crédit   de   l’Émetteur .   Il   est  exposé   au   risque   de   défaut   de   paiement,   de   faillite   et   de   mise  en   résolution   de   l’Émetteur .  Éligibilité   :   Contrats   d’assurance - vie   multisupport   ou   de  capitalisation   et   compte - titres   ordinaire .  Dans   le   cas   d’un   contrat   d’assurance   vie   ou   de  capitalisation,   l’assureur   s’engage   exclusivement   sur   le  nombre   de   parts   net   de   frais   du   contrat   mais   non   sur   leur  valeur .   La   valeur   de   ces   parts,   qui   reflète   la   valeur   d’actifs  sous - jacents,   n’est   pas   garantie   mais   est   sujette   à   des  fluctuations   à   la   hausse   ou   à   la   baisse   dépendant   en  particulier   de   l’évolution   des   marchés   financiers .   Il   est  précisé   que   l’assureur   d’une   part   et   l’Émetteur   d’autre   part  sont   des   entités   juridiques   indépendantes .   Ce   document  n’a   pas   été   rédigé   par   l’assureur .  Durée   d’investissement   conseillée   :   8   ans   (en   l’absence   de  remboursement   automatique   anticipé)  L’investisseur   prend   un   risque   de   perte   en   capital   non  mesurable   a   priori   en   cas   de   sortie   en   cours   de   vie   alors   que   les  conditions   de   remboursement   automatique   anticipé   ne   sont   pas  réunies .   Les   risques   associés   à   l’investissement   dans   ce   support  sont   détaillés   dans   la   brochure .   Le   mécanisme   de   remboursement  automatique   anticipé   est   décrit   ci - après   en   pages   4 ,   5   et   6 .  Période   de   souscription   :   du   20   novembre   2025   au   09   janvier  2026   dans   la   limite   de   l’enveloppe   disponible   en   l’absence   de  clôture   anticipée   et   sans   préavis   de   la   part   de   l’Émetteur .  Il   vous   appartient   de   vous   rapprocher   de   votre   conseiller   afin  d’évaluer   l’opportunité   de   cet   investissement   en   fonction   de   votre  situation   personnelle   et   financière,   vos   objectifs   et   votre   horizon   de  placement,   votre   sensibilité   au   risque   et   vos   connaissances   et  expérience   en   matière   de   produits   financiers .  SL   –   PHOENIX MEMOIRE TRIMESTRIEL BNP  JANVIER 2026  Titres   de   créance   de   droit   anglais   présentant   un   risque   de   perte   en   capital   partielle   ou  totale   en   cours   de   vie   et   à   l’échéance   du   produit .  Produit   de   placement   risqué   alternatif   à   un   investissement   dynamique   de   type   «   Actions   » .  L’investisseur   n’est   pas   protégé   contre   l’effet   de   l’inflation   dans   le   temps .   Le   rendement  corrigé   de   l’inflation   peut   par   conséquent   être   négatif .  Cette communication ne comporte pas de valeur contractuelle.  ( 1 )   Notations   de   crédit   :   Notations   de   crédit :   Standard   &   Poor’s   A+   ( 19 / 09 / 2025 ),   Moody’s   A 1   ( 02 / 10 / 2025 ),   Fitch   Ratings   AA -   ( 29 / 10 / 2025 ) .   Ces   notations   peuvent  être   révisées   à   tout   moment   et   ne   sont   pas   une   garantie   de   solvabilité   de   l’Émetteur .   Elles   ne   sauraient   constituer   un   argument   de   souscription   au   produit .   Les  agences   de   notation   peuvent   les   modifier   à   tout   moment .\n--- PAGE 2 ---\n➢   Une   exposition   à   l’Action   BNP   Paribas   dividendes   non   réinvestis  (Code   ISIN   :   FR 0000131104   –   Ticker   Bloomberg   :   BNP   FP   Equity )  ➢   Un   remboursement   automatique   anticipé   possible   chaque   trimestre ( 2 ) ,  à   partir   du   quatrième   trimestre,   offrant   un   gain   potentiel   de   1 , 875 %   par  trimestre   écoulé ( 1 )   depuis   la   Date   de   Constatation   Initiale ( 2 ) ,   dès   lors  qu’à   l’une   des   Dates   de   Constatation   Trimestrielle   prévue ( 2 ) ,   le   cours  de   l’Action   BNP   Paribas   clôture   à   un   niveau   supérieur   ou   égal   à   100 %  par   rapport   à   son   Niveau   Initial   Retenu   (soit   un   taux   de   rendement  actuariel   annuel   brut   maximum   de   7 , 68 % ( 1 ) )   (net   maximum   de  6 , 88 % ( 1 )( 3 ) ) .  ➢   Le   versement   de   coupons   trimestriels   fixes   au   taux   brut   de  1 , 875 % ( 1 ) ,   dès   lors   qu’à   l’une   des   Dates   de   Constatation  Trimestrielle,   l’Action   sous - jacente   clôture   à   un   niveau  supérieur   ou   égal   à   77 %   de   son   Niveau   Initial   Retenu .   Les  coupons   non   versés   sont   mémorisés ( 1 )   et   pourront   être   versés   les  trimestres   suivants .  ➢   Un   remboursement   de   l’intégralité   du   capital ( 2 ) ,   si   le   cours   de  clôture   de   l’Action   est   en   ",
+  "aiParsed": {
+    "name": "SL - PHOENIX MEMOIRE TRIMESTRIEL BNP JANVIER 2026",
+    "type": "phoenix",
+    "emitter": "Crédit Industriel et Commercial (CIC)",
+    "guarantor": "Crédit Industriel et Commercial (CIC)",
+    "distributor": "Non précisé",
+    "isin": "XS3238166899",
+    "underlyings": [
+      "Action BNP Paribas (FR0000131104)"
+    ],
+    "underlyingType": "single-stock",
+    "currency": "EUR",
+    "maturity": "8 ans",
+    "maturityDate": "2034-01-09",
+    "strikeDate": "2026-01-09",
+    "nominal": "1000 EUR",
+    "coupon": {
+      "rate": 1.875,
+      "type": "memoire",
+      "frequency": "trimestriel",
+      "trigger": 77,
+      "triggerDetail": "Cours BNP Paribas >= 77% du niveau initial",
+      "memory": true,
+      "maxReturn": "7.68% brut annuel (6.88% net)",
+      "totalReturn": "1.875% par trimestre écoulé"
+    },
+    "capitalProtection": {
+      "protected": false,
+      "level": 60,
+      "type": "conditionnelle-barriere",
+      "barrier": 60,
+      "barrierType": "europeenne",
+      "barrierObservation": "Capital intégralement remboursé si baisse <= 40% à l'échéance",
+      "inLifeRisk": "Risque de perte partielle ou totale en cours de vie"
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "autocall",
+      "trigger": 100,
+      "triggerDetail": "Cours BNP Paribas >= 100% du niveau initial aux dates trimestrielles",
+      "frequency": "trimestriel",
+      "startYear": 1,
+      "stepDown": false
+    },
+    "scenarios": {
+      "favorable": "Remboursement automatique anticipé avec gain de 1.875% par trimestre écoulé si BNP >= 100%",
+      "median": "Versement coupons trimestriels 1.875% si BNP >= 77%, capital protégé si baisse <= 40%",
+      "defavorable": "Perte en capital proportionnelle à la baisse de BNP si chute > 40%"
+    },
+    "advantages": [
+      "Exposition à l'action BNP Paribas",
+      "Remboursement automatique anticipé possible chaque trimestre à partir du 4ème trimestre",
+      "Coupons trimestriels mémorisés de 1.875%",
+      "Protection du capital jusqu'à -40% à l'échéance"
+    ],
+    "risks": [
+      "Risque de crédit de l'émetteur CIC",
+      "Risque de perte partielle ou totale en capital",
+      "Risque de défaut de paiement, faillite ou mise en résolution de l'émetteur",
+      "Pas de protection contre l'inflation",
+      "Risque de liquidité en cas de sortie anticipée"
+    ],
+    "keyDates": [
+      "Période de souscription: 20/11/2025 au 09/01/2026",
+      "Constatations trimestrielles à partir du 4ème trimestre",
+      "Échéance maximale: 8 ans"
+    ],
+    "ratings": "S&P: A+ (19/09/2025), Moody's: A1 (02/10/2025), Fitch: AA- (29/10/2025)",
+    "eligibility": "Contrats d'assurance-vie multisupport ou de capitalisation et compte-titres ordinaire",
+    "summary": "Produit structuré de 8 ans maximum sur l'action BNP Paribas offrant des coupons trimestriels mémorisés de 1.875% et un remboursement automatique anticipé possible chaque trimestre. Capital protégé jusqu'à -40% de baisse à l'échéance, mais risque de perte proportionnelle au-delà. Alternative risquée à un investissement actions avec durée conseillée de 8 ans."
+  },
+  "aiSummary": "## 1. DESCRIPTION\nProduit structuré Phoenix à mémoire émis par le Crédit Industriel et Commercial (CIC) avec une durée de 8 ans. Le sous-jacent est l'action BNP Paribas, avec observation trimestrielle des performances.\n\n## 2. RENDEMENT & COUPONS\nCoupon trimestriel de 1,875% à mémoire si BNP Paribas ≥ 77% du niveau initial. Rendement maximum de 7,68% brut annuel (6,88% net), soit 1,875% par trimestre écoulé cumulable.\n\n## 3. PROTECTION DU CAPITAL\nProtection conditionnelle à barrière européenne de 60% observée uniquement à l'échéance. Capital intégralement remboursé si la baisse de BNP Paribas ≤ 40% à l'échéance, mais risque de perte partielle ou totale en cours de vie.\n\n## 4. REMBOURSEMENT ANTICIPÉ\nRemboursement anticipé automatique (autocall) possible dès la 1ère année si BNP Paribas ≥ 100% du niveau initial. Observation trimestrielle sans mécanisme de step-down.\n\n## 5. SCÉNARIOS\n**Favorable:** Remboursement automatique anticipé avec gain de 1,875% par trimestre écoulé si BNP ≥ 100%\n**Médian:** Versement coupons trimestriels 1,875% si BNP ≥ 77%, capital protégé si baisse ≤ 40%\n**Défavorable:** Perte en capital proportionnelle à la baisse de BNP si chute > 40%\n\n## 6. POINTS D'ATTENTION\n- Risque de perte partielle ou totale en capital si BNP Paribas chute de plus de 40%\n- Risque de crédit de l'émetteur CIC malgré les bonnes notations (S&P: A+, Moody's: A1, Fitch: AA-)\n- Pas de protection contre l'inflation sur 8 ans\n- Risque de liquidité en cas de sortie anticipée\n- Exposition à un seul sous-jacent (concentration sur BNP Paribas)",
+  "sourceFile": "Brochure PHOENIX MEMOIRE TRIMESTRIEL BNP JANVIER 2026 (002).pdf",
+  "bankName": "Swiss Life",
+  "subscriptionDate": "2025-12-05",
+  "investedAmount": 30000,
+  "addedDate": "2026-03-19",
+  "status": "active"
+}
