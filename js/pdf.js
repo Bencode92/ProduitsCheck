@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — PDF Extraction & AI Parsing (V3 — Fixed truncation)
+// STRUCTBOARD — PDF Extraction & AI Parsing (V4 — max tokens)
 // ═══════════════════════════════════════════════════════════════
 
 class PDFExtractor {
@@ -38,16 +38,11 @@ class PDFExtractor {
 // ─── JSON Repair for truncated responses ────────────────────
 function repairJSON(str) {
   str = str.trim();
-  // Remove markdown code fences
   str = str.replace(/^```json?\s*/i, '').replace(/\s*```$/i, '').trim();
-  // Try parsing as-is first
   try { return JSON.parse(str); } catch(e) {}
-  // If truncated, try to close open structures
   let repaired = str;
-  // Close open strings
   const quoteCount = (repaired.match(/"/g) || []).length;
   if (quoteCount % 2 !== 0) repaired += '"';
-  // Close open arrays and objects
   const opens = { '{': 0, '[': 0 };
   let inString = false;
   for (let i = 0; i < repaired.length; i++) {
@@ -60,13 +55,10 @@ function repairJSON(str) {
       if (c === ']') opens['[']--;
     }
   }
-  // Remove trailing comma before closing
   repaired = repaired.replace(/,\s*$/, '');
-  // Close arrays then objects
   for (let i = 0; i < opens['[']; i++) repaired += ']';
   for (let i = 0; i < opens['{']; i++) repaired += '}';
   try { return JSON.parse(repaired); } catch(e) {}
-  // Last resort: extract partial JSON up to last valid closing brace
   for (let i = repaired.length - 1; i > 0; i--) {
     if (repaired[i] === '}') {
       try { return JSON.parse(repaired.substring(0, i + 1)); } catch(e) {}
@@ -75,12 +67,14 @@ function repairJSON(str) {
   throw new Error('JSON irréparable');
 }
 
+// Max tokens for Sonnet 4 output
+const MAX_TOKENS = 8192;
+
 class AIParser {
   constructor() { this.endpoint = CONFIG.AI_ENDPOINT; }
 
   async parseBrochure(rawText) {
     const textToSend = rawText.substring(0, 10000);
-
     const prompt = `Analyste expert en produits structurés FR. Extrais TOUTES les infos de cette brochure en JSON.
 
 TEXTE:
@@ -90,9 +84,8 @@ RÈGLES: "gain de X% par année" = coupon rate X. "remboursement automatique ant
 
 JSON UNIQUEMENT (pas de markdown):
 {"name":"Nom complet","type":"autocall/phoenix/capital-protege/autre","emitter":"Émetteur","guarantor":"Garant","distributor":"Distributeur","isin":"ISIN","underlyings":["sous-jacents"],"underlyingType":"single-stock/eurostoxx50/cac40/basket/autre","currency":"EUR","maturity":"durée","maturityDate":"YYYY-MM-DD","strikeDate":"YYYY-MM-DD","nominal":"1000 EUR","coupon":{"rate":5.7,"type":"conditionnel/fixe/memoire","frequency":"annuel","trigger":100,"triggerDetail":"description","memory":false,"maxReturn":"TRA max","totalReturn":"gain total max"},"capitalProtection":{"protected":true,"level":100,"type":"inconditionnelle-a-echeance/conditionnelle-barriere/aucune","barrier":null,"barrierType":"europeenne","barrierObservation":"description","inLifeRisk":"risque en cours de vie"},"earlyRedemption":{"possible":true,"type":"autocall","trigger":100,"triggerDetail":"description","frequency":"annuel","startYear":1,"stepDown":false},"scenarios":{"favorable":"détail avec %","median":"détail avec %","defavorable":"détail avec %"},"advantages":["avantages"],"risks":["risques"],"keyDates":["dates"],"ratings":"S&P/Moody/Fitch","eligibility":"éligibilité","summary":"résumé 3-4 phrases"}`;
-
     try {
-      const response = await this._callAI(prompt, 4096);
+      const response = await this._callAI(prompt, MAX_TOKENS);
       return repairJSON(response);
     } catch (e) {
       console.error('Erreur parsing IA:', e);
@@ -103,7 +96,7 @@ JSON UNIQUEMENT (pas de markdown):
   async generateSummary(productData) {
     const compact = { name: productData.name, type: productData.type, emitter: productData.emitter, underlyings: productData.underlyings, maturity: productData.maturity, coupon: productData.coupon, capitalProtection: productData.capitalProtection, earlyRedemption: productData.earlyRedemption, scenarios: productData.scenarios, risks: productData.risks, ratings: productData.ratings };
     const prompt = `Résumé structuré de ce produit structuré. Données:\n${JSON.stringify(compact)}\n\nFormat avec ## sections:\n## 1. DESCRIPTION\n[2 phrases: type, émetteur, sous-jacent, durée]\n## 2. RENDEMENT & COUPONS\n[Taux, fréquence, seuil, gain max — CHIFFRES]\n## 3. PROTECTION DU CAPITAL\n[Niveau, condition, barrière — en vie vs échéance]\n## 4. REMBOURSEMENT ANTICIPÉ\n[Autocall, seuil, fréquence, à partir de quand]\n## 5. SCÉNARIOS\n**Favorable:** [chiffres]\n**Médian:** [chiffres]\n**Défavorable:** [chiffres]\n## 6. POINTS D'ATTENTION\n[3-5 risques clés]\n\nDirect, précis, avec chiffres.`;
-    return await this._callAI(prompt, 2000);
+    return await this._callAI(prompt, MAX_TOKENS);
   }
 
   async chat(messages, productContext, portfolioContext) {
@@ -115,14 +108,14 @@ JSON UNIQUEMENT (pas de markdown):
   async summarizeConversation(messages, decision) {
     const chatText = messages.map(m => `${m.role === 'user' ? 'MOI' : 'CLAUDE'}: ${m.content}`).join('\n');
     const prompt = `Résume cette discussion en 3-5 points clés.\n\n${chatText}\n\nDécision: ${decision || 'Non décidée'}\n\nFormat: points discutés, pour/contre, conclusion.`;
-    return await this._callAI(prompt, 1500);
+    return await this._callAI(prompt, MAX_TOKENS);
   }
 
   async _callAI(prompt, maxTokens) {
     const res = await fetch(this.endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: maxTokens || 2000, messages: [{ role: 'user', content: prompt }] }),
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: maxTokens || MAX_TOKENS, messages: [{ role: 'user', content: prompt }] }),
     });
     if (!res.ok) { const err = await res.text(); throw new Error(`AI API ${res.status}: ${err}`); }
     const data = await res.json();
@@ -133,7 +126,7 @@ JSON UNIQUEMENT (pas de markdown):
     const res = await fetch(this.endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1500, system: systemPrompt, messages }),
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: MAX_TOKENS, system: systemPrompt, messages }),
     });
     if (!res.ok) { const err = await res.text(); throw new Error(`AI API ${res.status}: ${err}`); }
     const data = await res.json();
