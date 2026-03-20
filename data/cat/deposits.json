@@ -232,5 +232,121 @@
     "estimatedInterest": 16200,
     "entity": "cameleons",
     "entityName": "Caméleons"
+  },
+  {
+    "productType": "cat",
+    "bankId": "banque-populaire",
+    "bankName": "Banque Populaire",
+    "productName": "CATVAIR",
+    "amount": 50000,
+    "rate": 3.5,
+    "rateType": "progressif",
+    "rateSchedule": [
+      {
+        "from": "2023-01-26",
+        "to": "2023-07-25",
+        "rate": 1.5,
+        "earlyRate": null,
+        "label": "Mois 1-6",
+        "fromMonth": 1,
+        "toMonth": 6
+      },
+      {
+        "from": "2023-07-25",
+        "to": "2024-01-26",
+        "rate": 2.5,
+        "earlyRate": null,
+        "label": "Mois 7-12",
+        "fromMonth": 7,
+        "toMonth": 12
+      },
+      {
+        "from": "2024-01-26",
+        "to": "2024-07-25",
+        "rate": 2.8,
+        "earlyRate": null,
+        "label": "Mois 13-18",
+        "fromMonth": 13,
+        "toMonth": 18
+      },
+      {
+        "from": "2024-07-25",
+        "to": "2025-01-26",
+        "rate": 3.1,
+        "earlyRate": null,
+        "label": "Mois 19-24",
+        "fromMonth": 19,
+        "toMonth": 24
+      },
+      {
+        "from": "2025-01-26",
+        "to": "2025-07-25",
+        "rate": 3.5,
+        "earlyRate": null,
+        "label": "Mois 25-30",
+        "fromMonth": 25,
+        "toMonth": 30
+      },
+      {
+        "from": "2025-07-25",
+        "to": "2026-01-26",
+        "rate": 4.2,
+        "earlyRate": null,
+        "label": "Mois 31-36",
+        "fromMonth": 31,
+        "toMonth": 36
+      },
+      {
+        "from": "2026-01-26",
+        "to": "2026-07-25",
+        "rate": 4.4,
+        "earlyRate": null,
+        "label": "Mois 37-42",
+        "fromMonth": 37,
+        "toMonth": 42
+      },
+      {
+        "from": "2026-07-25",
+        "to": "2027-01-26",
+        "rate": 4.8,
+        "earlyRate": null,
+        "label": "Mois 43-48",
+        "fromMonth": 43,
+        "toMonth": 48
+      },
+      {
+        "from": "2027-01-26",
+        "to": "2027-07-25",
+        "rate": 5.2,
+        "earlyRate": null,
+        "label": "Mois 49-54",
+        "fromMonth": 49,
+        "toMonth": 54
+      },
+      {
+        "from": "2027-07-25",
+        "to": "2028-01-26",
+        "rate": 5.54,
+        "earlyRate": null,
+        "label": "Mois 55-60",
+        "fromMonth": 55,
+        "toMonth": 60
+      }
+    ],
+    "durationMonths": 60,
+    "startDate": "2023-01-26",
+    "interestPayment": "in fine",
+    "exitCondition": "notice",
+    "exitPenalty": "Aucun intérêt si retrait dans le mois de souscription",
+    "autoRenew": false,
+    "status": "active",
+    "entity": "cameleons",
+    "entityName": "Caméleons",
+    "sourceFile": "CATVAIR GRANDS COMPTES 5 ans - Notice d'Information Client taux en vigueur à la date du 22.12.2022.pdf",
+    "aiSummary": "CATVAIR 5 ans TRAAB 3,50%, taux progressif par paliers, intérêts versés in fine, capital garanti, transition énergétique.",
+    "id": "pl_mmyuzgov_6l2",
+    "createdDate": "2026-03-20",
+    "maturityDate": "2028-01-26",
+    "estimatedInterest": 9398.22
   }
 ]
