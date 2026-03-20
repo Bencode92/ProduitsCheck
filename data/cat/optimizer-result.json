@@ -1,15 +1,15 @@
 {
-  "lastUpdated": "2026-03-20T13:57:57.693Z",
-  "summary": "**AVANT: 1 460 000€ = 43 600,5€/an → APRÈS: 1 460 000€ = 44 000,5€/an (+400€/an)**\n\n| Produit | Action | Détail | Impact/an |\n|---------|--------|--------|-----------|\n| CATIP ENT 3ANS (CIC) | ARBITRER | 200k€ à 2.7% → CAT Progressif 60m à 2.9% | +400€ |\n| Autres contrats | GARDER | Tous leaders ou compétitifs | 0€ |\n\n**RECOMMANDATIONS:**\n\n• **ARBITRAGE PRIORITAIRE:** Sortir du CATIP CIC (200k€ à 2.7%) pour placer sur CAT Progressif 60 mois à 2.9% = **+400€/an**\n\n• **CONTRAINTE:** Préavis de 32 jours à respecter pour la sortie du CATIP CIC (28 mois restants)\n\n• **PORTEFEUILLE OPTIMISÉ:** 9/10 contrats déjà leaders du marché, seul le CIC sous-performe de 0.2 point\n\n**ACTION IMMÉDIATE:** Donner préavis sur CATIP CIC dès maintenant pour optimiser les 28 mois restants.",
+  "lastUpdated": "2026-03-20T14:27:30.626Z",
+  "summary": "**AVANT: 43 600€/an → APRÈS: 44 050€/an (+450€)**\n\n🔄 **CATIP ENT 3ANS** 200 000€ à 2,7% → Sortir et placer sur **Dépôt à terme 24 mois** à 2,93% = **+460€/an**\n⚠️ Contrainte: Taux minoré selon barème, mais gain substantiel\n\n✅ **6 contrats** performants à conserver (CAT CROISSANCE 3,21%, CATVAIR 3,5%, OPTIPLUS 5 ans 3,10%)\n\n✅ **4 contrats OPTIPLUS CONQUÊTE** arrivent à échéance dans 6 mois - prévoir renouvellement sur meilleurs taux disponibles\n\n• **Action prioritaire**: Sortir du CATIP CIC (sous-performant à 2,7% vs marché 2,93%)\n• **Surveillance**: Les 4 OPTIPLUS CONQUÊTE libéreront 600 000€ dans 6 mois - opportunité de réallocation majeure",
   "totalInvested": 1460000,
   "totalInterestPerYear": 43600.5,
   "weightedRate": 2.9863356164383563,
   "optimizedInterest": 43600.5,
   "optimizedRate": 2.9863356164383563,
-  "totalPotentialGain": 400,
+  "totalPotentialGain": 640,
   "arbitrageCount": 0,
   "depositCount": 10,
-  "rateCount": 9,
+  "rateCount": 32,
   "deposits": [
     {
       "name": "CAT CROISSANCE +3A PREAVIS",
@@ -52,14 +52,14 @@
       "remainingMonths": 28,
       "maturityDate": "2028-08-05",
       "bestAlt": {
-        "name": "CAT Progressif 60 mois",
-        "rate": 2.9,
-        "duration": 60,
-        "bankName": "CIC"
+        "name": "Dépôt à terme 24 mois",
+        "rate": 2.93,
+        "duration": 24,
+        "bankName": "Société Générale"
       },
-      "switchGainPerYear": 400,
+      "switchGainPerYear": 460,
       "recommendation": "SURVEILLER",
-      "reason": "+0.20% dispo"
+      "reason": "+0.23% dispo"
     },
     {
       "name": "CATVAIR GRANDS COMPTES 5 ANS",
@@ -86,10 +86,15 @@
       "interestPerYear": 4350,
       "remainingMonths": 6,
       "maturityDate": "2026-09-18",
-      "bestAlt": null,
-      "switchGainPerYear": 0,
-      "recommendation": "GARDER",
-      "reason": "Leader marché"
+      "bestAlt": {
+        "name": "Dépôt à terme 24 mois",
+        "rate": 2.93,
+        "duration": 24,
+        "bankName": "Société Générale"
+      },
+      "switchGainPerYear": 45,
+      "recommendation": "SURVEILLER",
+      "reason": "+0.03% dispo"
     },
     {
       "name": "OPTIPLUS CONQUÊTE",
@@ -101,10 +106,15 @@
       "interestPerYear": 4350,
       "remainingMonths": 6,
       "maturityDate": "2026-09-18",
-      "bestAlt": null,
-      "switchGainPerYear": 0,
-      "recommendation": "GARDER",
-      "reason": "Leader marché"
+      "bestAlt": {
+        "name": "Dépôt à terme 24 mois",
+        "rate": 2.93,
+        "duration": 24,
+        "bankName": "Société Générale"
+      },
+      "switchGainPerYear": 45,
+      "recommendation": "SURVEILLER",
+      "reason": "+0.03% dispo"
     },
     {
       "name": "OPTIPLUS CONQUÊTE",
@@ -116,10 +126,15 @@
       "interestPerYear": 4350,
       "remainingMonths": 6,
       "maturityDate": "2026-09-18",
-      "bestAlt": null,
-      "switchGainPerYear": 0,
-      "recommendation": "GARDER",
-      "reason": "Leader marché"
+      "bestAlt": {
+        "name": "Dépôt à terme 24 mois",
+        "rate": 2.93,
+        "duration": 24,
+        "bankName": "Société Générale"
+      },
+      "switchGainPerYear": 45,
+      "recommendation": "SURVEILLER",
+      "reason": "+0.03% dispo"
     },
     {
       "name": "OPTIPLUS CONQUÊTE",
@@ -131,10 +146,15 @@
       "interestPerYear": 4350,
       "remainingMonths": 6,
       "maturityDate": "2026-09-18",
-      "bestAlt": null,
-      "switchGainPerYear": 0,
-      "recommendation": "GARDER",
-      "reason": "Leader marché"
+      "bestAlt": {
+        "name": "Dépôt à terme 24 mois",
+        "rate": 2.93,
+        "duration": 24,
+        "bankName": "Société Générale"
+      },
+      "switchGainPerYear": 45,
+      "recommendation": "SURVEILLER",
+      "reason": "+0.03% dispo"
     },
     {
       "name": "COMPTE A TERME OPTIPLUS 5 ANS Réf.000001",
@@ -174,14 +194,74 @@
       "amount": 200000,
       "rate": 2.7,
       "recommendation": "SURVEILLER",
-      "reason": "+0.20% dispo",
+      "reason": "+0.23% dispo",
       "bestAlt": {
-        "name": "CAT Progressif 60 mois",
-        "rate": 2.9,
-        "duration": 60,
-        "bankName": "CIC"
+        "name": "Dépôt à terme 24 mois",
+        "rate": 2.93,
+        "duration": 24,
+        "bankName": "Société Générale"
       },
-      "switchGainPerYear": 400
+      "switchGainPerYear": 460
+    },
+    {
+      "name": "OPTIPLUS CONQUÊTE",
+      "bankName": "Banque Populaire",
+      "amount": 150000,
+      "rate": 2.9,
+      "recommendation": "SURVEILLER",
+      "reason": "+0.03% dispo",
+      "bestAlt": {
+        "name": "Dépôt à terme 24 mois",
+        "rate": 2.93,
+        "duration": 24,
+        "bankName": "Société Générale"
+      },
+      "switchGainPerYear": 45
+    },
+    {
+      "name": "OPTIPLUS CONQUÊTE",
+      "bankName": "Banque Populaire",
+      "amount": 150000,
+      "rate": 2.9,
+      "recommendation": "SURVEILLER",
+      "reason": "+0.03% dispo",
+      "bestAlt": {
+        "name": "Dépôt à terme 24 mois",
+        "rate": 2.93,
+        "duration": 24,
+        "bankName": "Société Générale"
+      },
+      "switchGainPerYear": 45
+    },
+    {
+      "name": "OPTIPLUS CONQUÊTE",
+      "bankName": "Banque Populaire",
+      "amount": 150000,
+      "rate": 2.9,
+      "recommendation": "SURVEILLER",
+      "reason": "+0.03% dispo",
+      "bestAlt": {
+        "name": "Dépôt à terme 24 mois",
+        "rate": 2.93,
+        "duration": 24,
+        "bankName": "Société Générale"
+      },
+      "switchGainPerYear": 45
+    },
+    {
+      "name": "OPTIPLUS CONQUÊTE",
+      "bankName": "Banque Populaire",
+      "amount": 150000,
+      "rate": 2.9,
+      "recommendation": "SURVEILLER",
+      "reason": "+0.03% dispo",
+      "bestAlt": {
+        "name": "Dépôt à terme 24 mois",
+        "rate": 2.93,
+        "duration": 24,
+        "bankName": "Société Générale"
+      },
+      "switchGainPerYear": 45
     }
   ]
 }
