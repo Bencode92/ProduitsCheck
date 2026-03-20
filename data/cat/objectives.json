@@ -1,6 +1,7 @@
 {
   "monthlyNeed": 0,
-  "liquidityReserve": 0,
+  "liquidityReserve": 50000,
+  "availableCash": 0,
   "maxPerBank": 100000,
   "horizon": "mixed",
   "notes": ""
