@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-03-20T13:20:21.370Z",
+  "lastUpdated": "2026-03-20T14:20:14.110Z",
   "rates": [
     {
       "bankId": "cic",
@@ -210,6 +210,443 @@
       "withdrawalConditions": "Période 1: 50% taux, autres: taux période précédente",
       "notice": "32 jours",
       "productName": "CAT Progressif 18m",
+      "calculationBase": null
+    },
+    {
+      "bankId": "sg",
+      "bankName": "Société Générale",
+      "durationMonths": 2,
+      "rate": 1.96,
+      "productType": "depot_terme",
+      "date": "2026-03-31",
+      "rateType": "fixe",
+      "rateSchedule": [
+        {
+          "period": "2 mois",
+          "rate": 1.96
+        }
+      ],
+      "withdrawalConditions": null,
+      "notice": null,
+      "productName": "Dépôt à terme 2 mois",
+      "calculationBase": null
+    },
+    {
+      "bankId": "sg",
+      "bankName": "Société Générale",
+      "durationMonths": 3,
+      "rate": 2.14,
+      "productType": "depot_terme",
+      "date": "2026-03-31",
+      "rateType": "fixe",
+      "rateSchedule": [
+        {
+          "period": "3 mois",
+          "rate": 2.14
+        }
+      ],
+      "withdrawalConditions": null,
+      "notice": null,
+      "productName": "Dépôt à terme 3 mois",
+      "calculationBase": null
+    },
+    {
+      "bankId": "sg",
+      "bankName": "Société Générale",
+      "durationMonths": 4,
+      "rate": 2.21,
+      "productType": "depot_terme",
+      "date": "2026-03-31",
+      "rateType": "fixe",
+      "rateSchedule": [
+        {
+          "period": "4 mois",
+          "rate": 2.21
+        }
+      ],
+      "withdrawalConditions": null,
+      "notice": null,
+      "productName": "Dépôt à terme 4 mois",
+      "calculationBase": null
+    },
+    {
+      "bankId": "sg",
+      "bankName": "Société Générale",
+      "durationMonths": 5,
+      "rate": 2.28,
+      "productType": "depot_terme",
+      "date": "2026-03-31",
+      "rateType": "fixe",
+      "rateSchedule": [
+        {
+          "period": "5 mois",
+          "rate": 2.28
+        }
+      ],
+      "withdrawalConditions": null,
+      "notice": null,
+      "productName": "Dépôt à terme 5 mois",
+      "calculationBase": null
+    },
+    {
+      "bankId": "sg",
+      "bankName": "Société Générale",
+      "durationMonths": 6,
+      "rate": 2.35,
+      "productType": "depot_terme",
+      "date": "2026-03-31",
+      "rateType": "fixe",
+      "rateSchedule": [
+        {
+          "period": "6 mois",
+          "rate": 2.35
+        }
+      ],
+      "withdrawalConditions": null,
+      "notice": null,
+      "productName": "Dépôt à terme 6 mois",
+      "calculationBase": null
+    },
+    {
+      "bankId": "sg",
+      "bankName": "Société Générale",
+      "durationMonths": 7,
+      "rate": 2.38,
+      "productType": "depot_terme",
+      "date": "2026-03-31",
+      "rateType": "fixe",
+      "rateSchedule": [
+        {
+          "period": "7 mois",
+          "rate": 2.38
+        }
+      ],
+      "withdrawalConditions": null,
+      "notice": null,
+      "productName": "Dépôt à terme 7 mois",
+      "calculationBase": null
+    },
+    {
+      "bankId": "sg",
+      "bankName": "Société Générale",
+      "durationMonths": 8,
+      "rate": 2.42,
+      "productType": "depot_terme",
+      "date": "2026-03-31",
+      "rateType": "fixe",
+      "rateSchedule": [
+        {
+          "period": "8 mois",
+          "rate": 2.42
+        }
+      ],
+      "withdrawalConditions": null,
+      "notice": null,
+      "productName": "Dépôt à terme 8 mois",
+      "calculationBase": null
+    },
+    {
+      "bankId": "sg",
+      "bankName": "Société Générale",
+      "durationMonths": 9,
+      "rate": 2.45,
+      "productType": "depot_terme",
+      "date": "2026-03-31",
+      "rateType": "fixe",
+      "rateSchedule": [
+        {
+          "period": "9 mois",
+          "rate": 2.45
+        }
+      ],
+      "withdrawalConditions": null,
+      "notice": null,
+      "productName": "Dépôt à terme 9 mois",
+      "calculationBase": null
+    },
+    {
+      "bankId": "sg",
+      "bankName": "Société Générale",
+      "durationMonths": 10,
+      "rate": 2.49,
+      "productType": "depot_terme",
+      "date": "2026-03-31",
+      "rateType": "fixe",
+      "rateSchedule": [
+        {
+          "period": "10 mois",
+          "rate": 2.49
+        }
+      ],
+      "withdrawalConditions": null,
+      "notice": null,
+      "productName": "Dépôt à terme 10 mois",
+      "calculationBase": null
+    },
+    {
+      "bankId": "sg",
+      "bankName": "Société Générale",
+      "durationMonths": 11,
+      "rate": 2.53,
+      "productType": "depot_terme",
+      "date": "2026-03-31",
+      "rateType": "fixe",
+      "rateSchedule": [
+        {
+          "period": "11 mois",
+          "rate": 2.53
+        }
+      ],
+      "withdrawalConditions": null,
+      "notice": null,
+      "productName": "Dépôt à terme 11 mois",
+      "calculationBase": null
+    },
+    {
+      "bankId": "sg",
+      "bankName": "Société Générale",
+      "durationMonths": 12,
+      "rate": 2.56,
+      "productType": "depot_terme",
+      "date": "2026-03-31",
+      "rateType": "fixe",
+      "rateSchedule": [
+        {
+          "period": "12 mois",
+          "rate": 2.56
+        }
+      ],
+      "withdrawalConditions": null,
+      "notice": null,
+      "productName": "Dépôt à terme 12 mois",
+      "calculationBase": null
+    },
+    {
+      "bankId": "sg",
+      "bankName": "Société Générale",
+      "durationMonths": 13,
+      "rate": 2.59,
+      "productType": "depot_terme",
+      "date": "2026-03-31",
+      "rateType": "fixe",
+      "rateSchedule": [
+        {
+          "period": "13 mois",
+          "rate": 2.59
+        }
+      ],
+      "withdrawalConditions": null,
+      "notice": null,
+      "productName": "Dépôt à terme 13 mois",
+      "calculationBase": null
+    },
+    {
+      "bankId": "sg",
+      "bankName": "Société Générale",
+      "durationMonths": 14,
+      "rate": 2.62,
+      "productType": "depot_terme",
+      "date": "2026-03-31",
+      "rateType": "fixe",
+      "rateSchedule": [
+        {
+          "period": "14 mois",
+          "rate": 2.62
+        }
+      ],
+      "withdrawalConditions": null,
+      "notice": null,
+      "productName": "Dépôt à terme 14 mois",
+      "calculationBase": null
+    },
+    {
+      "bankId": "sg",
+      "bankName": "Société Générale",
+      "durationMonths": 15,
+      "rate": 2.65,
+      "productType": "depot_terme",
+      "date": "2026-03-31",
+      "rateType": "fixe",
+      "rateSchedule": [
+        {
+          "period": "15 mois",
+          "rate": 2.65
+        }
+      ],
+      "withdrawalConditions": null,
+      "notice": null,
+      "productName": "Dépôt à terme 15 mois",
+      "calculationBase": null
+    },
+    {
+      "bankId": "sg",
+      "bankName": "Société Générale",
+      "durationMonths": 16,
+      "rate": 2.68,
+      "productType": "depot_terme",
+      "date": "2026-03-31",
+      "rateType": "fixe",
+      "rateSchedule": [
+        {
+          "period": "16 mois",
+          "rate": 2.68
+        }
+      ],
+      "withdrawalConditions": null,
+      "notice": null,
+      "productName": "Dépôt à terme 16 mois",
+      "calculationBase": null
+    },
+    {
+      "bankId": "sg",
+      "bankName": "Société Générale",
+      "durationMonths": 17,
+      "rate": 2.71,
+      "productType": "depot_terme",
+      "date": "2026-03-31",
+      "rateType": "fixe",
+      "rateSchedule": [
+        {
+          "period": "17 mois",
+          "rate": 2.71
+        }
+      ],
+      "withdrawalConditions": null,
+      "notice": null,
+      "productName": "Dépôt à terme 17 mois",
+      "calculationBase": null
+    },
+    {
+      "bankId": "sg",
+      "bankName": "Société Générale",
+      "durationMonths": 18,
+      "rate": 2.74,
+      "productType": "depot_terme",
+      "date": "2026-03-31",
+      "rateType": "fixe",
+      "rateSchedule": [
+        {
+          "period": "18 mois",
+          "rate": 2.74
+        }
+      ],
+      "withdrawalConditions": null,
+      "notice": null,
+      "productName": "Dépôt à terme 18 mois",
+      "calculationBase": null
+    },
+    {
+      "bankId": "sg",
+      "bankName": "Société Générale",
+      "durationMonths": 19,
+      "rate": 2.77,
+      "productType": "depot_terme",
+      "date": "2026-03-31",
+      "rateType": "fixe",
+      "rateSchedule": [
+        {
+          "period": "19 mois",
+          "rate": 2.77
+        }
+      ],
+      "withdrawalConditions": null,
+      "notice": null,
+      "productName": "Dépôt à terme 19 mois",
+      "calculationBase": null
+    },
+    {
+      "bankId": "sg",
+      "bankName": "Société Générale",
+      "durationMonths": 20,
+      "rate": 2.81,
+      "productType": "depot_terme",
+      "date": "2026-03-31",
+      "rateType": "fixe",
+      "rateSchedule": [
+        {
+          "period": "20 mois",
+          "rate": 2.81
+        }
+      ],
+      "withdrawalConditions": null,
+      "notice": null,
+      "productName": "Dépôt à terme 20 mois",
+      "calculationBase": null
+    },
+    {
+      "bankId": "sg",
+      "bankName": "Société Générale",
+      "durationMonths": 21,
+      "rate": 2.84,
+      "productType": "depot_terme",
+      "date": "2026-03-31",
+      "rateType": "fixe",
+      "rateSchedule": [
+        {
+          "period": "21 mois",
+          "rate": 2.84
+        }
+      ],
+      "withdrawalConditions": null,
+      "notice": null,
+      "productName": "Dépôt à terme 21 mois",
+      "calculationBase": null
+    },
+    {
+      "bankId": "sg",
+      "bankName": "Société Générale",
+      "durationMonths": 22,
+      "rate": 2.87,
+      "productType": "depot_terme",
+      "date": "2026-03-31",
+      "rateType": "fixe",
+      "rateSchedule": [
+        {
+          "period": "22 mois",
+          "rate": 2.87
+        }
+      ],
+      "withdrawalConditions": null,
+      "notice": null,
+      "productName": "Dépôt à terme 22 mois",
+      "calculationBase": null
+    },
+    {
+      "bankId": "sg",
+      "bankName": "Société Générale",
+      "durationMonths": 23,
+      "rate": 2.9,
+      "productType": "depot_terme",
+      "date": "2026-03-31",
+      "rateType": "fixe",
+      "rateSchedule": [
+        {
+          "period": "23 mois",
+          "rate": 2.9
+        }
+      ],
+      "withdrawalConditions": null,
+      "notice": null,
+      "productName": "Dépôt à terme 23 mois",
+      "calculationBase": null
+    },
+    {
+      "bankId": "sg",
+      "bankName": "Société Générale",
+      "durationMonths": 24,
+      "rate": 2.93,
+      "productType": "depot_terme",
+      "date": "2026-03-31",
+      "rateType": "fixe",
+      "rateSchedule": [
+        {
+          "period": "24 mois",
+          "rate": 2.93
+        }
+      ],
+      "withdrawalConditions": null,
+      "notice": null,
+      "productName": "Dépôt à terme 24 mois",
       "calculationBase": null
     }
   ]
