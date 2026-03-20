@@ -207,6 +207,8 @@
     "id": "pl_mmyqeaih_csw",
     "createdDate": "2026-03-20",
     "maturityDate": "2028-08-05",
-    "estimatedInterest": 16200
+    "estimatedInterest": 16200,
+    "entity": "cameleons",
+    "entityName": "Caméleons"
   }
 ]
