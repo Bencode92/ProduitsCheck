@@ -47,6 +47,7 @@
   <script src="js/cat-patches.js"></script>
   <script src="js/cat-optimizer.js"></script>
   <script src="js/cat-objectives-patch.js"></script>
+  <script src="js/cat-scanner.js"></script>
   <script src="js/proposal-patches.js"></script>
   <script src="js/analytics.js"></script>
   <script>
@@ -60,7 +61,6 @@
     document.addEventListener('DOMContentLoaded', async () => {
       await app.init();
       await loadCATAIConversation();
-      // Load saved optimizer result for dashboard display
       if (typeof loadOptimizerResult === 'function') await loadOptimizerResult();
     });
   </script>
