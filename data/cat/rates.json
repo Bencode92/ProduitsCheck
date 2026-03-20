@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-03-20T13:19:16.070Z",
+  "lastUpdated": "2026-03-20T13:19:25.553Z",
   "rates": [
     {
       "bankId": "cic",
@@ -310,25 +310,6 @@
       "withdrawalConditions": "Période 1: 50% taux, autres: taux période précédente",
       "notice": "32 jours",
       "productName": "CAT Progressif 60m",
-      "calculationBase": null
-    },
-    {
-      "bankId": "cic",
-      "bankName": "CIC",
-      "durationMonths": 3,
-      "rate": 2.1,
-      "productType": "cat",
-      "date": "2026-03-31",
-      "rateType": "fixe",
-      "rateSchedule": [
-        {
-          "period": "Mois 1-3",
-          "rate": 2.1
-        }
-      ],
-      "withdrawalConditions": "Pas de rémunération si sortie anticipée",
-      "notice": "32 jours",
-      "productName": "CAT Transition 3m",
       "calculationBase": null
     },
     {
