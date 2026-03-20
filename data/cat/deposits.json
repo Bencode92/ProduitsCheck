@@ -188,5 +188,25 @@
     "estimatedInterest": 5778,
     "entity": "cameleons",
     "entityName": "Caméleons"
+  },
+  {
+    "productType": "cat",
+    "bankId": "cic",
+    "bankName": "CIC",
+    "productName": "CATIP ENT 3ANS A PREAVIS",
+    "amount": 200000,
+    "rate": 2.7,
+    "rateType": "progressif",
+    "durationMonths": 36,
+    "startDate": "2025-08-05",
+    "interestPayment": "maturity",
+    "exitCondition": "notice",
+    "exitPenalty": "Taux minoré selon barème",
+    "autoRenew": true,
+    "status": "active",
+    "id": "pl_mmyqeaih_csw",
+    "createdDate": "2026-03-20",
+    "maturityDate": "2028-08-05",
+    "estimatedInterest": 16200
   }
 ]
