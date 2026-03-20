@@ -1,4 +1,4 @@
-// ═══ CAT Objectives Patch — Add availableCash + visual header ═══
+// ═══ CAT Objectives Patch — Visual header + availableCash + optimizer dashboard ═══
 
 // Override objectives modal to include availableCash
 const _origShowCATObjectivesModal = showCATObjectivesModal;
@@ -38,12 +38,11 @@ async function saveCATObjectivesV2() {
   renderCAT(document.getElementById('main-content'));
 }
 
-// Override renderCAT header — visual dashboard like structured products
+// Override renderCAT header — visual dashboard + optimizer section
 const _origRenderCATForHeader = renderCAT;
 renderCAT = function(container) {
   _origRenderCATForHeader(container);
 
-  // Replace the basic stats-row with visual dashboard
   const statsRow = container.querySelector('.stats-row');
   if (!statsRow) return;
 
@@ -53,11 +52,10 @@ renderCAT = function(container) {
   const reserve = parseFloat(obj.liquidityReserve) || 0;
   const totalTreasury = stats.totalInvested + cash;
   const placable = Math.max(0, cash - reserve);
-  const annualInterest = stats.totalInterest; // already annualized in _calcInterest for non-progressive
+  const annualInterest = stats.totalInterest;
   const nbBanks = Object.keys(stats.byBank).length;
   const fgdrCount = stats.fgdrAlerts.length;
 
-  // Best market rate for comparison
   const bestRate = catManager.rates?.rates?.reduce((max, r) => r.rate > max ? r.rate : max, 0) || 0;
   const rateVsMarket = bestRate > 0 && stats.weightedRate > 0
     ? (stats.weightedRate >= bestRate ? '✅ Au-dessus du marché' : '⚠️ ' + (bestRate - stats.weightedRate).toFixed(2) + '% sous le meilleur')
@@ -75,7 +73,7 @@ renderCAT = function(container) {
         <div style="background:var(--bg-card);padding:14px 16px;text-align:center">
           <div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">Trésorerie totale</div>
           <div style="font-size:22px;font-weight:800;color:var(--text-bright);font-family:var(--mono)">${formatNumber(totalTreasury)}€</div>
-          <div style="font-size:10px;color:var(--text-dim);margin-top:2px">${stats.totalDeposits} placements · ${nbBanks} banque${nbBanks > 1 ? 's' : ''}</div>
+          <div style="font-size:10px;color:var(--text-dim);margin-top:2px">${stats.totalDeposits} plac. · ${nbBanks} banque${nbBanks > 1 ? 's' : ''}</div>
         </div>
         <div style="background:var(--bg-card);padding:14px 16px;text-align:center">
           <div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">Placé</div>
@@ -85,7 +83,7 @@ renderCAT = function(container) {
         <div style="background:var(--bg-card);padding:14px 16px;text-align:center">
           <div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">Liquidités</div>
           <div style="font-size:22px;font-weight:800;color:${cash > 0 ? 'var(--cyan)' : 'var(--text-dim)'};font-family:var(--mono)">${formatNumber(cash)}€</div>
-          <div style="font-size:10px;color:var(--text-dim);margin-top:2px">${placable > 0 ? formatNumber(placable) + '€ à placer' : cash > 0 ? 'Réserve couverte' : 'Cliquez 🎯 pour saisir'}</div>
+          <div style="font-size:10px;color:var(--text-dim);margin-top:2px">${placable > 0 ? formatNumber(placable) + '€ à placer' : cash > 0 ? 'Réserve couverte' : 'Cliquez 🎯'}</div>
         </div>
         <div style="background:var(--bg-card);padding:14px 16px;text-align:center">
           <div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">Rendement / an</div>
@@ -95,7 +93,7 @@ renderCAT = function(container) {
         <div style="background:var(--bg-card);padding:14px 16px;text-align:center">
           <div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">Risque FGDR</div>
           <div style="font-size:22px;font-weight:800;color:${fgdrCount > 0 ? 'var(--orange)' : 'var(--green)'}">${fgdrCount > 0 ? '⚠️ ' + fgdrCount : '✅'}</div>
-          <div style="font-size:10px;color:var(--text-dim);margin-top:2px">${fgdrCount > 0 ? fgdrCount + ' dépassement' + (fgdrCount > 1 ? 's' : '') : 'Plafond respecté'}</div>
+          <div style="font-size:10px;color:var(--text-dim);margin-top:2px">${fgdrCount > 0 ? fgdrCount + ' dépass.' : 'OK'}</div>
         </div>
       </div>
       ${cash > 0 || stats.totalInvested > 0 ? `<div style="margin-top:12px;display:flex;gap:4px;height:8px;border-radius:4px;overflow:hidden">
@@ -110,6 +108,13 @@ renderCAT = function(container) {
       </div>` : ''}
     </div>`;
 
-  // Replace the old stats row with the new dashboard
   statsRow.outerHTML = dashHTML;
+
+  // ═══ INJECT OPTIMIZER DASHBOARD (if result exists) ═══
+  if (typeof renderOptimizerDashboard === 'function') {
+    const optimizerHTML = renderOptimizerDashboard();
+    if (optimizerHTML) {
+      container.insertAdjacentHTML('beforeend', optimizerHTML);
+    }
+  }
 };
