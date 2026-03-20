@@ -1,7 +1,6 @@
 // ═══════════════════════════════════════════════════════════════
 // STRUCTBOARD — Module Épargne (CAT + Parts Sociales)
-// Gestion, suivi, extraction PDF, simulation, optimisation
-// Tout sauvegardé sur GitHub via Cloudflare Worker
+// V2: Enhanced PDF extraction with rate schedule
 // ═══════════════════════════════════════════════════════════════
 
 const PLACEMENT_TYPES = [
@@ -71,51 +70,77 @@ class CATManager {
   removeDeposit(id) { this.deposits = this.deposits.filter(d => d.id !== id); }
 
   _calcInterest(deposit) {
+    // Use rate schedule if available for more accurate calculation
+    if (deposit.rateSchedule && deposit.rateSchedule.length > 0 && deposit.maturityDate) {
+      const amount = parseFloat(deposit.amount) || 0;
+      let total = 0;
+      for (const step of deposit.rateSchedule) {
+        const from = new Date(step.from), to = new Date(step.to);
+        const days = Math.max(0, (to - from) / (1000 * 60 * 60 * 24));
+        total += amount * (step.rate / 100) * (days / 365);
+      }
+      return Math.round(total * 100) / 100;
+    }
     const amount = parseFloat(deposit.amount) || 0;
     const rate = parseFloat(deposit.rate) || 0;
     const months = parseInt(deposit.durationMonths) || 12;
     return Math.round(amount * (rate / 100) * (months / 12) * 100) / 100;
   }
 
-  // ─── PDF Parsing pour conditions CAT/PS ───────────────────
+  // ─── PDF Parsing — V2: extracts rate schedule ─────────────
   async parsePDFConditions(file) {
     const rawText = await pdfExtractor.extractText(file);
     if (!rawText || rawText.trim().length < 30) throw new Error('PDF vide ou illisible');
 
-    const prompt = `Tu es un analyste financier. Extrais les informations d'un document de conditions pour un Compte à Terme ou Parts Sociales.
+    const prompt = `Tu es un analyste financier. Extrais TOUTES les informations d'un document de conditions pour un Compte à Terme ou Parts Sociales. Ce peut être une brochure commerciale, une lettre de blocage, ou une fiche produit.
 
 TEXTE DU DOCUMENT:
 ---
-${rawText.substring(0, 6000)}
+${rawText.substring(0, 8000)}
 ---
 
 Réponds UNIQUEMENT en JSON valide (pas de markdown):
 {
   "productType": "cat ou parts-sociales",
-  "productName": "Nom du produit",
-  "emitter": "Banque ou organisme",
-  "rate": "Taux annuel en % (nombre)",
+  "productName": "Nom du produit (ex: CAT CROISSANCE +3A)",
+  "emitter": "Banque ou organisme émetteur",
+  "rate": "Taux actuariel moyen annuel brut en % (nombre). Si progressif, c'est le TRAAB ou la moyenne pondérée",
   "rateType": "fixe/variable/progressif",
-  "rateDetails": "Détails du taux si progressif ou variable",
+  "rateSchedule": [
+    {"from": "YYYY-MM-DD", "to": "YYYY-MM-DD", "rate": 2.00, "earlyRate": 1.60, "label": "1er semestre"},
+    {"from": "YYYY-MM-DD", "to": "YYYY-MM-DD", "rate": 2.50, "earlyRate": 2.13, "label": "2ème semestre"}
+  ],
+  "rateDetails": "Description textuelle du barème si pas de dates exactes",
+  "amount": "Montant du contrat si mentionné (nombre ou null)",
   "minAmount": "Montant minimum (nombre ou null)",
   "maxAmount": "Montant maximum (nombre ou null)",
-  "durationMonths": "Durée en mois (nombre ou null pour indéterminé)",
+  "durationMonths": "Durée en mois (nombre ou null)",
+  "startDate": "Date de souscription/blocage si mentionnée (YYYY-MM-DD ou null)",
+  "maturityDate": "Date d'échéance si mentionnée (YYYY-MM-DD ou null)",
   "entryCondition": "monthly/quarterly/annual/anytime/specific",
   "exitCondition": "maturity/monthly/quarterly/annual/anytime/notice",
-  "exitNotice": "Délai de préavis si applicable",
-  "exitPenalty": "Pénalité de sortie anticipée si applicable",
+  "exitNotice": "Délai de préavis (ex: 32 jours) si applicable",
+  "exitPenalty": "Pénalité de sortie anticipée (ex: taux minoré selon barème)",
   "interestPayment": "maturity/monthly/quarterly/annual",
+  "interestCapitalized": "true si les intérêts sont réinvestis/capitalisés, false sinon",
   "autoRenew": "true/false",
   "capitalGuarantee": "true/false",
   "fiscality": "Description fiscalité si mentionnée",
   "conditions": ["Liste des conditions particulières"],
-  "summary": "Résumé en 2-3 phrases"
-}`;
+  "summary": "Résumé en 2-3 phrases avec les chiffres clés"
+}
+
+IMPORTANT pour rateSchedule:
+- Si le document contient un barème/tableau de taux par période, extrais CHAQUE palier avec dates exactes
+- "rate" = taux normal si on garde jusqu'au bout
+- "earlyRate" = taux appliqué si sortie anticipée pendant cette période (null si pas mentionné)
+- Si pas de barème progressif, laisse rateSchedule comme tableau vide []
+- Les dates doivent être au format YYYY-MM-DD`;
 
     const res = await fetch(CONFIG.AI_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1500, messages: [{ role: 'user', content: prompt }] }),
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 2000, messages: [{ role: 'user', content: prompt }] }),
     });
     if (!res.ok) throw new Error('Erreur IA: ' + res.status);
     const data = await res.json();
@@ -193,7 +218,6 @@ Réponds UNIQUEMENT en JSON valide (pas de markdown):
     });
 
     const allocations = [];
-    // Maximiser le rendement: du plus long au plus court
     const sortedDurations = [...durations].reverse();
     for (const dur of sortedDurations) {
       if (available <= 0) break;
@@ -346,8 +370,8 @@ function showPlacementUpload(productType) {
   modal.innerHTML = `<div class="modal-overlay" onclick="closeModal()"><div class="modal-content" onclick="event.stopPropagation()">
     <h2 class="modal-title">${typeInfo.icon} ${typeInfo.name}</h2>
     <div class="upload-zone" ondragover="event.preventDefault();this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')" ondrop="handlePlacementDrop(event,'${productType}')">
-      <div class="upload-icon">📄</div><div class="upload-text">Glisser le PDF des conditions ici</div>
-      <div class="upload-sub">Claude extraira automatiquement les informations</div>
+      <div class="upload-icon">📄</div><div class="upload-text">Glisser le PDF ici</div>
+      <div class="upload-sub">Brochure, lettre de blocage, fiche produit — Claude extraira tout</div>
       <input type="file" accept=".pdf" id="placement-file" style="display:none" onchange="handlePlacementFile(event,'${productType}')">
     </div>
     <button class="btn" style="width:100%;margin-top:12px" onclick="document.getElementById('placement-file').click()">Choisir un PDF</button>
@@ -371,7 +395,6 @@ async function processPlacementPDF(file, productType) {
     const { parsed, rawText } = await catManager.parsePDFConditions(file);
     if (status) status.textContent = 'Analyse terminée !';
     closeModal();
-    // Pré-remplir le formulaire avec les données extraites
     showManualPlacementModal(productType, parsed, rawText, file.name);
   } catch (e) {
     if (status) status.textContent = 'Erreur: ' + e.message;
@@ -392,29 +415,28 @@ function showManualPlacementModal(productType, prefill, rawText, sourceFile) {
         <option value="">Sélectionner...</option>
         ${BANKS.map(b => `<option value="${b.id}" ${p.emitter && b.name.toLowerCase().includes((p.emitter||'').toLowerCase().substring(0,4)) ? 'selected' : ''}>${b.name}</option>`).join('')}
         <option value="autre">Autre</option></select></div>
-      <div class="form-field full"><label>Nom du produit</label><input id="pl-name" value="${p.productName || ''}" placeholder="Ex: CAT 24 mois Promo / Parts Sociales Crédit Mutuel"></div>
-      <div class="form-field"><label>Montant (€)</label><input id="pl-amount" type="number" value="${p.minAmount || ''}" placeholder="50000"></div>
-      <div class="form-field"><label>Taux annuel (%)</label><input id="pl-rate" type="number" step="0.01" value="${p.rate || ''}" placeholder="3.50"></div>
+      <div class="form-field full"><label>Nom du produit</label><input id="pl-name" value="${p.productName || ''}" placeholder="Ex: CAT 24 mois Promo"></div>
+      <div class="form-field"><label>Montant (€)</label><input id="pl-amount" type="number" value="${p.amount || p.minAmount || ''}" placeholder="50000"></div>
+      <div class="form-field"><label>Taux moyen annuel (%)</label><input id="pl-rate" type="number" step="0.01" value="${p.rate || ''}" placeholder="3.50"></div>
       <div class="form-field"><label>Type de taux</label><select id="pl-rate-type">
         <option value="fixe" ${p.rateType === 'fixe' ? 'selected' : ''}>Fixe</option>
         <option value="variable" ${p.rateType === 'variable' ? 'selected' : ''}>Variable</option>
         <option value="progressif" ${p.rateType === 'progressif' ? 'selected' : ''}>Progressif</option></select></div>
-      <div class="form-field"><label>Durée (mois) — 0 si indéterminée</label><input id="pl-duration" type="number" value="${p.durationMonths || ''}" placeholder="24"></div>
-      <div class="form-field"><label>Date de souscription</label><input id="pl-start" type="date" value="${new Date().toISOString().split('T')[0]}"></div>
+      <div class="form-field"><label>Durée (mois)</label><input id="pl-duration" type="number" value="${p.durationMonths || ''}" placeholder="24"></div>
+      <div class="form-field"><label>Date de souscription</label><input id="pl-start" type="date" value="${p.startDate || new Date().toISOString().split('T')[0]}"></div>
       <div class="form-field"><label>Versement intérêts</label><select id="pl-interest">
         ${INTEREST_PAYMENTS.map(i => `<option value="${i.id}" ${p.interestPayment === i.id ? 'selected' : ''}>${i.name}</option>`).join('')}</select></div>
       <div class="form-field"><label>Condition de sortie</label><select id="pl-exit">
         ${EXIT_CONDITIONS.map(e => `<option value="${e.id}" ${p.exitCondition === e.id ? 'selected' : ''}>${e.name}</option>`).join('')}</select></div>
-      <div class="form-field"><label>Pénalité sortie anticipée</label><input id="pl-penalty" value="${p.exitPenalty || ''}" placeholder="Ex: Perte 3 mois d'intérêts"></div>
+      <div class="form-field"><label>Pénalité sortie</label><input id="pl-penalty" value="${p.exitPenalty || ''}" placeholder="Ex: 32j préavis, taux minoré"></div>
       <div class="form-field"><label>Renouvellement auto</label><select id="pl-renew">
         <option value="false" ${!p.autoRenew ? 'selected' : ''}>Non</option>
         <option value="true" ${p.autoRenew === true || p.autoRenew === 'true' ? 'selected' : ''}>Oui</option></select></div>
-      ${p.rateDetails ? `<div class="form-field full"><label>Détails taux</label><input id="pl-rate-details" value="${p.rateDetails}" readonly style="color:var(--text-muted)"></div>` : ''}
-      ${p.conditions && p.conditions.length > 0 ? `<div class="form-field full"><label>Conditions extraites</label><div style="font-size:11px;color:var(--text-muted);line-height:1.5">${p.conditions.join(' · ')}</div></div>` : ''}
     </div>
     <input type="hidden" id="pl-raw-text" value="${rawText ? encodeURIComponent(rawText) : ''}">
     <input type="hidden" id="pl-source-file" value="${sourceFile || ''}">
     <input type="hidden" id="pl-ai-summary" value="${p.summary ? encodeURIComponent(p.summary) : ''}">
+    <input type="hidden" id="pl-ai-schedule" value="${p.rateSchedule && p.rateSchedule.length > 0 ? encodeURIComponent(JSON.stringify(p.rateSchedule)) : ''}">
     <div class="modal-actions"><button class="btn" onclick="closeModal()">Annuler</button>
       <button class="btn primary" onclick="savePlacement()">Enregistrer</button></div>
   </div></div>`;
@@ -478,13 +500,17 @@ async function savePlacement(editId) {
     autoRenew: document.getElementById('pl-renew').value === 'true',
     status: 'active',
   };
-  // Données IA si upload PDF
   const rawEl = document.getElementById('pl-raw-text');
   const summaryEl = document.getElementById('pl-ai-summary');
   const sourceEl = document.getElementById('pl-source-file');
+  const scheduleEl = document.getElementById('pl-ai-schedule');
   if (rawEl?.value) deposit.rawText = decodeURIComponent(rawEl.value);
   if (summaryEl?.value) deposit.aiSummary = decodeURIComponent(summaryEl.value);
   if (sourceEl?.value) deposit.sourceFile = sourceEl.value;
+  // Auto-load rate schedule from AI extraction
+  if (scheduleEl?.value) {
+    try { deposit.rateSchedule = JSON.parse(decodeURIComponent(scheduleEl.value)); deposit.rateType = 'progressif'; } catch(e) {}
+  }
 
   if (editId) catManager.updateDeposit(editId, deposit);
   else catManager.addDeposit(deposit);
@@ -520,12 +546,7 @@ function showCATObjectivesModal() {
 }
 
 async function saveCATObjectives() {
-  catManager.objectives = {
-    monthlyNeed: parseFloat(document.getElementById('obj-monthly').value) || 0,
-    liquidityReserve: parseFloat(document.getElementById('obj-reserve').value) || 0,
-    maxPerBank: parseFloat(document.getElementById('obj-maxbank').value) || 100000,
-    notes: document.getElementById('obj-notes').value,
-  };
+  catManager.objectives = { monthlyNeed: parseFloat(document.getElementById('obj-monthly').value) || 0, liquidityReserve: parseFloat(document.getElementById('obj-reserve').value) || 0, maxPerBank: parseFloat(document.getElementById('obj-maxbank').value) || 100000, notes: document.getElementById('obj-notes').value };
   closeModal(); await catManager.saveObjectives();
   showToast('Objectifs sauvegardés', 'success');
   app.setState({ view: 'cat' }); renderCAT(document.getElementById('main-content'));
@@ -538,12 +559,9 @@ function showCATRatesModal() {
   modal.innerHTML = `<div class="modal-overlay" onclick="closeModal()"><div class="modal-content modal-large" onclick="event.stopPropagation()">
     <h2 class="modal-title">📊 Taux du Marché</h2>
     <div class="form-grid">
-      <div class="form-field"><label>Banque</label><select id="rate-bank">
-        ${BANKS.map(b => `<option value="${b.id}">${b.name}</option>`).join('')}</select></div>
-      <div class="form-field"><label>Type</label><select id="rate-type">
-        ${PLACEMENT_TYPES.map(t => `<option value="${t.id}">${t.name}</option>`).join('')}</select></div>
-      <div class="form-field"><label>Durée</label><select id="rate-duration">
-        ${durations.map(d => `<option value="${d}">${d} mois</option>`).join('')}</select></div>
+      <div class="form-field"><label>Banque</label><select id="rate-bank">${BANKS.map(b => `<option value="${b.id}">${b.name}</option>`).join('')}</select></div>
+      <div class="form-field"><label>Type</label><select id="rate-type">${PLACEMENT_TYPES.map(t => `<option value="${t.id}">${t.name}</option>`).join('')}</select></div>
+      <div class="form-field"><label>Durée</label><select id="rate-duration">${durations.map(d => `<option value="${d}">${d} mois</option>`).join('')}</select></div>
       <div class="form-field"><label>Taux (%)</label><input id="rate-value" type="number" step="0.01" placeholder="3.50"></div>
     </div>
     <button class="btn primary" style="width:100%;margin-top:12px" onclick="addMarketRate()">Ajouter ce taux</button>
@@ -568,8 +586,7 @@ async function addMarketRate() {
   const bank = BANKS.find(b => b.id === bankId);
   const rate = document.getElementById('rate-value').value;
   if (!rate) { showToast('Taux requis', 'error'); return; }
-  catManager.addRate(bankId, bank?.name || bankId, parseInt(document.getElementById('rate-duration').value),
-    rate, document.getElementById('rate-type').value);
+  catManager.addRate(bankId, bank?.name || bankId, parseInt(document.getElementById('rate-duration').value), rate, document.getElementById('rate-type').value);
   await catManager.saveRates();
   document.getElementById('rates-list').innerHTML = renderRatesList();
   document.getElementById('rate-value').value = '';
