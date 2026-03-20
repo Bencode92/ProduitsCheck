@@ -1,9 +1,45 @@
 // ═══════════════════════════════════════════════════════════════
 // STRUCTBOARD — CAT/PS Analyse IA + Chat + Import Taux Intelligent
+// V2: Fix JSON truncation (max_tokens 4000 + robust repair)
 // ═══════════════════════════════════════════════════════════════
 
 let catAIConversation = [];
 let catAIAnalysis = null;
+
+// ─── Robust JSON repair ─────────────────────────────────────
+function repairJSON(text) {
+  text = text.replace(/^```json?\s*/i, '').replace(/\s*```$/i, '').trim();
+  try { return JSON.parse(text); } catch(e) {}
+  // Fix trailing commas
+  let fixed = text.replace(/,\s*}/g, '}').replace(/,\s*]/g, ']');
+  try { return JSON.parse(fixed); } catch(e) {}
+  // Try to close unclosed strings/arrays/objects
+  let open = 0, inStr = false, lastChar = '';
+  for (let i = 0; i < fixed.length; i++) {
+    const c = fixed[i];
+    if (c === '"' && lastChar !== '\\') inStr = !inStr;
+    if (!inStr) { if (c === '{' || c === '[') open++; if (c === '}' || c === ']') open--; }
+    lastChar = c;
+  }
+  if (inStr) fixed += '"';
+  // Close open brackets
+  while (open > 0) {
+    // Check if we need ] or }
+    const lastOpen = [];
+    let s = false, lc = '';
+    for (let i = 0; i < fixed.length; i++) {
+      const c = fixed[i];
+      if (c === '"' && lc !== '\\') s = !s;
+      if (!s) { if (c === '{') lastOpen.push('}'); if (c === '[') lastOpen.push(']'); if (c === '}' || c === ']') lastOpen.pop(); }
+      lc = c;
+    }
+    fixed += lastOpen.length > 0 ? lastOpen.pop() : '}';
+    open--;
+  }
+  fixed = fixed.replace(/,\s*}/g, '}').replace(/,\s*]/g, ']');
+  try { return JSON.parse(fixed); } catch(e) {}
+  throw new Error('JSON invalide après réparation');
+}
 
 // ─── Wrap renderCAT pour injecter le bouton Analyse IA ──────
 const _originalRenderCAT = renderCAT;
@@ -25,7 +61,7 @@ renderCAT = function(container) {
 const _originalShowCATRatesModal = showCATRatesModal;
 showCATRatesModal = function() {
   const modal = document.getElementById('modal');
-  const durations = [1, 3, 6, 12, 18, 24, 36, 48, 60];
+  const durations = [1, 2, 3, 6, 12, 18, 24, 36, 48, 60];
   modal.innerHTML = `<div class="modal-overlay" onclick="closeModal()"><div class="modal-content modal-large" onclick="event.stopPropagation()">
     <h2 class="modal-title">📊 Taux du Marché</h2>
 
@@ -84,55 +120,53 @@ async function importRatesFromText() {
 
 TEXTE:
 ---
-${text.substring(0, 4000)}
+${text.substring(0, 5000)}
 ---
 
-Réponds UNIQUEMENT en JSON valide (pas de markdown, pas de backticks). Structure:
+Réponds UNIQUEMENT en JSON valide (pas de markdown, pas de backticks). Sois CONCIS dans les champs texte.
 {
-  "bankName": "Nom de la banque si identifié dans le texte",
-  "validityDate": "Mois/période de validité si mentionné",
+  "bankName": "Nom banque",
+  "validityDate": "Période",
   "products": [
     {
-      "name": "Nom du produit (ex: CAT Taux Fixe 12 mois, CAT Progressif 36 mois)",
-      "type": "cat ou parts-sociales",
-      "rateType": "fixe ou progressif",
+      "name": "CAT Fixe 12 mois",
+      "type": "cat",
+      "rateType": "fixe",
       "durationMonths": 12,
       "averageRate": 2.40,
-      "rateSchedule": [
-        {"period": "Mois 1-12", "rate": 2.40}
-      ],
-      "withdrawalConditions": "Conditions de retrait anticipé",
-      "notice": "Préavis si applicable (ex: 32 jours)",
-      "calculationBase": "Base de calcul si mentionnée (ex: exact/365)"
+      "rateSchedule": [{"period": "Mois 1-12", "rate": 2.40}],
+      "withdrawalConditions": "Conditions retrait",
+      "notice": "32 jours"
     }
-  ],
-  "generalConditions": "Conditions générales applicables à tous les produits"
+  ]
 }
 
-IMPORTANT: Extrais CHAQUE durée/taux comme un produit séparé. Pour les taux progressifs, détaille le schedule par période.`;
+RÈGLES:
+- Chaque durée/taux = un produit séparé
+- Pour les progressifs: détaille rateSchedule par période
+- withdrawalConditions: court (max 80 car)
+- averageRate = taux actuariel moyen annuel brut`;
 
   try {
     const res = await fetch(CONFIG.AI_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 2000, messages: [{ role: 'user', content: prompt }] }),
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 4000, messages: [{ role: 'user', content: prompt }] }),
     });
     if (!res.ok) throw new Error('Erreur IA: ' + res.status);
     const data = await res.json();
     let responseText = data.content?.map(b => b.text || '').join('') || '';
-    responseText = responseText.replace(/^```json?\s*/i, '').replace(/\s*```$/i, '').trim();
-    const parsed = JSON.parse(responseText);
+    const parsed = repairJSON(responseText);
 
     if (progress) progress.classList.add('hidden');
 
-    // Afficher les résultats pour validation
     if (!parsed.products || parsed.products.length === 0) {
       if (results) results.innerHTML = '<div style="color:var(--orange);padding:10px;font-size:12px">⚠️ Aucun taux trouvé dans ce texte.</div>';
       return;
     }
 
     let html = `<div style="margin-top:12px">
-      <h3 style="font-size:12px;color:var(--green);margin-bottom:8px">✅ ${parsed.products.length} produit(s) trouvé(s)${parsed.generalConditions ? ' — ' + parsed.generalConditions : ''}</h3>`;
+      <h3 style="font-size:12px;color:var(--green);margin-bottom:8px">✅ ${parsed.products.length} produit(s) trouvé(s)</h3>`;
 
     parsed.products.forEach((p, i) => {
       const rateDisplay = p.rateType === 'progressif'
@@ -144,7 +178,6 @@ IMPORTANT: Extrais CHAQUE durée/taux comme un produit séparé. Pour les taux p
           <strong style="color:var(--text-bright)">${p.name || p.type + ' ' + p.durationMonths + ' mois'}</strong>
           <div style="color:var(--text-muted);font-size:11px;margin-top:2px">${p.rateType === 'progressif' ? '📈 Progressif: ' + rateDisplay : '📊 Fixe: ' + rateDisplay}</div>
           ${p.withdrawalConditions ? '<div style="color:var(--orange);font-size:10px;margin-top:2px">⚠️ ' + p.withdrawalConditions + '</div>' : ''}
-          ${p.notice ? '<div style="color:var(--text-dim);font-size:10px">Préavis: ' + p.notice + '</div>' : ''}
         </div>
         <div style="display:flex;align-items:center;gap:6px">
           <span style="font-family:var(--mono);color:var(--green);font-size:14px;font-weight:600">${p.averageRate}%</span>
@@ -156,8 +189,6 @@ IMPORTANT: Extrais CHAQUE durée/taux comme un produit séparé. Pour les taux p
     html += `<button class="btn success lg" style="width:100%;margin-top:12px" onclick="confirmImportRates()">✅ Importer tous ces taux</button></div>`;
 
     if (results) results.innerHTML = html;
-
-    // Stocker temporairement pour confirmation
     window._pendingRatesImport = { parsed, bankId, bankName: bank?.name || bankId, date };
 
   } catch (e) {
@@ -176,8 +207,6 @@ async function confirmImportRates() {
     const rate = parseFloat(p.averageRate) || 0;
     if (duration > 0 && rate > 0) {
       catManager.addRate(bankId, bankName, duration, rate, p.type || 'cat', date);
-
-      // Aussi sauvegarder les détails du produit (progressif, conditions) dans un champ étendu
       const existing = catManager.rates.rates.find(r => r.bankId === bankId && r.durationMonths === duration && r.productType === (p.type || 'cat'));
       if (existing) {
         existing.rateType = p.rateType || 'fixe';
@@ -191,28 +220,18 @@ async function confirmImportRates() {
     }
   }
 
-  // Sauvegarder les conditions générales
   if (parsed.generalConditions) {
     catManager.rates.generalConditions = catManager.rates.generalConditions || {};
-    catManager.rates.generalConditions[bankId] = {
-      text: parsed.generalConditions,
-      date: date,
-      rawImportText: document.getElementById('import-text')?.value?.substring(0, 2000) || '',
-    };
+    catManager.rates.generalConditions[bankId] = { text: parsed.generalConditions, date, rawImportText: document.getElementById('import-text')?.value?.substring(0, 2000) || '' };
   }
 
   await catManager.saveRates();
   showToast(`${imported} taux importés pour ${bankName}`, 'success');
-
-  // Rafraîchir la liste
   const ratesList = document.getElementById('rates-list');
   if (ratesList) ratesList.innerHTML = renderRatesList();
-
-  // Effacer les résultats d'import
   const results = document.getElementById('import-results');
   if (results) results.innerHTML = '<div style="color:var(--green);padding:10px;font-size:12px">✅ Import terminé !</div>';
   document.getElementById('import-text').value = '';
-
   window._pendingRatesImport = null;
 }
 
@@ -234,13 +253,12 @@ renderRatesList = function() {
 };
 
 // ═══════════════════════════════════════════════════════════════
-// ANALYSE IA + CHAT (inchangé)
+// ANALYSE IA + CHAT
 // ═══════════════════════════════════════════════════════════════
 
 function buildCATPortfolioContext() {
   const stats = catManager.getStats();
   const active = catManager.deposits.filter(d => d.status === 'active');
-  const timeline = catManager.getMaturityTimeline();
   const depositsDetail = active.map(d => {
     const type = d.productType === 'parts-sociales' ? 'Parts Sociales' : 'CAT';
     const exit = EXIT_CONDITIONS.find(e => e.id === d.exitCondition)?.name || d.exitCondition;
@@ -265,20 +283,7 @@ ALERTES FGDR: ${stats.fgdrAlerts.length > 0 ? stats.fgdrAlerts.map(([,v]) => v.n
 
 async function runCATAIAnalysis() {
   const context = buildCATPortfolioContext();
-  const prompt = `Tu es un conseiller en gestion de patrimoine. Analyse ce portefeuille de CAT et Parts Sociales.
-
-${context}
-
-Analyse COMPLÈTE et DIRECTE:
-1. **DIAGNOSTIC** — Diversification, rendement, liquidité, risques
-2. **CONCENTRATIONS** — FGDR, durée, type
-3. **RENDEMENT** — Taux pondéré vs marché? Sous-performances?
-4. **ARBITRAGES** — Quoi arrêter/renouveler/augmenter?
-5. **OPTIMISATION** — Ré-allocation idéale
-6. **RISQUES** — Taux, liquidité, contrepartie
-7. **POINTS D'ATTENTION** — Pénalités, renew auto, échéances
-
-Direct, quantitatif, contrarian. Pas de langue de bois.`;
+  const prompt = `Tu es un conseiller en gestion de patrimoine. Analyse ce portefeuille de CAT et Parts Sociales.\n\n${context}\n\nAnalyse COMPLÈTE et DIRECTE:\n1. **DIAGNOSTIC** — Diversification, rendement, liquidité, risques\n2. **CONCENTRATIONS** — FGDR, durée, type\n3. **RENDEMENT** — Taux pondéré vs marché? Sous-performances?\n4. **ARBITRAGES** — Quoi arrêter/renouveler/augmenter?\n5. **OPTIMISATION** — Ré-allocation idéale\n6. **RISQUES** — Taux, liquidité, contrepartie\n7. **POINTS D'ATTENTION** — Pénalités, renew auto, échéances\n\nDirect, quantitatif, contrarian. Pas de langue de bois.`;
 
   const res = await fetch(CONFIG.AI_ENDPOINT, {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -307,10 +312,7 @@ async function sendCATChatMessage(userMessage) {
 }
 
 async function loadCATAIConversation() {
-  try {
-    const data = await github.readFile(`${CONFIG.DATA_PATH}/cat/ai-conversation.json`);
-    if (data) { catAIConversation = data.conversation || []; catAIAnalysis = data.analysis || null; }
-  } catch (e) { console.log('Pas de conversation IA existante'); }
+  try { const data = await github.readFile(`${CONFIG.DATA_PATH}/cat/ai-conversation.json`); if (data) { catAIConversation = data.conversation || []; catAIAnalysis = data.analysis || null; } } catch (e) { console.log('Pas de conversation IA existante'); }
 }
 
 async function resetCATChat() {
