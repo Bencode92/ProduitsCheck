@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Smart CAT Optimizer V3c — Fixed MD tables + concrete prompt
+// STRUCTBOARD — Smart CAT Optimizer V3d — Auto re-render + exit conditions
 // ═══════════════════════════════════════════════════════════════
 
 let _lastOptimizerResult = null;
@@ -34,35 +34,24 @@ async function saveOptimizerResult(summary, analysis) {
   await github.writeFile(`${CONFIG.DATA_PATH}/cat/optimizer-result.json`, result, '[StructBoard] Optimizer result');
 }
 
-// ═══ MARKDOWN TABLE → HTML TABLE CONVERTER ═══════════════
+// ═══ MARKDOWN TABLE → HTML ═══════════════════════════════
 function _mdToHtmlTable(md) {
-  // Find markdown tables and convert to styled HTML tables
   return md.replace(/(\|[^\n]+\|\n)((?:\|[-:| ]+\|\n))(\|[^\n]+\|\n?)+/g, (match) => {
     const lines = match.trim().split('\n').filter(l => l.trim());
     if (lines.length < 2) return match;
-    
     const parseRow = (line) => line.split('|').filter((_, i, a) => i > 0 && i < a.length - 1).map(c => c.trim());
     const headers = parseRow(lines[0]);
-    const isAlignRow = (l) => /^\|[\s:-]+\|$/.test(l.trim().replace(/\|/g, '|'));
-    const dataStart = isAlignRow(lines[1]) ? 2 : 1;
-
+    const dataStart = /^\|[\s:-]+\|$/.test(lines[1].trim().replace(/\|/g, '|')) ? 2 : 1;
     let html = '<table style="width:100%;border-collapse:collapse;font-size:11px;margin:12px 0"><thead><tr>';
-    headers.forEach(h => { html += `<th style="padding:8px 10px;text-align:left;color:var(--accent);font-weight:600;border-bottom:2px solid var(--border);font-size:11px">${_mdInline(h)}</th>`; });
+    headers.forEach(h => { html += `<th style="padding:8px 10px;text-align:left;color:var(--accent);font-weight:600;border-bottom:2px solid var(--border)">${h.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')}</th>`; });
     html += '</tr></thead><tbody>';
-
     for (let i = dataStart; i < lines.length; i++) {
       const cells = parseRow(lines[i]);
       if (cells.length === 0) continue;
       html += '<tr style="border-bottom:1px solid var(--border)">';
       cells.forEach((c, j) => {
-        const isAction = c.includes('ARBITRER') || c.includes('GARDER') || c.includes('SURVEILLER');
-        const isPositive = /^\+/.test(c) || c.includes('+');
-        const style = j === 0
-          ? 'font-weight:600;color:var(--text-bright)'
-          : isAction
-            ? `font-weight:600;color:${c.includes('ARBITRER') ? 'var(--orange)' : c.includes('SURVEILLER') ? 'var(--cyan)' : 'var(--green)'}`
-            : isPositive ? 'color:var(--green);font-family:var(--mono)' : '';
-        html += `<td style="padding:6px 10px;font-size:11px;${style}">${_mdInline(c)}</td>`;
+        const style = j === 0 ? 'font-weight:600;color:var(--text-bright)' : c.includes('ARBITRER') ? 'color:var(--orange);font-weight:600' : c.includes('GARDER') ? 'color:var(--green);font-weight:600' : /^\+/.test(c) ? 'color:var(--green);font-family:var(--mono)' : '';
+        html += `<td style="padding:6px 10px;${style}">${c.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/→/g, '<span style="color:var(--accent)">→</span>')}</td>`;
       });
       html += '</tr>';
     }
@@ -71,23 +60,13 @@ function _mdToHtmlTable(md) {
   });
 }
 
-function _mdInline(text) {
-  return text
-    .replace(/\*\*(.+?)\*\*/g, '<strong style="color:var(--text-bright)">$1</strong>')
-    .replace(/→/g, '<span style="color:var(--accent)">→</span>');
-}
-
-// ═══ ENHANCED formatAIText with table support ════════════
 function _formatOptimizerAI(text) {
   if (!text) return '';
-  // First convert markdown tables
   let html = _mdToHtmlTable(text);
-  // Then use standard formatAIText for the rest
   html = formatAIText(html);
   return html;
 }
 
-// ═══ BEAUTIFUL AI SUMMARY BLOCK ══════════════════════════
 function _renderAISummaryBlock(summary) {
   if (!summary) return '';
   return `<div style="background:linear-gradient(135deg,rgba(59,130,246,0.06),rgba(139,92,246,0.06));border:1px solid rgba(59,130,246,0.2);border-radius:var(--radius);overflow:hidden">
@@ -99,7 +78,7 @@ function _renderAISummaryBlock(summary) {
   </div>`;
 }
 
-// Direct launch — no form
+// ═══ DIRECT LAUNCH ═══════════════════════════════════════
 const _origShowCATSimulator = showCATSimulator;
 showCATSimulator = function() {
   const rates = (catManager.rates?.rates || []).filter(r => !_isRateExpired(r));
@@ -122,11 +101,21 @@ async function runSmartOptimizer() {
     let html = renderOptimizationTable(analysis);
     html += '<div id="ai-optimizer-summary" style="margin-top:16px"><div style="display:flex;align-items:center;gap:10px;padding:16px;color:var(--text-muted);background:var(--accent-glow);border-radius:var(--radius-sm)"><div class="spinner"></div>Claude analyse les arbitrages...</div></div>';
     results.innerHTML = html;
+
     const aiSummary = await getAIOptimizerSummary(analysis);
     const aiDiv = document.getElementById('ai-optimizer-summary');
     if (aiDiv) aiDiv.innerHTML = _renderAISummaryBlock(aiSummary);
+
+    // Save to GitHub
     await saveOptimizerResult(aiSummary, analysis);
     showToast('Optimisation sauvegardée', 'success');
+
+    // FIX: Replace Fermer button with "Fermer et voir sur le dashboard"
+    const modalActions = document.querySelector('.modal-actions');
+    if (modalActions) {
+      modalActions.innerHTML = `<button class="btn" onclick="closeModal()">Fermer</button>
+        <button class="btn primary" onclick="closeModal();renderCAT(document.getElementById('main-content'));">✅ Voir sur le dashboard</button>`;
+    }
   } catch(e) { results.innerHTML = `<div style="color:var(--red);padding:16px">❌ Erreur: ${e.message}</div>`; }
 }
 
@@ -147,13 +136,12 @@ function renderOptimizerDashboard() {
       </div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:16px">
-      <div style="background:var(--bg-card);padding:12px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px">Rendement actuel</div><div style="font-size:20px;font-weight:800;color:var(--green);font-family:var(--mono);margin-top:4px">+${formatNumber(r.totalInterestPerYear)}€<span style="font-size:11px;font-weight:400">/an</span></div><div style="font-size:10px;color:var(--text-dim);margin-top:2px">${(r.weightedRate||0).toFixed(2)}% moy.</div></div>
-      <div style="background:var(--bg-card);padding:12px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px">Après optimisation</div><div style="font-size:20px;font-weight:800;color:${r.totalPotentialGain > 0 ? 'var(--cyan)' : 'var(--green)'};font-family:var(--mono);margin-top:4px">+${formatNumber(r.optimizedInterest)}€<span style="font-size:11px;font-weight:400">/an</span></div><div style="font-size:10px;color:var(--text-dim);margin-top:2px">${(r.optimizedRate||0).toFixed(2)}% moy.</div></div>
+      <div style="background:var(--bg-card);padding:12px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px">Rendement actuel</div><div style="font-size:20px;font-weight:800;color:var(--green);font-family:var(--mono);margin-top:4px">+${formatNumber(r.totalInterestPerYear)}€<span style="font-size:11px;font-weight:400">/an</span></div><div style="font-size:10px;color:var(--text-dim);margin-top:2px">${(r.weightedRate||0).toFixed(2)}%</div></div>
+      <div style="background:var(--bg-card);padding:12px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px">Après optimisation</div><div style="font-size:20px;font-weight:800;color:${r.totalPotentialGain > 0 ? 'var(--cyan)' : 'var(--green)'};font-family:var(--mono);margin-top:4px">+${formatNumber(r.optimizedInterest)}€<span style="font-size:11px;font-weight:400">/an</span></div><div style="font-size:10px;color:var(--text-dim);margin-top:2px">${(r.optimizedRate||0).toFixed(2)}%</div></div>
       <div style="background:var(--bg-card);padding:12px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px">Gain potentiel</div><div style="font-size:20px;font-weight:800;color:${r.totalPotentialGain > 0 ? 'var(--green)' : 'var(--text-dim)'};font-family:var(--mono);margin-top:4px">${r.totalPotentialGain > 0 ? '+' + formatNumber(r.totalPotentialGain) + '€' : '✅'}</div><div style="font-size:10px;color:var(--text-dim);margin-top:2px">${r.totalPotentialGain > 0 ? 'par an' : 'Déjà optimisé'}</div></div>
-      <div style="background:var(--bg-card);padding:12px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px">Périmètre</div><div style="font-size:20px;font-weight:800;color:var(--text-bright);margin-top:4px">${r.depositCount || 0} <span style="font-size:11px;font-weight:400;color:var(--text-dim)">vs ${r.rateCount || 0}</span></div><div style="font-size:10px;color:var(--text-dim);margin-top:2px">contrats vs taux marché</div></div>
+      <div style="background:var(--bg-card);padding:12px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px">Périmètre</div><div style="font-size:20px;font-weight:800;color:var(--text-bright);margin-top:4px">${r.depositCount || 0} <span style="font-size:11px;font-weight:400;color:var(--text-dim)">vs ${r.rateCount || 0}</span></div><div style="font-size:10px;color:var(--text-dim);margin-top:2px">contrats vs taux</div></div>
     </div>`;
 
-  // Scrollable table
   if (deposits.length > 0) {
     html += `<div style="border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:16px">
       <div style="padding:10px 14px;background:var(--bg-elevated);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;font-weight:600;color:var(--text-bright)">📊 Comparaison contrats vs marché</span><span style="font-size:10px;color:var(--text-dim)">${deposits.length} contrats</span></div>
@@ -175,9 +163,10 @@ function renderOptimizerDashboard() {
   return html;
 }
 
-// ═══ ANALYSIS ENGINE ═════════════════════════════════════
+// ═══ ANALYSIS ENGINE — includes exit conditions ══════════
 function buildOptimizationAnalysis() {
   const now = new Date();
+  const nowStr = now.toISOString().split('T')[0];
   const active = catManager.deposits.filter(d => d.status === 'active');
   const rates = (catManager.rates?.rates || []).filter(r => !_isRateExpired(r));
   const obj = catManager.objectives;
@@ -194,25 +183,52 @@ function buildOptimizationAnalysis() {
     const remainingMonths = Math.max(0, durationMonths - elapsedMonths);
     const interestPerYear = Math.round(amount * (rate / 100) * 100) / 100;
 
+    // Current period rate for progressives
+    let currentPeriodRate = rate;
+    if (d.rateSchedule && d.rateSchedule.length > 0) {
+      const cp = d.rateSchedule.find(s => s.from <= nowStr && s.to >= nowStr);
+      if (cp) currentPeriodRate = cp.rate;
+    }
+
+    // Find best alternative across ALL market rates
     const bestAlt = Object.values(bestByDuration).filter(r => r.rate > rate).sort((a, b) => b.rate - a.rate)[0] || null;
     const switchGainPerYear = bestAlt ? Math.round((amount * (bestAlt.rate / 100) - interestPerYear) * 100) / 100 : 0;
 
-    let currentPeriodRate = rate;
-    if (d.rateSchedule && d.rateSchedule.length > 0) { const cp = d.rateSchedule.find(s => s.from <= now.toISOString().split('T')[0] && s.to >= now.toISOString().split('T')[0]); if (cp) currentPeriodRate = cp.rate; }
+    // Get withdrawal conditions from market rate
+    const bestAltFull = bestAlt ? rates.find(r => r.rate === bestAlt.rate && r.durationMonths === bestAlt.durationMonths) : null;
+    const altWithdrawalConditions = bestAltFull?.withdrawalConditions || '';
+    const altNotice = bestAltFull?.notice || '';
 
-    // Get withdrawal conditions from the best alternative market rate
-    const withdrawalInfo = bestAlt ? (rates.find(r => r.rate === bestAlt.rate)?.withdrawalConditions || '') : '';
+    // Get exit penalty from deposit
+    const exitPenalty = d.exitPenalty || '';
+    const exitCondition = d.exitCondition || '';
 
     let recommendation = 'GARDER', reason = 'Taux compétitif';
     if (bestAlt && bestAlt.rate > rate + 0.3) { recommendation = 'ARBITRER'; reason = `→ ${bestAlt.productName || bestAlt.bankName + ' ' + bestAlt.durationMonths + 'm'} à ${bestAlt.rate}%`; }
     else if (bestAlt && bestAlt.rate > rate) { recommendation = 'SURVEILLER'; reason = `+${(bestAlt.rate - rate).toFixed(2)}% dispo`; }
     else if (rate >= (bestOverall?.rate || 0)) { reason = 'Leader marché'; }
 
-    return { id: d.id, name: d.productName || 'CAT', bankName: d.bankName, entity: d.entityName || '', amount, rate, currentPeriodRate, durationMonths, elapsedMonths, remainingMonths, interestPerYear, bestAlt: bestAlt ? { name: bestAlt.productName || bestAlt.bankName + ' ' + bestAlt.durationMonths + 'm', rate: bestAlt.rate, duration: bestAlt.durationMonths, bankName: bestAlt.bankName } : null, switchGainPerYear, recommendation, reason, maturityDate: d.maturityDate, exitPenalty: d.exitPenalty || '', withdrawalInfo };
+    return {
+      id: d.id, name: d.productName || 'CAT', bankName: d.bankName, entity: d.entityName || '',
+      amount, rate, currentPeriodRate, durationMonths, elapsedMonths, remainingMonths, interestPerYear,
+      bestAlt: bestAlt ? { name: bestAlt.productName || bestAlt.bankName + ' ' + bestAlt.durationMonths + 'm', rate: bestAlt.rate, duration: bestAlt.durationMonths, bankName: bestAlt.bankName } : null,
+      switchGainPerYear, recommendation, reason, maturityDate: d.maturityDate,
+      exitPenalty, exitCondition, altWithdrawalConditions, altNotice,
+    };
   });
 
   const cashOpportunities = [];
-  if (placable > 0) { [...rates].sort((a, b) => b.rate - a.rate).slice(0, 5).forEach(r => { cashOpportunities.push({ name: r.productName || r.bankName + ' ' + r.durationMonths + 'm', rate: r.rate, duration: r.durationMonths, bankName: r.bankName, interestPerYear: Math.round(placable * (r.rate / 100) * 100) / 100, amount: placable }); }); }
+  if (placable > 0) {
+    [...rates].sort((a, b) => b.rate - a.rate).slice(0, 5).forEach(r => {
+      cashOpportunities.push({
+        name: r.productName || r.bankName + ' ' + r.durationMonths + 'm',
+        rate: r.rate, duration: r.durationMonths, bankName: r.bankName,
+        interestPerYear: Math.round(placable * (r.rate / 100) * 100) / 100,
+        amount: placable,
+        withdrawalConditions: r.withdrawalConditions || '',
+      });
+    });
+  }
 
   const totalInvested = depositAnalysis.reduce((s, d) => s + d.amount, 0);
   const totalInterestPerYear = depositAnalysis.reduce((s, d) => s + d.interestPerYear, 0);
@@ -232,11 +248,12 @@ function renderOptimizationTable(analysis) {
   let html = `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:16px">
     <div style="background:var(--bg-card);padding:12px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted)">Rendement actuel</div><div style="font-size:20px;font-weight:800;color:var(--green);font-family:var(--mono)">+${formatNumber(totalInterestPerYear)}€/an</div><div style="font-size:10px;color:var(--text-dim)">${weightedRate.toFixed(2)}% sur ${formatNumber(totalInvested)}€</div></div>
     <div style="background:var(--bg-card);padding:12px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted)">Après optimisation</div><div style="font-size:20px;font-weight:800;color:${totalPotentialGain > 0 ? 'var(--cyan)' : 'var(--green)'};font-family:var(--mono)">+${formatNumber(optimizedInterest)}€/an</div><div style="font-size:10px;color:var(--text-dim)">${optimizedRate.toFixed(2)}%${totalPotentialGain > 0 ? ' (+' + formatNumber(totalPotentialGain) + '€)' : ''}</div></div>
-    <div style="background:var(--bg-card);padding:12px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted)">Arbitrages</div><div style="font-size:20px;font-weight:800;color:${arbitrageCount > 0 ? 'var(--orange)' : 'var(--green)'}">${arbitrageCount > 0 ? '🔄 ' + arbitrageCount : '✅'}</div><div style="font-size:10px;color:var(--text-dim)">${arbitrageCount > 0 ? arbitrageCount + ' à réallouer' : 'Optimisé'}</div></div>
+    <div style="background:var(--bg-card);padding:12px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted)">Arbitrages</div><div style="font-size:20px;font-weight:800;color:${arbitrageCount > 0 ? 'var(--orange)' : 'var(--green)'}">${arbitrageCount > 0 ? '🔄 ' + arbitrageCount : '✅'}</div><div style="font-size:10px;color:var(--text-dim)">${arbitrageCount > 0 ? arbitrageCount + ' opportunité' + (arbitrageCount > 1 ? 's' : '') : 'Optimisé'}</div></div>
     <div style="background:var(--bg-card);padding:12px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted)">Meilleur marché</div><div style="font-size:20px;font-weight:800;color:var(--accent);font-family:var(--mono)">${bestOverall ? bestOverall.rate + '%' : '—'}</div><div style="font-size:10px;color:var(--text-dim)">${bestOverall ? (bestOverall.productName || bestOverall.bankName + ' ' + bestOverall.durationMonths + 'm') : ''}</div></div>
   </div>`;
 
   html += `<div style="border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden"><div style="max-height:400px;overflow-y:auto"><table style="width:100%;border-collapse:collapse;font-size:11px"><thead style="position:sticky;top:0;z-index:1"><tr style="background:var(--bg-elevated);border-bottom:1px solid var(--border)"><th style="padding:8px 10px;text-align:left;color:var(--text-muted);font-weight:500">Produit</th><th style="padding:8px 6px;text-align:right;color:var(--text-muted);font-weight:500">Montant</th><th style="padding:8px 6px;text-align:center;color:var(--text-muted);font-weight:500">Taux</th><th style="padding:8px 6px;text-align:right;color:var(--text-muted);font-weight:500">Rdt/an</th><th style="padding:8px 6px;text-align:center;color:var(--text-muted);font-weight:500">Restant</th><th style="padding:8px 6px;text-align:center;color:var(--text-muted);font-weight:500">Meilleur dispo</th><th style="padding:8px 6px;text-align:right;color:var(--text-muted);font-weight:500">Gain/an</th><th style="padding:8px 6px;text-align:center;color:var(--text-muted);font-weight:500">Action</th></tr></thead><tbody>`;
+
   depositAnalysis.forEach(d => {
     const recColor = d.recommendation === 'ARBITRER' ? 'var(--orange)' : d.recommendation === 'SURVEILLER' ? 'var(--cyan)' : 'var(--green)';
     const recIcon = d.recommendation === 'ARBITRER' ? '🔄' : d.recommendation === 'SURVEILLER' ? '👀' : '✅';
@@ -245,53 +262,55 @@ function renderOptimizationTable(analysis) {
   html += `</tbody></table></div></div>`;
 
   if (cashOpportunities.length > 0) {
-    html += `<div style="margin-top:16px"><h3 style="font-size:12px;color:var(--cyan);margin-bottom:8px">💰 Placer ${formatNumber(analysis.placable)}€</h3><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px">`;
-    cashOpportunities.forEach((c, i) => { html += `<div style="background:var(--bg-elevated);border:1px solid ${i === 0 ? 'var(--cyan)' : 'var(--border)'};border-radius:var(--radius-sm);padding:10px">${i === 0 ? '<div style="font-size:9px;color:var(--cyan);margin-bottom:4px">⭐ RECOMMANDÉ</div>' : ''}<div style="display:flex;justify-content:space-between;align-items:center"><strong style="font-size:11px;color:var(--text-bright)">${c.name}</strong><span style="font-family:var(--mono);color:var(--green);font-weight:700">${c.rate}%</span></div><div style="font-size:10px;color:var(--text-muted);margin-top:4px">${c.duration}m · <strong style="color:var(--green)">+${formatNumber(c.interestPerYear)}€/an</strong></div></div>`; });
+    html += `<div style="margin-top:16px"><h3 style="font-size:12px;color:var(--cyan);margin-bottom:8px">💰 Placer ${formatNumber(placable)}€</h3><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px">`;
+    cashOpportunities.forEach((c, i) => { html += `<div style="background:var(--bg-elevated);border:1px solid ${i === 0 ? 'var(--cyan)' : 'var(--border)'};border-radius:var(--radius-sm);padding:10px">${i === 0 ? '<div style="font-size:9px;color:var(--cyan);margin-bottom:4px">⭐ RECOMMANDÉ</div>' : ''}<div style="display:flex;justify-content:space-between;align-items:center"><strong style="font-size:11px;color:var(--text-bright)">${c.name}</strong><span style="font-family:var(--mono);color:var(--green);font-weight:700">${c.rate}%</span></div><div style="font-size:10px;color:var(--text-muted);margin-top:4px">${c.duration}m · <strong style="color:var(--green)">+${formatNumber(c.interestPerYear)}€/an</strong></div>${c.withdrawalConditions ? '<div style="font-size:9px;color:var(--orange);margin-top:2px">⚠️ ' + c.withdrawalConditions + '</div>' : ''}</div>`; });
     html += `</div></div>`;
   }
   return html;
 }
 
-// ═══ AI PROMPT — CONCRETE with withdrawal conditions ═════
+// ═══ AI PROMPT — with full exit conditions ═══════════════
 async function getAIOptimizerSummary(analysis) {
   const { depositAnalysis, cashOpportunities, placable, totalInvested, totalInterestPerYear, weightedRate, totalPotentialGain, arbitrageCount, optimizedInterest, optimizedRate } = analysis;
 
-  // Build detailed context with withdrawal conditions
   const depositsText = depositAnalysis.map(d => {
     let line = `• ${d.name} (${d.bankName}) | ${d.amount}€ à ${d.rate}% TRAAB`;
     if (d.currentPeriodRate !== d.rate) line += ` (palier actuel: ${d.currentPeriodRate}%)`;
-    line += ` | Rdt: +${d.interestPerYear}€/an | Restant: ${d.remainingMonths} mois`;
-    if (d.exitPenalty) line += ` | Pénalité sortie: ${d.exitPenalty}`;
-    if (d.bestAlt) line += ` | Meilleur marché: ${d.bestAlt.rate}% (${d.bestAlt.name})`;
-    if (d.switchGainPerYear > 0) line += ` | Gain si switch: +${d.switchGainPerYear}€/an`;
+    line += ` | Rdt: +${d.interestPerYear}€/an | Restant: ${d.remainingMonths}m`;
+    if (d.exitPenalty) line += ` | Sortie: ${d.exitPenalty}`;
+    if (d.bestAlt) {
+      line += ` | Meilleur: ${d.bestAlt.rate}% (${d.bestAlt.name})`;
+      if (d.altWithdrawalConditions) line += ` [Retrait: ${d.altWithdrawalConditions}]`;
+    }
+    if (d.switchGainPerYear > 0) line += ` | Gain: +${d.switchGainPerYear}€/an`;
     line += ` | → ${d.recommendation}`;
     return line;
   }).join('\n');
 
   const cashText = placable > 0 && cashOpportunities.length > 0
-    ? `\n\n💰 CASH À PLACER: ${formatNumber(placable)}€\nTop 3:\n` + cashOpportunities.slice(0, 3).map(c => `• ${c.name} à ${c.rate}% → +${c.interestPerYear}€/an`).join('\n')
+    ? `\n\n💰 CASH: ${formatNumber(placable)}€\n` + cashOpportunities.slice(0, 3).map(c =>
+        `• ${c.name} à ${c.rate}% → +${c.interestPerYear}€/an${c.withdrawalConditions ? ' [' + c.withdrawalConditions + ']' : ''}`
+      ).join('\n')
     : '';
 
-  const prompt = `Tu es un directeur financier qui conseille sur l'optimisation de la trésorerie. Analyse concrète et chiffrée.
+  const prompt = `Directeur financier. Optimisation trésorerie. Analyse CONCRÈTE.
 
-**SITUATION ACTUELLE:** ${formatNumber(totalInvested)}€ placés à ${weightedRate.toFixed(2)}% = **+${formatNumber(totalInterestPerYear)}€/an**
-**APRÈS OPTIMISATION:** ${optimizedRate.toFixed(2)}% = **+${formatNumber(optimizedInterest)}€/an** (${totalPotentialGain > 0 ? 'gain: +' + formatNumber(totalPotentialGain) + '€/an' : 'déjà optimisé'})
+**AVANT:** ${formatNumber(totalInvested)}€ à ${weightedRate.toFixed(2)}% = **+${formatNumber(totalInterestPerYear)}€/an**
+**APRÈS:** ${optimizedRate.toFixed(2)}% = **+${formatNumber(optimizedInterest)}€/an** (${totalPotentialGain > 0 ? '+' + formatNumber(totalPotentialGain) + '€/an' : 'déjà optimisé'})
 
-DÉTAIL DES ${depositAnalysis.length} CONTRATS:
+${depositAnalysis.length} CONTRATS:
 ${depositsText}${cashText}
 
-CONDITIONS: Tous les CAT sont à préavis 32 jours. Les progressifs ont des conditions de sortie spécifiques par palier.
+Tous les CAT sont à préavis 32 jours.
 
-INSTRUCTIONS DE FORMAT (TRÈS IMPORTANT):
-- NE PAS utiliser de tableau markdown (pas de |---|)
-- Commence par une ligne résumé: **AVANT: X€/an → APRÈS: Y€/an (+Z€)**
-- Puis pour chaque arbitrage, une ligne claire:
-  🔄 **[Nom contrat]** [montant]€ à [taux]% → Sortir et placer sur **[nouveau produit]** à [taux]% = **+[gain]€/an**
-  ⚠️ Contrainte: [préavis/pénalité]
-- Pour les contrats à garder, une ligne:
-  ✅ **[X] contrats** performants (leaders du marché ou proches)
-- Termine par 1-2 bullets de synthèse max
-- Max 150 mots. Très direct, très concret, très chiffré.`;
+FORMAT (STRICT — pas de tableau markdown):
+- Ligne résumé: **AVANT: X€/an → APRÈS: Y€/an (+Z€)**
+- Pour chaque arbitrage:
+  🔄 **[Nom]** [montant]€ à [taux]% → placer sur **[produit]** à [taux]% = **+[gain]€/an**
+  ⚠️ [conditions de sortie concrètes: préavis, pénalités]
+- ✅ **[N] contrats** leaders du marché
+- 1-2 bullets synthèse max
+- Max 150 mots`;
 
   const res = await fetch(CONFIG.AI_ENDPOINT, {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
