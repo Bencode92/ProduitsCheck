@@ -50,7 +50,7 @@
     "productName": "CATIP ENT 3ANS A PREAVIS",
     "amount": 200000,
     "rate": 2.7,
-    "rateType": "fixe",
+    "rateType": "progressif",
     "durationMonths": 36,
     "startDate": "2025-08-05",
     "interestPayment": "maturity",
@@ -63,7 +63,27 @@
     "maturityDate": "2028-08-05",
     "estimatedInterest": 16200,
     "entity": "cameleons",
-    "entityName": "Caméleons"
+    "entityName": "Caméleons",
+    "rateSchedule": [
+      {
+        "from": "2025-08-05",
+        "to": "2026-08-04",
+        "rate": 2.6,
+        "earlyRate": null
+      },
+      {
+        "from": "2026-08-05",
+        "to": "2026-08-04",
+        "rate": 2.7,
+        "earlyRate": null
+      },
+      {
+        "from": "2027-08-05",
+        "to": "2027-08-04",
+        "rate": 2.8,
+        "earlyRate": null
+      }
+    ]
   },
   {
     "productType": "cat",
