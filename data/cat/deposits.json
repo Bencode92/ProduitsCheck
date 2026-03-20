@@ -169,8 +169,8 @@
   },
   {
     "productType": "cat",
-    "bankId": "",
-    "bankName": "",
+    "bankId": "sg",
+    "bankName": "Société Générale",
     "productName": "CAT CROISSANCE +3A PREAVIS",
     "amount": 60000,
     "rate": 3.21,
