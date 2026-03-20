@@ -1,0 +1,142 @@
+{
+  "id": "sp_mmz30epd_icjv0",
+  "name": "SL – PHOENIX MEMOIRE FAST SEMESTRIEL ASML AVRIL 2026",
+  "bankId": "swiss-life",
+  "type": "autocall",
+  "underlyingType": "autre",
+  "underlyings": [
+    "ASML Holding NV"
+  ],
+  "currency": "EUR",
+  "maturity": "6 ans",
+  "maturityDate": "2026-04-30",
+  "strikeDate": "2020-04-30",
+  "coupon": {
+    "rate": 7,
+    "type": "conditionnel",
+    "frequency": "semestriel",
+    "trigger": -40,
+    "memory": true
+  },
+  "capitalProtection": {
+    "protected": false,
+    "level": 0,
+    "barrier": -60,
+    "barrierType": "europeenne"
+  },
+  "earlyRedemption": {
+    "possible": true,
+    "type": "autocall",
+    "trigger": 100,
+    "frequency": "semestriel",
+    "startYear": 1
+  },
+  "scenarios": {
+    "favorable": "Remboursement anticipé au semestre 2 à 103,5%",
+    "median": "Capital protégé avec TRA de 1,82%",
+    "defavorable": "Perte de capital, remboursement à 30%"
+  },
+  "risks": [
+    "Perte partielle ou totale du capital",
+    "Plafonnement des gains",
+    "Sensibilité aux seuils de barrière"
+  ],
+  "rawText": "--- PAGE 1 ---\nPUBLIC  •  •  •  •  •  •  •  •  )\n--- PAGE 2 ---\nPUBLIC  Un   mécanisme   de   remboursement   automatique   anticipé   dès   le   semestre   2   :  Du   semestre   2   au   semestre   11 ,   à   la   date   de   constatation   semestrielle   correspondante,   on   observe   le   cours   de   l’action   depuis   l’origine .  Si   l’action   ASML   Holding   NV   enregistre   une   performance   supérieure   ou   égale   à   la   Barrière   de   Remboursement   Anticipé,   le  mécanisme   de   remboursement   automatique   anticipé   est   automatiquement   activé,   et   l’investisseur   reçoit ( 1 )   à   la   date   de   remboursement  anticipé   :  L’intégralité du capital initial (2)  +  Un coupon de 3.50% par semestre écoulé depuis la date de constatation initiale défini ci -  dessus dans le mécanisme de versement du coupon conditionnel  (Taux de Rendement Annuel Brut compris entre au maximum 7.08% et minimum 6.07% dans ce cas, selon l’année de remboursement)  Un   mécanisme   de   remboursement   à   l’échéance   des   12   semestres   :  À   l'issue   des   12   semestres,   à   la   date   de   constatation   finale,   si   le   mécanisme   de   remboursement   automatique   anticipé   n’a   pas   été   activé  précédemment,   on   observe   le   cours   de   l’action,  ▪   Si   le   cours   de   l’action   enregistre   une   performance   supérieure   ou   égale   à   - 40 %   depuis   l’origine,   l’investisseur   reçoit ( 1 )   :  L’intégralité du capital initial (2)  +  Un coupon de 3.50% par semestre écoulé depuis la date de constatation initiale défini ci -  dessus dans le mécanisme de versement du coupon conditionnel  (Taux de Rendement Annuel Brut compris entre au maximum 7.09% et minimum 5.99% dans ce cas)  ▪   Si   le   cours   de   l’action   enregistre   une   performance   strictement   inférieure   à   - 60 %   depuis   l’origine ,   l’investisseur   reçoit   ( 1 )   :  L’intégralité du capital initial (2)   diminué de la baisse de l'action  Dans ce scénario, l’investisseur subit une perte en capital à l’échéance. Cette perte en capital  peut être partielle ou totale.  (Taux de Rendement Annuel Brut inférieur à   - 8,13% dans ce cas)  ▪   Si   le   cours   de   l’action   enregistre   une   performance   inférieure   à   - 40 %   mais   supérieure   ou   égale   à   - 60 %   depuis   l’origine ,  l’investisseur   reçoit   ( 1 )   :  L’intégralité du capital initial (2)  (Taux de Rendement Annuel Brut minimum de 0%)  Barrières de Remboursement Anticipé activant le mécanisme automatique de remboursement anticipé:  Un   mécanisme   de   versement   du   coupon   conditionnel :  Du   semestre   1   au   semestre   12 ,   à   chaque   date   de   constatation   semestrielle   correspondante,   on   observe   le   cours   de   l’action   depuis  l’origine .  Si   le   cours   de   l’action   ASML   Holding   NV   enregistre   une   performance   supérieure   ou   égale   à   - 40 % ,   l’investisseur   reçoit ( 1 )   à   la   date   de  versement   du   coupon   correspondante   :  Un coupon de 3.50%  +  Un coupon de 3.50% par semestre écoulé au titre duquel aucun coupon n’aurait été versé  précédemment  Semestres   2 - 3   4 - 5   6 - 7   8 - 9   10 - 11  Niveau de la  Barrière de  Remboursement  Anticipé  100%   95%   90%   85%   80%  ( 1 )   Hors   commission   de   souscription   ou   frais   d’entrée,   de   rachat,   d’arbitrage   et   de   gestion   liés   aux   contrats   d’assurance - vie   ou   de   capitalisation,   et/ou   fiscalité   et   prélèvements   sociaux  applicables .  ( 2 )   Les   termes   «   capital   initial   »   ou   «   capital   »   utilisés   dans   cette   brochure   désignent   la   valeur   nominale   des   titres   «   SL   –   PHOENIX   MEMOIRE   FAST   SEMESTRIEL   ASML   AVRIL   2026   »   soit   1   000  euros .   Le   montant   remboursé   est   calculé   sur   la   base   de   la   valeur   nominale   des   titres   «   SL   –   PHOENIX   MEMOIRE   FAST   SEMESTRIEL   ASML   AVRIL   2026   »,   hors   frais   et   fiscalité   applicables   au  cadre   d’investissement .\n--- PAGE 3 ---\nPUBLIC  ILLUSTRATIONS  Les   données   chiffrées   utilisées   dans   ces   illustrations   n’ont   qu’une   valeur   indicative   et   informative,   l’objectif   étant   de   décrire   le  mécanisme   du   produit .   Elles   ne   préjugent   en   rien   de   résultats   futurs   et   ne   sauraient   constituer   en   aucune   manière   une   offre  commerciale .   Ces   données   sont   présentées   hors   frais   et   fiscalité   applicables   au   cadre   de   l’investissement .  ▪   À   l’issue   des   semestres   2   à   11 ,   le   cours   de   l’action   enregistre   une  performance   inférieure   à   la   Barrière   de   Remboursement   Anticipé  correspondante   depuis   l’origine .   Le   produit   n’est   donc   pas   rappelé   par  anticipation .  ▪   À   l’échéance   des   12   semestres,   le   cours   de   l’action   enregistre   une  pe",
+  "aiParsed": {
+    "name": "SL – PHOENIX MEMOIRE FAST SEMESTRIEL ASML AVRIL 2026",
+    "type": "phoenix",
+    "emitter": "HSBC",
+    "guarantor": "HSBC",
+    "isin": "FR0014016TS2",
+    "underlyings": [
+      "ASML Holding NV"
+    ],
+    "underlyingType": "single-stock",
+    "currency": "EUR",
+    "maturity": "6 ans",
+    "maturityDate": "2026-04-30",
+    "strikeDate": "2020-04-30",
+    "coupon": {
+      "rate": 7,
+      "type": "conditionnel",
+      "frequency": "semestriel",
+      "trigger": -40,
+      "memory": true
+    },
+    "capitalProtection": {
+      "protected": false,
+      "level": 0,
+      "barrier": -60,
+      "barrierType": "europeenne"
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "autocall",
+      "trigger": 100,
+      "frequency": "semestriel",
+      "startYear": 1
+    },
+    "scenarios": {
+      "favorable": "Remboursement anticipé au semestre 2 à 103,5%",
+      "median": "Capital protégé avec TRA de 1,82%",
+      "defavorable": "Perte de capital, remboursement à 30%"
+    },
+    "risks": [
+      "Perte partielle ou totale du capital",
+      "Plafonnement des gains",
+      "Sensibilité aux seuils de barrière"
+    ],
+    "summary": "Produit Phoenix à mémoire sur ASML avec coupon semestriel de 3,50% et remboursement anticipé possible"
+  },
+  "aiSummary": "## DESCRIPTION\n**Produit :** Phoenix à mémoire semestriel sur ASML Holding NV  \n**Émetteur :** HSBC  \n**Durée :** 6 ans (échéance avril 2026)  \n**Sous-jacent :** ASML Holding NV (unique)\n\n## RENDEMENT\n**Coupon :** 7% conditionnel semestriel  \n**Mécanisme :** Coupon versé si ASML ≥ -40% vs niveau initial  \n**Mémoire :** Oui - rattrapage des coupons non versés si condition remplie ultérieurement\n\n## PROTECTION\n**Capital :** Non protégé  \n**Barrière de protection :** -60% (européenne)  \n**Mécanisme :** Perte proportionnelle du capital si ASML clôture sous -60% à l'échéance\n\n## REMBOURSEMENT ANTICIPÉ\n**Autocall :** Possible dès le semestre 2  \n**Condition :** ASML ≥ 100% du niveau initial  \n**Fréquence :** Observation semestrielle  \n**Remboursement :** 100% + coupons dus\n\n## SCÉNARIOS\n**Favorable :** Remboursement anticipé au semestre 2 à 103,5%  \n**Médian :** Capital protégé avec TRA de 1,82%  \n**Défavorable :** Perte de capital, remboursement à 30%\n\n## POINTS D'ATTENTION\n• **Risque de perte totale** du capital (barrière à -60%)  \n• **Gains plafonnés** par le mécanisme d'autocall  \n• **Sensibilité critique** aux seuils -40% (coupon) et -60% (capital)  \n• **Concentration** sur un seul titre (ASML)",
+  "sourceFile": "Brochure PHOENIX FAST SEMESTRIEL ASML AVRIL 2026.pdf",
+  "aiCategory": "phoenix-mono",
+  "aiCategoryLabel": "🎯 Phoenix Mono-actif",
+  "aiCategoryColor": "#3B82F6",
+  "aiOpinion": "Ce produit Phoenix offre un rendement attractif de 7% semestriel avec effet mémoire, mais présente un risque significatif étant exposé uniquement à ASML sans protection du capital. La barrière à -60% offre une marge de sécurité correcte, toutefois la concentration sur un seul titre technologique expose à une forte volatilité sectorielle.",
+  "aiAnalyzedAt": "2026-03-20T15:56:39.280Z",
+  "status": "analyzing",
+  "receivedDate": "2026-03-20",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null,
+  "score": {
+    "score": 39,
+    "details": [
+      {
+        "type": "warning",
+        "icon": "📦",
+        "text": "Même type que 4 produit(s) — 80% du book en \"Autocall / Phoenix\"",
+        "impact": 20,
+        "category": "redundancy"
+      },
+      {
+        "type": "info",
+        "icon": "🏦",
+        "text": "Même émetteur que 4 produit(s) — concentration Swiss Life",
+        "impact": 16,
+        "category": "redundancy"
+      },
+      {
+        "type": "positive",
+        "icon": "📈",
+        "text": "Coupon (7%) > moyenne du book (4.1%)",
+        "impact": 15,
+        "category": "complementarity"
+      },
+      {
+        "type": "positive",
+        "icon": "🔀",
+        "text": "Faible corrélation moyenne (30%) — diversification",
+        "impact": 10,
+        "category": "complementarity"
+      }
+    ],
+    "verdict": "🔴 Redondant — forte concentration, peu de valeur ajoutée.",
+    "breakdown": {
+      "redundancy": 36,
+      "complementarity": 25
+    }
+  }
+}
