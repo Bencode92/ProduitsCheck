@@ -324,5 +324,397 @@
     "createdDate": "2026-03-20",
     "maturityDate": "2028-01-26",
     "estimatedInterest": 9398.22
+  },
+  {
+    "productType": "cat",
+    "bankId": "banque-populaire",
+    "bankName": "Banque Populaire",
+    "productName": "OPTIPLUS CONQUÊTE",
+    "amount": 150000,
+    "rate": 2.9,
+    "rateType": "progressif",
+    "rateSchedule": [
+      {
+        "from": "2024-09-18",
+        "to": "2024-12-18",
+        "rate": 4,
+        "earlyRate": null,
+        "label": "Mois 1-3",
+        "fromMonth": 1,
+        "toMonth": 3
+      },
+      {
+        "from": "2024-12-18",
+        "to": "2025-03-18",
+        "rate": 3.75,
+        "earlyRate": null,
+        "label": "Mois 4-6",
+        "fromMonth": 4,
+        "toMonth": 6
+      },
+      {
+        "from": "2025-03-18",
+        "to": "2025-06-18",
+        "rate": 1.7,
+        "earlyRate": null,
+        "label": "Mois 7-9",
+        "fromMonth": 7,
+        "toMonth": 9
+      },
+      {
+        "from": "2025-06-18",
+        "to": "2025-09-18",
+        "rate": 1.6,
+        "earlyRate": null,
+        "label": "Mois 10-12",
+        "fromMonth": 10,
+        "toMonth": 12
+      },
+      {
+        "from": "2025-09-18",
+        "to": "2025-12-18",
+        "rate": 2.55,
+        "earlyRate": null,
+        "label": "Mois 13-15",
+        "fromMonth": 13,
+        "toMonth": 15
+      },
+      {
+        "from": "2025-12-18",
+        "to": "2026-03-18",
+        "rate": 3.3,
+        "earlyRate": null,
+        "label": "Mois 16-18",
+        "fromMonth": 16,
+        "toMonth": 18
+      },
+      {
+        "from": "2026-03-18",
+        "to": "2026-06-18",
+        "rate": 2.95,
+        "earlyRate": null,
+        "label": "Mois 19-21",
+        "fromMonth": 19,
+        "toMonth": 21
+      },
+      {
+        "from": "2026-06-18",
+        "to": "2026-09-18",
+        "rate": 3.1,
+        "earlyRate": null,
+        "label": "Mois 22-24",
+        "fromMonth": 22,
+        "toMonth": 24
+      }
+    ],
+    "durationMonths": 24,
+    "startDate": "2024-09-18",
+    "interestPayment": "quarterly",
+    "exitCondition": "notice",
+    "exitPenalty": "Aucun intérêt si retrait dans le mois de souscription",
+    "autoRenew": false,
+    "status": "active",
+    "entity": "cameleons",
+    "entityName": "Caméleons",
+    "sourceFile": "CAT CONQUETE 09.2024.PDF.pdf",
+    "aiSummary": "CAT progressif 2 ans TRAAB 2.90%, intérêts trimestriels, capital garanti, réservé aux professionnels.",
+    "id": "pl_mmyv18bl_m7z",
+    "createdDate": "2026-03-20",
+    "maturityDate": "2026-09-18",
+    "estimatedInterest": 8592.12
+  },
+  {
+    "productType": "cat",
+    "bankId": "banque-populaire",
+    "bankName": "Banque Populaire",
+    "productName": "OPTIPLUS CONQUÊTE",
+    "amount": 150000,
+    "rate": 2.9,
+    "rateType": "progressif",
+    "rateSchedule": [
+      {
+        "from": "2024-09-18",
+        "to": "2024-12-18",
+        "rate": 4,
+        "earlyRate": null,
+        "label": "Mois 1-3",
+        "fromMonth": 1,
+        "toMonth": 3
+      },
+      {
+        "from": "2024-12-18",
+        "to": "2025-03-18",
+        "rate": 3.75,
+        "earlyRate": null,
+        "label": "Mois 4-6",
+        "fromMonth": 4,
+        "toMonth": 6
+      },
+      {
+        "from": "2025-03-18",
+        "to": "2025-06-18",
+        "rate": 1.7,
+        "earlyRate": null,
+        "label": "Mois 7-9",
+        "fromMonth": 7,
+        "toMonth": 9
+      },
+      {
+        "from": "2025-06-18",
+        "to": "2025-09-18",
+        "rate": 1.6,
+        "earlyRate": null,
+        "label": "Mois 10-12",
+        "fromMonth": 10,
+        "toMonth": 12
+      },
+      {
+        "from": "2025-09-18",
+        "to": "2025-12-18",
+        "rate": 2.55,
+        "earlyRate": null,
+        "label": "Mois 13-15",
+        "fromMonth": 13,
+        "toMonth": 15
+      },
+      {
+        "from": "2025-12-18",
+        "to": "2026-03-18",
+        "rate": 3.3,
+        "earlyRate": null,
+        "label": "Mois 16-18",
+        "fromMonth": 16,
+        "toMonth": 18
+      },
+      {
+        "from": "2026-03-18",
+        "to": "2026-06-18",
+        "rate": 2.95,
+        "earlyRate": null,
+        "label": "Mois 19-21",
+        "fromMonth": 19,
+        "toMonth": 21
+      },
+      {
+        "from": "2026-06-18",
+        "to": "2026-09-18",
+        "rate": 3.1,
+        "earlyRate": null,
+        "label": "Mois 22-24",
+        "fromMonth": 22,
+        "toMonth": 24
+      }
+    ],
+    "durationMonths": 24,
+    "startDate": "2024-09-18",
+    "interestPayment": "quarterly",
+    "exitCondition": "notice",
+    "exitPenalty": "Aucun intérêt si retrait dans le mois de souscription",
+    "autoRenew": false,
+    "status": "active",
+    "entity": "cameleons",
+    "entityName": "Caméleons",
+    "sourceFile": "CAT CONQUETE 09.2024.PDF.pdf",
+    "aiSummary": "CAT progressif 2 ans TRAAB 2.90%, intérêts trimestriels, capital garanti, réservé aux professionnels.",
+    "id": "pl_mmyv18bl_sao",
+    "createdDate": "2026-03-20",
+    "maturityDate": "2026-09-18",
+    "estimatedInterest": 8592.12
+  },
+  {
+    "productType": "cat",
+    "bankId": "banque-populaire",
+    "bankName": "Banque Populaire",
+    "productName": "OPTIPLUS CONQUÊTE",
+    "amount": 150000,
+    "rate": 2.9,
+    "rateType": "progressif",
+    "rateSchedule": [
+      {
+        "from": "2024-09-18",
+        "to": "2024-12-18",
+        "rate": 4,
+        "earlyRate": null,
+        "label": "Mois 1-3",
+        "fromMonth": 1,
+        "toMonth": 3
+      },
+      {
+        "from": "2024-12-18",
+        "to": "2025-03-18",
+        "rate": 3.75,
+        "earlyRate": null,
+        "label": "Mois 4-6",
+        "fromMonth": 4,
+        "toMonth": 6
+      },
+      {
+        "from": "2025-03-18",
+        "to": "2025-06-18",
+        "rate": 1.7,
+        "earlyRate": null,
+        "label": "Mois 7-9",
+        "fromMonth": 7,
+        "toMonth": 9
+      },
+      {
+        "from": "2025-06-18",
+        "to": "2025-09-18",
+        "rate": 1.6,
+        "earlyRate": null,
+        "label": "Mois 10-12",
+        "fromMonth": 10,
+        "toMonth": 12
+      },
+      {
+        "from": "2025-09-18",
+        "to": "2025-12-18",
+        "rate": 2.55,
+        "earlyRate": null,
+        "label": "Mois 13-15",
+        "fromMonth": 13,
+        "toMonth": 15
+      },
+      {
+        "from": "2025-12-18",
+        "to": "2026-03-18",
+        "rate": 3.3,
+        "earlyRate": null,
+        "label": "Mois 16-18",
+        "fromMonth": 16,
+        "toMonth": 18
+      },
+      {
+        "from": "2026-03-18",
+        "to": "2026-06-18",
+        "rate": 2.95,
+        "earlyRate": null,
+        "label": "Mois 19-21",
+        "fromMonth": 19,
+        "toMonth": 21
+      },
+      {
+        "from": "2026-06-18",
+        "to": "2026-09-18",
+        "rate": 3.1,
+        "earlyRate": null,
+        "label": "Mois 22-24",
+        "fromMonth": 22,
+        "toMonth": 24
+      }
+    ],
+    "durationMonths": 24,
+    "startDate": "2024-09-18",
+    "interestPayment": "quarterly",
+    "exitCondition": "notice",
+    "exitPenalty": "Aucun intérêt si retrait dans le mois de souscription",
+    "autoRenew": false,
+    "status": "active",
+    "entity": "cameleons",
+    "entityName": "Caméleons",
+    "sourceFile": "CAT CONQUETE 09.2024.PDF.pdf",
+    "aiSummary": "CAT progressif 2 ans TRAAB 2.90%, intérêts trimestriels, capital garanti, réservé aux professionnels.",
+    "id": "pl_mmyv18bm_t5j",
+    "createdDate": "2026-03-20",
+    "maturityDate": "2026-09-18",
+    "estimatedInterest": 8592.12
+  },
+  {
+    "productType": "cat",
+    "bankId": "banque-populaire",
+    "bankName": "Banque Populaire",
+    "productName": "OPTIPLUS CONQUÊTE",
+    "amount": 150000,
+    "rate": 2.9,
+    "rateType": "progressif",
+    "rateSchedule": [
+      {
+        "from": "2024-09-18",
+        "to": "2024-12-18",
+        "rate": 4,
+        "earlyRate": null,
+        "label": "Mois 1-3",
+        "fromMonth": 1,
+        "toMonth": 3
+      },
+      {
+        "from": "2024-12-18",
+        "to": "2025-03-18",
+        "rate": 3.75,
+        "earlyRate": null,
+        "label": "Mois 4-6",
+        "fromMonth": 4,
+        "toMonth": 6
+      },
+      {
+        "from": "2025-03-18",
+        "to": "2025-06-18",
+        "rate": 1.7,
+        "earlyRate": null,
+        "label": "Mois 7-9",
+        "fromMonth": 7,
+        "toMonth": 9
+      },
+      {
+        "from": "2025-06-18",
+        "to": "2025-09-18",
+        "rate": 1.6,
+        "earlyRate": null,
+        "label": "Mois 10-12",
+        "fromMonth": 10,
+        "toMonth": 12
+      },
+      {
+        "from": "2025-09-18",
+        "to": "2025-12-18",
+        "rate": 2.55,
+        "earlyRate": null,
+        "label": "Mois 13-15",
+        "fromMonth": 13,
+        "toMonth": 15
+      },
+      {
+        "from": "2025-12-18",
+        "to": "2026-03-18",
+        "rate": 3.3,
+        "earlyRate": null,
+        "label": "Mois 16-18",
+        "fromMonth": 16,
+        "toMonth": 18
+      },
+      {
+        "from": "2026-03-18",
+        "to": "2026-06-18",
+        "rate": 2.95,
+        "earlyRate": null,
+        "label": "Mois 19-21",
+        "fromMonth": 19,
+        "toMonth": 21
+      },
+      {
+        "from": "2026-06-18",
+        "to": "2026-09-18",
+        "rate": 3.1,
+        "earlyRate": null,
+        "label": "Mois 22-24",
+        "fromMonth": 22,
+        "toMonth": 24
+      }
+    ],
+    "durationMonths": 24,
+    "startDate": "2024-09-18",
+    "interestPayment": "quarterly",
+    "exitCondition": "notice",
+    "exitPenalty": "Aucun intérêt si retrait dans le mois de souscription",
+    "autoRenew": false,
+    "status": "active",
+    "entity": "cameleons",
+    "entityName": "Caméleons",
+    "sourceFile": "CAT CONQUETE 09.2024.PDF.pdf",
+    "aiSummary": "CAT progressif 2 ans TRAAB 2.90%, intérêts trimestriels, capital garanti, réservé aux professionnels.",
+    "id": "pl_mmyv18bm_jx8",
+    "createdDate": "2026-03-20",
+    "maturityDate": "2026-09-18",
+    "estimatedInterest": 8592.12
   }
 ]
