@@ -620,5 +620,237 @@
     "createdDate": "2026-03-20",
     "maturityDate": "2026-09-18",
     "estimatedInterest": 8592.12
+  },
+  {
+    "productType": "cat",
+    "bankId": "banque-populaire",
+    "bankName": "Banque Populaire",
+    "productName": "COMPTE A TERME OPTIPLUS 5 ANS",
+    "amount": 250000,
+    "rate": 3.1039,
+    "rateType": "progressif",
+    "rateSchedule": [
+      {
+        "from": "2024-08-08",
+        "to": "2025-02-08",
+        "rate": 2.78,
+        "earlyRate": null,
+        "label": "Mois 1-6",
+        "fromMonth": 1,
+        "toMonth": 6
+      },
+      {
+        "from": "2025-02-08",
+        "to": "2025-08-08",
+        "rate": 3.37,
+        "earlyRate": null,
+        "label": "Mois 7-12",
+        "fromMonth": 7,
+        "toMonth": 12
+      },
+      {
+        "from": "2025-08-08",
+        "to": "2026-02-08",
+        "rate": 2.93,
+        "earlyRate": null,
+        "label": "Mois 13-18",
+        "fromMonth": 13,
+        "toMonth": 18
+      },
+      {
+        "from": "2026-02-08",
+        "to": "2026-08-08",
+        "rate": 2.83,
+        "earlyRate": null,
+        "label": "Mois 19-24",
+        "fromMonth": 19,
+        "toMonth": 24
+      },
+      {
+        "from": "2026-08-08",
+        "to": "2027-02-08",
+        "rate": 3.1,
+        "earlyRate": null,
+        "label": "Mois 25-30",
+        "fromMonth": 25,
+        "toMonth": 30
+      },
+      {
+        "from": "2027-02-08",
+        "to": "2027-08-08",
+        "rate": 3.18,
+        "earlyRate": null,
+        "label": "Mois 31-36",
+        "fromMonth": 31,
+        "toMonth": 36
+      },
+      {
+        "from": "2027-08-08",
+        "to": "2028-02-08",
+        "rate": 3.03,
+        "earlyRate": null,
+        "label": "Mois 37-42",
+        "fromMonth": 37,
+        "toMonth": 42
+      },
+      {
+        "from": "2028-02-08",
+        "to": "2028-08-08",
+        "rate": 3.03,
+        "earlyRate": null,
+        "label": "Mois 43-48",
+        "fromMonth": 43,
+        "toMonth": 48
+      },
+      {
+        "from": "2028-08-08",
+        "to": "2029-02-08",
+        "rate": 3.39,
+        "earlyRate": null,
+        "label": "Mois 49-54",
+        "fromMonth": 49,
+        "toMonth": 54
+      },
+      {
+        "from": "2029-02-08",
+        "to": "2029-08-08",
+        "rate": 3.2,
+        "earlyRate": null,
+        "label": "Mois 55-60",
+        "fromMonth": 55,
+        "toMonth": 60
+      }
+    ],
+    "durationMonths": 60,
+    "startDate": "2024-08-08",
+    "interestPayment": "semiannual",
+    "exitCondition": "notice",
+    "exitPenalty": "Pas d'intérêt versé si retrait avant 1 mois",
+    "autoRenew": false,
+    "status": "active",
+    "entity": "cameleons",
+    "entityName": "Caméleons",
+    "sourceFile": "Bulletin de souscription CAT - CAT32424081571000001 - 20240808.pdf",
+    "aiSummary": "CAT progressif 5 ans OPTIPLUS 3.1039% TRAAB, intérêts semestriels, capital garanti, préavis 32 jours.",
+    "id": "pl_mmyv2y7b_qa7",
+    "createdDate": "2026-03-20",
+    "maturityDate": "2029-08-08",
+    "estimatedInterest": 38566.85
+  },
+  {
+    "productType": "cat",
+    "bankId": "banque-populaire",
+    "bankName": "Banque Populaire",
+    "productName": "COMPTE A TERME OPTIPLUS 5 ANS",
+    "amount": 250000,
+    "rate": 3.1039,
+    "rateType": "progressif",
+    "rateSchedule": [
+      {
+        "from": "2024-08-08",
+        "to": "2025-02-08",
+        "rate": 2.78,
+        "earlyRate": null,
+        "label": "Mois 1-6",
+        "fromMonth": 1,
+        "toMonth": 6
+      },
+      {
+        "from": "2025-02-08",
+        "to": "2025-08-08",
+        "rate": 3.37,
+        "earlyRate": null,
+        "label": "Mois 7-12",
+        "fromMonth": 7,
+        "toMonth": 12
+      },
+      {
+        "from": "2025-08-08",
+        "to": "2026-02-08",
+        "rate": 2.93,
+        "earlyRate": null,
+        "label": "Mois 13-18",
+        "fromMonth": 13,
+        "toMonth": 18
+      },
+      {
+        "from": "2026-02-08",
+        "to": "2026-08-08",
+        "rate": 2.83,
+        "earlyRate": null,
+        "label": "Mois 19-24",
+        "fromMonth": 19,
+        "toMonth": 24
+      },
+      {
+        "from": "2026-08-08",
+        "to": "2027-02-08",
+        "rate": 3.1,
+        "earlyRate": null,
+        "label": "Mois 25-30",
+        "fromMonth": 25,
+        "toMonth": 30
+      },
+      {
+        "from": "2027-02-08",
+        "to": "2027-08-08",
+        "rate": 3.18,
+        "earlyRate": null,
+        "label": "Mois 31-36",
+        "fromMonth": 31,
+        "toMonth": 36
+      },
+      {
+        "from": "2027-08-08",
+        "to": "2028-02-08",
+        "rate": 3.03,
+        "earlyRate": null,
+        "label": "Mois 37-42",
+        "fromMonth": 37,
+        "toMonth": 42
+      },
+      {
+        "from": "2028-02-08",
+        "to": "2028-08-08",
+        "rate": 3.03,
+        "earlyRate": null,
+        "label": "Mois 43-48",
+        "fromMonth": 43,
+        "toMonth": 48
+      },
+      {
+        "from": "2028-08-08",
+        "to": "2029-02-08",
+        "rate": 3.39,
+        "earlyRate": null,
+        "label": "Mois 49-54",
+        "fromMonth": 49,
+        "toMonth": 54
+      },
+      {
+        "from": "2029-02-08",
+        "to": "2029-08-08",
+        "rate": 3.2,
+        "earlyRate": null,
+        "label": "Mois 55-60",
+        "fromMonth": 55,
+        "toMonth": 60
+      }
+    ],
+    "durationMonths": 60,
+    "startDate": "2024-08-08",
+    "interestPayment": "semiannual",
+    "exitCondition": "notice",
+    "exitPenalty": "Pas d'intérêt versé si retrait avant 1 mois",
+    "autoRenew": false,
+    "status": "active",
+    "entity": "cameleons",
+    "entityName": "Caméleons",
+    "sourceFile": "Bulletin de souscription CAT - CAT32424081571000001 - 20240808.pdf",
+    "aiSummary": "CAT progressif 5 ans OPTIPLUS 3.1039% TRAAB, intérêts semestriels, capital garanti, préavis 32 jours.",
+    "id": "pl_mmyv2y7b_zu7",
+    "createdDate": "2026-03-20",
+    "maturityDate": "2029-08-08",
+    "estimatedInterest": 38566.85
   }
 ]
