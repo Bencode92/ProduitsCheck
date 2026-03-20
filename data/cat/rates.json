@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-03-20T13:19:39.353Z",
+  "lastUpdated": "2026-03-20T13:19:44.870Z",
   "rates": [
     {
       "bankId": "cic",
@@ -183,25 +183,6 @@
       "withdrawalConditions": "Pas de rémunération si sortie anticipée",
       "notice": "32 jours",
       "productName": "CAT Fixe 3m",
-      "calculationBase": null
-    },
-    {
-      "bankId": "cic",
-      "bankName": "CIC",
-      "durationMonths": 12,
-      "rate": 2.4,
-      "productType": "cat",
-      "date": "2026-03-31",
-      "rateType": "fixe",
-      "rateSchedule": [
-        {
-          "period": "Mois 1-12",
-          "rate": 2.4
-        }
-      ],
-      "withdrawalConditions": "3 premiers mois: 0%, après 3 mois: 50% rémunération",
-      "notice": "32 jours",
-      "productName": "CAT Fixe 12m",
       "calculationBase": null
     },
     {
