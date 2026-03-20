@@ -1,6 +1,15 @@
 {
   "bankId": "swiss-life",
   "bankName": "Swiss Life",
-  "lastUpdated": null,
-  "products": []
+  "lastUpdated": "2026-03-20T15:56:39.282Z",
+  "products": [
+    {
+      "id": "sp_mmz30epd_icjv0",
+      "name": "SL – PHOENIX MEMOIRE FAST SEMESTRIEL ASML AVRIL 2026",
+      "type": "autocall",
+      "status": "analyzing",
+      "score": 39,
+      "receivedDate": "2026-03-20"
+    }
+  ]
 }
