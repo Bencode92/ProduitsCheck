@@ -194,7 +194,7 @@
     "bankId": "sg",
     "bankName": "Société Générale",
     "productName": "CAT CROISSANCE +3A PREAVIS (copie)",
-    "amount": 60000,
+    "amount": 50000,
     "rate": 3.21,
     "rateType": "progressif",
     "durationMonths": 36,
@@ -206,7 +206,7 @@
     "status": "active",
     "createdDate": "2026-03-20",
     "maturityDate": "2027-09-12",
-    "estimatedInterest": 5778,
+    "estimatedInterest": 4815,
     "entity": "cameleons",
     "entityName": "Caméleons",
     "id": "pl_mmyqeqe1_ftb"
