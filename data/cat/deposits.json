@@ -94,5 +94,29 @@
     "createdDate": "2026-03-20",
     "maturityDate": "2026-09-18",
     "estimatedInterest": 8700
+  },
+  {
+    "productType": "cat",
+    "bankId": "banque-populaire",
+    "bankName": "Banque Populaire",
+    "productName": "CATVAIR GRANDS COMPTES 5 ANS",
+    "amount": 50000,
+    "rate": 3.5,
+    "rateType": "progressif",
+    "durationMonths": 60,
+    "startDate": "2023-01-26",
+    "interestPayment": "maturity",
+    "exitCondition": "notice",
+    "exitPenalty": "Clôture du compte, aucun intérêt si retrait dans le mois de souscription, dernière période rémunérée prorata temporis",
+    "autoRenew": false,
+    "status": "active",
+    "entity": "cameleons",
+    "entityName": "Caméleons",
+    "sourceFile": "CATVAIR GRANDS COMPTES 5 ans - Notice d'Information Client taux en vigueur à la date du 22.12.2022.pdf",
+    "aiSummary": "Compte à terme progressif de 5 ans réservé aux professionnels avec un taux de rendement actuariel annuel brut de 3,50%. Capital garanti avec rémunération croissante par paliers de 1,50% à 5,54% selon la durée de détention.",
+    "id": "pl_mmyphr7w_nbh",
+    "createdDate": "2026-03-20",
+    "maturityDate": "2028-01-26",
+    "estimatedInterest": 8750
   }
 ]
