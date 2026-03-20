@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — PDF Extraction & AI Parsing (V4 — max tokens)
+// STRUCTBOARD — PDF Extraction & AI Parsing (V5 — robust JSON repair)
 // ═══════════════════════════════════════════════════════════════
 
 class PDFExtractor {
@@ -35,46 +35,79 @@ class PDFExtractor {
   }
 }
 
-// ─── JSON Repair for truncated responses ────────────────────
+// ─── Robust JSON Repair V2 ─────────────────────────────────
 function repairJSON(str) {
+  if (!str || typeof str !== 'string') throw new Error('Réponse vide');
   str = str.trim();
+  // Strip markdown fencing
   str = str.replace(/^```json?\s*/i, '').replace(/\s*```$/i, '').trim();
+  
+  // Try direct parse first
   try { return JSON.parse(str); } catch(e) {}
-  let repaired = str;
-  const quoteCount = (repaired.match(/"/g) || []).length;
-  if (quoteCount % 2 !== 0) repaired += '"';
-  const opens = { '{': 0, '[': 0 };
-  let inString = false;
-  for (let i = 0; i < repaired.length; i++) {
-    const c = repaired[i];
-    if (c === '"' && (i === 0 || repaired[i-1] !== '\\')) inString = !inString;
-    if (!inString) {
-      if (c === '{') opens['{']++;
-      if (c === '}') opens['{']--;
-      if (c === '[') opens['[']++;
-      if (c === ']') opens['[']--;
+
+  // Fix trailing commas
+  let fixed = str.replace(/,\s*}/g, '}').replace(/,\s*]/g, ']');
+  try { return JSON.parse(fixed); } catch(e) {}
+
+  // Check if we're inside an unclosed string
+  let inStr = false, lastChar = '';
+  for (let i = 0; i < fixed.length; i++) {
+    const c = fixed[i];
+    if (c === '"' && lastChar !== '\\') inStr = !inStr;
+    lastChar = c;
+  }
+  if (inStr) fixed += '"';
+
+  // Count and close open brackets
+  const stack = [];
+  inStr = false; lastChar = '';
+  for (let i = 0; i < fixed.length; i++) {
+    const c = fixed[i];
+    if (c === '"' && lastChar !== '\\') inStr = !inStr;
+    if (!inStr) {
+      if (c === '{') stack.push('}');
+      else if (c === '[') stack.push(']');
+      else if (c === '}' || c === ']') stack.pop();
+    }
+    lastChar = c;
+  }
+
+  // Remove trailing comma before closing
+  fixed = fixed.replace(/,\s*$/, '');
+
+  // Close remaining open brackets in reverse order
+  while (stack.length > 0) fixed += stack.pop();
+
+  // Final cleanup
+  fixed = fixed.replace(/,\s*}/g, '}').replace(/,\s*]/g, ']');
+  try { return JSON.parse(fixed); } catch(e) {}
+
+  // Last resort: try to find the last valid closing brace
+  for (let i = fixed.length - 1; i > 10; i--) {
+    if (fixed[i] === '}') {
+      try { return JSON.parse(fixed.substring(0, i + 1)); } catch(e) {}
     }
   }
-  repaired = repaired.replace(/,\s*$/, '');
-  for (let i = 0; i < opens['[']; i++) repaired += ']';
-  for (let i = 0; i < opens['{']; i++) repaired += '}';
-  try { return JSON.parse(repaired); } catch(e) {}
-  for (let i = repaired.length - 1; i > 0; i--) {
-    if (repaired[i] === '}') {
-      try { return JSON.parse(repaired.substring(0, i + 1)); } catch(e) {}
-    }
+
+  // Very last resort: extract JSON object from text
+  const jsonMatch = str.match(/\{[\s\S]*\}/);
+  if (jsonMatch) {
+    try { return JSON.parse(jsonMatch[0]); } catch(e) {}
+    // Try repair on extracted JSON
+    let extracted = jsonMatch[0].replace(/,\s*}/g, '}').replace(/,\s*]/g, ']');
+    try { return JSON.parse(extracted); } catch(e) {}
   }
-  throw new Error('JSON irréparable');
+
+  throw new Error('JSON invalide après réparation');
 }
 
-// Max tokens for Sonnet 4 output
 const MAX_TOKENS = 8192;
 
 class AIParser {
   constructor() { this.endpoint = CONFIG.AI_ENDPOINT; }
 
   async parseBrochure(rawText) {
-    const textToSend = rawText.substring(0, 10000);
+    const textToSend = rawText.substring(0, 12000);
     const prompt = `Analyste expert en produits structurés FR. Extrais TOUTES les infos de cette brochure en JSON.
 
 TEXTE:
@@ -82,8 +115,49 @@ ${textToSend}
 
 RÈGLES: "gain de X% par année" = coupon rate X. "remboursement automatique anticipé" = autocall. Cherche ISIN, émetteur, garant, dates, %, seuils.
 
-JSON UNIQUEMENT (pas de markdown):
-{"name":"Nom complet","type":"autocall/phoenix/capital-protege/autre","emitter":"Émetteur","guarantor":"Garant","distributor":"Distributeur","isin":"ISIN","underlyings":["sous-jacents"],"underlyingType":"single-stock/eurostoxx50/cac40/basket/autre","currency":"EUR","maturity":"durée","maturityDate":"YYYY-MM-DD","strikeDate":"YYYY-MM-DD","nominal":"1000 EUR","coupon":{"rate":5.7,"type":"conditionnel/fixe/memoire","frequency":"annuel","trigger":100,"triggerDetail":"description","memory":false,"maxReturn":"TRA max","totalReturn":"gain total max"},"capitalProtection":{"protected":true,"level":100,"type":"inconditionnelle-a-echeance/conditionnelle-barriere/aucune","barrier":null,"barrierType":"europeenne","barrierObservation":"description","inLifeRisk":"risque en cours de vie"},"earlyRedemption":{"possible":true,"type":"autocall","trigger":100,"triggerDetail":"description","frequency":"annuel","startYear":1,"stepDown":false},"scenarios":{"favorable":"détail avec %","median":"détail avec %","defavorable":"détail avec %"},"advantages":["avantages"],"risks":["risques"],"keyDates":["dates"],"ratings":"S&P/Moody/Fitch","eligibility":"éligibilité","summary":"résumé 3-4 phrases"}`;
+Réponds UNIQUEMENT en JSON valide (pas de markdown, pas de backticks).
+Sois CONCIS dans les champs texte (max 100 caractères par champ texte).
+
+{
+  "name": "Nom complet du produit",
+  "type": "autocall ou phoenix ou capital-protege ou autre",
+  "emitter": "Émetteur",
+  "guarantor": "Garant",
+  "isin": "ISIN si trouvé",
+  "underlyings": ["sous-jacent 1"],
+  "underlyingType": "single-stock ou eurostoxx50 ou cac40 ou basket ou autre",
+  "currency": "EUR",
+  "maturity": "10 ans max",
+  "maturityDate": "YYYY-MM-DD",
+  "strikeDate": "YYYY-MM-DD",
+  "coupon": {
+    "rate": 5.7,
+    "type": "conditionnel ou fixe ou memoire",
+    "frequency": "annuel ou trimestriel ou semestriel",
+    "trigger": 100,
+    "memory": false
+  },
+  "capitalProtection": {
+    "protected": true,
+    "level": 100,
+    "barrier": 60,
+    "barrierType": "europeenne ou americaine"
+  },
+  "earlyRedemption": {
+    "possible": true,
+    "type": "autocall",
+    "trigger": 100,
+    "frequency": "annuel",
+    "startYear": 1
+  },
+  "scenarios": {
+    "favorable": "description courte avec %",
+    "median": "description courte avec %",
+    "defavorable": "description courte avec %"
+  },
+  "risks": ["risque 1", "risque 2"],
+  "summary": "Résumé 2-3 phrases max"
+}`;
     try {
       const response = await this._callAI(prompt, MAX_TOKENS);
       return repairJSON(response);
@@ -94,7 +168,7 @@ JSON UNIQUEMENT (pas de markdown):
   }
 
   async generateSummary(productData) {
-    const compact = { name: productData.name, type: productData.type, emitter: productData.emitter, underlyings: productData.underlyings, maturity: productData.maturity, coupon: productData.coupon, capitalProtection: productData.capitalProtection, earlyRedemption: productData.earlyRedemption, scenarios: productData.scenarios, risks: productData.risks, ratings: productData.ratings };
+    const compact = { name: productData.name, type: productData.type, emitter: productData.emitter, underlyings: productData.underlyings, maturity: productData.maturity, coupon: productData.coupon, capitalProtection: productData.capitalProtection, earlyRedemption: productData.earlyRedemption, scenarios: productData.scenarios, risks: productData.risks };
     const prompt = `Résumé structuré de ce produit structuré. Données:\n${JSON.stringify(compact)}\n\nFormat avec ## sections:\n## 1. DESCRIPTION\n[2 phrases: type, émetteur, sous-jacent, durée]\n## 2. RENDEMENT & COUPONS\n[Taux, fréquence, seuil, gain max — CHIFFRES]\n## 3. PROTECTION DU CAPITAL\n[Niveau, condition, barrière — en vie vs échéance]\n## 4. REMBOURSEMENT ANTICIPÉ\n[Autocall, seuil, fréquence, à partir de quand]\n## 5. SCÉNARIOS\n**Favorable:** [chiffres]\n**Médian:** [chiffres]\n**Défavorable:** [chiffres]\n## 6. POINTS D'ATTENTION\n[3-5 risques clés]\n\nDirect, précis, avec chiffres.`;
     return await this._callAI(prompt, MAX_TOKENS);
   }
@@ -113,8 +187,7 @@ JSON UNIQUEMENT (pas de markdown):
 
   async _callAI(prompt, maxTokens) {
     const res = await fetch(this.endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: maxTokens || MAX_TOKENS, messages: [{ role: 'user', content: prompt }] }),
     });
     if (!res.ok) { const err = await res.text(); throw new Error(`AI API ${res.status}: ${err}`); }
@@ -124,8 +197,7 @@ JSON UNIQUEMENT (pas de markdown):
 
   async _callAIWithHistory(systemPrompt, messages) {
     const res = await fetch(this.endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: MAX_TOKENS, system: systemPrompt, messages }),
     });
     if (!res.ok) { const err = await res.text(); throw new Error(`AI API ${res.status}: ${err}`); }
