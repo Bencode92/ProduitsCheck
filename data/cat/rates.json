@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-03-20T12:53:12.351Z",
+  "lastUpdated": "2026-03-20T12:59:43.580Z",
   "rates": [
     {
       "bankId": "cic",
@@ -164,6 +164,217 @@
       "withdrawalConditions": "50% si retrait 1er semestre, taux période précédente sinon",
       "notice": "32 jours",
       "productName": "CAT Transition Progressif 18 mois",
+      "calculationBase": null
+    },
+    {
+      "bankId": "cic",
+      "bankName": "CIC",
+      "durationMonths": 2,
+      "rate": 2.2,
+      "productType": "cat",
+      "date": "2026-03-31",
+      "rateType": "fixe",
+      "rateSchedule": [
+        {
+          "period": "Mois 1-2",
+          "rate": 2.2
+        }
+      ],
+      "withdrawalConditions": "Pas de rémunération si sortie anticipée 1er mois",
+      "notice": "32 jours",
+      "productName": "CAT Fixe 2m",
+      "calculationBase": null
+    },
+    {
+      "bankId": "cic",
+      "bankName": "CIC",
+      "durationMonths": 3,
+      "rate": 2.2,
+      "productType": "cat",
+      "date": "2026-03-31",
+      "rateType": "fixe",
+      "rateSchedule": [
+        {
+          "period": "Mois 1-3",
+          "rate": 2.2
+        }
+      ],
+      "withdrawalConditions": "Pas de rémunération si sortie anticipée",
+      "notice": "32 jours",
+      "productName": "CAT Fixe 3m",
+      "calculationBase": null
+    },
+    {
+      "bankId": "cic",
+      "bankName": "CIC",
+      "durationMonths": 6,
+      "rate": 2.3,
+      "productType": "cat",
+      "date": "2026-03-31",
+      "rateType": "fixe",
+      "rateSchedule": [
+        {
+          "period": "Mois 1-6",
+          "rate": 2.3
+        }
+      ],
+      "withdrawalConditions": "3 premiers mois: 0%, après 3 mois: 50% rémunération",
+      "notice": "32 jours",
+      "productName": "CAT Fixe 6m",
+      "calculationBase": null
+    },
+    {
+      "bankId": "cic",
+      "bankName": "CIC",
+      "durationMonths": 12,
+      "rate": 2.4,
+      "productType": "cat",
+      "date": "2026-03-31",
+      "rateType": "fixe",
+      "rateSchedule": [
+        {
+          "period": "Mois 1-12",
+          "rate": 2.4
+        }
+      ],
+      "withdrawalConditions": "3 premiers mois: 0%, après 3 mois: 50% rémunération",
+      "notice": "32 jours",
+      "productName": "CAT Fixe 12m",
+      "calculationBase": null
+    },
+    {
+      "bankId": "cic",
+      "bankName": "CIC",
+      "durationMonths": 18,
+      "rate": 2.6,
+      "productType": "cat",
+      "date": "2026-03-31",
+      "rateType": "progressif",
+      "rateSchedule": [
+        {
+          "period": "Semestre 1",
+          "rate": 2.3
+        },
+        {
+          "period": "Semestre 2",
+          "rate": 2.5
+        },
+        {
+          "period": "Semestre 3",
+          "rate": 3.01
+        }
+      ],
+      "withdrawalConditions": "Période 1: 50% taux, autres: taux période précédente",
+      "notice": "32 jours",
+      "productName": "CAT Progressif 18m",
+      "calculationBase": null
+    },
+    {
+      "bankId": "cic",
+      "bankName": "CIC",
+      "durationMonths": 36,
+      "rate": 2.8,
+      "productType": "cat",
+      "date": "2026-03-31",
+      "rateType": "progressif",
+      "rateSchedule": [
+        {
+          "period": "Année 1",
+          "rate": 2.3
+        },
+        {
+          "period": "Année 2",
+          "rate": 2.8
+        },
+        {
+          "period": "Année 3",
+          "rate": 3.3
+        }
+      ],
+      "withdrawalConditions": "Période 1: 50% taux, autres: taux période précédente",
+      "notice": "32 jours",
+      "productName": "CAT Progressif 36m",
+      "calculationBase": null
+    },
+    {
+      "bankId": "cic",
+      "bankName": "CIC",
+      "durationMonths": 60,
+      "rate": 2.9,
+      "productType": "cat",
+      "date": "2026-03-31",
+      "rateType": "progressif",
+      "rateSchedule": [
+        {
+          "period": "Année 1",
+          "rate": 2.2
+        },
+        {
+          "period": "Année 2",
+          "rate": 2.5
+        },
+        {
+          "period": "Année 3",
+          "rate": 2.9
+        },
+        {
+          "period": "Année 4",
+          "rate": 3.3
+        },
+        {
+          "period": "Année 5",
+          "rate": 3.62
+        }
+      ],
+      "withdrawalConditions": "Période 1: 50% taux, autres: taux période précédente",
+      "notice": "32 jours",
+      "productName": "CAT Progressif 60m",
+      "calculationBase": null
+    },
+    {
+      "bankId": "cic",
+      "bankName": "CIC",
+      "durationMonths": 3,
+      "rate": 2.1,
+      "productType": "cat",
+      "date": "2026-03-31",
+      "rateType": "fixe",
+      "rateSchedule": [
+        {
+          "period": "Mois 1-3",
+          "rate": 2.1
+        }
+      ],
+      "withdrawalConditions": "Pas de rémunération si sortie anticipée",
+      "notice": "32 jours",
+      "productName": "CAT Transition 3m",
+      "calculationBase": null
+    },
+    {
+      "bankId": "cic",
+      "bankName": "CIC",
+      "durationMonths": 18,
+      "rate": 2.5,
+      "productType": "cat",
+      "date": "2026-03-31",
+      "rateType": "progressif",
+      "rateSchedule": [
+        {
+          "period": "Semestre 1",
+          "rate": 2.2
+        },
+        {
+          "period": "Semestre 2",
+          "rate": 2.4
+        },
+        {
+          "period": "Semestre 3",
+          "rate": 2.9
+        }
+      ],
+      "withdrawalConditions": "Avant fin S1: 50% taux, entre S1-S3: taux période précédente",
+      "notice": "32 jours",
+      "productName": "CAT Transition 18m",
       "calculationBase": null
     }
   ]
