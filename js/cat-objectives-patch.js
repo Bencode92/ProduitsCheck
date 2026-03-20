@@ -1,4 +1,4 @@
-// ═══ CAT Objectives Patch — Visual header + availableCash + optimizer dashboard ═══
+// ═══ CAT Objectives Patch — Visual header + availableCash + optimizer placement ═══
 
 // Override objectives modal to include availableCash
 const _origShowCATObjectivesModal = showCATObjectivesModal;
@@ -38,7 +38,7 @@ async function saveCATObjectivesV2() {
   renderCAT(document.getElementById('main-content'));
 }
 
-// Override renderCAT header — visual dashboard + optimizer section
+// Override renderCAT header — visual dashboard + optimizer between sections
 const _origRenderCATForHeader = renderCAT;
 renderCAT = function(container) {
   _origRenderCATForHeader(container);
@@ -110,11 +110,28 @@ renderCAT = function(container) {
 
   statsRow.outerHTML = dashHTML;
 
-  // ═══ INJECT OPTIMIZER DASHBOARD (if result exists) ═══
+  // ═══ INJECT OPTIMIZER between Échéancier and Taux du Marché ═══
   if (typeof renderOptimizerDashboard === 'function') {
     const optimizerHTML = renderOptimizerDashboard();
     if (optimizerHTML) {
-      container.insertAdjacentHTML('beforeend', optimizerHTML);
+      // Find the market rates section (added by cat-patches) — it has "📊 Taux du Marché" in its title
+      const allSections = container.querySelectorAll('.section');
+      let marketRatesSection = null;
+      allSections.forEach(s => {
+        const title = s.querySelector('.section-title');
+        if (title && title.textContent.includes('Taux du Marché')) marketRatesSection = s;
+      });
+
+      if (marketRatesSection) {
+        // Insert optimizer BEFORE market rates
+        marketRatesSection.insertAdjacentHTML('beforebegin', optimizerHTML);
+      } else {
+        // Fallback: insert after the last .section (before archives)
+        const sections = container.querySelectorAll('.section');
+        const lastSection = sections[sections.length - 1];
+        if (lastSection) lastSection.insertAdjacentHTML('afterend', optimizerHTML);
+        else container.insertAdjacentHTML('beforeend', optimizerHTML);
+      }
     }
   }
 };
