@@ -185,6 +185,8 @@
     "id": "pl_mmyq1n6y_1fk",
     "createdDate": "2026-03-20",
     "maturityDate": "2027-09-12",
-    "estimatedInterest": 5778
+    "estimatedInterest": 5778,
+    "entity": "cameleons",
+    "entityName": "Caméleons"
   }
 ]
