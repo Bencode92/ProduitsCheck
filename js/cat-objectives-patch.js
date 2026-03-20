@@ -1,6 +1,5 @@
-// ═══ CAT Objectives Patch — Visual header + availableCash + optimizer placement ═══
+// ═══ CAT Objectives Patch — Fixed annual interest + rate % + optimizer placement ═══
 
-// Override objectives modal to include availableCash
 const _origShowCATObjectivesModal = showCATObjectivesModal;
 showCATObjectivesModal = function() {
   const obj = catManager.objectives;
@@ -11,9 +10,9 @@ showCATObjectivesModal = function() {
       <div class="form-field" style="grid-column:span 2"><label style="color:var(--green)">💰 Cash disponible à placer (€)</label><input id="obj-cash" type="number" value="${obj.availableCash || 0}" placeholder="0" style="font-size:16px;font-weight:600">
         <div style="font-size:10px;color:var(--text-dim);margin-top:2px">Liquidités non investies, prêtes à être placées</div></div>
       <div class="form-field"><label>Réserve de sécurité (€)</label><input id="obj-reserve" type="number" value="${obj.liquidityReserve}" placeholder="0">
-        <div style="font-size:10px;color:var(--text-dim);margin-top:2px">Montant à ne jamais placer (BFR, trésorerie courante)</div></div>
+        <div style="font-size:10px;color:var(--text-dim);margin-top:2px">Montant à ne jamais placer (BFR)</div></div>
       <div class="form-field"><label>Besoin mensuel (€)</label><input id="obj-monthly" type="number" value="${obj.monthlyNeed}" placeholder="0">
-        <div style="font-size:10px;color:var(--text-dim);margin-top:2px">Décaissements mensuels récurrents</div></div>
+        <div style="font-size:10px;color:var(--text-dim);margin-top:2px">Décaissements récurrents</div></div>
       <div class="form-field"><label>Plafond FGDR par banque (€)</label><input id="obj-maxbank" type="number" value="${obj.maxPerBank}" placeholder="100000"></div>
       <div class="form-field full"><label>Notes</label><textarea id="obj-notes" style="min-height:60px">${obj.notes || ''}</textarea></div>
     </div>
@@ -38,7 +37,7 @@ async function saveCATObjectivesV2() {
   renderCAT(document.getElementById('main-content'));
 }
 
-// Override renderCAT header — visual dashboard + optimizer between sections
+// Override renderCAT — visual header with CORRECT annual interest
 const _origRenderCATForHeader = renderCAT;
 renderCAT = function(container) {
   _origRenderCATForHeader(container);
@@ -52,14 +51,34 @@ renderCAT = function(container) {
   const reserve = parseFloat(obj.liquidityReserve) || 0;
   const totalTreasury = stats.totalInvested + cash;
   const placable = Math.max(0, cash - reserve);
-  const annualInterest = stats.totalInterest;
   const nbBanks = Object.keys(stats.byBank).length;
   const fgdrCount = stats.fgdrAlerts.length;
 
+  // FIX: Calculate TRUE annual interest = sum(amount * rate / 100) per deposit
+  // NOT stats.totalInterest which is total over the entire duration
+  const active = catManager.deposits.filter(d => d.status === 'active');
+  const annualInterest = active.reduce((sum, d) => {
+    const amount = parseFloat(d.amount) || 0;
+    const rate = parseFloat(d.rate) || 0;
+    return sum + Math.round(amount * (rate / 100) * 100) / 100;
+  }, 0);
+  const totalInterestAllTime = stats.totalInterest; // total over all durations
+
+  // Weighted rate
+  const weightedRate = stats.weightedRate || 0;
+
+  // Best market rate comparison
   const bestRate = catManager.rates?.rates?.reduce((max, r) => r.rate > max ? r.rate : max, 0) || 0;
-  const rateVsMarket = bestRate > 0 && stats.weightedRate > 0
-    ? (stats.weightedRate >= bestRate ? '✅ Au-dessus du marché' : '⚠️ ' + (bestRate - stats.weightedRate).toFixed(2) + '% sous le meilleur')
+  const rateVsMarket = bestRate > 0 && weightedRate > 0
+    ? (weightedRate >= bestRate ? '✅ Au-dessus du marché' : '⚠️ -' + (bestRate - weightedRate).toFixed(2) + '% vs meilleur')
     : '';
+
+  // Calculate early exit value (what you'd get if you exited ALL now)
+  const nowStr = new Date().toISOString().split('T')[0];
+  let earlyExitInterest = 0;
+  if (typeof calcInterestAtExit === 'function') {
+    earlyExitInterest = active.reduce((sum, d) => sum + calcInterestAtExit(d, nowStr), 0);
+  }
 
   const dashHTML = `
     <div style="background:linear-gradient(135deg,var(--bg-elevated),var(--bg-card));border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px">
@@ -78,7 +97,7 @@ renderCAT = function(container) {
         <div style="background:var(--bg-card);padding:14px 16px;text-align:center">
           <div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">Placé</div>
           <div style="font-size:22px;font-weight:800;color:var(--green);font-family:var(--mono)">${formatNumber(stats.totalInvested)}€</div>
-          <div style="font-size:10px;color:var(--text-dim);margin-top:2px">${stats.weightedRate ? formatPct(stats.weightedRate) + ' moy.' : '—'}</div>
+          <div style="font-size:10px;color:var(--text-dim);margin-top:2px">${weightedRate ? formatPct(weightedRate) + ' moy. TRAAB' : '—'}</div>
         </div>
         <div style="background:var(--bg-card);padding:14px 16px;text-align:center">
           <div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">Liquidités</div>
@@ -88,12 +107,27 @@ renderCAT = function(container) {
         <div style="background:var(--bg-card);padding:14px 16px;text-align:center">
           <div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">Rendement / an</div>
           <div style="font-size:22px;font-weight:800;color:var(--green);font-family:var(--mono)">+${formatNumber(annualInterest)}€</div>
-          <div style="font-size:10px;color:var(--text-dim);margin-top:2px">${rateVsMarket || (stats.weightedRate ? formatPct(stats.weightedRate) + '/an' : '—')}</div>
+          <div style="font-size:10px;color:var(--text-dim);margin-top:2px">${weightedRate ? formatPct(weightedRate) + '/an' : '—'} ${rateVsMarket ? '· ' + rateVsMarket : ''}</div>
         </div>
         <div style="background:var(--bg-card);padding:14px 16px;text-align:center">
           <div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">Risque FGDR</div>
           <div style="font-size:22px;font-weight:800;color:${fgdrCount > 0 ? 'var(--orange)' : 'var(--green)'}">${fgdrCount > 0 ? '⚠️ ' + fgdrCount : '✅'}</div>
           <div style="font-size:10px;color:var(--text-dim);margin-top:2px">${fgdrCount > 0 ? fgdrCount + ' dépass.' : 'OK'}</div>
+        </div>
+      </div>
+      <!-- Second row: more details -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-top:1px">
+        <div style="background:var(--bg-card);padding:10px 16px;text-align:center">
+          <div style="font-size:9px;text-transform:uppercase;color:var(--text-dim)">Intérêts totaux (sur durée)</div>
+          <div style="font-size:14px;font-weight:700;color:var(--green);font-family:var(--mono)">+${formatNumber(totalInterestAllTime)}€</div>
+        </div>
+        <div style="background:var(--bg-card);padding:10px 16px;text-align:center">
+          <div style="font-size:9px;text-transform:uppercase;color:var(--text-dim)">Intérêts acquis (si sortie ajd)</div>
+          <div style="font-size:14px;font-weight:700;color:${earlyExitInterest > 0 ? 'var(--orange)' : 'var(--text-dim)'};font-family:var(--mono)">${earlyExitInterest > 0 ? '+' + formatNumber(earlyExitInterest) + '€' : '—'}</div>
+        </div>
+        <div style="background:var(--bg-card);padding:10px 16px;text-align:center">
+          <div style="font-size:9px;text-transform:uppercase;color:var(--text-dim)">Meilleur taux marché</div>
+          <div style="font-size:14px;font-weight:700;color:var(--accent);font-family:var(--mono)">${bestRate > 0 ? bestRate.toFixed(2) + '%' : '—'}</div>
         </div>
       </div>
       ${cash > 0 || stats.totalInvested > 0 ? `<div style="margin-top:12px;display:flex;gap:4px;height:8px;border-radius:4px;overflow:hidden">
@@ -110,28 +144,15 @@ renderCAT = function(container) {
 
   statsRow.outerHTML = dashHTML;
 
-  // ═══ INJECT OPTIMIZER between Échéancier and Taux du Marché ═══
+  // ═══ INJECT OPTIMIZER ═══
   if (typeof renderOptimizerDashboard === 'function') {
     const optimizerHTML = renderOptimizerDashboard();
     if (optimizerHTML) {
-      // Find the market rates section (added by cat-patches) — it has "📊 Taux du Marché" in its title
       const allSections = container.querySelectorAll('.section');
       let marketRatesSection = null;
-      allSections.forEach(s => {
-        const title = s.querySelector('.section-title');
-        if (title && title.textContent.includes('Taux du Marché')) marketRatesSection = s;
-      });
-
-      if (marketRatesSection) {
-        // Insert optimizer BEFORE market rates
-        marketRatesSection.insertAdjacentHTML('beforebegin', optimizerHTML);
-      } else {
-        // Fallback: insert after the last .section (before archives)
-        const sections = container.querySelectorAll('.section');
-        const lastSection = sections[sections.length - 1];
-        if (lastSection) lastSection.insertAdjacentHTML('afterend', optimizerHTML);
-        else container.insertAdjacentHTML('beforeend', optimizerHTML);
-      }
+      allSections.forEach(s => { const t = s.querySelector('.section-title'); if (t && t.textContent.includes('Taux du Marché')) marketRatesSection = s; });
+      if (marketRatesSection) marketRatesSection.insertAdjacentHTML('beforebegin', optimizerHTML);
+      else { const last = allSections[allSections.length - 1]; if (last) last.insertAdjacentHTML('afterend', optimizerHTML); else container.insertAdjacentHTML('beforeend', optimizerHTML); }
     }
   }
 };
