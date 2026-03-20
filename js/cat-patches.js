@@ -1,4 +1,4 @@
-// ═══ CAT PATCHES V2d — FIX: Auto-populate rateSchedule from PDF extraction ═══
+// ═══ CAT PATCHES V2e — FIX: Auto-convert relative months to dates in barème display ═══
 
 let _extractedBrochure = null;
 
@@ -32,32 +32,89 @@ function buildRateScheduleHTML(schedule) {
       <button class="btn sm danger" onclick="this.closest('.rs-row').remove()" style="margin-bottom:2px">✕</button>
     </div>`).join('');
 }
-function readRateScheduleFromModal() { const rows = document.querySelectorAll('.rs-row'); const schedule = []; rows.forEach(row => { const from = row.querySelector('.rs-from')?.value||''; const to = row.querySelector('.rs-to')?.value||''; const rate = parseFloat(row.querySelector('.rs-rate')?.value)||0; const ev = row.querySelector('.rs-early')?.value; const earlyRate = ev !== '' && ev != null ? parseFloat(ev) : null; if (from && to && rate > 0) schedule.push({ from, to, rate, earlyRate }); }); return schedule; }
+function readRateScheduleFromModal() { const rows = document.querySelectorAll('.rs-row'); const schedule = []; rows.forEach(row => { const from = row.querySelector('.rs-from')?.value||''; const to = row.querySelector('.rs-to')?.value||''; const rate = parseFloat(row.querySelector('.rs-rate')?.value)||0; const ev = row.querySelector('.rs-early')?.value; const earlyRate = ev !== '' && ev != null ? parseFloat(ev) : null; if (rate > 0) schedule.push({ from, to, rate, earlyRate }); }); return schedule; }
 function addRateScheduleRow(startDate) {
   const container = document.getElementById('rs-container'); if (!container) return;
   const rows = container.querySelectorAll('.rs-row');
-  let defaultFrom = startDate || new Date().toISOString().split('T')[0];
+  let defaultFrom = startDate || document.getElementById('pl-start')?.value || new Date().toISOString().split('T')[0];
   if (rows.length > 0) { const lastTo = rows[rows.length - 1].querySelector('.rs-to')?.value; if (lastTo) { const d = new Date(lastTo); d.setDate(d.getDate() + 1); defaultFrom = d.toISOString().split('T')[0]; } }
   const row = document.createElement('div'); row.className = 'rs-row'; row.style.cssText = 'display:grid;grid-template-columns:1fr 1fr 80px 80px auto;gap:6px;margin-bottom:6px;align-items:end';
   row.innerHTML = `<div class="form-field" style="margin:0"><label style="font-size:9px">Début</label><input class="rs-from" type="date" value="${defaultFrom}"></div><div class="form-field" style="margin:0"><label style="font-size:9px">Fin</label><input class="rs-to" type="date" value=""></div><div class="form-field" style="margin:0"><label style="font-size:9px">Taux (%)</label><input class="rs-rate" type="number" step="0.01" value=""></div><div class="form-field" style="margin:0"><label style="font-size:9px">Taux sortie (%)</label><input class="rs-early" type="number" step="0.01" value="" placeholder="=taux"></div><button class="btn sm danger" onclick="this.closest('.rs-row').remove()" style="margin-bottom:2px">✕</button>`;
   container.appendChild(row);
 }
 
+// ─── KEY FIX: Convert relative schedule to dated schedule before display ───
+function _resolveScheduleForDisplay(schedule, startDate) {
+  if (!schedule || schedule.length === 0) return [];
+  // Already has real dates? Return as-is
+  if (schedule[0].from && schedule[0].from.match && schedule[0].from.match(/^\d{4}-\d{2}-\d{2}$/)) return schedule;
+  // Has fromMonth/toMonth? Convert to dates
+  if (!startDate) return schedule;
+  const start = new Date(startDate);
+  if (isNaN(start.getTime())) return schedule;
+  return schedule.map(s => {
+    const fm = parseInt(s.fromMonth) || 1;
+    const tm = parseInt(s.toMonth) || fm;
+    const fromDate = new Date(start); fromDate.setMonth(fromDate.getMonth() + fm - 1);
+    const toDate = new Date(start); toDate.setMonth(toDate.getMonth() + tm);
+    toDate.setDate(toDate.getDate() - 1); // end of period, not start of next
+    return {
+      from: fromDate.toISOString().split('T')[0],
+      to: toDate.toISOString().split('T')[0],
+      rate: s.rate,
+      earlyRate: s.earlyRate != null ? s.earlyRate : null,
+      label: s.label || `Mois ${fm}-${tm}`,
+      fromMonth: fm, toMonth: tm
+    };
+  });
+}
+
+// Recalculate all dates when startDate changes
+function _recalcScheduleDates() {
+  const startDate = document.getElementById('pl-start')?.value;
+  const container = document.getElementById('rs-container');
+  if (!startDate || !container) return;
+  // Read the stored raw schedule from data attribute
+  const rawAttr = container.getAttribute('data-raw-schedule');
+  if (!rawAttr) return;
+  try {
+    const rawSchedule = JSON.parse(rawAttr);
+    const resolved = _resolveScheduleForDisplay(rawSchedule, startDate);
+    container.innerHTML = buildRateScheduleHTML(resolved);
+  } catch(e) {}
+}
+
 function _injectRateScheduleSection(deposit, prefillSchedule) {
   const formGrid = document.querySelector('.modal-content .form-grid');
   if (!formGrid) return;
-  // Use deposit schedule, or prefill from AI, or empty
-  const schedule = deposit?.rateSchedule || prefillSchedule || [];
+
+  // Get startDate from form or deposit
+  const startDate = document.getElementById('pl-start')?.value || deposit?.startDate || '';
+
+  // Raw schedule (may have fromMonth/toMonth OR from/to dates)
+  const rawSchedule = deposit?.rateSchedule || prefillSchedule || [];
+
+  // Convert to dated schedule for display
+  const schedule = _resolveScheduleForDisplay(rawSchedule, startDate);
+
   const section = document.createElement('div'); section.className = 'form-field full'; section.style.cssText = 'margin-top:12px';
   section.innerHTML = `
     <label style="display:flex;justify-content:space-between;align-items:center">
       <span>📊 Barème progressif</span>
-      <span style="font-size:10px;color:var(--text-dim)">${schedule.length > 0 ? schedule.length + ' paliers extraits' : 'Optionnel — pour taux progressifs'}</span>
+      <span style="font-size:10px;color:var(--text-dim)">${schedule.length > 0 ? schedule.length + ' paliers' + (prefillSchedule && prefillSchedule.length > 0 ? ' (auto-extrait)' : '') : 'Optionnel — pour taux progressifs'}</span>
     </label>
-    <div style="font-size:10px;color:var(--text-dim);margin:4px 0 8px">Modifiez les dates selon votre contrat. Taux sortie = taux si retrait anticipé pendant cette période.</div>
-    <div id="rs-container" style="margin-top:8px">${buildRateScheduleHTML(schedule)}</div>
-    <button class="btn ghost sm" style="width:100%;margin-top:4px" type="button" onclick="addRateScheduleRow('${deposit?.startDate || ''}')">+ Ajouter un palier</button>`;
+    <div style="font-size:10px;color:var(--text-dim);margin:4px 0 8px">Les dates se calculent automatiquement à partir de la date de souscription. Modifiables si besoin.</div>
+    <div id="rs-container" data-raw-schedule='${JSON.stringify(rawSchedule).replace(/'/g, "&#39;")}' style="margin-top:8px">${buildRateScheduleHTML(schedule)}</div>
+    <button class="btn ghost sm" style="width:100%;margin-top:4px" type="button" onclick="addRateScheduleRow()">+ Ajouter un palier</button>`;
   formGrid.after(section);
+
+  // Listen for startDate changes to auto-recalculate dates
+  setTimeout(() => {
+    const startInput = document.getElementById('pl-start');
+    if (startInput && rawSchedule.length > 0 && rawSchedule[0].fromMonth) {
+      startInput.addEventListener('change', _recalcScheduleDates);
+    }
+  }, 100);
 }
 
 // ─── 2. Override PDF processing → multi-contract modal ───
@@ -117,7 +174,6 @@ async function handleSaveBrochureContracts() {
   rows.forEach(row=>{const e=row.querySelector('.bc-entity')?.value||'';const a=parseFloat(row.querySelector('.bc-amount')?.value)||0;const d=row.querySelector('.bc-date')?.value||'';if(a>0)contracts.push({entity:e,amount:a,startDate:d});});
   if(contracts.length===0){showToast('Au moins un contrat requis','error');return;}
   closeModal();
-  // Include rateSchedule from AI extraction
   const aiSchedule = b.parsed?.rateSchedule || [];
   for(const c of contracts){
     catManager.addDeposit({
@@ -143,10 +199,9 @@ async function handleSaveBrochureContracts() {
 const _origShowManualPlacementModal = showManualPlacementModal;
 showManualPlacementModal = function(productType, prefill, rawText, sourceFile) {
   _origShowManualPlacementModal(productType, prefill, rawText, sourceFile);
-  // Entity
   const bankField = document.getElementById('pl-bank')?.closest('.form-field');
   if (bankField) { const ef=document.createElement('div'); ef.className='form-field'; ef.innerHTML=`<label>🏢 Entreprise</label><select id="pl-entity"><option value="">Sélectionner...</option>${MY_ENTITIES.map(e=>`<option value="${e.id}">${e.icon} ${e.name}</option>`).join('')}</select>`; bankField.after(ef); }
-  // FIX: Pass prefill rateSchedule from AI extraction
+  // FIX: Pass prefill rateSchedule — dates auto-calculated from startDate
   const aiSchedule = prefill?.rateSchedule || [];
   _injectRateScheduleSection(null, aiSchedule);
 };
@@ -171,7 +226,6 @@ const _origSavePlacement = savePlacement;
 savePlacement = async function(editId) {
   const entityVal = document.getElementById('pl-entity')?.value || '';
   const schedule = readRateScheduleFromModal();
-  // Also read from hidden AI field if no manual schedule
   let aiSchedule = [];
   const aiEl = document.getElementById('pl-ai-schedule');
   if (aiEl?.value && schedule.length === 0) { try { aiSchedule = JSON.parse(decodeURIComponent(aiEl.value)); } catch(e) {} }
@@ -180,7 +234,11 @@ savePlacement = async function(editId) {
   if (target) {
     if (entityVal) { target.entity = entityVal; target.entityName = MY_ENTITIES.find(e => e.id === entityVal)?.name || entityVal; }
     const finalSchedule = schedule.length > 0 ? schedule : aiSchedule;
-    if (finalSchedule.length > 0) { target.rateSchedule = finalSchedule; target.rateType = 'progressif'; }
+    if (finalSchedule.length > 0) {
+      // Convert relative months if needed
+      target.rateSchedule = convertRelativeScheduleToDates(finalSchedule, target.startDate);
+      target.rateType = 'progressif';
+    }
     await catManager.saveDeposits();
   }
 };
