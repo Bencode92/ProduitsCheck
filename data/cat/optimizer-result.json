@@ -1,15 +1,15 @@
 {
-  "lastUpdated": "2026-03-20T14:27:30.626Z",
-  "summary": "**AVANT: 43 600€/an → APRÈS: 44 050€/an (+450€)**\n\n🔄 **CATIP ENT 3ANS** 200 000€ à 2,7% → Sortir et placer sur **Dépôt à terme 24 mois** à 2,93% = **+460€/an**\n⚠️ Contrainte: Taux minoré selon barème, mais gain substantiel\n\n✅ **6 contrats** performants à conserver (CAT CROISSANCE 3,21%, CATVAIR 3,5%, OPTIPLUS 5 ans 3,10%)\n\n✅ **4 contrats OPTIPLUS CONQUÊTE** arrivent à échéance dans 6 mois - prévoir renouvellement sur meilleurs taux disponibles\n\n• **Action prioritaire**: Sortir du CATIP CIC (sous-performant à 2,7% vs marché 2,93%)\n• **Surveillance**: Les 4 OPTIPLUS CONQUÊTE libéreront 600 000€ dans 6 mois - opportunité de réallocation majeure",
+  "lastUpdated": "2026-03-22T08:22:56.217Z",
+  "summary": "**AVANT: 43 600€/an → APRÈS: 44 200€/an (+600€)**\n\n🔄 **CATIP ENT 3ANS** 200 000€ à 2.7% → placer sur **Tonic Croissance** à 3% = **+600€/an**\n⚠️ Préavis 32j, taux minoré selon barème CIC au retrait\n\n🔄 **4x OPTIPLUS CONQUÊTE** 600 000€ à 2.9% → placer sur **Tonic Croissance** à 3% = **+600€/an** \n⚠️ Sortie libre dans 6 mois (aucun intérêt si retrait <1 mois), puis rémunération réduite de moitié la 1ère année sur nouveau placement\n\n✅ **6 contrats** leaders du marché à conserver (CAT Croissance SG 3.21%, CATVAIR BP 3.5%, OptiPlus 5 ans BP 3.1%)\n\n• **Action immédiate** : Donner préavis 32j sur CATIP CIC (200k€)\n• **Action à 6 mois** : Arbitrer les 4 OptiPlus Conquête BP (600k€) \n• Gain total limité (+1 200€/an) mais sécurisé sur placements court terme",
   "totalInvested": 1460000,
   "totalInterestPerYear": 43600.5,
   "weightedRate": 2.9863356164383563,
   "optimizedInterest": 43600.5,
   "optimizedRate": 2.9863356164383563,
-  "totalPotentialGain": 640,
+  "totalPotentialGain": 1200,
   "arbitrageCount": 0,
   "depositCount": 10,
-  "rateCount": 32,
+  "rateCount": 61,
   "deposits": [
     {
       "name": "CAT CROISSANCE +3A PREAVIS",
@@ -19,7 +19,7 @@
       "rate": 3.21,
       "currentPeriodRate": 3.5,
       "interestPerYear": 1926,
-      "remainingMonths": 18,
+      "remainingMonths": 17,
       "maturityDate": "2027-09-12",
       "bestAlt": null,
       "switchGainPerYear": 0,
@@ -34,7 +34,7 @@
       "rate": 3.21,
       "currentPeriodRate": 3.5,
       "interestPerYear": 1605,
-      "remainingMonths": 18,
+      "remainingMonths": 17,
       "maturityDate": "2027-09-12",
       "bestAlt": null,
       "switchGainPerYear": 0,
@@ -52,14 +52,14 @@
       "remainingMonths": 28,
       "maturityDate": "2028-08-05",
       "bestAlt": {
-        "name": "Dépôt à terme 24 mois",
-        "rate": 2.93,
-        "duration": 24,
-        "bankName": "Société Générale"
+        "name": "Tonic Croissance",
+        "rate": 3,
+        "duration": 60,
+        "bankName": "Crédit Mutuel"
       },
-      "switchGainPerYear": 460,
+      "switchGainPerYear": 600,
       "recommendation": "SURVEILLER",
-      "reason": "+0.23% dispo"
+      "reason": "+0.30% dispo"
     },
     {
       "name": "CATVAIR GRANDS COMPTES 5 ANS",
@@ -87,14 +87,14 @@
       "remainingMonths": 6,
       "maturityDate": "2026-09-18",
       "bestAlt": {
-        "name": "Dépôt à terme 24 mois",
-        "rate": 2.93,
-        "duration": 24,
-        "bankName": "Société Générale"
+        "name": "Tonic Croissance",
+        "rate": 3,
+        "duration": 60,
+        "bankName": "Crédit Mutuel"
       },
-      "switchGainPerYear": 45,
+      "switchGainPerYear": 150,
       "recommendation": "SURVEILLER",
-      "reason": "+0.03% dispo"
+      "reason": "+0.10% dispo"
     },
     {
       "name": "OPTIPLUS CONQUÊTE",
@@ -107,14 +107,14 @@
       "remainingMonths": 6,
       "maturityDate": "2026-09-18",
       "bestAlt": {
-        "name": "Dépôt à terme 24 mois",
-        "rate": 2.93,
-        "duration": 24,
-        "bankName": "Société Générale"
+        "name": "Tonic Croissance",
+        "rate": 3,
+        "duration": 60,
+        "bankName": "Crédit Mutuel"
       },
-      "switchGainPerYear": 45,
+      "switchGainPerYear": 150,
       "recommendation": "SURVEILLER",
-      "reason": "+0.03% dispo"
+      "reason": "+0.10% dispo"
     },
     {
       "name": "OPTIPLUS CONQUÊTE",
@@ -127,14 +127,14 @@
       "remainingMonths": 6,
       "maturityDate": "2026-09-18",
       "bestAlt": {
-        "name": "Dépôt à terme 24 mois",
-        "rate": 2.93,
-        "duration": 24,
-        "bankName": "Société Générale"
+        "name": "Tonic Croissance",
+        "rate": 3,
+        "duration": 60,
+        "bankName": "Crédit Mutuel"
       },
-      "switchGainPerYear": 45,
+      "switchGainPerYear": 150,
       "recommendation": "SURVEILLER",
-      "reason": "+0.03% dispo"
+      "reason": "+0.10% dispo"
     },
     {
       "name": "OPTIPLUS CONQUÊTE",
@@ -147,14 +147,14 @@
       "remainingMonths": 6,
       "maturityDate": "2026-09-18",
       "bestAlt": {
-        "name": "Dépôt à terme 24 mois",
-        "rate": 2.93,
-        "duration": 24,
-        "bankName": "Société Générale"
+        "name": "Tonic Croissance",
+        "rate": 3,
+        "duration": 60,
+        "bankName": "Crédit Mutuel"
       },
-      "switchGainPerYear": 45,
+      "switchGainPerYear": 150,
       "recommendation": "SURVEILLER",
-      "reason": "+0.03% dispo"
+      "reason": "+0.10% dispo"
     },
     {
       "name": "COMPTE A TERME OPTIPLUS 5 ANS Réf.000001",
@@ -194,14 +194,14 @@
       "amount": 200000,
       "rate": 2.7,
       "recommendation": "SURVEILLER",
-      "reason": "+0.23% dispo",
+      "reason": "+0.30% dispo",
       "bestAlt": {
-        "name": "Dépôt à terme 24 mois",
-        "rate": 2.93,
-        "duration": 24,
-        "bankName": "Société Générale"
+        "name": "Tonic Croissance",
+        "rate": 3,
+        "duration": 60,
+        "bankName": "Crédit Mutuel"
       },
-      "switchGainPerYear": 460
+      "switchGainPerYear": 600
     },
     {
       "name": "OPTIPLUS CONQUÊTE",
@@ -209,14 +209,14 @@
       "amount": 150000,
       "rate": 2.9,
       "recommendation": "SURVEILLER",
-      "reason": "+0.03% dispo",
+      "reason": "+0.10% dispo",
       "bestAlt": {
-        "name": "Dépôt à terme 24 mois",
-        "rate": 2.93,
-        "duration": 24,
-        "bankName": "Société Générale"
+        "name": "Tonic Croissance",
+        "rate": 3,
+        "duration": 60,
+        "bankName": "Crédit Mutuel"
       },
-      "switchGainPerYear": 45
+      "switchGainPerYear": 150
     },
     {
       "name": "OPTIPLUS CONQUÊTE",
@@ -224,14 +224,14 @@
       "amount": 150000,
       "rate": 2.9,
       "recommendation": "SURVEILLER",
-      "reason": "+0.03% dispo",
+      "reason": "+0.10% dispo",
       "bestAlt": {
-        "name": "Dépôt à terme 24 mois",
-        "rate": 2.93,
-        "duration": 24,
-        "bankName": "Société Générale"
+        "name": "Tonic Croissance",
+        "rate": 3,
+        "duration": 60,
+        "bankName": "Crédit Mutuel"
       },
-      "switchGainPerYear": 45
+      "switchGainPerYear": 150
     },
     {
       "name": "OPTIPLUS CONQUÊTE",
@@ -239,14 +239,14 @@
       "amount": 150000,
       "rate": 2.9,
       "recommendation": "SURVEILLER",
-      "reason": "+0.03% dispo",
+      "reason": "+0.10% dispo",
       "bestAlt": {
-        "name": "Dépôt à terme 24 mois",
-        "rate": 2.93,
-        "duration": 24,
-        "bankName": "Société Générale"
+        "name": "Tonic Croissance",
+        "rate": 3,
+        "duration": 60,
+        "bankName": "Crédit Mutuel"
       },
-      "switchGainPerYear": 45
+      "switchGainPerYear": 150
     },
     {
       "name": "OPTIPLUS CONQUÊTE",
@@ -254,14 +254,14 @@
       "amount": 150000,
       "rate": 2.9,
       "recommendation": "SURVEILLER",
-      "reason": "+0.03% dispo",
+      "reason": "+0.10% dispo",
       "bestAlt": {
-        "name": "Dépôt à terme 24 mois",
-        "rate": 2.93,
-        "duration": 24,
-        "bankName": "Société Générale"
+        "name": "Tonic Croissance",
+        "rate": 3,
+        "duration": 60,
+        "bankName": "Crédit Mutuel"
       },
-      "switchGainPerYear": 45
+      "switchGainPerYear": 150
     }
   ]
 }
