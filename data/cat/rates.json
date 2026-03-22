@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-03-22T07:50:09.419Z",
+  "lastUpdated": "2026-03-22T07:50:52.300Z",
   "rates": [
     {
       "bankId": "cic",
@@ -1012,6 +1012,104 @@
       "withdrawalConditions": "Retrait anticipé entraîne clôture. Taux selon durée réelle détention.",
       "notice": "32 jours",
       "productName": "OPTIPLUS COURT TERME 12 mois"
+    },
+    {
+      "bankId": "banque-populaire",
+      "bankName": "Banque Populaire",
+      "durationMonths": 24,
+      "rate": 2.15,
+      "productType": "compte à terme",
+      "date": "2026-03-31",
+      "rateType": "progressif",
+      "rateSchedule": [
+        {
+          "periodStart": 1,
+          "periodEnd": 6,
+          "rate": 1.94
+        },
+        {
+          "periodStart": 7,
+          "periodEnd": 12,
+          "rate": 2.04
+        },
+        {
+          "periodStart": 13,
+          "periodEnd": 18,
+          "rate": 2.15
+        },
+        {
+          "periodStart": 19,
+          "periodEnd": 24,
+          "rate": 2.45
+        }
+      ],
+      "withdrawalConditions": "Tout retrait anticipé entraîne la clôture. Aucun intérêt si retrait dans le mois.",
+      "notice": "32 jours",
+      "productName": "OPTIPLUS 2 ans"
+    },
+    {
+      "bankId": "banque-populaire",
+      "bankName": "Banque Populaire",
+      "durationMonths": 60,
+      "rate": 2.7,
+      "productType": "compte à terme",
+      "date": "2026-03-31",
+      "rateType": "progressif",
+      "rateSchedule": [
+        {
+          "periodStart": 1,
+          "periodEnd": 6,
+          "rate": 1.94
+        },
+        {
+          "periodStart": 7,
+          "periodEnd": 12,
+          "rate": 2.14
+        },
+        {
+          "periodStart": 13,
+          "periodEnd": 18,
+          "rate": 2.35
+        },
+        {
+          "periodStart": 19,
+          "periodEnd": 24,
+          "rate": 2.54
+        },
+        {
+          "periodStart": 25,
+          "periodEnd": 30,
+          "rate": 2.72
+        },
+        {
+          "periodStart": 31,
+          "periodEnd": 36,
+          "rate": 2.95
+        },
+        {
+          "periodStart": 37,
+          "periodEnd": 42,
+          "rate": 2.8
+        },
+        {
+          "periodStart": 43,
+          "periodEnd": 48,
+          "rate": 2.9
+        },
+        {
+          "periodStart": 49,
+          "periodEnd": 54,
+          "rate": 2.97
+        },
+        {
+          "periodStart": 55,
+          "periodEnd": 60,
+          "rate": 3.65
+        }
+      ],
+      "withdrawalConditions": "Tout retrait anticipé entraîne la clôture. Aucun intérêt si retrait dans le mois.",
+      "notice": "32 jours",
+      "productName": "OPTIPLUS 5 ans"
     }
   ]
 }
