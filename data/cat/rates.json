@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-03-22T07:50:52.300Z",
+  "lastUpdated": "2026-03-22T07:54:27.949Z",
   "rates": [
     {
       "bankId": "cic",
@@ -1110,6 +1110,90 @@
       "withdrawalConditions": "Tout retrait anticipé entraîne la clôture. Aucun intérêt si retrait dans le mois.",
       "notice": "32 jours",
       "productName": "OPTIPLUS 5 ans"
+    },
+    {
+      "bankId": "banque-populaire",
+      "bankName": "Banque Populaire",
+      "durationMonths": 24,
+      "rate": 2.15,
+      "productType": "cat",
+      "date": "2026-03-31",
+      "rateType": "progressif",
+      "rateSchedule": [
+        {
+          "period": "1-6 mois",
+          "rate": 1.84
+        },
+        {
+          "period": "7-12 mois",
+          "rate": 2.04
+        },
+        {
+          "period": "13-18 mois",
+          "rate": 2.25
+        },
+        {
+          "period": "19-24 mois",
+          "rate": 2.44
+        }
+      ],
+      "withdrawalConditions": "Retrait anticipé entraîne clôture. Remboursement par anticipation possible.",
+      "notice": "32 jours",
+      "productName": "CATVAIR GRANDS COMPTES 2 ans"
+    },
+    {
+      "bankId": "banque-populaire",
+      "bankName": "Banque Populaire",
+      "durationMonths": 60,
+      "rate": 2.6,
+      "productType": "cat",
+      "date": "2026-03-31",
+      "rateType": "progressif",
+      "rateSchedule": [
+        {
+          "period": "1-6 mois",
+          "rate": 1.84
+        },
+        {
+          "period": "7-12 mois",
+          "rate": 2.04
+        },
+        {
+          "period": "13-18 mois",
+          "rate": 2.25
+        },
+        {
+          "period": "19-24 mois",
+          "rate": 2.44
+        },
+        {
+          "period": "24-30 mois",
+          "rate": 2.62
+        },
+        {
+          "period": "31-36 mois",
+          "rate": 2.85
+        },
+        {
+          "period": "37-42 mois",
+          "rate": 2.7
+        },
+        {
+          "period": "43-48 mois",
+          "rate": 2.8
+        },
+        {
+          "period": "49-54 mois",
+          "rate": 2.88
+        },
+        {
+          "period": "55-60 mois",
+          "rate": 3.55
+        }
+      ],
+      "withdrawalConditions": "Retrait anticipé entraîne clôture. Remboursement par anticipation possible.",
+      "notice": "32 jours",
+      "productName": "CATVAIR GRANDS COMPTES 5 ans"
     }
   ]
 }
