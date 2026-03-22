@@ -1,6 +1,6 @@
 {
-  "lastUpdated": "2026-03-22T16:02:30.596Z",
-  "summary": "**AVANT: 43 674€/an → APRÈS: 43 914€/an (NET +240€)**\n\n🔄 **CATIP ENT 3ANS** → **Dépôt à terme 24 mois** = brut +460€ - préavis 514€ = **NET +240€/an**\n\n**SURVEILLER (4 contrats):** Les 4 OPTIPLUS CONQUÊTE montrent un écart positif vers Tonic Croissance 3% mais génèrent chacun un **déficit NET de -639€/an** à cause des pénalités de préavis (-395€) qui dépassent largement le gain brut (+150€). Le seuil de rentabilité nécessiterait un écart de +0,49% minimum.\n\n✅ **5 contrats** leaders gardés:\n- 2x OPTIPLUS 5 ANS (3,10% > marché)\n- CATVAIR GRANDS COMPTES (3,5% > marché) \n- 2x CAT CROISSANCE SG (3,21% > marché)\n\n**Recommandation:** Arbitrer immédiatement le CIC (+240€ NET). Surveiller l'évolution des taux pour les 4 OPTIPLUS CONQUÊTE - un écart supplémentaire de +0,39% les rendrait rentables. Maintenir les 5 contrats performants actuels.",
+  "lastUpdated": "2026-03-22T16:12:51.278Z",
+  "summary": "**AVANT → APRÈS (NET +240€)**\n\n🔄 **CATIP ENT 3ANS A PREAVIS (CIC)** → **Dépôt à terme 24 mois** = **NET +240€/an** ⚠️ Sortie anticipée à 28 mois, négociation requise pour confirmer le taux cible 2.93%\n\n**Analyse taux web :** Sur 13 produits évalués, seul le Tonic Croissance (Crédit Mutuel) à 3% présente un intérêt théorique. Cependant, vos 4 contrats OPTIPLUS CONQUÊTE actuels à 2.9% sont déjà proches et bénéficient d'un palier à 2.95% dans 6 mois. L'écart de +0.1% ne justifie pas les coûts de transfert (-639€ NET par contrat).\n\n**Constat :** Vos taux négociés (3.1039%, 3.5%, 3.21%) surperforment largement le marché web. Les banques traditionnelles (BNP, CA, LCL) plafonnent à 2.5% maximum.\n\n✅ **6 contrats** leaders à conserver : vos CAT 5 ans Banque Populaire (3.1039%), CATVAIR Grands Comptes (3.5%) et CAT Croissance SG (3.21%) dominent l'offre actuelle.\n\n**Recommandation :** Patience sur les 4 OPTIPLUS - réévaluer après palier septembre.",
   "rateSource": "all",
   "algorithmVersion": "v2",
   "totalInvested": 1460000,
@@ -40,7 +40,7 @@
       "dynamicThreshold": 0.48989794855663565,
       "compositeScore": 0.22250000000000003,
       "recommendation": "SURVEILLER",
-      "reason": "Gain brut +150€ mais NET -639,04€ (coûts: -394,52€)"
+      "reason": "Brut +150€ mais NET -639,04€ (coûts -394,52€)"
     },
     {
       "name": "OPTIPLUS CONQUÊTE",
@@ -66,7 +66,7 @@
       "dynamicThreshold": 0.48989794855663565,
       "compositeScore": 0.22250000000000003,
       "recommendation": "SURVEILLER",
-      "reason": "Gain brut +150€ mais NET -639,04€ (coûts: -394,52€)"
+      "reason": "Brut +150€ mais NET -639,04€ (coûts -394,52€)"
     },
     {
       "name": "OPTIPLUS CONQUÊTE",
@@ -92,7 +92,7 @@
       "dynamicThreshold": 0.48989794855663565,
       "compositeScore": 0.22250000000000003,
       "recommendation": "SURVEILLER",
-      "reason": "Gain brut +150€ mais NET -639,04€ (coûts: -394,52€)"
+      "reason": "Brut +150€ mais NET -639,04€ (coûts -394,52€)"
     },
     {
       "name": "OPTIPLUS CONQUÊTE",
@@ -118,7 +118,7 @@
       "dynamicThreshold": 0.48989794855663565,
       "compositeScore": 0.22250000000000003,
       "recommendation": "SURVEILLER",
-      "reason": "Gain brut +150€ mais NET -639,04€ (coûts: -394,52€)"
+      "reason": "Brut +150€ mais NET -639,04€ (coûts -394,52€)"
     },
     {
       "name": "CATIP ENT 3ANS A PREAVIS",
@@ -144,7 +144,7 @@
       "dynamicThreshold": 0.09091372900969895,
       "compositeScore": 0.16412166666666667,
       "recommendation": "ARBITRER",
-      "reason": "NET +239,82€/an → Dépôt à terme 24 mois (seuil: 0.09%)"
+      "reason": "NET +239,82€/an → Dépôt à terme 24 mois"
     },
     {
       "name": "COMPTE A TERME OPTIPLUS 5 ANS Réf.000001",
