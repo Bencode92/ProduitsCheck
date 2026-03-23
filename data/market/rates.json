@@ -1,0 +1,14 @@
+{
+  "source": "ECB Statistical Data Warehouse",
+  "fetched_at": "2026-03-23T17:53:46.839175Z",
+  "yields": {},
+  "policy_rates": {
+    "ecb_main_rate": {
+      "name": "ECB Main Refinancing Rate",
+      "description": "Taux directeur BCE",
+      "current": 2.15,
+      "date": "2026-03-23"
+    }
+  },
+  "yield_curve_fr": {}
+}
