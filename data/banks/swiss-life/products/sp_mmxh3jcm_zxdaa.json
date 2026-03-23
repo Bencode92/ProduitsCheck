@@ -175,25 +175,25 @@
         "score": 65,
         "base": 75,
         "delta": -10,
-        "reasoning": "Qualité: base 75 → -10 = 65 (Données manquantes sur obligations, seul instrument monétaire identifié avec quality faible (43)) | Worst: Instruments du marché monétaire B:93"
+        "reasoning": "Qualité: base 75 → -10 = 65 (Exposition pure aux instruments monétaires avec vol 32% et DD 34% inadaptée au contexte, qualité dégradée.) | Worst: Instruments du marché monétaire B:93"
       },
       "portfolioFit": {
         "score": 35,
         "base": 40,
         "delta": -5,
-        "reasoning": "Fit: base 40 → -5 = 35 (Exposition obligations/monétaire peu attractive en contexte neutral avec energy favorisé)"
+        "reasoning": "Fit: base 40 → -5 = 35 (Sous-jacents monétaires volatils inadéquats en régime neutre, décalage total avec allocation recommandée.)"
       },
       "riskPremium": {
         "score": 0,
         "base": 5,
         "delta": -10,
-        "reasoning": "Prime: base 5 → -10 = 0 (Prime inexistante face au CAT 3%, structure défavorable sans compensation rendement) | 0% vs CAT 3%"
+        "reasoning": "Prime: base 5 → -10 = 0 (Structure sans rendement face au CAT 3% représente un coût d'opportunité majeur de 300bp.) | 0% vs CAT 3%"
       }
     },
-    "verdict": "Ce produit Swiss Life présente un profil très défavorable avec 0% de coupon et capital non protégé. L'absence de données sur les principaux sous-jacents obligataires empêche une évaluation précise des risques. La structure autocall à 100% sans rendement ne justifie aucune prime face aux alternatives 3%. Score ajusté: 3/100 (grade F).",
+    "verdict": "Ce produit Swiss Life présente une structure défaillante avec 0% de coupon sur des sous-jacents monétaires paradoxalement volatils (32% vol, 34% DD). L'autocall à 100% ne compense pas l'absence totale de rendement face à un CAT à 3%. Le coût d'opportunité annuel de 300bp sur 109k€ représente 3270€/an perdus. Grade ajusté: F (3/100).",
     "keyRisks": [
-      "Capital non protégé sans compensation rendement",
-      "Transparence insuffisante sur la composition obligataire"
+      "Perte d'opportunité garantie de 3270€/an vs CAT sans contrepartie",
+      "Volatilité excessive (32%) sur instruments monétaires censés être stables"
     ],
     "negotiationPoints": [],
     "scenarios": {
@@ -206,27 +206,27 @@
       "base": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.3,
-        "duration_years": 1
+        "probability": 0.25,
+        "duration_years": 2
       },
       "stress": {
-        "return_pct": -10,
-        "return_eur": -10900,
-        "probability": 0.08,
-        "duration_years": 1
+        "return_pct": -15,
+        "return_eur": -16350,
+        "probability": 0.1,
+        "duration_years": 3
       },
       "worst": {
         "return_pct": -25,
         "return_eur": -27250,
-        "probability": 0.02,
-        "duration_years": 1
+        "probability": 0.05,
+        "duration_years": 3
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-23T16:49:31.619Z",
-      "durationMs": 10325,
+      "gradedAt": "2026-03-23T16:56:03.831Z",
+      "durationMs": 12739,
       "aiUsed": true,
-      "version": "3.1",
+      "version": "3.2",
       "marketDataAvailable": true,
       "catBenchmark": 3,
       "couponAnnualized": 0,
