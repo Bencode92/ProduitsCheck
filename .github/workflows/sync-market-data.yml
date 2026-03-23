@@ -1,14 +1,14 @@
 name: Sync Market Data from stock-analysis-platform
 
 on:
-  # Run daily at 9am Paris time (after stock-analysis-platform updates)
   schedule:
-    - cron: '0 8 * * 1-5'  # 8h UTC = 9h Paris, weekdays only
-  # Manual trigger
+    - cron: '0 8 * * 1-5'
   workflow_dispatch:
-  # Also trigger when stock-analysis-platform pushes (via repository_dispatch)
   repository_dispatch:
     types: [market-data-updated]
+
+permissions:
+  contents: write
 
 jobs:
   sync:
@@ -33,7 +33,7 @@ jobs:
           curl -sL "https://raw.githubusercontent.com/Bencode92/stock-analysis-platform/main/data/stocks_us.json" -o data/market/stocks_us.json
           echo "stocks_us.json: $(wc -c < data/market/stocks_us.json) bytes"
 
-      - name: Build lightweight index (underlyings only)
+      - name: Build lightweight index
         run: |
           cat > /tmp/build_index.py << 'PYEOF'
           import json, sys, os
@@ -77,7 +77,6 @@ jobs:
                       'region': stock.get('region', ''),
                   }
 
-          # Markets summary
           markets_path = 'data/market/markets.json'
           markets_summary = {}
           if os.path.exists(markets_path):
