@@ -182,5 +182,80 @@
       "redundancy": 39,
       "complementarity": 45
     }
+  },
+  "grading": {
+    "grade": "D",
+    "score": 34,
+    "pillars": {
+      "adjustedReturn": {
+        "score": 15,
+        "couponEffective": 3.1,
+        "couponProbability": 0.5,
+        "reasoning": "Coupon 6.15% × probabilité 50% (barrière 0% + vol 21%) = 3.1% effectif. -15 pts capital non protégé. Très faible avec risque de perte totale."
+      },
+      "underlyingQuality": {
+        "score": 40,
+        "worstStock": "Crédit Agricole S.A.",
+        "keyRisk": "Secteur financier en difficulté (-8% macro)",
+        "reasoning": "LVMH données manquantes. CA: Quality 79/100 mais secteur Finance évité (-8% YTD), vol 21%, max DD 21%. Buffett score absent critique."
+      },
+      "portfolioFit": {
+        "score": 15,
+        "issuerOverlap": true,
+        "diversificationBenefit": false,
+        "reasoning": "CIC 33% → 53% concentration excessive (-20 pts). Type minoritaire AUTRE vs 4 AUTOCALL (-15 pts). Secteur Finance déjà présent indirectement."
+      },
+      "riskPremium": {
+        "score": 75,
+        "spreadVsCat": 3.15,
+        "catBenchmark": 3,
+        "reasoning": "Prime 3.15% vs CAT 3% acceptable mais compensée par risques structurels majeurs (capital non protégé + secteur défavorisé)."
+      }
+    },
+    "verdict": "Produit à éviter malgré prime correcte (3.15% vs 3%). Secteur Finance explicitement défavorisé en macro (-8% YTD), avec CA Quality 79/100 mais vol 21%. Concentration CIC excessive (33%→53%) et capital non protégé avec barrière 0% créent un profil rendement/risque dégradé (3.1% effectif pour risque de perte totale).",
+    "keyRisks": [
+      "Capital non protégé avec barrière 0%",
+      "Secteur Finance évité en macro (-8% YTD)",
+      "Sur-concentration émetteur CIC (53%)",
+      "Données LVMH manquantes"
+    ],
+    "negotiationPoints": [
+      "Protection partielle du capital minimum 80%",
+      "Réduction concentration CIC"
+    ],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 18,
+        "return_eur": 5382,
+        "probability": 0.15
+      },
+      "base": {
+        "return_pct": 6,
+        "return_eur": 1794,
+        "probability": 0.35
+      },
+      "stress": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.3
+      },
+      "worst": {
+        "return_pct": -100,
+        "return_eur": -29900,
+        "probability": 0.2
+      }
+    },
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "metadata": {
+      "gradedAt": "2026-03-23T14:05:03.245Z",
+      "durationMs": 21172,
+      "aiUsed": true,
+      "version": "2.0",
+      "marketDataAvailable": true,
+      "catBenchmark": 3
+    }
   }
 }
