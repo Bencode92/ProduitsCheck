@@ -27,6 +27,9 @@ jobs:
             echo "$f: $(wc -c < data/market/$f) bytes"
           done
 
+      - name: Fetch ECB rate data
+        run: python3 scripts/fetch-rates.py
+
       - name: Build enriched index
         run: |
           cat > /tmp/build_index.py << 'PYEOF'
@@ -105,7 +108,6 @@ jobs:
               with open(cp) as f: ctx = json.load(f)
               tilts = ctx.get('macro_tilts', {})
               diag = ctx.get('_meta', {}).get('diagnostics', {})
-              # Sector classifications as dict
               sector_class = {}
               for sc in diag.get('sector_classifications', []):
                   sector_class[sc['key']] = {
@@ -116,7 +118,6 @@ jobs:
                       'w52': sc.get('w52'),
                       'momentum': sc.get('effective_momentum'),
                   }
-              # Region classifications as dict
               region_class = {}
               for rc in diag.get('region_classifications', []):
                   region_class[rc['key']] = {
@@ -147,7 +148,6 @@ jobs:
           if os.path.exists(sp):
               with open(sp) as f: sdata = json.load(f)
               for sector_key, etfs in sdata.get('sectors', {}).items():
-                  # Keep only EU ETFs (STOXX Europe 600)
                   eu_etfs = [e for e in etfs if e.get('region') == 'Europe']
                   if eu_etfs:
                       sectors_perf[sector_key] = [{
