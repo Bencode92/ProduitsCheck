@@ -140,5 +140,41 @@
   "subscriptionDate": "2026-01-15",
   "integrationNotes": "",
   "entity": "cameleons",
-  "entityName": "Caméleons"
+  "entityName": "Caméleons",
+  "grading": {
+    "grade": "F",
+    "score": 0,
+    "killCriteria": {
+      "triggered": true,
+      "reasons": [
+        "5 sous-jacents déjà en portefeuille"
+      ]
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": null
+      },
+      "underlyingQuality": {
+        "score": null
+      },
+      "portfolioFit": {
+        "score": null
+      },
+      "riskPremium": {
+        "score": null
+      }
+    },
+    "verdict": "Rejet automatique: 5 sous-jacents déjà en portefeuille",
+    "keyRisks": [
+      "5 sous-jacents déjà en portefeuille"
+    ],
+    "scenarios": null,
+    "metadata": {
+      "gradedAt": "2026-03-23T15:14:36.538Z",
+      "durationMs": 263,
+      "aiUsed": false,
+      "version": "2.0",
+      "marketDataAvailable": true
+    }
+  }
 }
