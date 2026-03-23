@@ -156,67 +156,64 @@
     },
     "grading": {
       "grade": "D",
-      "score": 32,
+      "score": 35,
       "pillars": {
         "adjustedReturn": {
-          "score": 24,
-          "couponEffective": 5.42,
+          "score": 54,
+          "couponEffective": 5.7,
           "couponProbability": 0.95,
-          "reasoning": "Rendement ajusté faible (5.42%) pour un produit non protégé sur mono-sous-jacent de qualité médiocre. Maturité non précisée pénalise (-10 pts par défaut). Pas de mémoire (-5 pts). Protection capital (+15 pts) mais insuffisant."
+          "reasoning": "Rendement ajusté 5.42% (5.7% × 95%). Capital protégé +15, maturité inconnue (0 point). Score: 54.2 × 10 = 54."
         },
         "underlyingQuality": {
-          "score": 29,
+          "score": 25,
           "worstStock": "ENI",
-          "keyRisk": "Qualité fondamentale très faible",
-          "reasoning": "ENI présente des fondamentaux dégradés : Buffett 44/100 (C), Quality catastrophique 14/100, FCF négatif -13.54%, PE élevé 29.4. Volatilité modérée 20.45% mais drawdown 26.78%. Secteur énergie cyclique et ESG controversé."
+          "keyRisk": "Sous-jacent unique de très faible qualité",
+          "reasoning": "ENI: Buffett 44/100 (C), Quality 14/100 (très faible), volatilité 20.45% correcte mais drawdown 26.78% élevé. Sous-jacent unique amplifie le risque de concentration."
         },
         "portfolioFit": {
-          "score": 23,
-          "reasoning": "Concentration Swiss Life critique : 63% existant + ce produit = 73% total (-20 pts sévères). Aucun overlap sous-jacents (+5 pts). Secteur énergie nouveau dans portefeuille (+15 pts) mais insuffisant pour compenser."
+          "score": 15,
+          "reasoning": "Concentration Swiss Life critique: 63% existant + nouveau produit → ~73% du portefeuille total. Pénalité -20. Secteur énergie nouveau +15. Score final 15."
         },
         "riskPremium": {
-          "score": 52,
+          "score": 50,
           "spreadVsCat": 2.42,
-          "reasoning": "Spread vs CAT correct à 2.42% (5.42% - 3%), justifié par le risque ENI et concentration émetteur. Rémunération acceptable pour le niveau de risque."
+          "reasoning": "Rendement ajusté 5.42% vs CAT 3% = spread 2.42%. Dans la fourchette 2.5-4%, score 50 adapté au risque pris."
         }
       },
-      "verdict": "Produit DÉFAVORABLE malgré protection capital. Qualité catastrophique ENI (Quality 14/100, FCF négatif), concentration Swiss Life excessive (73% total), et rendement ajusté insuffisant pour compenser les risques. La surexposition à Swiss Life représente un risque systémique majeur.",
+      "verdict": "Produit présentant un risque de concentration inacceptable (émetteur Swiss Life 73% du portefeuille) malgré un sous-jacent ENI dans un secteur énergétique favorisé. La très faible qualité fondamentale d'ENI et la sur-concentration émetteur justifient le grade D.",
       "keyRisks": [
-        "Concentration Swiss Life critique (73% du portefeuille)",
-        "Qualité fondamentale ENI catastrophique (Quality 14/100)",
-        "FCF négatif ENI (-13.54%) signale stress financier",
-        "Mono-sous-jacent amplifie volatilité",
-        "Secteur énergie cyclique et controversé ESG"
+        "Concentration émetteur Swiss Life critique (73% du portefeuille)",
+        "Qualité fondamentale ENI très faible (Quality 14/100)",
+        "Risque pays Italie en difficulté macro",
+        "Sous-jacent unique sans diversification"
       ],
       "negotiationPoints": [
-        "Réduire d'abord exposition Swiss Life avant souscription",
-        "Exiger spread minimal +50bps vs prix initial",
-        "Négocier mécanisme mémoire pour compenser qualité ENI",
-        "Clarifier maturité exacte (impact scoring)",
-        "Demander analyse ESG approfondie secteur énergie"
+        "Réduction du nominal pour limiter la concentration Swiss Life",
+        "Recherche d'alternatives avec panier d'actions diversifié",
+        "Exploration d'autres émetteurs pour équilibrer le portefeuille"
       ],
       "scenarios": {
         "optimistic": {
           "return_pct": 5.7,
           "return_eur": 1710,
-          "probability": 0.35,
-          "duration_years": 3
+          "probability": 0.3,
+          "duration_years": 1
         },
         "base": {
-          "return_pct": 3,
-          "return_eur": 2700,
-          "probability": 0.4,
-          "duration_years": 6
+          "return_pct": 5.7,
+          "return_eur": 1710,
+          "probability": 0.35,
+          "duration_years": 1
         },
         "stress": {
           "return_pct": 0,
           "return_eur": 0,
-          "probability": 0.2,
+          "probability": 0.3,
           "duration_years": 12
         },
         "worst": {
-          "return_pct": -15,
-          "return_eur": -4500,
+          "return_pct": 0,
+          "return_eur": 0,
           "probability": 0.05,
           "duration_years": 12
         }
@@ -226,8 +223,8 @@
         "reasons": []
       },
       "metadata": {
-        "gradedAt": "2026-03-23T16:04:58.406Z",
-        "durationMs": 18212,
+        "gradedAt": "2026-03-23T16:05:20.531Z",
+        "durationMs": 14336,
         "aiUsed": true,
         "version": "2.2",
         "marketDataAvailable": true,
