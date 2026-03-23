@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Grader UI Patch v1.4 — with Actualiser button
+// STRUCTBOARD — Grader UI Patch v1.5 — Portfolio grading save fix
 // ═══════════════════════════════════════════════════════════════
 
 (function() {
@@ -34,6 +34,49 @@
     }
     setTimeout(_clearOldKillGrading, 3000);
 
+    // ═══════════════════════════════════════════════════════════════
+    // SAVE GRADING — works for BOTH proposals AND portfolio products
+    // ═══════════════════════════════════════════════════════════════
+
+    async function _saveGrading(product) {
+        var saved = { proposal: false, portfolio: false };
+
+        // 1. Save to proposal file (if product has bankId and exists in proposals)
+        if (product.bankId) {
+            try {
+                await app._saveProductFile(product.bankId, product);
+                saved.proposal = true;
+            } catch(e) {
+                console.warn('[GraderUI] Save proposal failed:', e.message);
+            }
+        }
+
+        // 2. Save to portfolio.json (if product exists in portfolio)
+        var portfolio = app.state.portfolio || [];
+        var pfProduct = portfolio.find(function(p) { return p.id === product.id; });
+        if (pfProduct) {
+            // Copy grading to the portfolio object
+            pfProduct.grading = product.grading;
+            try {
+                await github.writeFile(
+                    CONFIG.DATA_PATH + '/portfolio.json',
+                    portfolio,
+                    '[StructBoard] Grading: ' + (product.grading.grade || '?') + ' — ' + (product.name || product.id).substring(0, 40)
+                );
+                saved.portfolio = true;
+                console.log('[GraderUI] Grading saved to portfolio.json for:', product.name);
+            } catch(e) {
+                console.warn('[GraderUI] Save portfolio failed:', e.message);
+            }
+        }
+
+        if (!saved.proposal && !saved.portfolio) {
+            console.warn('[GraderUI] Grading NOT saved anywhere for:', product.name, product.id);
+        }
+
+        return saved;
+    }
+
     // ─── 1. OVERRIDE triggerGrading — save + full re-render ──────
     window.triggerGrading = async function(btn) {
         const product = app.state.currentProduct;
@@ -45,22 +88,21 @@
         try {
             // Clear old grading so it gets fresh data
             delete product.grading;
-            // Clear market cache to force reload with parse fix
+            // Clear market cache to force reload
             if (typeof _mktCache !== 'undefined') { _mktCache = null; _mktCacheTs = 0; }
 
             showToast('Grading en cours...', 'info');
             const result = await ProposalGrader.grade(product);
 
-            // SAVE to GitHub
-            if (product.bankId) {
-                await app._saveProductFile(product.bankId, product);
-            }
+            // SAVE to BOTH proposal file AND portfolio.json
+            var saveResult = await _saveGrading(product);
 
             // FULL re-render of the product sheet
             app.openProduct(product);
 
-            const gc = ProposalGrader.config.grades[result.grade] || {};
-            showToast(`Grade ${result.grade} \u2014 ${gc.label} (${result.score}/100)`, 'success');
+            var gc = ProposalGrader.config.grades[result.grade] || {};
+            var saveNote = saveResult.portfolio ? ' (portefeuille \u2713)' : (saveResult.proposal ? ' (proposition \u2713)' : '');
+            showToast('Grade ' + result.grade + ' \u2014 ' + gc.label + ' (' + result.score + '/100)' + saveNote, 'success');
         } catch (e) {
             console.error('[Grader] Error:', e);
             if (btn) { btn.textContent = '\u274c Erreur'; btn.disabled = false; }
@@ -151,7 +193,6 @@
             gd.className = 'fiche-section';
             gd.setAttribute('data-section', 'grading');
 
-            // Header with Actualiser button
             const refreshBtn = p.grading
                 ? '<button onclick="triggerGrading(this)" style="margin-left:auto;padding:4px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;font-size:11px;display:flex;align-items:center;gap:4px">\ud83d\udd04 Actualiser</button>'
                 : '';
@@ -243,7 +284,7 @@
                 var pc = (app.state.portfolio || []).length > 0 ? { available: true, currentIssuerPct: 0, overlappingUnderlyings: [], totalProducts: app.state.portfolio.length } : { available: false };
                 var kc = ProposalGrader.checkKillCriteria(n, pc, { bestRate: 3.0 });
                 if (kc.killed) {
-                    result.grading = { grade: 'F', score: 0, killCriteria: { triggered: true, reasons: kc.reasons }, verdict: 'Rejet automatique : ' + kc.reasons[0], metadata: { gradedAt: new Date().toISOString(), aiUsed: false, version: '1.4' } };
+                    result.grading = { grade: 'F', score: 0, killCriteria: { triggered: true, reasons: kc.reasons }, verdict: 'Rejet automatique : ' + kc.reasons[0], metadata: { gradedAt: new Date().toISOString(), aiUsed: false, version: '1.5' } };
                     await app._saveProductFile(bankId, result);
                     showToast('\u26d4 Grade F \u2014 ' + kc.reasons[0], 'error');
                 }
@@ -288,12 +329,16 @@
         showToast('Grading...', 'info');
         try {
             var results = await ProposalGrader.gradeBatch(ungraded, function(i, t, r) { showToast(i + '/' + t + ' \u2014 ' + r.grading.grade, 'info'); });
-            for (var j = 0; j < results.length; j++) { var pr = results[j].proposal; if (pr.bankId) try { await app._saveProductFile(pr.bankId, pr); } catch(e){} }
+            for (var j = 0; j < results.length; j++) {
+                var pr = results[j].proposal;
+                // Save to both proposal AND portfolio
+                await _saveGrading(pr);
+            }
             var counts = {}; results.forEach(function(r) { counts[r.grading.grade] = (counts[r.grading.grade]||0)+1; });
             showToast('Termin\u00e9 : ' + Object.entries(counts).map(function(e) { return e[1] + '\u00d7' + e[0]; }).join(', '), 'success');
             app.render();
         } catch(e) { showToast('Erreur: ' + e.message, 'error'); }
     }
 
-    console.log('[StructBoard] GraderUI v1.4 loaded');
+    console.log('[StructBoard] GraderUI v1.5 loaded — portfolio save + coupon annualization');
 })();
