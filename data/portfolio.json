@@ -153,6 +153,88 @@
       "level": 102.17,
       "date": "2026-03-18",
       "note": ""
+    },
+    "grading": {
+      "grade": "C",
+      "score": 51,
+      "pillars": {
+        "adjustedReturn": {
+          "score": 54,
+          "couponEffective": 5.42,
+          "couponProbability": 0.95,
+          "reasoning": "Rendement ajusté de 5.42% correct mais maturity inconnue (pénalité -5). Capital protégé (+15). Score: 54"
+        },
+        "underlyingQuality": {
+          "score": 29,
+          "worstStock": "ENI S.p.A.",
+          "keyRisk": "Single name sur titre de qualité très faible (Buffett 44/100, Quality 14/100) avec FCF négatif -13.54%",
+          "reasoning": "ENI très faible qualité: Buffett=44, Quality=14, FCF négatif, PE élevé à 29.4. Volatilité modérée 20.45% mais exposition single name risquée sur pétrolier italien en difficulté"
+        },
+        "portfolioFit": {
+          "score": 45,
+          "reasoning": "Concentration Swiss Life critique à 67% (-20 pts). Overlap direct avec ENI existant (-10 pts). Secteur énergie déjà présent. Score très pénalisé"
+        },
+        "riskPremium": {
+          "score": 81,
+          "spreadVsCat": 2.42,
+          "reasoning": "Rendement ajusté 5.42% vs CAT 3% = spread excellent de +2.42%. Compense partiellement les faiblesses structurelles"
+        }
+      },
+      "verdict": "Produit à éviter malgré le rendement attractif. Concentration émetteur critique (67%) et exposition single name sur ENI de très faible qualité (FCF négatif, ratios dégradés). La prime de risque élevée reflète justement ces risques structurels importants.",
+      "keyRisks": [
+        "Concentration émetteur Swiss Life déjà à 67%",
+        "Single name ENI de qualité très faible (Buffett 44, Quality 14)",
+        "Free Cash Flow négatif -13.54% sur ENI",
+        "Overlap direct avec position ENI existante",
+        "Exposition au secteur énergie cyclique italien"
+      ],
+      "negotiationPoints": [
+        "Diversifier les émetteurs avant tout nouvel investissement Swiss Life",
+        "Privilégier un panier d'actions plutôt qu'un single name",
+        "Attendre une amélioration des fondamentaux ENI"
+      ],
+      "scenarios": {
+        "optimistic": {
+          "return_pct": 5.7,
+          "return_eur": 1710,
+          "probability": 0.6,
+          "duration_years": 2
+        },
+        "base": {
+          "return_pct": 5.7,
+          "return_eur": 6840,
+          "probability": 0.3,
+          "duration_years": 6
+        },
+        "stress": {
+          "return_pct": 0,
+          "return_eur": 0,
+          "probability": 0.08,
+          "duration_years": 12
+        },
+        "worst": {
+          "return_pct": 0,
+          "return_eur": 0,
+          "probability": 0.02,
+          "duration_years": 12
+        }
+      },
+      "killCriteria": {
+        "triggered": false,
+        "reasons": []
+      },
+      "metadata": {
+        "gradedAt": "2026-03-23T15:47:55.337Z",
+        "durationMs": 16705,
+        "aiUsed": true,
+        "version": "2.1",
+        "marketDataAvailable": true,
+        "catBenchmark": 3,
+        "couponAnnualized": 5.7,
+        "couponRaw": 5.7,
+        "couponMultiplier": 1,
+        "couponFrequency": "annuel"
+      }
     }
   },
   {
