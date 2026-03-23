@@ -1,0 +1,126 @@
+name: Sync Market Data from stock-analysis-platform
+
+on:
+  # Run daily at 9am Paris time (after stock-analysis-platform updates)
+  schedule:
+    - cron: '0 8 * * 1-5'  # 8h UTC = 9h Paris, weekdays only
+  # Manual trigger
+  workflow_dispatch:
+  # Also trigger when stock-analysis-platform pushes (via repository_dispatch)
+  repository_dispatch:
+    types: [market-data-updated]
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout ProduitsCheck
+        uses: actions/checkout@v4
+
+      - name: Download stocks_europe.json
+        run: |
+          mkdir -p data/market
+          curl -sL "https://raw.githubusercontent.com/Bencode92/stock-analysis-platform/main/data/stocks_europe.json" -o data/market/stocks_europe.json
+          echo "stocks_europe.json: $(wc -c < data/market/stocks_europe.json) bytes"
+
+      - name: Download markets.json
+        run: |
+          curl -sL "https://raw.githubusercontent.com/Bencode92/stock-analysis-platform/main/data/markets.json" -o data/market/markets.json
+          echo "markets.json: $(wc -c < data/market/markets.json) bytes"
+
+      - name: Download stocks_us.json
+        run: |
+          curl -sL "https://raw.githubusercontent.com/Bencode92/stock-analysis-platform/main/data/stocks_us.json" -o data/market/stocks_us.json
+          echo "stocks_us.json: $(wc -c < data/market/stocks_us.json) bytes"
+
+      - name: Build lightweight index (underlyings only)
+        run: |
+          cat > /tmp/build_index.py << 'PYEOF'
+          import json, sys, os
+
+          index = {}
+
+          for region_file in ['stocks_europe.json', 'stocks_us.json']:
+              path = f'data/market/{region_file}'
+              if not os.path.exists(path):
+                  continue
+              with open(path) as f:
+                  data = json.load(f)
+              for stock in data.get('stocks', []):
+                  t = stock.get('ticker', '')
+                  if not t:
+                      continue
+                  index[t] = {
+                      'name': stock.get('name', ''),
+                      'sector': stock.get('sector', ''),
+                      'country': stock.get('country', ''),
+                      'price': stock.get('price'),
+                      'change_pct': stock.get('change_percent'),
+                      'perf_ytd': stock.get('perf_ytd'),
+                      'perf_1y': stock.get('perf_1y'),
+                      'perf_3y': stock.get('perf_3y'),
+                      'beta': stock.get('beta'),
+                      'volatility_3y': stock.get('volatility_3y'),
+                      'max_dd_3y': stock.get('max_drawdown_3y'),
+                      'distance_52w_high': stock.get('distance_52w_high'),
+                      'pe_ratio': stock.get('pe_ratio'),
+                      'roe': stock.get('roe'),
+                      'de_ratio': stock.get('de_ratio'),
+                      'net_margin': stock.get('net_margin'),
+                      'fcf_yield': stock.get('fcf_yield'),
+                      'dividend_yield': stock.get('dividend_yield'),
+                      'buffett_score': stock.get('buffett_score'),
+                      'buffett_grade': stock.get('buffett_grade'),
+                      'quality_score': stock.get('quality_score'),
+                      'quality_grade': stock.get('quality_grade'),
+                      'quality_subscores': stock.get('quality_subscores'),
+                      'region': stock.get('region', ''),
+                  }
+
+          # Markets summary
+          markets_path = 'data/market/markets.json'
+          markets_summary = {}
+          if os.path.exists(markets_path):
+              with open(markets_path) as f:
+                  mdata = json.load(f)
+              for region, indices in mdata.get('indices', {}).items():
+                  for idx in indices:
+                      markets_summary[idx.get('symbol', '')] = {
+                          'name': idx.get('index_name', ''),
+                          'country': idx.get('country', ''),
+                          'value': idx.get('value_num'),
+                          'change_pct': idx.get('change_num'),
+                          'ytd': idx.get('ytd_num'),
+                          'm3': idx.get('m3_num'),
+                          'w52': idx.get('w52_num'),
+                          'trend': idx.get('trend'),
+                      }
+
+          output = {
+              'timestamp': data.get('timestamp', ''),
+              'stocks_count': len(index),
+              'markets_count': len(markets_summary),
+              'stocks': index,
+              'markets': markets_summary,
+          }
+
+          with open('data/market/index.json', 'w') as f:
+              json.dump(output, f, separators=(',', ':'))
+
+          print(f'Index built: {len(index)} stocks, {len(markets_summary)} market indices')
+          print(f'Index size: {os.path.getsize("data/market/index.json")} bytes')
+          PYEOF
+          python3 /tmp/build_index.py
+
+      - name: Commit and push
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add data/market/
+          if git diff --staged --quiet; then
+            echo 'No changes to commit'
+          else
+            git commit -m "[Auto] Sync market data $(date +%Y-%m-%d)"
+            git push
+            echo 'Market data synced!'
+          fi
