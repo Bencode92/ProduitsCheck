@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Grader UI Patch v1.3 — ALL FIXES
+// STRUCTBOARD — Grader UI Patch v1.4 — with Actualiser button
 // ═══════════════════════════════════════════════════════════════
 
 (function() {
@@ -34,28 +34,6 @@
     }
     setTimeout(_clearOldKillGrading, 3000);
 
-    // ─── 0b. FIX MARKET DATA LOADING ─────────────────────────────
-    // The index.json may have structure { stocks: [...] } instead of
-    // { stocks_europe: [...], stocks_us: [...] }
-    // Monkey-patch _extractMarketData to handle both formats
-    if (typeof _extractMarketData === 'function') {
-        const _origExtract = _extractMarketData;
-        _extractMarketData = function(product, marketIndex) {
-            // Fix: normalize index structure before passing to original
-            if (marketIndex && !marketIndex.stocks_europe && !marketIndex.stocks_us) {
-                // Try alternate structures
-                if (Array.isArray(marketIndex)) {
-                    marketIndex = { stocks_europe: marketIndex, stocks_us: [] };
-                } else if (marketIndex.stocks && Array.isArray(marketIndex.stocks)) {
-                    marketIndex = { stocks_europe: marketIndex.stocks, stocks_us: [] };
-                } else if (marketIndex.data && Array.isArray(marketIndex.data)) {
-                    marketIndex = { stocks_europe: marketIndex.data, stocks_us: [] };
-                }
-            }
-            return _origExtract(product, marketIndex);
-        };
-    }
-
     // ─── 1. OVERRIDE triggerGrading — save + full re-render ──────
     window.triggerGrading = async function(btn) {
         const product = app.state.currentProduct;
@@ -65,6 +43,11 @@
         if (btn) { btn.disabled = true; btn.textContent = '\u23f3 Analyse en cours...'; }
 
         try {
+            // Clear old grading so it gets fresh data
+            delete product.grading;
+            // Clear market cache to force reload with parse fix
+            if (typeof _mktCache !== 'undefined') { _mktCache = null; _mktCacheTs = 0; }
+
             showToast('Grading en cours...', 'info');
             const result = await ProposalGrader.grade(product);
 
@@ -107,8 +90,6 @@
         _prevRenderProductSheet(container, state);
         const p = state.currentProduct;
         if (!p) return;
-
-        // Schedule aggressive cleanup AFTER all other patches (ui-patches, deep-analysis)
         setTimeout(() => _cleanupProductSheet(container, p), 0);
     };
 
@@ -116,11 +97,11 @@
         const sheetMain = container.querySelector('.sheet-main');
         const sidebar = container.querySelector('.sheet-sidebar');
 
-        // ═══ Remove top nav actions (duplicated in sidebar) ═══
+        // Remove top nav actions (duplicated in sidebar)
         const navActions = container.querySelector('.sheet-nav-actions');
         if (navActions) navActions.remove();
 
-        // ═══ Remove ALL old analysis sections by title ═══
+        // Remove ALL old analysis sections
         if (sheetMain) {
             sheetMain.querySelectorAll('.fiche-section').forEach(section => {
                 const title = section.querySelector('.fiche-section-title');
@@ -132,20 +113,17 @@
                     section.remove();
                 }
             });
-            // Kill deep analysis injected elements (class-based)
             sheetMain.querySelectorAll('.deep-analysis-section, [data-section="deep-analysis"]').forEach(s => s.remove());
-            // Kill any fiche-ai-summary
             sheetMain.querySelectorAll('.fiche-ai-summary').forEach(el => {
                 const parent = el.closest('.fiche-section');
                 if (parent) parent.remove();
             });
-            // NUCLEAR: remove any section containing "Analyse approfondie" text anywhere
             sheetMain.querySelectorAll('.fiche-section').forEach(section => {
                 if (section.textContent.includes('Analyse approfondie')) section.remove();
             });
         }
 
-        // ═══ Remove old sidebar score panel ═══
+        // Remove old sidebar score panel
         if (sidebar) {
             sidebar.querySelectorAll('.sheet-card').forEach(card => {
                 const title = card.querySelector('.sheet-card-title, h3');
@@ -157,7 +135,7 @@
             sidebar.querySelectorAll('.score-panel').forEach(el => el.remove());
         }
 
-        // ═══ Replace header score widget ═══
+        // Replace header score widget
         const scoreWidget = container.querySelector('.score-widget');
         if (scoreWidget) {
             if (p.grading) {
@@ -167,16 +145,30 @@
             }
         }
 
-        // ═══ Inject grading section ═══
+        // ═══ Inject grading section WITH Actualiser button ═══
         if (sheetMain) {
             const gd = document.createElement('div');
             gd.className = 'fiche-section';
             gd.setAttribute('data-section', 'grading');
-            gd.innerHTML = '<div class="fiche-section-header"><span class="fiche-section-icon">\ud83c\udfaf</span><span class="fiche-section-title">Grading Unifi\u00e9</span></div><div class="fiche-section-body">' + ProposalGrader.renderSection(p.grading) + '</div>';
+
+            // Header with Actualiser button
+            const refreshBtn = p.grading
+                ? '<button onclick="triggerGrading(this)" style="margin-left:auto;padding:4px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;font-size:11px;display:flex;align-items:center;gap:4px">\ud83d\udd04 Actualiser</button>'
+                : '';
+
+            gd.innerHTML = '<div class="fiche-section-header" style="display:flex;align-items:center">' +
+                '<span class="fiche-section-icon">\ud83c\udfaf</span>' +
+                '<span class="fiche-section-title">Grading Unifi\u00e9</span>' +
+                refreshBtn +
+                '</div>' +
+                '<div class="fiche-section-body">' +
+                ProposalGrader.renderSection(p.grading) +
+                '</div>';
+
             sheetMain.prepend(gd);
         }
 
-        // ═══ Inject sidebar grade panel ═══
+        // Inject sidebar grade panel
         if (sidebar) {
             const panel = document.createElement('div');
             panel.innerHTML = _buildGradeSidebarPanel(p.grading);
@@ -185,16 +177,14 @@
     }
 
     // ─── 4. DISABLE injectDeepAnalysis completely ────────────────
-    // Override before AND after ui-patches.js has run
     function _disableDeepAnalysis() {
         if (typeof window.injectDeepAnalysis === 'function' && !window._deepAnalysisDisabled) {
             window._origInjectDeepAnalysis = window.injectDeepAnalysis;
-            window.injectDeepAnalysis = function() { /* disabled by grader */ };
+            window.injectDeepAnalysis = function() {};
             window._deepAnalysisDisabled = true;
         }
     }
     _disableDeepAnalysis();
-    // Re-check in case ui-patches.js redefines it later
     setTimeout(_disableDeepAnalysis, 100);
     setTimeout(_disableDeepAnalysis, 500);
 
@@ -253,7 +243,7 @@
                 var pc = (app.state.portfolio || []).length > 0 ? { available: true, currentIssuerPct: 0, overlappingUnderlyings: [], totalProducts: app.state.portfolio.length } : { available: false };
                 var kc = ProposalGrader.checkKillCriteria(n, pc, { bestRate: 3.0 });
                 if (kc.killed) {
-                    result.grading = { grade: 'F', score: 0, killCriteria: { triggered: true, reasons: kc.reasons }, verdict: 'Rejet automatique : ' + kc.reasons[0], metadata: { gradedAt: new Date().toISOString(), aiUsed: false, version: '1.3' } };
+                    result.grading = { grade: 'F', score: 0, killCriteria: { triggered: true, reasons: kc.reasons }, verdict: 'Rejet automatique : ' + kc.reasons[0], metadata: { gradedAt: new Date().toISOString(), aiUsed: false, version: '1.4' } };
                     await app._saveProductFile(bankId, result);
                     showToast('\u26d4 Grade F \u2014 ' + kc.reasons[0], 'error');
                 }
@@ -305,5 +295,5 @@
         } catch(e) { showToast('Erreur: ' + e.message, 'error'); }
     }
 
-    console.log('[StructBoard] GraderUI v1.3 loaded');
+    console.log('[StructBoard] GraderUI v1.4 loaded');
 })();
