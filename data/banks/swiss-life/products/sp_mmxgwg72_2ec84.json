@@ -154,45 +154,43 @@
     "note": ""
   },
   "grading": {
-    "grade": "D",
-    "score": 35,
+    "grade": "C",
+    "score": 51,
     "pillars": {
       "adjustedReturn": {
         "score": 54,
         "couponEffective": 5.42,
         "couponProbability": 0.95,
-        "reasoning": "Rendement ajusté 5.42% (5.7% × 95%) correct. Pénalité -15 pour non-protection capital. Maturité non spécifiée donc neutre."
+        "reasoning": "Rendement ajusté de 5.42% correct mais maturity inconnue (pénalité -5). Capital protégé (+15). Score: 54"
       },
       "underlyingQuality": {
         "score": 29,
-        "worstStock": "ENI",
-        "keyRisk": "Qualité médiocre ENI (Buffett 44/100, Quality 14/100), volatilité 20.45%, exposition secteur énergie cyclique",
-        "reasoning": "ENI présente fondamentaux faibles (FCF négatif -13.54%, PE élevé 29.4) malgré performance récente. Beta faible 0.28 limite downside mais qualité structurelle préoccupante."
+        "worstStock": "ENI S.p.A.",
+        "keyRisk": "Single name sur titre de qualité très faible (Buffett 44/100, Quality 14/100) avec FCF négatif -13.54%",
+        "reasoning": "ENI très faible qualité: Buffett=44, Quality=14, FCF négatif, PE élevé à 29.4. Volatilité modérée 20.45% mais exposition single name risquée sur pétrolier italien en difficulté"
       },
       "portfolioFit": {
-        "score": 5,
-        "issuerOverlap": true,
-        "diversificationBenefit": false,
-        "reasoning": "Concentration Swiss Life critique (67% → 73% post-investissement). Overlap ENI existant. Type autocall déjà 80%. Seul point positif: pas de nouveau worst-of."
+        "score": 45,
+        "reasoning": "Concentration Swiss Life critique à 67% (-20 pts). Overlap direct avec ENI existant (-10 pts). Secteur énergie déjà présent. Score très pénalisé"
       },
       "riskPremium": {
-        "score": 80,
+        "score": 81,
         "spreadVsCat": 2.42,
-        "catBenchmark": 3,
-        "reasoning": "Prime attractive +242bp vs CAT 3%, compensant partiellement les risques structurels."
+        "reasoning": "Rendement ajusté 5.42% vs CAT 3% = spread excellent de +2.42%. Compense partiellement les faiblesses structurelles"
       }
     },
-    "verdict": "Produit problématique malgré prime attractive. Concentration émetteur Swiss Life devient critique (73%), ENI présente qualité médiocre avec fondamentaux dégradés. Seule la probabilité coupon élevée 95% et prime +242bp sauvent partiellement le scoring.",
+    "verdict": "Produit à éviter malgré le rendement attractif. Concentration émetteur critique (67%) et exposition single name sur ENI de très faible qualité (FCF négatif, ratios dégradés). La prime de risque élevée reflète justement ces risques structurels importants.",
     "keyRisks": [
-      "Concentration émetteur Swiss Life critique (73%)",
-      "Qualité sous-jacent ENI faible (Buffett 44/100)",
-      "Exposition secteur énergie cyclique",
-      "Absence protection capital"
+      "Concentration émetteur Swiss Life déjà à 67%",
+      "Single name ENI de qualité très faible (Buffett 44, Quality 14)",
+      "Free Cash Flow négatif -13.54% sur ENI",
+      "Overlap direct avec position ENI existante",
+      "Exposition au secteur énergie cyclique italien"
     ],
     "negotiationPoints": [
-      "Réduction exposition Swiss Life portfolio",
-      "Diversification vers autres émetteurs",
-      "Coupon majoré compensation risque qualité"
+      "Diversifier les émetteurs avant tout nouvel investissement Swiss Life",
+      "Privilégier un panier d'actions plutôt qu'un single name",
+      "Attendre une amélioration des fondamentaux ENI"
     ],
     "scenarios": {
       "optimistic": {
@@ -202,20 +200,20 @@
         "duration_years": 2
       },
       "base": {
-        "return_pct": 5.42,
-        "return_eur": 6504,
+        "return_pct": 5.7,
+        "return_eur": 6840,
         "probability": 0.3,
-        "duration_years": 4
+        "duration_years": 6
       },
       "stress": {
-        "return_pct": -15,
-        "return_eur": -4500,
+        "return_pct": 0,
+        "return_eur": 0,
         "probability": 0.08,
         "duration_years": 12
       },
       "worst": {
-        "return_pct": -35,
-        "return_eur": -10500,
+        "return_pct": 0,
+        "return_eur": 0,
         "probability": 0.02,
         "duration_years": 12
       }
@@ -225,12 +223,16 @@
       "reasons": []
     },
     "metadata": {
-      "gradedAt": "2026-03-23T15:26:14.691Z",
-      "durationMs": 15256,
+      "gradedAt": "2026-03-23T15:47:55.337Z",
+      "durationMs": 16705,
       "aiUsed": true,
-      "version": "2.0",
+      "version": "2.1",
       "marketDataAvailable": true,
-      "catBenchmark": 3
+      "catBenchmark": 3,
+      "couponAnnualized": 5.7,
+      "couponRaw": 5.7,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel"
     }
   }
 }
