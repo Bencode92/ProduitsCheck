@@ -184,44 +184,44 @@
     }
   },
   "grading": {
-    "grade": "D",
-    "score": 34,
+    "grade": "F",
+    "score": 24,
     "pillars": {
       "adjustedReturn": {
         "score": 15,
-        "couponEffective": 3.1,
-        "couponProbability": 0.5,
-        "reasoning": "Coupon 6.15% × probabilité 50% (barrière 0% + vol 21%) = 3.1% effectif. -15 pts capital non protégé. Très faible avec risque de perte totale."
+        "couponEffective": 2.8,
+        "couponProbability": 0.45,
+        "reasoning": "Coupon 6.15% sans protection capital et barrière 0% donne probabilité faible 45% vu volatilité 21.22%. Score pénalisé -15 pts absence protection capital."
       },
       "underlyingQuality": {
-        "score": 40,
-        "worstStock": "Crédit Agricole S.A.",
-        "keyRisk": "Secteur financier en difficulté (-8% macro)",
-        "reasoning": "LVMH données manquantes. CA: Quality 79/100 mais secteur Finance évité (-8% YTD), vol 21%, max DD 21%. Buffett score absent critique."
+        "score": 35,
+        "worstStock": "Crédit Agricole",
+        "keyRisk": "Secteur financier évité en macro, performance -8.95% YTD",
+        "reasoning": "Quality score 79 correct mais buffett indisponible LVMH inquiétant. Crédit Agricole finance évité macro avec -8.95% YTD, volatilité 21.22%."
       },
       "portfolioFit": {
-        "score": 15,
+        "score": 10,
         "issuerOverlap": true,
         "diversificationBenefit": false,
-        "reasoning": "CIC 33% → 53% concentration excessive (-20 pts). Type minoritaire AUTRE vs 4 AUTOCALL (-15 pts). Secteur Finance déjà présent indirectement."
+        "reasoning": "Concentration CIC critique 33%+ce produit dépasse largement 30%. Aucun bénéfice diversification, finance déjà exposé indirectement."
       },
       "riskPremium": {
-        "score": 75,
+        "score": 40,
         "spreadVsCat": 3.15,
         "catBenchmark": 3,
-        "reasoning": "Prime 3.15% vs CAT 3% acceptable mais compensée par risques structurels majeurs (capital non protégé + secteur défavorisé)."
+        "reasoning": "Prime 3.15% vs CAT 3% correcte mais insuffisante vu risques structurel (capital non protégé) et qualité sous-jacents."
       }
     },
-    "verdict": "Produit à éviter malgré prime correcte (3.15% vs 3%). Secteur Finance explicitement défavorisé en macro (-8% YTD), avec CA Quality 79/100 mais vol 21%. Concentration CIC excessive (33%→53%) et capital non protégé avec barrière 0% créent un profil rendement/risque dégradé (3.1% effectif pour risque de perte totale).",
+    "verdict": "Produit très risqué combinant absence protection capital, exposition finance (secteur évité macro -7.58% YTD), concentration émetteur critique CIC >30% et données LVMH manquantes. Quality score 79 Crédit Agricole insuffisant face volatilité 21.22% et barrière 0%. Prime 3.15% vs CAT 3% ne compense pas ces risques majeurs.",
     "keyRisks": [
       "Capital non protégé avec barrière 0%",
-      "Secteur Finance évité en macro (-8% YTD)",
-      "Sur-concentration émetteur CIC (53%)",
-      "Données LVMH manquantes"
+      "Secteur finance évité en contexte macro",
+      "Concentration émetteur CIC excessive",
+      "Données LVMH indisponibles"
     ],
     "negotiationPoints": [
-      "Protection partielle du capital minimum 80%",
-      "Réduction concentration CIC"
+      "Protection partielle capital minimum 90%",
+      "Réduction nominal pour limiter concentration CIC"
     ],
     "scenarios": {
       "optimistic": {
@@ -232,17 +232,17 @@
       "base": {
         "return_pct": 6,
         "return_eur": 1794,
-        "probability": 0.35
+        "probability": 0.25
       },
       "stress": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.3
+        "probability": 0.35
       },
       "worst": {
-        "return_pct": -100,
-        "return_eur": -29900,
-        "probability": 0.2
+        "return_pct": -35,
+        "return_eur": -10465,
+        "probability": 0.25
       }
     },
     "killCriteria": {
@@ -250,8 +250,8 @@
       "reasons": []
     },
     "metadata": {
-      "gradedAt": "2026-03-23T14:05:03.245Z",
-      "durationMs": 21172,
+      "gradedAt": "2026-03-23T14:16:06.666Z",
+      "durationMs": 14683,
       "aiUsed": true,
       "version": "2.0",
       "marketDataAvailable": true,
