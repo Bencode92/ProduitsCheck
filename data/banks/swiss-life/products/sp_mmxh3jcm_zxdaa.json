@@ -175,56 +175,57 @@
         "score": 65,
         "base": 75,
         "delta": -10,
-        "reasoning": "Qualité: base 75 → -10 = 65 (Exposition pure aux instruments monétaires avec vol 32% et DD 34% inadaptée au contexte, qualité dégradée.) | Worst: Instruments du marché monétaire B:93"
+        "reasoning": "Qualité: base 75 → -10 = 65 (Exposition monétaire/obligataire dans contexte de volatilité des taux et incertitude sur la duration réelle.) | Worst: Instruments du marché monétaire B:93"
       },
       "portfolioFit": {
         "score": 35,
         "base": 40,
         "delta": -5,
-        "reasoning": "Fit: base 40 → -5 = 35 (Sous-jacents monétaires volatils inadéquats en régime neutre, décalage total avec allocation recommandée.)"
+        "reasoning": "Fit: base 40 → -5 = 35 (Allocation obligataire/monétaire peu pertinente dans un régime neutre où l'energy est favorisé.)"
       },
       "riskPremium": {
         "score": 0,
         "base": 5,
-        "delta": -10,
-        "reasoning": "Prime: base 5 → -10 = 0 (Structure sans rendement face au CAT 3% représente un coût d'opportunité majeur de 300bp.) | 0% vs CAT 3%"
+        "delta": -15,
+        "reasoning": "Prime: base 5 → -15 = 0 (Prime nulle vs CAT 3% représente un coût d'opportunité majeur de 3270€/an sur ce nominal.) | 0% vs CAT 3%"
       }
     },
-    "verdict": "Ce produit Swiss Life présente une structure défaillante avec 0% de coupon sur des sous-jacents monétaires paradoxalement volatils (32% vol, 34% DD). L'autocall à 100% ne compense pas l'absence totale de rendement face à un CAT à 3%. Le coût d'opportunité annuel de 300bp sur 109k€ représente 3270€/an perdus. Grade ajusté: F (3/100).",
+    "verdict": "Ce produit Swiss Life présente un profil défavorable avec 0% de rendement contre 3% sur CAT, soit 3270€ de manque à gagner annuel. L'exposition obligataire/monétaire manque de visibilité sur la duration et subit les incertitudes de taux. Sans barrière définie ni protection de capital explicite, le risque/rendement est déséquilibré. Score ajusté: -2/100 (Grade F).",
     "keyRisks": [
-      "Perte d'opportunité garantie de 3270€/an vs CAT sans contrepartie",
-      "Volatilité excessive (32%) sur instruments monétaires censés être stables"
+      "Coût d'opportunité de 3270€/an vs placement sans risque CAT 3%",
+      "Exposition aux risques de taux et de crédit sans compensation de rendement",
+      "Manque de transparence sur la duration et composition exacte du portefeuille"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 0,
-        "return_eur": 0,
-        "probability": 0.6,
+        "return_pct": 1,
+        "return_eur": 1090,
+        "probability": 0.2,
         "duration_years": 1
       },
       "base": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.25,
-        "duration_years": 2
+        "probability": 0.5,
+        "duration_years": 1
       },
       "stress": {
-        "return_pct": -15,
-        "return_eur": -16350,
-        "probability": 0.1,
-        "duration_years": 3
+        "return_pct": -2,
+        "return_eur": -2180,
+        "probability": 0.25,
+        "duration_years": 1
       },
       "worst": {
-        "return_pct": -25,
-        "return_eur": -27250,
+        "return_pct": -5,
+        "return_eur": -5450,
         "probability": 0.05,
-        "duration_years": 3
+        "duration_years": 1
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-23T16:56:03.831Z",
-      "durationMs": 12739,
+      "gradedAt": "2026-03-23T16:56:29.921Z",
+      "durationMs": 12144,
       "aiUsed": true,
       "version": "3.2",
       "marketDataAvailable": true,
@@ -240,7 +241,7 @@
         "p1": 0,
         "p2": -10,
         "p3": -5,
-        "p4": -10
+        "p4": -15
       }
     }
   }
