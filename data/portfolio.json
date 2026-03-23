@@ -628,83 +628,38 @@
     "entity": "cameleons",
     "entityName": "Caméleons",
     "grading": {
-      "grade": "D",
-      "score": 32,
+      "grade": "F",
+      "score": 0,
+      "killCriteria": {
+        "triggered": true,
+        "reasons": [
+          "Barrière 60% sans protection"
+        ]
+      },
       "pillars": {
         "adjustedReturn": {
-          "score": 52,
-          "couponEffective": 7,
-          "couponProbability": 0.95,
-          "reasoning": "Coupon 7% avec probabilité élevée (95%) donne rendement ajusté 6.65%. Score base 67 pénalisé par non protection (-15), worst-of >2 sous-jacents (-5), et maturité longue 10 ans (-10)."
+          "score": null
         },
         "underlyingQuality": {
-          "score": 22,
-          "worstStock": "BMPS",
-          "keyRisk": "Panier toxique dominé par banques italiennes fragiles",
-          "reasoning": "Worst-of catastrophique: BMPS (banque zombie italienne, vol 36%, DD 25%, YTD -23%), UCG (finance instable), secteur bancaire évité en macro. Seul Novo Nordisk manquant pourrait sauver. Corrélation élevée Italie."
+          "score": null
         },
         "portfolioFit": {
-          "score": 5,
-          "reasoning": "Désastre: concentration Swiss Life 67%→87% (+20%, pénalité -20), overlap TOTAL avec produits existants (-20), secteurs déjà présents (-10). Aucune diversification."
+          "score": null
         },
         "riskPremium": {
-          "score": 90,
-          "reasoning": "Prime excellente: rendement ajusté 6.65% vs CAT 3% = spread +3.65%, largement au-dessus du seuil 4% pour score maximal."
+          "score": null
         }
       },
-      "verdict": "ÉVITER ABSOLUMENT. Prime attractive ne compense pas la toxicité du panier (banques italiennes fragiles) et sur-concentration Swiss Life critique (87%). Produit spéculatif déguisé.",
+      "verdict": "Rejet: Barrière 60% sans protection",
       "keyRisks": [
-        "Concentration émetteur critique 87%",
-        "Banques italiennes en détresse (BMPS zombie)",
-        "Secteur finance évité en contexte macro",
-        "Aucune diversification vs portefeuille existant"
+        "Barrière 60% sans protection"
       ],
-      "negotiationPoints": [
-        "Exiger réduction exposition Swiss Life",
-        "Demander panier moins toxique (exit BMPS/UCG)",
-        "Négocier barrière plus basse (50%)"
-      ],
-      "scenarios": {
-        "optimistic": {
-          "return_pct": 7,
-          "return_eur": 2100,
-          "probability": 0.2,
-          "duration_years": 1
-        },
-        "base": {
-          "return_pct": 3.5,
-          "return_eur": 10500,
-          "probability": 0.4,
-          "duration_years": 5
-        },
-        "stress": {
-          "return_pct": -30,
-          "return_eur": -9000,
-          "probability": 0.3,
-          "duration_years": 10
-        },
-        "worst": {
-          "return_pct": -60,
-          "return_eur": -18000,
-          "probability": 0.1,
-          "duration_years": 10
-        }
-      },
-      "killCriteria": {
-        "triggered": false,
-        "reasons": []
-      },
+      "scenarios": null,
       "metadata": {
-        "gradedAt": "2026-03-23T15:49:26.272Z",
-        "durationMs": 17148,
-        "aiUsed": true,
-        "version": "2.1",
-        "marketDataAvailable": true,
-        "catBenchmark": 3,
-        "couponAnnualized": 7,
-        "couponRaw": 7,
-        "couponMultiplier": 1,
-        "couponFrequency": "annuel"
+        "gradedAt": "2026-03-23T16:48:33.128Z",
+        "durationMs": 98,
+        "aiUsed": false,
+        "version": "3.1"
       }
     }
   },
