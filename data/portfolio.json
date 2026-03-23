@@ -403,84 +403,89 @@
     },
     "grading": {
       "grade": "F",
-      "score": 18,
+      "score": 23,
+      "killCriteria": {
+        "triggered": false,
+        "reasons": []
+      },
       "pillars": {
         "adjustedReturn": {
           "score": 0,
-          "couponEffective": 0,
-          "couponProbability": 1,
-          "reasoning": "Coupon 0% avec probabilité 100% = rendement ajusté 0%. Score minimal même pour un produit de taux garanti. Aucune rémunération pour l'investisseur."
+          "base": 0,
+          "delta": 0,
+          "reasoning": "Rendement: base 0 | Coupon 0%"
         },
         "underlyingQuality": {
-          "score": 45,
-          "worstStock": "Instruments du marché monétaire",
-          "keyRisk": "Capital non protégé sur produit de taux",
-          "reasoning": "Produit de taux non protégé = score de base 45. Sous-jacents obligataires diversifiés mais sans protection du capital, exposant à un risque de perte en capital sur des actifs supposés moins risqués."
+          "score": 65,
+          "base": 75,
+          "delta": -10,
+          "reasoning": "Qualité: base 75 → -10 = 65 (Données manquantes sur obligations, seul instrument monétaire identifié avec quality faible (43)) | Worst: Instruments du marché monétaire B:93"
         },
         "portfolioFit": {
-          "score": 25,
-          "reasoning": "Concentration Swiss Life déjà à 67% du portefeuille. Ajouter ce produit porterait la concentration à ~89% (299k existant + 109k nouveau sur ~408k total). Pénalité majeure -20 pts pour dépassement seuil 30%. Diversification taux vs actions +10 pts. Overlap avec instruments similaires -5 pts."
+          "score": 35,
+          "base": 40,
+          "delta": -5,
+          "reasoning": "Fit: base 40 → -5 = 35 (Exposition obligations/monétaire peu attractive en contexte neutral avec energy favorisé)"
         },
         "riskPremium": {
-          "score": 5,
-          "spreadVsCat": -3,
-          "reasoning": "Rendement ajusté 0% vs CAT 3% = spread -3%. Performance largement inférieure aux alternatives, même pour un produit sans risque théorique."
+          "score": 0,
+          "base": 5,
+          "delta": -10,
+          "reasoning": "Prime: base 5 → -10 = 0 (Prime inexistante face au CAT 3%, structure défavorable sans compensation rendement) | 0% vs CAT 3%"
         }
       },
-      "verdict": "Produit inacceptable. Rendement nul avec concentration excessive chez Swiss Life (89% du portefeuille). Aucune justification économique.",
+      "verdict": "Ce produit Swiss Life présente un profil très défavorable avec 0% de coupon et capital non protégé. L'absence de données sur les principaux sous-jacents obligataires empêche une évaluation précise des risques. La structure autocall à 100% sans rendement ne justifie aucune prime face aux alternatives 3%. Score ajusté: 3/100 (grade F).",
       "keyRisks": [
-        "Rendement nul garanti",
-        "Sur-concentration émetteur critique (89%)",
-        "Capital non protégé sur actifs de taux",
-        "Maturité indéfinie"
+        "Capital non protégé sans compensation rendement",
+        "Transparence insuffisante sur la composition obligataire"
       ],
-      "negotiationPoints": [
-        "Exiger un coupon minimum de 2-3%",
-        "Réduire d'abord l'exposition Swiss Life existante",
-        "Clarifier la maturité et conditions de sortie",
-        "Protection du capital obligatoire"
-      ],
+      "negotiationPoints": [],
       "scenarios": {
         "optimistic": {
           "return_pct": 0,
           "return_eur": 0,
-          "probability": 1,
+          "probability": 0.6,
           "duration_years": 1
         },
         "base": {
           "return_pct": 0,
           "return_eur": 0,
-          "probability": 1,
+          "probability": 0.3,
           "duration_years": 1
         },
         "stress": {
-          "return_pct": -5,
-          "return_eur": -5450,
-          "probability": 0.2,
+          "return_pct": -10,
+          "return_eur": -10900,
+          "probability": 0.08,
           "duration_years": 1
         },
         "worst": {
-          "return_pct": -15,
-          "return_eur": -16350,
-          "probability": 0.05,
+          "return_pct": -25,
+          "return_eur": -27250,
+          "probability": 0.02,
           "duration_years": 1
         }
       },
-      "killCriteria": {
-        "triggered": false,
-        "reasons": []
-      },
       "metadata": {
-        "gradedAt": "2026-03-23T15:53:29.821Z",
-        "durationMs": 14863,
+        "gradedAt": "2026-03-23T16:49:31.619Z",
+        "durationMs": 10325,
         "aiUsed": true,
-        "version": "2.1",
+        "version": "3.1",
         "marketDataAvailable": true,
         "catBenchmark": 3,
         "couponAnnualized": 0,
         "couponRaw": 0,
         "couponMultiplier": 1,
-        "couponFrequency": "annuel"
+        "couponFrequency": "annuel",
+        "isInPortfolio": false,
+        "baseScore": 28,
+        "baseGrade": "D",
+        "adjustments": {
+          "p1": 0,
+          "p2": -10,
+          "p3": -5,
+          "p4": -10
+        }
       }
     }
   },
