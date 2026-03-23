@@ -1,22 +1,44 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Grader UI Patch v1.0
+// STRUCTBOARD — Grader UI Patch v1.1 — CLEAN REWRITE
 // ═══════════════════════════════════════════════════════════════
-// Injecte le grading unifié A-F dans :
-//   1. Fiche produit (remplace Analyse IA + Score compatibilité + Deep Analysis)
-//   2. Cards produit (badge grade dans le footer)
-//   3. Liste propositions (badge + tri par grade)
-//
-// Dépendances : proposal-grader.js (ProposalGrader), ui.js, ui-patches.js
-// Charger APRÈS proposal-patches.js dans index.html
+// Replaces ALL old analysis sections with the unified grading.
+// Old sections removed: Analyse IA, Score Compatibilité,
+//   Analyse Approfondie, Résumé IA portefeuille
+// Kept: Grading Unifié, Suivi Performance, Caractéristiques
 // ═══════════════════════════════════════════════════════════════
 
 (function() {
     'use strict';
 
     if (typeof ProposalGrader === 'undefined') {
-        console.warn('[GraderUI] ProposalGrader not loaded, skipping UI patch');
+        console.warn('[GraderUI] ProposalGrader not loaded, skipping');
         return;
     }
+
+    // ─── 0. FIX: Remove issuer concentration from kill criteria ──
+    // Concentration is handled by portfolioFit pillar (-20 to -30 pts), not as an auto-kill
+    // This allows full AI analysis even for concentrated portfolios
+    if (typeof GRADING_CONFIG !== 'undefined' && GRADING_CONFIG.killCriteria) {
+        delete GRADING_CONFIG.killCriteria.maxIssuerConcentration;
+        console.log('[GraderUI] Kill criteria: issuer concentration disabled (→ pilier Fit)');
+    }
+    // Also clear any cached F grading from previous version
+    // so products get re-analyzed with the new rules
+    function _clearOldKillGrading() {
+        const proposals = Object.values(app.state?.proposals || {}).flat();
+        proposals.forEach(p => {
+            if (p.grading && p.grading.killCriteria?.triggered) {
+                const reasons = p.grading.killCriteria.reasons || [];
+                const wasIssuerKill = reasons.some(r => r.includes('metteur') || r.includes('book'));
+                if (wasIssuerKill) {
+                    delete p.grading;  // Clear so it can be re-graded
+                    console.log('[GraderUI] Cleared old issuer-kill grading for:', p.name);
+                }
+            }
+        });
+    }
+    setTimeout(_clearOldKillGrading, 2000);  // After app.init()
+
 
     // ─── 1. PATCH renderProductCard — Badge grade dans le footer ──
 
@@ -27,10 +49,9 @@
         const grading = product.grading;
         if (grading && grading.grade && grading.grade !== '?') {
             const badge = ProposalGrader.renderBadge(grading.grade, grading.score);
-            html = html.replace(
-                /<div class="card-score[^"]*">[^<]*<\/div>/,
-                badge
-            );
+            // Remplacer le score numérique existant
+            html = html.replace(/<div class="card-score[^"]*">[^<]*<\/div>/, badge);
+            // Si pas de score existant, injecter dans le footer
             if (!html.includes('style="display:inline-flex')) {
                 const footerIdx = html.indexOf('product-card-footer');
                 if (footerIdx > -1) {
@@ -39,11 +60,10 @@
                 }
             }
         }
-
         return html;
     };
 
-    // ─── 2. PATCH renderProductSheet — Section grading unifiée ────
+    // ─── 2. PATCH renderProductSheet — NETTOYAGE COMPLET ─────────
 
     const _prevRenderProductSheet = renderProductSheet;
     renderProductSheet = function(container, state) {
@@ -52,66 +72,138 @@
         const p = state.currentProduct;
         if (!p) return;
 
-        // 2a. Remplacer le score widget dans le header par le grade badge
-        const scoreWidget = container.querySelector('.score-widget');
-        if (scoreWidget && p.grading) {
-            scoreWidget.outerHTML = ProposalGrader.renderBadge(p.grading.grade, p.grading.score, 'large');
-        }
+        // ══════════════════════════════════════════════════════════
+        // PHASE 1 — SUPPRIMER toutes les anciennes sections d'analyse
+        // ══════════════════════════════════════════════════════════
 
-        // 2b. Remplacer le score panel dans la sidebar
-        const scorePanel = container.querySelector('.score-panel');
-        if (scorePanel && p.grading) {
-            scorePanel.outerHTML = _buildGradeSidebarPanel(p.grading);
-        } else if (!scorePanel && p.grading) {
-            // Pas de score panel existant → injecter avant les actions
-            const sidebar = container.querySelector('.sheet-sidebar');
-            if (sidebar) {
-                const panel = document.createElement('div');
-                panel.innerHTML = _buildGradeSidebarPanel(p.grading);
-                sidebar.insertBefore(panel.firstElementChild, sidebar.firstChild);
-            }
-        }
-
-        // 2c. Injecter la section grading dans le main content
         const sheetMain = container.querySelector('.sheet-main');
-        if (sheetMain) {
-            let existingGrading = sheetMain.querySelector('.grading-section');
-            if (!existingGrading) {
-                const gradingDiv = document.createElement('div');
-                gradingDiv.className = 'fiche-section';
-                gradingDiv.setAttribute('data-section', 'grading');
-                gradingDiv.innerHTML = `
-                    <div class="fiche-section-header">
-                        <span class="fiche-section-icon">\ud83c\udfaf</span>
-                        <span class="fiche-section-title">Grading Unifié</span>
-                    </div>
-                    <div class="fiche-section-body">
-                        ${ProposalGrader.renderSection(p.grading)}
-                    </div>`;
+        const sidebar = container.querySelector('.sheet-sidebar');
 
-                // Insérer en première position visible
-                const firstSection = sheetMain.querySelector('.fiche-section');
-                if (firstSection) {
-                    firstSection.before(gradingDiv);
-                } else {
-                    sheetMain.prepend(gradingDiv);
+        if (sheetMain) {
+            // Supprimer par titre de section (texte dans fiche-section-title)
+            const allSections = sheetMain.querySelectorAll('.fiche-section');
+            allSections.forEach(section => {
+                const title = section.querySelector('.fiche-section-title');
+                if (!title) return;
+                const text = title.textContent.trim().toLowerCase();
+
+                // Sections à supprimer :
+                if (text.includes('analyse ia') ||
+                    text.includes('résumé ia') ||
+                    text.includes('résumé discussion') ||
+                    text.includes('analyse approfondie') ||
+                    text.includes('grading unifi')) {  // remove any previous grading section too
+                    section.remove();
                 }
+            });
+
+            // Supprimer aussi les sections injectées par deep-analysis.js
+            const deepSections = sheetMain.querySelectorAll('.deep-analysis-section, [data-section="deep-analysis"]');
+            deepSections.forEach(s => s.remove());
+
+            // Supprimer l'ancien résumé IA (qui peut être un div standalone)
+            sheetMain.querySelectorAll('.fiche-ai-summary').forEach(el => {
+                // Remonter au parent .fiche-section si possible
+                const parent = el.closest('.fiche-section');
+                if (parent) parent.remove();
+            });
+        }
+
+        // ══════════════════════════════════════════════════════════
+        // PHASE 2 — SUPPRIMER l'ancien sidebar score panel
+        // ══════════════════════════════════════════════════════════
+
+        if (sidebar) {
+            // Supprimer le "Score de Compatibilité" panel
+            const allCards = sidebar.querySelectorAll('.sheet-card');
+            allCards.forEach(card => {
+                const title = card.querySelector('.sheet-card-title, h3');
+                if (title) {
+                    const text = title.textContent.trim().toLowerCase();
+                    if (text.includes('score') || text.includes('compatib')) {
+                        card.remove();
+                    }
+                }
+            });
+
+            // Supprimer aussi le score-panel par classe
+            sidebar.querySelectorAll('.score-panel').forEach(el => el.remove());
+        }
+
+        // ══════════════════════════════════════════════════════════
+        // PHASE 3 — REMPLACER le score widget du header (cercle 39)
+        // ══════════════════════════════════════════════════════════
+
+        const scoreWidget = container.querySelector('.score-widget');
+        if (scoreWidget) {
+            if (p.grading) {
+                scoreWidget.outerHTML = ProposalGrader.renderBadge(p.grading.grade, p.grading.score, 'large');
+            } else {
+                // Pas encore gradé : afficher un placeholder
+                scoreWidget.outerHTML = `<div style="width:80px;height:80px;border-radius:50%;border:3px dashed var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0.5" onclick="triggerGrading(this)" title="Cliquer pour grader">
+                    <span style="font-size:20px;color:var(--text-muted)">?</span>
+                </div>`;
             }
         }
 
-        // 2d. Masquer l'ancienne Deep Analysis si grading existe
-        if (p.grading && p.grading.grade !== '?') {
-            const deepSection = container.querySelector('.deep-analysis-section, [data-section="deep-analysis"]');
-            if (deepSection) {
-                deepSection.style.display = 'none';
+        // ══════════════════════════════════════════════════════════
+        // PHASE 4 — INJECTER le grading unifié (section + sidebar)
+        // ══════════════════════════════════════════════════════════
+
+        if (sheetMain) {
+            const gradingDiv = document.createElement('div');
+            gradingDiv.className = 'fiche-section';
+            gradingDiv.setAttribute('data-section', 'grading');
+            gradingDiv.innerHTML = `
+                <div class="fiche-section-header">
+                    <span class="fiche-section-icon">\ud83c\udfaf</span>
+                    <span class="fiche-section-title">Grading Unifi\u00e9</span>
+                </div>
+                <div class="fiche-section-body">
+                    ${ProposalGrader.renderSection(p.grading)}
+                </div>`;
+
+            // Insérer en première position (avant Suivi Performance et tout le reste)
+            sheetMain.prepend(gradingDiv);
+        }
+
+        // Sidebar : injecter le grade panel
+        if (sidebar) {
+            const panel = document.createElement('div');
+            panel.innerHTML = _buildGradeSidebarPanel(p.grading);
+            if (panel.firstElementChild) {
+                sidebar.insertBefore(panel.firstElementChild, sidebar.firstChild);
             }
         }
     };
 
-    // ─── 3. Grade sidebar panel ──────────────────────────────────
+    // ─── 3. DISABLE injectDeepAnalysis ───────────────────────────
+    // Empêcher deep-analysis.js d'injecter son contenu (on le remplace)
+
+    if (typeof window.injectDeepAnalysis === 'function') {
+        window._origInjectDeepAnalysis = window.injectDeepAnalysis;
+        window.injectDeepAnalysis = function(container, product) {
+            // Si le produit a un grading, ne pas injecter la deep analysis
+            if (product && product.grading) return;
+            // Sinon, laisser l'ancien comportement
+            window._origInjectDeepAnalysis(container, product);
+        };
+    }
+
+    // ─── 4. Grade sidebar panel ──────────────────────────────────
 
     function _buildGradeSidebarPanel(grading) {
-        if (!grading) return '';
+        if (!grading) {
+            return `<div class="sheet-card">
+                <h3 class="sheet-card-title">Grade</h3>
+                <div style="text-align:center;padding:20px 0;">
+                    <div style="width:64px;height:64px;border-radius:50%;border:3px dashed var(--border);display:inline-flex;align-items:center;justify-content:center;margin-bottom:8px">
+                        <span style="font-size:24px;color:var(--text-muted)">?</span>
+                    </div>
+                    <div style="font-size:12px;color:var(--text-muted)">Non grad\u00e9</div>
+                </div>
+            </div>`;
+        }
 
         const g = grading;
         const config = ProposalGrader.config.grades[g.grade] || ProposalGrader.config.grades.F;
@@ -184,7 +276,7 @@
         return html;
     }
 
-    // ─── 4. PATCH renderBankSections — Compteur grades par banque ─
+    // ─── 5. PATCH renderBankSections — Grade badges ──────────────
 
     const _prevRenderBankSections = typeof renderBankSections === 'function' ? renderBankSections : null;
     if (_prevRenderBankSections) {
@@ -197,13 +289,10 @@
                 if (graded.length === 0) return;
 
                 const counts = { A: 0, B: 0, C: 0, D: 0, F: 0 };
-                graded.forEach(p => {
-                    const g = p.grading.grade;
-                    if (counts[g] !== undefined) counts[g]++;
-                });
+                graded.forEach(p => { if (counts[p.grading.grade] !== undefined) counts[p.grading.grade]++; });
 
                 const summary = Object.entries(counts)
-                    .filter(([, count]) => count > 0)
+                    .filter(([, c]) => c > 0)
                     .map(([grade, count]) => {
                         const color = ProposalGrader.config.grades[grade]?.color || '#888';
                         return `<span style="display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;border-radius:4px;background:${color}22;color:${color};font-weight:700;font-size:10px;padding:0 4px">${count}${grade}</span>`;
@@ -211,10 +300,9 @@
 
                 if (summary) {
                     const bankName = (BANKS.find(b => b.id === bankId)?.name || bankId);
-                    const marker = `<span class="bank-count">`;
                     const bankStart = html.indexOf(bankName);
                     if (bankStart > -1) {
-                        const countIdx = html.indexOf(marker, bankStart);
+                        const countIdx = html.indexOf('<span class="bank-count">', bankStart);
                         if (countIdx > -1) {
                             const endOfCount = html.indexOf('</span>', countIdx) + 7;
                             html = html.substring(0, endOfCount) +
@@ -224,12 +312,11 @@
                     }
                 }
             });
-
             return html;
         };
     }
 
-    // ─── 5. Auto kill-check on PDF upload ─────────────────────────
+    // ─── 6. Auto kill-check on upload ────────────────────────────
 
     const _origAddProposal = app.addProposal.bind(app);
     app.addProposal = async function(bankId, product) {
@@ -258,39 +345,32 @@
                 console.warn('[GraderUI] Auto kill-check failed:', e);
             }
         }
-
         return result;
     };
 
-    // ─── 6. Batch grade button in dashboard ──────────────────────
+    // ─── 7. Batch grade button ───────────────────────────────────
 
     const _myDashboardPatch = function(container, state) {
         setTimeout(() => {
-            const proposalHeaders = container.querySelectorAll('.section-header');
-            proposalHeaders.forEach(header => {
+            container.querySelectorAll('.section-header').forEach(header => {
                 const title = header.querySelector('.section-title');
-                if (title && title.textContent.includes('Propositions')) {
-                    const existingGradeBtn = header.querySelector('.btn-grade-all');
-                    if (!existingGradeBtn) {
-                        const allProposals = Object.values(state.proposals).flat();
-                        const ungraded = allProposals.filter(p => !p.grading);
-
-                        if (ungraded.length > 0) {
-                            const btn = document.createElement('button');
-                            btn.className = 'btn btn-grade-all';
-                            btn.style.cssText = 'margin-right:8px;white-space:nowrap';
-                            btn.innerHTML = `\ud83c\udfaf Grader tout (${ungraded.length})`;
-                            btn.onclick = () => _handleBatchGrade(state);
-                            const addBtn = header.querySelector('.btn.primary');
-                            if (addBtn) header.insertBefore(btn, addBtn);
-                        }
+                if (title && title.textContent.includes('Propositions') && !header.querySelector('.btn-grade-all')) {
+                    const allProposals = Object.values(state.proposals).flat();
+                    const ungraded = allProposals.filter(p => !p.grading);
+                    if (ungraded.length > 0) {
+                        const btn = document.createElement('button');
+                        btn.className = 'btn btn-grade-all';
+                        btn.style.cssText = 'margin-right:8px;white-space:nowrap';
+                        btn.innerHTML = `\ud83c\udfaf Grader tout (${ungraded.length})`;
+                        btn.onclick = () => _handleBatchGrade(state);
+                        const addBtn = header.querySelector('.btn.primary');
+                        if (addBtn) header.insertBefore(btn, addBtn);
                     }
                 }
             });
         }, 50);
     };
 
-    // Hook into dashboard render chain
     const _dashboardInterval = setInterval(() => {
         if (typeof renderDashboard === 'function') {
             const _currentDashboard = renderDashboard;
@@ -304,49 +384,34 @@
     setTimeout(() => clearInterval(_dashboardInterval), 5000);
 
     async function _handleBatchGrade(state) {
-        const allProposals = Object.values(state.proposals).flat();
-        const ungraded = allProposals.filter(p => !p.grading);
-
-        if (ungraded.length === 0) {
-            showToast('Toutes les propositions sont d\u00e9j\u00e0 grad\u00e9es', 'info');
-            return;
-        }
-
+        const ungraded = Object.values(state.proposals).flat().filter(p => !p.grading);
+        if (ungraded.length === 0) { showToast('Tout est grad\u00e9', 'info'); return; }
         if (!confirm(`Grader ${ungraded.length} propositions ? ~${Math.ceil(ungraded.length * 2.5 / 60)} min.`)) return;
 
-        showToast(`Grading de ${ungraded.length} propositions...`, 'info');
-
+        showToast(`Grading en cours...`, 'info');
         try {
             const results = await ProposalGrader.gradeBatch(ungraded, (i, total, result) => {
                 showToast(`${i}/${total} \u2014 Grade ${result.grading.grade}`, 'info');
             });
 
             for (const { proposal } of results) {
-                if (proposal.bankId) {
-                    try { await app._saveProductFile(proposal.bankId, proposal); } catch (e) {}
-                }
+                if (proposal.bankId) try { await app._saveProductFile(proposal.bankId, proposal); } catch(e){}
             }
 
-            const counts = { A: 0, B: 0, C: 0, D: 0, F: 0 };
-            results.forEach(r => { const g = r.grading.grade; if (counts[g] !== undefined) counts[g]++; });
-            const summary = Object.entries(counts).filter(([, c]) => c > 0).map(([g, c]) => `${c}\u00d7${g}`).join(', ');
+            const counts = {};
+            results.forEach(r => { counts[r.grading.grade] = (counts[r.grading.grade]||0) + 1; });
+            showToast(`Termin\u00e9 : ${Object.entries(counts).map(([g,c])=>`${c}\u00d7${g}`).join(', ')}`, 'success');
 
-            showToast(`Grading termin\u00e9 : ${summary}`, 'success');
-
-            const toReject = results.filter(r => ['D', 'F'].includes(r.grading.grade));
-            if (toReject.length > 0 && confirm(`${toReject.length} propositions en D/F. Rejeter automatiquement ?`)) {
+            const toReject = results.filter(r => ['D','F'].includes(r.grading.grade));
+            if (toReject.length > 0 && confirm(`${toReject.length} D/F. Rejeter ?`)) {
                 for (const { proposal } of toReject) {
                     const bid = _resolveBankId(proposal.id, proposal.bankId);
                     if (bid) await app.updateProposalStatus(bid, proposal.id, 'rejected', `Grade ${proposal.grading.grade}`);
                 }
-                showToast(`${toReject.length} propositions rejet\u00e9es`, 'success');
             }
-
             app.render();
-        } catch (e) {
-            showToast('Erreur batch: ' + e.message, 'error');
-        }
+        } catch(e) { showToast('Erreur: ' + e.message, 'error'); }
     }
 
-    console.log('[StructBoard] GraderUI Patch v1.0 loaded');
+    console.log('[StructBoard] GraderUI Patch v1.1 loaded \u2014 clean UI');
 })();
