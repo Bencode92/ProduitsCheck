@@ -241,60 +241,63 @@
     "_marketDataDate": "2026-03-22T17:18:19.741Z"
   },
   "grading": {
-    "grade": "D",
-    "score": 33,
+    "grade": "B",
+    "score": 72,
     "pillars": {
       "adjustedReturn": {
-        "score": 42,
-        "couponEffective": 3.5,
-        "couponProbability": 0.5,
-        "reasoning": "Coupon 7% conditionnel sans données volatilité, probabilité estimée à 50%. Capital non protégé (-15 pts), compensé partiellement par effet mémoire (+5 pts)."
+        "score": 85,
+        "couponEffective": 5.6,
+        "couponProbability": 0.8,
+        "reasoning": "Coupon 7% semestriel avec mémoire et autocall 100%. Distance barrière -60% offre bonne protection malgré volatilité 36.9%. Probabilité versement élevée grâce à seuil d'activation au pair."
       },
       "underlyingQuality": {
-        "score": 50,
-        "worstStock": "ASML Holding NV",
-        "keyRisk": "Données marché indisponibles",
-        "reasoning": "Score neutre par défaut 50/100 faute de données marché. ASML = semi-conducteurs, secteur cyclique et volatil."
+        "score": 78,
+        "worstStock": "ASML",
+        "keyRisk": "Volatilité élevée 36.9% et drawdown -45% malgré fondamentaux excellents",
+        "reasoning": "ASML présente des fondamentaux exceptionnels (Buffett 100/100, ROE 50%, marge 29%) mais volatilité élevée 36.9% et max drawdown -45%. Secteur tech en difficulté (-0.67% YTD) mais position dominante ASML en lithographie."
       },
       "portfolioFit": {
-        "score": 5,
+        "score": 60,
         "issuerOverlap": true,
-        "diversificationBenefit": false,
-        "reasoning": "Swiss Life déjà à 67% du portefeuille, largement au-dessus du seuil critique de 30% (-20 pts). Concentration autocall à 80% du book (-15 pts). Risque de concentration majeur."
+        "diversificationBenefit": true,
+        "reasoning": "Concentration Swiss Life critique à 67% du portefeuille (-20 pts). Autocall saturé à 80% (-12 pts). Apporte diversification géographique (Pays-Bas +4.5% vs Zone Euro -1.9%) et nouveau sous-jacent (+15 pts)."
       },
       "riskPremium": {
-        "score": 35,
-        "spreadVsCat": 0.5,
+        "score": 75,
+        "spreadVsCat": 2.6,
         "catBenchmark": 3,
-        "reasoning": "Rendement ajusté 3.5% vs CAT 3%, prime de seulement 0.5%. Insuffisant pour compenser les risques de capital et de concentration."
+        "reasoning": "Coupon effectif 5.6% offre prime attractive de 2.6% vs CAT 3%. Compense partiellement la forte volatilité et risque de perte en capital."
       }
     },
-    "verdict": "Rejeter absolument en raison de la sur-concentration Swiss Life (67%) et d'une prime risque insuffisante. La concentration émetteur représente un risque systémique inacceptable.",
+    "verdict": "Produit attractif porté par la qualité exceptionnelle d'ASML (Buffett 100/100, leader lithographie) et un coupon généreux de 7% semestriel à mémoire. La forte volatilité (36.9%) et le drawdown historique (-45%) sont compensés par la barrière profonde à -60% et les fondamentaux robustes (ROE 50%, marge 29%). Principal frein : sur-concentration Swiss Life à 67% du portefeuille nécessitant prudence sur le sizing.",
     "keyRisks": [
-      "Sur-concentration émetteur Swiss Life 67%",
-      "Capital non protégé",
-      "Données sous-jacent indisponibles"
+      "Sur-concentration émetteur Swiss Life (67% portefeuille)",
+      "Volatilité élevée ASML 36.9% et drawdown -45%",
+      "Secteur technologique sous pression (-0.67% YTD)"
     ],
-    "negotiationPoints": [],
+    "negotiationPoints": [
+      "Barrière plus profonde à -65% vu la volatilité historique",
+      "Réduction exposition Swiss Life pour équilibrer le portefeuille"
+    ],
     "scenarios": {
       "optimistic": {
         "return_pct": 42,
-        "return_eur": 0,
-        "probability": 0.2
+        "return_eur": 12558,
+        "probability": 0.25
       },
       "base": {
-        "return_pct": 21,
-        "return_eur": 0,
-        "probability": 0.3
+        "return_pct": 28,
+        "return_eur": 8372,
+        "probability": 0.35
       },
       "stress": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.35
+        "probability": 0.25
       },
       "worst": {
-        "return_pct": -60,
-        "return_eur": 0,
+        "return_pct": -45,
+        "return_eur": -13455,
         "probability": 0.15
       }
     },
@@ -303,11 +306,11 @@
       "reasons": []
     },
     "metadata": {
-      "gradedAt": "2026-03-23T13:40:12.548Z",
-      "durationMs": 11338,
+      "gradedAt": "2026-03-23T14:15:20.159Z",
+      "durationMs": 17222,
       "aiUsed": true,
-      "version": "1.0",
-      "marketDataAvailable": false,
+      "version": "2.0",
+      "marketDataAvailable": true,
       "catBenchmark": 3
     }
   }
