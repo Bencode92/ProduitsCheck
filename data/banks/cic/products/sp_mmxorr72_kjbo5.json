@@ -184,67 +184,69 @@
     }
   },
   "grading": {
-    "grade": "D",
-    "score": 38,
+    "grade": "C",
+    "score": 52,
     "pillars": {
       "adjustedReturn": {
-        "score": 40,
-        "couponEffective": 3.5,
-        "couponProbability": 0.57,
-        "reasoning": "Coupon facial 6.15% attractif mais pénalisé par worst-of sur 2 sous-jacents (-5 pts), capital NON protégé (-15 pts), et forte volatilité LVMH (29.46%) réduisant probabilité de versement. Mémoire apporte +5 pts."
+        "score": 58,
+        "couponEffective": 5.84,
+        "couponProbability": 0.95,
+        "reasoning": "Rendement ajusté de 5.84% (6.15% × 95%) correct pour produit sans autocall avec coupon mémoire. Pénalité de -15 pts pour capital non protégé et -5 pts pour worst-of. Bonus +5 pts pour mémoire."
       },
       "underlyingQuality": {
-        "score": 45,
-        "worstStock": "LVMH",
-        "keyRisk": "Exposition luxe cyclique en difficulté",
-        "reasoning": "Worst-of tire la note vers le bas : LVMH (maillon faible) avec Buffett 81 mais volatilité 29.46%, max drawdown 51.49%, et performance catastrophique (-44% sur 3 ans). Secteur consumer-discretionary évité par la macro."
+        "score": 50,
+        "worstStock": "Crédit Agricole",
+        "keyRisk": "Exposition bancaire française en période difficile",
+        "reasoning": "LVMH (Buffett 81, Quality 65) vs Crédit Agricole (Buffett 40 par défaut, Quality 79). Worst-of pénalisé par corrélation faible entre luxe et banque (-15 pts). Secteur financier évité en macro actuelle."
       },
       "portfolioFit": {
         "score": 25,
         "issuerOverlap": true,
         "diversificationBenefit": false,
-        "reasoning": "Concentration CIC critique à 33% (+5% avec ce produit = 38%) engendre -20 pts sur risque crédit. Aucun overlap sous-jacent mais pas de diversification géographique (100% France)."
+        "reasoning": "Concentration CIC déjà à 33%, ce produit portera à 43% (-20 pts). Type capital protégé différent du portefeuille autocall existant (+15 pts). Pas de nouveau secteur car finance déjà présent."
       },
       "riskPremium": {
-        "score": 45,
-        "spreadVsCat": 3.15,
+        "score": 71,
+        "spreadVsCat": 2.84,
         "catBenchmark": 3,
-        "reasoning": "Prime de 3.15% vs CAT 3% correcte mais insuffisante compte tenu des risques (capital non protégé, LVMH en détresse, sur-concentration émetteur)."
+        "reasoning": "Rendement ajusté 5.84% vs CAT 3% = prime de 2.84%. Prime solide mais limitée par exposition bancaire française et absence protection capital."
       }
     },
-    "verdict": "Grade D justifié par l'accumulation de risques critiques : capital NON protégé sur un worst-of incluant LVMH (-44% sur 3 ans, 51% de drawdown), sur-concentration émetteur CIC déjà à 33%, et exposition à un secteur consumer-discretionary évité par la macro. Seule la mémoire et le coupon facial 6.15% apportent un attrait limité face à ces vulnérabilités majeures.",
+    "verdict": "Produit défensif avec coupon mémoire intéressant mais bridé par surconcentration émetteur CIC (43%) et exposition bancaire française défavorable. Le rendement ajusté de 5.84% offre une prime correcte de 2.84% vs CAT, mais le risque worst-of est amplifié par la faible corrélation luxe/banque. Crédit Agricole constitue le maillon faible avec 40% de distance vs plus hauts.",
     "keyRisks": [
-      "Capital non protégé sur worst-of",
-      "LVMH en détresse (-44% sur 3 ans)",
-      "Sur-concentration CIC (38% du book)"
+      "Surconcentration émetteur CIC (43% du portefeuille)",
+      "Exposition secteur bancaire français en difficulté",
+      "Capital non protégé avec worst-of LVMH/Crédit Agricole",
+      "Corrélation faible amplifiant le risque worst-of"
     ],
     "negotiationPoints": [
-      "Négocier protection capital partielle",
-      "Réduire exposition CIC"
+      "Réduire exposition CIC ou négocier structure différente",
+      "Demander protection partielle du capital",
+      "Considérer version autocall pour réduire risque temporel"
     ],
     "scenarios": {
       "optimistic": {
         "return_pct": 6.15,
         "return_eur": 1839,
-        "probability": 0.15,
-        "duration_years": 2
+        "probability": 0.3,
+        "duration_years": 1
       },
       "base": {
-        "return_pct": 4.1,
-        "return_eur": 2450,
-        "probability": 0.25,
+        "return_pct": 5.84,
+        "return_eur": 5245,
+        "probability": 0.5,
         "duration_years": 3
       },
       "stress": {
-        "return_pct": 0,
-        "return_eur": 0,
-        "probability": 0.35,
+        "return_pct": 1.95,
+        "return_eur": 1748,
+        "probability": 0.15,
         "duration_years": 3
       },
       "worst": {
-        "return_pct": -15,
-        "return_eur": -4485,
-        "probability": 0.25,
+        "return_pct": -13,
+        "return_eur": -11674,
+        "probability": 0.05,
         "duration_years": 3
       }
     },
@@ -253,8 +255,8 @@
       "reasons": []
     },
     "metadata": {
-      "gradedAt": "2026-03-23T14:40:43.180Z",
-      "durationMs": 14940,
+      "gradedAt": "2026-03-23T15:12:28.035Z",
+      "durationMs": 15404,
       "aiUsed": true,
       "version": "2.0",
       "marketDataAvailable": true,
