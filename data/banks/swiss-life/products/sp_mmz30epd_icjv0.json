@@ -241,83 +241,90 @@
     "_marketDataDate": "2026-03-22T17:18:19.741Z"
   },
   "grading": {
-    "grade": "B",
-    "score": 65,
+    "grade": "A",
+    "score": 87,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
     "pillars": {
       "adjustedReturn": {
-        "score": 67,
-        "couponEffective": 6.65,
-        "couponProbability": 0.95,
-        "reasoning": "Coupon ajusté solide à 6.65% (7% × 95% probabilité) grâce à la barrière éloignée à -60% et la forte qualité d'ASML. Mémoire apporte +5 pts mais capital non protégé retire -15 pts."
+        "score": 85,
+        "base": 90,
+        "delta": -5,
+        "reasoning": "Rendement: base 90 → -5 = 85 (Volatilité 36.9% élevée sur single name tech avec barrière -60%, probabilité knock-in non négligeable malgré coupon attractif) | Coupon 14% (7×2)"
       },
       "underlyingQuality": {
-        "score": 84,
-        "worstStock": "ASML",
-        "keyRisk": "Forte volatilité 37% et drawdown maximal 45%",
-        "reasoning": "ASML excellent avec Buffett score parfait (100/100) et quality solide (67/100). Secteur tech en difficulté (-0.67% YTD) mais l'action surperforme (+22.44% YTD, +67% sur 1an)."
+        "score": 94,
+        "base": 84,
+        "delta": 10,
+        "reasoning": "Qualité: base 84 → +10 = 94 (ASML leader mondial lithographie EUV, fondamentaux exceptionnels (ROE 50.46%, marge 29.42%) et momentum haussier +67% sur 1an) | Worst: ASML Holding NV B:100"
       },
       "portfolioFit": {
-        "score": 33,
-        "issuerOverlap": true,
-        "diversificationBenefit": false,
-        "reasoning": "Concentration Swiss Life critique à 67% du portefeuille (-20 pts). Même type autocall majoritaire (-15 pts). Aucun overlap direct mais pas de nouveau secteur (+0 pt)."
+        "score": 75,
+        "base": 80,
+        "delta": -5,
+        "reasoning": "Fit: base 80 → -5 = 75 (Concentration 100% sur single name tech néerlandais, manque de diversification géographique/sectorielle)"
       },
       "riskPremium": {
-        "score": 73,
-        "spreadVsCat": 3.65,
-        "catBenchmark": 3,
-        "reasoning": "Prime attractive de 3.65% vs CAT 3%, soit +122% au-dessus du benchmark. Rendement ajusté justifie largement la prime demandée."
+        "score": 90,
+        "base": 100,
+        "delta": -10,
+        "reasoning": "Prime: base 100 → -10 = 90 (Prime apparente trompeuse car coupon conditionnel sur autocall, risque de non-paiement si ASML sous-performe) | 14% vs CAT 3%"
       }
     },
-    "verdict": "Produit attractif porté par l'excellence d'ASML (leader mondial litho) avec probabilité de coupon très élevée (95%) et prime solide vs CAT. Cependant, risque de concentration émetteur critique (Swiss Life à 67% du portefeuille) et volatilité élevée d'ASML (37%). La mémoire semestrielle offre un bon potentiel de récupération.",
+    "verdict": "Produit premium sur ASML, champion incontournable de la lithographie EUV avec des fondamentaux exceptionnels et une dynamique haussière forte (+67% sur 1an). Le coupon semestriel de 14% annualisé est attractif mais conditionnel à l'autocall, créant un risque de non-paiement. La concentration sur un single name tech européen limite la diversification, et la volatilité de 36.9% avec une barrière à -60% génère un risque de perte en capital significatif. Malgré la qualité intrinsèque d'ASML, la structure nécessite une conviction forte sur la trajectoire du titre.",
     "keyRisks": [
-      "Concentration Swiss Life critique (67% portefeuille)",
-      "Volatilité ASML élevée (37%) avec drawdowns importants",
-      "Secteur technologique en difficulté macro",
-      "Capital non protégé avec barrière -60%"
+      "Concentration 100% sur ASML - exposition totale aux aléas spécifiques du secteur semi-conducteurs et géopolitique Chine-Taiwan",
+      "Coupon conditionnel - risque de non-paiement prolongé si ASML stagne ou baisse, malgré la qualité fondamentale"
     ],
-    "negotiationPoints": [
-      "Négocier barrière plus éloignée (-65/-70%)",
-      "Demander réduction du nominal pour limiter concentration émetteur",
-      "Explorer version avec protection partielle du capital"
-    ],
+    "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 14,
-        "return_eur": 4186,
+        "return_eur": 14000,
         "probability": 0.3,
         "duration_years": 1
       },
       "base": {
-        "return_pct": 7,
-        "return_eur": 6279,
+        "return_pct": 28,
+        "return_eur": 28000,
         "probability": 0.4,
-        "duration_years": 3
+        "duration_years": 2
       },
       "stress": {
         "return_pct": 0,
         "return_eur": 0,
         "probability": 0.2,
-        "duration_years": 6
+        "duration_years": 2
       },
       "worst": {
-        "return_pct": -60,
-        "return_eur": -17940,
+        "return_pct": -35,
+        "return_eur": -35000,
         "probability": 0.1,
-        "duration_years": 6
+        "duration_years": 2
       }
     },
-    "killCriteria": {
-      "triggered": false,
-      "reasons": []
-    },
     "metadata": {
-      "gradedAt": "2026-03-23T15:11:49.707Z",
-      "durationMs": 17057,
+      "gradedAt": "2026-03-23T16:58:07.560Z",
+      "durationMs": 14016,
       "aiUsed": true,
-      "version": "2.0",
+      "version": "3.2",
       "marketDataAvailable": true,
-      "catBenchmark": 3
+      "catBenchmark": 3,
+      "couponAnnualized": 14,
+      "couponRaw": 7,
+      "couponMultiplier": 2,
+      "couponFrequency": "semestriel",
+      "isInPortfolio": false,
+      "baseScore": 89,
+      "baseGrade": "A",
+      "adjustments": {
+        "p1": -5,
+        "p2": 10,
+        "p3": -5,
+        "p4": -10
+      }
     }
   }
 }
