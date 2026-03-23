@@ -142,38 +142,90 @@
   "entity": "cameleons",
   "entityName": "Caméleons",
   "grading": {
-    "grade": "F",
-    "score": 0,
+    "grade": "D",
+    "score": 42,
     "killCriteria": {
-      "triggered": true,
-      "reasons": [
-        "Barrière 60% sans protection"
-      ]
+      "triggered": false,
+      "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": null
+        "score": 30,
+        "base": 40,
+        "delta": -10,
+        "reasoning": "Rendement: base 40 → -10 = 30 (Barrière 60% trop élevée pour panier avec BMPS (vol 36%) et UCG (vol 30%), probabilité coupon dégradée) | Coupon 7%"
       },
       "underlyingQuality": {
-        "score": null
+        "score": 37,
+        "base": 49,
+        "delta": -12,
+        "reasoning": "Qualité: base 49 → -12 = 37 (Secteur financier défavorisé macro, BMPS -22.74% YTD avec DD 25%, UCG -16% YTD, qualité moyenne 60) | Worst: Veolia Environnement SA B:28"
       },
       "portfolioFit": {
-        "score": null
+        "score": 12,
+        "base": 20,
+        "delta": -8,
+        "reasoning": "Fit: base 20 → -8 = 12 (3/5 sous-jacents défavorisés (financials évités), maillon faible Veolia perf négative)"
       },
       "riskPremium": {
-        "score": null
+        "score": 85,
+        "base": 90,
+        "delta": -5,
+        "reasoning": "Prime: base 90 → -5 = 85 (Prime surévaluée car coupon conditionnel avec forte probabilité d'activation barrière) | 7% vs CAT 3%"
       }
     },
-    "verdict": "Rejet: Barrière 60% sans protection",
+    "verdict": "Produit risqué avec exposition 60% aux financières italiennes (BMPS, UCG) en contexte macro défavorable. BMPS affiche une volatilité extrême (36%) et YTD -22.74%, tandis que la barrière 60% paraît insuffisante. Le coupon 7% sera difficile à obtenir avec ce niveau de risque et ces sous-jacents dégradés.",
     "keyRisks": [
-      "Barrière 60% sans protection"
+      "Secteur bancaire italien sous pression : BMPS et UCG cumulent 60% du panier avec volatilités élevées (36% et 30%)",
+      "Barrière 60% fragile face à la volatilité moyenne du panier (~26%) et aux drawdowns observés (25% BMPS)"
     ],
-    "scenarios": null,
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 7,
+        "return_eur": 2100,
+        "probability": 0.15,
+        "duration_years": 1
+      },
+      "base": {
+        "return_pct": 3.5,
+        "return_eur": 3150,
+        "probability": 0.25,
+        "duration_years": 1.5
+      },
+      "stress": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.35,
+        "duration_years": 2
+      },
+      "worst": {
+        "return_pct": -25,
+        "return_eur": -7500,
+        "probability": 0.25,
+        "duration_years": 2
+      }
+    },
     "metadata": {
-      "gradedAt": "2026-03-23T16:55:26.280Z",
-      "durationMs": 724,
-      "aiUsed": false,
-      "version": "3.1"
+      "gradedAt": "2026-03-23T16:56:47.431Z",
+      "durationMs": 12057,
+      "aiUsed": true,
+      "version": "3.2",
+      "marketDataAvailable": true,
+      "catBenchmark": 3,
+      "couponAnnualized": 7,
+      "couponRaw": 7,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "baseScore": 51,
+      "baseGrade": "C",
+      "adjustments": {
+        "p1": -10,
+        "p2": -12,
+        "p3": -8,
+        "p4": -5
+      }
     }
   }
 }
