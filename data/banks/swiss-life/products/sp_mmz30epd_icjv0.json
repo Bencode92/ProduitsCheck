@@ -242,45 +242,44 @@
   },
   "grading": {
     "grade": "B",
-    "score": 63,
+    "score": 65,
     "pillars": {
       "adjustedReturn": {
         "score": 67,
         "couponEffective": 6.65,
         "couponProbability": 0.95,
-        "reasoning": "Rendement ajusté de 6.65% (7% × 95%) solide pour un sous-jacent unique de qualité. Pénalisé par l'absence de protection du capital (-15 pts) et maturité longue de 6 ans (-5 pts). Compensé par l'effet mémoire (+5 pts)."
+        "reasoning": "Coupon ajusté solide à 6.65% (7% × 95% probabilité) grâce à la barrière éloignée à -60% et la forte qualité d'ASML. Mémoire apporte +5 pts mais capital non protégé retire -15 pts."
       },
       "underlyingQuality": {
         "score": 84,
         "worstStock": "ASML",
-        "keyRisk": "Volatilité élevée 36.9% et drawdown maximal de 45.12%",
-        "reasoning": "ASML présente un excellent score Buffett (100/100) avec des fondamentaux exceptionnels (ROE 50.46%, marge 29.42%). Quality score de 67/100 reste correct. Risque modéré avec beta 1.07 et performance remarquable (+67% sur 1 an)."
+        "keyRisk": "Forte volatilité 37% et drawdown maximal 45%",
+        "reasoning": "ASML excellent avec Buffett score parfait (100/100) et quality solide (67/100). Secteur tech en difficulté (-0.67% YTD) mais l'action surperforme (+22.44% YTD, +67% sur 1an)."
       },
       "portfolioFit": {
-        "score": 25,
+        "score": 33,
         "issuerOverlap": true,
-        "diversificationBenefit": true,
-        "reasoning": "Concentration Swiss Life critique à 67% du portefeuille (-20 pts). Surpondération autocall à 80% (-12 pts). Compense partiellement en ajoutant l'exposition technologique européenne absente du portefeuille (+15 pts)."
+        "diversificationBenefit": false,
+        "reasoning": "Concentration Swiss Life critique à 67% du portefeuille (-20 pts). Même type autocall majoritaire (-15 pts). Aucun overlap direct mais pas de nouveau secteur (+0 pt)."
       },
       "riskPremium": {
         "score": 73,
         "spreadVsCat": 3.65,
         "catBenchmark": 3,
-        "reasoning": "Prime de risque solide de 3.65% vs CAT 3%, reflétant correctement le profil risque/rendement d'ASML. Spread de 365 bps justifié par la volatilité du sous-jacent technologique."
+        "reasoning": "Prime attractive de 3.65% vs CAT 3%, soit +122% au-dessus du benchmark. Rendement ajusté justifie largement la prime demandée."
       }
     },
-    "verdict": "Produit intéressant sur ASML, leader européen des semi-conducteurs, avec un rendement ajusté attractif de 6.65% (probabilité de coupon 95%). La qualité exceptionnelle du sous-jacent compense partiellement les risques de volatilité élevée. Point bloquant : concentration Swiss Life déjà excessive à 67% du portefeuille, créant un risque de contrepartie critique.",
+    "verdict": "Produit attractif porté par l'excellence d'ASML (leader mondial litho) avec probabilité de coupon très élevée (95%) et prime solide vs CAT. Cependant, risque de concentration émetteur critique (Swiss Life à 67% du portefeuille) et volatilité élevée d'ASML (37%). La mémoire semestrielle offre un bon potentiel de récupération.",
     "keyRisks": [
-      "Concentration émetteur Swiss Life critique (67% du portefeuille)",
-      "Volatilité élevée d'ASML (36.9%) avec drawdown maximal de 45.12%",
-      "Absence de protection du capital sur 6 ans d'exposition",
-      "Secteur technologique en trend baissier (-0.67% YTD)"
+      "Concentration Swiss Life critique (67% portefeuille)",
+      "Volatilité ASML élevée (37%) avec drawdowns importants",
+      "Secteur technologique en difficulté macro",
+      "Capital non protégé avec barrière -60%"
     ],
     "negotiationPoints": [
-      "Exiger une réduction de concentration Swiss Life avant souscription",
-      "Négocier un coupon bonifié à 7.5% vu la qualité d'ASML",
-      "Demander une barrière plus profonde (-65%) sur ce sous-jacent premium",
-      "Considérer une version plus courte (4 ans) pour réduire le risque temporel"
+      "Négocier barrière plus éloignée (-65/-70%)",
+      "Demander réduction du nominal pour limiter concentration émetteur",
+      "Explorer version avec protection partielle du capital"
     ],
     "scenarios": {
       "optimistic": {
@@ -290,10 +289,10 @@
         "duration_years": 1
       },
       "base": {
-        "return_pct": 6.65,
-        "return_eur": 11940,
+        "return_pct": 7,
+        "return_eur": 6279,
         "probability": 0.4,
-        "duration_years": 3.5
+        "duration_years": 3
       },
       "stress": {
         "return_pct": 0,
@@ -302,8 +301,8 @@
         "duration_years": 6
       },
       "worst": {
-        "return_pct": -35,
-        "return_eur": -10465,
+        "return_pct": -60,
+        "return_eur": -17940,
         "probability": 0.1,
         "duration_years": 6
       }
@@ -313,8 +312,8 @@
       "reasons": []
     },
     "metadata": {
-      "gradedAt": "2026-03-23T15:09:29.379Z",
-      "durationMs": 19336,
+      "gradedAt": "2026-03-23T15:11:49.707Z",
+      "durationMs": 17057,
       "aiUsed": true,
       "version": "2.0",
       "marketDataAvailable": true,
