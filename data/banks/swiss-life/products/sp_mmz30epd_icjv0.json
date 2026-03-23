@@ -241,43 +241,76 @@
     "_marketDataDate": "2026-03-22T17:18:19.741Z"
   },
   "grading": {
-    "grade": "F",
-    "score": 0,
-    "killCriteria": {
-      "triggered": true,
-      "reasons": [
-        "Émetteur Swiss Life déjà à 67% du book (max: 40%)"
-      ]
-    },
+    "grade": "C",
+    "score": 54,
     "pillars": {
       "adjustedReturn": {
-        "score": null,
-        "reasoning": "Kill criteria déclenché"
+        "score": 65,
+        "couponEffective": 4.9,
+        "couponProbability": 0.7,
+        "reasoning": "Coupon 7% semestriel avec barrière -60% donne probabilité modérée 70%. Pas de protection capital (-15 pts) mais effet mémoire (+5 pts)."
       },
       "underlyingQuality": {
-        "score": null,
-        "reasoning": "Kill criteria déclenché"
+        "score": 50,
+        "worstStock": "ASML",
+        "keyRisk": "Données marché indisponibles",
+        "reasoning": "Score neutre 50/100 par défaut. ASML est un leader tech mais volatilité semi-conducteurs élevée."
       },
       "portfolioFit": {
-        "score": null,
-        "reasoning": "Kill criteria déclenché"
+        "score": 35,
+        "issuerOverlap": true,
+        "diversificationBenefit": false,
+        "reasoning": "Concentration Swiss Life critique à 67% (-20 pts). Autocall comme 80% du book (-15 pts). Pas de diversification géographique/sectorielle significative."
       },
       "riskPremium": {
-        "score": null,
-        "reasoning": "Kill criteria déclenché"
+        "score": 65,
+        "spreadVsCat": 1.9,
+        "catBenchmark": 3,
+        "reasoning": "Prime 1.9% (4.9% rendement ajusté vs 3% CAT) dans fourchette acceptable mais pas exceptionnelle."
       }
     },
-    "verdict": "Rejet automatique : Émetteur Swiss Life déjà à 67% du book (max: 40%)",
+    "verdict": "Produit acceptable techniquement mais concentration émetteur Swiss Life (67%) trop élevée. Négocier conditions ou diversifier émetteurs avant intégration.",
     "keyRisks": [
-      "Émetteur Swiss Life déjà à 67% du book (max: 40%)"
+      "Sur-concentration émetteur Swiss Life",
+      "Capital non protégé avec barrière -60%"
     ],
-    "negotiationPoints": [],
-    "scenarios": null,
+    "negotiationPoints": [
+      "Réduire nominal pour limiter concentration Swiss Life",
+      "Demander amélioration coupon ou barrière"
+    ],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 42,
+        "return_eur": 12600,
+        "probability": 0.25
+      },
+      "base": {
+        "return_pct": 14,
+        "return_eur": 4200,
+        "probability": 0.35
+      },
+      "stress": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.25
+      },
+      "worst": {
+        "return_pct": -60,
+        "return_eur": -18000,
+        "probability": 0.15
+      }
+    },
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
     "metadata": {
-      "gradedAt": "2026-03-23T13:22:28.189Z",
-      "durationMs": 58,
-      "aiUsed": false,
-      "version": "1.0"
+      "gradedAt": "2026-03-23T13:38:39.864Z",
+      "durationMs": 10634,
+      "aiUsed": true,
+      "version": "1.0",
+      "marketDataAvailable": false,
+      "catBenchmark": 3
     }
   }
 }
