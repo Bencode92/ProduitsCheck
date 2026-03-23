@@ -1,4 +1,21 @@
-// ═══ CAT Objectives Patch V4 — Cash per entity (ByCam / Caméleons) ═══
+// ═══ CAT Objectives Patch V4b — Fix navigation to Structured Products ═══
+
+// ═══ GLOBAL NAV HELPER (used by liquidity banners) ═══
+function switchMainView(target) {
+  if (target === 'proposals' || target === 'dashboard') {
+    app.goToDashboard();
+    // Also click the nav tab to update highlight
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      if (btn.textContent.includes('Produits Structurés')) btn.click();
+    });
+  } else if (target === 'cat') {
+    app.setState({ view: 'cat' });
+    app.render();
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      if (btn.textContent.includes('Comptes à Terme')) btn.click();
+    });
+  }
+}
 
 const _origShowCATObjectivesModal = showCATObjectivesModal;
 showCATObjectivesModal = function() {
@@ -30,7 +47,7 @@ async function saveCATObjectivesV2() {
   catManager.objectives = {
     monthlyNeed: parseFloat(document.getElementById('obj-monthly').value) || 0,
     liquidityReserve: parseFloat(document.getElementById('obj-reserve').value) || 0,
-    availableCash: cashByCam + cashCameleons, // total for backward compat
+    availableCash: cashByCam + cashCameleons,
     cashByCam, cashCameleons,
     maxPerBank: parseFloat(document.getElementById('obj-maxbank').value) || 100000,
     targetRate: parseFloat(document.getElementById('obj-target-rate').value) || 0,
@@ -43,7 +60,7 @@ async function saveCATObjectivesV2() {
   renderCAT(document.getElementById('main-content'));
 }
 
-// ═══ Override renderCAT — Header + Liquidity → Structured Products ═══
+// ═══ Override renderCAT ═══
 const _origRenderCATForHeader = renderCAT;
 renderCAT = function(container) {
   _origRenderCATForHeader(container);
@@ -73,7 +90,6 @@ renderCAT = function(container) {
 
   const portfolio = (app.state?.portfolio || []).filter(p => !p.archived);
   const structuredNominal = portfolio.reduce((s, p) => s + (parseFloat(p.investedAmount) || 0), 0);
-  const proposals = Object.values(app.state?.proposals || {}).flat().filter(p => !['rejected','subscribed'].includes(p.status));
 
   let dashHTML = `
     <div style="background:linear-gradient(135deg,var(--bg-elevated),var(--bg-card));border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px">
