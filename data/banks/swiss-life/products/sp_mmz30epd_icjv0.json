@@ -138,5 +138,106 @@
       "redundancy": 36,
       "complementarity": 25
     }
+  },
+  "aiDeepAnalysis": {
+    "risk_score": 8,
+    "risk_breakdown": {
+      "underlying": 9,
+      "barrier": 1,
+      "issuer": 3,
+      "complexity": 6
+    },
+    "scenarios": {
+      "optimistic": {
+        "label": "Autocall S1",
+        "return_pct": 7,
+        "return_eur": 21000,
+        "probability": "Moyenne"
+      },
+      "base": {
+        "label": "Autocall S4-6",
+        "return_pct": 28,
+        "return_eur": 84000,
+        "probability": "Moyenne"
+      },
+      "stress": {
+        "label": "Coupons 3-4 ans",
+        "return_pct": 28,
+        "return_eur": 84000,
+        "probability": "Moyenne"
+      },
+      "worst": {
+        "label": "Performance worst",
+        "return_pct": -50,
+        "return_eur": -150000,
+        "probability": "Élevée"
+      }
+    },
+    "vs_cat": {
+      "cat_rate": 3,
+      "product_tra_expected": 5.2,
+      "risk_premium": 2.2,
+      "verdict": "Prime de risque insuffisante pour un panier aussi volatil."
+    },
+    "underlying_verdict": "Panier très hétérogène avec des actifs de qualité variable : ASML excellent mais volatile, Tesla et Estée Lauder en difficulté fondamentale, ENI cyclique.",
+    "alerts": [
+      {
+        "type": "danger",
+        "text": "Estée Lauder en situation financière critique avec ROE négatif et endettement élevé."
+      },
+      {
+        "type": "warning",
+        "text": "Volatilité moyenne du panier très élevée avec plusieurs actifs >40% de volatilité."
+      },
+      {
+        "type": "warning",
+        "text": "Concentration excessive sur Swiss Life (67%) dans le portefeuille global."
+      }
+    ],
+    "summary": "Produit Phoenix à haut risque sur un panier déséquilibré mêlant des leaders (ASML) et des valeurs problématiques (EL, TSLA). Le coupon 7% semble insuffisant face à la volatilité importante et aux fondamentaux dégradés de certains sous-jacents. À éviter dans un portefeuille déjà concentré sur Swiss Life.",
+    "_underlyings": [
+      {
+        "ticker": "ASML",
+        "type": "stock",
+        "name": "ASML HOLDING NV"
+      },
+      {
+        "ticker": "TSLA",
+        "type": "stock",
+        "name": "TESLA INC"
+      },
+      {
+        "ticker": "ENI",
+        "type": "stock",
+        "name": "ENI"
+      },
+      {
+        "ticker": "MO",
+        "type": "stock",
+        "name": "ALTRIA GROUP INC"
+      },
+      {
+        "ticker": "FAST",
+        "type": "stock",
+        "name": "FASTENAL"
+      },
+      {
+        "ticker": "EL",
+        "type": "stock",
+        "name": "ESTEE LAUDER INC CLASS A"
+      },
+      {
+        "ticker": "ASML",
+        "type": "stock",
+        "name": "ASML HOLDING NV"
+      },
+      {
+        "ticker": "RI",
+        "type": "stock",
+        "name": "PERNOD RICARD SA"
+      }
+    ],
+    "_timestamp": "2026-03-23T12:17:52.138Z",
+    "_marketDataDate": "2026-03-22T17:18:19.741Z"
   }
 }
