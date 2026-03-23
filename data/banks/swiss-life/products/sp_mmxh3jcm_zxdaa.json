@@ -159,70 +159,67 @@
   },
   "grading": {
     "grade": "F",
-    "score": 15,
+    "score": 18,
     "pillars": {
       "adjustedReturn": {
         "score": 0,
         "couponEffective": 0,
-        "couponProbability": 0.95,
-        "reasoning": "Coupon 0% même avec probabilité élevée = 0% rendement ajusté. Produit sans capital protection (-15 pts). Maturité indéfinie pénalise fortement (-10 pts)."
+        "couponProbability": 1,
+        "reasoning": "Coupon 0% avec probabilité 100% = rendement ajusté 0%. Score minimal même pour un produit de taux garanti. Aucune rémunération pour l'investisseur."
       },
       "underlyingQuality": {
-        "score": 25,
+        "score": 45,
         "worstStock": "Instruments du marché monétaire",
-        "keyRisk": "Volatilité élevée (32%) et drawdown important (34%) pour du monétaire",
-        "reasoning": "Sous-jacents obligataires/monétaires difficiles à évaluer. Seul 'Instruments marché monétaire' trouvé avec vol 32% anormalement élevée pour du monétaire. Buffett absent sur 2/3 des sous-jacents = forte pénalité."
+        "keyRisk": "Capital non protégé sur produit de taux",
+        "reasoning": "Produit de taux non protégé = score de base 45. Sous-jacents obligataires diversifiés mais sans protection du capital, exposant à un risque de perte en capital sur des actifs supposés moins risqués."
       },
       "portfolioFit": {
-        "score": 10,
-        "issuerOverlap": true,
-        "diversificationBenefit": false,
-        "reasoning": "Concentration Swiss Life catastrophique à 67% du portefeuille (-20 pts). Type 'AUTRE' minoritaire (+0). Overlap total sur les 3 sous-jacents (-30 pts). Aucun bénéfice diversification."
+        "score": 25,
+        "reasoning": "Concentration Swiss Life déjà à 67% du portefeuille. Ajouter ce produit porterait la concentration à ~89% (299k existant + 109k nouveau sur ~408k total). Pénalité majeure -20 pts pour dépassement seuil 30%. Diversification taux vs actions +10 pts. Overlap avec instruments similaires -5 pts."
       },
       "riskPremium": {
-        "score": 0,
+        "score": 5,
         "spreadVsCat": -3,
-        "catBenchmark": 3,
-        "reasoning": "Rendement ajusté 0% vs CAT 3% = spread négatif de -3%. Aucune compensation pour le risque pris. Performance inacceptable vs alternatives."
+        "reasoning": "Rendement ajusté 0% vs CAT 3% = spread -3%. Performance largement inférieure aux alternatives, même pour un produit sans risque théorique."
       }
     },
-    "verdict": "Produit à rejeter catégoriquement. Rendement nul, sur-concentration Swiss Life (67%), sous-jacents redondants et maturité indéfinie. Aucune logique économique avec probabilité coupon 95% mais paiement 0%.",
+    "verdict": "Produit inacceptable. Rendement nul avec concentration excessive chez Swiss Life (89% du portefeuille). Aucune justification économique.",
     "keyRisks": [
-      "Concentration émetteur critique (67% Swiss Life)",
       "Rendement nul garanti",
-      "Maturité indéfinie sans visibilité",
-      "Overlap total des sous-jacents"
+      "Sur-concentration émetteur critique (89%)",
+      "Capital non protégé sur actifs de taux",
+      "Maturité indéfinie"
     ],
     "negotiationPoints": [
-      "Exiger un coupon minimum même symbolique",
-      "Clarifier la maturité et mécanisme de sortie",
-      "Réduire drastiquement l'exposition Swiss Life",
-      "Revoir la structure produit fondamentalement"
+      "Exiger un coupon minimum de 2-3%",
+      "Réduire d'abord l'exposition Swiss Life existante",
+      "Clarifier la maturité et conditions de sortie",
+      "Protection du capital obligatoire"
     ],
     "scenarios": {
       "optimistic": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.95,
+        "probability": 1,
         "duration_years": 1
       },
       "base": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.95,
-        "duration_years": 3
+        "probability": 1,
+        "duration_years": 1
       },
       "stress": {
         "return_pct": -5,
         "return_eur": -5450,
-        "probability": 0.03,
-        "duration_years": 5
+        "probability": 0.2,
+        "duration_years": 1
       },
       "worst": {
         "return_pct": -15,
         "return_eur": -16350,
-        "probability": 0.02,
-        "duration_years": 5
+        "probability": 0.05,
+        "duration_years": 1
       }
     },
     "killCriteria": {
@@ -230,12 +227,16 @@
       "reasons": []
     },
     "metadata": {
-      "gradedAt": "2026-03-23T15:25:21.182Z",
-      "durationMs": 17173,
+      "gradedAt": "2026-03-23T15:53:29.821Z",
+      "durationMs": 14863,
       "aiUsed": true,
-      "version": "2.0",
+      "version": "2.1",
       "marketDataAvailable": true,
-      "catBenchmark": 3
+      "catBenchmark": 3,
+      "couponAnnualized": 0,
+      "couponRaw": 0,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel"
     }
   }
 }
