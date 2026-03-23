@@ -1,4 +1,4 @@
-// ═══ CAT Objectives Patch — Fixed annual interest + rate % + optimizer placement ═══
+// ═══ CAT Objectives Patch V3 — Liquidity banner → Structured Products ONLY ═══
 
 const _origShowCATObjectivesModal = showCATObjectivesModal;
 showCATObjectivesModal = function() {
@@ -11,9 +11,10 @@ showCATObjectivesModal = function() {
         <div style="font-size:10px;color:var(--text-dim);margin-top:2px">Liquidités non investies, prêtes à être placées</div></div>
       <div class="form-field"><label>Réserve de sécurité (€)</label><input id="obj-reserve" type="number" value="${obj.liquidityReserve}" placeholder="0">
         <div style="font-size:10px;color:var(--text-dim);margin-top:2px">Montant à ne jamais placer (BFR)</div></div>
-      <div class="form-field"><label>Besoin mensuel (€)</label><input id="obj-monthly" type="number" value="${obj.monthlyNeed}" placeholder="0">
-        <div style="font-size:10px;color:var(--text-dim);margin-top:2px">Décaissements récurrents</div></div>
-      <div class="form-field"><label>Plafond FGDR par banque (€)</label><input id="obj-maxbank" type="number" value="${obj.maxPerBank}" placeholder="100000"></div>
+      <div class="form-field"><label>Besoin mensuel (€)</label><input id="obj-monthly" type="number" value="${obj.monthlyNeed}" placeholder="0"></div>
+      <div class="form-field"><label>Plafond FGDR / banque (€)</label><input id="obj-maxbank" type="number" value="${obj.maxPerBank}" placeholder="100000"></div>
+      <div class="form-field"><label>Objectif rendement (%)</label><input id="obj-target-rate" type="number" step="0.01" value="${obj.targetRate || ''}" placeholder="3.00">
+        <div style="font-size:10px;color:var(--text-dim);margin-top:2px">Cible taux moyen (CAT + structurés)</div></div>
       <div class="form-field full"><label>Notes</label><textarea id="obj-notes" style="min-height:60px">${obj.notes || ''}</textarea></div>
     </div>
     <div class="modal-actions"><button class="btn" onclick="closeModal()">Annuler</button>
@@ -28,6 +29,7 @@ async function saveCATObjectivesV2() {
     liquidityReserve: parseFloat(document.getElementById('obj-reserve').value) || 0,
     availableCash: parseFloat(document.getElementById('obj-cash').value) || 0,
     maxPerBank: parseFloat(document.getElementById('obj-maxbank').value) || 100000,
+    targetRate: parseFloat(document.getElementById('obj-target-rate').value) || 0,
     notes: document.getElementById('obj-notes').value,
   };
   closeModal();
@@ -37,7 +39,7 @@ async function saveCATObjectivesV2() {
   renderCAT(document.getElementById('main-content'));
 }
 
-// Override renderCAT — visual header with CORRECT annual interest
+// ═══ Override renderCAT — Header + Liquidity → Structured Products ═══
 const _origRenderCATForHeader = renderCAT;
 renderCAT = function(container) {
   _origRenderCATForHeader(container);
@@ -54,33 +56,24 @@ renderCAT = function(container) {
   const nbBanks = Object.keys(stats.byBank).length;
   const fgdrCount = stats.fgdrAlerts.length;
 
-  // FIX: Calculate TRUE annual interest = sum(amount * rate / 100) per deposit
-  // NOT stats.totalInterest which is total over the entire duration
   const active = catManager.deposits.filter(d => d.status === 'active');
-  const annualInterest = active.reduce((sum, d) => {
-    const amount = parseFloat(d.amount) || 0;
-    const rate = parseFloat(d.rate) || 0;
-    return sum + Math.round(amount * (rate / 100) * 100) / 100;
-  }, 0);
-  const totalInterestAllTime = stats.totalInterest; // total over all durations
-
-  // Weighted rate
+  const annualInterest = active.reduce((sum, d) => sum + Math.round((parseFloat(d.amount) || 0) * ((parseFloat(d.rate) || 0) / 100) * 100) / 100, 0);
+  const totalInterestAllTime = stats.totalInterest;
   const weightedRate = stats.weightedRate || 0;
-
-  // Best market rate comparison
   const bestRate = catManager.rates?.rates?.reduce((max, r) => r.rate > max ? r.rate : max, 0) || 0;
-  const rateVsMarket = bestRate > 0 && weightedRate > 0
-    ? (weightedRate >= bestRate ? '✅ Au-dessus du marché' : '⚠️ -' + (bestRate - weightedRate).toFixed(2) + '% vs meilleur')
-    : '';
+  const rateVsMarket = bestRate > 0 && weightedRate > 0 ? (weightedRate >= bestRate ? '✅ Leader' : '⚠️ -' + (bestRate - weightedRate).toFixed(2) + '%') : '';
 
-  // Calculate early exit value (what you'd get if you exited ALL now)
   const nowStr = new Date().toISOString().split('T')[0];
   let earlyExitInterest = 0;
-  if (typeof calcInterestAtExit === 'function') {
-    earlyExitInterest = active.reduce((sum, d) => sum + calcInterestAtExit(d, nowStr), 0);
-  }
+  if (typeof calcInterestAtExit === 'function') earlyExitInterest = active.reduce((sum, d) => sum + calcInterestAtExit(d, nowStr), 0);
 
-  const dashHTML = `
+  // Structured products info
+  const portfolio = (app.state?.portfolio || []).filter(p => !p.archived);
+  const structuredNominal = portfolio.reduce((s, p) => s + (parseFloat(p.investedAmount) || 0), 0);
+  const proposals = Object.values(app.state?.proposals || {}).flat().filter(p => !['rejected','subscribed'].includes(p.status));
+  const avgStructCoupon = portfolio.length > 0 ? (portfolio.reduce((s, p) => s + (parseFloat(p.coupon?.rate) || 0), 0) / portfolio.length).toFixed(1) : 0;
+
+  let dashHTML = `
     <div style="background:linear-gradient(135deg,var(--bg-elevated),var(--bg-card));border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
         <div style="font-size:15px;font-weight:700;color:var(--text-bright)">💰 TRÉSORERIE</div>
@@ -95,9 +88,9 @@ renderCAT = function(container) {
           <div style="font-size:10px;color:var(--text-dim);margin-top:2px">${stats.totalDeposits} plac. · ${nbBanks} banque${nbBanks > 1 ? 's' : ''}</div>
         </div>
         <div style="background:var(--bg-card);padding:14px 16px;text-align:center">
-          <div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">Placé</div>
+          <div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">Placé CAT</div>
           <div style="font-size:22px;font-weight:800;color:var(--green);font-family:var(--mono)">${formatNumber(stats.totalInvested)}€</div>
-          <div style="font-size:10px;color:var(--text-dim);margin-top:2px">${weightedRate ? formatPct(weightedRate) + ' moy. TRAAB' : '—'}</div>
+          <div style="font-size:10px;color:var(--text-dim);margin-top:2px">${weightedRate ? formatPct(weightedRate) + ' moy.' : '—'}</div>
         </div>
         <div style="background:var(--bg-card);padding:14px 16px;text-align:center">
           <div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">Liquidités</div>
@@ -105,9 +98,9 @@ renderCAT = function(container) {
           <div style="font-size:10px;color:var(--text-dim);margin-top:2px">${placable > 0 ? formatNumber(placable) + '€ à placer' : cash > 0 ? 'Réserve couverte' : 'Cliquez 🎯'}</div>
         </div>
         <div style="background:var(--bg-card);padding:14px 16px;text-align:center">
-          <div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">Rendement / an</div>
+          <div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">Rendement CAT / an</div>
           <div style="font-size:22px;font-weight:800;color:var(--green);font-family:var(--mono)">+${formatNumber(annualInterest)}€</div>
-          <div style="font-size:10px;color:var(--text-dim);margin-top:2px">${weightedRate ? formatPct(weightedRate) + '/an' : '—'} ${rateVsMarket ? '· ' + rateVsMarket : ''}</div>
+          <div style="font-size:10px;color:var(--text-dim);margin-top:2px">${weightedRate ? formatPct(weightedRate) + '/an' : '—'} ${rateVsMarket}</div>
         </div>
         <div style="background:var(--bg-card);padding:14px 16px;text-align:center">
           <div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">Risque FGDR</div>
@@ -115,7 +108,6 @@ renderCAT = function(container) {
           <div style="font-size:10px;color:var(--text-dim);margin-top:2px">${fgdrCount > 0 ? fgdrCount + ' dépass.' : 'OK'}</div>
         </div>
       </div>
-      <!-- Second row: more details -->
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-top:1px">
         <div style="background:var(--bg-card);padding:10px 16px;text-align:center">
           <div style="font-size:9px;text-transform:uppercase;color:var(--text-dim)">Intérêts totaux (sur durée)</div>
@@ -131,20 +123,52 @@ renderCAT = function(container) {
         </div>
       </div>
       ${cash > 0 || stats.totalInvested > 0 ? `<div style="margin-top:12px;display:flex;gap:4px;height:8px;border-radius:4px;overflow:hidden">
-        <div style="flex:${stats.totalInvested};background:var(--green);border-radius:4px 0 0 4px" title="Placé: ${formatNumber(stats.totalInvested)}€"></div>
+        <div style="flex:${stats.totalInvested};background:var(--green);border-radius:4px 0 0 4px" title="CAT: ${formatNumber(stats.totalInvested)}€"></div>
+        ${structuredNominal > 0 ? `<div style="flex:${structuredNominal};background:var(--purple)" title="Structurés: ${formatNumber(structuredNominal)}€"></div>` : ''}
         ${reserve > 0 ? `<div style="flex:${reserve};background:var(--orange)" title="Réserve: ${formatNumber(reserve)}€"></div>` : ''}
         ${placable > 0 ? `<div style="flex:${placable};background:var(--cyan);border-radius:0 4px 4px 0" title="À placer: ${formatNumber(placable)}€"></div>` : ''}
       </div>
       <div style="display:flex;gap:12px;margin-top:6px;font-size:10px">
-        <span style="color:var(--green)">■ Placé</span>
+        <span style="color:var(--green)">■ CAT ${formatNumber(stats.totalInvested)}€</span>
+        ${structuredNominal > 0 ? '<span style="color:var(--purple)">■ Structurés ' + formatNumber(structuredNominal) + '€</span>' : ''}
         ${reserve > 0 ? '<span style="color:var(--orange)">■ Réserve</span>' : ''}
-        ${placable > 0 ? '<span style="color:var(--cyan)">■ À placer</span>' : ''}
+        ${placable > 0 ? '<span style="color:var(--cyan)">■ À placer ' + formatNumber(placable) + '€</span>' : ''}
       </div>` : ''}
     </div>`;
 
+  // ═══ LIQUIDITY BANNER → STRUCTURED PRODUCTS ONLY ═══
+  if (placable > 0) {
+    dashHTML += `
+    <div style="background:linear-gradient(135deg,rgba(139,92,246,0.08),rgba(59,130,246,0.04));border:1px solid rgba(139,92,246,0.25);border-left:4px solid var(--purple);border-radius:var(--radius);padding:16px;margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="display:flex;align-items:center;gap:12px">
+          <span style="font-size:28px">📊</span>
+          <div>
+            <div style="font-size:14px;font-weight:700;color:var(--text-bright)">
+              ${formatNumber(placable)}€ de liquidités disponibles pour des produits structurés
+            </div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:4px">
+              Coupon cible : 3-12% /an · Phoenix, Autocall, Capital protégé
+              ${portfolio.length > 0 ? ' · Portefeuille actuel : ' + portfolio.length + ' produit' + (portfolio.length > 1 ? 's' : '') + (avgStructCoupon > 0 ? ' à ~' + avgStructCoupon + '%' : '') : ''}
+              ${proposals.length > 0 ? ' · <strong style="color:var(--purple)">' + proposals.length + ' proposition' + (proposals.length > 1 ? 's' : '') + ' en attente</strong>' : ''}
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-shrink:0">
+          <button class="btn" onclick="switchMainView('proposals')" style="color:var(--purple);border-color:var(--purple)">
+            ${proposals.length > 0 ? '📋 ' + proposals.length + ' proposition' + (proposals.length > 1 ? 's' : '') : '📊 Explorer'}
+          </button>
+          <button class="btn primary ai-glow" onclick="switchMainView('proposals')" style="background:var(--purple)">
+            🚀 Produits Structurés →
+          </button>
+        </div>
+      </div>
+    </div>`;
+  }
+
   statsRow.outerHTML = dashHTML;
 
-  // ═══ INJECT OPTIMIZER ═══
+  // ═══ INJECT OPTIMIZER (CAT only — separate from liquidity banner) ═══
   if (typeof renderOptimizerDashboard === 'function') {
     const optimizerHTML = renderOptimizerDashboard();
     if (optimizerHTML) {
