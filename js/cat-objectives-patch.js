@@ -1,21 +1,5 @@
-// ═══ CAT Objectives Patch V4b — Fix navigation to Structured Products ═══
-
-// ═══ GLOBAL NAV HELPER (used by liquidity banners) ═══
-function switchMainView(target) {
-  if (target === 'proposals' || target === 'dashboard') {
-    app.goToDashboard();
-    // Also click the nav tab to update highlight
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-      if (btn.textContent.includes('Produits Structurés')) btn.click();
-    });
-  } else if (target === 'cat') {
-    app.setState({ view: 'cat' });
-    app.render();
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-      if (btn.textContent.includes('Comptes à Terme')) btn.click();
-    });
-  }
-}
+// ═══ CAT Objectives Patch V4c — Fix: don't override switchMainView, use 'dashboard' ═══
+// switchMainView() is defined in index.html — DO NOT redefine here
 
 const _origShowCATObjectivesModal = showCATObjectivesModal;
 showCATObjectivesModal = function() {
@@ -110,10 +94,10 @@ renderCAT = function(container) {
         <div style="background:var(--bg-card);padding:10px 16px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-dim)">Meilleur marché</div><div style="font-size:14px;font-weight:700;color:var(--accent);font-family:var(--mono)">${bestRate > 0 ? bestRate.toFixed(2) + '%' : '—'}</div></div>
       </div>
       ${cash > 0 || stats.totalInvested > 0 ? `<div style="margin-top:12px;display:flex;gap:4px;height:8px;border-radius:4px;overflow:hidden">
-        <div style="flex:${stats.totalInvested};background:var(--green);border-radius:4px 0 0 4px" title="CAT: ${formatNumber(stats.totalInvested)}€"></div>
-        ${structuredNominal > 0 ? '<div style="flex:' + structuredNominal + ';background:var(--purple)" title="Structurés: ' + formatNumber(structuredNominal) + '€"></div>' : ''}
-        ${reserve > 0 ? '<div style="flex:' + reserve + ';background:var(--orange)" title="Réserve: ' + formatNumber(reserve) + '€"></div>' : ''}
-        ${placable > 0 ? '<div style="flex:' + placable + ';background:var(--cyan);border-radius:0 4px 4px 0" title="À placer: ' + formatNumber(placable) + '€"></div>' : ''}
+        <div style="flex:${stats.totalInvested};background:var(--green);border-radius:4px 0 0 4px" title="CAT"></div>
+        ${structuredNominal > 0 ? '<div style="flex:' + structuredNominal + ';background:var(--purple)" title="Structurés"></div>' : ''}
+        ${reserve > 0 ? '<div style="flex:' + reserve + ';background:var(--orange)" title="Réserve"></div>' : ''}
+        ${placable > 0 ? '<div style="flex:' + placable + ';background:var(--cyan);border-radius:0 4px 4px 0" title="À placer"></div>' : ''}
       </div>
       <div style="display:flex;gap:12px;margin-top:6px;font-size:10px">
         <span style="color:var(--green)">■ CAT ${formatNumber(stats.totalInvested)}€</span>
@@ -123,7 +107,7 @@ renderCAT = function(container) {
       </div>` : ''}
     </div>`;
 
-  // Liquidity banner → Structured Products
+  // ═══ Liquidity banner → uses switchMainView('dashboard') which is the Produits Structurés tab ═══
   if (placable > 0) {
     dashHTML += `<div style="background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.25);border-left:4px solid var(--purple);border-radius:var(--radius);padding:14px 16px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
       <div>
@@ -134,7 +118,7 @@ renderCAT = function(container) {
           <span style="color:var(--text-dim)">Total : <strong style="color:var(--cyan)">${formatNumber(placable)}€</strong></span>
         </div>
       </div>
-      <button class="btn" onclick="switchMainView('proposals')" style="border-color:var(--purple);color:var(--purple);white-space:nowrap">📊 Produits Structurés →</button>
+      <button class="btn" onclick="switchMainView('dashboard')" style="border-color:var(--purple);color:var(--purple);white-space:nowrap">📊 Produits Structurés →</button>
     </div>`;
   }
 
