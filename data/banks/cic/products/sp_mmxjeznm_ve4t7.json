@@ -145,65 +145,63 @@
     "note": ""
   },
   "grading": {
-    "grade": "C",
-    "score": 52,
+    "grade": "B",
+    "score": 63,
     "pillars": {
       "adjustedReturn": {
-        "score": 57,
-        "couponEffective": 5.7,
-        "couponProbability": 0.95,
-        "reasoning": "Coupon 6% sur TEC 10 avec probabilité élevée (95%) car volatilité faible des taux (~12%). Rendement ajusté 5.70%. Malus capital non protégé (-15 pts) et maturité longue 10 ans (-10 pts)."
+        "score": 61,
+        "couponEffective": 6,
+        "couponProbability": 0.85,
+        "reasoning": "Coupon 6% avec probabilité 85% → rendement ajusté 5.10%. +15 capital garanti, +5 maturité ≤3a anticipée autocall. Score: 51 + 15 + 5 = 71, mais plafonné compte tenu du contexte taux"
       },
       "underlyingQuality": {
-        "score": 45,
-        "worstStock": "TEC 10",
-        "keyRisk": "Risque de hausse des taux BCE",
-        "reasoning": "Indice de taux français 10 ans, capital NON protégé (45 pts base). Risque principal: hausse BCE si inflation persistante. Duration élevée (sensibilité aux taux). Volatilité modérée ~12% vs 30% actions."
+        "score": 70,
+        "worstStock": "TEC10",
+        "keyRisk": "Hausse des taux au-dessus du seuil d'autocall",
+        "reasoning": "TEC 10 = indice référence OAT françaises 10 ans. Capital 100% protégé = base 65 pts. Volatilité faible (10-15%) favorable. Risque principal: remontée taux BCE si inflation persistante"
       },
       "portfolioFit": {
         "score": 43,
-        "reasoning": "Concentration CIC critique à 33% (-20 pts). Overlap détecté avec indice TEC 10 existant (-10 pts). Diversification positive taux vs actions (+10 pts). Balance négative."
+        "reasoning": "Concentration CIC 33% → -20 pts (>30% bientôt atteint). Overlap TEC 10 détecté → -10 pts. +10 diversification taux vs actions. Base 60 - 20 - 10 + 10 = 40"
       },
       "riskPremium": {
         "score": 70,
-        "spreadVsCat": 2.7,
-        "reasoning": "Rendement ajusté 5.70% vs CAT 3.00% = spread +2.70%. Prime attractive pour produit de taux, compensant le risque de capital et la duration."
+        "spreadVsCat": 2.1,
+        "reasoning": "Rendement ajusté 5.10% vs CAT 3.0% = spread +2.10%. Dans la tranche 1.5-2.5% mais proche de 2.5%, donc score favorable 70"
       }
     },
-    "verdict": "Produit de taux correct mais concentration émetteur problématique. Prime attractive mais risque de hausse des taux BCE et capital non protégé. Diversification positive mais overlap existant.",
+    "verdict": "Produit de taux solide avec capital protégé et autocall attractif. Coupon 6% probable à 85% mais attention à la concentration émetteur CIC et overlap TEC 10 existant.",
     "keyRisks": [
-      "Capital non protégé en cas de hausse forte des taux",
-      "Concentration CIC à 33% du portefeuille",
-      "Duration élevée (10 ans) = sensibilité aux taux",
-      "Risque BCE hawkish si inflation persistante"
+      "Concentration émetteur CIC approchant 30%",
+      "Overlap TEC 10 dans le portefeuille",
+      "Risque de non-autocall si hausse significative des taux"
     ],
     "negotiationPoints": [
-      "Protection partielle du capital à 90%",
-      "Réduction de la maturité à 6-7 ans",
-      "Clause d'autocall anticipé si TEC < 2%"
+      "Demander réduction concentration CIC",
+      "Négocier coupon à 6.5% pour compenser l'overlap"
     ],
     "scenarios": {
       "optimistic": {
         "return_pct": 6,
         "return_eur": 6000,
-        "probability": 0.3,
-        "duration_years": 1
+        "probability": 0.6,
+        "duration_years": 2
       },
       "base": {
-        "return_pct": 5.7,
-        "return_eur": 57000,
-        "probability": 0.5,
-        "duration_years": 10
+        "return_pct": 6,
+        "return_eur": 30000,
+        "probability": 0.25,
+        "duration_years": 5
       },
       "stress": {
-        "return_pct": -15,
-        "return_eur": -15000,
-        "probability": 0.15,
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.1,
         "duration_years": 10
       },
       "worst": {
-        "return_pct": -30,
-        "return_eur": -30000,
+        "return_pct": 0,
+        "return_eur": 0,
         "probability": 0.05,
         "duration_years": 10
       }
@@ -213,12 +211,16 @@
       "reasons": []
     },
     "metadata": {
-      "gradedAt": "2026-03-23T15:37:34.241Z",
-      "durationMs": 13581,
+      "gradedAt": "2026-03-23T15:52:59.066Z",
+      "durationMs": 14532,
       "aiUsed": true,
-      "version": "2.0",
+      "version": "2.1",
       "marketDataAvailable": false,
-      "catBenchmark": 3
+      "catBenchmark": 3,
+      "couponAnnualized": 6,
+      "couponRaw": 6,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel"
     }
   }
 }
