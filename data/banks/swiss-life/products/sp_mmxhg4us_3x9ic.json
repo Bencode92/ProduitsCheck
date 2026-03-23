@@ -143,69 +143,64 @@
   "entityName": "Caméleons",
   "grading": {
     "grade": "D",
-    "score": 23,
+    "score": 32,
     "pillars": {
       "adjustedReturn": {
-        "score": 45,
-        "couponEffective": 6.65,
+        "score": 52,
+        "couponEffective": 7,
         "couponProbability": 0.95,
-        "reasoning": "Rendement ajusté 6.65% (7%×95%) correct mais pénalisé par absence protection (-15), worst-of 5 actifs (-5), et maturité inconnue problématique"
+        "reasoning": "Coupon 7% avec probabilité élevée (95%) donne rendement ajusté 6.65%. Score base 67 pénalisé par non protection (-15), worst-of >2 sous-jacents (-5), et maturité longue 10 ans (-10)."
       },
       "underlyingQuality": {
-        "score": 25,
+        "score": 22,
         "worstStock": "BMPS",
-        "keyRisk": "Banca Monte dei Paschi (maillon faible): volatilité extrême 36.43%, max DD 25.51%, YTD -22.74%",
-        "reasoning": "Panier catastrophique: BMPS en détresse bancaire italienne, 3 stocks italiens sur 5, corrélation élevée secteur/géo, Novo Nordisk manquant, quality moyenne 48/100"
+        "keyRisk": "Panier toxique dominé par banques italiennes fragiles",
+        "reasoning": "Worst-of catastrophique: BMPS (banque zombie italienne, vol 36%, DD 25%, YTD -23%), UCG (finance instable), secteur bancaire évité en macro. Seul Novo Nordisk manquant pourrait sauver. Corrélation élevée Italie."
       },
       "portfolioFit": {
         "score": 5,
-        "issuerOverlap": true,
-        "diversificationBenefit": false,
-        "reasoning": "Concentration Swiss Life critique à 67%, overlap total des 5 sous-jacents, aucune diversification, surpondération autocall à 80%"
+        "reasoning": "Désastre: concentration Swiss Life 67%→87% (+20%, pénalité -20), overlap TOTAL avec produits existants (-20), secteurs déjà présents (-10). Aucune diversification."
       },
       "riskPremium": {
-        "score": 30,
-        "spreadVsCat": 3.65,
-        "catBenchmark": 3,
-        "reasoning": "Prime 3.65% vs CAT 3% acceptable mais insuffisante pour compenser les risques italiens et la concentration bancaire"
+        "score": 90,
+        "reasoning": "Prime excellente: rendement ajusté 6.65% vs CAT 3% = spread +3.65%, largement au-dessus du seuil 4% pour score maximal."
       }
     },
-    "verdict": "Produit à éviter absolument. Concentration Swiss Life à 67% inacceptable, panier toxique dominé par l'Italie avec BMPS en crise (vol 36%, -23% YTD). Probabilité 95% illusoire vu la qualité des sous-jacents.",
+    "verdict": "ÉVITER ABSOLUMENT. Prime attractive ne compense pas la toxicité du panier (banques italiennes fragiles) et sur-concentration Swiss Life critique (87%). Produit spéculatif déguisé.",
     "keyRisks": [
-      "Concentration émetteur Swiss Life critique 67%",
-      "BMPS en détresse: vol 36.43%, max DD 25.51%",
-      "Surexposition Italie (3/5 stocks) en difficulté macro",
-      "Corrélation élevée secteur bancaire/services publics"
+      "Concentration émetteur critique 87%",
+      "Banques italiennes en détresse (BMPS zombie)",
+      "Secteur finance évité en contexte macro",
+      "Aucune diversification vs portefeuille existant"
     ],
     "negotiationPoints": [
-      "Réduction drastique exposition Swiss Life",
-      "Remplacement BMPS par actif de qualité",
-      "Diversification géographique hors Italie",
-      "Prime insuffisante pour niveau de risque"
+      "Exiger réduction exposition Swiss Life",
+      "Demander panier moins toxique (exit BMPS/UCG)",
+      "Négocier barrière plus basse (50%)"
     ],
     "scenarios": {
       "optimistic": {
         "return_pct": 7,
         "return_eur": 2100,
-        "probability": 0.1,
+        "probability": 0.2,
         "duration_years": 1
       },
       "base": {
         "return_pct": 3.5,
-        "return_eur": 3150,
-        "probability": 0.25,
-        "duration_years": 3
+        "return_eur": 10500,
+        "probability": 0.4,
+        "duration_years": 5
       },
       "stress": {
-        "return_pct": -15,
-        "return_eur": -4500,
-        "probability": 0.4,
+        "return_pct": -30,
+        "return_eur": -9000,
+        "probability": 0.3,
         "duration_years": 10
       },
       "worst": {
-        "return_pct": -25,
-        "return_eur": -7500,
-        "probability": 0.25,
+        "return_pct": -60,
+        "return_eur": -18000,
+        "probability": 0.1,
         "duration_years": 10
       }
     },
@@ -214,12 +209,16 @@
       "reasons": []
     },
     "metadata": {
-      "gradedAt": "2026-03-23T15:25:44.349Z",
-      "durationMs": 15589,
+      "gradedAt": "2026-03-23T15:49:26.272Z",
+      "durationMs": 17148,
       "aiUsed": true,
-      "version": "2.0",
+      "version": "2.1",
       "marketDataAvailable": true,
-      "catBenchmark": 3
+      "catBenchmark": 3,
+      "couponAnnualized": 7,
+      "couponRaw": 7,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel"
     }
   }
 }
