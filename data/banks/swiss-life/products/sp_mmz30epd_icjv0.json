@@ -242,63 +242,70 @@
   },
   "grading": {
     "grade": "B",
-    "score": 72,
+    "score": 63,
     "pillars": {
       "adjustedReturn": {
-        "score": 85,
-        "couponEffective": 5.6,
-        "couponProbability": 0.8,
-        "reasoning": "Coupon 7% semestriel avec mémoire et autocall 100%. Distance barrière -60% offre bonne protection malgré volatilité 36.9%. Probabilité versement élevée grâce à seuil d'activation au pair."
+        "score": 67,
+        "couponEffective": 6.65,
+        "couponProbability": 0.95,
+        "reasoning": "Rendement ajusté de 6.65% (7% × 95%) solide pour un sous-jacent unique de qualité. Pénalisé par l'absence de protection du capital (-15 pts) et maturité longue de 6 ans (-5 pts). Compensé par l'effet mémoire (+5 pts)."
       },
       "underlyingQuality": {
-        "score": 78,
+        "score": 84,
         "worstStock": "ASML",
-        "keyRisk": "Volatilité élevée 36.9% et drawdown -45% malgré fondamentaux excellents",
-        "reasoning": "ASML présente des fondamentaux exceptionnels (Buffett 100/100, ROE 50%, marge 29%) mais volatilité élevée 36.9% et max drawdown -45%. Secteur tech en difficulté (-0.67% YTD) mais position dominante ASML en lithographie."
+        "keyRisk": "Volatilité élevée 36.9% et drawdown maximal de 45.12%",
+        "reasoning": "ASML présente un excellent score Buffett (100/100) avec des fondamentaux exceptionnels (ROE 50.46%, marge 29.42%). Quality score de 67/100 reste correct. Risque modéré avec beta 1.07 et performance remarquable (+67% sur 1 an)."
       },
       "portfolioFit": {
-        "score": 60,
+        "score": 25,
         "issuerOverlap": true,
         "diversificationBenefit": true,
-        "reasoning": "Concentration Swiss Life critique à 67% du portefeuille (-20 pts). Autocall saturé à 80% (-12 pts). Apporte diversification géographique (Pays-Bas +4.5% vs Zone Euro -1.9%) et nouveau sous-jacent (+15 pts)."
+        "reasoning": "Concentration Swiss Life critique à 67% du portefeuille (-20 pts). Surpondération autocall à 80% (-12 pts). Compense partiellement en ajoutant l'exposition technologique européenne absente du portefeuille (+15 pts)."
       },
       "riskPremium": {
-        "score": 75,
-        "spreadVsCat": 2.6,
+        "score": 73,
+        "spreadVsCat": 3.65,
         "catBenchmark": 3,
-        "reasoning": "Coupon effectif 5.6% offre prime attractive de 2.6% vs CAT 3%. Compense partiellement la forte volatilité et risque de perte en capital."
+        "reasoning": "Prime de risque solide de 3.65% vs CAT 3%, reflétant correctement le profil risque/rendement d'ASML. Spread de 365 bps justifié par la volatilité du sous-jacent technologique."
       }
     },
-    "verdict": "Produit attractif porté par la qualité exceptionnelle d'ASML (Buffett 100/100, leader lithographie) et un coupon généreux de 7% semestriel à mémoire. La forte volatilité (36.9%) et le drawdown historique (-45%) sont compensés par la barrière profonde à -60% et les fondamentaux robustes (ROE 50%, marge 29%). Principal frein : sur-concentration Swiss Life à 67% du portefeuille nécessitant prudence sur le sizing.",
+    "verdict": "Produit intéressant sur ASML, leader européen des semi-conducteurs, avec un rendement ajusté attractif de 6.65% (probabilité de coupon 95%). La qualité exceptionnelle du sous-jacent compense partiellement les risques de volatilité élevée. Point bloquant : concentration Swiss Life déjà excessive à 67% du portefeuille, créant un risque de contrepartie critique.",
     "keyRisks": [
-      "Sur-concentration émetteur Swiss Life (67% portefeuille)",
-      "Volatilité élevée ASML 36.9% et drawdown -45%",
-      "Secteur technologique sous pression (-0.67% YTD)"
+      "Concentration émetteur Swiss Life critique (67% du portefeuille)",
+      "Volatilité élevée d'ASML (36.9%) avec drawdown maximal de 45.12%",
+      "Absence de protection du capital sur 6 ans d'exposition",
+      "Secteur technologique en trend baissier (-0.67% YTD)"
     ],
     "negotiationPoints": [
-      "Barrière plus profonde à -65% vu la volatilité historique",
-      "Réduction exposition Swiss Life pour équilibrer le portefeuille"
+      "Exiger une réduction de concentration Swiss Life avant souscription",
+      "Négocier un coupon bonifié à 7.5% vu la qualité d'ASML",
+      "Demander une barrière plus profonde (-65%) sur ce sous-jacent premium",
+      "Considérer une version plus courte (4 ans) pour réduire le risque temporel"
     ],
     "scenarios": {
       "optimistic": {
-        "return_pct": 42,
-        "return_eur": 12558,
-        "probability": 0.25
+        "return_pct": 14,
+        "return_eur": 4186,
+        "probability": 0.3,
+        "duration_years": 1
       },
       "base": {
-        "return_pct": 28,
-        "return_eur": 8372,
-        "probability": 0.35
+        "return_pct": 6.65,
+        "return_eur": 11940,
+        "probability": 0.4,
+        "duration_years": 3.5
       },
       "stress": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.25
+        "probability": 0.2,
+        "duration_years": 6
       },
       "worst": {
-        "return_pct": -45,
-        "return_eur": -13455,
-        "probability": 0.15
+        "return_pct": -35,
+        "return_eur": -10465,
+        "probability": 0.1,
+        "duration_years": 6
       }
     },
     "killCriteria": {
@@ -306,8 +313,8 @@
       "reasons": []
     },
     "metadata": {
-      "gradedAt": "2026-03-23T14:15:20.159Z",
-      "durationMs": 17222,
+      "gradedAt": "2026-03-23T15:09:29.379Z",
+      "durationMs": 19336,
       "aiUsed": true,
       "version": "2.0",
       "marketDataAvailable": true,
