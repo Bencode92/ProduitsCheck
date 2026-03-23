@@ -239,5 +239,45 @@
     ],
     "_timestamp": "2026-03-23T12:17:52.138Z",
     "_marketDataDate": "2026-03-22T17:18:19.741Z"
+  },
+  "grading": {
+    "grade": "F",
+    "score": 0,
+    "killCriteria": {
+      "triggered": true,
+      "reasons": [
+        "Émetteur Swiss Life déjà à 67% du book (max: 40%)"
+      ]
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": null,
+        "reasoning": "Kill criteria déclenché"
+      },
+      "underlyingQuality": {
+        "score": null,
+        "reasoning": "Kill criteria déclenché"
+      },
+      "portfolioFit": {
+        "score": null,
+        "reasoning": "Kill criteria déclenché"
+      },
+      "riskPremium": {
+        "score": null,
+        "reasoning": "Kill criteria déclenché"
+      }
+    },
+    "verdict": "Rejet automatique : Émetteur Swiss Life déjà à 67% du book (max: 40%)",
+    "keyRisks": [
+      "Émetteur Swiss Life déjà à 67% du book (max: 40%)"
+    ],
+    "negotiationPoints": [],
+    "scenarios": null,
+    "metadata": {
+      "gradedAt": "2026-03-23T13:19:49.597Z",
+      "durationMs": 424,
+      "aiUsed": false,
+      "version": "1.0"
+    }
   }
 }
