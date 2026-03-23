@@ -869,38 +869,90 @@
       "note": ""
     },
     "grading": {
-      "grade": "F",
-      "score": 0,
+      "grade": "B",
+      "score": 67,
       "killCriteria": {
-        "triggered": true,
-        "reasons": [
-          "Barrière 60% sans protection"
-        ]
+        "triggered": false,
+        "reasons": []
       },
       "pillars": {
         "adjustedReturn": {
-          "score": null
+          "score": 55,
+          "base": 65,
+          "delta": -10,
+          "reasoning": "Rendement: base 65 → -10 = 55 (Barrière 60% avec volatilité 25.94% et performance -34% sur 1 an augmente significativement le risque de knock-in) | Coupon 7.5% (1.875×4)"
         },
         "underlyingQuality": {
-          "score": null
+          "score": 75,
+          "base": 87,
+          "delta": -12,
+          "reasoning": "Qualité: base 87 → -12 = 75 (BNP dans secteur financier évité en régime macro neutral, performance catastrophique -34% 1Y et -22% YTD malgré des fondamentaux corrects) | Worst: Action BNP Paribas (FR0000131104) B:100"
         },
         "portfolioFit": {
-          "score": null
+          "score": 52,
+          "base": 60,
+          "delta": -8,
+          "reasoning": "Fit: base 60 → -8 = 52 (Mono sous-jacent financier français inadéquat en contexte macro défavorable aux financières, absence de diversification critique)"
         },
         "riskPremium": {
-          "score": null
+          "score": 85,
+          "base": 90,
+          "delta": -5,
+          "reasoning": "Prime: base 90 → -5 = 85 (Prime attrayante mais trompeuse car coupon conditionnel sur sous-jacent en forte détresse, probabilité de versement surévaluée) | 7.5% vs CAT 3%"
         }
       },
-      "verdict": "Rejet: Barrière 60% sans protection",
+      "verdict": "Produit à éviter malgré un coupon attractif de 7.5%. BNP Paribas affiche une performance désastreuse (-34% sur 1 an) dans un contexte macro défavorable aux financières. La barrière à 60% avec une volatilité de 26% présente un risque élevé d'activation, d'autant plus que l'action évolue déjà 40% sous ses plus hauts. La concentration sur un seul sous-jacent français du secteur financier amplifie dangereusement l'exposition.",
       "keyRisks": [
-        "Barrière 60% sans protection"
+        "Knock-in très probable : action déjà -34% avec barrière 60% et volatilité 26%",
+        "Secteur financier défavorisé par contexte macro et momentum négatif persistant"
       ],
-      "scenarios": null,
+      "negotiationPoints": [],
+      "scenarios": {
+        "optimistic": {
+          "return_pct": 7.5,
+          "return_eur": 2250,
+          "probability": 0.15,
+          "duration_years": 1
+        },
+        "base": {
+          "return_pct": 3.75,
+          "return_eur": 2250,
+          "probability": 0.25,
+          "duration_years": 2
+        },
+        "stress": {
+          "return_pct": -15,
+          "return_eur": -4500,
+          "probability": 0.35,
+          "duration_years": 2
+        },
+        "worst": {
+          "return_pct": -40,
+          "return_eur": -12000,
+          "probability": 0.25,
+          "duration_years": 2
+        }
+      },
       "metadata": {
-        "gradedAt": "2026-03-23T16:48:48.503Z",
-        "durationMs": 91,
-        "aiUsed": false,
-        "version": "3.1"
+        "gradedAt": "2026-03-23T16:57:15.748Z",
+        "durationMs": 12973,
+        "aiUsed": true,
+        "version": "3.2",
+        "marketDataAvailable": true,
+        "catBenchmark": 3,
+        "couponAnnualized": 7.5,
+        "couponRaw": 1.875,
+        "couponMultiplier": 4,
+        "couponFrequency": "trimestriel",
+        "isInPortfolio": false,
+        "baseScore": 76,
+        "baseGrade": "A",
+        "adjustments": {
+          "p1": -10,
+          "p2": -12,
+          "p3": -8,
+          "p4": -5
+        }
       }
     }
   },
