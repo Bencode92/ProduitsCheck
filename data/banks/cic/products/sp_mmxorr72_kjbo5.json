@@ -184,83 +184,90 @@
     }
   },
   "grading": {
-    "grade": "C",
-    "score": 52,
-    "pillars": {
-      "adjustedReturn": {
-        "score": 58,
-        "couponEffective": 5.84,
-        "couponProbability": 0.95,
-        "reasoning": "Rendement ajusté de 5.84% (6.15% × 95%) correct pour produit sans autocall avec coupon mémoire. Pénalité de -15 pts pour capital non protégé et -5 pts pour worst-of. Bonus +5 pts pour mémoire."
-      },
-      "underlyingQuality": {
-        "score": 50,
-        "worstStock": "Crédit Agricole",
-        "keyRisk": "Exposition bancaire française en période difficile",
-        "reasoning": "LVMH (Buffett 81, Quality 65) vs Crédit Agricole (Buffett 40 par défaut, Quality 79). Worst-of pénalisé par corrélation faible entre luxe et banque (-15 pts). Secteur financier évité en macro actuelle."
-      },
-      "portfolioFit": {
-        "score": 25,
-        "issuerOverlap": true,
-        "diversificationBenefit": false,
-        "reasoning": "Concentration CIC déjà à 33%, ce produit portera à 43% (-20 pts). Type capital protégé différent du portefeuille autocall existant (+15 pts). Pas de nouveau secteur car finance déjà présent."
-      },
-      "riskPremium": {
-        "score": 71,
-        "spreadVsCat": 2.84,
-        "catBenchmark": 3,
-        "reasoning": "Rendement ajusté 5.84% vs CAT 3% = prime de 2.84%. Prime solide mais limitée par exposition bancaire française et absence protection capital."
-      }
-    },
-    "verdict": "Produit défensif avec coupon mémoire intéressant mais bridé par surconcentration émetteur CIC (43%) et exposition bancaire française défavorable. Le rendement ajusté de 5.84% offre une prime correcte de 2.84% vs CAT, mais le risque worst-of est amplifié par la faible corrélation luxe/banque. Crédit Agricole constitue le maillon faible avec 40% de distance vs plus hauts.",
-    "keyRisks": [
-      "Surconcentration émetteur CIC (43% du portefeuille)",
-      "Exposition secteur bancaire français en difficulté",
-      "Capital non protégé avec worst-of LVMH/Crédit Agricole",
-      "Corrélation faible amplifiant le risque worst-of"
-    ],
-    "negotiationPoints": [
-      "Réduire exposition CIC ou négocier structure différente",
-      "Demander protection partielle du capital",
-      "Considérer version autocall pour réduire risque temporel"
-    ],
-    "scenarios": {
-      "optimistic": {
-        "return_pct": 6.15,
-        "return_eur": 1839,
-        "probability": 0.3,
-        "duration_years": 1
-      },
-      "base": {
-        "return_pct": 5.84,
-        "return_eur": 5245,
-        "probability": 0.5,
-        "duration_years": 3
-      },
-      "stress": {
-        "return_pct": 1.95,
-        "return_eur": 1748,
-        "probability": 0.15,
-        "duration_years": 3
-      },
-      "worst": {
-        "return_pct": -13,
-        "return_eur": -11674,
-        "probability": 0.05,
-        "duration_years": 3
-      }
-    },
+    "grade": "B",
+    "score": 71,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 77,
+        "base": 67,
+        "delta": 10,
+        "reasoning": "Rendement: base 67 → +10 = 77 (Coupon de 6.15% garanti très attractif dans l'environnement de taux actuel, sans barrière désactivante) | Coupon 6.15%, protégé"
+      },
+      "underlyingQuality": {
+        "score": 54,
+        "base": 66,
+        "delta": -12,
+        "reasoning": "Qualité: base 66 → -12 = 54 (Crédit Agricole (-8.95% YTD) dans un secteur financier macro-défavorisé, LVMH (-29% YTD) en forte baisse cyclique) | Worst: Crédit Agricole S.A. B:50"
+      },
+      "portfolioFit": {
+        "score": 72,
+        "base": 80,
+        "delta": -8,
+        "reasoning": "Fit: base 80 → -8 = 72 (Exposition aux secteurs évités (financials, consumer-discretionary) va à l'encontre du momentum macro favorable)"
+      },
+      "riskPremium": {
+        "score": 80,
+        "base": 75,
+        "delta": 5,
+        "reasoning": "Prime: base 75 → +5 = 80 (Prime de 315bp vs CAT justifiée par la garantie du capital et du coupon fixe sans conditions) | 6.15% vs CAT 3%"
+      }
+    },
+    "verdict": "Produit défensif offrant 6.15% garanti avec capital protégé jusqu'en 2029. Malgré l'exposition à deux secteurs macro-défavorisés, la structure sans barrière élimine le risque de perte en capital. LVMH (-29% YTD) et Crédit Agricole (-8.95% YTD) sont actuellement sous pression mais le coupon fixe compense la faiblesse conjoncturelle. La prime de 315bp vs obligations souveraines reste justifiée par la sécurité structurelle du produit.",
+    "keyRisks": [
+      "Exposition concentrated sur deux secteurs macro-défavorisés (finance et luxe cyclique)",
+      "Risque de crédit émetteur sur 5 ans avec dégradation potentielle de notation"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 6.15,
+        "return_eur": 30750,
+        "probability": 0.95,
+        "duration_years": 5
+      },
+      "base": {
+        "return_pct": 6.15,
+        "return_eur": 30750,
+        "probability": 0.85,
+        "duration_years": 5
+      },
+      "stress": {
+        "return_pct": 6.15,
+        "return_eur": 30750,
+        "probability": 0.75,
+        "duration_years": 5
+      },
+      "worst": {
+        "return_pct": -15,
+        "return_eur": -15000,
+        "probability": 0.05,
+        "duration_years": 5
+      }
+    },
     "metadata": {
-      "gradedAt": "2026-03-23T15:12:28.035Z",
-      "durationMs": 15404,
+      "gradedAt": "2026-03-23T16:58:40.184Z",
+      "durationMs": 11646,
       "aiUsed": true,
-      "version": "2.0",
+      "version": "3.2",
       "marketDataAvailable": true,
-      "catBenchmark": 3
+      "catBenchmark": 3,
+      "couponAnnualized": 6.15,
+      "couponRaw": 6.15,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "baseScore": 71,
+      "baseGrade": "B",
+      "adjustments": {
+        "p1": 10,
+        "p2": -12,
+        "p3": -8,
+        "p4": 5
+      }
     }
   }
 }
