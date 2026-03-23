@@ -142,39 +142,84 @@
   "entity": "cameleons",
   "entityName": "Caméleons",
   "grading": {
-    "grade": "F",
-    "score": 0,
-    "killCriteria": {
-      "triggered": true,
-      "reasons": [
-        "5 sous-jacents déjà en portefeuille"
-      ]
-    },
+    "grade": "D",
+    "score": 23,
     "pillars": {
       "adjustedReturn": {
-        "score": null
+        "score": 45,
+        "couponEffective": 6.65,
+        "couponProbability": 0.95,
+        "reasoning": "Rendement ajusté 6.65% (7%×95%) correct mais pénalisé par absence protection (-15), worst-of 5 actifs (-5), et maturité inconnue problématique"
       },
       "underlyingQuality": {
-        "score": null
+        "score": 25,
+        "worstStock": "BMPS",
+        "keyRisk": "Banca Monte dei Paschi (maillon faible): volatilité extrême 36.43%, max DD 25.51%, YTD -22.74%",
+        "reasoning": "Panier catastrophique: BMPS en détresse bancaire italienne, 3 stocks italiens sur 5, corrélation élevée secteur/géo, Novo Nordisk manquant, quality moyenne 48/100"
       },
       "portfolioFit": {
-        "score": null
+        "score": 5,
+        "issuerOverlap": true,
+        "diversificationBenefit": false,
+        "reasoning": "Concentration Swiss Life critique à 67%, overlap total des 5 sous-jacents, aucune diversification, surpondération autocall à 80%"
       },
       "riskPremium": {
-        "score": null
+        "score": 30,
+        "spreadVsCat": 3.65,
+        "catBenchmark": 3,
+        "reasoning": "Prime 3.65% vs CAT 3% acceptable mais insuffisante pour compenser les risques italiens et la concentration bancaire"
       }
     },
-    "verdict": "Rejet automatique: 5 sous-jacents déjà en portefeuille",
+    "verdict": "Produit à éviter absolument. Concentration Swiss Life à 67% inacceptable, panier toxique dominé par l'Italie avec BMPS en crise (vol 36%, -23% YTD). Probabilité 95% illusoire vu la qualité des sous-jacents.",
     "keyRisks": [
-      "5 sous-jacents déjà en portefeuille"
+      "Concentration émetteur Swiss Life critique 67%",
+      "BMPS en détresse: vol 36.43%, max DD 25.51%",
+      "Surexposition Italie (3/5 stocks) en difficulté macro",
+      "Corrélation élevée secteur bancaire/services publics"
     ],
-    "scenarios": null,
+    "negotiationPoints": [
+      "Réduction drastique exposition Swiss Life",
+      "Remplacement BMPS par actif de qualité",
+      "Diversification géographique hors Italie",
+      "Prime insuffisante pour niveau de risque"
+    ],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 7,
+        "return_eur": 2100,
+        "probability": 0.1,
+        "duration_years": 1
+      },
+      "base": {
+        "return_pct": 3.5,
+        "return_eur": 3150,
+        "probability": 0.25,
+        "duration_years": 3
+      },
+      "stress": {
+        "return_pct": -15,
+        "return_eur": -4500,
+        "probability": 0.4,
+        "duration_years": 10
+      },
+      "worst": {
+        "return_pct": -25,
+        "return_eur": -7500,
+        "probability": 0.25,
+        "duration_years": 10
+      }
+    },
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
     "metadata": {
-      "gradedAt": "2026-03-23T15:14:36.538Z",
-      "durationMs": 263,
-      "aiUsed": false,
+      "gradedAt": "2026-03-23T15:25:44.349Z",
+      "durationMs": 15589,
+      "aiUsed": true,
       "version": "2.0",
-      "marketDataAvailable": true
+      "marketDataAvailable": true,
+      "catBenchmark": 3
     }
   }
 }
