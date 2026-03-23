@@ -152,5 +152,85 @@
     "level": 102.17,
     "date": "2026-03-18",
     "note": ""
+  },
+  "grading": {
+    "grade": "C",
+    "score": 45,
+    "pillars": {
+      "adjustedReturn": {
+        "score": 70,
+        "couponEffective": 5.42,
+        "couponProbability": 0.95,
+        "reasoning": "Rendement ajusté solide (5.42% = 5.7% × 95%) grâce à une barrière inconditionnelle favorable. Score ajusté pour capital non protégé (-15 pts) mais bénéficie du bonus maturité longue."
+      },
+      "underlyingQuality": {
+        "score": 35,
+        "worstStock": "ENI",
+        "keyRisk": "Sous-jacent unique de faible qualité dans secteur cyclique",
+        "reasoning": "ENI présente des fondamentaux dégradés (Buffett 44/100, Quality 14/100) avec FCF négatif (-13.54%) et PE élevé (29.4). Exposition unique au secteur énergie italien volatil."
+      },
+      "portfolioFit": {
+        "score": 25,
+        "issuerOverlap": true,
+        "diversificationBenefit": false,
+        "reasoning": "Forte concentration Swiss Life (67%→80% avec ce produit). Overlap direct avec ENI existant. Autocall supplémentaire (80% du portefeuille). Seul avantage : exposition énergie alignée avec macro."
+      },
+      "riskPremium": {
+        "score": 50,
+        "spreadVsCat": 2.42,
+        "catBenchmark": 3,
+        "reasoning": "Prime correcte de 242 bps vs CAT (5.42% vs 3%), mais insuffisante au regard des risques de concentration et qualité du sous-jacent."
+      }
+    },
+    "verdict": "Produit présentant un rendement ajusté attractif (5.42%) mais pénalisé par la faible qualité d'ENI et une forte concentration d'émetteur. La probabilité de coupon élevée (95%) compense partiellement les risques, mais l'exposition unique à l'énergie italienne reste préoccupante. À éviter sans diversification préalable du portefeuille.",
+    "keyRisks": [
+      "Concentration Swiss Life excessive (80%)",
+      "Qualité ENI dégradée (FCF négatif, PE élevé)",
+      "Exposition unique secteur énergie italien",
+      "Capital non protégé avec maturité longue"
+    ],
+    "negotiationPoints": [
+      "Demander barrière de capital protection",
+      "Négocier coupon plus élevé (6.5%+) vu les risques",
+      "Réduire exposition Swiss Life avant souscription"
+    ],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 5.7,
+        "return_eur": 1710,
+        "probability": 0.3,
+        "duration_years": 1
+      },
+      "base": {
+        "return_pct": 4.8,
+        "return_eur": 8640,
+        "probability": 0.4,
+        "duration_years": 6
+      },
+      "stress": {
+        "return_pct": -5,
+        "return_eur": -9000,
+        "probability": 0.2,
+        "duration_years": 12
+      },
+      "worst": {
+        "return_pct": -35,
+        "return_eur": -63000,
+        "probability": 0.1,
+        "duration_years": 12
+      }
+    },
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "metadata": {
+      "gradedAt": "2026-03-23T15:14:18.324Z",
+      "durationMs": 16598,
+      "aiUsed": true,
+      "version": "2.0",
+      "marketDataAvailable": true,
+      "catBenchmark": 3
+    }
   }
 }
