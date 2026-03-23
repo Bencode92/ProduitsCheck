@@ -144,5 +144,41 @@
     "level": 93.27,
     "date": "2026-03-18",
     "note": ""
+  },
+  "grading": {
+    "grade": "F",
+    "score": 0,
+    "killCriteria": {
+      "triggered": true,
+      "reasons": [
+        "Prime ajustée vs CAT négative: rendement 1.8% (coupon 1.875% × prob 95%) vs CAT 3%"
+      ]
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": null
+      },
+      "underlyingQuality": {
+        "score": null
+      },
+      "portfolioFit": {
+        "score": null
+      },
+      "riskPremium": {
+        "score": null
+      }
+    },
+    "verdict": "Rejet automatique: Prime ajustée vs CAT négative: rendement 1.8% (coupon 1.875% × prob 95%) vs CAT 3%",
+    "keyRisks": [
+      "Prime ajustée vs CAT négative: rendement 1.8% (coupon 1.875% × prob 95%) vs CAT 3%"
+    ],
+    "scenarios": null,
+    "metadata": {
+      "gradedAt": "2026-03-23T15:26:22.402Z",
+      "durationMs": 709,
+      "aiUsed": false,
+      "version": "2.0",
+      "marketDataAvailable": true
+    }
   }
 }
