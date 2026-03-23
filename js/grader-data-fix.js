@@ -1,10 +1,15 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Grader Data Fix v3.0
+// STRUCTBOARD — Grader Data Fix v4.0 — POST-AUDIT FIXES
 // ═══════════════════════════════════════════════════════════════
-// FIX 1: JSON.parse safety for large files
-// FIX 2: Accent-insensitive stock matching + extended aliases
-// FIX 3: Prompt: issuer ≠ underlying + duration-based scenarios
-// Load AFTER proposal-grader.js, BEFORE grader-ui-patch.js
+// Implements all 9 fixes from the OpenAI expert audit:
+// F1: Quantitative coupon probability model
+// F2: Worst-of correlation penalty (sector proxy)
+// F4: Prime vs CAT on adjusted return (not facial)
+// F7: Kill criteria barrier sign bug
+// F8: Maturity adjustment in P1
+// F9: Buffett score fallback 40 (not 100)
+// + Recalibrated grade thresholds
+// + JSON.parse safety, accent matching, issuer≠underlying
 // ═══════════════════════════════════════════════════════════════
 
 (function() {
@@ -14,7 +19,7 @@
         return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     }
 
-    // ─── FIX 1: JSON.parse safety ────────────────────────────────
+    // ─── JSON.parse safety ───────────────────────────────────────
     function _safeParse(data) {
         if (!data) return null;
         if (typeof data === 'string') {
@@ -47,21 +52,18 @@
         };
     }
 
-    // ─── FIX 2: Extended aliases + accent matching ───────────────
+    // ─── Extended aliases + accent matching ──────────────────────
 
     var EXTRA_ALIASES = {
         'CREDIT AGRICOLE': 'ACA', 'CRÉDIT AGRICOLE': 'ACA', 'CA': 'ACA',
         'SOCIETE GENERALE': 'GLE', 'SOCIÉTÉ GÉNÉRALE': 'GLE', 'SOCGEN': 'GLE', 'SG': 'GLE',
         'BNP PARIBAS': 'BNP', 'BNPP': 'BNP',
-        'SAINT GOBAIN': 'SGO', 'SAINT-GOBAIN': 'SGO',
-        'SCHNEIDER ELECTRIC': 'SU',
+        'SAINT GOBAIN': 'SGO', 'SAINT-GOBAIN': 'SGO', 'SCHNEIDER ELECTRIC': 'SU',
         'AIR LIQUIDE': 'AI', 'CAPGEMINI': 'CAP',
-        'HERMES': 'RMS', 'HERMÈS': 'RMS',
-        'KERING': 'KER', 'ORANGE': 'ORA', 'VEOLIA': 'VIE',
+        'HERMES': 'RMS', 'HERMÈS': 'RMS', 'KERING': 'KER', 'ORANGE': 'ORA', 'VEOLIA': 'VIE',
         'BOUYGUES': 'EN', 'MICHELIN': 'ML', 'RENAULT': 'RNO',
         'STELLANTIS': 'STLAP', 'UNIBAIL': 'URW',
-        'VOLKSWAGEN': 'VOW3', 'VW': 'VOW3',
-        'SIEMENS': 'SIE', 'SAP': 'SAP', 'ADIDAS': 'ADS',
+        'VOLKSWAGEN': 'VOW3', 'VW': 'VOW3', 'SIEMENS': 'SIE', 'SAP': 'SAP', 'ADIDAS': 'ADS',
         'BAYER': 'BAYN', 'BASF': 'BAS', 'ALLIANZ': 'ALV',
         'DEUTSCHE BANK': 'DBK', 'BMW': 'BMW', 'MERCEDES': 'MBG',
         'NESTLE': 'NESN', 'NESTLÉ': 'NESN', 'NOVARTIS': 'NOVN', 'ROCHE': 'ROG',
@@ -114,7 +116,6 @@
                     return false;
                 });
                 if (match) {
-                    console.log('[GraderFix] Fuzzy:', s.name, '→', match.ticker, match.name);
                     result.stocks[idx] = {
                         name: s.name, ticker: match.ticker, found: true,
                         price: match.price, change_pct: match.change_percent,
@@ -132,66 +133,351 @@
                 }
             });
 
+            // ── FIX F9: Buffett fallback = 40 (not 100) ──
             var found = result.stocks.filter(function(s) { return s.found; });
             if (found.length > 0) {
                 result.worstMetrics = {
-                    worst_buffett: Math.min.apply(null, found.map(function(s) { return s.buffett_score != null ? s.buffett_score : 100; })),
-                    worst_quality: Math.min.apply(null, found.map(function(s) { return s.quality_score != null ? s.quality_score : 100; })),
+                    worst_buffett: Math.min.apply(null, found.map(function(s) { return s.buffett_score != null ? s.buffett_score : 40; })),
+                    worst_quality: Math.min.apply(null, found.map(function(s) { return s.quality_score != null ? s.quality_score : 40; })),
                     worst_perf_1y: Math.min.apply(null, found.map(function(s) { return s.perf_1y != null ? s.perf_1y : 0; })),
-                    max_volatility: Math.max.apply(null, found.map(function(s) { return s.volatility_3y || 0; })),
-                    max_drawdown: Math.max.apply(null, found.map(function(s) { return Math.abs(s.max_drawdown_3y || 0); })),
+                    max_volatility: Math.max.apply(null, found.map(function(s) { return s.volatility_3y || 30; })),
+                    max_drawdown: Math.max.apply(null, found.map(function(s) { return Math.abs(s.max_drawdown_3y || 30); })),
                     max_beta: Math.max.apply(null, found.map(function(s) { return s.beta || 1; })),
-                    worst_name: found.reduce(function(w, s) { return (s.buffett_score != null ? s.buffett_score : 100) < (w.buffett_score != null ? w.buffett_score : 100) ? s : w; }).name
+                    worst_name: found.reduce(function(w, s) { return (s.buffett_score != null ? s.buffett_score : 40) < (w.buffett_score != null ? w.buffett_score : 40) ? s : w; }).name,
+                    missing_data: found.some(function(s) { return s.buffett_score == null; })
                 };
             }
             return result;
         };
     }
 
-    // ─── FIX 3: Patch prompts — issuer ≠ underlying + duration ──
+    // ═══════════════════════════════════════════════════════════════
+    // AUDIT FIX F7 — Kill criteria barrier sign bug (CRITIQUE)
+    // ═══════════════════════════════════════════════════════════════
+    // Bug: barrier > minBarrier is TRUE for -40% (-40 > -50) but
+    // FALSE for -60% (-60 < -50). Logic is inverted.
+    // Fix: compare absolute values
 
-    if (typeof _buildSystemPrompt === 'function') {
-        _buildSystemPrompt = function() {
-            return "Tu es un analyste de produits structurés pour une trésorerie d'entreprise.\nNote un produit structuré sur 4 piliers puis attribue un grade A/B/C/D/F.\n\n## DISTINCTION CRITIQUE : ÉMETTEUR ≠ SOUS-JACENT\nL'ÉMETTEUR (ex: Swiss Life, CIC, Natixis) est la banque qui structure et garantit le produit. C'est un risque CRÉDIT (contrepartie).\nLes SOUS-JACENTS (ex: ASML, LVMH, Crédit Agricole) sont les actions/indices dont dépend le coupon et la protection capital. C'est un risque MARCHÉ.\nNe confonds JAMAIS les deux. L'émetteur n'est PAS un sous-jacent. Si l'émetteur est aussi un sous-jacent (rare), mentionne-le explicitement.\n\n## Pilier 1 — Rendement ajusté au risque (30%)\nScore /100. Coupon facial × probabilité de versement (distance barrière + volatilité). -15 si capital non protégé. -5/sous-jacent au-delà de 2 en worst-of. +5 mémoire, +15 garanti.\n\n## Pilier 2 — Qualité sous-jacent (25%)\nScore /100 basé sur données marché RÉELLES. Buffett score + Quality score (poids principal). Vol 3Y, Max Drawdown 3Y, Beta. ROE, dette/equity, marge nette. Worst-of = note du PIRE. Intègre contexte sectoriel et macro.\nATTENTION : utilise UNIQUEMENT les données fournies pour chaque sous-jacent. Ne confonds pas le secteur de l'émetteur avec celui du sous-jacent.\n\n## Pilier 3 — Fit portefeuille (25%)\nScore /100. Concentration ÉMETTEUR -20 pts si >30% du book (risque crédit). Concentration type produit -15 pts si >60%. Overlap sous-jacents -10 pts/doublon. Diversification +15 pts si nouveau secteur/géo.\n\n## Pilier 4 — Prime vs CAT (20%)\nScore /100. Prime > 4% → 90-100. 2.5-4% → 70-89. 1.5-2.5% → 40-69. 0-1.5% → 10-39. <0 → 0.\n\nScore = P1×0.30 + P2×0.25 + P3×0.25 + P4×0.20. A ≥ 75, B 60-74, C 45-59, D 25-44, F < 25.\n\n## SCÉNARIOS (INTÈGRE LA DURÉE)\n4 scénarios avec return_eur basé sur le MONTANT NOMINAL :\n- Optimiste : autocall rapide (S1-S2 si autocall, sinon coupons max sur durée courte). Indique la durée estimée.\n- Base : coupons partiels sur 50-70% de la maturité, puis autocall ou maturité. Durée = 50-70% × maturité.\n- Stress : pas de coupons, capital remboursé à maturité (0% sur durée totale). Durée = 100% maturité.\n- Worst : barrière touchée à maturité, perte proportionnelle au niveau du sous-jacent. Durée = 100% maturité.\nPour chaque scénario, le return_pct est le rendement ANNUALISÉ, pas le rendement total.\n\n## VERDICT\nParagraphe de 3-4 phrases justifiant la note. Mentionne les données concrètes (Buffett score, vol, secteur). Distingue clairement risque émetteur (crédit) et risque sous-jacent (marché).\n\nRÉPONDS en JSON valide UNIQUEMENT (pas de backticks) :\n{\"grade\":\"C\",\"score\":48,\"pillars\":{\"adjustedReturn\":{\"score\":55,\"couponEffective\":4.2,\"couponProbability\":0.60,\"reasoning\":\"...\"},\"underlyingQuality\":{\"score\":65,\"worstStock\":\"EL\",\"keyRisk\":\"...\",\"reasoning\":\"...\"},\"portfolioFit\":{\"score\":30,\"issuerOverlap\":true,\"diversificationBenefit\":false,\"reasoning\":\"...\"},\"riskPremium\":{\"score\":40,\"spreadVsCat\":1.2,\"catBenchmark\":3.0,\"reasoning\":\"...\"}},\"verdict\":\"Paragraphe 3-4 phrases...\",\"keyRisks\":[\"r1\",\"r2\"],\"negotiationPoints\":[\"p1\"],\"scenarios\":{\"optimistic\":{\"return_pct\":7,\"return_eur\":4200,\"probability\":0.20,\"duration_years\":1},\"base\":{\"return_pct\":5,\"return_eur\":6000,\"probability\":0.30,\"duration_years\":3},\"stress\":{\"return_pct\":0,\"return_eur\":0,\"probability\":0.30,\"duration_years\":6},\"worst\":{\"return_pct\":-8,\"return_eur\":-12000,\"probability\":0.20,\"duration_years\":6}}}";
+    if (typeof _checkKillCriteria === 'function') {
+        _checkKillCriteria = function(product, pfCtx, catBench) {
+            var kc = GRADING_CONFIG.killCriteria, reasons = [];
+
+            // KC1: Too many worst-of underlyings
+            if (product.worstOf && product.underlyings.length > kc.maxWorstOfUnderlyings)
+                reasons.push('Worst-of sur ' + product.underlyings.length + ' sous-jacents (max: ' + kc.maxWorstOfUnderlyings + ')');
+
+            // KC2: FIXED — barrier too shallow without capital protection
+            // Use Math.abs to correctly compare: |barrier| < |threshold| means MORE risk
+            if (!product.capitalProtection && product.barrier !== 0) {
+                var absBarrier = Math.abs(product.barrier);
+                var absThreshold = Math.abs(kc.minBarrierWithoutProtection); // 50
+                if (absBarrier < absThreshold) {
+                    reasons.push('Barrière -' + absBarrier + '% sans protection capital (min: -' + absThreshold + '%)');
+                }
+            }
+
+            // KC3: Negative risk premium vs CAT — FIXED F4: use adjusted return
+            var bestCat = catBench.bestRate || 3.0;
+            var couponProb = _computeCouponProbability(product);
+            var adjustedReturn = product.coupon * couponProb;
+            if (product.coupon > 0 && (adjustedReturn - bestCat) < kc.minRiskPremiumVsCat) {
+                reasons.push('Prime ajust\u00e9e vs CAT n\u00e9gative: rendement ' + adjustedReturn.toFixed(1) + '% (coupon ' + product.coupon + '% \u00d7 prob ' + Math.round(couponProb * 100) + '%) vs CAT ' + bestCat + '%');
+            }
+
+            // KC4: Too many overlapping underlyings
+            if (pfCtx.available && pfCtx.overlappingUnderlyings && pfCtx.overlappingUnderlyings.length > kc.maxSameUnderlying)
+                reasons.push(pfCtx.overlappingUnderlyings.length + ' sous-jacents d\u00e9j\u00e0 en portefeuille');
+
+            // KC5 NEW (from audit F8): Excessive maturity without protection
+            if (product.maturityYears > 12 && !product.capitalProtection) {
+                reasons.push('Maturit\u00e9 ' + product.maturityYears + ' ans sans protection capital');
+            }
+
+            return { killed: reasons.length > 0, reasons: reasons };
+        };
+
+        // Update ProposalGrader export
+        if (window.ProposalGrader) window.ProposalGrader.checkKillCriteria = _checkKillCriteria;
+        console.log('[AuditFix] F7: Kill criteria barrier sign fixed + KC5 maturity added');
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // AUDIT FIX F1 — Quantitative coupon probability model
+    // ═══════════════════════════════════════════════════════════════
+    // d = |barrier| / (vol_3Y × √maturity)
+    // p = lookup table based on d (conservative estimates)
+
+    function _computeCouponProbability(product) {
+        var barrier = Math.abs(product.barrier || 0);
+        var vol = 30; // default if unknown
+        var mat = product.maturityYears || 3;
+
+        // Try to get vol from market data cache
+        if (_mktCache && product.underlyings && product.underlyings.length > 0) {
+            var all = [].concat(_mktCache.stocksEurope || [], _mktCache.stocksUS || []);
+            var maxVol = 0;
+            product.underlyings.forEach(function(und) {
+                var ticker = (typeof _resolveAlias === 'function') ? _resolveAlias(und) : und.toUpperCase();
+                var stripped = _stripAccents(und.toUpperCase());
+                var s = all.find(function(x) {
+                    return x.ticker === ticker || x.ticker === stripped ||
+                        _stripAccents((x.name || '').toUpperCase()).indexOf(stripped) >= 0 ||
+                        _stripAccents((x.name_api || '').toUpperCase()).indexOf(stripped) >= 0;
+                });
+                if (s && s.volatility_3y && s.volatility_3y > maxVol) maxVol = s.volatility_3y;
+            });
+            if (maxVol > 0) vol = maxVol;
+        }
+
+        // If no barrier (guaranteed coupon or rate product), probability ≈ 95%
+        if (barrier === 0 || barrier >= 100) return 0.95;
+
+        // d = distance barrière normalisée
+        var sqrtMat = Math.sqrt(mat);
+        var d = barrier / (vol * sqrtMat / 100);  // vol is in %, barrier in %
+
+        // Lookup table (conservative, based on normal distribution approximation)
+        var prob;
+        if (d >= 3.0) prob = 0.95;
+        else if (d >= 2.5) prob = 0.92;
+        else if (d >= 2.0) prob = 0.88;
+        else if (d >= 1.5) prob = 0.80;
+        else if (d >= 1.2) prob = 0.72;
+        else if (d >= 1.0) prob = 0.65;
+        else if (d >= 0.8) prob = 0.58;
+        else if (d >= 0.6) prob = 0.50;
+        else if (d >= 0.4) prob = 0.40;
+        else prob = 0.30;
+
+        // Autocall bonus: increases probability of early exit
+        if (product.autocall) prob = Math.min(0.95, prob + 0.05);
+
+        // Memory bonus: missed coupons can be caught up
+        if (product.hasMemory) prob = Math.min(0.95, prob + 0.03);
+
+        return prob;
+    }
+
+    // Make it available globally for kill criteria and prompt
+    window._computeCouponProbability = _computeCouponProbability;
+    console.log('[AuditFix] F1: Quantitative coupon probability model loaded');
+
+    // ═══════════════════════════════════════════════════════════════
+    // AUDIT FIX F2 — Worst-of correlation penalty (sector proxy)
+    // ═══════════════════════════════════════════════════════════════
+
+    function _computeCorrelationPenalty(stocks) {
+        if (!stocks || stocks.length <= 1) return 0;
+        var found = stocks.filter(function(s) { return s.found; });
+        if (found.length <= 1) return 0;
+
+        // Group by sector_api
+        var sectors = {};
+        found.forEach(function(s) {
+            var sec = (s.sector_api || 'Unknown').toLowerCase();
+            sectors[sec] = (sectors[sec] || 0) + 1;
+        });
+
+        var nSectors = Object.keys(sectors).length;
+        var nStocks = found.length;
+
+        // Estimated average correlation based on sector diversity
+        var avgCorr;
+        if (nSectors === 1) {
+            avgCorr = 0.75; // Same sector = high correlation
+        } else if (nSectors === 2 && nStocks <= 3) {
+            avgCorr = 0.55;
+        } else if (nSectors >= nStocks) {
+            avgCorr = 0.30; // All different sectors = low correlation
+        } else {
+            avgCorr = 0.30 + 0.45 * (1 - nSectors / nStocks); // Linear interpolation
+        }
+
+        // Penalty: lower correlation = higher worst-of risk
+        var penalty;
+        if (avgCorr >= 0.7) penalty = 5;
+        else if (avgCorr >= 0.4) penalty = 10;
+        else penalty = 15;
+
+        console.log('[AuditFix] F2: Correlation proxy — ' + nSectors + ' sectors, ' + nStocks + ' stocks, avg_corr≈' + avgCorr.toFixed(2) + ', penalty=-' + penalty);
+        return penalty;
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // AUDIT FIX F8 — Maturity adjustment
+    // ═══════════════════════════════════════════════════════════════
+
+    function _maturityAdjustment(matYears) {
+        if (!matYears || matYears <= 0) return 0;
+        if (matYears <= 3) return 5;   // Short = bonus
+        if (matYears <= 6) return 0;   // Medium = neutral
+        if (matYears <= 10) return -5;  // Long = malus
+        return -10;                     // Very long = strong malus
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // PATCH _localFallback — Integrate F1, F2, F4, F8, F9
+    // ═══════════════════════════════════════════════════════════════
+
+    if (typeof _localFallback === 'function') {
+        _localFallback = function(ctx) {
+            var p = ctx.product, cat = ctx.cat, pf = ctx.portfolio;
+
+            // ── P1: Rendement ajusté (F1 + F8) ──
+            var couponProb = _computeCouponProbability(p);
+            var adjustedReturn = p.coupon * couponProb;
+            var p1 = Math.min(100, adjustedReturn * 10);
+            if (!p.capitalProtection) p1 -= 15;
+            if (p.worstOf) p1 -= Math.max(0, (p.underlyings.length - 2) * 5);
+            if (p.hasMemory) p1 += 5;
+            if (p.couponType === 'garanti') p1 += 15;
+            p1 += _maturityAdjustment(p.maturityYears); // F8
+            p1 = Math.max(0, Math.min(100, p1));
+
+            // ── P2: Qualité sous-jacent (F9 + F2) ──
+            var p2 = 40; // F9: default 40 (not 50) when no data
+            if (ctx.market.available && ctx.market.worstMetrics) {
+                var wm = ctx.market.worstMetrics;
+                p2 = Math.min(100, Math.max(0,
+                    (wm.worst_buffett || 40) * 0.35 +   // F9: fallback 40
+                    (wm.worst_quality || 40) * 0.25 +    // F9: fallback 40
+                    Math.max(0, 100 - (wm.max_volatility || 30)) * 0.2 +
+                    Math.max(0, 80 - (wm.max_drawdown || 30)) * 0.2
+                ));
+                // F2: Correlation penalty for worst-of
+                if (ctx.market.stocks && ctx.market.stocks.length > 1) {
+                    p2 -= _computeCorrelationPenalty(ctx.market.stocks);
+                }
+            }
+            p2 = Math.max(0, Math.min(100, p2));
+
+            // ── P3: Fit portefeuille ──
+            var p3 = 70;
+            if (pf.available) {
+                if (pf.currentIssuerPct > 0.3) p3 -= 20;
+                p3 -= (pf.overlappingUnderlyings ? pf.overlappingUnderlyings.length : 0) * 10;
+            }
+            p3 = Math.max(0, Math.min(100, p3));
+
+            // ── P4: Prime vs CAT (F4: use adjusted return, not facial) ──
+            var spread = adjustedReturn - (cat.bestRate || 3.0); // F4: adjusted, not facial
+            var p4 = spread >= 4 ? 95 : spread >= 2.5 ? 75 : spread >= 1.5 ? 50 : spread >= 0 ? 25 : 5;
+
+            var score = Math.round(p1 * 0.30 + p2 * 0.25 + p3 * 0.25 + p4 * 0.20);
+            var grade = score >= 70 ? 'A' : score >= 55 ? 'B' : score >= 40 ? 'C' : score >= 20 ? 'D' : 'F';
+
+            return {
+                grade: grade, score: score,
+                killCriteria: { triggered: false, reasons: [] },
+                pillars: {
+                    adjustedReturn: { score: Math.round(p1), couponProbability: couponProb, couponEffective: Math.round(adjustedReturn * 100) / 100, reasoning: 'Local: coupon ' + p.coupon + '% \u00d7 prob ' + Math.round(couponProb * 100) + '% = ' + adjustedReturn.toFixed(1) + '%' },
+                    underlyingQuality: { score: Math.round(p2), reasoning: 'Local' + (ctx.market.available ? ' (march\u00e9 \u2713)' : ' (pas de donn\u00e9es, score conservateur)') },
+                    portfolioFit: { score: Math.round(p3), reasoning: 'Local' },
+                    riskPremium: { score: Math.round(p4), spreadVsCat: Math.round(spread * 100) / 100, reasoning: 'Prime ajust\u00e9e ' + adjustedReturn.toFixed(1) + '% vs CAT ' + (cat.bestRate || 3.0) + '%' }
+                },
+                verdict: 'Score local ' + score + '/100 (prob coupon ' + Math.round(couponProb * 100) + '%). Relancer avec IA.',
+                keyRisks: [], negotiationPoints: [], scenarios: null
+            };
+        };
+        console.log('[AuditFix] F1+F2+F4+F8+F9: _localFallback patched');
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // RECALIBRATE GRADE THRESHOLDS (audit recommendation)
+    // ═══════════════════════════════════════════════════════════════
+
+    if (typeof GRADING_CONFIG !== 'undefined') {
+        GRADING_CONFIG.grades.A.min = 70;   // was 75
+        GRADING_CONFIG.grades.B.min = 55;   // was 60
+        GRADING_CONFIG.grades.C.min = 40;   // was 45
+        GRADING_CONFIG.grades.D.min = 20;   // was 25
+        GRADING_CONFIG.grades.F.min = 0;
+        console.log('[AuditFix] Grade thresholds recalibrated: A≥70, B≥55, C≥40, D≥20, F<20');
+    }
+
+    // Also patch _normalizeResult to use new thresholds
+    if (typeof _normalizeResult === 'function') {
+        _normalizeResult = function(raw) {
+            var r = Object.assign({}, raw);
+            r.score = Math.max(0, Math.min(100, parseInt(r.score) || 0));
+            r.grade = r.score >= 70 ? 'A' : r.score >= 55 ? 'B' : r.score >= 40 ? 'C' : r.score >= 20 ? 'D' : 'F';
+            if (r.killCriteria && r.killCriteria.triggered) { r.grade = 'F'; r.score = 0; }
+            if (r.pillars) Object.keys(r.pillars).forEach(function(k) {
+                var p = r.pillars[k];
+                if (p && typeof p.score === 'number') p.score = Math.max(0, Math.min(100, p.score));
+            });
+            return r;
         };
     }
 
-    // Patch user prompt to add issuer clarification + duration
+    // ═══════════════════════════════════════════════════════════════
+    // PATCH SYSTEM PROMPT — Include probability model + correlation
+    // ═══════════════════════════════════════════════════════════════
+
+    if (typeof _buildSystemPrompt === 'function') {
+        _buildSystemPrompt = function() {
+            return "Tu es un analyste de produits structur\u00e9s pour une tr\u00e9sorerie d'entreprise.\nNote un produit structur\u00e9 sur 4 piliers puis attribue un grade A/B/C/D/F.\n\n## DISTINCTION CRITIQUE : \u00c9METTEUR \u2260 SOUS-JACENT\nL'\u00c9METTEUR (ex: Swiss Life, CIC) = risque CR\u00c9DIT (contrepartie).\nLes SOUS-JACENTS (ex: ASML, LVMH) = risque MARCH\u00c9 (actions/indices).\nNe confonds JAMAIS les deux.\n\n## Pilier 1 \u2014 Rendement ajust\u00e9 au risque (30%)\nScore /100. UTILISE LA PROBABILIT\u00c9 DE COUPON FOURNIE (calcul\u00e9e quantitativement via d = |barri\u00e8re| / (vol \u00d7 \u221amaturit\u00e9)).\nRendement ajust\u00e9 = coupon \u00d7 probabilit\u00e9. Score = rendement ajust\u00e9 \u00d7 10 (cap\u00e9 \u00e0 100).\nAjustements : -15 capital non prot\u00e9g\u00e9, -5/sous-jacent worst-of au-del\u00e0 de 2, +5 m\u00e9moire, +15 garanti.\nAjustement maturit\u00e9 : +5 si \u22643 ans, 0 si 3-6 ans, -5 si 6-10 ans, -10 si >10 ans.\n\n## Pilier 2 \u2014 Qualit\u00e9 sous-jacent (25%)\nScore /100. Buffett + Quality score (poids principal). Vol, Max DD, Beta.\nWorst-of = note du PIRE. P\u00c9NALIT\u00c9 CORR\u00c9LATION : si les sous-jacents sont dans des secteurs diff\u00e9rents (faible corr\u00e9lation), le risque worst-of est PLUS \u00c9LEV\u00c9 (-10 \u00e0 -15 pts). M\u00eame secteur = -5 pts.\nSi Buffett score absent pour un sous-jacent, utilise 40/100 (pas 100).\n\n## Pilier 3 \u2014 Fit portefeuille (25%)\nConcentration \u00e9metteur -20 pts si >30%. Type -15 pts si >60%. Overlap -10 pts/doublon. +15 si nouveau secteur.\n\n## Pilier 4 \u2014 Prime vs CAT (20%)\nIMPORTANT : compare le RENDEMENT AJUST\u00c9 (coupon \u00d7 probabilit\u00e9) au CAT, PAS le coupon facial.\nPrime > 4% \u2192 90-100. 2.5-4% \u2192 70-89. 1.5-2.5% \u2192 40-69. 0-1.5% \u2192 10-39. <0 \u2192 0.\n\nScore = P1\u00d70.30 + P2\u00d70.25 + P3\u00d70.25 + P4\u00d70.20.\nA \u2265 70, B 55-69, C 40-54, D 20-39, F < 20.\n\nSC\u00c9NARIOS : utilise le MONTANT NOMINAL + la DUR\u00c9E (optimiste=autocall rapide, base=50-70% maturit\u00e9, stress/worst=100% maturit\u00e9). return_pct = rendement ANNUALIS\u00c9.\n\nVERDICT : paragraphe 3-4 phrases, donn\u00e9es concr\u00e8tes, distingue risque \u00e9metteur/march\u00e9. MENTIONNE la probabilit\u00e9 de coupon calcul\u00e9e.\n\nR\u00c9PONDS en JSON valide UNIQUEMENT (pas de backticks) :\n{\"grade\":\"C\",\"score\":48,\"pillars\":{\"adjustedReturn\":{\"score\":55,\"couponEffective\":4.2,\"couponProbability\":0.60,\"reasoning\":\"...\"},\"underlyingQuality\":{\"score\":65,\"worstStock\":\"EL\",\"keyRisk\":\"...\",\"reasoning\":\"...\"},\"portfolioFit\":{\"score\":30,\"issuerOverlap\":true,\"diversificationBenefit\":false,\"reasoning\":\"...\"},\"riskPremium\":{\"score\":40,\"spreadVsCat\":1.2,\"catBenchmark\":3.0,\"reasoning\":\"...\"}},\"verdict\":\"Paragraphe...\",\"keyRisks\":[\"r1\"],\"negotiationPoints\":[\"p1\"],\"scenarios\":{\"optimistic\":{\"return_pct\":7,\"return_eur\":4200,\"probability\":0.20,\"duration_years\":1},\"base\":{\"return_pct\":5,\"return_eur\":6000,\"probability\":0.30,\"duration_years\":3},\"stress\":{\"return_pct\":0,\"return_eur\":0,\"probability\":0.30,\"duration_years\":6},\"worst\":{\"return_pct\":-8,\"return_eur\":-12000,\"probability\":0.20,\"duration_years\":6}}}";
+        };
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // PATCH USER PROMPT — Add computed probability + correlation info
+    // ═══════════════════════════════════════════════════════════════
+
     if (typeof _buildUserPrompt === 'function') {
         var _origBuildUser = _buildUserPrompt;
         _buildUserPrompt = function(context) {
             var base = _origBuildUser(context);
             var product = context.product;
 
-            // Add issuer ≠ underlying clarification at the top
-            var clarification = '\n## ⚠ RAPPEL : ÉMETTEUR ≠ SOUS-JACENT\n';
-            clarification += '- ÉMETTEUR (risque crédit) : ' + (product.issuer || 'inconnu') + '\n';
-            clarification += '- SOUS-JACENTS (risque marché) : ' + (product.underlyings.length > 0 ? product.underlyings.join(', ') : 'aucun identifié') + '\n';
-            clarification += 'Analyse le risque marché sur les SOUS-JACENTS, pas sur l\'émetteur.\n';
+            var clarification = '\n## \u26a0 RAPPEL : \u00c9METTEUR \u2260 SOUS-JACENT\n';
+            clarification += '- \u00c9METTEUR (risque cr\u00e9dit) : ' + (product.issuer || 'inconnu') + '\n';
+            clarification += '- SOUS-JACENTS (risque march\u00e9) : ' + (product.underlyings.length > 0 ? product.underlyings.join(', ') : 'aucun') + '\n\n';
 
-            // Add duration info for scenarios
-            var matYears = product.maturityYears || 0;
-            if (matYears > 0) {
-                clarification += '\n## DURÉE POUR SCÉNARIOS\n';
-                clarification += '- Maturité : ' + matYears + ' ans\n';
-                if (product.autocall) {
-                    var freq = product.couponFrequency || 'semestriel';
-                    clarification += '- Autocall : Oui (' + freq + ') → scénario optimiste = sortie rapide (0.5-1 an)\n';
-                    clarification += '- Scénario base : coupons partiels + autocall tardif (~' + Math.round(matYears * 0.5) + '-' + Math.round(matYears * 0.7) + ' ans)\n';
-                } else {
-                    clarification += '- Autocall : Non → capital bloqué ' + matYears + ' ans\n';
-                    clarification += '- Scénario optimiste : coupons max sur ' + matYears + ' ans\n';
+            // F1: Computed coupon probability
+            var couponProb = _computeCouponProbability(product);
+            var adjReturn = product.coupon * couponProb;
+            clarification += '## PROBABILIT\u00c9 DE COUPON (calcul quantitatif)\n';
+            clarification += '- Coupon facial : ' + product.coupon + '%\n';
+            clarification += '- Barri\u00e8re : ' + product.barrier + '%, Vol worst-of estim\u00e9e, Maturit\u00e9 : ' + (product.maturityYears || '?') + ' ans\n';
+            clarification += '- Probabilit\u00e9 de versement calcul\u00e9e : ' + Math.round(couponProb * 100) + '%\n';
+            clarification += '- RENDEMENT AJUST\u00c9 = ' + product.coupon + '% \u00d7 ' + Math.round(couponProb * 100) + '% = ' + adjReturn.toFixed(2) + '%\n';
+            clarification += '- UTILISE CE RENDEMENT AJUST\u00c9 pour le Pilier 4 (pas le coupon facial)\n\n';
+
+            // F2: Correlation info
+            if (context.market && context.market.stocks && context.market.stocks.length > 1) {
+                var found = context.market.stocks.filter(function(s) { return s.found; });
+                if (found.length > 1) {
+                    var sectorSet = {};
+                    found.forEach(function(s) { sectorSet[(s.sector_api || 'Unknown').toLowerCase()] = 1; });
+                    var nSectors = Object.keys(sectorSet).length;
+                    var corrEstimate = nSectors >= found.length ? 'FAIBLE (~0.3)' : nSectors === 1 ? '\u00c9LEV\u00c9E (~0.75)' : 'MOYENNE (~0.5)';
+                    clarification += '## CORR\u00c9LATION WORST-OF\n';
+                    clarification += '- ' + found.length + ' sous-jacents dans ' + nSectors + ' secteur(s) diff\u00e9rent(s)\n';
+                    clarification += '- Corr\u00e9lation estim\u00e9e : ' + corrEstimate + '\n';
+                    clarification += '- Corr\u00e9lation FAIBLE = risque worst-of PLUS \u00c9LEV\u00c9 (p\u00e9naliser davantage P2)\n\n';
                 }
-                clarification += '- Scénarios stress/worst : durée complète ' + matYears + ' ans\n';
-                clarification += '- return_pct dans les scénarios = rendement ANNUALISÉ (pas total)\n';
             }
 
-            // Insert after the product JSON block
-            var insertPoint = base.indexOf('## DONNÉES');
-            if (insertPoint === -1) insertPoint = base.indexOf('## DONN');
+            // F8: Duration
+            var matYears = product.maturityYears || 0;
+            if (matYears > 0) {
+                clarification += '## DUR\u00c9E\n';
+                clarification += '- Maturit\u00e9 : ' + matYears + ' ans\n';
+                var matAdj = _maturityAdjustment(matYears);
+                clarification += '- Ajustement P1 : ' + (matAdj >= 0 ? '+' : '') + matAdj + ' pts\n';
+                if (product.autocall) {
+                    clarification += '- Autocall : Oui \u2192 optimiste = 0.5-1 an, base = ' + Math.round(matYears * 0.5) + '-' + Math.round(matYears * 0.7) + ' ans\n';
+                } else {
+                    clarification += '- Autocall : Non \u2192 capital bloqu\u00e9 ' + matYears + ' ans\n';
+                }
+                clarification += '- return_pct = rendement ANNUALIS\u00c9\n\n';
+            }
+
+            var insertPoint = base.indexOf('## DONN');
             if (insertPoint === -1) insertPoint = base.indexOf('## MACRO');
             if (insertPoint > 0) {
-                return base.substring(0, insertPoint) + clarification + '\n' + base.substring(insertPoint);
+                return base.substring(0, insertPoint) + clarification + base.substring(insertPoint);
             }
             return base + clarification;
         };
@@ -200,5 +486,5 @@
     // ─── Clear cache ─────────────────────────────────────────────
     if (typeof _mktCache !== 'undefined') { _mktCache = null; _mktCacheTs = 0; }
 
-    console.log('[GraderFix] v3.0 — issuer≠underlying + duration scenarios + accent matching');
+    console.log('[GraderFix] v4.0 POST-AUDIT \u2014 F1(prob)+F2(corr)+F4(adj)+F7(sign)+F8(mat)+F9(fallback) applied');
 })();
