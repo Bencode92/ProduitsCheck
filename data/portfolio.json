@@ -993,82 +993,93 @@
       "note": ""
     },
     "grading": {
-      "grade": "B",
-      "score": 63,
+      "grade": "C",
+      "score": 56,
+      "killCriteria": {
+        "triggered": false,
+        "reasons": []
+      },
       "pillars": {
         "adjustedReturn": {
-          "score": 61,
-          "couponEffective": 6,
-          "couponProbability": 0.85,
-          "reasoning": "Coupon 6% avec probabilité 85% → rendement ajusté 5.10%. +15 capital garanti, +5 maturité ≤3a anticipée autocall. Score: 51 + 15 + 5 = 71, mais plafonné compte tenu du contexte taux"
+          "score": 50,
+          "base": 60,
+          "delta": -10,
+          "reasoning": "Rendement: base 60 → -10 = 50 (TARN structure limite l'upside malgré autocall favorable, coupon plafonné par accumulation) | Coupon 6%, protégé"
         },
         "underlyingQuality": {
-          "score": 70,
-          "worstStock": "TEC10",
-          "keyRisk": "Hausse des taux au-dessus du seuil d'autocall",
-          "reasoning": "TEC 10 = indice référence OAT françaises 10 ans. Capital 100% protégé = base 65 pts. Volatilité faible (10-15%) favorable. Risque principal: remontée taux BCE si inflation persistante"
+          "score": 55,
+          "base": 50,
+          "delta": 5,
+          "reasoning": "Qualité: base 50 → +5 = 55 (TEC 10 diversifié avec exposition energy favorisée en contexte macro neutral)"
         },
         "portfolioFit": {
-          "score": 43,
-          "reasoning": "Concentration CIC 33% → -20 pts (>30% bientôt atteint). Overlap TEC 10 détecté → -10 pts. +10 diversification taux vs actions. Base 60 - 20 - 10 + 10 = 40"
+          "score": 55,
+          "base": 60,
+          "delta": -5,
+          "reasoning": "Fit: base 60 → -5 = 55 (Exposition significative aux secteurs évités (financials, telecom) dans l'indice TEC 10)"
         },
         "riskPremium": {
-          "score": 70,
-          "spreadVsCat": 2.1,
-          "reasoning": "Rendement ajusté 5.10% vs CAT 3.0% = spread +2.10%. Dans la tranche 1.5-2.5% mais proche de 2.5%, donc score favorable 70"
+          "score": 65,
+          "base": 75,
+          "delta": -10,
+          "reasoning": "Prime: base 75 → -10 = 65 (Prime surestimée car TARN bride sévèrement le potentiel de gain vs obligation classique) | 6% vs CAT 3%"
         }
       },
-      "verdict": "Produit de taux solide avec capital protégé et autocall attractif. Coupon 6% probable à 85% mais attention à la concentration émetteur CIC et overlap TEC 10 existant.",
+      "verdict": "Structure TARN défavorable malgré capital protégé et autocall à 24%. Le mécanisme d'accumulation des coupons bride l'upside à 6% annuel maximum même en cas de forte performance. L'exposition TEC 10 offre une diversification correcte avec biais favorable energy, mais inclut des secteurs évités. La complexité TARN ne justifie pas la prime face aux alternatives obligataires à 3%.",
       "keyRisks": [
-        "Concentration émetteur CIC approchant 30%",
-        "Overlap TEC 10 dans le portefeuille",
-        "Risque de non-autocall si hausse significative des taux"
+        "Plafonnement strict des gains par mécanisme TARN malgré performance potentielle",
+        "Exposition indirecte aux secteurs financials et telecom défavorisés dans TEC 10"
       ],
       "negotiationPoints": [
-        "Demander réduction concentration CIC",
-        "Négocier coupon à 6.5% pour compenser l'overlap"
+        "Augmentation du seuil autocall de 24% à 30%",
+        "Réduction de la prime ou amélioration du coupon de base"
       ],
       "scenarios": {
         "optimistic": {
           "return_pct": 6,
           "return_eur": 6000,
-          "probability": 0.6,
-          "duration_years": 2
+          "probability": 0.35,
+          "duration_years": 1
         },
         "base": {
-          "return_pct": 6,
-          "return_eur": 30000,
-          "probability": 0.25,
+          "return_pct": 4.5,
+          "return_eur": 22500,
+          "probability": 0.4,
           "duration_years": 5
         },
         "stress": {
-          "return_pct": 0,
-          "return_eur": 0,
-          "probability": 0.1,
-          "duration_years": 10
+          "return_pct": 2,
+          "return_eur": 22000,
+          "probability": 0.2,
+          "duration_years": 11
         },
         "worst": {
           "return_pct": 0,
           "return_eur": 0,
           "probability": 0.05,
-          "duration_years": 10
+          "duration_years": 11
         }
       },
-      "killCriteria": {
-        "triggered": false,
-        "reasons": []
-      },
       "metadata": {
-        "gradedAt": "2026-03-23T15:52:59.066Z",
-        "durationMs": 14532,
+        "gradedAt": "2026-03-23T16:49:08.455Z",
+        "durationMs": 12377,
         "aiUsed": true,
-        "version": "2.1",
+        "version": "3.1",
         "marketDataAvailable": false,
         "catBenchmark": 3,
         "couponAnnualized": 6,
         "couponRaw": 6,
         "couponMultiplier": 1,
-        "couponFrequency": "annuel"
+        "couponFrequency": "annuel",
+        "isInPortfolio": false,
+        "baseScore": 61,
+        "baseGrade": "B",
+        "adjustments": {
+          "p1": -10,
+          "p2": 5,
+          "p3": -5,
+          "p4": -10
+        }
       }
     }
   }
