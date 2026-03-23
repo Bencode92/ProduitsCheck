@@ -239,5 +239,76 @@
     ],
     "_timestamp": "2026-03-23T12:17:52.138Z",
     "_marketDataDate": "2026-03-22T17:18:19.741Z"
+  },
+  "grading": {
+    "grade": "D",
+    "score": 33,
+    "pillars": {
+      "adjustedReturn": {
+        "score": 42,
+        "couponEffective": 3.5,
+        "couponProbability": 0.5,
+        "reasoning": "Coupon 7% conditionnel sans données volatilité, probabilité estimée à 50%. Capital non protégé (-15 pts), compensé partiellement par effet mémoire (+5 pts)."
+      },
+      "underlyingQuality": {
+        "score": 50,
+        "worstStock": "ASML Holding NV",
+        "keyRisk": "Données marché indisponibles",
+        "reasoning": "Score neutre par défaut 50/100 faute de données marché. ASML = semi-conducteurs, secteur cyclique et volatil."
+      },
+      "portfolioFit": {
+        "score": 5,
+        "issuerOverlap": true,
+        "diversificationBenefit": false,
+        "reasoning": "Swiss Life déjà à 67% du portefeuille, largement au-dessus du seuil critique de 30% (-20 pts). Concentration autocall à 80% du book (-15 pts). Risque de concentration majeur."
+      },
+      "riskPremium": {
+        "score": 35,
+        "spreadVsCat": 0.5,
+        "catBenchmark": 3,
+        "reasoning": "Rendement ajusté 3.5% vs CAT 3%, prime de seulement 0.5%. Insuffisant pour compenser les risques de capital et de concentration."
+      }
+    },
+    "verdict": "Rejeter absolument en raison de la sur-concentration Swiss Life (67%) et d'une prime risque insuffisante. La concentration émetteur représente un risque systémique inacceptable.",
+    "keyRisks": [
+      "Sur-concentration émetteur Swiss Life 67%",
+      "Capital non protégé",
+      "Données sous-jacent indisponibles"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 42,
+        "return_eur": 0,
+        "probability": 0.2
+      },
+      "base": {
+        "return_pct": 21,
+        "return_eur": 0,
+        "probability": 0.3
+      },
+      "stress": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.35
+      },
+      "worst": {
+        "return_pct": -60,
+        "return_eur": 0,
+        "probability": 0.15
+      }
+    },
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "metadata": {
+      "gradedAt": "2026-03-23T13:40:12.548Z",
+      "durationMs": 11338,
+      "aiUsed": true,
+      "version": "1.0",
+      "marketDataAvailable": false,
+      "catBenchmark": 3
+    }
   }
 }
