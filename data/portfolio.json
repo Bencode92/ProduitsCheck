@@ -995,6 +995,85 @@
       "level": 96.26,
       "date": "2026-03-19",
       "note": ""
+    },
+    "grading": {
+      "grade": "B",
+      "score": 63,
+      "pillars": {
+        "adjustedReturn": {
+          "score": 61,
+          "couponEffective": 6,
+          "couponProbability": 0.85,
+          "reasoning": "Coupon 6% avec probabilité 85% → rendement ajusté 5.10%. +15 capital garanti, +5 maturité ≤3a anticipée autocall. Score: 51 + 15 + 5 = 71, mais plafonné compte tenu du contexte taux"
+        },
+        "underlyingQuality": {
+          "score": 70,
+          "worstStock": "TEC10",
+          "keyRisk": "Hausse des taux au-dessus du seuil d'autocall",
+          "reasoning": "TEC 10 = indice référence OAT françaises 10 ans. Capital 100% protégé = base 65 pts. Volatilité faible (10-15%) favorable. Risque principal: remontée taux BCE si inflation persistante"
+        },
+        "portfolioFit": {
+          "score": 43,
+          "reasoning": "Concentration CIC 33% → -20 pts (>30% bientôt atteint). Overlap TEC 10 détecté → -10 pts. +10 diversification taux vs actions. Base 60 - 20 - 10 + 10 = 40"
+        },
+        "riskPremium": {
+          "score": 70,
+          "spreadVsCat": 2.1,
+          "reasoning": "Rendement ajusté 5.10% vs CAT 3.0% = spread +2.10%. Dans la tranche 1.5-2.5% mais proche de 2.5%, donc score favorable 70"
+        }
+      },
+      "verdict": "Produit de taux solide avec capital protégé et autocall attractif. Coupon 6% probable à 85% mais attention à la concentration émetteur CIC et overlap TEC 10 existant.",
+      "keyRisks": [
+        "Concentration émetteur CIC approchant 30%",
+        "Overlap TEC 10 dans le portefeuille",
+        "Risque de non-autocall si hausse significative des taux"
+      ],
+      "negotiationPoints": [
+        "Demander réduction concentration CIC",
+        "Négocier coupon à 6.5% pour compenser l'overlap"
+      ],
+      "scenarios": {
+        "optimistic": {
+          "return_pct": 6,
+          "return_eur": 6000,
+          "probability": 0.6,
+          "duration_years": 2
+        },
+        "base": {
+          "return_pct": 6,
+          "return_eur": 30000,
+          "probability": 0.25,
+          "duration_years": 5
+        },
+        "stress": {
+          "return_pct": 0,
+          "return_eur": 0,
+          "probability": 0.1,
+          "duration_years": 10
+        },
+        "worst": {
+          "return_pct": 0,
+          "return_eur": 0,
+          "probability": 0.05,
+          "duration_years": 10
+        }
+      },
+      "killCriteria": {
+        "triggered": false,
+        "reasons": []
+      },
+      "metadata": {
+        "gradedAt": "2026-03-23T15:52:59.066Z",
+        "durationMs": 14532,
+        "aiUsed": true,
+        "version": "2.1",
+        "marketDataAvailable": false,
+        "catBenchmark": 3,
+        "couponAnnualized": 6,
+        "couponRaw": 6,
+        "couponMultiplier": 1,
+        "couponFrequency": "annuel"
+      }
     }
   }
 ]
