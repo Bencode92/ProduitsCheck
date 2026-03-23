@@ -1,4 +1,4 @@
-// ═══ PATCHES V12e — Visual AI Summary Dashboard ═══
+// ═══ PATCHES V12f — Liquidity banner on Structured Products page ═══
 
 let _pendingProduct = null;
 let _cachedAISummary = null;
@@ -14,13 +14,60 @@ function _injectBeforeLastDiv(html,content) { const idx=html.lastIndexOf('</div>
 async function _loadAISummary() { try { const r=await fetch(`https://raw.githubusercontent.com/${CONFIG.REPO_OWNER}/${CONFIG.REPO_NAME}/${CONFIG.BRANCH}/${CONFIG.DATA_PATH}/ai-summary.json?t=${Date.now()}`); if(r.ok) _cachedAISummary=await r.json(); } catch(e){} }
 _loadAISummary();
 
-// ═══════════════════════════════════════════════════════════════
-// BUILD VISUAL SUMMARY DASHBOARD (data-driven, no AI for this part)
-// ═══════════════════════════════════════════════════════════════
+// ═══ LIQUIDITY BANNER for Structured Products ════════════
+function _buildLiquidityBanner() {
+  // Read CAT objectives for available cash
+  const obj = typeof catManager !== 'undefined' ? catManager.objectives : null;
+  if (!obj) return '';
+  const cash = parseFloat(obj.availableCash) || 0;
+  const reserve = parseFloat(obj.liquidityReserve) || 0;
+  const placable = Math.max(0, cash - reserve);
+  if (placable <= 0) return '';
+
+  // CAT stats
+  const catStats = typeof catManager !== 'undefined' ? catManager.getStats() : null;
+  const catInvested = catStats ? catStats.totalInvested : 0;
+  const catRate = catStats ? catStats.weightedRate : 0;
+
+  // Structured portfolio stats
+  const portfolio = (app.state?.portfolio || []).filter(p => !p.archived);
+  const structInvested = portfolio.reduce((s, p) => s + (parseFloat(p.investedAmount) || 0), 0);
+  const totalInvested = catInvested + structInvested;
+
+  return `<div style="background:linear-gradient(135deg,rgba(6,214,160,0.08),rgba(139,92,246,0.06));border:1px solid rgba(6,214,160,0.3);border-radius:var(--radius);padding:16px;margin-bottom:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+      <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:280px">
+        <div style="width:48px;height:48px;background:linear-gradient(135deg,var(--green),var(--cyan));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">💎</div>
+        <div>
+          <div style="font-size:16px;font-weight:800;color:var(--text-bright)">${formatNumber(placable)}€ <span style="font-weight:400;font-size:13px;color:var(--text-muted)">de liquidités à investir</span></div>
+          <div style="font-size:11px;color:var(--text-dim);margin-top:3px">
+            Trésorerie : ${formatNumber(totalInvested + cash)}€
+            ${catInvested > 0 ? ' · <span style="color:var(--green)">CAT ' + formatNumber(catInvested) + '€ (' + catRate.toFixed(1) + '%)</span>' : ''}
+            ${structInvested > 0 ? ' · <span style="color:var(--purple)">Structurés ' + formatNumber(structInvested) + '€</span>' : ''}
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-shrink:0">
+        <button class="btn" onclick="showUploadModal('portfolio')" style="border-color:var(--green);color:var(--green)">📄 Analyser un PDF</button>
+        <button class="btn primary" onclick="showUploadModal('portfolio')" style="background:var(--green)">+ Investir</button>
+      </div>
+    </div>
+    <div style="margin-top:12px;display:flex;gap:4px;height:6px;border-radius:3px;overflow:hidden">
+      ${catInvested > 0 ? `<div style="flex:${catInvested};background:var(--green);border-radius:3px 0 0 3px" title="CAT: ${formatNumber(catInvested)}€"></div>` : ''}
+      ${structInvested > 0 ? `<div style="flex:${structInvested};background:var(--purple)" title="Structurés: ${formatNumber(structInvested)}€"></div>` : ''}
+      <div style="flex:${placable};background:var(--cyan);border-radius:0 3px 3px 0" title="À investir: ${formatNumber(placable)}€"></div>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:5px;font-size:9px">
+      ${catInvested > 0 ? '<span style="color:var(--green)">■ CAT</span>' : ''}
+      ${structInvested > 0 ? '<span style="color:var(--purple)">■ Structurés</span>' : ''}
+      <span style="color:var(--cyan)">■ À investir ${formatNumber(placable)}€</span>
+    </div>
+  </div>`;
+}
+
+// ═══ VISUAL SUMMARY DASHBOARD ════════════════════════════
 function _buildPortfolioSummaryHTML(active, aiInsights) {
   const totalInvested = active.reduce((s,p) => s + (parseFloat(p.investedAmount)||0), 0);
-
-  // Per-product row data
   const rows = active.map(p => {
     const annRate = typeof getAnnualizedRate==='function' ? getAnnualizedRate(p) : (parseFloat(p.coupon?.rate)||0);
     const amount = parseFloat(p.investedAmount)||0;
@@ -32,69 +79,38 @@ function _buildPortfolioSummaryHTML(active, aiInsights) {
     const barrier = parseFloat(p.capitalProtection?.barrier)||0;
     const bank = BANKS_LIST.find(b=>b.id===p.bankId)?.name||'';
     const entity = p.entity ? MY_ENTITIES.find(e=>e.id===p.entity) : null;
-
     let riskLevel, riskColor, riskIcon;
     if (barrier > 0 && margeRestante !== null && margeRestante <= 10) { riskLevel='CRITIQUE'; riskColor='#E53935'; riskIcon='🔴'; }
     else if (!couponOK) { riskLevel='COUPON PERDU'; riskColor='#FFB74D'; riskIcon='⚠️'; }
     else if (barrier > 0 && margeRestante !== null && margeRestante <= 20) { riskLevel='VIGILANCE'; riskColor='#FFB74D'; riskIcon='🟡'; }
     else if (s?.autocallOK) { riskLevel='AUTOCALL'; riskColor='#4CAF50'; riskIcon='✅'; }
     else { riskLevel='OK'; riskColor='#81C784'; riskIcon='🟢'; }
-
     return { name: (p.name||'').substring(0,35), amount, annRate, yieldAmt, variation, couponOK, margeRestante, barrier, bank, entity, riskLevel, riskColor, riskIcon, id: p.id, bankId: p.bankId||'' };
   });
-
-  // Aggregate metrics
   const totalYield = rows.reduce((s,r) => s + r.yieldAmt, 0);
   const avgRate = totalInvested > 0 ? (rows.reduce((s,r) => s + r.amount * r.annRate, 0) / totalInvested) : 0;
   const couponsOK = rows.filter(r => r.couponOK).length;
   const couponsLost = rows.filter(r => !r.couponOK).length;
   const lostAmount = rows.filter(r => !r.couponOK).reduce((s,r) => s + r.yieldAmt, 0);
   const atRisk = rows.filter(r => r.riskLevel === 'CRITIQUE' || r.riskLevel === 'VIGILANCE').length;
-
-  // Bank concentration
-  const bankMap = {};
-  rows.forEach(r => { bankMap[r.bank||'?'] = (bankMap[r.bank||'?']||0) + r.amount; });
+  const bankMap = {}; rows.forEach(r => { bankMap[r.bank||'?'] = (bankMap[r.bank||'?']||0) + r.amount; });
   const topBank = Object.entries(bankMap).sort((a,b) => b[1]-a[1])[0];
   const topBankPct = topBank ? Math.round(topBank[1]/totalInvested*100) : 0;
   const bankCount = Object.keys(bankMap).length;
   const diversOK = topBankPct <= 40;
-
-  // Overall risk score
   let globalRisk, globalRiskColor;
   if (atRisk > 0 || couponsLost >= 2) { globalRisk = '⚠️ Élevé'; globalRiskColor = '#E53935'; }
   else if (couponsLost > 0 || !diversOK) { globalRisk = '🟡 Modéré'; globalRiskColor = '#FFB74D'; }
   else { globalRisk = '🟢 Faible'; globalRiskColor = '#4CAF50'; }
 
-  // Build HTML
   return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
-    <!-- HEADER METRICS -->
     <div style="display:grid;grid-template-columns:repeat(5,1fr);border-bottom:1px solid var(--border)">
-      <div style="padding:12px 16px;text-align:center;border-right:1px solid var(--border)">
-        <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px">Investi</div>
-        <div style="font-size:18px;font-weight:700;color:var(--text-bright)">${formatNumber(totalInvested)}€</div>
-      </div>
-      <div style="padding:12px 16px;text-align:center;border-right:1px solid var(--border)">
-        <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px">Rendement/an</div>
-        <div style="font-size:18px;font-weight:700;color:var(--green)">${formatNumber(totalYield)}€</div>
-        <div style="font-size:10px;color:var(--text-dim)">${avgRate.toFixed(2)}% moy.</div>
-      </div>
-      <div style="padding:12px 16px;text-align:center;border-right:1px solid var(--border)">
-        <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px">Coupons</div>
-        <div style="font-size:18px;font-weight:700;color:${couponsLost>0?'var(--orange)':'var(--green)'}">${couponsOK}/${rows.length}</div>
-        <div style="font-size:10px;color:${couponsLost>0?'var(--red)':'var(--text-dim)'}">${couponsLost>0?couponsLost+' perdu ('+formatNumber(lostAmount)+'€)':'tous versés'}</div>
-      </div>
-      <div style="padding:12px 16px;text-align:center;border-right:1px solid var(--border)">
-        <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px">Diversification</div>
-        <div style="font-size:18px;font-weight:700;color:${diversOK?'var(--green)':'var(--orange)'}">${bankCount} banque${bankCount>1?'s':''}</div>
-        <div style="font-size:10px;color:var(--text-dim)">${topBank?topBank[0]+' '+topBankPct+'%':''}</div>
-      </div>
-      <div style="padding:12px 16px;text-align:center">
-        <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px">Risque global</div>
-        <div style="font-size:16px;font-weight:700;color:${globalRiskColor}">${globalRisk}</div>
-      </div>
+      <div style="padding:12px 16px;text-align:center;border-right:1px solid var(--border)"><div style="font-size:10px;color:var(--text-dim);text-transform:uppercase">Investi</div><div style="font-size:18px;font-weight:700;color:var(--text-bright)">${formatNumber(totalInvested)}€</div></div>
+      <div style="padding:12px 16px;text-align:center;border-right:1px solid var(--border)"><div style="font-size:10px;color:var(--text-dim);text-transform:uppercase">Rendement/an</div><div style="font-size:18px;font-weight:700;color:var(--green)">${formatNumber(totalYield)}€</div><div style="font-size:10px;color:var(--text-dim)">${avgRate.toFixed(2)}% moy.</div></div>
+      <div style="padding:12px 16px;text-align:center;border-right:1px solid var(--border)"><div style="font-size:10px;color:var(--text-dim);text-transform:uppercase">Coupons</div><div style="font-size:18px;font-weight:700;color:${couponsLost>0?'var(--orange)':'var(--green)'}">${couponsOK}/${rows.length}</div><div style="font-size:10px;color:${couponsLost>0?'var(--red)':'var(--text-dim)'}">${couponsLost>0?couponsLost+' perdu ('+formatNumber(lostAmount)+'€)':'tous versés'}</div></div>
+      <div style="padding:12px 16px;text-align:center;border-right:1px solid var(--border)"><div style="font-size:10px;color:var(--text-dim);text-transform:uppercase">Diversification</div><div style="font-size:18px;font-weight:700;color:${diversOK?'var(--green)':'var(--orange)'}">${bankCount} banque${bankCount>1?'s':''}</div><div style="font-size:10px;color:var(--text-dim)">${topBank?topBank[0]+' '+topBankPct+'%':''}</div></div>
+      <div style="padding:12px 16px;text-align:center"><div style="font-size:10px;color:var(--text-dim);text-transform:uppercase">Risque global</div><div style="font-size:16px;font-weight:700;color:${globalRiskColor}">${globalRisk}</div></div>
     </div>
-
-    <!-- POSITIONS TABLE -->
     <table style="width:100%;font-size:12px;border-collapse:collapse">
       <thead><tr style="background:var(--bg)">
         <th style="padding:8px 12px;text-align:left;color:var(--text-dim);font-size:10px;text-transform:uppercase;font-weight:600">Produit</th>
@@ -109,7 +125,7 @@ function _buildPortfolioSummaryHTML(active, aiInsights) {
         const varColor = r.variation===null?'var(--text-dim)':r.variation>=0?'var(--green)':r.variation>-20?'var(--orange)':'var(--red)';
         return `<tr style="border-top:1px solid var(--border);cursor:pointer" onclick="app.openProduct(app._findProduct('${r.id}','${r.bankId}'))">
           <td style="padding:8px 12px"><div style="font-weight:600;color:var(--text-bright)">${r.name}</div><div style="font-size:10px;color:var(--text-dim)">${r.bank}${r.entity?' · <span style=color:'+r.entity.color+'>'+r.entity.icon+r.entity.name+'</span>':''}</div></td>
-          <td style="padding:8px;text-align:right;font-family:var(--mono);color:var(--text)">${formatNumber(r.amount)}€</td>
+          <td style="padding:8px;text-align:right;font-family:var(--mono)">${formatNumber(r.amount)}€</td>
           <td style="padding:8px;text-align:right;font-family:var(--mono);color:var(--green)">${r.annRate.toFixed(2)}%</td>
           <td style="padding:8px;text-align:right;font-family:var(--mono);font-weight:600;color:var(--green)">${formatNumber(r.yieldAmt)}€</td>
           <td style="padding:8px;text-align:center;font-family:var(--mono);font-weight:600;color:${varColor}">${varStr}</td>
@@ -124,59 +140,43 @@ function _buildPortfolioSummaryHTML(active, aiInsights) {
         <td colspan="2"></td>
       </tr></tbody>
     </table>
-
-    ${aiInsights ? `
-    <!-- AI INSIGHTS (short bullets only) -->
-    <div style="border-top:1px solid var(--border);padding:12px 16px;background:rgba(59,130,246,0.04)">
-      <div style="font-size:10px;font-weight:600;color:var(--accent);text-transform:uppercase;margin-bottom:6px">🤖 Analyse IA</div>
-      <div style="font-size:12px;line-height:1.5;color:var(--text)">${aiInsights}</div>
-    </div>` : ''}
+    ${aiInsights ? `<div style="border-top:1px solid var(--border);padding:12px 16px;background:rgba(59,130,246,0.04)"><div style="font-size:10px;font-weight:600;color:var(--accent);text-transform:uppercase;margin-bottom:6px">🤖 Analyse IA</div><div style="font-size:12px;line-height:1.5;color:var(--text)">${aiInsights}</div></div>` : ''}
   </div>`;
 }
 
-// ═══ GENERATE SUMMARY ═══════════════════════════════════════
+// ═══ GENERATE SUMMARY ════════════════════════════════════
 async function generatePortfolioSummary() {
   const btn = document.getElementById('ai-summary-btn');
   const box = document.getElementById('ai-summary-box');
   if (!btn||!box) return;
   btn.disabled = true; btn.innerHTML = '⏳ Analyse...';
-
   const active = (app.state.portfolio||[]).filter(p => !p.archived);
-
-  // Show data dashboard immediately
   box.style.display = 'block';
   box.innerHTML = _buildPortfolioSummaryHTML(active, '<div style="text-align:center;color:var(--text-dim)"><span class="spinner" style="display:inline-block;width:14px;height:14px;margin-right:6px;vertical-align:middle"></span>Claude analyse...</div>');
-
-  // Build compact data for AI
   const productsData = active.map(p => {
     const annRate = typeof getAnnualizedRate==='function' ? getAnnualizedRate(p) : (parseFloat(p.coupon?.rate)||0);
     const s = typeof getTrackingStatus==='function' ? getTrackingStatus(p) : null;
     return `${(p.name||'').substring(0,30)}: ${formatNumber(p.investedAmount)}€, ${annRate}%/an${s?', variation '+((s.variation>=0?'+':'')+s.variation.toFixed(1))+'%'+(!s.couponOK?' COUPON PERDU':'')+(s.margeRestante<20?' marge '+s.margeRestante.toFixed(0)+'%':''):''}`;
   }).join('\n');
-
   try {
-    const resp = await fetch(CONFIG.AI_ENDPOINT, {
-      method: 'POST', headers: {'Content-Type':'application/json'},
+    const resp = await fetch(CONFIG.AI_ENDPOINT, { method: 'POST', headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 400, messages: [{ role: 'user',
-        content: `Portefeuille structurés:\n${productsData}\n\nDonne exactement 3 bullet points courts (1 ligne chacun) en français:\n- 1 constat clé sur la situation\n- 1 risque principal\n- 1 action recommandée\nFormat: "▸ texte". Pas de titre, pas de numéro, juste 3 lignes.`
+        content: `Portefeuille structurés:\n${productsData}\n\nDonne exactement 3 bullet points courts (1 ligne chacun):\n- 1 constat clé\n- 1 risque principal\n- 1 action recommandée\nFormat: "▸ texte". Pas de titre.`
       }]})
     });
     const data = await resp.json();
     const text = data.content?.[0]?.text || '';
     const insights = text.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
-
     const now = new Date();
     _cachedAISummary = { insights, date: now.toLocaleDateString('fr-FR'), time: now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}), timestamp: now.toISOString() };
     box.innerHTML = _buildPortfolioSummaryHTML(active, insights + `<div style="font-size:9px;color:var(--text-dim);text-align:right;margin-top:4px">Mis à jour le ${_cachedAISummary.date} à ${_cachedAISummary.time}</div>`);
-
-    try { await github.writeFile(`${CONFIG.DATA_PATH}/ai-summary.json`, _cachedAISummary, `[StructBoard] AI Summary ${_cachedAISummary.date}`); } catch(e){}
-    showToast('Résumé mis à jour','success');
+    try { await github.writeFile(`${CONFIG.DATA_PATH}/ai-summary.json`, _cachedAISummary, `[StructBoard] AI Summary`); } catch(e){}
+    showToast('OK','success');
   } catch(e) {
-    box.innerHTML = _buildPortfolioSummaryHTML(active, `<span style="color:var(--red)">Erreur IA: ${e.message}</span>`);
+    box.innerHTML = _buildPortfolioSummaryHTML(active, `<span style="color:var(--red)">${e.message}</span>`);
   }
   btn.disabled = false; btn.innerHTML = '🤖 Actualiser';
 }
-
 function _renderSavedSummary() {
   const active = (app.state.portfolio||[]).filter(p => !p.archived);
   if (!active.length) return '';
@@ -184,7 +184,7 @@ function _renderSavedSummary() {
   return _buildPortfolioSummaryHTML(active, insights);
 }
 
-// ═══ Upload / Integrate / Edit (unchanged) ══════════════════
+// ═══ Upload / Integrate / Edit ═══════════════════════════
 const _origProcessUploadedFile=processUploadedFile;processUploadedFile=async function(file,ctx,bid){const pr=document.getElementById('upload-progress'),st=document.getElementById('upload-status');if(pr)pr.classList.remove('hidden');try{if(st)st.textContent='Extraction...';const p=await app.handlePDFUpload(file,bid);if(st)st.textContent='OK!';if(ctx==='portfolio'){_pendingProduct=p;const m=document.getElementById('modal');m.classList.remove('visible');m.innerHTML='';setTimeout(()=>showDirectAddModal(p,bid),350);}else{closeModal();await app.addProposal(bid,p);app.render();}}catch(e){if(st)st.textContent='Erreur: '+e.message;}};
 const _origHandleManualSave=handleManualSave;handleManualSave=function(ctx,bid){const p={id:app._uid(),name:document.getElementById('f-name')?.value||'',bankId:bid||document.getElementById('f-bank')?.value||'',type:document.getElementById('f-type')?.value||'autre',underlyingType:document.getElementById('f-underlying')?.value||'autre',underlyings:[],maturity:document.getElementById('f-maturity')?.value||'',coupon:{rate:document.getElementById('f-coupon')?.value||null,type:document.getElementById('f-coupon-type')?.value||'conditionnel'},capitalProtection:{barrier:document.getElementById('f-barrier')?.value||null,level:document.getElementById('f-protection')?.value||null,protected:!!(document.getElementById('f-protection')?.value)},earlyRedemption:{possible:document.getElementById('f-autocall')?.value==='true',type:document.getElementById('f-autocall')?.value==='true'?'autocall':'none'},notes:document.getElementById('f-notes')?.value||''};if(ctx==='portfolio'){_pendingProduct=p;const m=document.getElementById('modal');m.classList.remove('visible');m.innerHTML='';setTimeout(()=>showDirectAddModal(p,bid),350);}else{closeModal();app.addProposal(bid,p);}};
 function showDirectAddModal(p,bid){const det=p?.aiParsed?.distributor||p?.aiParsed?.emitter||'';p.bankId=p.bankId||bid||'';const m=document.getElementById('modal');m.innerHTML=`<div class="modal-overlay" onclick="closeModal()"><div class="modal-content" onclick="event.stopPropagation()"><h2 class="modal-title">Ajouter au portefeuille</h2><div style="background:var(--accent-glow);border:1px solid rgba(59,130,246,0.2);border-radius:var(--radius-sm);padding:12px;margin-bottom:16px;font-size:12px"><strong style="color:var(--accent)">Produit:</strong> ${p.name||'Sans nom'}${det?'<br><strong>Distributeur:</strong> '+det:''}</div><div class="form-grid">${metadataFieldsHTML(p)}</div><div class="modal-actions"><button class="btn" onclick="closeModal();_pendingProduct=null;">Annuler</button><button class="btn success" onclick="handleDirectAdd()">✅ Ajouter</button></div></div></div>`;m.classList.add('visible');}
@@ -197,7 +197,7 @@ async function handleEditMetadata(){const p=app.state.currentProduct;if(!p)retur
 // ═══ renderProductCard ═══
 const _origRenderProductCard=renderProductCard;renderProductCard=function(product,context){if(!product.bankId||product.bankId==='undefined'||product.bankId==='null')product.bankId='';const origRate=product.coupon?.rate;if(product.coupon&&typeof getAnnualizedRate==='function'){const ann=getAnnualizedRate(product);if(ann!==origRate&&ann>0){product.coupon._origRate=origRate;product.coupon.rate=ann;}}let html=_origRenderProductCard(product,context);if(product.coupon?._origRate!==undefined){product.coupon.rate=product.coupon._origRate;delete product.coupon._origRate;}if(product.entity){const ei=MY_ENTITIES.find(e=>e.id===product.entity);if(ei){const badge=`<div class="product-card-bank" style="color:${ei.color};border-color:${ei.color}33;background:${ei.color}12;margin-left:4px">${ei.icon} ${ei.name}</div>`;const he=html.indexOf('</div></div>');if(he>=0)html=html.substring(0,he)+badge+html.substring(he);}}let extra='';if(product.archived&&typeof renderArchiveBadge==='function')extra=renderArchiveBadge(product);else if(product.tracking?.level!=null&&typeof renderTrackingGauge==='function')extra=renderTrackingGauge(product);if(extra)html=_injectBeforeLastDiv(html,extra);return html;};
 
-// ═══ renderDashboard ═══
+// ═══ renderDashboard — WITH LIQUIDITY BANNER ═════════════
 const _origRenderDashboard=renderDashboard;renderDashboard=function(container,state){
   _origRenderDashboard(container,state);
   const allP=state.portfolio||[]; const active=allP.filter(p=>!p.archived); const archived=allP.filter(p=>p.archived);
@@ -206,10 +206,22 @@ const _origRenderDashboard=renderDashboard;renderDashboard=function(container,st
   container.querySelectorAll('.stat-card.orange').forEach(c=>{const l=c.querySelector('.stat-label');if(l&&l.textContent.includes('Coupon')){const v=c.querySelector('.stat-value'),s=c.querySelector('.stat-sub');if(v)v.textContent=avg.toFixed(2).replace('.',',')+  '%';if(s)s.textContent='annualisé pondéré';}});
   const sr=container.querySelector('.stats-row');if(sr){const yc=document.createElement('div');yc.className='stat-card green';yc.innerHTML=`<div class="stat-label">Rendement Annuel</div><div class="stat-value">${formatNumber(ay)}€</div><div class="stat-sub">${avg.toFixed(2).replace('.',',')}% pondéré</div>`;sr.appendChild(yc);}
 
+  // ═══ INJECT LIQUIDITY BANNER (after stats, before tracking) ═══
+  const liqBanner = _buildLiquidityBanner();
+  if (liqBanner) {
+    const statsRowEl = container.querySelector('.stats-row');
+    if (statsRowEl) {
+      statsRowEl.insertAdjacentHTML('afterend', liqBanner);
+    } else {
+      // Fallback: insert at top of container
+      container.insertAdjacentHTML('afterbegin', liqBanner);
+    }
+  }
+
   // Tracking alerts
   if(typeof getPortfolioAlerts==='function'){const alerts=getPortfolioAlerts(active);if(alerts.length>0){const ac={danger:'rgba(229,57,53,0.15)',warn:'rgba(255,183,77,0.15)',success:'rgba(76,175,80,0.15)',info:'rgba(100,181,246,0.15)'};const ab={danger:'#E53935',warn:'#FFB74D',success:'#4CAF50',info:'#64B5F6'};const ah=alerts.map(a=>`<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:${ac[a.type]};border-left:3px solid ${ab[a.type]};border-radius:0 var(--radius-sm) var(--radius-sm) 0;cursor:pointer" onclick="app.openProduct(app._findProduct('${a.productId}','${a.bankId||''}'))"><span>${a.icon}</span><span style="font-size:12px">${a.text}</span></div>`).join('');const secs=container.querySelectorAll('.section');const ps=secs[0];if(ps){const ta=document.createElement('div');ta.style.cssText='display:flex;flex-direction:column;gap:4px;margin-bottom:16px';ta.innerHTML=`<div style="font-size:11px;font-weight:600;color:var(--text-dim);margin-bottom:4px">📍 SUIVI POSITIONS</div>${ah}`;ps.before(ta);}}}
 
-  // AI Summary panel
+  // AI Summary
   if(active.length>0){const secs=container.querySelectorAll('.section');const ps=secs[0];if(ps){
     const sh=ps.querySelector('.section-header');
     if(sh){const aiBtn=document.createElement('button');aiBtn.id='ai-summary-btn';aiBtn.className='btn ai-glow';aiBtn.style.cssText='white-space:nowrap;margin-right:8px';aiBtn.innerHTML=_cachedAISummary?'🤖 Actualiser':'🤖 Résumé IA';aiBtn.onclick=generatePortfolioSummary;sh.insertBefore(aiBtn,sh.querySelector('.btn'));}
@@ -230,6 +242,6 @@ const _origRenderProductSheet=renderProductSheet;renderProductSheet=function(con
   if(p.archived&&typeof renderArchiveSection==='function'){const sm=container.querySelector('.sheet-main');if(sm){const ad=document.createElement('div');ad.innerHTML=renderArchiveSection(p);sm.insertBefore(ad.firstElementChild,sm.firstChild);}}
   if(typeof renderTrackingSection==='function'&&!p.archived){const sm=container.querySelector('.sheet-main');if(sm){const td=document.createElement('div');td.innerHTML=renderTrackingSection(p);const fs=sm.querySelector('.fiche-section');if(fs)sm.insertBefore(td.firstElementChild,fs);else sm.appendChild(td.firstElementChild);}}
   const sub=container.querySelector('.fiche-subtitle');if(sub){sub.querySelectorAll('.fiche-tag.bank').forEach(tag=>{const t=tag.textContent.trim();if(t==='\u2014'||t.toUpperCase()==='UNDEFINED'||t===''){tag.textContent='\u270f\ufe0f Assigner';tag.style.color='var(--accent)';tag.style.borderColor='var(--accent)';}tag.style.cursor='pointer';tag.onclick=e=>{e.stopPropagation();showEditMetadataModal();};});if(p.entity){const ei=MY_ENTITIES.find(e=>e.id===p.entity);if(ei){const et=document.createElement('span');et.className='fiche-tag bank';et.style.cssText=`color:${ei.color};border-color:${ei.color};cursor:pointer`;et.textContent=`${ei.icon} ${ei.name}`;et.onclick=e=>{e.stopPropagation();showEditMetadataModal();};sub.insertBefore(et,sub.firstChild);}}if(p.archived){const ab=document.createElement('span');ab.className='fiche-tag';ab.style.cssText='color:#94A3B8;border-color:#94A3B8;background:rgba(148,163,184,0.1)';ab.textContent='\ud83d\udce6 Archivé';sub.appendChild(ab);}if(p.subscriptionDate){const d=document.createElement('span');d.style.cssText='color:var(--text-muted);font-size:11px;cursor:pointer';d.textContent=`\ud83d\udcc5 Souscrit le ${new Date(p.subscriptionDate).toLocaleDateString('fr-FR')}`;d.onclick=e=>{e.stopPropagation();showEditMetadataModal();};sub.appendChild(d);}if(p.integrationNotes){const n=document.createElement('span');n.style.cssText='color:var(--text-dim);font-size:11px;cursor:pointer';n.textContent=`\ud83d\udcac ${p.integrationNotes}`;n.onclick=e=>{e.stopPropagation();showEditMetadataModal();};sub.appendChild(n);}if(!p.entity&&!p.subscriptionDate&&!p.archived){const es=document.createElement('span');es.style.cssText='color:var(--accent);font-size:11px;cursor:pointer;text-decoration:underline';es.textContent='\u270f\ufe0f Compléter';es.onclick=e=>{e.stopPropagation();showEditMetadataModal();};sub.appendChild(es);}}
-  const sb=container.querySelector('.sheet-sidebar .action-buttons');if(sb){const eb=document.createElement('button');eb.className='btn lg';eb.style.cssText='width:100%';eb.innerHTML='\u270f\ufe0f Modifier infos';eb.onclick=()=>showEditMetadataModal();sb.insertBefore(eb,sb.firstChild);if(!p.archived){if(typeof showTrackingModal==='function'){const tb=document.createElement('button');tb.className='btn lg';tb.style.cssText='width:100%;background:var(--surface);border:1px solid var(--border)';tb.innerHTML='\ud83d\udccd Valorisation';tb.onclick=()=>showTrackingModal();sb.insertBefore(tb,sb.children[1]||null);}if(_isInPortfolio(p)&&typeof showArchiveModal==='function'){const ab=document.createElement('button');ab.className='btn lg';ab.style.cssText='width:100%;background:rgba(148,163,184,0.1);border:1px solid #94A3B8;color:#94A3B8';ab.innerHTML='\ud83d\udce6 Archiver (produit terminé)';ab.onclick=()=>showArchiveModal();sb.appendChild(ab);}}}
+  const sb=container.querySelector('.sheet-sidebar .action-buttons');if(sb){const eb=document.createElement('button');eb.className='btn lg';eb.style.cssText='width:100%';eb.innerHTML='\u270f\ufe0f Modifier infos';eb.onclick=()=>showEditMetadataModal();sb.insertBefore(eb,sb.firstChild);if(!p.archived){if(typeof showTrackingModal==='function'){const tb=document.createElement('button');tb.className='btn lg';tb.style.cssText='width:100%;background:var(--surface);border:1px solid var(--border)';tb.innerHTML='\ud83d\udccd Valorisation';tb.onclick=()=>showTrackingModal();sb.insertBefore(tb,sb.children[1]||null);}if(_isInPortfolio(p)&&typeof showArchiveModal==='function'){const ab=document.createElement('button');ab.className='btn lg';ab.style.cssText='width:100%;background:rgba(148,163,184,0.1);border:1px solid #94A3B8;color:#94A3B8';ab.innerHTML='\ud83d\udce6 Archiver';ab.onclick=()=>showArchiveModal();sb.appendChild(ab);}}}
   if(_isInPortfolio(p)&&!p.archived){const n=container.querySelector('.integrated-notice');if(n){const rd=p.subscriptionDate?new Date(p.subscriptionDate).toLocaleDateString('fr-FR'):formatDate(p.addedDate);const el=p.entity?(MY_ENTITIES.find(e=>e.id===p.entity)?.name||''):'';const bl=p.bankId?(BANKS_LIST.find(b=>b.id===p.bankId)?.name||p.bankId):'';n.innerHTML=`\u2705 Intégré le ${rd}${el?'<br>\ud83c\udfe2 '+el:''}${bl?'<br>\ud83c\udfe6 '+bl:''}<br>Montant: ${formatNumber(p.investedAmount)}\u20ac${p.integrationNotes?'<br><span style="color:var(--text-dim);font-size:11px">'+p.integrationNotes+'</span>':''}`;}}
 };
