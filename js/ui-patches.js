@@ -1,12 +1,19 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — UI Patches v2.0 — Compact product detail sections
+// STRUCTBOARD — UI Patches v2.1 — Compact sections + missing helper
 // ═══════════════════════════════════════════════════════════════
-// Merges Coupon + Capital + Autocall into a single 3-column row
 
+// ─── _injectBeforeLastDiv: used by proposal-patches.js ───
+// Injects HTML before the last closing </div> of a string
+function _injectBeforeLastDiv(html, inject) {
+    var lastDiv = html.lastIndexOf('</div>');
+    if (lastDiv === -1) return html + inject;
+    return html.substring(0, lastDiv) + inject + html.substring(lastDiv);
+}
+
+// ─── Compact 3-column product detail sections ───
 (function() {
     'use strict';
 
-    // Wait for renderProductSheet to exist, then patch it
     var _patchAttempts = 0;
     var _patchInterval = setInterval(function() {
         _patchAttempts++;
@@ -17,17 +24,15 @@
         var _origRenderSheet = renderProductSheet;
         renderProductSheet = function(container, state) {
             _origRenderSheet(container, state);
-            // After original render, merge the 3 sections
             setTimeout(function() { _mergeProductSections(container); }, 10);
         };
-        console.log('[UI-Patches] v2.0 — compact 3-col sections');
+        console.log('[UI-Patches] v2.1 — compact 3-col + _injectBeforeLastDiv');
     }, 50);
 
     function _mergeProductSections(container) {
         var sheetMain = container.querySelector('.sheet-main');
         if (!sheetMain) return;
 
-        // Find the 3 target sections by their icon
         var sections = sheetMain.querySelectorAll('.fiche-section');
         var couponSection = null, capitalSection = null, autocallSection = null;
 
@@ -40,16 +45,13 @@
             else if (t.indexOf('remboursement') >= 0 || t.indexOf('anticip') >= 0) autocallSection = sec;
         });
 
-        // Only merge if we found all 3
         if (!couponSection || !capitalSection || !autocallSection) return;
 
-        // Extract the info-box content from each section
         var couponBody = couponSection.querySelector('.fiche-section-body');
         var capitalBody = capitalSection.querySelector('.fiche-section-body');
         var autocallBody = autocallSection.querySelector('.fiche-section-body');
         if (!couponBody || !capitalBody || !autocallBody) return;
 
-        // Create the merged 3-column section
         var merged = document.createElement('div');
         merged.className = 'fiche-section';
         merged.setAttribute('data-section', 'product-details-compact');
@@ -64,10 +66,7 @@
             '<div>' + autocallBody.innerHTML + '</div>' +
             '</div></div>';
 
-        // Insert merged section where couponSection was
         couponSection.parentNode.insertBefore(merged, couponSection);
-
-        // Remove the 3 original sections
         couponSection.remove();
         capitalSection.remove();
         autocallSection.remove();
