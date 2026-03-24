@@ -655,39 +655,144 @@
     "entity": "cameleons",
     "entityName": "Caméleons",
     "grading": {
-      "grade": "-",
-      "score": null,
+      "grade": "C",
+      "score": 49,
       "killCriteria": {
         "triggered": false,
         "reasons": []
       },
       "pillars": {
         "adjustedReturn": {
-          "score": null
+          "score": 30,
+          "base": 40,
+          "delta": -10,
+          "reasoning": "Rendement: base 40 → -10 = 30 (Panier fragile avec BMPS en forte baisse (-22.74% YTD), vol élevées (30-36%) et barrière 60% trop proche avec ce niveau de risque) | Coupon 7%, barrière 60%"
         },
         "underlyingQuality": {
-          "score": null
+          "score": 51,
+          "base": 63,
+          "delta": -12,
+          "reasoning": "Qualité: base 63 → -12 = 51 (Exposition lourde aux financières (BMPS/UCG) défavorisées en macro + données manquantes Novo Nordisk créent opacité majeure) [vol/DD 30%] | Worst: Veolia Environnement SA B:28"
         },
         "portfolioFit": {
-          "score": null
+          "score": 70,
+          "base": 70,
+          "delta": 0,
+          "reasoning": "En portefeuille — neutre"
         },
         "riskPremium": {
-          "score": null
+          "score": 70,
+          "base": 75,
+          "delta": -5,
+          "reasoning": "Prime: base 75 → -5 = 70 (Coupon 7% insuffisant pour compenser risque réel du panier, notamment BMPS en détresse) | 7% vs CAT 2.5% (spread 4.5%)"
         }
       },
-      "verdict": "Produit de liquidité / parking cash. Non gradable comme produit structuré.",
+      "verdict": "Produit risqué avec panier déséquilibré : 40% financières italiennes fragiles (BMPS -22.74% YTD, vol 36%) en contexte macro défavorable. Novo Nordisk non analysable. Coupon 7% inadéquat pour ce niveau de risque avec barrière 60% trop proche. Structure pénalisée par maillon faible Veolia et volatilités élevées limitant probabilité d'autocall.",
       "keyRisks": [
-        "Rendement très faible",
-        "Alternative : CAT ou livret"
+        "Crise bancaire italienne : BMPS et UCG vulnérables aux tensions sectorielles",
+        "Données manquantes Novo Nordisk : impossible d'évaluer 20% du panier"
       ],
-      "scenarios": null,
+      "negotiationPoints": [],
+      "scenarios": {
+        "optimistic": {
+          "return_pct": 7,
+          "return_eur": 2100,
+          "probability": 0.2,
+          "duration_years": 1
+        },
+        "base": {
+          "return_pct": 3.5,
+          "return_eur": 6300,
+          "probability": 0.3,
+          "duration_years": 3
+        },
+        "stress": {
+          "return_pct": 0,
+          "return_eur": 0,
+          "probability": 0.35,
+          "duration_years": 6
+        },
+        "worst": {
+          "return_pct": -25,
+          "return_eur": -7500,
+          "probability": 0.15,
+          "duration_years": 6
+        }
+      },
       "metadata": {
-        "gradedAt": "2026-03-24T12:51:53.986Z",
-        "durationMs": 0,
-        "aiUsed": false,
+        "gradedAt": "2026-03-24T12:52:03.127Z",
+        "durationMs": 12805,
+        "aiUsed": true,
         "version": "4.1",
-        "productType": "liquidity",
-        "isInPortfolio": true
+        "productType": "standard",
+        "marketDataAvailable": true,
+        "catBenchmark": 2.5,
+        "catSource": "fallback-2026",
+        "couponAnnualized": 7,
+        "couponRaw": 7,
+        "couponMultiplier": 1,
+        "couponFrequency": "annuel",
+        "isInPortfolio": true,
+        "hasBarrier": true,
+        "barrierPct": 60,
+        "baseScore": 59,
+        "baseGrade": "C",
+        "adjustments": {
+          "p1": -10,
+          "p2": -12,
+          "p3": 0,
+          "p4": -5
+        },
+        "stockData": [
+          {
+            "name": "Banca Monte dei Paschi di Siena SpA",
+            "ticker": "BMPS",
+            "sector": "Finance",
+            "perf_ytd": -22.74,
+            "perf_1y": null,
+            "volatility_3y": 36.43,
+            "max_drawdown_3y": 25.51,
+            "buffett_score": null,
+            "quality_score": 48,
+            "buffett_grade": null
+          },
+          {
+            "name": "Enel SpA",
+            "ticker": "ENEL",
+            "sector": "Services publics",
+            "perf_ytd": 3.35,
+            "perf_1y": 25.04,
+            "volatility_3y": 18.95,
+            "max_drawdown_3y": 16.27,
+            "buffett_score": 30,
+            "quality_score": 49,
+            "buffett_grade": "D"
+          },
+          {
+            "name": "UniCredit SpA",
+            "ticker": "UCG",
+            "sector": "Finance",
+            "perf_ytd": -16,
+            "perf_1y": 11.91,
+            "volatility_3y": 30.05,
+            "max_drawdown_3y": 24.12,
+            "buffett_score": null,
+            "quality_score": 83,
+            "buffett_grade": null
+          },
+          {
+            "name": "Veolia Environnement SA",
+            "ticker": "VIE",
+            "sector": "Services publics",
+            "perf_ytd": 6.46,
+            "perf_1y": -0.47,
+            "volatility_3y": 19.2,
+            "max_drawdown_3y": 16.28,
+            "buffett_score": 28,
+            "quality_score": 62,
+            "buffett_grade": "D"
+          }
+        ]
       }
     }
   },
