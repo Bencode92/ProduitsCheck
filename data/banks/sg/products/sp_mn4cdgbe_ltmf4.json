@@ -138,78 +138,76 @@
     }
   },
   "grading": {
-    "grade": "D",
-    "score": 38,
+    "grade": "C",
+    "score": 56,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 45,
+        "score": 50,
         "base": 55,
-        "delta": -10,
-        "reasoning": "Rendement: base 55 → -10 = 45 (Produit taux fixe callable sans protection barrière - risque de remboursement anticipé défavorable en cas de baisse des taux) | Coupon 4%, protégé"
+        "delta": -5,
+        "reasoning": "Rendement: base 55 → -5 = 50 (Taux fixes 4% insuffisants face à l'inflation persistante et aux taux directeurs élevés) | Coupon 4%, protégé"
       },
       "underlyingQuality": {
-        "score": 35,
-        "base": 50,
-        "delta": -15,
-        "reasoning": "Qualité: base 50 → -15 = 35 (Absence totale de sous-jacents identifiés - impossible d'évaluer la qualité fondamentale et la cohérence avec le régime macro neutral) [B/Q 35%]"
+        "score": 80,
+        "base": 75,
+        "delta": 5,
+        "reasoning": "Qualité: base 75 → +5 = 80 (Qualité crédit émetteur solide dans un contexte de resserrement des spreads corporate) [crédit émetteur]"
       },
       "portfolioFit": {
-        "score": 55,
+        "score": 60,
         "base": 70,
-        "delta": -15,
-        "reasoning": "Fit: base 70 → -15 = 55 (Fit impossible à déterminer sans connaissance des sous-jacents, incompatible avec une allocation diversifiée)"
+        "delta": -10,
+        "reasoning": "Fit: base 70 → -10 = 60 (Produit de taux peu adapté en période d'incertitude sur l'évolution des taux directeurs)"
       },
       "riskPremium": {
-        "score": 20,
+        "score": 35,
         "base": 25,
-        "delta": -5,
-        "reasoning": "Prime: base 25 → -5 = 20 (Prime callable défavorable à l'investisseur - l'émetteur peut rembourser anticipé si les conditions deviennent favorables) | 4% vs CAT 2.5% (spread 1.5%)"
+        "delta": 10,
+        "reasoning": "Prime: base 25 → +10 = 35 (Prime d'illiquidité justifiée pour un callable, structure simple sans complexité excessive) | 4% vs CAT 2.5% (spread 1.5%)"
       }
     },
-    "verdict": "Produit structuré incomplet avec des données critiques manquantes (sous-jacents, maturité). Le coupon fixe 4% callable présente un risque asymétrique défavorable - l'émetteur peut exercer l'option de remboursement anticipé si les taux baissent ou si les sous-jacents performent bien. Sans visibilité sur les actifs sous-jacents, impossible d'évaluer la pertinence macro ou la qualité fondamentale. Grade final D (34/100) reflète ces incertitudes majeures.",
+    "verdict": "Cette obligation callable offre un rendement garanti de 4% avec possibilité de bonus à 5% en cas de rappel anticipé. Dans le contexte actuel de taux élevés, le risque principal est un rappel rapide par l'émetteur si les taux baissent, forçant un réinvestissement à des conditions moins favorables. La qualité crédit de l'émetteur compense partiellement ce risque de réinvestissement. Le produit convient aux investisseurs cherchant de la visibilité sur le rendement mais avec une tolérance limitée au risque de taux.",
     "keyRisks": [
-      "Risque de remboursement anticipé défavorable via la clause callable",
-      "Exposition inconnue sans identification des sous-jacents"
+      "Risque de rappel anticipé si les taux baissent, obligeant un réinvestissement à des taux plus faibles",
+      "Risque de crédit de l'émetteur sur 6 ans maximum, même si la notation semble solide"
     ],
-    "negotiationPoints": [
-      "Exiger la liste complète des sous-jacents avant tout engagement",
-      "Clarifier les conditions précises d'exercice de l'option callable"
-    ],
+    "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 4,
-        "return_eur": 4000,
-        "probability": 0.2,
-        "duration_years": 1
-      },
-      "base": {
-        "return_pct": 2,
-        "return_eur": 6000,
+        "return_pct": 15,
+        "return_eur": 15000,
         "probability": 0.3,
         "duration_years": 3
       },
+      "base": {
+        "return_pct": 20,
+        "return_eur": 20000,
+        "probability": 0.4,
+        "duration_years": 4
+      },
       "stress": {
-        "return_pct": 1,
-        "return_eur": 3000,
-        "probability": 0.35,
-        "duration_years": 3
+        "return_pct": 24,
+        "return_eur": 24000,
+        "probability": 0.25,
+        "duration_years": 6
       },
       "worst": {
-        "return_pct": 0,
-        "return_eur": 0,
-        "probability": 0.15,
-        "duration_years": 1
+        "return_pct": -80,
+        "return_eur": -80000,
+        "probability": 0.05,
+        "duration_years": 6
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-24T08:19:50.571Z",
-      "durationMs": 12619,
+      "gradedAt": "2026-03-24T08:45:53.924Z",
+      "durationMs": 11336,
       "aiUsed": true,
-      "version": "4.0",
+      "version": "4.1",
+      "productType": "fixed-rate-callable",
       "marketDataAvailable": false,
       "catBenchmark": 2.5,
       "catSource": "fallback-2026",
@@ -220,14 +218,13 @@
       "isInPortfolio": false,
       "hasBarrier": false,
       "barrierPct": 0,
-      "p2Weights": "buffett-quality-35",
-      "baseScore": 49,
+      "baseScore": 56,
       "baseGrade": "C",
       "adjustments": {
-        "p1": -10,
-        "p2": -15,
-        "p3": -15,
-        "p4": -5
+        "p1": -5,
+        "p2": 5,
+        "p3": -10,
+        "p4": 10
       }
     }
   }
