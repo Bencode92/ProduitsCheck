@@ -147,41 +147,41 @@
   },
   "grading": {
     "grade": "B",
-    "score": 63,
+    "score": 67,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 48,
-        "base": 58,
-        "delta": -10,
-        "reasoning": "Rendement: base 58 → -10 = 48 (Volatilité élevée (25.94%) augmente significativement le risque d'activation de barrière sur action unique) | Coupon 7.5% (1.875×4), barrière 60%"
+        "score": 51,
+        "base": 59,
+        "delta": -8,
+        "reasoning": "Rendement: base 59 → -8 = 51 (Volatilité élevée (25.94%) et drawdown sévère (41.67%) réduisent la probabilité d'autocall rapide sur titre unique.) | Coupon 7.5% (1.875×4), barrière 60%"
       },
       "underlyingQuality": {
         "score": 73,
         "base": 85,
         "delta": -12,
-        "reasoning": "Qualité: base 85 → -12 = 73 (Secteur financier évité en contexte macro neutral, malgré ROE solide (25.21%) le drawdown de 41.67% révèle une fragilité structurelle) [vol/DD 30%] | Worst: Action BNP Paribas (FR0000131104) B:100"
+        "reasoning": "Qualité: base 85 → -12 = 73 (Financials évitées en macro + exposition pure BNP sans diversification + beta 0.91 amplifie le stress systémique.) [vol/DD 30%] | Worst: Action BNP Paribas (FR0000131104) B:100"
       },
       "portfolioFit": {
-        "score": 52,
-        "base": 60,
-        "delta": -8,
-        "reasoning": "Fit: base 60 → -8 = 52 (Exposition mono-valeur sur secteur financier non recommandé actuellement, absence de diversification sectorielle)"
+        "score": 70,
+        "base": 70,
+        "delta": 0,
+        "reasoning": "En portefeuille — neutre"
       },
       "riskPremium": {
-        "score": 80,
-        "base": 83,
-        "delta": -3,
-        "reasoning": "Prime: base 83 → -3 = 80 (Prime correcte mais risque concentration sur action unique justifie léger ajustement à la baisse) | 7.5% vs CAT 2.5% (spread 5.0%)"
+        "score": 79,
+        "base": 84,
+        "delta": -5,
+        "reasoning": "Prime: base 84 → -5 = 79 (Prime semble généreuse mais justifiée par la volatilité et le risque sectoriel financier actuel.) | 7.5% vs CAT 2.5% (spread 5.0%)"
       }
     },
-    "verdict": "Ce Phoenix sur BNP Paribas présente des fondamentaux solides (ROE 25.21%, Buffett 100) mais souffre de défauts structurels majeurs. L'exposition mono-valeur sur le secteur financier, évité en contexte macro neutral, combinée à une volatilité élevée (25.94%) et un drawdown historique de 41.67%, fragilise significativement le profil risque-rendement. Le coupon de 7.5% ne compense pas suffisamment ces risques concentrés.",
+    "verdict": "Ce produit présente un risque significatif avec une exposition pure sur BNP Paribas, secteur financier actuellement évité. Malgré un ROE solide (25.21%), la volatilité élevée et le drawdown de 41.67% compromettent la probabilité d'autocall rapide. Le coupon 7.5% compense partiellement mais l'absence de diversification amplifie le risque de franchise de barrière. Structure adaptée uniquement aux investisseurs convaincus par la reprise des financières.",
     "keyRisks": [
-      "Risque de concentration extrême sur action unique du secteur financier",
-      "Volatilité élevée (25.94%) augmentant la probabilité d'activation de barrière à 60%"
+      "Exposition pure BNP sans diversification - vulnérabilité maximale aux chocs sectoriels financiers",
+      "Volatilité 25.94% et drawdown 41.67% augmentent significativement le risque de franchise de barrière 60%"
     ],
     "negotiationPoints": [],
     "scenarios": {
@@ -194,27 +194,28 @@
       "base": {
         "return_pct": 4.5,
         "return_eur": 4050,
-        "probability": 0.3,
+        "probability": 0.35,
         "duration_years": 3
       },
       "stress": {
-        "return_pct": -15,
-        "return_eur": -4500,
-        "probability": 0.35,
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.3,
         "duration_years": 6
       },
       "worst": {
-        "return_pct": -40,
-        "return_eur": -12000,
+        "return_pct": -25,
+        "return_eur": -7500,
         "probability": 0.15,
         "duration_years": 6
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-24T08:13:37.585Z",
-      "durationMs": 11525,
+      "gradedAt": "2026-03-24T17:02:16.882Z",
+      "durationMs": 11268,
       "aiUsed": true,
-      "version": "4.0",
+      "version": "4.3",
+      "productType": "standard",
       "marketDataAvailable": true,
       "catBenchmark": 2.5,
       "catSource": "fallback-2026",
@@ -222,18 +223,34 @@
       "couponRaw": 1.875,
       "couponMultiplier": 4,
       "couponFrequency": "trimestriel",
-      "isInPortfolio": false,
+      "isInPortfolio": true,
       "hasBarrier": true,
       "barrierPct": 60,
-      "p2Weights": "vol-dd-30",
-      "baseScore": 71,
-      "baseGrade": "B",
+      "expectedMaturity": 0,
+      "maxMaturity": 0,
+      "maxBeta": 0.91,
+      "baseScore": 76,
+      "baseGrade": "A",
       "adjustments": {
-        "p1": -10,
+        "p1": -8,
         "p2": -12,
-        "p3": -8,
-        "p4": -3
-      }
+        "p3": 0,
+        "p4": -5
+      },
+      "stockData": [
+        {
+          "name": "Action BNP Paribas (FR0000131104)",
+          "ticker": "RMS",
+          "sector": "Biens de consommation cycliques",
+          "perf_ytd": -21.96,
+          "perf_1y": -34.08,
+          "volatility_3y": 25.94,
+          "max_drawdown_3y": 41.67,
+          "buffett_score": 100,
+          "quality_score": 70,
+          "buffett_grade": "A"
+        }
+      ]
     }
   }
 }
