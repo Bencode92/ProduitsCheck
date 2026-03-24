@@ -136,5 +136,99 @@
       "redundancy": 6,
       "complementarity": 45
     }
+  },
+  "grading": {
+    "grade": "D",
+    "score": 38,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 45,
+        "base": 55,
+        "delta": -10,
+        "reasoning": "Rendement: base 55 → -10 = 45 (Produit taux fixe callable sans protection barrière - risque de remboursement anticipé défavorable en cas de baisse des taux) | Coupon 4%, protégé"
+      },
+      "underlyingQuality": {
+        "score": 35,
+        "base": 50,
+        "delta": -15,
+        "reasoning": "Qualité: base 50 → -15 = 35 (Absence totale de sous-jacents identifiés - impossible d'évaluer la qualité fondamentale et la cohérence avec le régime macro neutral) [B/Q 35%]"
+      },
+      "portfolioFit": {
+        "score": 55,
+        "base": 70,
+        "delta": -15,
+        "reasoning": "Fit: base 70 → -15 = 55 (Fit impossible à déterminer sans connaissance des sous-jacents, incompatible avec une allocation diversifiée)"
+      },
+      "riskPremium": {
+        "score": 20,
+        "base": 25,
+        "delta": -5,
+        "reasoning": "Prime: base 25 → -5 = 20 (Prime callable défavorable à l'investisseur - l'émetteur peut rembourser anticipé si les conditions deviennent favorables) | 4% vs CAT 2.5% (spread 1.5%)"
+      }
+    },
+    "verdict": "Produit structuré incomplet avec des données critiques manquantes (sous-jacents, maturité). Le coupon fixe 4% callable présente un risque asymétrique défavorable - l'émetteur peut exercer l'option de remboursement anticipé si les taux baissent ou si les sous-jacents performent bien. Sans visibilité sur les actifs sous-jacents, impossible d'évaluer la pertinence macro ou la qualité fondamentale. Grade final D (34/100) reflète ces incertitudes majeures.",
+    "keyRisks": [
+      "Risque de remboursement anticipé défavorable via la clause callable",
+      "Exposition inconnue sans identification des sous-jacents"
+    ],
+    "negotiationPoints": [
+      "Exiger la liste complète des sous-jacents avant tout engagement",
+      "Clarifier les conditions précises d'exercice de l'option callable"
+    ],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 4,
+        "return_eur": 4000,
+        "probability": 0.2,
+        "duration_years": 1
+      },
+      "base": {
+        "return_pct": 2,
+        "return_eur": 6000,
+        "probability": 0.3,
+        "duration_years": 3
+      },
+      "stress": {
+        "return_pct": 1,
+        "return_eur": 3000,
+        "probability": 0.35,
+        "duration_years": 3
+      },
+      "worst": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.15,
+        "duration_years": 1
+      }
+    },
+    "metadata": {
+      "gradedAt": "2026-03-24T08:19:50.571Z",
+      "durationMs": 12619,
+      "aiUsed": true,
+      "version": "4.0",
+      "marketDataAvailable": false,
+      "catBenchmark": 2.5,
+      "catSource": "fallback-2026",
+      "couponAnnualized": 4,
+      "couponRaw": 4,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": false,
+      "barrierPct": 0,
+      "p2Weights": "buffett-quality-35",
+      "baseScore": 49,
+      "baseGrade": "C",
+      "adjustments": {
+        "p1": -10,
+        "p2": -15,
+        "p3": -15,
+        "p4": -5
+      }
+    }
   }
 }
