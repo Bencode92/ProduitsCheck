@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Grader UI Patch v1.6 — Stock table fuzzy fix
+// STRUCTBOARD — Grader UI Patch v1.7 — Batch re-grade all
 // ═══════════════════════════════════════════════════════════════
 
 (function() {
@@ -59,7 +59,6 @@
             showToast('Grading en cours...', 'info');
             const result = await ProposalGrader.grade(product);
 
-            // ─── ATTACH STOCK DATA using _extractStockData (with fuzzy matching) ───
             try {
                 if (_mktCache && result && result.metadata && typeof _extractStockData === 'function') {
                     var norm = ProposalGrader.normalize(product);
@@ -83,7 +82,7 @@
             app.openProduct(product);
             var gc = ProposalGrader.config.grades[result.grade] || {};
             var saveNote = saveResult.portfolio ? ' (portefeuille \u2713)' : (saveResult.proposal ? ' (proposition \u2713)' : '');
-            showToast('Grade ' + result.grade + ' \u2014 ' + (gc.label || '') + ' (' + (result.score !== null ? result.score + '/100' : 'liquidité') + ')' + saveNote, 'success');
+            showToast('Grade ' + result.grade + ' \u2014 ' + (gc.label || '') + ' (' + (result.score !== null ? result.score + '/100' : 'liquidit\u00e9') + ')' + saveNote, 'success');
         } catch (e) {
             console.error('[Grader] Error:', e);
             if (btn) { btn.textContent = '\u274c Erreur'; btn.disabled = false; }
@@ -169,8 +168,6 @@
             const gd = document.createElement('div');
             gd.className = 'fiche-section';
             gd.setAttribute('data-section', 'grading');
-
-            // Buttons: Actualiser + Marquer Liquidité
             var btns = '';
             if (p.grading) {
                 btns = '<button onclick="triggerGrading(this)" style="margin-left:auto;padding:4px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;font-size:11px;display:flex;align-items:center;gap:4px">\ud83d\udd04 Actualiser</button>';
@@ -181,7 +178,6 @@
 
             var gradingHtml = ProposalGrader.renderSection(p.grading);
 
-            // INJECT STOCK TABLE
             if (p.grading && p.grading.metadata && p.grading.metadata.stockData && p.grading.metadata.stockData.length > 0) {
                 var stockTableHtml = _renderStockTable(p.grading.metadata.stockData);
                 var insertPoint = gradingHtml.indexOf('grid-template-columns:repeat(4');
@@ -284,7 +280,7 @@
                 var pc = (app.state.portfolio || []).length > 0 ? { available: true, currentIssuerPct: 0, overlappingUnderlyings: [], totalProducts: app.state.portfolio.length } : { available: false };
                 var kc = ProposalGrader.checkKillCriteria(n, pc, { bestRate: 3.0 });
                 if (kc.killed) {
-                    result.grading = { grade: 'F', score: 0, killCriteria: { triggered: true, reasons: kc.reasons }, verdict: 'Rejet automatique : ' + kc.reasons[0], metadata: { gradedAt: new Date().toISOString(), aiUsed: false, version: '1.6' } };
+                    result.grading = { grade: 'F', score: 0, killCriteria: { triggered: true, reasons: kc.reasons }, verdict: 'Rejet automatique : ' + kc.reasons[0], metadata: { gradedAt: new Date().toISOString(), aiUsed: false, version: '1.7' } };
                     await app._saveProductFile(bankId, result);
                     showToast('\u26d4 Grade F \u2014 ' + kc.reasons[0], 'error');
                 }
@@ -293,19 +289,41 @@
         return result;
     };
 
-    // ─── 8. Batch grade button ───────────────────────────────────
+    // ─── 8. Batch grade buttons ──────────────────────────────────
     var _dashPatch = function(container, state) {
         setTimeout(function() {
             container.querySelectorAll('.section-header').forEach(function(header) {
                 var title = header.querySelector('.section-title');
+
+                // ── PROPOSALS: "Grader tout" (ungraded) ──
                 if (title && title.textContent.includes('Propositions') && !header.querySelector('.btn-grade-all')) {
-                    var ungraded = Object.values(state.proposals).flat().filter(function(p) { return !p.grading; });
+                    var allProps = Object.values(state.proposals).flat();
+                    var ungraded = allProps.filter(function(p) { return !p.grading; });
+                    var gradable = allProps.filter(function(p) { return !p.grading || (p.grading.grade !== '-' && p.grading.grade !== '?'); });
                     if (ungraded.length > 0) {
                         var btn = document.createElement('button'); btn.className = 'btn btn-grade-all'; btn.style.cssText = 'margin-right:8px;white-space:nowrap';
                         btn.innerHTML = '\ud83c\udfaf Grader tout (' + ungraded.length + ')';
-                        btn.onclick = function() { _handleBatch(state); };
+                        btn.onclick = function() { _handleBatch(state, 'ungraded'); };
                         var ab = header.querySelector('.btn.primary');
                         if (ab) header.insertBefore(btn, ab);
+                    }
+                }
+
+                // ── PORTFOLIO: "🔄 Actualiser tout" (re-grade all) ──
+                if (title && title.textContent.includes('Portefeuille') && !header.querySelector('.btn-regrade-all')) {
+                    var pfGradable = (state.portfolio || []).filter(function(p) {
+                        return p.grading && p.grading.grade && p.grading.grade !== '-' && p.grading.grade !== '?';
+                    });
+                    if (pfGradable.length > 0) {
+                        var reBtn = document.createElement('button');
+                        reBtn.className = 'btn btn-regrade-all';
+                        reBtn.style.cssText = 'margin-right:8px;white-space:nowrap';
+                        reBtn.innerHTML = '\ud83d\udd04 Actualiser tout (' + pfGradable.length + ')';
+                        reBtn.onclick = function() { _handleBatch(state, 'portfolio'); };
+                        // Insert before "📊 Optimiser" or first btn
+                        var optBtn = header.querySelector('.btn-struct-opt') || header.querySelector('.btn.primary') || header.querySelector('.btn');
+                        if (optBtn) header.insertBefore(reBtn, optBtn);
+                        else header.appendChild(reBtn);
                     }
                 }
             });
@@ -314,19 +332,78 @@
     var _di2 = setInterval(function() { if (typeof renderDashboard === 'function') { var _cd2 = renderDashboard; renderDashboard = function(c, s) { _cd2(c, s); _dashPatch(c, s); }; clearInterval(_di2); } }, 100);
     setTimeout(function() { clearInterval(_di2); }, 5000);
 
-    async function _handleBatch(state) {
-        var ungraded = Object.values(state.proposals).flat().filter(function(p) { return !p.grading; });
-        if (!ungraded.length) { showToast('Tout grad\u00e9', 'info'); return; }
-        if (!confirm('Grader ' + ungraded.length + ' propositions ?')) return;
-        showToast('Grading...', 'info');
+    // ─── BATCH HANDLER (supports both modes) ─────────────────────
+    async function _handleBatch(state, mode) {
+        var products = [];
+        var label = '';
+
+        if (mode === 'ungraded') {
+            // Only ungraded proposals
+            products = Object.values(state.proposals).flat().filter(function(p) { return !p.grading; });
+            label = products.length + ' propositions non grad\u00e9es';
+        } else if (mode === 'portfolio') {
+            // All gradable portfolio products (re-grade with fresh market data)
+            products = (state.portfolio || []).filter(function(p) {
+                return p.grading && p.grading.grade && p.grading.grade !== '-';
+            });
+            label = products.length + ' produits portefeuille';
+        } else if (mode === 'all') {
+            // Everything: portfolio + proposals (excluding liquidity)
+            var pf = (state.portfolio || []).filter(function(p) {
+                return !p.grading || p.grading.grade !== '-';
+            });
+            var pr = Object.values(state.proposals).flat().filter(function(p) {
+                return !p.grading || (p.grading.grade !== '-' && p.grading.grade !== '?');
+            });
+            products = pf.concat(pr);
+            label = products.length + ' produits (portefeuille + propositions)';
+        }
+
+        if (!products.length) { showToast('Rien \u00e0 grader', 'info'); return; }
+
+        var duration = Math.ceil(products.length * 2.5 / 60);
+        if (!confirm('Actualiser ' + label + ' ?\nDur\u00e9e estim\u00e9e : ~' + duration + ' min (' + products.length + ' appels Claude)')) return;
+
+        // Clear market cache to get fresh data
+        if (typeof _mktCache !== 'undefined') { _mktCache = null; _mktCacheTs = 0; }
+
+        showToast('Grading de ' + label + '...', 'info');
+
         try {
-            var results = await ProposalGrader.gradeBatch(ungraded, function(i, t, r) { showToast(i + '/' + t + ' \u2014 ' + r.grading.grade, 'info'); });
-            for (var j = 0; j < results.length; j++) { await _saveGrading(results[j].proposal); }
-            var counts = {}; results.forEach(function(r) { counts[r.grading.grade] = (counts[r.grading.grade]||0)+1; });
+            // Delete existing grades to force re-grade
+            products.forEach(function(p) { delete p.grading; });
+
+            var results = await ProposalGrader.gradeBatch(products, function(i, t, r) {
+                showToast(i + '/' + t + ' \u2014 ' + (r.proposal?.name || '').substring(0, 20) + ' \u2192 ' + r.grading.grade, 'info');
+            });
+
+            // Save all graded products
+            var pfSaved = false;
+            for (var j = 0; j < results.length; j++) {
+                var product = results[j].proposal;
+                // Save proposals individually
+                if (product.bankId) {
+                    try { await app._saveProductFile(product.bankId, product); } catch(e) {}
+                }
+                // Mark portfolio for batch save
+                var pfP = (state.portfolio || []).find(function(p) { return p.id === product.id; });
+                if (pfP) { pfP.grading = product.grading; pfSaved = true; }
+            }
+
+            // Save portfolio once (not per product)
+            if (pfSaved) {
+                try { await github.writeFile(CONFIG.DATA_PATH + '/portfolio.json', state.portfolio, '[StructBoard] Batch re-grade ' + results.length + ' products'); } catch(e) {}
+            }
+
+            var counts = {};
+            results.forEach(function(r) { counts[r.grading.grade] = (counts[r.grading.grade] || 0) + 1; });
             showToast('Termin\u00e9 : ' + Object.entries(counts).map(function(e) { return e[1] + '\u00d7' + e[0]; }).join(', '), 'success');
             app.render();
         } catch(e) { showToast('Erreur: ' + e.message, 'error'); }
     }
 
-    console.log('[StructBoard] GraderUI v1.6 \u2014 fuzzy stock table + liquidity button');
+    // ─── GLOBAL: "Actualiser tout" from anywhere ─────────────────
+    window.batchReGradeAll = function() { _handleBatch(app.state, 'all'); };
+
+    console.log('[StructBoard] GraderUI v1.7 \u2014 batch re-grade all (portfolio + proposals)');
 })();
