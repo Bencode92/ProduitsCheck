@@ -1,9 +1,10 @@
-// STRUCTBOARD — Proposal Grader v4.1 — Liquidity detection + WO8 + callable
-// Changes from v4.0:
-// - Kill WO threshold: 5 → 8 (Magnificent 7 + Netflix = 8 SJ, legitimate)
-// - Liquidity product detection (Bond 12M, fonds monétaire) → skip grading
-// - Fixed rate callable detection → adapted P2 (credit quality, not equity)
-// - Removed minCouponAnnualized kill (catches liquidity products unfairly)
+// STRUCTBOARD — Proposal Grader v4.2 — Post-audit scoring refinements
+// 5 changes from expert audit (validated):
+// 1. P1 barrier convex ^1.5 (was linear)
+// 2. P1 flat penalty -15 → -25 (no barrier, non-protected)
+// 3. P1 WO penalty non-linear (n-2)^1.3 (was linear *3)
+// 4. P2 neutral score 50 → 35 (missing data = prudence)
+// 5. P4 concave beyond 400bps (was fully linear)
 
 const GRADING_CONFIG = {
     weightsProposal: { adjustedReturn: 0.30, underlyingQuality: 0.25, portfolioFit: 0.20, riskPremium: 0.25 },
@@ -19,27 +20,11 @@ const GRADING_CONFIG = {
     killCriteria: { maxWorstOfUnderlyings: 8 }
 };
 
-// ═══════════════════════════════════════════════════════════════
-// PRODUCT TYPE DETECTION
-// ═══════════════════════════════════════════════════════════════
-
-// Liquidity products: cash parking, money market, not a real structured product
+// ═══ PRODUCT TYPE DETECTION ═══
 var LIQUIDITY_KEYWORDS = ['bond 12m', 'compartiment', 'fonds monetaire', 'fonds monétaire', 'money market', 'cash fund', 'tresorerie', 'trésorerie', 'sicav monetaire', 'opcvm monetaire', 'livret', 'compte a terme'];
-function _isLiquidityProduct(product) {
-    var name = ((product.name || '') + ' ' + (product.type || '')).toLowerCase();
-    return LIQUIDITY_KEYWORDS.some(function(kw) { return name.indexOf(kw) >= 0; });
-}
-
-// Fixed rate callable: no equity underlying, coupon fixe, callable by issuer
-// Example: "Note Taux Fixe Callable Bonus" by SG
+function _isLiquidityProduct(product) { var name = ((product.name || '') + ' ' + (product.type || '')).toLowerCase(); return LIQUIDITY_KEYWORDS.some(function(kw) { return name.indexOf(kw) >= 0; }); }
 var FIXED_RATE_KEYWORDS = ['taux fixe', 'fixed rate', 'callable bonus', 'note callable', 'obligation callable'];
-function _isFixedRateCallable(product) {
-    var name = (product.name || '').toLowerCase();
-    var hasFixedKw = FIXED_RATE_KEYWORDS.some(function(kw) { return name.indexOf(kw) >= 0; });
-    var isFixedCoupon = product.couponType === 'fixe' || product.couponType === 'garanti';
-    var noEquityUnderlyings = !product.underlyings || product.underlyings.length === 0;
-    return hasFixedKw || (isFixedCoupon && product.capitalProtection && noEquityUnderlyings);
-}
+function _isFixedRateCallable(product) { var name = (product.name || '').toLowerCase(); var hasFixedKw = FIXED_RATE_KEYWORDS.some(function(kw) { return name.indexOf(kw) >= 0; }); var isFixedCoupon = product.couponType === 'fixe' || product.couponType === 'garanti'; var noEquity = !product.underlyings || product.underlyings.length === 0; return hasFixedKw || (isFixedCoupon && product.capitalProtection && noEquity); }
 
 // ═══ COUPON ANNUALIZATION ═══
 var FREQUENCY_MULTIPLIERS = {'trimestriel':4,'trimestrielle':4,'trimestre':4,'quarterly':4,'q':4,'3m':4,'3 mois':4,'semestriel':2,'semestrielle':2,'semestre':2,'semi-annual':2,'semi-annuel':2,'6m':2,'6 mois':2,'mensuel':12,'mensuelle':12,'monthly':12,'1m':12,'mois':12,'annuel':1,'annuelle':1,'annual':1,'yearly':1,'an':1,'12m':1,'12 mois':1};
@@ -55,20 +40,32 @@ var _mktCache=null,_mktCacheTs=0;
 async function _loadAllMarketData(){if(_mktCache&&_mktCacheTs>Date.now()-3600000)return _mktCache;var r=await Promise.all([github.readFile('data/market/stocks_europe.json').catch(function(){return null}),github.readFile('data/market/stocks_us.json').catch(function(){return null}),github.readFile('data/market/sectors.json').catch(function(){return null}),github.readFile('data/market/markets.json').catch(function(){return null}),github.readFile('data/market/market_context.json').catch(function(){return null})]);_mktCache={stocksEurope:(r[0]&&r[0].stocks)?r[0].stocks:[],stocksUS:(r[1]&&r[1].stocks)?r[1].stocks:[],sectors:(r[2]&&r[2].sectors)?r[2].sectors:{},indices:(r[3]&&r[3].indices)?r[3].indices:{},context:r[4]||{}};_mktCacheTs=Date.now();return _mktCache;}
 var STOCK_ALIASES={'DANONE':'BN','ENI':'ENI','TOTALENERGIES':'TTE','TOTAL':'TTE','LVMH':'MC','SCHNEIDER':'SU','ASML':'ASML','TESLA':'TSLA','ESTEE LAUDER':'EL','PHILIP MORRIS':'MO','FASTENAL':'FAST','PERNOD RICARD':'RI','BNP':'BNP','SOCIETE GENERALE':'GLE','AXA':'CS','SANOFI':'SAN','AIR LIQUIDE':'AI'};
 function _resolveAlias(name){var u=name.toUpperCase().trim();if(typeof BANK_ALIASES!=='undefined'&&BANK_ALIASES[u])return BANK_ALIASES[u];return STOCK_ALIASES[u]||u;}
-function _extractStockData(product,mkt){var all=[].concat(mkt.stocksEurope,mkt.stocksUS);var result={available:false,stocks:[],worstMetrics:null,marketContext:null};product.underlyings.forEach(function(und){var ticker=_resolveAlias(und);var s=all.find(function(x){return x.ticker===ticker||x.ticker===und.toUpperCase()||(x.name&&x.name.toUpperCase().indexOf(und.toUpperCase())>=0)||(x.name_api&&x.name_api.toUpperCase().indexOf(und.toUpperCase())>=0)});if(s){result.available=true;result.stocks.push({name:und,ticker:s.ticker,found:true,price:s.price,change_pct:s.change_percent,perf_ytd:s.perf_ytd,perf_1y:s.perf_1y,perf_3y:s.perf_3y,beta:s.beta,volatility_3y:s.volatility_3y,max_drawdown_3y:s.max_drawdown_3y,distance_52w_high:s.distance_52w_high,pe_ratio:s.pe_ratio,roe:s.roe,de_ratio:s.de_ratio,net_margin:s.net_margin,fcf_yield:s.fcf_yield,dividend_yield:s.dividend_yield,buffett_score:s.buffett_score,buffett_grade:s.buffett_grade,quality_score:s.quality_score,quality_subscores:s.quality_subscores,sector:s.sector,sector_api:s.sector_api,industry:s.industry,country:s.country,region:s.region})}else{result.stocks.push({name:und,ticker:ticker,found:false})}});var found=result.stocks.filter(function(s){return s.found});if(found.length>0){result.worstMetrics={worst_buffett:Math.min.apply(null,found.map(function(s){return s.buffett_score!=null?s.buffett_score:50})),worst_quality:Math.min.apply(null,found.map(function(s){return s.quality_score!=null?s.quality_score:50})),max_volatility:Math.max.apply(null,found.map(function(s){return s.volatility_3y||30})),max_drawdown:Math.max.apply(null,found.map(function(s){return Math.abs(s.max_drawdown_3y||30)})),max_beta:Math.max.apply(null,found.map(function(s){return s.beta||1})),worst_name:found.reduce(function(w,s){return(s.buffett_score!=null?s.buffett_score:50)<(w.buffett_score!=null?w.buffett_score:50)?s:w}).name}}result.marketContext=mkt.context||null;return result;}
+function _extractStockData(product,mkt){var all=[].concat(mkt.stocksEurope,mkt.stocksUS);var result={available:false,stocks:[],worstMetrics:null,marketContext:null};product.underlyings.forEach(function(und){var ticker=_resolveAlias(und);var s=all.find(function(x){return x.ticker===ticker||x.ticker===und.toUpperCase()||(x.name&&x.name.toUpperCase().indexOf(und.toUpperCase())>=0)||(x.name_api&&x.name_api.toUpperCase().indexOf(und.toUpperCase())>=0)});if(s){result.available=true;result.stocks.push({name:und,ticker:s.ticker,found:true,price:s.price,change_pct:s.change_percent,perf_ytd:s.perf_ytd,perf_1y:s.perf_1y,perf_3y:s.perf_3y,beta:s.beta,volatility_3y:s.volatility_3y,max_drawdown_3y:s.max_drawdown_3y,distance_52w_high:s.distance_52w_high,pe_ratio:s.pe_ratio,roe:s.roe,de_ratio:s.de_ratio,net_margin:s.net_margin,fcf_yield:s.fcf_yield,dividend_yield:s.dividend_yield,buffett_score:s.buffett_score,buffett_grade:s.buffett_grade,quality_score:s.quality_score,quality_subscores:s.quality_subscores,sector:s.sector,sector_api:s.sector_api,industry:s.industry,country:s.country,region:s.region})}else{result.stocks.push({name:und,ticker:ticker,found:false})}});var found=result.stocks.filter(function(s){return s.found});if(found.length>0){result.worstMetrics={worst_buffett:Math.min.apply(null,found.map(function(s){return s.buffett_score!=null?s.buffett_score:35})),worst_quality:Math.min.apply(null,found.map(function(s){return s.quality_score!=null?s.quality_score:35})),max_volatility:Math.max.apply(null,found.map(function(s){return s.volatility_3y||30})),max_drawdown:Math.max.apply(null,found.map(function(s){return Math.abs(s.max_drawdown_3y||30)})),max_beta:Math.max.apply(null,found.map(function(s){return s.beta||1})),worst_name:found.reduce(function(w,s){return(s.buffett_score!=null?s.buffett_score:35)<(w.buffett_score!=null?w.buffett_score:35)?s:w}).name}}result.marketContext=mkt.context||null;return result;}
 async function _loadCatBenchmark(){try{var rates=await github.readFile('data/cat-market-rates.json');if(rates){var list=Array.isArray(rates.rates||rates)?(rates.rates||rates):[];var best=list.reduce(function(b,r){var v=parseFloat(r.rate||r.taux)||0;return v>b.rate?{rate:v,bank:r.bank||r.banque}:b},{rate:0});if(best.rate>0)return{bestRate:best.rate,bestBank:best.bank,source:'market-rates'}}}catch(e){}try{var deps=await github.readFile('data/cat-deposits.json');if(deps){var dl=Array.isArray(deps.deposits||deps)?(deps.deposits||deps):[];var rs=dl.map(function(d){return parseFloat(d.rate||d.taux)||0}).filter(function(r){return r>0});if(rs.length>0)return{bestRate:Math.max.apply(null,rs),source:'portfolio-cat'}}}catch(e){}return{bestRate:2.5,source:'fallback-2026'}}
 
-// ═══ DETERMINISTIC BASE SCORING ═══
+// ═══════════════════════════════════════════════════════════════
+// DETERMINISTIC BASE SCORING — v4.2 post-audit
+// ═══════════════════════════════════════════════════════════════
 
+// [AUDIT FIX 1+2+3] P1: convex barrier, stronger flat penalty, non-linear WO
 function _computeP1(p) {
     var s = Math.min(100, p.coupon * 10);
     if (!p.capitalProtection) {
         if (p.barrier > 0 && p.barrier < 100) {
-            var barrierPenalty = Math.max(0, (p.barrier - 30) / 100);
+            // [FIX 1] CONVEX barrier penalty — penalizes tight barriers more aggressively
+            // barrier 80% → 45%, barrier 60% → 20%, barrier 40% → 5%
+            var barrierPenalty = Math.pow(Math.max(0, (p.barrier - 30) / 70), 1.5);
             s = s * (1 - barrierPenalty);
-        } else { s -= 15; }
+        } else {
+            // [FIX 2] No barrier info + non-protected = highest risk → -25 (was -15)
+            s -= 25;
+        }
     }
-    if (p.worstOf) s -= Math.max(0, (p.underlyings.length - 2) * 3); // softened: was *5, now *3 for large baskets
+    // [FIX 3] Non-linear WO penalty — combinatorial risk explosion
+    // 3 SJ: -3, 5 SJ: -12, 7 SJ: -24 (was: 3→-3, 5→-9, 7→-15)
+    if (p.worstOf && p.underlyings.length > 2) {
+        s -= Math.round(3 * Math.pow(p.underlyings.length - 2, 1.3));
+    }
     if (p.hasMemory) s += 5;
     if (p.couponType === 'garanti' || p.couponType === 'fixe') s += 15;
     var my = p.maturityYears || 0;
@@ -76,18 +73,16 @@ function _computeP1(p) {
     return Math.max(0, Math.min(100, Math.round(s)));
 }
 
+// [AUDIT FIX 4] P2: neutral score 50 → 35 when data missing (prudence principle)
 function _computeP2(p, market, productType) {
-    // Fixed rate callable: no equity risk, evaluate on credit quality
     if (productType === 'fixed-rate-callable') {
-        // Capital protected + fixed coupon = essentially a bond
-        // P2 based on issuer credit quality (SG = A1/A, good)
         var base = p.capitalProtection ? 70 : 55;
-        if (p.maturityYears > 8) base -= 5; // longer = more credit risk
-        if (p.autocall) base += 5; // callable = possible early exit
+        if (p.maturityYears > 8) base -= 5;
+        if (p.autocall) base += 5;
         return Math.max(0, Math.min(100, base));
     }
-
-    if (!market.available || !market.worstMetrics) return 50;
+    // [FIX 4] Missing data = probably exotic/illiquid = more risky → 35 instead of 50
+    if (!market.available || !market.worstMetrics) return 35;
     var wm = market.worstMetrics;
     var hasBarrier = !p.capitalProtection && p.barrier > 0;
     var wB, wQ, wV, wD;
@@ -95,7 +90,7 @@ function _computeP2(p, market, productType) {
     else { wB = 0.35; wQ = 0.35; wV = 0.15; wD = 0.15; }
     var volC = Math.max(0, 100 - Math.max(0, (wm.max_volatility || 30) - 20) * 1.5);
     var ddC = Math.max(0, 100 - Math.max(0, (wm.max_drawdown || 30) - 25) * 1.2);
-    var s = (wm.worst_buffett || 50) * wB + (wm.worst_quality || 50) * wQ + volC * wV + ddC * wD;
+    var s = (wm.worst_buffett || 35) * wB + (wm.worst_quality || 35) * wQ + volC * wV + ddC * wD;
     if (market.stocks && market.stocks.length > 1) {
         var found = market.stocks.filter(function(x) { return x.found; });
         if (found.length > 1) { var sec = {}; found.forEach(function(x) { sec[(x.sector_api || '?').toLowerCase()] = 1; }); if (Object.keys(sec).length === 1) s -= 10; else if (Object.keys(sec).length < found.length) s -= 5; }
@@ -114,9 +109,20 @@ function _computeP3(p, portfolio, isInPf) {
     return Math.max(0, Math.min(100, Math.round(s)));
 }
 
+// [AUDIT FIX 5] P4: concave beyond 400bps — high spread = risk signal, not windfall
 function _computeP4(p, catRate) {
     var spreadBps = (p.coupon - (catRate || 2.5)) * 100;
-    return Math.max(5, Math.min(100, Math.round(spreadBps / 6)));
+    if (spreadBps <= 0) return 5;
+    if (spreadBps <= 400) {
+        // Zone saine: slightly more generous (÷5 instead of ÷6)
+        return Math.min(80, Math.max(5, Math.round(spreadBps / 5)));
+    }
+    // Beyond 400bps: diminishing returns — high spread = high risk
+    // Asymptote towards 100, but much slower
+    var base = 80; // 400bps = 80/100
+    var excess = spreadBps - 400;
+    var bonus = 20 * (1 - Math.exp(-excess / 400));
+    return Math.min(100, Math.round(base + bonus));
 }
 
 function _checkKillCriteria(p, cat) {
@@ -140,30 +146,7 @@ function _buildSystemPrompt(isInPf, productType) {
     return base;
 }
 
-function _buildUserPrompt(ctx, base, productType) {
-    var p = ctx.product, m = ctx.market;
-    var nom = p.nominal > 0 ? p.nominal : 100000;
-    var pr = '## PRODUIT (nominal: ' + formatNumber(nom) + '€)\n';
-    if (productType === 'fixed-rate-callable') pr += '⚠ TYPE: OBLIGATION TAUX FIXE CALLABLE (pas un structuré actions)\n';
-    pr += 'Nom: ' + p.name + '\nCoupon annualisé: ' + p.coupon + '%';
-    if (p.couponMultiplier > 1) pr += ' (' + p.couponRaw + '% × ' + p.couponMultiplier + ' ' + p.couponFrequency + ')';
-    pr += '\nBarrière: ' + (p.barrier || 'N/A') + '%' + (p.barrier > 0 ? ' (SJ peut baisser de ' + (100 - p.barrier) + '% avant knock-in)' : '') + ' | Capital: ' + (p.capitalProtection ? 'protégé' : 'non protégé');
-    pr += '\nMaturité: ' + (p.maturityYears || '?') + 'a | Autocall: ' + (p.autocall ? 'oui' + (productType === 'fixed-rate-callable' ? ' (au gré de l\'émetteur)' : ' seuil ' + p.autocallThreshold + '%') : 'non');
-    pr += '\nSous-jacents: ' + (p.underlyings.length > 0 ? p.underlyings.join(', ') : 'AUCUN (produit de taux)') + (p.worstOf ? ' (worst-of)' : '') + '\n\n';
-    if (m.available && m.stocks.length > 0) {
-        pr += '## DONNÉES MARCHÉ\n';
-        m.stocks.forEach(function(s) {
-            if (!s.found) { pr += '- ' + s.name + ': NON TROUVÉ\n'; return; }
-            pr += '- ' + s.name + ' (' + s.ticker + ', ' + (s.sector || '?') + '): Buffett=' + s.buffett_score + ', Quality=' + s.quality_score + ', vol=' + s.volatility_3y + '%, DD=' + s.max_drawdown_3y + '%, beta=' + s.beta + '\n';
-            pr += '  ROE=' + s.roe + '%, marge=' + s.net_margin + '%, perf_1Y=' + s.perf_1y + '%, YTD=' + s.perf_ytd + '%\n';
-        });
-        if (m.worstMetrics) pr += 'Maillon faible: ' + m.worstMetrics.worst_name + '\n';
-    }
-    if (m.marketContext && m.marketContext.market_regime) { var mc = m.marketContext; pr += '\n## MACRO: régime=' + mc.market_regime; if (mc.macro_tilts) { if (mc.macro_tilts.favored_sectors) pr += ', favorisés=' + mc.macro_tilts.favored_sectors.join(','); if (mc.macro_tilts.avoided_sectors) pr += ', évités=' + mc.macro_tilts.avoided_sectors.join(','); } pr += '\n'; }
-    pr += '\n## SCORES DE BASE (v4.1)\nP1: ' + base.p1 + '/100 | P2: ' + base.p2 + '/100' + (productType === 'fixed-rate-callable' ? ' [crédit émetteur]' : '') + ' | P3: ' + base.p3 + '/100 | P4: ' + base.p4 + '/100\n';
-    pr += 'Score base: ' + base.total + '/100 → ' + base.grade + '\n\nAJUSTE ±15 pts/pilier. Nominal: ' + formatNumber(nom) + '€\n';
-    return pr;
-}
+function _buildUserPrompt(ctx, base, productType) { var p = ctx.product, m = ctx.market; var nom = p.nominal > 0 ? p.nominal : 100000; var pr = '## PRODUIT (nominal: ' + formatNumber(nom) + '€)\n'; if (productType === 'fixed-rate-callable') pr += '⚠ TYPE: OBLIGATION TAUX FIXE CALLABLE\n'; pr += 'Nom: ' + p.name + '\nCoupon annualisé: ' + p.coupon + '%'; if (p.couponMultiplier > 1) pr += ' (' + p.couponRaw + '% × ' + p.couponMultiplier + ' ' + p.couponFrequency + ')'; pr += '\nBarrière: ' + (p.barrier || 'N/A') + '%' + (p.barrier > 0 ? ' (SJ peut baisser de ' + (100 - p.barrier) + '% avant knock-in)' : '') + ' | Capital: ' + (p.capitalProtection ? 'protégé' : 'non protégé'); pr += '\nMaturité: ' + (p.maturityYears || '?') + 'a | Autocall: ' + (p.autocall ? 'oui' + (productType === 'fixed-rate-callable' ? ' (émetteur)' : ' seuil ' + p.autocallThreshold + '%') : 'non'); pr += '\nSous-jacents: ' + (p.underlyings.length > 0 ? p.underlyings.join(', ') : 'AUCUN (taux)') + (p.worstOf ? ' (worst-of)' : '') + '\n\n'; if (m.available && m.stocks.length > 0) { pr += '## DONNÉES MARCHÉ\n'; m.stocks.forEach(function(s) { if (!s.found) { pr += '- ' + s.name + ': NON TROUVÉ\n'; return; } pr += '- ' + s.name + ' (' + s.ticker + ', ' + (s.sector || '?') + '): Buffett=' + s.buffett_score + ', Quality=' + s.quality_score + ', vol=' + s.volatility_3y + '%, DD=' + s.max_drawdown_3y + '%, beta=' + s.beta + '\n'; pr += '  ROE=' + s.roe + '%, marge=' + s.net_margin + '%, perf_1Y=' + s.perf_1y + '%, YTD=' + s.perf_ytd + '%\n'; }); if (m.worstMetrics) pr += 'Maillon faible: ' + m.worstMetrics.worst_name + '\n'; } if (m.marketContext && m.marketContext.market_regime) { var mc = m.marketContext; pr += '\n## MACRO: régime=' + mc.market_regime; if (mc.macro_tilts) { if (mc.macro_tilts.favored_sectors) pr += ', favorisés=' + mc.macro_tilts.favored_sectors.join(','); if (mc.macro_tilts.avoided_sectors) pr += ', évités=' + mc.macro_tilts.avoided_sectors.join(','); } pr += '\n'; } pr += '\n## SCORES DE BASE (v4.2)\nP1: ' + base.p1 + '/100 | P2: ' + base.p2 + '/100' + (productType === 'fixed-rate-callable' ? ' [crédit]' : '') + ' | P3: ' + base.p3 + '/100 | P4: ' + base.p4 + '/100\n'; pr += 'Score base: ' + base.total + '/100 → ' + base.grade + '\nAJUSTE ±15 pts/pilier. Nominal: ' + formatNumber(nom) + '€\n'; return pr; }
 
 async function _callClaude(ctx, base, productType) { var resp = await fetch(CONFIG.AI_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1500, system: _buildSystemPrompt(ctx.isInPortfolio, productType), messages: [{ role: 'user', content: _buildUserPrompt(ctx, base, productType) }] }) }); if (!resp.ok) throw new Error('Claude API ' + resp.status); var data = await resp.json(); var text = (data.content || []).filter(function(c) { return c.type === 'text'; }).map(function(c) { return c.text; }).join(''); return _parseJSON(text); }
 function _parseJSON(t) { var c = t.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim(); try { return JSON.parse(c); } catch(e) {} var f = c.indexOf('{'), l = c.lastIndexOf('}'); if (f !== -1 && l > f) c = c.slice(f, l + 1); c = c.replace(/,\s*([}\]])/g, '$1'); return JSON.parse(c); }
@@ -172,43 +155,22 @@ function _applyAdjustments(base, adj, weights) { var max = GRADING_CONFIG.maxAdj
 
 // ═══ MAIN ORCHESTRATOR ═══
 async function gradeProposal(product) {
-    var t0 = Date.now();
-    var ctx = await _collectContext(product);
-    var p = ctx.product;
-
-    // ─── LIQUIDITY PRODUCT: skip grading entirely ───
-    if (_isLiquidityProduct(p)) {
-        var lr = {
-            grade: '-', score: null,
-            killCriteria: { triggered: false, reasons: [] },
-            pillars: { adjustedReturn: { score: null }, underlyingQuality: { score: null }, portfolioFit: { score: null }, riskPremium: { score: null } },
-            verdict: 'Produit de liquidité / parking cash. Non gradable comme produit structuré.',
-            keyRisks: ['Rendement très faible', 'Alternative : CAT ou livret'], scenarios: null,
-            metadata: { gradedAt: new Date().toISOString(), durationMs: Date.now() - t0, aiUsed: false, version: '4.1', productType: 'liquidity', isInPortfolio: ctx.isInPortfolio }
-        };
-        product.grading = lr; return lr;
-    }
-
-    // ─── Detect product type ───
+    var t0 = Date.now(); var ctx = await _collectContext(product); var p = ctx.product;
+    if (_isLiquidityProduct(p)) { var lr = { grade: '-', score: null, killCriteria: { triggered: false, reasons: [] }, pillars: { adjustedReturn: { score: null }, underlyingQuality: { score: null }, portfolioFit: { score: null }, riskPremium: { score: null } }, verdict: 'Produit de liquidit\u00e9 / parking cash. Non gradable comme produit structur\u00e9.', keyRisks: ['Rendement tr\u00e8s faible', 'Alternative : CAT ou livret'], scenarios: null, metadata: { gradedAt: new Date().toISOString(), durationMs: Date.now() - t0, aiUsed: false, version: '4.2', productType: 'liquidity', isInPortfolio: ctx.isInPortfolio } }; product.grading = lr; return lr; }
     var productType = _isFixedRateCallable(p) ? 'fixed-rate-callable' : 'standard';
-
     var weights = ctx.isInPortfolio ? GRADING_CONFIG.weightsPortfolio : GRADING_CONFIG.weightsProposal;
     var kill = _checkKillCriteria(p, ctx.cat);
-    if (kill.killed) { var r = { grade: 'F', score: 0, killCriteria: { triggered: true, reasons: kill.reasons }, pillars: { adjustedReturn: { score: null }, underlyingQuality: { score: null }, portfolioFit: { score: null }, riskPremium: { score: null } }, verdict: 'Rejet: ' + kill.reasons[0], keyRisks: kill.reasons, scenarios: null, metadata: { gradedAt: new Date().toISOString(), durationMs: Date.now() - t0, aiUsed: false, version: '4.1', productType: productType } }; product.grading = r; return r; }
-
+    if (kill.killed) { var r = { grade: 'F', score: 0, killCriteria: { triggered: true, reasons: kill.reasons }, pillars: { adjustedReturn: { score: null }, underlyingQuality: { score: null }, portfolioFit: { score: null }, riskPremium: { score: null } }, verdict: 'Rejet: ' + kill.reasons[0], keyRisks: kill.reasons, scenarios: null, metadata: { gradedAt: new Date().toISOString(), durationMs: Date.now() - t0, aiUsed: false, version: '4.2', productType: productType } }; product.grading = r; return r; }
     var base = { p1: _computeP1(p), p2: _computeP2(p, ctx.market, productType), p3: _computeP3(p, ctx.portfolio, ctx.isInPortfolio), p4: _computeP4(p, ctx.cat.bestRate) };
     base.total = Math.round(base.p1 * weights.adjustedReturn + base.p2 * weights.underlyingQuality + base.p3 * weights.portfolioFit + base.p4 * weights.riskPremium);
     base.grade = base.total >= 75 ? 'A' : base.total >= 60 ? 'B' : base.total >= 45 ? 'C' : base.total >= 25 ? 'D' : 'F';
-
     var claudeResult = null, final = base, aiUsed = false;
     try { claudeResult = await _callClaude(ctx, base, productType); if (claudeResult && claudeResult.adjustments) { final = _applyAdjustments(base, claudeResult.adjustments, weights); aiUsed = true; } } catch(e) { console.warn('[Grader] Claude:', e.message); }
-
     function _reason(key, name) { var s = name + ': base ' + base[key]; if (aiUsed && final.deltas[key] !== 0) { s += ' \u2192 ' + (final.deltas[key] > 0 ? '+' : '') + final.deltas[key] + ' = ' + final[key]; if (final.reasons[key]) s += ' (' + final.reasons[key] + ')'; } return s; }
-
     var result = { grade: final.grade, score: final.total, killCriteria: { triggered: false, reasons: [] },
         pillars: {
             adjustedReturn: { score: final.p1, base: base.p1, delta: final.deltas ? final.deltas.p1 : 0, reasoning: _reason('p1', 'Rendement') + ' | Coupon ' + p.coupon + '%' + (p.couponMultiplier > 1 ? ' (' + p.couponRaw + '\u00d7' + p.couponMultiplier + ')' : '') + (p.capitalProtection ? ', prot\u00e9g\u00e9' : p.barrier > 0 ? ', barri\u00e8re ' + p.barrier + '%' : '') },
-            underlyingQuality: { score: final.p2, base: base.p2, delta: final.deltas ? final.deltas.p2 : 0, reasoning: _reason('p2', 'Qualit\u00e9') + (productType === 'fixed-rate-callable' ? ' [cr\u00e9dit \u00e9metteur]' : (!p.capitalProtection && p.barrier > 0 ? ' [vol/DD 30%]' : ' [B/Q 35%]')) + (ctx.market.worstMetrics ? ' | Worst: ' + ctx.market.worstMetrics.worst_name + ' B:' + ctx.market.worstMetrics.worst_buffett : '') },
+            underlyingQuality: { score: final.p2, base: base.p2, delta: final.deltas ? final.deltas.p2 : 0, reasoning: _reason('p2', 'Qualit\u00e9') + (productType === 'fixed-rate-callable' ? ' [cr\u00e9dit]' : (!p.capitalProtection && p.barrier > 0 ? ' [vol/DD 30%]' : ' [B/Q 35%]')) + (ctx.market.worstMetrics ? ' | Worst: ' + ctx.market.worstMetrics.worst_name + ' B:' + ctx.market.worstMetrics.worst_buffett : '') },
             portfolioFit: { score: final.p3, base: base.p3, delta: final.deltas ? final.deltas.p3 : 0, reasoning: ctx.isInPortfolio ? 'En portefeuille \u2014 neutre' : _reason('p3', 'Fit') },
             riskPremium: { score: final.p4, base: base.p4, delta: final.deltas ? final.deltas.p4 : 0, reasoning: _reason('p4', 'Prime') + ' | ' + p.coupon + '% vs CAT ' + ctx.cat.bestRate + '% (spread ' + (p.coupon - ctx.cat.bestRate).toFixed(1) + '%)' }
         },
@@ -216,7 +178,7 @@ async function gradeProposal(product) {
         keyRisks: claudeResult && claudeResult.keyRisks ? claudeResult.keyRisks : [],
         negotiationPoints: claudeResult && claudeResult.negotiationPoints ? claudeResult.negotiationPoints : [],
         scenarios: claudeResult && claudeResult.scenarios ? claudeResult.scenarios : null,
-        metadata: { gradedAt: new Date().toISOString(), durationMs: Date.now() - t0, aiUsed: aiUsed, version: '4.1', productType: productType, marketDataAvailable: ctx.market.available, catBenchmark: ctx.cat.bestRate, catSource: ctx.cat.source, couponAnnualized: p.coupon, couponRaw: p.couponRaw, couponMultiplier: p.couponMultiplier, couponFrequency: p.couponFrequency, isInPortfolio: ctx.isInPortfolio, hasBarrier: !p.capitalProtection && p.barrier > 0, barrierPct: p.barrier, baseScore: base.total, baseGrade: base.grade, adjustments: aiUsed ? final.deltas : null }
+        metadata: { gradedAt: new Date().toISOString(), durationMs: Date.now() - t0, aiUsed: aiUsed, version: '4.2', productType: productType, marketDataAvailable: ctx.market.available, catBenchmark: ctx.cat.bestRate, catSource: ctx.cat.source, couponAnnualized: p.coupon, couponRaw: p.couponRaw, couponMultiplier: p.couponMultiplier, couponFrequency: p.couponFrequency, isInPortfolio: ctx.isInPortfolio, hasBarrier: !p.capitalProtection && p.barrier > 0, barrierPct: p.barrier, baseScore: base.total, baseGrade: base.grade, adjustments: aiUsed ? final.deltas : null }
     };
     product.grading = result; return result;
 }
@@ -229,10 +191,7 @@ function renderGradeBadge(g, s, size) { if (g === '-') return '<span style="disp
 function renderGradingSection(grading) {
     if (!grading) return '<div class="grading-section" style="padding:20px;text-align:center"><button onclick="triggerGrading(this)" class="btn primary" style="padding:12px 24px;border-radius:8px;font-size:14px;cursor:pointer">\ud83c\udfaf Lancer le grading</button></div>';
     var g = grading;
-
-    // Liquidity product: special minimal display
     if (g.grade === '-') return '<div class="grading-section" style="padding:16px"><div style="display:flex;align-items:center;gap:16px"><div style="width:64px;height:64px;border-radius:50%;background:#94A3B822;display:flex;align-items:center;justify-content:center"><span style="font-size:28px;color:#94A3B8">$</span></div><div><div style="font-size:16px;font-weight:600;color:#94A3B8">Liquidit\u00e9 / Parking Cash</div><div style="font-size:13px;color:var(--text-muted);margin-top:4px">' + (g.verdict || '') + '</div></div></div></div>';
-
     var cfg = GRADING_CONFIG.grades[g.grade] || GRADING_CONFIG.grades.F;
     var isPortfolio = g.metadata && g.metadata.isInPortfolio;
     var isCallable = g.metadata && g.metadata.productType === 'fixed-rate-callable';
@@ -248,9 +207,9 @@ function renderGradingSection(grading) {
     if (g.scenarios) { h += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px">'; [['optimistic', 'Optimiste', '#06D6A0'], ['base', 'Base', '#4ECDC4'], ['stress', 'Stress', '#FFB627'], ['worst', 'Worst', '#EF233C']].forEach(function(x) { var s = g.scenarios[x[0]]; if (!s) return; h += '<div style="text-align:center;padding:8px;border-radius:8px;background:' + x[2] + '15;border:1px solid ' + x[2] + '30"><div style="font-size:10px;color:var(--text-muted)">' + x[1] + '</div><div style="font-size:16px;font-weight:600;color:' + x[2] + '">' + ((s.return_eur || 0) >= 0 ? '+' : '') + (s.return_eur || 0).toLocaleString('fr-FR') + '\u20ac</div><div style="font-size:10px;color:var(--text-muted)">' + ((s.return_pct || 0) >= 0 ? '+' : '') + (s.return_pct || 0) + '% \u00b7 ' + Math.round((s.probability || 0) * 100) + '%</div></div>'; }); h += '</div>'; }
     if (g.keyRisks && g.keyRisks.length > 0) h += '<div style="font-size:12px;color:var(--text-muted);margin-bottom:8px"><strong>Risques :</strong> ' + g.keyRisks.join(' \u00b7 ') + '</div>';
     if (g.grade === 'C' && g.negotiationPoints && g.negotiationPoints.length > 0) h += '<div style="font-size:12px;color:#FFB627;margin-bottom:8px"><strong>\u00c0 n\u00e9gocier :</strong> ' + g.negotiationPoints.join(' \u00b7 ') + '</div>';
-    h += '<div style="font-size:10px;color:var(--text-muted);opacity:0.5;margin-top:8px">v4.1' + (g.metadata.aiUsed ? ' Hybride' : ' Local') + ' \u00b7 ' + new Date(g.metadata.gradedAt).toLocaleDateString('fr-FR') + ' \u00b7 ' + g.metadata.durationMs + 'ms \u00b7 CAT ' + (g.metadata.catBenchmark || '?') + '% (' + (g.metadata.catSource || '?') + ')' + (isPortfolio ? ' \u00b7 Portefeuille' : '') + (isCallable ? ' \u00b7 Callable' : '') + (g.metadata.hasBarrier ? ' \u00b7 P2 vol/DD 30%' : '') + '</div>';
+    h += '<div style="font-size:10px;color:var(--text-muted);opacity:0.5;margin-top:8px">v4.2' + (g.metadata.aiUsed ? ' Hybride' : ' Local') + ' \u00b7 ' + new Date(g.metadata.gradedAt).toLocaleDateString('fr-FR') + ' \u00b7 ' + g.metadata.durationMs + 'ms \u00b7 CAT ' + (g.metadata.catBenchmark || '?') + '% (' + (g.metadata.catSource || '?') + ')' + (isPortfolio ? ' \u00b7 Portefeuille' : '') + (isCallable ? ' \u00b7 Callable' : '') + (g.metadata.hasBarrier ? ' \u00b7 P2 vol/DD 30%' : '') + '</div>';
     h += '</div>'; return h;
 }
 
-window.ProposalGrader = { grade: gradeProposal, gradeBatch: gradeProposalsBatch, renderBadge: renderGradeBadge, renderSection: renderGradingSection, checkKillCriteria: _checkKillCriteria, normalize: _graderNormalize, config: GRADING_CONFIG, isLiquidity: _isLiquidityProduct, isFixedRateCallable: _isFixedRateCallable, version: '4.1' };
-console.log('[StructBoard] ProposalGrader v4.1 \u2014 liquidity detection, WO\u22648, callable support');
+window.ProposalGrader = { grade: gradeProposal, gradeBatch: gradeProposalsBatch, renderBadge: renderGradeBadge, renderSection: renderGradingSection, checkKillCriteria: _checkKillCriteria, normalize: _graderNormalize, config: GRADING_CONFIG, isLiquidity: _isLiquidityProduct, isFixedRateCallable: _isFixedRateCallable, version: '4.2' };
+console.log('[StructBoard] ProposalGrader v4.2 \u2014 post-audit: convex barrier, concave P4, prudent defaults');
