@@ -143,23 +143,23 @@
   "entityName": "Caméleons",
   "grading": {
     "grade": "C",
-    "score": 48,
+    "score": 50,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 30,
-        "base": 40,
+        "score": 27,
+        "base": 37,
         "delta": -10,
-        "reasoning": "Rendement: base 40 → -10 = 30 (Barrière 60% insuffisante face à la volatilité élevée des financières (BMPS 36%, UCG 30%) et panier très risqué.) | Coupon 7%, barrière 60%"
+        "reasoning": "Rendement: base 37 → -10 = 27 (Barrière 60% trop généreuse face à la volatilité élevée du secteur bancaire italien (BMPS 36%, UCG 30%) et Novo Nordisk non analysable) | Coupon 7%, barrière 60%"
       },
       "underlyingQuality": {
-        "score": 51,
-        "base": 63,
+        "score": 53,
+        "base": 65,
         "delta": -12,
-        "reasoning": "Qualité: base 63 → -12 = 51 (Secteur financier évité en macro + BMPS en difficulté (-23% YTD) + Novo Nordisk introuvable fragilise le panier.) [vol/DD 30%] | Worst: Veolia Environnement SA B:28"
+        "reasoning": "Qualité: base 65 → -12 = 53 (Secteur financier évité en macro + banques italiennes fragiles (BMPS quality 48, YTD -22%) + exposition significative aux financials défavorisés) [vol/DD 30%] | Worst: Veolia Environnement SA B:28"
       },
       "portfolioFit": {
         "score": 70,
@@ -168,16 +168,16 @@
         "reasoning": "En portefeuille — neutre"
       },
       "riskPremium": {
-        "score": 67,
-        "base": 75,
+        "score": 74,
+        "base": 82,
         "delta": -8,
-        "reasoning": "Prime: base 75 → -8 = 67 (Coupon 7% insuffisant pour compenser le risque élevé d'un panier bancaire italien + sous-jacent manquant.) | 7% vs CAT 2.5% (spread 4.5%)"
+        "reasoning": "Prime: base 82 → -8 = 74 (Coupon 7% insuffisant pour compenser les risques du panier bancaire italien et l'incertitude sur Novo Nordisk) | 7% vs CAT 2.5% (spread 4.5%)"
       }
     },
-    "verdict": "Produit très risqué dominé par des financières italiennes en difficulté (BMPS -23% YTD, UCG -16%) dans un contexte macro défavorable au secteur. La barrière 60% est insuffisante face aux volatilités de 30-36% des bancaires. L'absence de données sur Novo Nordisk (20% du panier) ajoute une incertitude majeure. Le coupon 7% ne compense pas ces risques structurels.",
+    "verdict": "Ce produit présente des faiblesses majeures dans sa composition. L'exposition aux banques italiennes (BMPS, UCG) intervient dans un contexte macro défavorable aux financials, avec BMPS affichant une performance YTD de -22% et une qualité médiocre (48). La donnée manquante sur Novo Nordisk empêche une évaluation complète du risque. Le coupon de 7% paraît insuffisant pour cette prise de risque sur un panier fragile. À éviter en l'état actuel.",
     "keyRisks": [
-      "Concentration bancaire italienne avec BMPS en crise structurelle et secteur financier évité",
-      "Sous-jacent Novo Nordisk introuvable représentant 20% du panier, créant un angle mort majeur"
+      "Concentration bancaire italienne dans un secteur évité par la macro",
+      "Données manquantes sur Novo Nordisk empêchant l'évaluation complète du worst-of"
     ],
     "negotiationPoints": [],
     "scenarios": {
@@ -189,28 +189,28 @@
       },
       "base": {
         "return_pct": 3.5,
-        "return_eur": 3150,
-        "probability": 0.25,
-        "duration_years": 1.5
+        "return_eur": 2625,
+        "probability": 0.3,
+        "duration_years": 2.5
       },
       "stress": {
         "return_pct": 0,
         "return_eur": 0,
         "probability": 0.35,
-        "duration_years": 2
+        "duration_years": 2.5
       },
       "worst": {
         "return_pct": -25,
         "return_eur": -7500,
-        "probability": 0.25,
-        "duration_years": 2
+        "probability": 0.2,
+        "duration_years": 2.5
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-24T12:52:09.286Z",
-      "durationMs": 12898,
+      "gradedAt": "2026-03-24T17:02:13.711Z",
+      "durationMs": 13068,
       "aiUsed": true,
-      "version": "4.1",
+      "version": "4.3",
       "productType": "standard",
       "marketDataAvailable": true,
       "catBenchmark": 2.5,
@@ -222,8 +222,11 @@
       "isInPortfolio": true,
       "hasBarrier": true,
       "barrierPct": 60,
-      "baseScore": 59,
-      "baseGrade": "C",
+      "expectedMaturity": 0,
+      "maxMaturity": 0,
+      "maxBeta": 1.18,
+      "baseScore": 60,
+      "baseGrade": "B",
       "adjustments": {
         "p1": -10,
         "p2": -12,
