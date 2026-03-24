@@ -156,41 +156,41 @@
     },
     "grading": {
       "grade": "C",
-      "score": 56,
+      "score": 54,
       "killCriteria": {
         "triggered": false,
         "reasons": []
       },
       "pillars": {
         "adjustedReturn": {
-          "score": 49,
+          "score": 67,
           "base": 57,
-          "delta": -8,
-          "reasoning": "Rendement: base 57 → -8 = 49 (Volatilité 20.45% élevée pour un mono-sous-jacent énergétique, risque d'activation anticipée réduit malgré autocall à 100%) | Coupon 5.7%, protégé"
+          "delta": 10,
+          "reasoning": "Rendement: base 57 → +10 = 67 (Autocall 100% + volatilité modérée (20.45%) + secteur energy favorisé = probabilité coupon élevée) | Coupon 5.7%, protégé"
         },
         "underlyingQuality": {
-          "score": 58,
+          "score": 42,
           "base": 50,
-          "delta": 8,
-          "reasoning": "Qualité: base 50 → +8 = 58 (Secteur énergétique favorisé en contexte macro neutre, fondamentaux corrects malgré ROE/marge faibles, drawdown maîtrisé à 26.78%) [B/Q 35%] | Worst: ENI S.p.A. B:44"
+          "delta": -8,
+          "reasoning": "Qualité: base 50 → -8 = 42 (Quality score faible (14) et ROE dégradé (5.06%) malgré le contexte macro favorable à l'énergie) [B/Q 35%] | Worst: ENI S.p.A. B:44"
         },
         "portfolioFit": {
-          "score": 65,
-          "base": 60,
+          "score": 75,
+          "base": 70,
           "delta": 5,
-          "reasoning": "Fit: base 60 → +5 = 65 (Mono-exposition ENI cohérente pour diversification sectorielle, bêta défensif 0.28 atténue risque de concentration)"
+          "reasoning": "En portefeuille — neutre"
         },
         "riskPremium": {
-          "score": 55,
+          "score": 53,
           "base": 53,
-          "delta": 2,
-          "reasoning": "Prime: base 53 → +2 = 55 (Prime 5.7% vs CAT 2.5% justifiée par risque mono-sous-jacent et volatilité énergétique) | 5.7% vs CAT 2.5% (spread 3.2%)"
+          "delta": 0,
+          "reasoning": "Prime: base 53 | 5.7% vs CAT 2.5% (spread 3.2%)"
         }
       },
-      "verdict": "Produit offrant 5.7% annualisé sur ENI avec capital protégé et autocall à 100%. Le secteur énergétique bénéficie d'un contexte macro favorable, compensant des fondamentaux modestes (ROE 5.06%, Buffett 44). La volatilité 20.45% et le mono-sous-jacent créent un profil risque-rendement équilibré pour cette classe d'actifs défensive (bêta 0.28). Maturité inconnue problématique pour l'évaluation complète.",
+      "verdict": "Produit attractif porté par le contexte macro favorable à l'énergie et un autocall accessible (100%). Le coupon de 5.7% est rémunérateur pour un capital protégé, mais la faible qualité fondamentale d'ENI (Quality 14, ROE 5.06%) tempère l'enthousiasme. La volatilité modérée (20.45%) et l'absence de barrière offrent un bon profil risque/rendement. Score ajusté : 60/100 (B-).",
       "keyRisks": [
-        "Concentration sur un seul titre énergétique italien exposé aux chocs sectoriels et géopolitiques",
-        "Maturité non précisée empêche l'évaluation du risque de duration et de probabilité d'autocall"
+        "Dépendance totale à ENI : mono-exposition sur un titre à fundamentaux dégradés",
+        "Retournement secteur énergie : fin du cycle haussier des commodités"
       ],
       "negotiationPoints": [],
       "scenarios": {
@@ -201,8 +201,8 @@
           "duration_years": 1
         },
         "base": {
-          "return_pct": 5.7,
-          "return_eur": 5130,
+          "return_pct": 4.2,
+          "return_eur": 3780,
           "probability": 0.4,
           "duration_years": 3
         },
@@ -213,17 +213,18 @@
           "duration_years": 6
         },
         "worst": {
-          "return_pct": -15,
-          "return_eur": -4500,
+          "return_pct": 0,
+          "return_eur": 0,
           "probability": 0.05,
           "duration_years": 6
         }
       },
       "metadata": {
-        "gradedAt": "2026-03-24T08:12:26.232Z",
-        "durationMs": 13630,
+        "gradedAt": "2026-03-24T09:22:05.147Z",
+        "durationMs": 13737,
         "aiUsed": true,
-        "version": "4.0",
+        "version": "4.1",
+        "productType": "standard",
         "marketDataAvailable": true,
         "catBenchmark": 2.5,
         "catSource": "fallback-2026",
@@ -231,18 +232,31 @@
         "couponRaw": 5.7,
         "couponMultiplier": 1,
         "couponFrequency": "annuel",
-        "isInPortfolio": false,
+        "isInPortfolio": true,
         "hasBarrier": false,
         "barrierPct": 0,
-        "p2Weights": "buffett-quality-35",
-        "baseScore": 55,
+        "baseScore": 53,
         "baseGrade": "C",
         "adjustments": {
-          "p1": -8,
-          "p2": 8,
+          "p1": 10,
+          "p2": -8,
           "p3": 5,
-          "p4": 2
-        }
+          "p4": 0
+        },
+        "stockData": [
+          {
+            "name": "ENI S.p.A.",
+            "ticker": "ENI",
+            "sector": "Energie",
+            "perf_ytd": 45.13,
+            "perf_1y": 62.65,
+            "volatility_3y": 20.45,
+            "max_drawdown_3y": 26.78,
+            "buffett_score": 44,
+            "quality_score": 14,
+            "buffett_grade": "C"
+          }
+        ]
       }
     }
   },
