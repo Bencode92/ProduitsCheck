@@ -158,94 +158,39 @@
     "note": ""
   },
   "grading": {
-    "grade": "F",
-    "score": 20,
+    "grade": "-",
+    "score": null,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 0,
-        "base": 0,
-        "delta": 0,
-        "reasoning": "Rendement: base 0 | Coupon 0%, barrière 0%"
+        "score": null
       },
       "underlyingQuality": {
-        "score": 63,
-        "base": 73,
-        "delta": -10,
-        "reasoning": "Qualité: base 73 → -10 = 63 (Sous-jacents mal définis (obligations génériques), seul l'instrument monétaire tech identifié avec vol élevée 32% et drawdown 34% préoccupant.) [B/Q 35%] | Worst: Instruments du marché monétaire B:93"
+        "score": null
       },
       "portfolioFit": {
-        "score": 20,
-        "base": 25,
-        "delta": -5,
-        "reasoning": "Fit: base 25 → -5 = 20 (Exposition tech via instruments monétaire non cohérente avec diversification obligataire attendue.)"
+        "score": null
       },
       "riskPremium": {
-        "score": 0,
-        "base": 5,
-        "delta": -10,
-        "reasoning": "Prime: base 5 → -10 = 0 (Autocall 100% sur obligations sans coupon = structure inadaptée, spread défavorable vs obligations directes.) | 0% vs CAT 2.5% (spread -2.5%)"
+        "score": null
       }
     },
-    "verdict": "Produit structuré défaillant avec 0% de coupon et sous-jacents mal définis limitant l'analyse de risque. La présence d'un autocall à 100% sur des obligations sans rendement annuel constitue une anomalie structurelle. Le seul actif identifiable (instruments monétaire tech) présente une volatilité de 32% inadéquate pour un fonds obligataire, avec un Buffett score correct à 93 mais une qualité médiocre à 43.",
+    "verdict": "Produit de liquidité / parking cash. Non gradable comme produit structuré.",
     "keyRisks": [
-      "Transparence insuffisante sur la composition réelle du portefeuille obligataire",
-      "Volatilité excessive (32%) de la composante technologique incompatible avec un profil conservateur"
+      "Rendement très faible",
+      "Alternative : CAT ou livret"
     ],
-    "negotiationPoints": [],
-    "scenarios": {
-      "optimistic": {
-        "return_pct": 2,
-        "return_eur": 2180,
-        "probability": 0.2,
-        "duration_years": 1
-      },
-      "base": {
-        "return_pct": 0,
-        "return_eur": 0,
-        "probability": 0.5,
-        "duration_years": 1
-      },
-      "stress": {
-        "return_pct": -3,
-        "return_eur": -3270,
-        "probability": 0.2,
-        "duration_years": 1
-      },
-      "worst": {
-        "return_pct": -8,
-        "return_eur": -8720,
-        "probability": 0.1,
-        "duration_years": 1
-      }
-    },
+    "scenarios": null,
     "metadata": {
-      "gradedAt": "2026-03-24T08:12:47.979Z",
-      "durationMs": 12245,
-      "aiUsed": true,
-      "version": "4.0",
-      "marketDataAvailable": true,
-      "catBenchmark": 2.5,
-      "catSource": "fallback-2026",
-      "couponAnnualized": 0,
-      "couponRaw": 0,
-      "couponMultiplier": 1,
-      "couponFrequency": "annuel",
-      "isInPortfolio": false,
-      "hasBarrier": false,
-      "barrierPct": 0,
-      "p2Weights": "buffett-quality-35",
-      "baseScore": 25,
-      "baseGrade": "D",
-      "adjustments": {
-        "p1": 0,
-        "p2": -10,
-        "p3": -5,
-        "p4": -10
-      }
+      "gradedAt": "2026-03-24T12:52:22.070Z",
+      "durationMs": 0,
+      "aiUsed": false,
+      "version": "4.1",
+      "productType": "liquidity",
+      "isInPortfolio": true
     }
   }
 }
