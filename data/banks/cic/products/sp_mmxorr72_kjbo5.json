@@ -185,88 +185,92 @@
   },
   "grading": {
     "grade": "B",
-    "score": 71,
+    "score": 60,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 77,
+        "score": 59,
         "base": 67,
-        "delta": 10,
-        "reasoning": "Rendement: base 67 → +10 = 77 (Coupon de 6.15% garanti très attractif dans l'environnement de taux actuel, sans barrière désactivante) | Coupon 6.15%, protégé"
+        "delta": -8,
+        "reasoning": "Rendement: base 67 → -8 = 59 (Aucune barrière de protection spécifiée sur un worst-of avec LVMH très volatil (29.46%) et drawdown élevé (51.49%), risque significatif sur le coupon.) | Coupon 6.15%, protégé"
       },
       "underlyingQuality": {
-        "score": 54,
-        "base": 66,
+        "score": 51,
+        "base": 63,
         "delta": -12,
-        "reasoning": "Qualité: base 66 → -12 = 54 (Crédit Agricole (-8.95% YTD) dans un secteur financier macro-défavorisé, LVMH (-29% YTD) en forte baisse cyclique) | Worst: Crédit Agricole S.A. B:50"
+        "reasoning": "Qualité: base 63 → -12 = 51 (Crédit Agricole dans les financials évités en macro, LVMH en consumer-discretionary également évité, secteurs défavorisés malgré fondamentaux corrects.) [B/Q 35%] | Worst: Crédit Agricole S.A. B:50"
       },
       "portfolioFit": {
-        "score": 72,
+        "score": 80,
         "base": 80,
-        "delta": -8,
-        "reasoning": "Fit: base 80 → -8 = 72 (Exposition aux secteurs évités (financials, consumer-discretionary) va à l'encontre du momentum macro favorable)"
+        "delta": 0,
+        "reasoning": "Fit: base 80"
       },
       "riskPremium": {
-        "score": 80,
-        "base": 75,
-        "delta": 5,
-        "reasoning": "Prime: base 75 → +5 = 80 (Prime de 315bp vs CAT justifiée par la garantie du capital et du coupon fixe sans conditions) | 6.15% vs CAT 3%"
+        "score": 56,
+        "base": 61,
+        "delta": -5,
+        "reasoning": "Prime: base 61 → -5 = 56 (Prime de 6.15% vs CAT 2.5% semble correcte mais le risque worst-of sans barrière justifie une décote supplémentaire.) | 6.15% vs CAT 2.5% (spread 3.7%)"
       }
     },
-    "verdict": "Produit défensif offrant 6.15% garanti avec capital protégé jusqu'en 2029. Malgré l'exposition à deux secteurs macro-défavorisés, la structure sans barrière élimine le risque de perte en capital. LVMH (-29% YTD) et Crédit Agricole (-8.95% YTD) sont actuellement sous pression mais le coupon fixe compense la faiblesse conjoncturelle. La prime de 315bp vs obligations souveraines reste justifiée par la sécurité structurelle du produit.",
+    "verdict": "Produit structuré défensif avec capital protégé mais exposé aux secteurs évités (financials, consumer-discretionary). LVMH affiche d'excellents fondamentaux (ROE 19.64%) mais une volatilité élevée (29.46%), tandis que Crédit Agricole présente une qualité correcte (Quality 79) dans un secteur défavorisé. Le coupon de 6.15% reste attractif mais la structure worst-of sans barrière augmente le risque de non-versement. Score ajusté: 42/100, grade D+.",
     "keyRisks": [
-      "Exposition concentrated sur deux secteurs macro-défavorisés (finance et luxe cyclique)",
-      "Risque de crédit émetteur sur 5 ans avec dégradation potentielle de notation"
+      "Structure worst-of sans barrière sur deux secteurs macro défavorisés (financials, consumer-discretionary)",
+      "Volatilité élevée de LVMH (29.46%) avec drawdown maximal de 51.49% augmentant le risque de non-coupon"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 6.15,
-        "return_eur": 30750,
-        "probability": 0.95,
-        "duration_years": 5
+        "return_eur": 6150,
+        "probability": 0.2,
+        "duration_years": 1
       },
       "base": {
-        "return_pct": 6.15,
-        "return_eur": 30750,
-        "probability": 0.85,
-        "duration_years": 5
+        "return_pct": 4.1,
+        "return_eur": 12300,
+        "probability": 0.3,
+        "duration_years": 3
       },
       "stress": {
-        "return_pct": 6.15,
-        "return_eur": 30750,
-        "probability": 0.75,
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.35,
         "duration_years": 5
       },
       "worst": {
-        "return_pct": -15,
-        "return_eur": -15000,
-        "probability": 0.05,
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.15,
         "duration_years": 5
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-23T16:58:40.184Z",
-      "durationMs": 11646,
+      "gradedAt": "2026-03-24T08:14:57.043Z",
+      "durationMs": 12702,
       "aiUsed": true,
-      "version": "3.2",
+      "version": "4.0",
       "marketDataAvailable": true,
-      "catBenchmark": 3,
+      "catBenchmark": 2.5,
+      "catSource": "fallback-2026",
       "couponAnnualized": 6.15,
       "couponRaw": 6.15,
       "couponMultiplier": 1,
       "couponFrequency": "annuel",
       "isInPortfolio": false,
-      "baseScore": 71,
+      "hasBarrier": false,
+      "barrierPct": 0,
+      "p2Weights": "buffett-quality-35",
+      "baseScore": 67,
       "baseGrade": "B",
       "adjustments": {
-        "p1": 10,
+        "p1": -8,
         "p2": -12,
-        "p3": -8,
-        "p4": 5
+        "p3": 0,
+        "p4": -5
       }
     }
   }
