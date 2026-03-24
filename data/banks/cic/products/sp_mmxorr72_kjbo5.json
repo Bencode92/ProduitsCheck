@@ -185,7 +185,7 @@
   },
   "grading": {
     "grade": "B",
-    "score": 60,
+    "score": 66,
     "killCriteria": {
       "triggered": false,
       "reasons": []
@@ -195,64 +195,65 @@
         "score": 59,
         "base": 67,
         "delta": -8,
-        "reasoning": "Rendement: base 67 → -8 = 59 (Aucune barrière de protection spécifiée sur un worst-of avec LVMH très volatil (29.46%) et drawdown élevé (51.49%), risque significatif sur le coupon.) | Coupon 6.15%, protégé"
+        "reasoning": "Rendement: base 67 → -8 = 59 (Coupon fixe 6.15% attractif mais structure worst-of expose au maillon faible Crédit Agricole avec vol 21% et beta 0.75) | Coupon 6.15%, protégé"
       },
       "underlyingQuality": {
-        "score": 51,
-        "base": 63,
+        "score": 62,
+        "base": 74,
         "delta": -12,
-        "reasoning": "Qualité: base 63 → -12 = 51 (Crédit Agricole dans les financials évités en macro, LVMH en consumer-discretionary également évité, secteurs défavorisés malgré fondamentaux corrects.) [B/Q 35%] | Worst: Crédit Agricole S.A. B:50"
+        "reasoning": "Qualité: base 74 → -12 = 62 (Secteurs évités par macro (finance + biens cycliques), LVMH en forte baisse -29% YTD, Crédit Agricole dans financials défavorisées) [B/Q 35%] | Worst: Crédit Agricole S.A. B:79"
       },
       "portfolioFit": {
-        "score": 80,
+        "score": 75,
         "base": 80,
-        "delta": 0,
-        "reasoning": "Fit: base 80"
+        "delta": -5,
+        "reasoning": "Fit: base 80 → -5 = 75 (Exposition dual-secteur (luxe/banque) offre diversification mais secteurs tous deux sous pression macro actuellement)"
       },
       "riskPremium": {
-        "score": 56,
-        "base": 61,
-        "delta": -5,
-        "reasoning": "Prime: base 61 → -5 = 56 (Prime de 6.15% vs CAT 2.5% semble correcte mais le risque worst-of sans barrière justifie une décote supplémentaire.) | 6.15% vs CAT 2.5% (spread 3.7%)"
+        "score": 70,
+        "base": 73,
+        "delta": -3,
+        "reasoning": "Prime: base 73 → -3 = 70 (Prime 6.15% correcte mais reflète mal le risque concentration sur deux secteurs défavorisés macro) | 6.15% vs CAT 2.5% (spread 3.7%)"
       }
     },
-    "verdict": "Produit structuré défensif avec capital protégé mais exposé aux secteurs évités (financials, consumer-discretionary). LVMH affiche d'excellents fondamentaux (ROE 19.64%) mais une volatilité élevée (29.46%), tandis que Crédit Agricole présente une qualité correcte (Quality 79) dans un secteur défavorisé. Le coupon de 6.15% reste attractif mais la structure worst-of sans barrière augmente le risque de non-versement. Score ajusté: 42/100, grade D+.",
+    "verdict": "Produit pénalisé par un timing macro défavorable avec double exposition aux secteurs évités (finance + cyclique). LVMH souffre du ralentissement chinois (-29% YTD) tandis que Crédit Agricole pâtit des tensions sur les financials. Le coupon fixe 6.15% reste attractif mais la structure worst-of amplifie le risque sur le maillon faible bancaire. Attendre un meilleur point d'entrée ou une amélioration du contexte macro.",
     "keyRisks": [
-      "Structure worst-of sans barrière sur deux secteurs macro défavorisés (financials, consumer-discretionary)",
-      "Volatilité élevée de LVMH (29.46%) avec drawdown maximal de 51.49% augmentant le risque de non-coupon"
+      "Double exposition secteurs défavorisés macro (finance + biens cycliques)",
+      "Risque Chine sur LVMH et tensions bancaires européennes sur Crédit Agricole"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 6.15,
-        "return_eur": 6150,
+        "return_eur": 30750,
         "probability": 0.2,
-        "duration_years": 1
+        "duration_years": 5
       },
       "base": {
         "return_pct": 4.1,
-        "return_eur": 12300,
-        "probability": 0.3,
-        "duration_years": 3
+        "return_eur": 20500,
+        "probability": 0.35,
+        "duration_years": 5
       },
       "stress": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.35,
+        "probability": 0.3,
         "duration_years": 5
       },
       "worst": {
-        "return_pct": 0,
-        "return_eur": 0,
+        "return_pct": -8,
+        "return_eur": -8000,
         "probability": 0.15,
         "duration_years": 5
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-24T08:14:57.043Z",
-      "durationMs": 12702,
+      "gradedAt": "2026-03-24T17:04:04.014Z",
+      "durationMs": 12928,
       "aiUsed": true,
-      "version": "4.0",
+      "version": "4.3",
+      "productType": "standard",
       "marketDataAvailable": true,
       "catBenchmark": 2.5,
       "catSource": "fallback-2026",
@@ -263,15 +264,43 @@
       "isInPortfolio": false,
       "hasBarrier": false,
       "barrierPct": 0,
-      "p2Weights": "buffett-quality-35",
-      "baseScore": 67,
+      "expectedMaturity": 0,
+      "maxMaturity": 0,
+      "maxBeta": 0.88,
+      "baseScore": 73,
       "baseGrade": "B",
       "adjustments": {
         "p1": -8,
         "p2": -12,
-        "p3": 0,
-        "p4": -5
-      }
+        "p3": -5,
+        "p4": -3
+      },
+      "stockData": [
+        {
+          "name": "LVMH Moët Hennessy Louis Vuitton SA",
+          "ticker": "MC",
+          "sector": "Biens de consommation cycliques",
+          "perf_ytd": -29,
+          "perf_1y": -23.46,
+          "volatility_3y": 29.46,
+          "max_drawdown_3y": 51.49,
+          "buffett_score": 81,
+          "quality_score": 65,
+          "buffett_grade": "A"
+        },
+        {
+          "name": "Crédit Agricole S.A.",
+          "ticker": "ACA",
+          "sector": "Finance",
+          "perf_ytd": -7.61,
+          "perf_1y": -5.37,
+          "volatility_3y": 21.23,
+          "max_drawdown_3y": 21.42,
+          "buffett_score": null,
+          "quality_score": 79,
+          "buffett_grade": null
+        }
+      ]
     }
   }
 }
