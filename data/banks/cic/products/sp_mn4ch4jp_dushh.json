@@ -141,41 +141,41 @@
   },
   "grading": {
     "grade": "B",
-    "score": 66,
+    "score": 63,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 65,
-        "base": 75,
+        "score": 67,
+        "base": 77,
         "delta": -10,
-        "reasoning": "Rendement: base 75 → -10 = 65 (Distance barrière 40% insuffisante vu volatilité EuroStoxx Banks 25-30%, probabilité knock-in élevée sur 7 ans) | Coupon 19.4% (9.7×2), barrière 60%"
+        "reasoning": "Rendement: base 77 → -10 = 67 (Secteur bancaire européen hautement volatil avec corrélations élevées en stress, réduisant les chances de coupon régulier) | Coupon 19.4% (9.7×2), barrière 60%"
       },
       "underlyingQuality": {
-        "score": 35,
-        "base": 50,
+        "score": 20,
+        "base": 35,
         "delta": -15,
-        "reasoning": "Qualité: base 50 → -15 = 35 (Secteur bancaire européen structurellement évité en régime neutral, sous pression réglementaire et marge nette d'intérêt comprimée) [vol/DD 30%]"
+        "reasoning": "Qualité: base 35 → -15 = 20 (Financials explicitement évités dans contexte macro actuel, secteur bancaire européen sous pression réglementaire et taux) [vol/DD 30%]"
       },
       "portfolioFit": {
         "score": 65,
         "base": 80,
         "delta": -15,
-        "reasoning": "Fit: base 80 → -15 = 65 (EuroStoxx Banks totalement inadapté au contexte macro défavorable aux financials, exposition concentrée risquée)"
+        "reasoning": "Fit: base 80 → -15 = 65 (Exposition 100% aux financials va à l'encontre des recommandations macro d'évitement du secteur)"
       },
       "riskPremium": {
-        "score": 100,
-        "base": 100,
+        "score": 99,
+        "base": 99,
         "delta": 0,
-        "reasoning": "Prime: base 100 | 19.4% vs CAT 2.5% (spread 16.9%)"
+        "reasoning": "Prime: base 99 | 19.4% vs CAT 2.5% (spread 16.9%)"
       }
     },
-    "verdict": "Produit inadapté malgré coupon attractif 19.4%. EuroStoxx Banks violé les recommandations macro (financials évités). Barrière 60% trop haute pour volatilité bancaire 25-30% sur 7 ans. Secteur sous pression réglementaire persistante et marges NII comprimées. Score ajusté 46/100.",
+    "verdict": "Ce produit sur l'EuroStoxx Banks présente un piège attractif avec 19.4% de coupon annualisé mais dans un secteur explicitement déconseillé. Les banques européennes font face à des défis structurels (taux, régulation, récession) créant une forte volatilité et corrélation en cas de stress. La barrière à 60% offre peu de protection face aux chocs sectoriels potentiels. Malgré le spread généreux, l'exposition 100% aux financials contredit la stratégie macro prudente.",
     "keyRisks": [
-      "Knock-in quasi-certain : volatilité bancaire 25-30% × horizon 7 ans avec barrière seulement 40% sous le spot",
-      "Secteur bancaire européen structurellement défavorisé : réglementation Bâle, compression marges, stress tests"
+      "Corrélation extrême des banques européennes en cas de crise systémique ou récession",
+      "Secteur financier explicitement évité par recommandations macro actuelles"
     ],
     "negotiationPoints": [],
     "scenarios": {
@@ -186,29 +186,30 @@
         "duration_years": 1
       },
       "base": {
-        "return_pct": -20,
-        "return_eur": -20000,
-        "probability": 0.45,
-        "duration_years": 7
+        "return_pct": 8,
+        "return_eur": 24000,
+        "probability": 0.3,
+        "duration_years": 3
       },
       "stress": {
-        "return_pct": -35,
-        "return_eur": -35000,
-        "probability": 0.25,
-        "duration_years": 7
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.4,
+        "duration_years": 6
       },
       "worst": {
-        "return_pct": -50,
-        "return_eur": -50000,
+        "return_pct": -35,
+        "return_eur": -35000,
         "probability": 0.15,
-        "duration_years": 7
+        "duration_years": 6
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-24T08:20:46.081Z",
-      "durationMs": 11815,
+      "gradedAt": "2026-03-24T17:04:23.266Z",
+      "durationMs": 11682,
       "aiUsed": true,
-      "version": "4.0",
+      "version": "4.3",
+      "productType": "standard",
       "marketDataAvailable": false,
       "catBenchmark": 2.5,
       "catSource": "fallback-2026",
@@ -219,9 +220,11 @@
       "isInPortfolio": false,
       "hasBarrier": true,
       "barrierPct": 60,
-      "p2Weights": "vol-dd-30",
-      "baseScore": 76,
-      "baseGrade": "A",
+      "expectedMaturity": 0,
+      "maxMaturity": 0,
+      "maxBeta": null,
+      "baseScore": 73,
+      "baseGrade": "B",
       "adjustments": {
         "p1": -10,
         "p2": -15,
