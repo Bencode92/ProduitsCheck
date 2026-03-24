@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Grader UI Patch v1.5 — Portfolio grading save fix
+// STRUCTBOARD — Grader UI Patch v1.6 — Stock table fuzzy fix
 // ═══════════════════════════════════════════════════════════════
 
 (function() {
@@ -15,7 +15,6 @@
         delete GRADING_CONFIG.killCriteria.maxIssuerConcentration;
     }
 
-    // Clear old F grades from GitHub
     async function _clearOldKillGrading() {
         let cleared = 0;
         for (const [bankId, proposals] of Object.entries(app.state?.proposals || {})) {
@@ -23,8 +22,7 @@
                 if (p.grading && p.grading.killCriteria?.triggered) {
                     const reasons = p.grading.killCriteria.reasons || [];
                     if (reasons.some(r => r.includes('metteur') || r.includes('book') || r.includes('max: 40'))) {
-                        delete p.grading;
-                        cleared++;
+                        delete p.grading; cleared++;
                         try { await app._saveProductFile(bankId, p); } catch(e){}
                     }
                 }
@@ -34,107 +32,58 @@
     }
     setTimeout(_clearOldKillGrading, 3000);
 
-    // ═══════════════════════════════════════════════════════════════
-    // SAVE GRADING — works for BOTH proposals AND portfolio products
-    // ═══════════════════════════════════════════════════════════════
-
+    // ═══ SAVE GRADING ═══
     async function _saveGrading(product) {
         var saved = { proposal: false, portfolio: false };
-
-        // 1. Save to proposal file (if product has bankId and exists in proposals)
-        if (product.bankId) {
-            try {
-                await app._saveProductFile(product.bankId, product);
-                saved.proposal = true;
-            } catch(e) {
-                console.warn('[GraderUI] Save proposal failed:', e.message);
-            }
-        }
-
-        // 2. Save to portfolio.json (if product exists in portfolio)
+        if (product.bankId) { try { await app._saveProductFile(product.bankId, product); saved.proposal = true; } catch(e) { console.warn('[GraderUI] Save proposal:', e.message); } }
         var portfolio = app.state.portfolio || [];
         var pfProduct = portfolio.find(function(p) { return p.id === product.id; });
         if (pfProduct) {
-            // Copy grading to the portfolio object
             pfProduct.grading = product.grading;
-            try {
-                await github.writeFile(
-                    CONFIG.DATA_PATH + '/portfolio.json',
-                    portfolio,
-                    '[StructBoard] Grading: ' + (product.grading.grade || '?') + ' — ' + (product.name || product.id).substring(0, 40)
-                );
-                saved.portfolio = true;
-                console.log('[GraderUI] Grading saved to portfolio.json for:', product.name);
-            } catch(e) {
-                console.warn('[GraderUI] Save portfolio failed:', e.message);
-            }
+            try { await github.writeFile(CONFIG.DATA_PATH + '/portfolio.json', portfolio, '[StructBoard] Grading: ' + (product.grading.grade || '?') + ' — ' + (product.name || product.id).substring(0, 40)); saved.portfolio = true; } catch(e) { console.warn('[GraderUI] Save portfolio:', e.message); }
         }
-
-        if (!saved.proposal && !saved.portfolio) {
-            console.warn('[GraderUI] Grading NOT saved anywhere for:', product.name, product.id);
-        }
-
         return saved;
     }
 
-    // ─── 1. OVERRIDE triggerGrading — save + full re-render ──────
+    // ─── 1. OVERRIDE triggerGrading ──────────────────────────────
     window.triggerGrading = async function(btn) {
         const product = app.state.currentProduct;
         if (!product) { showToast('Aucun produit', 'error'); return; }
-
         if (btn && btn.disabled) return;
         if (btn) { btn.disabled = true; btn.textContent = '\u23f3 Analyse en cours...'; }
 
         try {
-            // Clear old grading so it gets fresh data
             delete product.grading;
-            // Clear market cache to force reload
             if (typeof _mktCache !== 'undefined') { _mktCache = null; _mktCacheTs = 0; }
 
             showToast('Grading en cours...', 'info');
             const result = await ProposalGrader.grade(product);
 
-            // ─── ATTACH STOCK DATA for the table ───
+            // ─── ATTACH STOCK DATA using _extractStockData (with fuzzy matching) ───
             try {
-                if (_mktCache && result && result.metadata) {
+                if (_mktCache && result && result.metadata && typeof _extractStockData === 'function') {
                     var norm = ProposalGrader.normalize(product);
-                    var all = [].concat(_mktCache.stocksEurope || [], _mktCache.stocksUS || []);
-                    if (all.length > 0 && norm.underlyings && norm.underlyings.length > 0) {
-                        var stockData = [];
-                        norm.underlyings.forEach(function(und) {
-                            var ticker = (typeof _resolveAlias === 'function') ? _resolveAlias(und) : und.toUpperCase();
-                            var s = all.find(function(x) {
-                                return x.ticker === ticker || x.ticker === und.toUpperCase() ||
-                                    (x.name && x.name.toUpperCase().indexOf(und.toUpperCase()) >= 0) ||
-                                    (x.name_api && x.name_api.toUpperCase().indexOf(und.toUpperCase()) >= 0);
-                            });
-                            if (s) {
-                                stockData.push({
-                                    name: und, ticker: s.ticker, sector: s.sector || '\u2014',
-                                    perf_ytd: s.perf_ytd, perf_1y: s.perf_1y,
-                                    volatility_3y: s.volatility_3y, max_drawdown_3y: s.max_drawdown_3y,
-                                    buffett_score: s.buffett_score, quality_score: s.quality_score,
-                                    buffett_grade: s.buffett_grade
-                                });
-                            }
+                    var stockInfo = _extractStockData(norm, _mktCache);
+                    if (stockInfo.available && stockInfo.stocks.length > 0) {
+                        result.metadata.stockData = stockInfo.stocks.filter(function(s) { return s.found; }).map(function(s) {
+                            return {
+                                name: s.name, ticker: s.ticker, sector: s.sector || '\u2014',
+                                perf_ytd: s.perf_ytd, perf_1y: s.perf_1y,
+                                volatility_3y: s.volatility_3y, max_drawdown_3y: s.max_drawdown_3y,
+                                buffett_score: s.buffett_score, quality_score: s.quality_score,
+                                buffett_grade: s.buffett_grade
+                            };
                         });
-                        if (stockData.length > 0) {
-                            result.metadata.stockData = stockData;
-                            product.grading = result;
-                        }
+                        product.grading = result;
                     }
                 }
             } catch(e) { console.warn('[GraderUI] stockData:', e.message); }
 
-            // SAVE to BOTH proposal file AND portfolio.json
             var saveResult = await _saveGrading(product);
-
-            // FULL re-render of the product sheet
             app.openProduct(product);
-
             var gc = ProposalGrader.config.grades[result.grade] || {};
             var saveNote = saveResult.portfolio ? ' (portefeuille \u2713)' : (saveResult.proposal ? ' (proposition \u2713)' : '');
-            showToast('Grade ' + result.grade + ' \u2014 ' + gc.label + ' (' + result.score + '/100)' + saveNote, 'success');
+            showToast('Grade ' + result.grade + ' \u2014 ' + (gc.label || '') + ' (' + (result.score !== null ? result.score + '/100' : 'liquidité') + ')' + saveNote, 'success');
         } catch (e) {
             console.error('[Grader] Error:', e);
             if (btn) { btn.textContent = '\u274c Erreur'; btn.disabled = false; }
@@ -142,7 +91,24 @@
         }
     };
 
-    // ─── 2. PATCH renderProductCard — Badge grade ────────────────
+    // ─── MANUAL LIQUIDITY TAG ────────────────────────────────────
+    window.tagAsLiquidity = async function(btn) {
+        var product = app.state.currentProduct;
+        if (!product) return;
+        product.grading = {
+            grade: '-', score: null,
+            killCriteria: { triggered: false, reasons: [] },
+            pillars: { adjustedReturn: { score: null }, underlyingQuality: { score: null }, portfolioFit: { score: null }, riskPremium: { score: null } },
+            verdict: 'Produit de liquidit\u00e9 / parking cash. Non gradable comme produit structur\u00e9.',
+            keyRisks: ['Rendement tr\u00e8s faible', 'Alternative : CAT ou livret'], scenarios: null,
+            metadata: { gradedAt: new Date().toISOString(), durationMs: 0, aiUsed: false, version: '4.1', productType: 'liquidity', isInPortfolio: true }
+        };
+        await _saveGrading(product);
+        app.openProduct(product);
+        showToast('Marqu\u00e9 comme liquidit\u00e9', 'success');
+    };
+
+    // ─── 2. PATCH renderProductCard ──────────────────────────────
     const _prevRenderProductCard = renderProductCard;
     renderProductCard = function(product, context) {
         let html = _prevRenderProductCard(product, context);
@@ -158,7 +124,7 @@
         return html;
     };
 
-    // ─── 3. PATCH renderProductSheet — clean + inject ─────────────
+    // ─── 3. PATCH renderProductSheet ─────────────────────────────
     const _prevRenderProductSheet = renderProductSheet;
     renderProductSheet = function(container, state) {
         _prevRenderProductSheet(container, state);
@@ -170,101 +136,74 @@
     function _cleanupProductSheet(container, p) {
         const sheetMain = container.querySelector('.sheet-main');
         const sidebar = container.querySelector('.sheet-sidebar');
-
-        // Remove top nav actions (duplicated in sidebar)
         const navActions = container.querySelector('.sheet-nav-actions');
         if (navActions) navActions.remove();
 
-        // Remove ALL old analysis sections
         if (sheetMain) {
             sheetMain.querySelectorAll('.fiche-section').forEach(section => {
                 const title = section.querySelector('.fiche-section-title');
                 if (!title) return;
                 const t = title.textContent.trim().toLowerCase();
-                if (t.includes('analyse ia') || t.includes('r\u00e9sum\u00e9 ia') ||
-                    t.includes('r\u00e9sum\u00e9 discussion') || t.includes('analyse approfondie') ||
-                    t.includes('grading unifi')) {
-                    section.remove();
-                }
+                if (t.includes('analyse ia') || t.includes('r\u00e9sum\u00e9 ia') || t.includes('r\u00e9sum\u00e9 discussion') || t.includes('analyse approfondie') || t.includes('grading unifi')) section.remove();
             });
             sheetMain.querySelectorAll('.deep-analysis-section, [data-section="deep-analysis"]').forEach(s => s.remove());
-            sheetMain.querySelectorAll('.fiche-ai-summary').forEach(el => {
-                const parent = el.closest('.fiche-section');
-                if (parent) parent.remove();
-            });
-            sheetMain.querySelectorAll('.fiche-section').forEach(section => {
-                if (section.textContent.includes('Analyse approfondie')) section.remove();
-            });
+            sheetMain.querySelectorAll('.fiche-ai-summary').forEach(el => { const parent = el.closest('.fiche-section'); if (parent) parent.remove(); });
+            sheetMain.querySelectorAll('.fiche-section').forEach(section => { if (section.textContent.includes('Analyse approfondie')) section.remove(); });
         }
 
-        // Remove old sidebar score panel
         if (sidebar) {
             sidebar.querySelectorAll('.sheet-card').forEach(card => {
                 const title = card.querySelector('.sheet-card-title, h3');
-                if (title) {
-                    const t = title.textContent.trim().toLowerCase();
-                    if (t.includes('score') || t.includes('compatib')) card.remove();
-                }
+                if (title) { const t = title.textContent.trim().toLowerCase(); if (t.includes('score') || t.includes('compatib')) card.remove(); }
             });
             sidebar.querySelectorAll('.score-panel').forEach(el => el.remove());
         }
 
-        // Replace header score widget
         const scoreWidget = container.querySelector('.score-widget');
         if (scoreWidget) {
-            if (p.grading) {
-                scoreWidget.outerHTML = ProposalGrader.renderBadge(p.grading.grade, p.grading.score, 'large');
-            } else {
-                scoreWidget.outerHTML = '<div style="width:80px;height:80px;border-radius:50%;border:3px dashed var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0.5" onclick="triggerGrading(this)"><span style="font-size:20px;color:var(--text-muted)">?</span></div>';
-            }
+            if (p.grading) { scoreWidget.outerHTML = ProposalGrader.renderBadge(p.grading.grade, p.grading.score, 'large'); }
+            else { scoreWidget.outerHTML = '<div style="width:80px;height:80px;border-radius:50%;border:3px dashed var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0.5" onclick="triggerGrading(this)"><span style="font-size:20px;color:var(--text-muted)">?</span></div>'; }
         }
 
-        // ═══ Inject grading section WITH Actualiser button ═══
         if (sheetMain) {
             const gd = document.createElement('div');
             gd.className = 'fiche-section';
             gd.setAttribute('data-section', 'grading');
 
-            const refreshBtn = p.grading
-                ? '<button onclick="triggerGrading(this)" style="margin-left:auto;padding:4px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;font-size:11px;display:flex;align-items:center;gap:4px">\ud83d\udd04 Actualiser</button>'
-                : '';
+            // Buttons: Actualiser + Marquer Liquidité
+            var btns = '';
+            if (p.grading) {
+                btns = '<button onclick="triggerGrading(this)" style="margin-left:auto;padding:4px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;font-size:11px;display:flex;align-items:center;gap:4px">\ud83d\udd04 Actualiser</button>';
+            }
+            if (!p.grading || (p.grading.grade !== '-')) {
+                btns += '<button onclick="tagAsLiquidity(this)" style="padding:4px 12px;border-radius:6px;border:1px solid #94A3B844;background:transparent;color:#94A3B8;cursor:pointer;font-size:11px;margin-left:6px">$ Liquidit\u00e9</button>';
+            }
 
-            // Build grading HTML + stock table
             var gradingHtml = ProposalGrader.renderSection(p.grading);
 
-            // ─── INJECT STOCK TABLE if data available ───
+            // INJECT STOCK TABLE
             if (p.grading && p.grading.metadata && p.grading.metadata.stockData && p.grading.metadata.stockData.length > 0) {
                 var stockTableHtml = _renderStockTable(p.grading.metadata.stockData);
-                // Insert before scenarios or risks
                 var insertPoint = gradingHtml.indexOf('grid-template-columns:repeat(4');
                 if (insertPoint > 0) {
                     var divStart = gradingHtml.lastIndexOf('<div style="display:grid', insertPoint);
                     if (divStart > 0) gradingHtml = gradingHtml.substring(0, divStart) + stockTableHtml + gradingHtml.substring(divStart);
                 } else {
                     var risksPoint = gradingHtml.indexOf('<strong>Risques');
-                    if (risksPoint > 0) {
-                        var divR = gradingHtml.lastIndexOf('<div', risksPoint);
-                        if (divR > 0) gradingHtml = gradingHtml.substring(0, divR) + stockTableHtml + gradingHtml.substring(divR);
-                    } else {
-                        var footerPoint = gradingHtml.lastIndexOf('<div style="font-size:10px');
-                        if (footerPoint > 0) gradingHtml = gradingHtml.substring(0, footerPoint) + stockTableHtml + gradingHtml.substring(footerPoint);
-                    }
+                    if (risksPoint > 0) { var divR = gradingHtml.lastIndexOf('<div', risksPoint); if (divR > 0) gradingHtml = gradingHtml.substring(0, divR) + stockTableHtml + gradingHtml.substring(divR); }
+                    else { var footerPoint = gradingHtml.lastIndexOf('<div style="font-size:10px'); if (footerPoint > 0) gradingHtml = gradingHtml.substring(0, footerPoint) + stockTableHtml + gradingHtml.substring(footerPoint); }
                 }
             }
 
             gd.innerHTML = '<div class="fiche-section-header" style="display:flex;align-items:center">' +
                 '<span class="fiche-section-icon">\ud83c\udfaf</span>' +
                 '<span class="fiche-section-title">Grading Unifi\u00e9</span>' +
-                refreshBtn +
+                btns +
                 '</div>' +
-                '<div class="fiche-section-body">' +
-                gradingHtml +
-                '</div>';
-
+                '<div class="fiche-section-body">' + gradingHtml + '</div>';
             sheetMain.prepend(gd);
         }
 
-        // Inject sidebar grade panel
         if (sidebar) {
             const panel = document.createElement('div');
             panel.innerHTML = _buildGradeSidebarPanel(p.grading);
@@ -272,93 +211,45 @@
         }
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    // STOCK TABLE RENDERER — mini table of underlying metrics
-    // ═══════════════════════════════════════════════════════════════
-
+    // ═══ STOCK TABLE RENDERER ═══
     function _renderStockTable(stockData) {
         if (!stockData || stockData.length === 0) return '';
-
-        function _perfColor(v) {
-            if (v == null) return '#888';
-            return v >= 10 ? '#06D6A0' : v >= 0 ? '#4ECDC4' : v >= -10 ? '#FFB627' : '#EF233C';
-        }
-        function _scoreColor(v) {
-            if (v == null) return '#888';
-            return v >= 70 ? '#06D6A0' : v >= 50 ? '#4ECDC4' : v >= 30 ? '#FFB627' : '#EF233C';
-        }
-        function _fmt(v, suffix) {
-            if (v == null) return '<span style="color:#555">\u2014</span>';
-            var color = suffix === '%' ? _perfColor(v) : _scoreColor(v);
-            return '<span style="color:' + color + ';font-weight:600">' + (v >= 0 && suffix === '%' ? '+' : '') + v + (suffix || '') + '</span>';
-        }
-
+        function _pc(v) { if (v == null) return '#888'; return v >= 10 ? '#06D6A0' : v >= 0 ? '#4ECDC4' : v >= -10 ? '#FFB627' : '#EF233C'; }
+        function _sc(v) { if (v == null) return '#888'; return v >= 70 ? '#06D6A0' : v >= 50 ? '#4ECDC4' : v >= 30 ? '#FFB627' : '#EF233C'; }
+        function _f(v, s) { if (v == null) return '<span style="color:#555">\u2014</span>'; var c = s === '%' ? _pc(v) : _sc(v); return '<span style="color:' + c + ';font-weight:600">' + (v >= 0 && s === '%' ? '+' : '') + v + (s || '') + '</span>'; }
         var cs = 'padding:4px 6px;font-size:11px;border-bottom:1px solid rgba(255,255,255,0.06);white-space:nowrap;';
         var hs = cs + 'color:var(--text-muted);font-weight:500;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;';
-
         var h = '<div style="margin:12px 0"><div style="font-size:11px;font-weight:600;color:var(--text-muted);margin-bottom:6px">\ud83d\udcca Sous-jacents</div>';
         h += '<div style="overflow-x:auto;border-radius:8px;border:1px solid rgba(255,255,255,0.08)">';
         h += '<table style="width:100%;border-collapse:collapse;font-size:11px">';
-        h += '<tr style="background:rgba(255,255,255,0.03)">';
-        h += '<th style="' + hs + 'text-align:left">Nom</th>';
-        h += '<th style="' + hs + 'text-align:right">YTD</th>';
-        h += '<th style="' + hs + 'text-align:right">1 an</th>';
-        h += '<th style="' + hs + 'text-align:right">Vol 3Y</th>';
-        h += '<th style="' + hs + 'text-align:right">DD 3Y</th>';
-        h += '<th style="' + hs + 'text-align:right">Buffett</th>';
-        h += '<th style="' + hs + 'text-align:right">Quality</th>';
-        h += '</tr>';
-
+        h += '<tr style="background:rgba(255,255,255,0.03)"><th style="' + hs + 'text-align:left">Nom</th><th style="' + hs + 'text-align:right">YTD</th><th style="' + hs + 'text-align:right">1 an</th><th style="' + hs + 'text-align:right">Vol 3Y</th><th style="' + hs + 'text-align:right">DD 3Y</th><th style="' + hs + 'text-align:right">Buffett</th><th style="' + hs + 'text-align:right">Quality</th></tr>';
         stockData.forEach(function(s, i) {
             var bg = i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)';
-            h += '<tr style="background:' + bg + '">';
-            h += '<td style="' + cs + 'text-align:left"><span style="font-weight:600;color:var(--text-primary,#e0e0e0)">' + s.name + '</span> <span style="color:#666;font-size:10px">' + s.ticker + '</span></td>';
-            h += '<td style="' + cs + 'text-align:right">' + _fmt(s.perf_ytd, '%') + '</td>';
-            h += '<td style="' + cs + 'text-align:right">' + _fmt(s.perf_1y, '%') + '</td>';
-            h += '<td style="' + cs + 'text-align:right">' + _fmt(s.volatility_3y, '%') + '</td>';
-            h += '<td style="' + cs + 'text-align:right">' + _fmt(s.max_drawdown_3y != null ? -Math.abs(s.max_drawdown_3y) : null, '%') + '</td>';
-            h += '<td style="' + cs + 'text-align:right">' + _fmt(s.buffett_score, '') + '<span style="font-size:9px;color:#666">/' + (s.buffett_grade || '?') + '</span></td>';
-            h += '<td style="' + cs + 'text-align:right">' + _fmt(s.quality_score, '') + '</td>';
-            h += '</tr>';
+            h += '<tr style="background:' + bg + '"><td style="' + cs + 'text-align:left"><span style="font-weight:600;color:var(--text-primary,#e0e0e0)">' + s.name + '</span> <span style="color:#666;font-size:10px">' + s.ticker + '</span></td>';
+            h += '<td style="' + cs + 'text-align:right">' + _f(s.perf_ytd, '%') + '</td><td style="' + cs + 'text-align:right">' + _f(s.perf_1y, '%') + '</td>';
+            h += '<td style="' + cs + 'text-align:right">' + _f(s.volatility_3y, '%') + '</td><td style="' + cs + 'text-align:right">' + _f(s.max_drawdown_3y != null ? -Math.abs(s.max_drawdown_3y) : null, '%') + '</td>';
+            h += '<td style="' + cs + 'text-align:right">' + _f(s.buffett_score, '') + '<span style="font-size:9px;color:#666">/' + (s.buffett_grade || '?') + '</span></td>';
+            h += '<td style="' + cs + 'text-align:right">' + _f(s.quality_score, '') + '</td></tr>';
         });
-
         h += '</table></div></div>';
         return h;
     }
 
-    // ─── 4. DISABLE injectDeepAnalysis completely ────────────────
-    function _disableDeepAnalysis() {
-        if (typeof window.injectDeepAnalysis === 'function' && !window._deepAnalysisDisabled) {
-            window._origInjectDeepAnalysis = window.injectDeepAnalysis;
-            window.injectDeepAnalysis = function() {};
-            window._deepAnalysisDisabled = true;
-        }
-    }
-    _disableDeepAnalysis();
-    setTimeout(_disableDeepAnalysis, 100);
-    setTimeout(_disableDeepAnalysis, 500);
+    // ─── 4. DISABLE injectDeepAnalysis ───────────────────────────
+    function _disableDeepAnalysis() { if (typeof window.injectDeepAnalysis === 'function' && !window._deepAnalysisDisabled) { window._origInjectDeepAnalysis = window.injectDeepAnalysis; window.injectDeepAnalysis = function() {}; window._deepAnalysisDisabled = true; } }
+    _disableDeepAnalysis(); setTimeout(_disableDeepAnalysis, 100); setTimeout(_disableDeepAnalysis, 500);
 
-    // ─── 5. Grade sidebar panel builder ──────────────────────────
+    // ─── 5. Grade sidebar ────────────────────────────────────────
     function _buildGradeSidebarPanel(grading) {
-        if (!grading) {
-            return '<div class="sheet-card"><h3 class="sheet-card-title">Grade</h3><div style="text-align:center;padding:20px 0;"><div style="width:64px;height:64px;border-radius:50%;border:3px dashed var(--border);display:inline-flex;align-items:center;justify-content:center;margin-bottom:8px"><span style="font-size:24px;color:var(--text-muted)">?</span></div><div style="font-size:12px;color:var(--text-muted)">Non grad\u00e9</div></div></div>';
-        }
+        if (!grading) return '<div class="sheet-card"><h3 class="sheet-card-title">Grade</h3><div style="text-align:center;padding:20px 0;"><div style="width:64px;height:64px;border-radius:50%;border:3px dashed var(--border);display:inline-flex;align-items:center;justify-content:center;margin-bottom:8px"><span style="font-size:24px;color:var(--text-muted)">?</span></div><div style="font-size:12px;color:var(--text-muted)">Non grad\u00e9</div></div></div>';
         const g = grading;
+        if (g.grade === '-') return '<div class="sheet-card" style="border-top:3px solid #94A3B8"><h3 class="sheet-card-title">Grade</h3><div style="text-align:center;padding:12px 0"><span style="font-size:32px;color:#94A3B8">$</span><div style="font-size:14px;font-weight:600;color:#94A3B8;margin-top:4px">Liquidit\u00e9</div><div style="font-size:11px;color:var(--text-muted);margin-top:8px">' + (g.verdict || '') + '</div></div></div>';
         const config = ProposalGrader.config.grades[g.grade] || ProposalGrader.config.grades.F;
         const color = config.color;
         let html = '<div class="sheet-card" style="border-top:3px solid ' + color + '"><h3 class="sheet-card-title">Grade</h3><div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">' + ProposalGrader.renderBadge(g.grade, g.score, 'large') + '<div><div style="font-size:14px;font-weight:600;color:' + color + '">' + config.label + '</div><div style="font-size:11px;color:var(--text-muted)">' + (g.score !== null ? g.score + '/100' : '') + '</div></div></div>';
-        if (g.killCriteria && g.killCriteria.triggered) {
-            html += '<div style="background:rgba(239,35,60,0.08);border-radius:6px;padding:8px;margin-bottom:10px;"><div style="font-size:11px;font-weight:600;color:#EF233C;margin-bottom:4px">\u26d4 Rejet automatique</div>' + g.killCriteria.reasons.map(function(r) { return '<div style="font-size:10px;color:#EF233C;padding:1px 0">\u2022 ' + r + '</div>'; }).join('') + '</div>';
-        }
+        if (g.killCriteria && g.killCriteria.triggered) html += '<div style="background:rgba(239,35,60,0.08);border-radius:6px;padding:8px;margin-bottom:10px;"><div style="font-size:11px;font-weight:600;color:#EF233C;margin-bottom:4px">\u26d4 Rejet automatique</div>' + g.killCriteria.reasons.map(function(r) { return '<div style="font-size:10px;color:#EF233C;padding:1px 0">\u2022 ' + r + '</div>'; }).join('') + '</div>';
         var pn = { adjustedReturn: 'Rendement', underlyingQuality: 'Sous-jacent', portfolioFit: 'Fit portfolio', riskPremium: 'Prime/CAT' };
-        if (g.pillars) {
-            Object.entries(pn).forEach(function(e) {
-                var key = e[0], name = e[1], pillar = g.pillars[key] || {}, score = pillar.score;
-                if (score === null || score === undefined) return;
-                var bc = score >= 70 ? '#06D6A0' : score >= 45 ? '#FFB627' : '#EF233C';
-                html += '<div style="margin-bottom:6px"><div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:2px"><span style="color:var(--text-muted)">' + name + '</span><span style="font-weight:600">' + score + '</span></div><div style="height:4px;background:var(--surface);border-radius:2px;overflow:hidden"><div style="height:100%;width:' + score + '%;background:' + bc + ';border-radius:2px"></div></div></div>';
-            });
-        }
+        if (g.pillars) { Object.entries(pn).forEach(function(e) { var key = e[0], name = e[1], pillar = g.pillars[key] || {}, score = pillar.score; if (score === null || score === undefined) return; var bc = score >= 70 ? '#06D6A0' : score >= 45 ? '#FFB627' : '#EF233C'; html += '<div style="margin-bottom:6px"><div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:2px"><span style="color:var(--text-muted)">' + name + '</span><span style="font-weight:600">' + score + '</span></div><div style="height:4px;background:var(--surface);border-radius:2px;overflow:hidden"><div style="height:100%;width:' + score + '%;background:' + bc + ';border-radius:2px"></div></div></div>'; }); }
         if (g.verdict) html += '<div style="font-size:11px;color:var(--text-muted);margin-top:10px;padding-top:8px;border-top:1px solid var(--border);line-height:1.4">' + g.verdict + '</div>';
         if (g.keyRisks && g.keyRisks.length > 0) { html += '<div style="margin-top:8px">'; g.keyRisks.forEach(function(r) { html += '<div style="font-size:10px;color:var(--red);padding:2px 0">\u26a0 ' + r + '</div>'; }); html += '</div>'; }
         if (g.metadata) html += '<div style="font-size:9px;color:var(--text-dim);margin-top:8px;opacity:0.6">' + (g.metadata.aiUsed ? 'Claude IA' : 'Local') + ' \u00b7 ' + new Date(g.metadata.gradedAt).toLocaleDateString('fr-FR') + '</div>';
@@ -393,11 +284,11 @@
                 var pc = (app.state.portfolio || []).length > 0 ? { available: true, currentIssuerPct: 0, overlappingUnderlyings: [], totalProducts: app.state.portfolio.length } : { available: false };
                 var kc = ProposalGrader.checkKillCriteria(n, pc, { bestRate: 3.0 });
                 if (kc.killed) {
-                    result.grading = { grade: 'F', score: 0, killCriteria: { triggered: true, reasons: kc.reasons }, verdict: 'Rejet automatique : ' + kc.reasons[0], metadata: { gradedAt: new Date().toISOString(), aiUsed: false, version: '1.5' } };
+                    result.grading = { grade: 'F', score: 0, killCriteria: { triggered: true, reasons: kc.reasons }, verdict: 'Rejet automatique : ' + kc.reasons[0], metadata: { gradedAt: new Date().toISOString(), aiUsed: false, version: '1.6' } };
                     await app._saveProductFile(bankId, result);
                     showToast('\u26d4 Grade F \u2014 ' + kc.reasons[0], 'error');
                 }
-            } catch (e) { console.warn('[GraderUI] kill-check failed:', e); }
+            } catch (e) { console.warn('[GraderUI] kill-check:', e); }
         }
         return result;
     };
@@ -410,9 +301,7 @@
                 if (title && title.textContent.includes('Propositions') && !header.querySelector('.btn-grade-all')) {
                     var ungraded = Object.values(state.proposals).flat().filter(function(p) { return !p.grading; });
                     if (ungraded.length > 0) {
-                        var btn = document.createElement('button');
-                        btn.className = 'btn btn-grade-all';
-                        btn.style.cssText = 'margin-right:8px;white-space:nowrap';
+                        var btn = document.createElement('button'); btn.className = 'btn btn-grade-all'; btn.style.cssText = 'margin-right:8px;white-space:nowrap';
                         btn.innerHTML = '\ud83c\udfaf Grader tout (' + ungraded.length + ')';
                         btn.onclick = function() { _handleBatch(state); };
                         var ab = header.querySelector('.btn.primary');
@@ -422,13 +311,7 @@
             });
         }, 50);
     };
-    var _di2 = setInterval(function() {
-        if (typeof renderDashboard === 'function') {
-            var _cd2 = renderDashboard;
-            renderDashboard = function(c, s) { _cd2(c, s); _dashPatch(c, s); };
-            clearInterval(_di2);
-        }
-    }, 100);
+    var _di2 = setInterval(function() { if (typeof renderDashboard === 'function') { var _cd2 = renderDashboard; renderDashboard = function(c, s) { _cd2(c, s); _dashPatch(c, s); }; clearInterval(_di2); } }, 100);
     setTimeout(function() { clearInterval(_di2); }, 5000);
 
     async function _handleBatch(state) {
@@ -438,16 +321,12 @@
         showToast('Grading...', 'info');
         try {
             var results = await ProposalGrader.gradeBatch(ungraded, function(i, t, r) { showToast(i + '/' + t + ' \u2014 ' + r.grading.grade, 'info'); });
-            for (var j = 0; j < results.length; j++) {
-                var pr = results[j].proposal;
-                // Save to both proposal AND portfolio
-                await _saveGrading(pr);
-            }
+            for (var j = 0; j < results.length; j++) { await _saveGrading(results[j].proposal); }
             var counts = {}; results.forEach(function(r) { counts[r.grading.grade] = (counts[r.grading.grade]||0)+1; });
             showToast('Termin\u00e9 : ' + Object.entries(counts).map(function(e) { return e[1] + '\u00d7' + e[0]; }).join(', '), 'success');
             app.render();
         } catch(e) { showToast('Erreur: ' + e.message, 'error'); }
     }
 
-    console.log('[StructBoard] GraderUI v1.5 loaded \u2014 portfolio save + stock table');
+    console.log('[StructBoard] GraderUI v1.6 \u2014 fuzzy stock table + liquidity button');
 })();
