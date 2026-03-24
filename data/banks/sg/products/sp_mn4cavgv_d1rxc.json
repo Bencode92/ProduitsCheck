@@ -161,5 +161,21 @@
       "redundancy": 35,
       "complementarity": 60
     }
+  },
+  "grading": {
+    "grade": "F",
+    "score": 0,
+    "killCriteria": {
+      "triggered": true,
+      "reasons": [
+        "Worst-of 8 sous-jacents (max 5)"
+      ]
+    },
+    "verdict": "Rejet automatique : Worst-of 8 sous-jacents (max 5)",
+    "metadata": {
+      "gradedAt": "2026-03-24T08:15:36.386Z",
+      "aiUsed": false,
+      "version": "1.5"
+    }
   }
 }
