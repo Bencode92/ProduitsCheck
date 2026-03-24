@@ -242,41 +242,41 @@
   },
   "grading": {
     "grade": "A",
-    "score": 87,
+    "score": 83,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 85,
+        "score": 80,
         "base": 90,
-        "delta": -5,
-        "reasoning": "Rendement: base 90 → -5 = 85 (Volatilité 36.9% élevée sur single name tech avec barrière -60%, probabilité knock-in non négligeable malgré coupon attractif) | Coupon 14% (7×2)"
+        "delta": -10,
+        "reasoning": "Rendement: base 90 → -10 = 80 (Volatilité 36.9% élevée avec barrière -60% réduit significativement la probabilité de survie sur 2 ans, surtout avec drawdown historique de 45%) | Coupon 14% (7×2), barrière -60%"
       },
       "underlyingQuality": {
-        "score": 94,
-        "base": 84,
-        "delta": 10,
-        "reasoning": "Qualité: base 84 → +10 = 94 (ASML leader mondial lithographie EUV, fondamentaux exceptionnels (ROE 50.46%, marge 29.42%) et momentum haussier +67% sur 1an) | Worst: ASML Holding NV B:100"
+        "score": 74,
+        "base": 82,
+        "delta": -8,
+        "reasoning": "Qualité: base 82 → -8 = 74 (Exposition 100% au secteur semiconducteurs très cyclique, vulnérable aux tensions géopolitiques Chine-USA et cycles technologiques) [B/Q 35%] | Worst: ASML Holding NV B:100"
       },
       "portfolioFit": {
         "score": 75,
         "base": 80,
         "delta": -5,
-        "reasoning": "Fit: base 80 → -5 = 75 (Concentration 100% sur single name tech néerlandais, manque de diversification géographique/sectorielle)"
+        "reasoning": "Fit: base 80 → -5 = 75 (Concentration extrême sur un seul titre tech européen limite la diversification, inadaptée aux portefeuilles conservateurs)"
       },
       "riskPremium": {
-        "score": 90,
+        "score": 100,
         "base": 100,
-        "delta": -10,
-        "reasoning": "Prime: base 100 → -10 = 90 (Prime apparente trompeuse car coupon conditionnel sur autocall, risque de non-paiement si ASML sous-performe) | 14% vs CAT 3%"
+        "delta": 0,
+        "reasoning": "Prime: base 100 | 14% vs CAT 2.5% (spread 11.5%)"
       }
     },
-    "verdict": "Produit premium sur ASML, champion incontournable de la lithographie EUV avec des fondamentaux exceptionnels et une dynamique haussière forte (+67% sur 1an). Le coupon semestriel de 14% annualisé est attractif mais conditionnel à l'autocall, créant un risque de non-paiement. La concentration sur un single name tech européen limite la diversification, et la volatilité de 36.9% avec une barrière à -60% génère un risque de perte en capital significatif. Malgré la qualité intrinsèque d'ASML, la structure nécessite une conviction forte sur la trajectoire du titre.",
+    "verdict": "Produit attractif sur le papier avec 14% de coupon sur ASML, leader mondial des équipements lithographiques (ROE 50%, marges 29%). Cependant, la forte volatilité (36.9%) et l'exposition concentrée au secteur semiconducteurs créent un risque significatif de non-versement des coupons. La barrière à -60% offre une protection relative mais reste vulnérable aux chocs sectoriels majeurs. Réservé aux investisseurs acceptant une forte concentration tech européenne.",
     "keyRisks": [
-      "Concentration 100% sur ASML - exposition totale aux aléas spécifiques du secteur semi-conducteurs et géopolitique Chine-Taiwan",
-      "Coupon conditionnel - risque de non-paiement prolongé si ASML stagne ou baisse, malgré la qualité fondamentale"
+      "Concentration sectorielle semiconducteurs exposée aux cycles technologiques et tensions commerciales USA-Chine",
+      "Volatilité élevée (36.9%) avec historique de drawdown à -45% augmente le risque de franchissement de barrière"
     ],
     "negotiationPoints": [],
     "scenarios": {
@@ -289,41 +289,45 @@
       "base": {
         "return_pct": 28,
         "return_eur": 28000,
-        "probability": 0.4,
+        "probability": 0.25,
         "duration_years": 2
       },
       "stress": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.2,
+        "probability": 0.3,
         "duration_years": 2
       },
       "worst": {
-        "return_pct": -35,
-        "return_eur": -35000,
-        "probability": 0.1,
+        "return_pct": -45,
+        "return_eur": -45000,
+        "probability": 0.15,
         "duration_years": 2
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-23T16:58:07.560Z",
-      "durationMs": 14016,
+      "gradedAt": "2026-03-24T08:14:37.798Z",
+      "durationMs": 12155,
       "aiUsed": true,
-      "version": "3.2",
+      "version": "4.0",
       "marketDataAvailable": true,
-      "catBenchmark": 3,
+      "catBenchmark": 2.5,
+      "catSource": "fallback-2026",
       "couponAnnualized": 14,
       "couponRaw": 7,
       "couponMultiplier": 2,
       "couponFrequency": "semestriel",
       "isInPortfolio": false,
+      "hasBarrier": false,
+      "barrierPct": -60,
+      "p2Weights": "buffett-quality-35",
       "baseScore": 89,
       "baseGrade": "A",
       "adjustments": {
-        "p1": -5,
-        "p2": 10,
+        "p1": -10,
+        "p2": -8,
         "p3": -5,
-        "p4": -10
+        "p4": 0
       }
     }
   }
