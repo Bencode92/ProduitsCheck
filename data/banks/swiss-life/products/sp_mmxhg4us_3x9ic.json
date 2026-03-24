@@ -142,108 +142,39 @@
   "entity": "cameleons",
   "entityName": "Caméleons",
   "grading": {
-    "grade": "C",
-    "score": 48,
+    "grade": "-",
+    "score": null,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 30,
-        "base": 40,
-        "delta": -10,
-        "reasoning": "Rendement: base 40 → -10 = 30 (Barrière à 60% insuffisante face à la volatilité élevée du secteur bancaire (BMPS 36%, UCG 30%) et panier majoritairement financier en contexte défavorable) | Coupon 7%, barrière 60%"
+        "score": null
       },
       "underlyingQuality": {
-        "score": 51,
-        "base": 63,
-        "delta": -12,
-        "reasoning": "Qualité: base 63 → -12 = 51 (Exposition massive aux financières (BMPS, UCG) dans un régime macro défavorable au secteur, avec BMPS en forte chute (-22.74% YTD) et qualité médiocre) [vol/DD 30%] | Worst: Veolia Environnement SA B:28"
+        "score": null
       },
       "portfolioFit": {
-        "score": 70,
-        "base": 70,
-        "delta": 0,
-        "reasoning": "En portefeuille — neutre"
+        "score": null
       },
       "riskPremium": {
-        "score": 67,
-        "base": 75,
-        "delta": -8,
-        "reasoning": "Prime: base 75 → -8 = 67 (Coupon 7% attractif mais insuffisant pour compenser le risque réel d'un panier dominé par des financières italiennes fragiles) | 7% vs CAT 2.5% (spread 4.5%)"
+        "score": null
       }
     },
-    "verdict": "Ce produit présente un profil risque/rendement déséquilibré avec une exposition dangereuse aux financières italiennes. BMPS (-22.74% YTD) et UCG (-16% YTD) subissent de fortes pressions, tandis que le régime macro défavorise explicitement le secteur financier. La barrière à 60% semble insuffisante face aux volatilités élevées (36% pour BMPS). Le coupon 7% ne compense pas adequatement ces risques structurels.",
+    "verdict": "Produit de liquidité / parking cash. Non gradable comme produit structuré.",
     "keyRisks": [
-      "Concentration secteur financier italien en difficulté (BMPS qualité 48, forte volatilité 36%)",
-      "Barrière knock-in trop haute (60%) face aux volatilités du panier et contexte macro défavorable aux financières"
+      "Rendement très faible",
+      "Alternative : CAT ou livret"
     ],
-    "negotiationPoints": [],
-    "scenarios": {
-      "optimistic": {
-        "return_pct": 7,
-        "return_eur": 2100,
-        "probability": 0.15,
-        "duration_years": 1
-      },
-      "base": {
-        "return_pct": 3.5,
-        "return_eur": 2625,
-        "probability": 0.3,
-        "duration_years": 2.5
-      },
-      "stress": {
-        "return_pct": 0,
-        "return_eur": 0,
-        "probability": 0.35,
-        "duration_years": 2.5
-      },
-      "worst": {
-        "return_pct": -25,
-        "return_eur": -7500,
-        "probability": 0.2,
-        "duration_years": 2.5
-      }
-    },
+    "scenarios": null,
     "metadata": {
-      "gradedAt": "2026-03-24T09:22:53.772Z",
-      "durationMs": 13215,
-      "aiUsed": true,
+      "gradedAt": "2026-03-24T12:51:51.721Z",
+      "durationMs": 0,
+      "aiUsed": false,
       "version": "4.1",
-      "productType": "standard",
-      "marketDataAvailable": true,
-      "catBenchmark": 2.5,
-      "catSource": "fallback-2026",
-      "couponAnnualized": 7,
-      "couponRaw": 7,
-      "couponMultiplier": 1,
-      "couponFrequency": "annuel",
-      "isInPortfolio": true,
-      "hasBarrier": true,
-      "barrierPct": 60,
-      "baseScore": 59,
-      "baseGrade": "C",
-      "adjustments": {
-        "p1": -10,
-        "p2": -12,
-        "p3": 0,
-        "p4": -8
-      },
-      "stockData": [
-        {
-          "name": "Veolia Environnement SA",
-          "ticker": "VIE",
-          "sector": "Services publics",
-          "perf_ytd": 6.46,
-          "perf_1y": -0.47,
-          "volatility_3y": 19.2,
-          "max_drawdown_3y": 16.28,
-          "buffett_score": 28,
-          "quality_score": 62,
-          "buffett_grade": "D"
-        }
-      ]
+      "productType": "liquidity",
+      "isInPortfolio": true
     }
   }
 }
