@@ -1,0 +1,144 @@
+{
+  "id": "sp_mn4ccbl0_1r90m",
+  "name": "ATHENA SUR INDICE SOLACTIVE GOLD MINERS À DÉCRÉMENT 2",
+  "bankId": "sg",
+  "type": "autocall",
+  "underlyingType": "autre",
+  "underlyings": [
+    "Indice Solactive GDX EUR AR 5%"
+  ],
+  "currency": "EUR",
+  "maturity": "5 ans",
+  "maturityDate": null,
+  "strikeDate": null,
+  "coupon": {
+    "rate": 9,
+    "type": "conditionnel",
+    "frequency": "semestriel",
+    "trigger": 60,
+    "memory": true
+  },
+  "capitalProtection": {
+    "protected": false,
+    "level": 0,
+    "barrier": 50,
+    "barrierType": "europeenne"
+  },
+  "earlyRedemption": {
+    "possible": true,
+    "type": "autocall",
+    "trigger": 95,
+    "frequency": "semestriel",
+    "startYear": 2
+  },
+  "scenarios": {
+    "favorable": "Remboursement anticipé avec 100% capital + coupon",
+    "median": "Remboursement à échéance avec 100% du capital",
+    "defavorable": "Perte en capital partielle ou totale possible"
+  },
+  "risks": [
+    "Risque de perte en capital partielle ou totale",
+    "Risque de crédit Société Générale",
+    "Exposition au taux de change EUR/USD",
+    "Impact du prélèvement forfaitaire de 5% par an"
+  ],
+  "rawText": "--- PAGE 1 ---\nATHENA SUR  INDICE  SOLACTIVE GOLD  MINERS  À DÉCRÉMENT  2\n--- PAGE 2 ---\n▪   À   l’issue   des   semestres   4   à   9 ,   si   à   une   des   dates   d’observations   semestrielles,   le   Niveau   du   Sous - Jacent   est   supérieur  ou   égal   à   la   barrière   de   rappel ,   un   mécanisme   de   remboursement   anticipé   est   automatiquement   activé   et   le   produit  s’arrête .   Cette   barrière   de   rappel   est   dégressive,   ce   qui   permet   d’augmenter   la   probabilité   d’un   remboursement  automatique   par   anticipation .  ▪   En   cas   de   remboursement   anticipé ,   le   produit   est   remboursé   et   vous   recevez   100 %   du   Capital   investi,   en   plus  l’investisseur   reçoit   un   Coupon   Conditionnel   de   4 , 50 %   par   semestre   ( 9 , 00 %   p . a . )   écoulé   depuis   la   date   d'observation  initiale .  ▪   Un   remboursement   de   100 %   du   Capital   Initial   à   l’échéance   si   le   Niveau   du   Sous - Jacent   est   supérieur   ou   égal   à   50 %   de  son   Niveau   Initial .   Un   risque   de   perte   en   capital   partielle   ou   totale   au - delà .  ▪   Pour   prendre   connaissance   des   risques   liés   à   ce   produit ,   veuillez - vous   référer   à   la   page   9 .  ATHENA SUR INDICE SOLACTIVE GOLD MINERS  À DÉCRÉMENT  PRÉSENTATION CONFIDENTIELLE   │   7  Points   Clés  Sous - Jacent   Indice   Solactive   GDX EUR AR 5%  <SOLGDXA5 Index>  Protection du capital   Non  Coupon   Conditionel   4,50% par semestre écoulé  (9,00% p.a.)  Fréquence   Semestrielle  Format  Titre de créance de droit français  Émetteur  SG   Issuer  Garant  Société Générale (Moody’s : A1 ; S&P : A)*  Points   Clés  Maturité   5 ans  Devise   EUR  Barrière   de Coupon  Conditionnel   à  l’échéance  60% du Niveau Initial du  Sous - Jacent  Barrière   de rappel  95% dès le quatrième semestre  puis dégressive de   - 2,50% par  semestre  Barrière du Capital à  maturité  50% du Niveau Initial du  Sous - Jacent  * Source : Bloomberg, Le   1 3 /03/2026 .\n--- PAGE 3 ---\n•   MÉCANISME   DE   REMBOURSEMENT   PAR   ANTICIPATION  -   À   partir   de   la   1 ère   année   et   à   la   fin   de   chaque   année,   le   niveau   du   sous - jacent   est   observé .   Si,   à   une   date  d’observation   annuelle,   le   niveau   du   sous - jacent   est   supérieur   ou   égal   à   sa   barrière   de   rappel,   le   produit   est  automatiquement   remboursé,   et   l’investisseur   reçoit ( 1 )   :  -   Sinon,   le   produit   continue .  100% du Capital Initial + un coupon de 9.00% x nombre d’années écoulées  PRÉSENTATION CONFIDENTIELLE   │   8  Mécanisme   du   produit     MÉCANISME   DE   REMBOURSEMENT   À   L’ÉCHÉANCE  -   Si   le   mécanisme   de   remboursement   anticipé   n’a   pas   été   activé   précédemment,   l’investisseur   reçoit ( 1 )   :  100% du Capital   I nitial  +  un coupon de 9.00% x nombre  d’années écoulées  Si le Niveau Final du sous - jacent est  supérieur ou égal à 77.50 %   de son  Niveau Initial  La   Barrière   de   Rappel   est   exprimée   en   %   du   Niveau   Initial   de   la   valeur   du   sous - jacent   à   chaque   date   d'observation :  Année   Y1   Y2   Y3   Y4   Y5   Y6   Y7   Y8   Y9  Barrière  de Rappel   100%   97.50%   95.00%   92.50%   90.00%   87.50%   85.00%   82.50%   80.00%  ATHENA SUR INDICE SOLACTIVE GOLD MINERS  À DÉCRÉMENT  100% du Capital   I nitial  Si le Niveau Final du sous - jacent  est inférieur à 77.50% de son  Niveau Initial, mais supérieur ou  égal à 50% de son Niveau Initial  Niveau Moyen Final du Sous - Jacent /  Niveau Initial du Sous - Jacent  Perte en capital**  Dans le pire des scénarii la perte en  capital peut être totale  Si le Niveau Final du sous - jacent est  inférieur à 50% de son Niveau Initial  •   MÉCANISME   DE   REMBOURSEMENT   PAR   ANTICIPATION  -   À   l’issue   des   semestres   4   à   9 ,   le   Niveau   du   Sous - Jacent   est   observé .   Si,   à   une   date   d’observation   semestrielle,   le  Niveau   du   Sous - Jacent   est   supérieur   ou   égal   à   sa   Barrière   de   Rappel ,   le   produit   est   automatiquement   remboursé,  et   l’investisseur   reçoit ( 1 )   :  -   Sinon,   le   produit   continue .  100% du Capital Initial + un Coupon Conditionnel de 4,50% x nombre de semestres écoulés     MÉCANISME   DE   REMBOURSEMENT   À   L’ÉCHÉANCE  -   À   maturité,   si   le   mécanisme   de   remboursement   anticipé   n’a   pas   été   activé   précédemment,   l’investisseur   reçoit ( 1 )   :  100% du Capital   I nitial  +  un coupon de 4,50% x nombre de  semestres écoulés  Si le Niveau Final du Sous - jacent est  supérieur ou égal à 60,00 %   de son  Niveau Initial  La   Barrière   de   Rappel   est   exprimée   en   %   du   Niveau   Initial   de   la   valeur   du   S ous - Jacent   à   chaque   date   d'observation :  Semestre   S4   S5   S6   S7   S8   S9  Barrière de  Rappel   95,00%   92,50%   90,00%   87,50%   85,",
+  "aiParsed": {
+    "name": "ATHENA SUR INDICE SOLACTIVE GOLD MINERS À DÉCRÉMENT 2",
+    "type": "autocall",
+    "emitter": "SG Issuer",
+    "guarantor": "Société Générale",
+    "isin": null,
+    "underlyings": [
+      "Indice Solactive GDX EUR AR 5%"
+    ],
+    "underlyingType": "single-stock",
+    "currency": "EUR",
+    "maturity": "5 ans",
+    "maturityDate": null,
+    "strikeDate": null,
+    "coupon": {
+      "rate": 9,
+      "type": "conditionnel",
+      "frequency": "semestriel",
+      "trigger": 60,
+      "memory": true
+    },
+    "capitalProtection": {
+      "protected": false,
+      "level": 0,
+      "barrier": 50,
+      "barrierType": "europeenne"
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "autocall",
+      "trigger": 95,
+      "frequency": "semestriel",
+      "startYear": 2
+    },
+    "scenarios": {
+      "favorable": "Remboursement anticipé avec 100% capital + coupon",
+      "median": "Remboursement à échéance avec 100% du capital",
+      "defavorable": "Perte en capital partielle ou totale possible"
+    },
+    "risks": [
+      "Risque de perte en capital partielle ou totale",
+      "Risque de crédit Société Générale",
+      "Exposition au taux de change EUR/USD",
+      "Impact du prélèvement forfaitaire de 5% par an"
+    ],
+    "summary": "Produit autocall sur mines d'or avec coupon semestriel de 4,50% et barrière de rappel dégressive"
+  },
+  "aiSummary": "## DESCRIPTION\n**ATHENA SUR INDICE SOLACTIVE GOLD MINERS À DÉCRÉMENT 2**\n- Type : Autocall à coupon conditionnel\n- Émetteur : SG Issuer (Société Générale)\n- Sous-jacent : Indice Solactive GDX EUR AR 5%\n- Durée : 5 ans\n\n## RENDEMENT\n- **Coupon conditionnel** : 9% brut semestriel\n- **Condition** : Versé si l'indice ≥ 60% de sa valeur initiale\n- **Effet mémoire** : Oui (rattrapage des coupons non versés)\n- **Impact décrément** : -5% par an sur la performance\n\n## PROTECTION\n- **Capital non protégé**\n- **Barrière européenne** : 50% (observée uniquement à l'échéance)\n- **Perte possible** : Partielle ou totale si clôture finale < 50%\n\n## REMBOURSEMENT ANTICIPÉ\n- **Autocall possible** dès l'année 2\n- **Déclenchement** : Si indice ≥ 95% \n- **Fréquence d'observation** : Semestrielle\n- **Remboursement** : 100% du capital + coupon de la période\n\n## SCÉNARIOS\n- **Favorable** : Autocall avec capital intégral + coupon 9%\n- **Médian** : Remboursement à échéance à 100% du capital\n- **Défavorable** : Perte en capital si sous-jacent < 50% à l'échéance\n\n## POINTS D'ATTENTION\n- Risque de perte totale du capital\n- Risque de crédit Société Générale\n- Exposition change EUR/USD sur l'indice\n- Décrément de 5%/an impactant la performance\n- Secteur concentré (mines d'or) très volatil",
+  "sourceFile": "Produit_2_Athena_Solactive_Gold_Miners.pdf",
+  "aiCategory": "autocall-mono",
+  "aiCategoryLabel": "⚡ Autocall Mono-actif",
+  "aiCategoryColor": "#06D6A0",
+  "aiOpinion": "Produit offrant un rendement attractif de 9% semestriel avec effet mémoire, mais exposé à un secteur volatil (mines d'or) sans protection du capital. Le risque de perte totale en cas de chute durable de plus de 50% de l'indice est significatif, compensé par un seuil d'autocall relativement accessible à 95%.",
+  "aiAnalyzedAt": "2026-03-24T08:16:42.219Z",
+  "status": "analyzing",
+  "receivedDate": "2026-03-24",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null,
+  "score": {
+    "score": 70,
+    "details": [
+      {
+        "type": "warning",
+        "icon": "📦",
+        "text": "Même type que 4 produit(s) — 80% du book en \"Autocall / Phoenix\"",
+        "impact": 20,
+        "category": "redundancy"
+      },
+      {
+        "type": "positive",
+        "icon": "✅",
+        "text": "Nouvelle contrepartie — diversification émetteur",
+        "impact": 15,
+        "category": "complementarity"
+      },
+      {
+        "type": "positive",
+        "icon": "📈",
+        "text": "Coupon (9%) > moyenne du book (4.1%)",
+        "impact": 15,
+        "category": "complementarity"
+      },
+      {
+        "type": "positive",
+        "icon": "🔀",
+        "text": "Faible corrélation moyenne (30%) — diversification",
+        "impact": 10,
+        "category": "complementarity"
+      }
+    ],
+    "verdict": "🟡 Intéressant — bonne diversification avec quelques recouvrements.",
+    "breakdown": {
+      "redundancy": 20,
+      "complementarity": 40
+    }
+  }
+}
