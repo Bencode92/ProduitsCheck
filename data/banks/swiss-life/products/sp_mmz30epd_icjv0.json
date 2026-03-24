@@ -252,62 +252,62 @@
         "score": 75,
         "base": 80,
         "delta": -5,
-        "reasoning": "Rendement: base 80 → -5 = 75 (Volatilité élevée 36.9% et beta 1.07 réduisent la probabilité d'autocall rapide malgré le seuil à 100%) | Coupon 14% (7×2)"
+        "reasoning": "Rendement: base 80 → -5 = 75 (Volatilité très élevée (36.9%) augmente le risque de franchissement de barrière malgré le seuil à -60%) | Coupon 14% (7×2)"
       },
       "underlyingQuality": {
-        "score": 74,
+        "score": 72,
         "base": 82,
-        "delta": -8,
-        "reasoning": "Qualité: base 82 → -8 = 74 (Secteur tech évité en macro neutre, forte cyclicité des semi-conducteurs et valorisation tendue après +67% en 1 an) [B/Q 35%] | Worst: ASML Holding NV B:100"
+        "delta": -10,
+        "reasoning": "Qualité: base 82 → -10 = 72 (Beta >1 et secteur tech évité en contexte macro neutre, exposition élevée aux corrections de marché) [B/Q 35%] | Worst: ASML Holding NV B:100"
       },
       "portfolioFit": {
-        "score": 77,
+        "score": 85,
         "base": 80,
-        "delta": -3,
-        "reasoning": "Fit: base 80 → -3 = 77 (Mono-sous-jacent ASML expose à un risque spécifique élevé sans diversification sectorielle)"
+        "delta": 5,
+        "reasoning": "Fit: base 80 → +5 = 85 (ASML leader mondial de l'équipement semi-conducteur, excellent fit pour exposition tech pure)"
       },
       "riskPremium": {
-        "score": 97,
+        "score": 92,
         "base": 97,
-        "delta": 0,
-        "reasoning": "Prime: base 97 | 14% vs CAT 2.5% (spread 11.5%)"
+        "delta": -5,
+        "reasoning": "Prime: base 97 → -5 = 92 (Prime attractive mais volatilité extrême du sous-jacent justifie une décote de valorisation) | 14% vs CAT 2.5% (spread 11.5%)"
       }
     },
-    "verdict": "Produit attractif sur un leader des semi-conducteurs avec un coupon généreux de 14%, mais exposé à la forte volatilité d'ASML (36.9%). La barrière à -60% offre une protection correcte, mais le secteur tech reste sous pression dans l'environnement macro actuel. La qualité exceptionnelle d'ASML (ROE 50.5%, marge 29.4%) compense partiellement les risques cycliques. Convient aux investisseurs acceptant une exposition concentrée sur les semi-conducteurs.",
+    "verdict": "Phoenix attractif sur ASML avec coupon 14% semestriel et barrière profonde à -60%. La qualité exceptionnelle d'ASML (ROE 50%, marges 29%) compense partiellement la volatilité élevée. Cependant, le beta >1 et la forte cyclicité des semi-conducteurs créent un risque systémique important. Produit réservé aux investisseurs acceptant une forte volatilité pour un rendement premium.",
     "keyRisks": [
-      "Risque sectoriel tech : cyclicité des semi-conducteurs et tensions géopolitiques Chine-USA",
-      "Concentration mono-sous-jacent : exposition totale aux spécificités d'ASML sans diversification"
+      "Volatilité extrême (36.9%) d'ASML augmente significativement le risque d'activation de barrière",
+      "Cyclicité des semi-conducteurs et exposition géopolitique (Chine/Taiwan) sur un sous-jacent unique"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 14,
-        "return_eur": 14000,
+        "return_pct": 28,
+        "return_eur": 28000,
         "probability": 0.25,
         "duration_years": 1
       },
       "base": {
-        "return_pct": 28,
-        "return_eur": 28000,
-        "probability": 0.4,
-        "duration_years": 2
+        "return_pct": 42,
+        "return_eur": 42000,
+        "probability": 0.35,
+        "duration_years": 3
       },
       "stress": {
         "return_pct": 0,
         "return_eur": 0,
         "probability": 0.25,
-        "duration_years": 2
+        "duration_years": 1.5
       },
       "worst": {
-        "return_pct": -25,
-        "return_eur": -25000,
-        "probability": 0.1,
-        "duration_years": 2
+        "return_pct": -35,
+        "return_eur": -35000,
+        "probability": 0.15,
+        "duration_years": 1.5
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-24T17:02:40.569Z",
-      "durationMs": 12002,
+      "gradedAt": "2026-03-24T17:02:50.951Z",
+      "durationMs": 11141,
       "aiUsed": true,
       "version": "4.3",
       "productType": "standard",
@@ -328,9 +328,9 @@
       "baseGrade": "A",
       "adjustments": {
         "p1": -5,
-        "p2": -8,
-        "p3": -3,
-        "p4": 0
+        "p2": -10,
+        "p3": 5,
+        "p4": -5
       },
       "stockData": [
         {
