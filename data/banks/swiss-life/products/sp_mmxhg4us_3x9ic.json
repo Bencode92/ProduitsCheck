@@ -143,41 +143,41 @@
   "entityName": "Caméleons",
   "grading": {
     "grade": "D",
-    "score": 42,
+    "score": 35,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 30,
-        "base": 40,
-        "delta": -10,
-        "reasoning": "Rendement: base 40 → -10 = 30 (Barrière 60% trop élevée pour panier avec BMPS (vol 36%) et UCG (vol 30%), probabilité coupon dégradée) | Coupon 7%"
+        "score": 22,
+        "base": 34,
+        "delta": -12,
+        "reasoning": "Rendement: base 34 → -12 = 22 (Volatilité excessive du panier (BMPS 36%, UCG 30%) avec barrière 60% augmente significativement le risque de knock-in sur 18 mois) | Coupon 7%, barrière 60%"
       },
       "underlyingQuality": {
-        "score": 37,
-        "base": 49,
-        "delta": -12,
-        "reasoning": "Qualité: base 49 → -12 = 37 (Secteur financier défavorisé macro, BMPS -22.74% YTD avec DD 25%, UCG -16% YTD, qualité moyenne 60) | Worst: Veolia Environnement SA B:28"
+        "score": 48,
+        "base": 63,
+        "delta": -15,
+        "reasoning": "Qualité: base 63 → -15 = 48 (Panier dégradé : BMPS en détresse (-23% YTD), secteur financier évité en macro, absence totale de données Novo Nordisk, mix risqué finance/utilities) [vol/DD 30%] | Worst: Veolia Environnement SA B:28"
       },
       "portfolioFit": {
-        "score": 12,
-        "base": 20,
-        "delta": -8,
-        "reasoning": "Fit: base 20 → -8 = 12 (3/5 sous-jacents défavorisés (financials évités), maillon faible Veolia perf négative)"
+        "score": 0,
+        "base": 0,
+        "delta": 0,
+        "reasoning": "Fit: base 0"
       },
       "riskPremium": {
-        "score": 85,
-        "base": 90,
-        "delta": -5,
-        "reasoning": "Prime: base 90 → -5 = 85 (Prime surévaluée car coupon conditionnel avec forte probabilité d'activation barrière) | 7% vs CAT 3%"
+        "score": 67,
+        "base": 75,
+        "delta": -8,
+        "reasoning": "Prime: base 75 → -8 = 67 (Prime surévaluée compte tenu du profil risque réel du panier, spread attractif mais ne compense pas la qualité médiocre des sous-jacents) | 7% vs CAT 2.5% (spread 4.5%)"
       }
     },
-    "verdict": "Produit risqué avec exposition 60% aux financières italiennes (BMPS, UCG) en contexte macro défavorable. BMPS affiche une volatilité extrême (36%) et YTD -22.74%, tandis que la barrière 60% paraît insuffisante. Le coupon 7% sera difficile à obtenir avec ce niveau de risque et ces sous-jacents dégradés.",
+    "verdict": "Produit à éviter malgré un coupon attractif de 7%. Le panier présente des faiblesses majeures avec BMPS en grande difficulté (vol 36%, -23% YTD) et l'absence totale de données sur Novo Nordisk. La concentration sur les financiers (évités en contexte macro) et la volatilité élevée du panier rendent la barrière 60% très fragile. Score ajusté : 10/100.",
     "keyRisks": [
-      "Secteur bancaire italien sous pression : BMPS et UCG cumulent 60% du panier avec volatilités élevées (36% et 30%)",
-      "Barrière 60% fragile face à la volatilité moyenne du panier (~26%) et aux drawdowns observés (25% BMPS)"
+      "Risque systémique financier italien (BMPS/UCG représentent 40% du panier)",
+      "Volatilité excessive pouvant déclencher knock-in précoce"
     ],
     "negotiationPoints": [],
     "scenarios": {
@@ -188,43 +188,47 @@
         "duration_years": 1
       },
       "base": {
-        "return_pct": 3.5,
-        "return_eur": 3150,
-        "probability": 0.25,
-        "duration_years": 1.5
+        "return_pct": -15,
+        "return_eur": -4500,
+        "probability": 0.35,
+        "duration_years": 2
       },
       "stress": {
-        "return_pct": 0,
-        "return_eur": 0,
+        "return_pct": -35,
+        "return_eur": -10500,
         "probability": 0.35,
         "duration_years": 2
       },
       "worst": {
-        "return_pct": -25,
-        "return_eur": -7500,
-        "probability": 0.25,
+        "return_pct": -60,
+        "return_eur": -18000,
+        "probability": 0.15,
         "duration_years": 2
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-23T16:56:47.431Z",
-      "durationMs": 12057,
+      "gradedAt": "2026-03-24T08:13:15.233Z",
+      "durationMs": 12961,
       "aiUsed": true,
-      "version": "3.2",
+      "version": "4.0",
       "marketDataAvailable": true,
-      "catBenchmark": 3,
+      "catBenchmark": 2.5,
+      "catSource": "fallback-2026",
       "couponAnnualized": 7,
       "couponRaw": 7,
       "couponMultiplier": 1,
       "couponFrequency": "annuel",
       "isInPortfolio": false,
-      "baseScore": 51,
+      "hasBarrier": true,
+      "barrierPct": 60,
+      "p2Weights": "vol-dd-30",
+      "baseScore": 45,
       "baseGrade": "C",
       "adjustments": {
-        "p1": -10,
-        "p2": -12,
-        "p3": -8,
-        "p4": -5
+        "p1": -12,
+        "p2": -15,
+        "p3": 0,
+        "p4": -8
       }
     }
   }
