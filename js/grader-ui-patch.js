@@ -1,409 +1,93 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Grader UI Patch v1.7 — Batch re-grade all
+// STRUCTBOARD — Grader UI Patch v1.8 — Actualiser tout = ALL
+// FIX: button now re-grades portfolio + proposals (was portfolio only)
 // ═══════════════════════════════════════════════════════════════
 
 (function() {
     'use strict';
+    if (typeof ProposalGrader === 'undefined') { console.warn('[GraderUI] ProposalGrader not loaded'); return; }
+    if (typeof GRADING_CONFIG !== 'undefined' && GRADING_CONFIG.killCriteria) { delete GRADING_CONFIG.killCriteria.maxIssuerConcentration; }
 
-    if (typeof ProposalGrader === 'undefined') {
-        console.warn('[GraderUI] ProposalGrader not loaded');
-        return;
-    }
-
-    // ─── 0. KILL CRITERIA: remove issuer concentration ───────────
-    if (typeof GRADING_CONFIG !== 'undefined' && GRADING_CONFIG.killCriteria) {
-        delete GRADING_CONFIG.killCriteria.maxIssuerConcentration;
-    }
-
-    async function _clearOldKillGrading() {
-        let cleared = 0;
-        for (const [bankId, proposals] of Object.entries(app.state?.proposals || {})) {
-            for (const p of proposals) {
-                if (p.grading && p.grading.killCriteria?.triggered) {
-                    const reasons = p.grading.killCriteria.reasons || [];
-                    if (reasons.some(r => r.includes('metteur') || r.includes('book') || r.includes('max: 40'))) {
-                        delete p.grading; cleared++;
-                        try { await app._saveProductFile(bankId, p); } catch(e){}
-                    }
-                }
-            }
-        }
-        if (cleared > 0) { console.log(`[GraderUI] Cleared ${cleared} old F grades`); app.render(); }
-    }
+    async function _clearOldKillGrading() { let cleared = 0; for (const [bankId, proposals] of Object.entries(app.state?.proposals || {})) { for (const p of proposals) { if (p.grading && p.grading.killCriteria?.triggered) { const reasons = p.grading.killCriteria.reasons || []; if (reasons.some(r => r.includes('metteur') || r.includes('book') || r.includes('max: 40'))) { delete p.grading; cleared++; try { await app._saveProductFile(bankId, p); } catch(e){} } } } } if (cleared > 0) { console.log('[GraderUI] Cleared ' + cleared + ' old F grades'); app.render(); } }
     setTimeout(_clearOldKillGrading, 3000);
 
-    // ═══ SAVE GRADING ═══
-    async function _saveGrading(product) {
-        var saved = { proposal: false, portfolio: false };
-        if (product.bankId) { try { await app._saveProductFile(product.bankId, product); saved.proposal = true; } catch(e) { console.warn('[GraderUI] Save proposal:', e.message); } }
-        var portfolio = app.state.portfolio || [];
-        var pfProduct = portfolio.find(function(p) { return p.id === product.id; });
-        if (pfProduct) {
-            pfProduct.grading = product.grading;
-            try { await github.writeFile(CONFIG.DATA_PATH + '/portfolio.json', portfolio, '[StructBoard] Grading: ' + (product.grading.grade || '?') + ' — ' + (product.name || product.id).substring(0, 40)); saved.portfolio = true; } catch(e) { console.warn('[GraderUI] Save portfolio:', e.message); }
-        }
-        return saved;
-    }
+    async function _saveGrading(product) { var saved = { proposal: false, portfolio: false }; if (product.bankId) { try { await app._saveProductFile(product.bankId, product); saved.proposal = true; } catch(e) {} } var portfolio = app.state.portfolio || []; var pfProduct = portfolio.find(function(p) { return p.id === product.id; }); if (pfProduct) { pfProduct.grading = product.grading; try { await github.writeFile(CONFIG.DATA_PATH + '/portfolio.json', portfolio, '[StructBoard] Grading: ' + (product.grading.grade || '?') + ' \u2014 ' + (product.name || product.id).substring(0, 40)); saved.portfolio = true; } catch(e) {} } return saved; }
 
-    // ─── 1. OVERRIDE triggerGrading ──────────────────────────────
-    window.triggerGrading = async function(btn) {
-        const product = app.state.currentProduct;
-        if (!product) { showToast('Aucun produit', 'error'); return; }
-        if (btn && btn.disabled) return;
-        if (btn) { btn.disabled = true; btn.textContent = '\u23f3 Analyse en cours...'; }
+    window.triggerGrading = async function(btn) { const product = app.state.currentProduct; if (!product) { showToast('Aucun produit', 'error'); return; } if (btn && btn.disabled) return; if (btn) { btn.disabled = true; btn.textContent = '\u23f3 Analyse en cours...'; } try { delete product.grading; if (typeof _mktCache !== 'undefined') { _mktCache = null; _mktCacheTs = 0; } showToast('Grading en cours...', 'info'); const result = await ProposalGrader.grade(product); try { if (_mktCache && result && result.metadata && typeof _extractStockData === 'function') { var norm = ProposalGrader.normalize(product); var stockInfo = _extractStockData(norm, _mktCache); if (stockInfo.available && stockInfo.stocks.length > 0) { result.metadata.stockData = stockInfo.stocks.filter(function(s) { return s.found; }).map(function(s) { return { name: s.name, ticker: s.ticker, sector: s.sector || '\u2014', perf_ytd: s.perf_ytd, perf_1y: s.perf_1y, volatility_3y: s.volatility_3y, max_drawdown_3y: s.max_drawdown_3y, buffett_score: s.buffett_score, quality_score: s.quality_score, buffett_grade: s.buffett_grade }; }); product.grading = result; } } } catch(e) {} var saveResult = await _saveGrading(product); app.openProduct(product); var gc = ProposalGrader.config.grades[result.grade] || {}; showToast('Grade ' + result.grade + ' \u2014 ' + (gc.label || '') + ' (' + (result.score !== null ? result.score + '/100' : 'liquidit\u00e9') + ')', 'success'); } catch (e) { console.error('[Grader] Error:', e); if (btn) { btn.textContent = '\u274c Erreur'; btn.disabled = false; } showToast('Erreur: ' + e.message, 'error'); } };
 
-        try {
-            delete product.grading;
-            if (typeof _mktCache !== 'undefined') { _mktCache = null; _mktCacheTs = 0; }
+    window.tagAsLiquidity = async function(btn) { var product = app.state.currentProduct; if (!product) return; product.grading = { grade: '-', score: null, killCriteria: { triggered: false, reasons: [] }, pillars: { adjustedReturn: { score: null }, underlyingQuality: { score: null }, portfolioFit: { score: null }, riskPremium: { score: null } }, verdict: 'Produit de liquidit\u00e9 / parking cash.', keyRisks: ['Rendement tr\u00e8s faible'], scenarios: null, metadata: { gradedAt: new Date().toISOString(), durationMs: 0, aiUsed: false, version: '4.1', productType: 'liquidity', isInPortfolio: true } }; await _saveGrading(product); app.openProduct(product); showToast('Marqu\u00e9 comme liquidit\u00e9', 'success'); };
 
-            showToast('Grading en cours...', 'info');
-            const result = await ProposalGrader.grade(product);
+    const _prevRPC = renderProductCard; renderProductCard = function(product, context) { let html = _prevRPC(product, context); const g = product.grading; if (g && g.grade && g.grade !== '?') { const badge = ProposalGrader.renderBadge(g.grade, g.score); html = html.replace(/<div class="card-score[^"]*">[^<]*<\/div>/, badge); if (!html.includes('style="display:inline-flex')) { const fi = html.indexOf('product-card-footer'); if (fi > -1) { const ii = html.indexOf('>', fi) + 1; html = html.substring(0, ii) + badge + html.substring(ii); } } } return html; };
 
-            try {
-                if (_mktCache && result && result.metadata && typeof _extractStockData === 'function') {
-                    var norm = ProposalGrader.normalize(product);
-                    var stockInfo = _extractStockData(norm, _mktCache);
-                    if (stockInfo.available && stockInfo.stocks.length > 0) {
-                        result.metadata.stockData = stockInfo.stocks.filter(function(s) { return s.found; }).map(function(s) {
-                            return {
-                                name: s.name, ticker: s.ticker, sector: s.sector || '\u2014',
-                                perf_ytd: s.perf_ytd, perf_1y: s.perf_1y,
-                                volatility_3y: s.volatility_3y, max_drawdown_3y: s.max_drawdown_3y,
-                                buffett_score: s.buffett_score, quality_score: s.quality_score,
-                                buffett_grade: s.buffett_grade
-                            };
-                        });
-                        product.grading = result;
-                    }
-                }
-            } catch(e) { console.warn('[GraderUI] stockData:', e.message); }
-
-            var saveResult = await _saveGrading(product);
-            app.openProduct(product);
-            var gc = ProposalGrader.config.grades[result.grade] || {};
-            var saveNote = saveResult.portfolio ? ' (portefeuille \u2713)' : (saveResult.proposal ? ' (proposition \u2713)' : '');
-            showToast('Grade ' + result.grade + ' \u2014 ' + (gc.label || '') + ' (' + (result.score !== null ? result.score + '/100' : 'liquidit\u00e9') + ')' + saveNote, 'success');
-        } catch (e) {
-            console.error('[Grader] Error:', e);
-            if (btn) { btn.textContent = '\u274c Erreur'; btn.disabled = false; }
-            showToast('Erreur: ' + e.message, 'error');
-        }
-    };
-
-    // ─── MANUAL LIQUIDITY TAG ────────────────────────────────────
-    window.tagAsLiquidity = async function(btn) {
-        var product = app.state.currentProduct;
-        if (!product) return;
-        product.grading = {
-            grade: '-', score: null,
-            killCriteria: { triggered: false, reasons: [] },
-            pillars: { adjustedReturn: { score: null }, underlyingQuality: { score: null }, portfolioFit: { score: null }, riskPremium: { score: null } },
-            verdict: 'Produit de liquidit\u00e9 / parking cash. Non gradable comme produit structur\u00e9.',
-            keyRisks: ['Rendement tr\u00e8s faible', 'Alternative : CAT ou livret'], scenarios: null,
-            metadata: { gradedAt: new Date().toISOString(), durationMs: 0, aiUsed: false, version: '4.1', productType: 'liquidity', isInPortfolio: true }
-        };
-        await _saveGrading(product);
-        app.openProduct(product);
-        showToast('Marqu\u00e9 comme liquidit\u00e9', 'success');
-    };
-
-    // ─── 2. PATCH renderProductCard ──────────────────────────────
-    const _prevRenderProductCard = renderProductCard;
-    renderProductCard = function(product, context) {
-        let html = _prevRenderProductCard(product, context);
-        const g = product.grading;
-        if (g && g.grade && g.grade !== '?') {
-            const badge = ProposalGrader.renderBadge(g.grade, g.score);
-            html = html.replace(/<div class="card-score[^"]*">[^<]*<\/div>/, badge);
-            if (!html.includes('style="display:inline-flex')) {
-                const fi = html.indexOf('product-card-footer');
-                if (fi > -1) { const ii = html.indexOf('>', fi) + 1; html = html.substring(0, ii) + badge + html.substring(ii); }
-            }
-        }
-        return html;
-    };
-
-    // ─── 3. PATCH renderProductSheet ─────────────────────────────
-    const _prevRenderProductSheet = renderProductSheet;
-    renderProductSheet = function(container, state) {
-        _prevRenderProductSheet(container, state);
-        const p = state.currentProduct;
-        if (!p) return;
-        setTimeout(() => _cleanupProductSheet(container, p), 0);
-    };
+    const _prevRPS = renderProductSheet; renderProductSheet = function(container, state) { _prevRPS(container, state); const p = state.currentProduct; if (!p) return; setTimeout(() => _cleanupProductSheet(container, p), 0); };
 
     function _cleanupProductSheet(container, p) {
-        const sheetMain = container.querySelector('.sheet-main');
-        const sidebar = container.querySelector('.sheet-sidebar');
-        const navActions = container.querySelector('.sheet-nav-actions');
-        if (navActions) navActions.remove();
-
-        if (sheetMain) {
-            sheetMain.querySelectorAll('.fiche-section').forEach(section => {
-                const title = section.querySelector('.fiche-section-title');
-                if (!title) return;
-                const t = title.textContent.trim().toLowerCase();
-                if (t.includes('analyse ia') || t.includes('r\u00e9sum\u00e9 ia') || t.includes('r\u00e9sum\u00e9 discussion') || t.includes('analyse approfondie') || t.includes('grading unifi')) section.remove();
-            });
-            sheetMain.querySelectorAll('.deep-analysis-section, [data-section="deep-analysis"]').forEach(s => s.remove());
-            sheetMain.querySelectorAll('.fiche-ai-summary').forEach(el => { const parent = el.closest('.fiche-section'); if (parent) parent.remove(); });
-            sheetMain.querySelectorAll('.fiche-section').forEach(section => { if (section.textContent.includes('Analyse approfondie')) section.remove(); });
-        }
-
-        if (sidebar) {
-            sidebar.querySelectorAll('.sheet-card').forEach(card => {
-                const title = card.querySelector('.sheet-card-title, h3');
-                if (title) { const t = title.textContent.trim().toLowerCase(); if (t.includes('score') || t.includes('compatib')) card.remove(); }
-            });
-            sidebar.querySelectorAll('.score-panel').forEach(el => el.remove());
-        }
-
-        const scoreWidget = container.querySelector('.score-widget');
-        if (scoreWidget) {
-            if (p.grading) { scoreWidget.outerHTML = ProposalGrader.renderBadge(p.grading.grade, p.grading.score, 'large'); }
-            else { scoreWidget.outerHTML = '<div style="width:80px;height:80px;border-radius:50%;border:3px dashed var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0.5" onclick="triggerGrading(this)"><span style="font-size:20px;color:var(--text-muted)">?</span></div>'; }
-        }
-
-        if (sheetMain) {
-            const gd = document.createElement('div');
-            gd.className = 'fiche-section';
-            gd.setAttribute('data-section', 'grading');
-            var btns = '';
-            if (p.grading) {
-                btns = '<button onclick="triggerGrading(this)" style="margin-left:auto;padding:4px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;font-size:11px;display:flex;align-items:center;gap:4px">\ud83d\udd04 Actualiser</button>';
-            }
-            if (!p.grading || (p.grading.grade !== '-')) {
-                btns += '<button onclick="tagAsLiquidity(this)" style="padding:4px 12px;border-radius:6px;border:1px solid #94A3B844;background:transparent;color:#94A3B8;cursor:pointer;font-size:11px;margin-left:6px">$ Liquidit\u00e9</button>';
-            }
-
+        const sheetMain = container.querySelector('.sheet-main'); const sidebar = container.querySelector('.sheet-sidebar'); const navActions = container.querySelector('.sheet-nav-actions'); if (navActions) navActions.remove();
+        if (sheetMain) { sheetMain.querySelectorAll('.fiche-section').forEach(section => { const title = section.querySelector('.fiche-section-title'); if (!title) return; const t = title.textContent.trim().toLowerCase(); if (t.includes('analyse ia') || t.includes('r\u00e9sum\u00e9 ia') || t.includes('r\u00e9sum\u00e9 discussion') || t.includes('analyse approfondie') || t.includes('grading unifi')) section.remove(); }); sheetMain.querySelectorAll('.deep-analysis-section, [data-section="deep-analysis"]').forEach(s => s.remove()); sheetMain.querySelectorAll('.fiche-ai-summary').forEach(el => { const parent = el.closest('.fiche-section'); if (parent) parent.remove(); }); sheetMain.querySelectorAll('.fiche-section').forEach(section => { if (section.textContent.includes('Analyse approfondie')) section.remove(); }); }
+        if (sidebar) { sidebar.querySelectorAll('.sheet-card').forEach(card => { const title = card.querySelector('.sheet-card-title, h3'); if (title) { const t = title.textContent.trim().toLowerCase(); if (t.includes('score') || t.includes('compatib')) card.remove(); } }); sidebar.querySelectorAll('.score-panel').forEach(el => el.remove()); }
+        const scoreWidget = container.querySelector('.score-widget'); if (scoreWidget) { if (p.grading) { scoreWidget.outerHTML = ProposalGrader.renderBadge(p.grading.grade, p.grading.score, 'large'); } else { scoreWidget.outerHTML = '<div style="width:80px;height:80px;border-radius:50%;border:3px dashed var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0.5" onclick="triggerGrading(this)"><span style="font-size:20px;color:var(--text-muted)">?</span></div>'; } }
+        if (sheetMain) { const gd = document.createElement('div'); gd.className = 'fiche-section'; gd.setAttribute('data-section', 'grading'); var btns = ''; if (p.grading) { btns = '<button onclick="triggerGrading(this)" style="margin-left:auto;padding:4px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;font-size:11px;display:flex;align-items:center;gap:4px">\ud83d\udd04 Actualiser</button>'; } if (!p.grading || (p.grading.grade !== '-')) { btns += '<button onclick="tagAsLiquidity(this)" style="padding:4px 12px;border-radius:6px;border:1px solid #94A3B844;background:transparent;color:#94A3B8;cursor:pointer;font-size:11px;margin-left:6px">$ Liquidit\u00e9</button>'; }
             var gradingHtml = ProposalGrader.renderSection(p.grading);
-
-            if (p.grading && p.grading.metadata && p.grading.metadata.stockData && p.grading.metadata.stockData.length > 0) {
-                var stockTableHtml = _renderStockTable(p.grading.metadata.stockData);
-                var insertPoint = gradingHtml.indexOf('grid-template-columns:repeat(4');
-                if (insertPoint > 0) {
-                    var divStart = gradingHtml.lastIndexOf('<div style="display:grid', insertPoint);
-                    if (divStart > 0) gradingHtml = gradingHtml.substring(0, divStart) + stockTableHtml + gradingHtml.substring(divStart);
-                } else {
-                    var risksPoint = gradingHtml.indexOf('<strong>Risques');
-                    if (risksPoint > 0) { var divR = gradingHtml.lastIndexOf('<div', risksPoint); if (divR > 0) gradingHtml = gradingHtml.substring(0, divR) + stockTableHtml + gradingHtml.substring(divR); }
-                    else { var footerPoint = gradingHtml.lastIndexOf('<div style="font-size:10px'); if (footerPoint > 0) gradingHtml = gradingHtml.substring(0, footerPoint) + stockTableHtml + gradingHtml.substring(footerPoint); }
-                }
-            }
-
-            gd.innerHTML = '<div class="fiche-section-header" style="display:flex;align-items:center">' +
-                '<span class="fiche-section-icon">\ud83c\udfaf</span>' +
-                '<span class="fiche-section-title">Grading Unifi\u00e9</span>' +
-                btns +
-                '</div>' +
-                '<div class="fiche-section-body">' + gradingHtml + '</div>';
-            sheetMain.prepend(gd);
-        }
-
-        if (sidebar) {
-            const panel = document.createElement('div');
-            panel.innerHTML = _buildGradeSidebarPanel(p.grading);
-            if (panel.firstElementChild) sidebar.insertBefore(panel.firstElementChild, sidebar.firstChild);
-        }
+            if (p.grading && p.grading.metadata && p.grading.metadata.stockData && p.grading.metadata.stockData.length > 0) { var stockTableHtml = _renderStockTable(p.grading.metadata.stockData); var insertPoint = gradingHtml.indexOf('grid-template-columns:repeat(4'); if (insertPoint > 0) { var divStart = gradingHtml.lastIndexOf('<div style="display:grid', insertPoint); if (divStart > 0) gradingHtml = gradingHtml.substring(0, divStart) + stockTableHtml + gradingHtml.substring(divStart); } else { var risksPoint = gradingHtml.indexOf('<strong>Risques'); if (risksPoint > 0) { var divR = gradingHtml.lastIndexOf('<div', risksPoint); if (divR > 0) gradingHtml = gradingHtml.substring(0, divR) + stockTableHtml + gradingHtml.substring(divR); } else { var footerPoint = gradingHtml.lastIndexOf('<div style="font-size:10px'); if (footerPoint > 0) gradingHtml = gradingHtml.substring(0, footerPoint) + stockTableHtml + gradingHtml.substring(footerPoint); } } }
+            gd.innerHTML = '<div class="fiche-section-header" style="display:flex;align-items:center"><span class="fiche-section-icon">\ud83c\udfaf</span><span class="fiche-section-title">Grading Unifi\u00e9</span>' + btns + '</div><div class="fiche-section-body">' + gradingHtml + '</div>'; sheetMain.prepend(gd); }
+        if (sidebar) { const panel = document.createElement('div'); panel.innerHTML = _buildGradeSidebarPanel(p.grading); if (panel.firstElementChild) sidebar.insertBefore(panel.firstElementChild, sidebar.firstChild); }
     }
 
-    // ═══ STOCK TABLE RENDERER ═══
-    function _renderStockTable(stockData) {
-        if (!stockData || stockData.length === 0) return '';
-        function _pc(v) { if (v == null) return '#888'; return v >= 10 ? '#06D6A0' : v >= 0 ? '#4ECDC4' : v >= -10 ? '#FFB627' : '#EF233C'; }
-        function _sc(v) { if (v == null) return '#888'; return v >= 70 ? '#06D6A0' : v >= 50 ? '#4ECDC4' : v >= 30 ? '#FFB627' : '#EF233C'; }
-        function _f(v, s) { if (v == null) return '<span style="color:#555">\u2014</span>'; var c = s === '%' ? _pc(v) : _sc(v); return '<span style="color:' + c + ';font-weight:600">' + (v >= 0 && s === '%' ? '+' : '') + v + (s || '') + '</span>'; }
-        var cs = 'padding:4px 6px;font-size:11px;border-bottom:1px solid rgba(255,255,255,0.06);white-space:nowrap;';
-        var hs = cs + 'color:var(--text-muted);font-weight:500;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;';
-        var h = '<div style="margin:12px 0"><div style="font-size:11px;font-weight:600;color:var(--text-muted);margin-bottom:6px">\ud83d\udcca Sous-jacents</div>';
-        h += '<div style="overflow-x:auto;border-radius:8px;border:1px solid rgba(255,255,255,0.08)">';
-        h += '<table style="width:100%;border-collapse:collapse;font-size:11px">';
-        h += '<tr style="background:rgba(255,255,255,0.03)"><th style="' + hs + 'text-align:left">Nom</th><th style="' + hs + 'text-align:right">YTD</th><th style="' + hs + 'text-align:right">1 an</th><th style="' + hs + 'text-align:right">Vol 3Y</th><th style="' + hs + 'text-align:right">DD 3Y</th><th style="' + hs + 'text-align:right">Buffett</th><th style="' + hs + 'text-align:right">Quality</th></tr>';
-        stockData.forEach(function(s, i) {
-            var bg = i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)';
-            h += '<tr style="background:' + bg + '"><td style="' + cs + 'text-align:left"><span style="font-weight:600;color:var(--text-primary,#e0e0e0)">' + s.name + '</span> <span style="color:#666;font-size:10px">' + s.ticker + '</span></td>';
-            h += '<td style="' + cs + 'text-align:right">' + _f(s.perf_ytd, '%') + '</td><td style="' + cs + 'text-align:right">' + _f(s.perf_1y, '%') + '</td>';
-            h += '<td style="' + cs + 'text-align:right">' + _f(s.volatility_3y, '%') + '</td><td style="' + cs + 'text-align:right">' + _f(s.max_drawdown_3y != null ? -Math.abs(s.max_drawdown_3y) : null, '%') + '</td>';
-            h += '<td style="' + cs + 'text-align:right">' + _f(s.buffett_score, '') + '<span style="font-size:9px;color:#666">/' + (s.buffett_grade || '?') + '</span></td>';
-            h += '<td style="' + cs + 'text-align:right">' + _f(s.quality_score, '') + '</td></tr>';
-        });
-        h += '</table></div></div>';
-        return h;
-    }
+    function _renderStockTable(stockData) { if (!stockData || stockData.length === 0) return ''; function _pc(v) { if (v == null) return '#888'; return v >= 10 ? '#06D6A0' : v >= 0 ? '#4ECDC4' : v >= -10 ? '#FFB627' : '#EF233C'; } function _sc(v) { if (v == null) return '#888'; return v >= 70 ? '#06D6A0' : v >= 50 ? '#4ECDC4' : v >= 30 ? '#FFB627' : '#EF233C'; } function _f(v, s) { if (v == null) return '<span style="color:#555">\u2014</span>'; var c = s === '%' ? _pc(v) : _sc(v); return '<span style="color:' + c + ';font-weight:600">' + (v >= 0 && s === '%' ? '+' : '') + v + (s || '') + '</span>'; } var cs = 'padding:4px 6px;font-size:11px;border-bottom:1px solid rgba(255,255,255,0.06);white-space:nowrap;'; var hs = cs + 'color:var(--text-muted);font-weight:500;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;'; var h = '<div style="margin:12px 0"><div style="font-size:11px;font-weight:600;color:var(--text-muted);margin-bottom:6px">\ud83d\udcca Sous-jacents</div><div style="overflow-x:auto;border-radius:8px;border:1px solid rgba(255,255,255,0.08)"><table style="width:100%;border-collapse:collapse;font-size:11px"><tr style="background:rgba(255,255,255,0.03)"><th style="' + hs + 'text-align:left">Nom</th><th style="' + hs + 'text-align:right">YTD</th><th style="' + hs + 'text-align:right">1 an</th><th style="' + hs + 'text-align:right">Vol 3Y</th><th style="' + hs + 'text-align:right">DD 3Y</th><th style="' + hs + 'text-align:right">Buffett</th><th style="' + hs + 'text-align:right">Quality</th></tr>'; stockData.forEach(function(s, i) { var bg = i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)'; h += '<tr style="background:' + bg + '"><td style="' + cs + 'text-align:left"><span style="font-weight:600;color:var(--text-primary,#e0e0e0)">' + s.name + '</span> <span style="color:#666;font-size:10px">' + s.ticker + '</span></td><td style="' + cs + 'text-align:right">' + _f(s.perf_ytd, '%') + '</td><td style="' + cs + 'text-align:right">' + _f(s.perf_1y, '%') + '</td><td style="' + cs + 'text-align:right">' + _f(s.volatility_3y, '%') + '</td><td style="' + cs + 'text-align:right">' + _f(s.max_drawdown_3y != null ? -Math.abs(s.max_drawdown_3y) : null, '%') + '</td><td style="' + cs + 'text-align:right">' + _f(s.buffett_score, '') + '<span style="font-size:9px;color:#666">/' + (s.buffett_grade || '?') + '</span></td><td style="' + cs + 'text-align:right">' + _f(s.quality_score, '') + '</td></tr>'; }); h += '</table></div></div>'; return h; }
 
-    // ─── 4. DISABLE injectDeepAnalysis ───────────────────────────
     function _disableDeepAnalysis() { if (typeof window.injectDeepAnalysis === 'function' && !window._deepAnalysisDisabled) { window._origInjectDeepAnalysis = window.injectDeepAnalysis; window.injectDeepAnalysis = function() {}; window._deepAnalysisDisabled = true; } }
     _disableDeepAnalysis(); setTimeout(_disableDeepAnalysis, 100); setTimeout(_disableDeepAnalysis, 500);
 
-    // ─── 5. Grade sidebar ────────────────────────────────────────
-    function _buildGradeSidebarPanel(grading) {
-        if (!grading) return '<div class="sheet-card"><h3 class="sheet-card-title">Grade</h3><div style="text-align:center;padding:20px 0;"><div style="width:64px;height:64px;border-radius:50%;border:3px dashed var(--border);display:inline-flex;align-items:center;justify-content:center;margin-bottom:8px"><span style="font-size:24px;color:var(--text-muted)">?</span></div><div style="font-size:12px;color:var(--text-muted)">Non grad\u00e9</div></div></div>';
-        const g = grading;
-        if (g.grade === '-') return '<div class="sheet-card" style="border-top:3px solid #94A3B8"><h3 class="sheet-card-title">Grade</h3><div style="text-align:center;padding:12px 0"><span style="font-size:32px;color:#94A3B8">$</span><div style="font-size:14px;font-weight:600;color:#94A3B8;margin-top:4px">Liquidit\u00e9</div><div style="font-size:11px;color:var(--text-muted);margin-top:8px">' + (g.verdict || '') + '</div></div></div>';
-        const config = ProposalGrader.config.grades[g.grade] || ProposalGrader.config.grades.F;
-        const color = config.color;
-        let html = '<div class="sheet-card" style="border-top:3px solid ' + color + '"><h3 class="sheet-card-title">Grade</h3><div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">' + ProposalGrader.renderBadge(g.grade, g.score, 'large') + '<div><div style="font-size:14px;font-weight:600;color:' + color + '">' + config.label + '</div><div style="font-size:11px;color:var(--text-muted)">' + (g.score !== null ? g.score + '/100' : '') + '</div></div></div>';
-        if (g.killCriteria && g.killCriteria.triggered) html += '<div style="background:rgba(239,35,60,0.08);border-radius:6px;padding:8px;margin-bottom:10px;"><div style="font-size:11px;font-weight:600;color:#EF233C;margin-bottom:4px">\u26d4 Rejet automatique</div>' + g.killCriteria.reasons.map(function(r) { return '<div style="font-size:10px;color:#EF233C;padding:1px 0">\u2022 ' + r + '</div>'; }).join('') + '</div>';
-        var pn = { adjustedReturn: 'Rendement', underlyingQuality: 'Sous-jacent', portfolioFit: 'Fit portfolio', riskPremium: 'Prime/CAT' };
-        if (g.pillars) { Object.entries(pn).forEach(function(e) { var key = e[0], name = e[1], pillar = g.pillars[key] || {}, score = pillar.score; if (score === null || score === undefined) return; var bc = score >= 70 ? '#06D6A0' : score >= 45 ? '#FFB627' : '#EF233C'; html += '<div style="margin-bottom:6px"><div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:2px"><span style="color:var(--text-muted)">' + name + '</span><span style="font-weight:600">' + score + '</span></div><div style="height:4px;background:var(--surface);border-radius:2px;overflow:hidden"><div style="height:100%;width:' + score + '%;background:' + bc + ';border-radius:2px"></div></div></div>'; }); }
-        if (g.verdict) html += '<div style="font-size:11px;color:var(--text-muted);margin-top:10px;padding-top:8px;border-top:1px solid var(--border);line-height:1.4">' + g.verdict + '</div>';
-        if (g.keyRisks && g.keyRisks.length > 0) { html += '<div style="margin-top:8px">'; g.keyRisks.forEach(function(r) { html += '<div style="font-size:10px;color:var(--red);padding:2px 0">\u26a0 ' + r + '</div>'; }); html += '</div>'; }
-        if (g.metadata) html += '<div style="font-size:9px;color:var(--text-dim);margin-top:8px;opacity:0.6">' + (g.metadata.aiUsed ? 'Claude IA' : 'Local') + ' \u00b7 ' + new Date(g.metadata.gradedAt).toLocaleDateString('fr-FR') + '</div>';
-        html += '</div>';
-        return html;
-    }
+    function _buildGradeSidebarPanel(grading) { if (!grading) return '<div class="sheet-card"><h3 class="sheet-card-title">Grade</h3><div style="text-align:center;padding:20px 0;"><div style="width:64px;height:64px;border-radius:50%;border:3px dashed var(--border);display:inline-flex;align-items:center;justify-content:center;margin-bottom:8px"><span style="font-size:24px;color:var(--text-muted)">?</span></div><div style="font-size:12px;color:var(--text-muted)">Non grad\u00e9</div></div></div>'; const g = grading; if (g.grade === '-') return '<div class="sheet-card" style="border-top:3px solid #94A3B8"><h3 class="sheet-card-title">Grade</h3><div style="text-align:center;padding:12px 0"><span style="font-size:32px;color:#94A3B8">$</span><div style="font-size:14px;font-weight:600;color:#94A3B8;margin-top:4px">Liquidit\u00e9</div><div style="font-size:11px;color:var(--text-muted);margin-top:8px">' + (g.verdict || '') + '</div></div></div>'; const config = ProposalGrader.config.grades[g.grade] || ProposalGrader.config.grades.F; const color = config.color; let html = '<div class="sheet-card" style="border-top:3px solid ' + color + '"><h3 class="sheet-card-title">Grade</h3><div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">' + ProposalGrader.renderBadge(g.grade, g.score, 'large') + '<div><div style="font-size:14px;font-weight:600;color:' + color + '">' + config.label + '</div><div style="font-size:11px;color:var(--text-muted)">' + (g.score !== null ? g.score + '/100' : '') + '</div></div></div>'; if (g.killCriteria && g.killCriteria.triggered) html += '<div style="background:rgba(239,35,60,0.08);border-radius:6px;padding:8px;margin-bottom:10px;"><div style="font-size:11px;font-weight:600;color:#EF233C;margin-bottom:4px">\u26d4 Rejet</div>' + g.killCriteria.reasons.map(function(r) { return '<div style="font-size:10px;color:#EF233C;padding:1px 0">\u2022 ' + r + '</div>'; }).join('') + '</div>'; var pn = { adjustedReturn: 'Rendement', underlyingQuality: 'Sous-jacent', portfolioFit: 'Fit portfolio', riskPremium: 'Prime/CAT' }; if (g.pillars) { Object.entries(pn).forEach(function(e) { var key = e[0], name = e[1], pillar = g.pillars[key] || {}, score = pillar.score; if (score === null || score === undefined) return; var bc = score >= 70 ? '#06D6A0' : score >= 45 ? '#FFB627' : '#EF233C'; html += '<div style="margin-bottom:6px"><div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:2px"><span style="color:var(--text-muted)">' + name + '</span><span style="font-weight:600">' + score + '</span></div><div style="height:4px;background:var(--surface);border-radius:2px;overflow:hidden"><div style="height:100%;width:' + score + '%;background:' + bc + ';border-radius:2px"></div></div></div>'; }); } if (g.verdict) html += '<div style="font-size:11px;color:var(--text-muted);margin-top:10px;padding-top:8px;border-top:1px solid var(--border);line-height:1.4">' + g.verdict + '</div>'; if (g.keyRisks && g.keyRisks.length > 0) { html += '<div style="margin-top:8px">'; g.keyRisks.forEach(function(r) { html += '<div style="font-size:10px;color:var(--red);padding:2px 0">\u26a0 ' + r + '</div>'; }); html += '</div>'; } if (g.metadata) html += '<div style="font-size:9px;color:var(--text-dim);margin-top:8px;opacity:0.6">' + (g.metadata.aiUsed ? 'Claude IA' : 'Local') + ' \u00b7 ' + new Date(g.metadata.gradedAt).toLocaleDateString('fr-FR') + '</div>'; html += '</div>'; return html; }
 
-    // ─── 6. Bank section badges ──────────────────────────────────
     var _prevRBS = typeof renderBankSections === 'function' ? renderBankSections : null;
-    if (_prevRBS) {
-        renderBankSections = function(state) {
-            var html = _prevRBS(state);
-            Object.keys(state.proposals).forEach(function(bankId) {
-                var graded = (state.proposals[bankId] || []).filter(function(p) { return p.grading && p.grading.grade; });
-                if (!graded.length) return;
-                var counts = { A:0, B:0, C:0, D:0, F:0 };
-                graded.forEach(function(p) { if (counts[p.grading.grade] !== undefined) counts[p.grading.grade]++; });
-                var summary = Object.entries(counts).filter(function(e) { return e[1] > 0; }).map(function(e) { var clr = ProposalGrader.config.grades[e[0]]?.color || '#888'; return '<span style="display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;border-radius:4px;background:' + clr + '22;color:' + clr + ';font-weight:700;font-size:10px;padding:0 4px">' + e[1] + e[0] + '</span>'; }).join(' ');
-                if (summary) { var bn = (BANKS.find(function(b) { return b.id === bankId; })?.name || bankId); var bs = html.indexOf(bn); if (bs > -1) { var ci = html.indexOf('<span class="bank-count">', bs); if (ci > -1) { var ec = html.indexOf('</span>', ci) + 7; html = html.substring(0, ec) + '<span style="margin-left:6px">' + summary + '</span>' + html.substring(ec); } } }
-            });
-            return html;
-        };
-    }
+    if (_prevRBS) { renderBankSections = function(state) { var html = _prevRBS(state); Object.keys(state.proposals).forEach(function(bankId) { var graded = (state.proposals[bankId] || []).filter(function(p) { return p.grading && p.grading.grade; }); if (!graded.length) return; var counts = { A:0, B:0, C:0, D:0, F:0 }; graded.forEach(function(p) { if (counts[p.grading.grade] !== undefined) counts[p.grading.grade]++; }); var summary = Object.entries(counts).filter(function(e) { return e[1] > 0; }).map(function(e) { var clr = ProposalGrader.config.grades[e[0]]?.color || '#888'; return '<span style="display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;border-radius:4px;background:' + clr + '22;color:' + clr + ';font-weight:700;font-size:10px;padding:0 4px">' + e[1] + e[0] + '</span>'; }).join(' '); if (summary) { var bn = (BANKS.find(function(b) { return b.id === bankId; })?.name || bankId); var bs = html.indexOf(bn); if (bs > -1) { var ci = html.indexOf('<span class="bank-count">', bs); if (ci > -1) { var ec = html.indexOf('</span>', ci) + 7; html = html.substring(0, ec) + '<span style="margin-left:6px">' + summary + '</span>' + html.substring(ec); } } } }); return html; }; }
 
-    // ─── 7. Auto kill-check on upload ────────────────────────────
     var _origAP = app.addProposal.bind(app);
-    app.addProposal = async function(bankId, product) {
-        var result = await _origAP(bankId, product);
-        if (result && !result.grading) {
-            try {
-                var n = ProposalGrader.normalize(result);
-                var pc = (app.state.portfolio || []).length > 0 ? { available: true, currentIssuerPct: 0, overlappingUnderlyings: [], totalProducts: app.state.portfolio.length } : { available: false };
-                var kc = ProposalGrader.checkKillCriteria(n, pc, { bestRate: 3.0 });
-                if (kc.killed) {
-                    result.grading = { grade: 'F', score: 0, killCriteria: { triggered: true, reasons: kc.reasons }, verdict: 'Rejet automatique : ' + kc.reasons[0], metadata: { gradedAt: new Date().toISOString(), aiUsed: false, version: '1.7' } };
-                    await app._saveProductFile(bankId, result);
-                    showToast('\u26d4 Grade F \u2014 ' + kc.reasons[0], 'error');
-                }
-            } catch (e) { console.warn('[GraderUI] kill-check:', e); }
-        }
-        return result;
-    };
+    app.addProposal = async function(bankId, product) { var result = await _origAP(bankId, product); if (result && !result.grading) { try { var n = ProposalGrader.normalize(result); var pc = (app.state.portfolio || []).length > 0 ? { available: true, currentIssuerPct: 0, overlappingUnderlyings: [], totalProducts: app.state.portfolio.length } : { available: false }; var kc = ProposalGrader.checkKillCriteria(n, pc, { bestRate: 3.0 }); if (kc.killed) { result.grading = { grade: 'F', score: 0, killCriteria: { triggered: true, reasons: kc.reasons }, verdict: 'Rejet: ' + kc.reasons[0], metadata: { gradedAt: new Date().toISOString(), aiUsed: false, version: '1.8' } }; await app._saveProductFile(bankId, result); showToast('\u26d4 Grade F \u2014 ' + kc.reasons[0], 'error'); } } catch (e) {} } return result; };
 
-    // ─── 8. Batch grade buttons ──────────────────────────────────
-    var _dashPatch = function(container, state) {
-        setTimeout(function() {
-            container.querySelectorAll('.section-header').forEach(function(header) {
-                var title = header.querySelector('.section-title');
-
-                // ── PROPOSALS: "Grader tout" (ungraded) ──
-                if (title && title.textContent.includes('Propositions') && !header.querySelector('.btn-grade-all')) {
-                    var allProps = Object.values(state.proposals).flat();
-                    var ungraded = allProps.filter(function(p) { return !p.grading; });
-                    var gradable = allProps.filter(function(p) { return !p.grading || (p.grading.grade !== '-' && p.grading.grade !== '?'); });
-                    if (ungraded.length > 0) {
-                        var btn = document.createElement('button'); btn.className = 'btn btn-grade-all'; btn.style.cssText = 'margin-right:8px;white-space:nowrap';
-                        btn.innerHTML = '\ud83c\udfaf Grader tout (' + ungraded.length + ')';
-                        btn.onclick = function() { _handleBatch(state, 'ungraded'); };
-                        var ab = header.querySelector('.btn.primary');
-                        if (ab) header.insertBefore(btn, ab);
-                    }
-                }
-
-                // ── PORTFOLIO: "🔄 Actualiser tout" (re-grade all) ──
-                if (title && title.textContent.includes('Portefeuille') && !header.querySelector('.btn-regrade-all')) {
-                    var pfGradable = (state.portfolio || []).filter(function(p) {
-                        return p.grading && p.grading.grade && p.grading.grade !== '-' && p.grading.grade !== '?';
-                    });
-                    if (pfGradable.length > 0) {
-                        var reBtn = document.createElement('button');
-                        reBtn.className = 'btn btn-regrade-all';
-                        reBtn.style.cssText = 'margin-right:8px;white-space:nowrap';
-                        reBtn.innerHTML = '\ud83d\udd04 Actualiser tout (' + pfGradable.length + ')';
-                        reBtn.onclick = function() { _handleBatch(state, 'portfolio'); };
-                        // Insert before "📊 Optimiser" or first btn
-                        var optBtn = header.querySelector('.btn-struct-opt') || header.querySelector('.btn.primary') || header.querySelector('.btn');
-                        if (optBtn) header.insertBefore(reBtn, optBtn);
-                        else header.appendChild(reBtn);
-                    }
-                }
-            });
-        }, 50);
-    };
-    var _di2 = setInterval(function() { if (typeof renderDashboard === 'function') { var _cd2 = renderDashboard; renderDashboard = function(c, s) { _cd2(c, s); _dashPatch(c, s); }; clearInterval(_di2); } }, 100);
-    setTimeout(function() { clearInterval(_di2); }, 5000);
-
-    // ─── BATCH HANDLER (supports both modes) ─────────────────────
+    // ═══════════════════════════════════════════════════════════════
+    // 8. BATCH HANDLER — supports ungraded, portfolio, ALL
+    // ═══════════════════════════════════════════════════════════════
     async function _handleBatch(state, mode) {
         var products = [];
         var label = '';
-
         if (mode === 'ungraded') {
-            // Only ungraded proposals
             products = Object.values(state.proposals).flat().filter(function(p) { return !p.grading; });
             label = products.length + ' propositions non grad\u00e9es';
         } else if (mode === 'portfolio') {
-            // All gradable portfolio products (re-grade with fresh market data)
-            products = (state.portfolio || []).filter(function(p) {
-                return p.grading && p.grading.grade && p.grading.grade !== '-';
-            });
+            products = (state.portfolio || []).filter(function(p) { return !p.grading || p.grading.grade !== '-'; });
             label = products.length + ' produits portefeuille';
         } else if (mode === 'all') {
-            // Everything: portfolio + proposals (excluding liquidity)
-            var pf = (state.portfolio || []).filter(function(p) {
-                return !p.grading || p.grading.grade !== '-';
-            });
-            var pr = Object.values(state.proposals).flat().filter(function(p) {
-                return !p.grading || (p.grading.grade !== '-' && p.grading.grade !== '?');
-            });
+            var pf = (state.portfolio || []).filter(function(p) { return !p.grading || p.grading.grade !== '-'; });
+            var pr = Object.values(state.proposals || {}).flat().filter(function(p) { return !p.grading || (p.grading.grade !== '-' && p.grading.grade !== '?'); });
             products = pf.concat(pr);
             label = products.length + ' produits (portefeuille + propositions)';
         }
-
         if (!products.length) { showToast('Rien \u00e0 grader', 'info'); return; }
-
         var duration = Math.ceil(products.length * 2.5 / 60);
         if (!confirm('Actualiser ' + label + ' ?\nDur\u00e9e estim\u00e9e : ~' + duration + ' min (' + products.length + ' appels Claude)')) return;
-
-        // Clear market cache to get fresh data
         if (typeof _mktCache !== 'undefined') { _mktCache = null; _mktCacheTs = 0; }
-
         showToast('Grading de ' + label + '...', 'info');
-
         try {
-            // Delete existing grades to force re-grade
             products.forEach(function(p) { delete p.grading; });
-
-            var results = await ProposalGrader.gradeBatch(products, function(i, t, r) {
-                showToast(i + '/' + t + ' \u2014 ' + (r.proposal?.name || '').substring(0, 20) + ' \u2192 ' + r.grading.grade, 'info');
-            });
-
-            // Save all graded products
+            var results = await ProposalGrader.gradeBatch(products, function(i, t, r) { showToast(i + '/' + t + ' \u2014 ' + (r.proposal?.name || '').substring(0, 20) + ' \u2192 ' + r.grading.grade, 'info'); });
             var pfSaved = false;
-            for (var j = 0; j < results.length; j++) {
-                var product = results[j].proposal;
-                // Save proposals individually
-                if (product.bankId) {
-                    try { await app._saveProductFile(product.bankId, product); } catch(e) {}
-                }
-                // Mark portfolio for batch save
-                var pfP = (state.portfolio || []).find(function(p) { return p.id === product.id; });
-                if (pfP) { pfP.grading = product.grading; pfSaved = true; }
-            }
-
-            // Save portfolio once (not per product)
-            if (pfSaved) {
-                try { await github.writeFile(CONFIG.DATA_PATH + '/portfolio.json', state.portfolio, '[StructBoard] Batch re-grade ' + results.length + ' products'); } catch(e) {}
-            }
-
-            var counts = {};
-            results.forEach(function(r) { counts[r.grading.grade] = (counts[r.grading.grade] || 0) + 1; });
+            for (var j = 0; j < results.length; j++) { var product = results[j].proposal; if (product.bankId) { try { await app._saveProductFile(product.bankId, product); } catch(e) {} } var pfP = (state.portfolio || []).find(function(p) { return p.id === product.id; }); if (pfP) { pfP.grading = product.grading; pfSaved = true; } }
+            if (pfSaved) { try { await github.writeFile(CONFIG.DATA_PATH + '/portfolio.json', state.portfolio, '[StructBoard] Batch re-grade ' + results.length + ' products'); } catch(e) {} }
+            var counts = {}; results.forEach(function(r) { counts[r.grading.grade] = (counts[r.grading.grade] || 0) + 1; });
             showToast('Termin\u00e9 : ' + Object.entries(counts).map(function(e) { return e[1] + '\u00d7' + e[0]; }).join(', '), 'success');
             app.render();
         } catch(e) { showToast('Erreur: ' + e.message, 'error'); }
     }
 
-    // ─── GLOBAL: "Actualiser tout" from anywhere ─────────────────
+    // ═══ GLOBAL — exposed for structured-optimizer.js ═══
     window.batchReGradeAll = function() { _handleBatch(app.state, 'all'); };
 
-    console.log('[StructBoard] GraderUI v1.7 \u2014 batch re-grade all (portfolio + proposals)');
+    // ═══ DASHBOARD PATCH — NOT USED (consolidated in structured-optimizer.js) ═══
+    // The "Actualiser tout" and "Grader tout" buttons are now injected by
+    // structured-optimizer.js in its single renderDashboard hook to avoid
+    // race conditions. This file only exposes batchReGradeAll().
+
+    console.log('[StructBoard] GraderUI v1.8 \u2014 batchReGradeAll = portfolio + proposals');
 })();
