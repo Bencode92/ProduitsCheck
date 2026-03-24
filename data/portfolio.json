@@ -156,7 +156,7 @@
     },
     "grading": {
       "grade": "B",
-      "score": 60,
+      "score": 62,
       "killCriteria": {
         "triggered": false,
         "reasons": []
@@ -166,62 +166,62 @@
           "score": 65,
           "base": 57,
           "delta": 8,
-          "reasoning": "Rendement: base 57 → +8 = 65 (Coupon 5.7% attractif avec autocall à 100% et beta faible de 0.28 réduisant la volatilité systémique) | Coupon 5.7%, protégé"
+          "reasoning": "Rendement: base 57 → +8 = 65 (Autocall à 100% avec coupon 5.7% attractive, beta très faible 0.28 réduit la volatilité systémique) | Coupon 5.7%, protégé"
         },
         "underlyingQuality": {
-          "score": 55,
+          "score": 60,
           "base": 50,
-          "delta": 5,
-          "reasoning": "Qualité: base 50 → +5 = 55 (ENI bénéficie du contexte macro favorable au secteur energy avec des fondamentaux solides malgré ROE modéré) [B/Q 35%] | Worst: ENI S.p.A. B:44"
+          "delta": 10,
+          "reasoning": "Qualité: base 50 → +10 = 60 (ENI bénéficie du régime macro favorable à l'énergie, fondamentaux solides malgré ROE modeste) [B/Q 35%] | Worst: ENI S.p.A. B:44"
         },
         "portfolioFit": {
-          "score": 70,
+          "score": 75,
           "base": 70,
-          "delta": 0,
+          "delta": 5,
           "reasoning": "En portefeuille — neutre"
         },
         "riskPremium": {
           "score": 61,
           "base": 64,
           "delta": -3,
-          "reasoning": "Prime: base 64 → -3 = 61 (Spread de 5.7% semble légèrement généreux compte tenu du beta très faible et de la protection du capital) | 5.7% vs CAT 2.5% (spread 3.2%)"
+          "reasoning": "Prime: base 64 → -3 = 61 (Coupon 5.7% légèrement généreux compte tenu du beta très faible et volatilité modérée) | 5.7% vs CAT 2.5% (spread 3.2%)"
         }
       },
-      "verdict": "Produit solide avec ENI bien positionné dans un contexte macro favorable à l'énergie. Le coupon de 5.7% est attractif avec un risque systémique limité (beta 0.28) et une autocall à 100%. La protection du capital et le secteur énergétique privilégié renforcent l'attractivité. Maturité décembre 2025 offre un horizon raisonnable pour une sortie anticipée.",
+      "verdict": "Produit attractif sur ENI avec autocall à 100% et coupon 5.7% annualisé. Le beta très faible (0.28) et le contexte macro favorable à l'énergie offrent un profil risque/rendement intéressant. La protection capital sans barrière sécurise l'investissement. Cependant, l'exposition mono-titre reste un point d'attention malgré la solidité d'ENI.",
       "keyRisks": [
-        "Dépendance à un seul titre ENI sans diversification sectorielle",
-        "Volatilité énergétique et exposition aux prix du pétrole/gaz"
+        "Risque sectoriel énergie lié aux prix du pétrole/gaz et transitions énergétiques",
+        "Concentration sur un seul titre malgré la solidité d'ENI"
       ],
       "negotiationPoints": [],
       "scenarios": {
         "optimistic": {
-          "return_pct": 8.5,
-          "return_eur": 2550,
+          "return_pct": 5.7,
+          "return_eur": 1710,
           "probability": 0.3,
           "duration_years": 1
         },
         "base": {
-          "return_pct": 5.7,
-          "return_eur": 1710,
+          "return_pct": 11.4,
+          "return_eur": 3420,
           "probability": 0.4,
-          "duration_years": 1
+          "duration_years": 2
         },
         "stress": {
           "return_pct": 0,
           "return_eur": 0,
           "probability": 0.25,
-          "duration_years": 1
+          "duration_years": 3
         },
         "worst": {
-          "return_pct": -8,
-          "return_eur": -2400,
+          "return_pct": 0,
+          "return_eur": 0,
           "probability": 0.05,
-          "duration_years": 1
+          "duration_years": 3
         }
       },
       "metadata": {
-        "gradedAt": "2026-03-24T16:35:11.316Z",
-        "durationMs": 11028,
+        "gradedAt": "2026-03-24T17:01:47.782Z",
+        "durationMs": 12190,
         "aiUsed": true,
         "version": "4.3",
         "productType": "standard",
@@ -242,24 +242,10 @@
         "baseGrade": "C",
         "adjustments": {
           "p1": 8,
-          "p2": 5,
-          "p3": 0,
+          "p2": 10,
+          "p3": 5,
           "p4": -3
-        },
-        "stockData": [
-          {
-            "name": "ENI S.p.A.",
-            "ticker": "ENI",
-            "sector": "Energie",
-            "perf_ytd": 45.13,
-            "perf_1y": 62.65,
-            "volatility_3y": 20.45,
-            "max_drawdown_3y": 26.78,
-            "buffett_score": 44,
-            "quality_score": 14,
-            "buffett_grade": "C"
-          }
-        ]
+        }
       }
     }
   },
@@ -604,23 +590,23 @@
     "entityName": "Caméleons",
     "grading": {
       "grade": "C",
-      "score": 48,
+      "score": 50,
       "killCriteria": {
         "triggered": false,
         "reasons": []
       },
       "pillars": {
         "adjustedReturn": {
-          "score": 30,
-          "base": 40,
+          "score": 27,
+          "base": 37,
           "delta": -10,
-          "reasoning": "Rendement: base 40 → -10 = 30 (Barrière 60% insuffisante face à la volatilité élevée des financières (BMPS 36%, UCG 30%) et panier très risqué.) | Coupon 7%, barrière 60%"
+          "reasoning": "Rendement: base 37 → -10 = 27 (Barrière 60% trop généreuse face à la volatilité élevée du secteur bancaire italien (BMPS 36%, UCG 30%) et Novo Nordisk non analysable) | Coupon 7%, barrière 60%"
         },
         "underlyingQuality": {
-          "score": 51,
-          "base": 63,
+          "score": 53,
+          "base": 65,
           "delta": -12,
-          "reasoning": "Qualité: base 63 → -12 = 51 (Secteur financier évité en macro + BMPS en difficulté (-23% YTD) + Novo Nordisk introuvable fragilise le panier.) [vol/DD 30%] | Worst: Veolia Environnement SA B:28"
+          "reasoning": "Qualité: base 65 → -12 = 53 (Secteur financier évité en macro + banques italiennes fragiles (BMPS quality 48, YTD -22%) + exposition significative aux financials défavorisés) [vol/DD 30%] | Worst: Veolia Environnement SA B:28"
         },
         "portfolioFit": {
           "score": 70,
@@ -629,16 +615,16 @@
           "reasoning": "En portefeuille — neutre"
         },
         "riskPremium": {
-          "score": 67,
-          "base": 75,
+          "score": 74,
+          "base": 82,
           "delta": -8,
-          "reasoning": "Prime: base 75 → -8 = 67 (Coupon 7% insuffisant pour compenser le risque élevé d'un panier bancaire italien + sous-jacent manquant.) | 7% vs CAT 2.5% (spread 4.5%)"
+          "reasoning": "Prime: base 82 → -8 = 74 (Coupon 7% insuffisant pour compenser les risques du panier bancaire italien et l'incertitude sur Novo Nordisk) | 7% vs CAT 2.5% (spread 4.5%)"
         }
       },
-      "verdict": "Produit très risqué dominé par des financières italiennes en difficulté (BMPS -23% YTD, UCG -16%) dans un contexte macro défavorable au secteur. La barrière 60% est insuffisante face aux volatilités de 30-36% des bancaires. L'absence de données sur Novo Nordisk (20% du panier) ajoute une incertitude majeure. Le coupon 7% ne compense pas ces risques structurels.",
+      "verdict": "Ce produit présente des faiblesses majeures dans sa composition. L'exposition aux banques italiennes (BMPS, UCG) intervient dans un contexte macro défavorable aux financials, avec BMPS affichant une performance YTD de -22% et une qualité médiocre (48). La donnée manquante sur Novo Nordisk empêche une évaluation complète du risque. Le coupon de 7% paraît insuffisant pour cette prise de risque sur un panier fragile. À éviter en l'état actuel.",
       "keyRisks": [
-        "Concentration bancaire italienne avec BMPS en crise structurelle et secteur financier évité",
-        "Sous-jacent Novo Nordisk introuvable représentant 20% du panier, créant un angle mort majeur"
+        "Concentration bancaire italienne dans un secteur évité par la macro",
+        "Données manquantes sur Novo Nordisk empêchant l'évaluation complète du worst-of"
       ],
       "negotiationPoints": [],
       "scenarios": {
@@ -650,28 +636,28 @@
         },
         "base": {
           "return_pct": 3.5,
-          "return_eur": 3150,
-          "probability": 0.25,
-          "duration_years": 1.5
+          "return_eur": 2625,
+          "probability": 0.3,
+          "duration_years": 2.5
         },
         "stress": {
           "return_pct": 0,
           "return_eur": 0,
           "probability": 0.35,
-          "duration_years": 2
+          "duration_years": 2.5
         },
         "worst": {
           "return_pct": -25,
           "return_eur": -7500,
-          "probability": 0.25,
-          "duration_years": 2
+          "probability": 0.2,
+          "duration_years": 2.5
         }
       },
       "metadata": {
-        "gradedAt": "2026-03-24T12:52:09.286Z",
-        "durationMs": 12898,
+        "gradedAt": "2026-03-24T17:02:13.711Z",
+        "durationMs": 13068,
         "aiUsed": true,
-        "version": "4.1",
+        "version": "4.3",
         "productType": "standard",
         "marketDataAvailable": true,
         "catBenchmark": 2.5,
@@ -683,8 +669,11 @@
         "isInPortfolio": true,
         "hasBarrier": true,
         "barrierPct": 60,
-        "baseScore": 59,
-        "baseGrade": "C",
+        "expectedMaturity": 0,
+        "maxMaturity": 0,
+        "maxBeta": 1.18,
+        "baseScore": 60,
+        "baseGrade": "B",
         "adjustments": {
           "p1": -10,
           "p2": -12,
@@ -890,97 +879,6 @@
       "level": 93.27,
       "date": "2026-03-18",
       "note": ""
-    },
-    "grading": {
-      "grade": "B",
-      "score": 63,
-      "killCriteria": {
-        "triggered": false,
-        "reasons": []
-      },
-      "pillars": {
-        "adjustedReturn": {
-          "score": 48,
-          "base": 58,
-          "delta": -10,
-          "reasoning": "Rendement: base 58 → -10 = 48 (Volatilité élevée (25.94%) augmente significativement le risque d'activation de barrière sur action unique) | Coupon 7.5% (1.875×4), barrière 60%"
-        },
-        "underlyingQuality": {
-          "score": 73,
-          "base": 85,
-          "delta": -12,
-          "reasoning": "Qualité: base 85 → -12 = 73 (Secteur financier évité en contexte macro neutral, malgré ROE solide (25.21%) le drawdown de 41.67% révèle une fragilité structurelle) [vol/DD 30%] | Worst: Action BNP Paribas (FR0000131104) B:100"
-        },
-        "portfolioFit": {
-          "score": 52,
-          "base": 60,
-          "delta": -8,
-          "reasoning": "Fit: base 60 → -8 = 52 (Exposition mono-valeur sur secteur financier non recommandé actuellement, absence de diversification sectorielle)"
-        },
-        "riskPremium": {
-          "score": 80,
-          "base": 83,
-          "delta": -3,
-          "reasoning": "Prime: base 83 → -3 = 80 (Prime correcte mais risque concentration sur action unique justifie léger ajustement à la baisse) | 7.5% vs CAT 2.5% (spread 5.0%)"
-        }
-      },
-      "verdict": "Ce Phoenix sur BNP Paribas présente des fondamentaux solides (ROE 25.21%, Buffett 100) mais souffre de défauts structurels majeurs. L'exposition mono-valeur sur le secteur financier, évité en contexte macro neutral, combinée à une volatilité élevée (25.94%) et un drawdown historique de 41.67%, fragilise significativement le profil risque-rendement. Le coupon de 7.5% ne compense pas suffisamment ces risques concentrés.",
-      "keyRisks": [
-        "Risque de concentration extrême sur action unique du secteur financier",
-        "Volatilité élevée (25.94%) augmentant la probabilité d'activation de barrière à 60%"
-      ],
-      "negotiationPoints": [],
-      "scenarios": {
-        "optimistic": {
-          "return_pct": 7.5,
-          "return_eur": 2250,
-          "probability": 0.2,
-          "duration_years": 1
-        },
-        "base": {
-          "return_pct": 4.5,
-          "return_eur": 4050,
-          "probability": 0.3,
-          "duration_years": 3
-        },
-        "stress": {
-          "return_pct": -15,
-          "return_eur": -4500,
-          "probability": 0.35,
-          "duration_years": 6
-        },
-        "worst": {
-          "return_pct": -40,
-          "return_eur": -12000,
-          "probability": 0.15,
-          "duration_years": 6
-        }
-      },
-      "metadata": {
-        "gradedAt": "2026-03-24T08:13:37.585Z",
-        "durationMs": 11525,
-        "aiUsed": true,
-        "version": "4.0",
-        "marketDataAvailable": true,
-        "catBenchmark": 2.5,
-        "catSource": "fallback-2026",
-        "couponAnnualized": 7.5,
-        "couponRaw": 1.875,
-        "couponMultiplier": 4,
-        "couponFrequency": "trimestriel",
-        "isInPortfolio": false,
-        "hasBarrier": true,
-        "barrierPct": 60,
-        "p2Weights": "vol-dd-30",
-        "baseScore": 71,
-        "baseGrade": "B",
-        "adjustments": {
-          "p1": -10,
-          "p2": -12,
-          "p3": -8,
-          "p4": -3
-        }
-      }
     }
   },
   {
@@ -1128,97 +1026,6 @@
       "level": 96.26,
       "date": "2026-03-19",
       "note": ""
-    },
-    "grading": {
-      "grade": "C",
-      "score": 54,
-      "killCriteria": {
-        "triggered": false,
-        "reasons": []
-      },
-      "pillars": {
-        "adjustedReturn": {
-          "score": 52,
-          "base": 60,
-          "delta": -8,
-          "reasoning": "Rendement: base 60 → -8 = 52 (Autocall 24% très éloigné pour un indice obligataire (TEC 10), probabilité de remboursement anticipé quasi-nulle) | Coupon 6%, protégé"
-        },
-        "underlyingQuality": {
-          "score": 55,
-          "base": 50,
-          "delta": 5,
-          "reasoning": "Qualité: base 50 → +5 = 55 (TEC 10 (obligations allemandes 7-10 ans) offre stabilité et qualité institutionnelle malgré environnement taux complexe) [B/Q 35%]"
-        },
-        "portfolioFit": {
-          "score": 57,
-          "base": 60,
-          "delta": -3,
-          "reasoning": "Fit: base 60 → -3 = 57 (Indice obligataire peu adapté aux mécaniques autocall, volatilité trop faible pour déclencher les seuils)"
-        },
-        "riskPremium": {
-          "score": 53,
-          "base": 58,
-          "delta": -5,
-          "reasoning": "Prime: base 58 → -5 = 53 (Structure TARN sur obligataire crée complexité disproportionnée vs rendement, spread défavorable) | 6% vs CAT 2.5% (spread 3.5%)"
-        }
-      },
-      "verdict": "Ce TARN sur TEC 10 présente un paradoxe structurel : autocall à 24% sur un indice obligataire volatilité ~3-5%. Le coupon 6% semble attractif mais la probabilité de remboursement anticipé est quasi-nulle, transformant de facto ce produit en investissement 11 ans. La qualité du sous-jacent (obligations allemandes) compense partiellement, mais la mécanique reste inadaptée.",
-      "keyRisks": [
-        "Autocall illusoire : seuil 24% inatteignable pour un indice obligataire, durée effective = maturité complète",
-        "Risque de taux : sur 11 ans, évolution défavorable des courbes peut impacter significativement le sous-jacent"
-      ],
-      "negotiationPoints": [],
-      "scenarios": {
-        "optimistic": {
-          "return_pct": 6,
-          "return_eur": 66000,
-          "probability": 0.15,
-          "duration_years": 11
-        },
-        "base": {
-          "return_pct": 4,
-          "return_eur": 44000,
-          "probability": 0.5,
-          "duration_years": 11
-        },
-        "stress": {
-          "return_pct": 1,
-          "return_eur": 11000,
-          "probability": 0.25,
-          "duration_years": 11
-        },
-        "worst": {
-          "return_pct": -8,
-          "return_eur": -8000,
-          "probability": 0.1,
-          "duration_years": 11
-        }
-      },
-      "metadata": {
-        "gradedAt": "2026-03-24T08:14:01.785Z",
-        "durationMs": 13724,
-        "aiUsed": true,
-        "version": "4.0",
-        "marketDataAvailable": false,
-        "catBenchmark": 2.5,
-        "catSource": "fallback-2026",
-        "couponAnnualized": 6,
-        "couponRaw": 6,
-        "couponMultiplier": 1,
-        "couponFrequency": "annuel",
-        "isInPortfolio": false,
-        "hasBarrier": false,
-        "barrierPct": 0,
-        "p2Weights": "buffett-quality-35",
-        "baseScore": 57,
-        "baseGrade": "C",
-        "adjustments": {
-          "p1": -8,
-          "p2": 5,
-          "p3": -3,
-          "p4": -5
-        }
-      }
     }
   }
 ]
