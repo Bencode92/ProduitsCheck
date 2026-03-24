@@ -163,19 +163,94 @@
     }
   },
   "grading": {
-    "grade": "F",
-    "score": 0,
+    "grade": "C",
+    "score": 53,
     "killCriteria": {
-      "triggered": true,
-      "reasons": [
-        "Worst-of 8 sous-jacents (max 5)"
-      ]
+      "triggered": false,
+      "reasons": []
     },
-    "verdict": "Rejet automatique : Worst-of 8 sous-jacents (max 5)",
+    "pillars": {
+      "adjustedReturn": {
+        "score": 42,
+        "base": 52,
+        "delta": -10,
+        "reasoning": "Rendement: base 52 → -10 = 42 (Sans barrière définie, impossible d'évaluer la probabilité réelle du coupon 7%, et Tesla (vol 58%) comme maillon faible augmente significativement le risque de non-paiement) | Coupon 7%, protégé"
+      },
+      "underlyingQuality": {
+        "score": 35,
+        "base": 47,
+        "delta": -12,
+        "reasoning": "Qualité: base 47 → -12 = 35 (Panier concentré sur secteurs évités (communication-services, consumer-discretionary), Tesla en difficulté (ROE 5%, marge 4%), et forte volatilité moyenne du panier (37%)) [B/Q 35%] | Worst: Tesla B:54"
+      },
+      "portfolioFit": {
+        "score": 75,
+        "base": 80,
+        "delta": -5,
+        "reasoning": "Fit: base 80 → -5 = 75 (Exposition excessive aux mega-caps tech américaines sans diversification géographique ni sectorielle, inadaptée au contexte macro neutre favorisant l'énergie)"
+      },
+      "riskPremium": {
+        "score": 67,
+        "base": 75,
+        "delta": -8,
+        "reasoning": "Prime: base 75 → -8 = 67 (Coupon 7% attractif en apparence mais structure worst-of sur 8 valeurs volatiles sans protection barrière rend le spread trompeur face au risque réel) | 7% vs CAT 2.5% (spread 4.5%)"
+      }
+    },
+    "verdict": "Ce produit présente un profil risque/rendement déséquilibré avec un coupon 7% alléchant mais une structure worst-of sur 8 mega-caps tech volatiles sans protection barrière. Tesla (vol 58%, ROE 5%) comme maillon faible fragilise l'ensemble du panier. La concentration sur des secteurs actuellement évités (communication-services, consumer-discretionary) et l'absence de diversification géographique rendent ce produit inadapté au contexte macro actuel. Sans barrière définie, l'évaluation du risque de non-paiement des coupons reste impossible.",
+    "keyRisks": [
+      "Risque Tesla : maillon faible avec volatilité 58% et fondamentaux dégradés (ROE 5%, marge 4%)",
+      "Absence de protection barrière sur structure worst-of 8 valeurs, risque de suspension coupons élevé"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 7,
+        "return_eur": 7000,
+        "probability": 0.2,
+        "duration_years": 1
+      },
+      "base": {
+        "return_pct": 3.5,
+        "return_eur": 10500,
+        "probability": 0.35,
+        "duration_years": 3
+      },
+      "stress": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.3,
+        "duration_years": 3
+      },
+      "worst": {
+        "return_pct": -15,
+        "return_eur": -15000,
+        "probability": 0.15,
+        "duration_years": 3
+      }
+    },
     "metadata": {
-      "gradedAt": "2026-03-24T08:15:36.386Z",
-      "aiUsed": false,
-      "version": "1.5"
+      "gradedAt": "2026-03-24T08:44:03.681Z",
+      "durationMs": 14255,
+      "aiUsed": true,
+      "version": "4.1",
+      "productType": "standard",
+      "marketDataAvailable": true,
+      "catBenchmark": 2.5,
+      "catSource": "fallback-2026",
+      "couponAnnualized": 7,
+      "couponRaw": 7,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": false,
+      "barrierPct": 0,
+      "baseScore": 62,
+      "baseGrade": "B",
+      "adjustments": {
+        "p1": -10,
+        "p2": -12,
+        "p3": -5,
+        "p4": -8
+      }
     }
   }
 }
