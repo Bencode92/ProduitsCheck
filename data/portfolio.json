@@ -656,7 +656,7 @@
     "entityName": "Caméleons",
     "grading": {
       "grade": "C",
-      "score": 49,
+      "score": 48,
       "killCriteria": {
         "triggered": false,
         "reasons": []
@@ -666,13 +666,13 @@
           "score": 30,
           "base": 40,
           "delta": -10,
-          "reasoning": "Rendement: base 40 → -10 = 30 (Panier fragile avec BMPS en forte baisse (-22.74% YTD), vol élevées (30-36%) et barrière 60% trop proche avec ce niveau de risque) | Coupon 7%, barrière 60%"
+          "reasoning": "Rendement: base 40 → -10 = 30 (Barrière 60% insuffisante face à la volatilité élevée des financières (BMPS 36%, UCG 30%) et panier très risqué.) | Coupon 7%, barrière 60%"
         },
         "underlyingQuality": {
           "score": 51,
           "base": 63,
           "delta": -12,
-          "reasoning": "Qualité: base 63 → -12 = 51 (Exposition lourde aux financières (BMPS/UCG) défavorisées en macro + données manquantes Novo Nordisk créent opacité majeure) [vol/DD 30%] | Worst: Veolia Environnement SA B:28"
+          "reasoning": "Qualité: base 63 → -12 = 51 (Secteur financier évité en macro + BMPS en difficulté (-23% YTD) + Novo Nordisk introuvable fragilise le panier.) [vol/DD 30%] | Worst: Veolia Environnement SA B:28"
         },
         "portfolioFit": {
           "score": 70,
@@ -681,47 +681,47 @@
           "reasoning": "En portefeuille — neutre"
         },
         "riskPremium": {
-          "score": 70,
+          "score": 67,
           "base": 75,
-          "delta": -5,
-          "reasoning": "Prime: base 75 → -5 = 70 (Coupon 7% insuffisant pour compenser risque réel du panier, notamment BMPS en détresse) | 7% vs CAT 2.5% (spread 4.5%)"
+          "delta": -8,
+          "reasoning": "Prime: base 75 → -8 = 67 (Coupon 7% insuffisant pour compenser le risque élevé d'un panier bancaire italien + sous-jacent manquant.) | 7% vs CAT 2.5% (spread 4.5%)"
         }
       },
-      "verdict": "Produit risqué avec panier déséquilibré : 40% financières italiennes fragiles (BMPS -22.74% YTD, vol 36%) en contexte macro défavorable. Novo Nordisk non analysable. Coupon 7% inadéquat pour ce niveau de risque avec barrière 60% trop proche. Structure pénalisée par maillon faible Veolia et volatilités élevées limitant probabilité d'autocall.",
+      "verdict": "Produit très risqué dominé par des financières italiennes en difficulté (BMPS -23% YTD, UCG -16%) dans un contexte macro défavorable au secteur. La barrière 60% est insuffisante face aux volatilités de 30-36% des bancaires. L'absence de données sur Novo Nordisk (20% du panier) ajoute une incertitude majeure. Le coupon 7% ne compense pas ces risques structurels.",
       "keyRisks": [
-        "Crise bancaire italienne : BMPS et UCG vulnérables aux tensions sectorielles",
-        "Données manquantes Novo Nordisk : impossible d'évaluer 20% du panier"
+        "Concentration bancaire italienne avec BMPS en crise structurelle et secteur financier évité",
+        "Sous-jacent Novo Nordisk introuvable représentant 20% du panier, créant un angle mort majeur"
       ],
       "negotiationPoints": [],
       "scenarios": {
         "optimistic": {
           "return_pct": 7,
           "return_eur": 2100,
-          "probability": 0.2,
+          "probability": 0.15,
           "duration_years": 1
         },
         "base": {
           "return_pct": 3.5,
-          "return_eur": 6300,
-          "probability": 0.3,
-          "duration_years": 3
+          "return_eur": 3150,
+          "probability": 0.25,
+          "duration_years": 1.5
         },
         "stress": {
           "return_pct": 0,
           "return_eur": 0,
           "probability": 0.35,
-          "duration_years": 6
+          "duration_years": 2
         },
         "worst": {
           "return_pct": -25,
           "return_eur": -7500,
-          "probability": 0.15,
-          "duration_years": 6
+          "probability": 0.25,
+          "duration_years": 2
         }
       },
       "metadata": {
-        "gradedAt": "2026-03-24T12:52:03.127Z",
-        "durationMs": 12805,
+        "gradedAt": "2026-03-24T12:52:09.286Z",
+        "durationMs": 12898,
         "aiUsed": true,
         "version": "4.1",
         "productType": "standard",
@@ -741,7 +741,7 @@
           "p1": -10,
           "p2": -12,
           "p3": 0,
-          "p4": -5
+          "p4": -8
         },
         "stockData": [
           {
