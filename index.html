@@ -53,6 +53,7 @@
   <script src="js/cat-scanner.js"></script>
   <script src="js/proposal-patches.js"></script>
   <script src="js/grader-ui-patch.js"></script>
+  <script src="js/structured-optimizer.js"></script>
   <script src="js/analytics.js"></script>
   <script>
     function switchMainView(view) {
@@ -66,6 +67,7 @@
       await app.init();
       await loadCATAIConversation();
       if (typeof loadOptimizerResult === 'function') await loadOptimizerResult();
+      if (typeof loadStructOptimizerResult === 'function') await loadStructOptimizerResult();
     });
   </script>
 </body>
