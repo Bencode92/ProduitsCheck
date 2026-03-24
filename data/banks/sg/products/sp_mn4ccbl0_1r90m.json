@@ -140,5 +140,96 @@
       "redundancy": 20,
       "complementarity": 40
     }
+  },
+  "grading": {
+    "grade": "A",
+    "score": 76,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 75,
+        "base": 85,
+        "delta": -10,
+        "reasoning": "Rendement: base 85 → -10 = 75 (Distance barrière 50% insuffisante pour un secteur à volatilité 35%+ et drawdowns historiques >60%) | Coupon 18% (9×2), barrière 50%"
+      },
+      "underlyingQuality": {
+        "score": 60,
+        "base": 50,
+        "delta": 10,
+        "reasoning": "Qualité: base 50 → +10 = 60 (Secteur aurifère aligné avec contexte macro favorable aux matières premières et protection inflation) [vol/DD 30%]"
+      },
+      "portfolioFit": {
+        "score": 75,
+        "base": 80,
+        "delta": -5,
+        "reasoning": "Fit: base 80 → -5 = 75 (Exposition sectorielle concentrée sur mines d'or crée un risque de corrélation élevée non diversifié)"
+      },
+      "riskPremium": {
+        "score": 92,
+        "base": 100,
+        "delta": -8,
+        "reasoning": "Prime: base 100 → -8 = 92 (Prime attractive mais risque de knock-in élevé sur secteur cyclique volatile réduit la valeur réelle) | 18% vs CAT 2.5% (spread 15.5%)"
+      }
+    },
+    "verdict": "Produit attractif par son rendement 18% et alignement macro favorable aux matières premières, mais barrière 50% insuffisante pour la volatilité extrême du secteur minier (>35%). L'indice GDX présente des drawdowns historiques dépassant 60%, rendant le knock-in probable. Grade ajusté B+ (66/100) reflète le déséquilibre risque/rendement malgré le contexte porteur.",
+    "keyRisks": [
+      "Volatilité extrême secteur minier (35%+) avec barrière 50% créant probabilité knock-in élevée",
+      "Corrélation forte prix or/actions minières pouvant amplifier les pertes en cas de retournement"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 18,
+        "return_eur": 18000,
+        "probability": 0.3,
+        "duration_years": 1
+      },
+      "base": {
+        "return_pct": 12,
+        "return_eur": 36000,
+        "probability": 0.35,
+        "duration_years": 3
+      },
+      "stress": {
+        "return_pct": -25,
+        "return_eur": -25000,
+        "probability": 0.25,
+        "duration_years": 6
+      },
+      "worst": {
+        "return_pct": -50,
+        "return_eur": -50000,
+        "probability": 0.1,
+        "duration_years": 6
+      }
+    },
+    "metadata": {
+      "gradedAt": "2026-03-24T08:17:02.755Z",
+      "durationMs": 11741,
+      "aiUsed": true,
+      "version": "4.0",
+      "marketDataAvailable": false,
+      "catBenchmark": 2.5,
+      "catSource": "fallback-2026",
+      "couponAnnualized": 18,
+      "couponRaw": 9,
+      "couponMultiplier": 2,
+      "couponFrequency": "semestriel",
+      "isInPortfolio": false,
+      "hasBarrier": true,
+      "barrierPct": 50,
+      "p2Weights": "vol-dd-30",
+      "baseScore": 79,
+      "baseGrade": "A",
+      "adjustments": {
+        "p1": -10,
+        "p2": 10,
+        "p3": -5,
+        "p4": -8
+      }
+    }
   }
 }
