@@ -155,8 +155,8 @@
       "note": ""
     },
     "grading": {
-      "grade": "C",
-      "score": 54,
+      "grade": "B",
+      "score": 61,
       "killCriteria": {
         "triggered": false,
         "reasons": []
@@ -166,64 +166,64 @@
           "score": 67,
           "base": 57,
           "delta": 10,
-          "reasoning": "Rendement: base 57 → +10 = 67 (Autocall 100% + volatilité modérée (20.45%) + secteur energy favorisé = probabilité coupon élevée) | Coupon 5.7%, protégé"
+          "reasoning": "Rendement: base 57 → +10 = 67 (Coupon 5.7% attractif avec autocall 100% sur titre unique volatil (20.45%), probabilités de déclenchement favorables) | Coupon 5.7%, protégé"
         },
         "underlyingQuality": {
-          "score": 42,
+          "score": 55,
           "base": 50,
-          "delta": -8,
-          "reasoning": "Qualité: base 50 → -8 = 42 (Quality score faible (14) et ROE dégradé (5.06%) malgré le contexte macro favorable à l'énergie) [B/Q 35%] | Worst: ENI S.p.A. B:44"
+          "delta": 5,
+          "reasoning": "Qualité: base 50 → +5 = 55 (ENI bénéficie du contexte macro favorable à l'énergie, beta faible 0.28 limite le risque systémique malgré volatilité élevée) [B/Q 35%] | Worst: ENI S.p.A. B:44"
         },
         "portfolioFit": {
-          "score": 75,
+          "score": 65,
           "base": 70,
-          "delta": 5,
+          "delta": -5,
           "reasoning": "En portefeuille — neutre"
         },
         "riskPremium": {
-          "score": 53,
-          "base": 53,
-          "delta": 0,
-          "reasoning": "Prime: base 53 | 5.7% vs CAT 2.5% (spread 3.2%)"
+          "score": 61,
+          "base": 64,
+          "delta": -3,
+          "reasoning": "Prime: base 64 → -3 = 61 (Prime correcte mais légèrement surévaluée compte tenu du profil risque/rendement d'ENI seul) | 5.7% vs CAT 2.5% (spread 3.2%)"
         }
       },
-      "verdict": "Produit attractif porté par le contexte macro favorable à l'énergie et un autocall accessible (100%). Le coupon de 5.7% est rémunérateur pour un capital protégé, mais la faible qualité fondamentale d'ENI (Quality 14, ROE 5.06%) tempère l'enthousiasme. La volatilité modérée (20.45%) et l'absence de barrière offrent un bon profil risque/rendement. Score ajusté : 60/100 (B-).",
+      "verdict": "Produit attractif profitant du contexte favorable à l'énergie avec ENI bien positionné (beta 0.28, ROE 5.06%). Le coupon 5.7% avec autocall 100% offre un bon potentiel de déclenchement rapide grâce à la volatilité 20.45% d'ENI. Cependant, la concentration sur un seul titre augmente le risque spécifique. La protection du capital compense partiellement ce risque de concentration.",
       "keyRisks": [
-        "Dépendance totale à ENI : mono-exposition sur un titre à fundamentaux dégradés",
-        "Retournement secteur énergie : fin du cycle haussier des commodités"
+        "Risque de concentration sur ENI seul - pas de diversification sectorielle",
+        "Volatilité élevée d'ENI (20.45%) peut retarder l'autocall malgré le seuil à 100%"
       ],
       "negotiationPoints": [],
       "scenarios": {
         "optimistic": {
           "return_pct": 5.7,
           "return_eur": 1710,
-          "probability": 0.35,
+          "probability": 0.3,
           "duration_years": 1
         },
         "base": {
-          "return_pct": 4.2,
-          "return_eur": 3780,
-          "probability": 0.4,
+          "return_pct": 4.3,
+          "return_eur": 3870,
+          "probability": 0.35,
           "duration_years": 3
         },
         "stress": {
           "return_pct": 0,
           "return_eur": 0,
-          "probability": 0.2,
+          "probability": 0.25,
           "duration_years": 6
         },
         "worst": {
-          "return_pct": 0,
-          "return_eur": 0,
-          "probability": 0.05,
+          "return_pct": -12,
+          "return_eur": -3600,
+          "probability": 0.1,
           "duration_years": 6
         }
       },
       "metadata": {
-        "gradedAt": "2026-03-24T09:22:05.147Z",
-        "durationMs": 13737,
+        "gradedAt": "2026-03-24T15:45:24.979Z",
+        "durationMs": 13048,
         "aiUsed": true,
-        "version": "4.1",
+        "version": "4.3",
         "productType": "standard",
         "marketDataAvailable": true,
         "catBenchmark": 2.5,
@@ -235,13 +235,16 @@
         "isInPortfolio": true,
         "hasBarrier": false,
         "barrierPct": 0,
-        "baseScore": 53,
+        "expectedMaturity": 0,
+        "maxMaturity": 0,
+        "maxBeta": 0.28,
+        "baseScore": 57,
         "baseGrade": "C",
         "adjustments": {
           "p1": 10,
-          "p2": -8,
-          "p3": 5,
-          "p4": 0
+          "p2": 5,
+          "p3": -5,
+          "p4": -3
         },
         "stockData": [
           {
