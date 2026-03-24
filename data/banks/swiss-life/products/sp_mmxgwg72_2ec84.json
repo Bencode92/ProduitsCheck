@@ -154,89 +154,93 @@
     "note": ""
   },
   "grading": {
-    "grade": "B",
-    "score": 62,
+    "grade": "C",
+    "score": 56,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 67,
+        "score": 49,
         "base": 57,
-        "delta": 10,
-        "reasoning": "Rendement: base 57 → +10 = 67 (Autocall 100% + sous-jacent volatil (20.45%) avec forte performance récente = haute probabilité déclenchement anticipé) | Coupon 5.7%, protégé"
+        "delta": -8,
+        "reasoning": "Rendement: base 57 → -8 = 49 (Volatilité 20.45% élevée pour un mono-sous-jacent énergétique, risque d'activation anticipée réduit malgré autocall à 100%) | Coupon 5.7%, protégé"
       },
       "underlyingQuality": {
         "score": 58,
         "base": 50,
         "delta": 8,
-        "reasoning": "Qualité: base 50 → +8 = 58 (ENI bénéficie du régime macro favorable à l'énergie, performance exceptionnelle +62.65% sur 1an) | Worst: ENI S.p.A. B:44"
+        "reasoning": "Qualité: base 50 → +8 = 58 (Secteur énergétique favorisé en contexte macro neutre, fondamentaux corrects malgré ROE/marge faibles, drawdown maîtrisé à 26.78%) [B/Q 35%] | Worst: ENI S.p.A. B:44"
       },
       "portfolioFit": {
         "score": 65,
         "base": 60,
         "delta": 5,
-        "reasoning": "Fit: base 60 → +5 = 65 (Exposition énergie alignée avec secteur favorisé en contexte macro actuel)"
+        "reasoning": "Fit: base 60 → +5 = 65 (Mono-exposition ENI cohérente pour diversification sectorielle, bêta défensif 0.28 atténue risque de concentration)"
       },
       "riskPremium": {
-        "score": 57,
-        "base": 60,
-        "delta": -3,
-        "reasoning": "Prime: base 60 → -3 = 57 (Coupon conditionnel sur mono-valeur volatile majore légèrement le spread théorique) | 5.7% vs CAT 3%"
+        "score": 55,
+        "base": 53,
+        "delta": 2,
+        "reasoning": "Prime: base 53 → +2 = 55 (Prime 5.7% vs CAT 2.5% justifiée par risque mono-sous-jacent et volatilité énergétique) | 5.7% vs CAT 2.5% (spread 3.2%)"
       }
     },
-    "verdict": "Produit attractif bénéficiant d'un timing optimal sur ENI, portée par la dynamique énergie et sa performance remarquable (+62.65% sur 1an). L'autocall à 100% maximise les chances de sortie anticipée avec un coupon de 5.7% annualisé, supérieur aux taux sans risque. La volatilité d'ENI (20.45%) et l'absence de barrière de protection renforcent l'intérêt du produit dans le contexte macro favorable à l'énergie. Recommandation d'investissement sous réserve de tolérance au risque action sur mono-valeur.",
+    "verdict": "Produit offrant 5.7% annualisé sur ENI avec capital protégé et autocall à 100%. Le secteur énergétique bénéficie d'un contexte macro favorable, compensant des fondamentaux modestes (ROE 5.06%, Buffett 44). La volatilité 20.45% et le mono-sous-jacent créent un profil risque-rendement équilibré pour cette classe d'actifs défensive (bêta 0.28). Maturité inconnue problématique pour l'évaluation complète.",
     "keyRisks": [
-      "Risque de concentration sur mono-valeur ENI sans diversification sectorielle",
-      "Volatilité élevée (20.45%) et drawdown historique (-26.78%) d'ENI peuvent retarder l'autocall"
+      "Concentration sur un seul titre énergétique italien exposé aux chocs sectoriels et géopolitiques",
+      "Maturité non précisée empêche l'évaluation du risque de duration et de probabilité d'autocall"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 5.7,
         "return_eur": 1710,
-        "probability": 0.45,
+        "probability": 0.35,
         "duration_years": 1
       },
       "base": {
         "return_pct": 5.7,
-        "return_eur": 2565,
-        "probability": 0.35,
-        "duration_years": 1.5
+        "return_eur": 5130,
+        "probability": 0.4,
+        "duration_years": 3
       },
       "stress": {
-        "return_pct": 5.7,
-        "return_eur": 3420,
-        "probability": 0.15,
-        "duration_years": 2
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.2,
+        "duration_years": 6
       },
       "worst": {
         "return_pct": -15,
         "return_eur": -4500,
         "probability": 0.05,
-        "duration_years": 2
+        "duration_years": 6
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-23T16:48:08.696Z",
-      "durationMs": 13719,
+      "gradedAt": "2026-03-24T08:12:26.232Z",
+      "durationMs": 13630,
       "aiUsed": true,
-      "version": "3.1",
+      "version": "4.0",
       "marketDataAvailable": true,
-      "catBenchmark": 3,
+      "catBenchmark": 2.5,
+      "catSource": "fallback-2026",
       "couponAnnualized": 5.7,
       "couponRaw": 5.7,
       "couponMultiplier": 1,
       "couponFrequency": "annuel",
       "isInPortfolio": false,
-      "baseScore": 57,
+      "hasBarrier": false,
+      "barrierPct": 0,
+      "p2Weights": "buffett-quality-35",
+      "baseScore": 55,
       "baseGrade": "C",
       "adjustments": {
-        "p1": 10,
+        "p1": -8,
         "p2": 8,
         "p3": 5,
-        "p4": -3
+        "p4": 2
       }
     }
   }
