@@ -146,74 +146,75 @@
   },
   "grading": {
     "grade": "C",
-    "score": 54,
+    "score": 51,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 52,
+        "score": 50,
         "base": 60,
-        "delta": -8,
-        "reasoning": "Rendement: base 60 → -8 = 52 (Autocall 24% très éloigné pour un indice obligataire (TEC 10), probabilité de remboursement anticipé quasi-nulle) | Coupon 6%, protégé"
+        "delta": -10,
+        "reasoning": "Rendement: base 60 → -10 = 50 (Autocall seuil 24% très élevé réduit significativement la probabilité d'activation précoce sur un indice obligations souveraines) | Coupon 6%, protégé"
       },
       "underlyingQuality": {
-        "score": 55,
-        "base": 50,
+        "score": 40,
+        "base": 35,
         "delta": 5,
-        "reasoning": "Qualité: base 50 → +5 = 55 (TEC 10 (obligations allemandes 7-10 ans) offre stabilité et qualité institutionnelle malgré environnement taux complexe) [B/Q 35%]"
+        "reasoning": "Qualité: base 35 → +5 = 40 (Indice TEC 10 (obligations souveraines) bénéficie du contexte macro neutral avec aversion au risque et recherche de qualité) [B/Q 35%]"
       },
       "portfolioFit": {
-        "score": 57,
-        "base": 60,
-        "delta": -3,
-        "reasoning": "Fit: base 60 → -3 = 57 (Indice obligataire peu adapté aux mécaniques autocall, volatilité trop faible pour déclencher les seuils)"
+        "score": 70,
+        "base": 70,
+        "delta": 0,
+        "reasoning": "En portefeuille — neutre"
       },
       "riskPremium": {
-        "score": 53,
-        "base": 58,
+        "score": 65,
+        "base": 70,
         "delta": -5,
-        "reasoning": "Prime: base 58 → -5 = 53 (Structure TARN sur obligataire crée complexité disproportionnée vs rendement, spread défavorable) | 6% vs CAT 2.5% (spread 3.5%)"
+        "reasoning": "Prime: base 70 → -5 = 65 (Coupon 6% semble généreux mais compensé par l'autocall très difficile à déclencher sur obligations) | 6% vs CAT 2.5% (spread 3.5%)"
       }
     },
-    "verdict": "Ce TARN sur TEC 10 présente un paradoxe structurel : autocall à 24% sur un indice obligataire volatilité ~3-5%. Le coupon 6% semble attractif mais la probabilité de remboursement anticipé est quasi-nulle, transformant de facto ce produit en investissement 11 ans. La qualité du sous-jacent (obligations allemandes) compense partiellement, mais la mécanique reste inadaptée.",
+    "verdict": "Ce TARN sur TEC 10 présente un profil défensif adapté au contexte macro, mais le seuil d'autocall à 24% est inadapté à un indice obligataire peu volatil. La probabilité d'activation précoce est quasi-nulle, transformant le produit en obligation à coupon suspendu de 11 ans. Le rendement de 6% reste attractif pour un profil défensif, mais la durée effective sera très probablement la maturité complète.",
     "keyRisks": [
-      "Autocall illusoire : seuil 24% inatteignable pour un indice obligataire, durée effective = maturité complète",
-      "Risque de taux : sur 11 ans, évolution défavorable des courbes peut impacter significativement le sous-jacent"
+      "Autocall quasi-impossible : seuil 24% totalement inadapté à la volatilité d'un indice obligataire",
+      "Duration risque : exposition longue aux taux d'intérêt sur 11 ans sans possibilité de sortie anticipée"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 6,
         "return_eur": 66000,
-        "probability": 0.15,
-        "duration_years": 11
+        "probability": 0.05,
+        "duration_years": 1
       },
       "base": {
-        "return_pct": 4,
-        "return_eur": 44000,
-        "probability": 0.5,
+        "return_pct": 6,
+        "return_eur": 66000,
+        "probability": 0.85,
         "duration_years": 11
       },
       "stress": {
-        "return_pct": 1,
-        "return_eur": 11000,
-        "probability": 0.25,
+        "return_pct": 3,
+        "return_eur": 33000,
+        "probability": 0.08,
         "duration_years": 11
       },
       "worst": {
-        "return_pct": -8,
-        "return_eur": -8000,
-        "probability": 0.1,
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.02,
         "duration_years": 11
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-24T08:14:01.785Z",
-      "durationMs": 13724,
+      "gradedAt": "2026-03-24T17:02:20.415Z",
+      "durationMs": 12232,
       "aiUsed": true,
-      "version": "4.0",
+      "version": "4.3",
+      "productType": "standard",
       "marketDataAvailable": false,
       "catBenchmark": 2.5,
       "catSource": "fallback-2026",
@@ -221,16 +222,18 @@
       "couponRaw": 6,
       "couponMultiplier": 1,
       "couponFrequency": "annuel",
-      "isInPortfolio": false,
+      "isInPortfolio": true,
       "hasBarrier": false,
       "barrierPct": 0,
-      "p2Weights": "buffett-quality-35",
-      "baseScore": 57,
+      "expectedMaturity": 0,
+      "maxMaturity": 0,
+      "maxBeta": null,
+      "baseScore": 54,
       "baseGrade": "C",
       "adjustments": {
-        "p1": -8,
+        "p1": -10,
         "p2": 5,
-        "p3": -3,
+        "p3": 0,
         "p4": -5
       }
     }
