@@ -164,48 +164,48 @@
   },
   "grading": {
     "grade": "C",
-    "score": 53,
+    "score": 51,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 42,
-        "base": 52,
+        "score": 29,
+        "base": 39,
         "delta": -10,
-        "reasoning": "Rendement: base 52 → -10 = 42 (Capital protégé mais coupon 7% sur panier Tech volatile (Tesla 58% vol, NVIDIA 48%) avec macro défavorable aux secteurs représentés) | Coupon 7%, protégé"
+        "reasoning": "Rendement: base 39 → -10 = 29 (Capital protégé mais pénalité Tesla (vol 57%, beta 2.15) réduit drastiquement la probabilité d'activer le coupon 7% sur ce panier worst-of) | Coupon 7%, protégé"
       },
       "underlyingQuality": {
-        "score": 35,
-        "base": 47,
+        "score": 34,
+        "base": 46,
         "delta": -12,
-        "reasoning": "Qualité: base 47 → -12 = 35 (Macro évite communication-services et consumer-discretionary qui représentent 50% du panier, Tesla maillon faible avec ROE 4.93% et marge 4.07%) [B/Q 35%] | Worst: Tesla B:54"
+        "reasoning": "Qualité: base 46 → -12 = 34 (Panier hyper-corrélé tech (6/8 titres) avec betas élevés dans un contexte où communication-services et consumer-discretionary sont évités macro) [B/Q 35%] | Worst: Tesla B:54"
       },
       "portfolioFit": {
         "score": 75,
         "base": 80,
         "delta": -5,
-        "reasoning": "Fit: base 80 → -5 = 75 (Concentration excessive sur Tech US déjà surreprésentée dans portefeuilles, manque de diversification sectorielle et géographique)"
+        "reasoning": "Fit: base 80 → -5 = 75 (Exposition quasi-pure aux GAFAM+Tesla manque de diversification sectorielle malgré la qualité des noms)"
       },
       "riskPremium": {
-        "score": 67,
-        "base": 75,
+        "score": 74,
+        "base": 82,
         "delta": -8,
-        "reasoning": "Prime: base 75 → -8 = 67 (Coupon 7% paraît généreux mais structure court terme sans autocall limite l'upside, pas de transparence sur maturité exacte) | 7% vs CAT 2.5% (spread 4.5%)"
+        "reasoning": "Prime: base 82 → -8 = 74 (Coupon 7% paraît généreux mais trompeur vu la volatilité extrême du worst-of Tesla qui compromet l'activation) | 7% vs CAT 2.5% (spread 4.5%)"
       }
     },
-    "verdict": "Produit problématique malgré la protection du capital. Le panier concentre 8 mega-caps Tech US dans un contexte macro défavorable aux secteurs communication et consumer-discretionary. Tesla (maillon faible) affiche des fondamentaux dégradés avec seulement 4.93% de ROE. La volatilité élevée (Tesla 58%, NVIDIA 48%) compromet la probabilité de versement du coupon 7%, même avec protection du capital.",
+    "verdict": "Produit à capital protégé attractif en théorie avec des leaders tech de qualité, mais la présence de Tesla (vol 57%, beta 2.15) comme maillon faible dans un mécanisme worst-of compromet sévèrement les chances d'activer le coupon 7%. La concentration sectorielle tech expose à un risque systémique élevé dans un contexte macro défavorable aux communication-services et consumer-discretionary. Le capital protégé limite les dégâts mais le rendement risque d'être décevant.",
     "keyRisks": [
-      "Concentration sectorielle : 100% Tech US dans environnement macro défavorable aux secteurs représentés",
-      "Volatilité extrême du maillon faible Tesla (58% vol, -18% YTD) compromettant les coupons sur toute la durée"
+      "Tesla maillon faible : volatilité 57% et beta 2.15 compromettent l'activation du coupon sur l'ensemble du panier",
+      "Concentration tech excessive : 6/8 titres corrélés avec betas élevés amplifient le risque systémique macro défavorable"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 7,
         "return_eur": 7000,
-        "probability": 0.2,
+        "probability": 0.15,
         "duration_years": 1
       },
       "base": {
@@ -217,7 +217,7 @@
       "stress": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.3,
+        "probability": 0.35,
         "duration_years": 3
       },
       "worst": {
@@ -228,10 +228,10 @@
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-24T12:52:51.889Z",
-      "durationMs": 12636,
+      "gradedAt": "2026-03-24T17:02:47.548Z",
+      "durationMs": 13090,
       "aiUsed": true,
-      "version": "4.1",
+      "version": "4.3",
       "productType": "standard",
       "marketDataAvailable": true,
       "catBenchmark": 2.5,
@@ -243,7 +243,10 @@
       "isInPortfolio": false,
       "hasBarrier": false,
       "barrierPct": 0,
-      "baseScore": 62,
+      "expectedMaturity": 0,
+      "maxMaturity": 0,
+      "maxBeta": 2.15,
+      "baseScore": 60,
       "baseGrade": "B",
       "adjustments": {
         "p1": -10,
