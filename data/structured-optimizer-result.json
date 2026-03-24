@@ -1,144 +1,128 @@
 {
-  "lastUpdated": "2026-03-24T17:04:44.988Z",
-  "summary": "## ANALYSE PORTEFEUILLE STRUCTURÉ\n\n**PORTEFEUILLE ACTUEL:** +12 060€/an (vs CAT +5 674€ = excédent +6 386€)\n\n**PRODUITS EXISTANTS:**\n• ✅ **ATHENA PRIVILEGE** - Grade B solide, performance correcte\n• 👀 **Oxygène Mars 2026** - Grade C, surveiller approche échéance\n• ✅ **PHOENIX TRIMESTRI** - Grade B, bon rendement 7.5%\n• 👀 **TARN TEC 2035** - Grade C sur gros montant, diversifier le risque\n\n**PROPOSITIONS PRIORITAIRES:**\n1. ✅ **ATHENA SOLACTIVE** - 18% | +4 504€ vs CAT | Grade B excellent\n2. ✅ **Autocall Euro Stoxx Banks** - 19.4% | +4 924€ vs CAT | Potentiel exceptionnel\n3. ✅ **PHOENIX FAST** - 14% | +3 304€ vs CAT | Grade A sécurisé\n4. ✅ **EMTN LVMH** - 6.15% | +949€ vs CAT | Diversification sous-jacent\n\n**DÉPLOIEMENT LIQUIDITÉ (109K€):**\n- **120K€** sur les 4 propositions prioritaires (30K€ chacune)\n- **Gain additionnel:** +13 681€/an vs CAT\n- **Nouveau portefeuille:** 310K€ → +25 741€/an\n- **Performance globale:** 8.3% vs 2.99% CAT\n\nStratégie: maximiser les Grades A/B haute performance tout en surveillant les positions Grade C existantes.",
-  "version": "1.0",
+  "lastUpdated": "2026-03-24T21:37:11.080Z",
+  "summary": "**RÉSUMÉ:** 109 000€ disponibles → 109 000€ à déployer → +16 554€/an\n\n**SOUSCRIPTIONS:**\n✅ **SL – PHOENIX MEMOIRE FAST** → 50 000€ à 14% = +7 000€/an vs CAT (+5 507€)\n✅ **ATHENA SUR INDICE SOLACTI** → 50 000€ à 18% = +9 000€/an vs CAT (+7 507€)  \n✅ **EMTN Digitale WO LVMH Cré** → 9 000€ à 6.15% = +554€/an vs CAT (+285€)\n\n**REJETS:**\n❌ **NOTE TAUX FIXE CALLABLE B** — Grade C faible (54/100) avec seulement 4% de rendement\n❌ **Solution Court Terme Boos** — Grade C médiocre (51/100) malgré 7% de coupon\n\n**CONCLUSION:** \nVotre allocation totale (299 000€) génère **28 614€/an** soit **+19 685€** de plus que le CAT benchmark (2.99%). Le déploiement recommandé privilégie des produits Grade A/B avec des rendements attractifs (6.15% à 18%). Phoenix Memoire Fast (Grade A, 14%) et Athena Solactive (Grade B, 18%) offrent un excellent rapport risque/rendement. L'EMTN LVMH complète efficacement avec un profil plus conservateur mais supérieur au CAT.\n\nPerformance globale: **+9.57%** vs **2.99%** CAT = **surperformance de 6.58 points**.",
+  "version": "1.1",
   "totalLiquidity": 109000,
-  "totalDeployed": 190000,
-  "totalAnnualReturn": 12060,
-  "catAlternativeReturn": 8929,
-  "excessReturnVsCat": 6386,
-  "portfolioCount": 4,
-  "proposalCount": 6,
-  "subscribeCount": 4,
-  "holdCount": 2,
-  "waitCount": 2,
+  "totalPortfolioInvested": 190000,
+  "totalPortfolioReturn": 12060,
   "catBenchmark": 2.9863356164383563,
+  "deployedAmount": 109000,
+  "deployedReturn": 16554,
+  "deployedCatReturn": 3255,
+  "deployedExcess": 13299,
+  "remainingCash": 0,
+  "portfolioCount": 4,
+  "subscribeCount": 4,
   "portfolio": [
     {
       "name": "SL - ATHENA PRIVILEGE ENI DECEMBRE 2025",
       "grade": "B",
-      "score": 62,
       "amount": 30000,
       "coupon": 5.7,
       "annualReturn": 1710,
       "catReturn": 896,
-      "excessVsCat": 814,
-      "expectedMaturity": 0,
-      "recommendation": "GARDER",
-      "reason": "Grade B — excédent vs CAT +814€/an"
+      "excessVsCat": 814
     },
     {
       "name": "Oxygène Objectif Mars 2026",
       "grade": "C",
-      "score": 50,
       "amount": 30000,
       "coupon": 7,
       "annualReturn": 2100,
       "catReturn": 896,
-      "excessVsCat": 1204,
-      "expectedMaturity": 0,
-      "recommendation": "SURVEILLER",
-      "reason": "Grade C, +1 204€/an vs CAT — surveiller"
+      "excessVsCat": 1204
     },
     {
       "name": "SL - PHOENIX MEMOIRE TRIMESTRIEL BNP JANVIER 2026",
       "grade": "B",
-      "score": 70,
       "amount": 30000,
       "coupon": 7.5,
       "annualReturn": 2250,
       "catReturn": 896,
-      "excessVsCat": 1354,
-      "expectedMaturity": 0,
-      "recommendation": "GARDER",
-      "reason": "Grade B — excédent vs CAT +1 354€/an"
+      "excessVsCat": 1354
     },
     {
       "name": "TARN TEC 10 Décembre 2035 B",
       "grade": "C",
-      "score": 47,
       "amount": 100000,
       "coupon": 6,
       "annualReturn": 6000,
       "catReturn": 2986,
-      "excessVsCat": 3014,
-      "expectedMaturity": 0,
-      "recommendation": "SURVEILLER",
-      "reason": "Grade C, +3 014€/an vs CAT — surveiller"
+      "excessVsCat": 3014
     }
   ],
-  "proposals": [
-    {
-      "name": "Solution Court Terme Boostée sur Panier d'Actions 3",
-      "grade": "C",
-      "score": 51,
-      "suggestedAmount": 100000,
-      "coupon": 7,
-      "annualReturn": 7000,
-      "catReturn": 2986,
-      "excessVsCat": 4014,
-      "recommendation": "ATTENDRE",
-      "reason": "Grade C (51/100) — risque élevé pour le rendement"
-    },
-    {
-      "name": "NOTE TAUX FIXE CALLABLE BONUS PAIEMENT À MATURITÉ",
-      "grade": "C",
-      "score": 54,
-      "suggestedAmount": 100000,
-      "coupon": 4,
-      "annualReturn": 4000,
-      "catReturn": 2986,
-      "excessVsCat": 1014,
-      "recommendation": "ATTENDRE",
-      "reason": "Grade C (54/100) — risque élevé pour le rendement"
-    },
+  "allocation": [
     {
       "name": "SL – PHOENIX MEMOIRE FAST SEMESTRIEL ASML AVRIL 2026",
       "grade": "A",
       "score": 81,
-      "suggestedAmount": 100000,
+      "allocatedAmount": 50000,
       "coupon": 14,
-      "annualReturn": 14000,
-      "catReturn": 2986,
-      "excessVsCat": 11014,
+      "annualReturn": 7000,
+      "catReturn": 1493,
+      "excessVsCat": 5507,
       "recommendation": "SOUSCRIRE",
-      "reason": "Grade A (81/100) — +11 014€/an vs CAT"
+      "reason": "Grade A (81/100) — 50 000€ → +5 507€/an vs CAT"
     },
     {
       "name": "ATHENA SUR INDICE SOLACTIVE GOLD MINERS À DÉCRÉMENT 2",
       "grade": "B",
       "score": 74,
-      "suggestedAmount": 100000,
+      "allocatedAmount": 50000,
       "coupon": 18,
-      "annualReturn": 18000,
-      "catReturn": 2986,
-      "excessVsCat": 15014,
+      "annualReturn": 9000,
+      "catReturn": 1493,
+      "excessVsCat": 7507,
       "recommendation": "SOUSCRIRE",
-      "reason": "Grade B (74/100) — +15 014€/an vs CAT"
+      "reason": "Grade B (74/100) — 50 000€ → +7 507€/an vs CAT"
     },
     {
       "name": "EMTN Digitale WO LVMH Crédit Agricole Avril 2029",
       "grade": "B",
       "score": 66,
-      "suggestedAmount": 100000,
+      "allocatedAmount": 9000,
       "coupon": 6.15,
-      "annualReturn": 6150,
-      "catReturn": 2986,
-      "excessVsCat": 3164,
+      "annualReturn": 554,
+      "catReturn": 269,
+      "excessVsCat": 285,
       "recommendation": "SOUSCRIRE",
-      "reason": "Grade B (66/100) — +3 164€/an vs CAT"
+      "reason": "Grade B (66/100) — 9 000€ → +285€/an vs CAT"
     },
     {
       "name": "Autocall Euro Stoxx Banks Avril 2031",
       "grade": "B",
       "score": 63,
-      "suggestedAmount": 100000,
+      "allocatedAmount": 0,
       "coupon": 19.4,
-      "annualReturn": 19400,
-      "catReturn": 2986,
-      "excessVsCat": 16414,
+      "annualReturn": 0,
+      "catReturn": 0,
+      "excessVsCat": 0,
       "recommendation": "SOUSCRIRE",
-      "reason": "Grade B (63/100) — +16 414€/an vs CAT"
+      "reason": "Grade B (63/100) — 0€ → +0€/an vs CAT"
+    },
+    {
+      "name": "NOTE TAUX FIXE CALLABLE BONUS PAIEMENT À MATURITÉ",
+      "grade": "C",
+      "score": 54,
+      "allocatedAmount": 0,
+      "coupon": 4,
+      "annualReturn": 0,
+      "catReturn": 0,
+      "excessVsCat": 0,
+      "recommendation": "ATTENDRE",
+      "reason": "Grade C (54/100) — rendement insuffisant pour le risque"
+    },
+    {
+      "name": "Solution Court Terme Boostée sur Panier d'Actions 3",
+      "grade": "C",
+      "score": 51,
+      "allocatedAmount": 0,
+      "coupon": 7,
+      "annualReturn": 0,
+      "catReturn": 0,
+      "excessVsCat": 0,
+      "recommendation": "ATTENDRE",
+      "reason": "Grade C (51/100) — rendement insuffisant pour le risque"
     }
   ]
 }
