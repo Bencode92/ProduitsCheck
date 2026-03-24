@@ -159,7 +159,7 @@
   },
   "grading": {
     "grade": "F",
-    "score": 23,
+    "score": 20,
     "killCriteria": {
       "triggered": false,
       "reasons": []
@@ -169,38 +169,37 @@
         "score": 0,
         "base": 0,
         "delta": 0,
-        "reasoning": "Rendement: base 0 | Coupon 0%"
+        "reasoning": "Rendement: base 0 | Coupon 0%, barrière 0%"
       },
       "underlyingQuality": {
-        "score": 65,
-        "base": 75,
+        "score": 63,
+        "base": 73,
         "delta": -10,
-        "reasoning": "Qualité: base 75 → -10 = 65 (Exposition monétaire/obligataire dans contexte de volatilité des taux et incertitude sur la duration réelle.) | Worst: Instruments du marché monétaire B:93"
+        "reasoning": "Qualité: base 73 → -10 = 63 (Sous-jacents mal définis (obligations génériques), seul l'instrument monétaire tech identifié avec vol élevée 32% et drawdown 34% préoccupant.) [B/Q 35%] | Worst: Instruments du marché monétaire B:93"
       },
       "portfolioFit": {
-        "score": 35,
-        "base": 40,
+        "score": 20,
+        "base": 25,
         "delta": -5,
-        "reasoning": "Fit: base 40 → -5 = 35 (Allocation obligataire/monétaire peu pertinente dans un régime neutre où l'energy est favorisé.)"
+        "reasoning": "Fit: base 25 → -5 = 20 (Exposition tech via instruments monétaire non cohérente avec diversification obligataire attendue.)"
       },
       "riskPremium": {
         "score": 0,
         "base": 5,
-        "delta": -15,
-        "reasoning": "Prime: base 5 → -15 = 0 (Prime nulle vs CAT 3% représente un coût d'opportunité majeur de 3270€/an sur ce nominal.) | 0% vs CAT 3%"
+        "delta": -10,
+        "reasoning": "Prime: base 5 → -10 = 0 (Autocall 100% sur obligations sans coupon = structure inadaptée, spread défavorable vs obligations directes.) | 0% vs CAT 2.5% (spread -2.5%)"
       }
     },
-    "verdict": "Ce produit Swiss Life présente un profil défavorable avec 0% de rendement contre 3% sur CAT, soit 3270€ de manque à gagner annuel. L'exposition obligataire/monétaire manque de visibilité sur la duration et subit les incertitudes de taux. Sans barrière définie ni protection de capital explicite, le risque/rendement est déséquilibré. Score ajusté: -2/100 (Grade F).",
+    "verdict": "Produit structuré défaillant avec 0% de coupon et sous-jacents mal définis limitant l'analyse de risque. La présence d'un autocall à 100% sur des obligations sans rendement annuel constitue une anomalie structurelle. Le seul actif identifiable (instruments monétaire tech) présente une volatilité de 32% inadéquate pour un fonds obligataire, avec un Buffett score correct à 93 mais une qualité médiocre à 43.",
     "keyRisks": [
-      "Coût d'opportunité de 3270€/an vs placement sans risque CAT 3%",
-      "Exposition aux risques de taux et de crédit sans compensation de rendement",
-      "Manque de transparence sur la duration et composition exacte du portefeuille"
+      "Transparence insuffisante sur la composition réelle du portefeuille obligataire",
+      "Volatilité excessive (32%) de la composante technologique incompatible avec un profil conservateur"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 1,
-        "return_eur": 1090,
+        "return_pct": 2,
+        "return_eur": 2180,
         "probability": 0.2,
         "duration_years": 1
       },
@@ -211,37 +210,41 @@
         "duration_years": 1
       },
       "stress": {
-        "return_pct": -2,
-        "return_eur": -2180,
-        "probability": 0.25,
+        "return_pct": -3,
+        "return_eur": -3270,
+        "probability": 0.2,
         "duration_years": 1
       },
       "worst": {
-        "return_pct": -5,
-        "return_eur": -5450,
-        "probability": 0.05,
+        "return_pct": -8,
+        "return_eur": -8720,
+        "probability": 0.1,
         "duration_years": 1
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-23T16:56:29.921Z",
-      "durationMs": 12144,
+      "gradedAt": "2026-03-24T08:12:47.979Z",
+      "durationMs": 12245,
       "aiUsed": true,
-      "version": "3.2",
+      "version": "4.0",
       "marketDataAvailable": true,
-      "catBenchmark": 3,
+      "catBenchmark": 2.5,
+      "catSource": "fallback-2026",
       "couponAnnualized": 0,
       "couponRaw": 0,
       "couponMultiplier": 1,
       "couponFrequency": "annuel",
       "isInPortfolio": false,
-      "baseScore": 28,
+      "hasBarrier": false,
+      "barrierPct": 0,
+      "p2Weights": "buffett-quality-35",
+      "baseScore": 25,
       "baseGrade": "D",
       "adjustments": {
         "p1": 0,
         "p2": -10,
         "p3": -5,
-        "p4": -15
+        "p4": -10
       }
     }
   }
