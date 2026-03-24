@@ -94,6 +94,38 @@
             showToast('Grading en cours...', 'info');
             const result = await ProposalGrader.grade(product);
 
+            // ─── ATTACH STOCK DATA for the table ───
+            try {
+                if (_mktCache && result && result.metadata) {
+                    var norm = ProposalGrader.normalize(product);
+                    var all = [].concat(_mktCache.stocksEurope || [], _mktCache.stocksUS || []);
+                    if (all.length > 0 && norm.underlyings && norm.underlyings.length > 0) {
+                        var stockData = [];
+                        norm.underlyings.forEach(function(und) {
+                            var ticker = (typeof _resolveAlias === 'function') ? _resolveAlias(und) : und.toUpperCase();
+                            var s = all.find(function(x) {
+                                return x.ticker === ticker || x.ticker === und.toUpperCase() ||
+                                    (x.name && x.name.toUpperCase().indexOf(und.toUpperCase()) >= 0) ||
+                                    (x.name_api && x.name_api.toUpperCase().indexOf(und.toUpperCase()) >= 0);
+                            });
+                            if (s) {
+                                stockData.push({
+                                    name: und, ticker: s.ticker, sector: s.sector || '\u2014',
+                                    perf_ytd: s.perf_ytd, perf_1y: s.perf_1y,
+                                    volatility_3y: s.volatility_3y, max_drawdown_3y: s.max_drawdown_3y,
+                                    buffett_score: s.buffett_score, quality_score: s.quality_score,
+                                    buffett_grade: s.buffett_grade
+                                });
+                            }
+                        });
+                        if (stockData.length > 0) {
+                            result.metadata.stockData = stockData;
+                            product.grading = result;
+                        }
+                    }
+                }
+            } catch(e) { console.warn('[GraderUI] stockData:', e.message); }
+
             // SAVE to BOTH proposal file AND portfolio.json
             var saveResult = await _saveGrading(product);
 
@@ -197,13 +229,36 @@
                 ? '<button onclick="triggerGrading(this)" style="margin-left:auto;padding:4px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;font-size:11px;display:flex;align-items:center;gap:4px">\ud83d\udd04 Actualiser</button>'
                 : '';
 
+            // Build grading HTML + stock table
+            var gradingHtml = ProposalGrader.renderSection(p.grading);
+
+            // ─── INJECT STOCK TABLE if data available ───
+            if (p.grading && p.grading.metadata && p.grading.metadata.stockData && p.grading.metadata.stockData.length > 0) {
+                var stockTableHtml = _renderStockTable(p.grading.metadata.stockData);
+                // Insert before scenarios or risks
+                var insertPoint = gradingHtml.indexOf('grid-template-columns:repeat(4');
+                if (insertPoint > 0) {
+                    var divStart = gradingHtml.lastIndexOf('<div style="display:grid', insertPoint);
+                    if (divStart > 0) gradingHtml = gradingHtml.substring(0, divStart) + stockTableHtml + gradingHtml.substring(divStart);
+                } else {
+                    var risksPoint = gradingHtml.indexOf('<strong>Risques');
+                    if (risksPoint > 0) {
+                        var divR = gradingHtml.lastIndexOf('<div', risksPoint);
+                        if (divR > 0) gradingHtml = gradingHtml.substring(0, divR) + stockTableHtml + gradingHtml.substring(divR);
+                    } else {
+                        var footerPoint = gradingHtml.lastIndexOf('<div style="font-size:10px');
+                        if (footerPoint > 0) gradingHtml = gradingHtml.substring(0, footerPoint) + stockTableHtml + gradingHtml.substring(footerPoint);
+                    }
+                }
+            }
+
             gd.innerHTML = '<div class="fiche-section-header" style="display:flex;align-items:center">' +
                 '<span class="fiche-section-icon">\ud83c\udfaf</span>' +
                 '<span class="fiche-section-title">Grading Unifi\u00e9</span>' +
                 refreshBtn +
                 '</div>' +
                 '<div class="fiche-section-body">' +
-                ProposalGrader.renderSection(p.grading) +
+                gradingHtml +
                 '</div>';
 
             sheetMain.prepend(gd);
@@ -215,6 +270,60 @@
             panel.innerHTML = _buildGradeSidebarPanel(p.grading);
             if (panel.firstElementChild) sidebar.insertBefore(panel.firstElementChild, sidebar.firstChild);
         }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // STOCK TABLE RENDERER — mini table of underlying metrics
+    // ═══════════════════════════════════════════════════════════════
+
+    function _renderStockTable(stockData) {
+        if (!stockData || stockData.length === 0) return '';
+
+        function _perfColor(v) {
+            if (v == null) return '#888';
+            return v >= 10 ? '#06D6A0' : v >= 0 ? '#4ECDC4' : v >= -10 ? '#FFB627' : '#EF233C';
+        }
+        function _scoreColor(v) {
+            if (v == null) return '#888';
+            return v >= 70 ? '#06D6A0' : v >= 50 ? '#4ECDC4' : v >= 30 ? '#FFB627' : '#EF233C';
+        }
+        function _fmt(v, suffix) {
+            if (v == null) return '<span style="color:#555">\u2014</span>';
+            var color = suffix === '%' ? _perfColor(v) : _scoreColor(v);
+            return '<span style="color:' + color + ';font-weight:600">' + (v >= 0 && suffix === '%' ? '+' : '') + v + (suffix || '') + '</span>';
+        }
+
+        var cs = 'padding:4px 6px;font-size:11px;border-bottom:1px solid rgba(255,255,255,0.06);white-space:nowrap;';
+        var hs = cs + 'color:var(--text-muted);font-weight:500;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;';
+
+        var h = '<div style="margin:12px 0"><div style="font-size:11px;font-weight:600;color:var(--text-muted);margin-bottom:6px">\ud83d\udcca Sous-jacents</div>';
+        h += '<div style="overflow-x:auto;border-radius:8px;border:1px solid rgba(255,255,255,0.08)">';
+        h += '<table style="width:100%;border-collapse:collapse;font-size:11px">';
+        h += '<tr style="background:rgba(255,255,255,0.03)">';
+        h += '<th style="' + hs + 'text-align:left">Nom</th>';
+        h += '<th style="' + hs + 'text-align:right">YTD</th>';
+        h += '<th style="' + hs + 'text-align:right">1 an</th>';
+        h += '<th style="' + hs + 'text-align:right">Vol 3Y</th>';
+        h += '<th style="' + hs + 'text-align:right">DD 3Y</th>';
+        h += '<th style="' + hs + 'text-align:right">Buffett</th>';
+        h += '<th style="' + hs + 'text-align:right">Quality</th>';
+        h += '</tr>';
+
+        stockData.forEach(function(s, i) {
+            var bg = i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)';
+            h += '<tr style="background:' + bg + '">';
+            h += '<td style="' + cs + 'text-align:left"><span style="font-weight:600;color:var(--text-primary,#e0e0e0)">' + s.name + '</span> <span style="color:#666;font-size:10px">' + s.ticker + '</span></td>';
+            h += '<td style="' + cs + 'text-align:right">' + _fmt(s.perf_ytd, '%') + '</td>';
+            h += '<td style="' + cs + 'text-align:right">' + _fmt(s.perf_1y, '%') + '</td>';
+            h += '<td style="' + cs + 'text-align:right">' + _fmt(s.volatility_3y, '%') + '</td>';
+            h += '<td style="' + cs + 'text-align:right">' + _fmt(s.max_drawdown_3y != null ? -Math.abs(s.max_drawdown_3y) : null, '%') + '</td>';
+            h += '<td style="' + cs + 'text-align:right">' + _fmt(s.buffett_score, '') + '<span style="font-size:9px;color:#666">/' + (s.buffett_grade || '?') + '</span></td>';
+            h += '<td style="' + cs + 'text-align:right">' + _fmt(s.quality_score, '') + '</td>';
+            h += '</tr>';
+        });
+
+        h += '</table></div></div>';
+        return h;
     }
 
     // ─── 4. DISABLE injectDeepAnalysis completely ────────────────
@@ -340,5 +449,5 @@
         } catch(e) { showToast('Erreur: ' + e.message, 'error'); }
     }
 
-    console.log('[StructBoard] GraderUI v1.5 loaded — portfolio save + coupon annualization');
+    console.log('[StructBoard] GraderUI v1.5 loaded \u2014 portfolio save + stock table');
 })();
