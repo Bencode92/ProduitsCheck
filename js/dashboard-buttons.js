@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Dashboard Buttons + Portfolio Summary Table v5
-// Added MARGE BARRIÈRE + PROCHAINE DATE columns
+// STRUCTBOARD — Dashboard Buttons + Portfolio Summary Table v5.1
+// Restored "Liquidités disponibles" section (ByCam / Caméléons)
 // ═══════════════════════════════════════════════════════════════
 
 // ═══ QUICK VARIATION EDITOR ══════════════════════════════
@@ -79,13 +79,8 @@ function _computeMargeBarriere(p, tracking) {
 function _computeNextEvent(p) {
     var grade = (p.grading && p.grading.grade) || '?';
     if (grade === '-') return { html: '<span style="color:#94A3B8;font-size:10px">\u2014</span>', days: 9999 };
-    // Try maturityDate
     var matDate = p.maturityDate ? new Date(p.maturityDate) : null;
-    if (!matDate && p.maturity) {
-        var yMatch = p.maturity.match(/(\d{2})\/(\d{2})\/(\d{4})/);
-        if (yMatch) matDate = new Date(yMatch[3] + '-' + yMatch[2] + '-' + yMatch[1]);
-    }
-    // Try to find next autocall observation date
+    if (!matDate && p.maturity) { var yMatch = p.maturity.match(/(\d{2})\/(\d{2})\/(\d{4})/); if (yMatch) matDate = new Date(yMatch[3] + '-' + yMatch[2] + '-' + yMatch[1]); }
     var subDate = p.subscriptionDate ? new Date(p.subscriptionDate) : (p.addedDate ? new Date(p.addedDate) : null);
     var hasAutocall = p.earlyRedemption?.possible === true || p.earlyRedemption?.possible === 'true';
     var nextObs = null;
@@ -93,29 +88,113 @@ function _computeNextEvent(p) {
         var now = Date.now();
         var freq = p.earlyRedemption?.frequency || p.coupon?.frequency || 'annuel';
         var monthsStep = 12;
-        if (typeof freq === 'string') {
-            if (freq.indexOf('trimestr') >= 0) monthsStep = 3;
-            else if (freq.indexOf('semestr') >= 0) monthsStep = 6;
-        }
-        for (var m = 12; m <= 240; m += monthsStep) {
-            var d = new Date(subDate);
-            d.setMonth(d.getMonth() + m);
-            if (d.getTime() > now) { nextObs = d; break; }
-        }
+        if (typeof freq === 'string') { if (freq.indexOf('trimestr') >= 0) monthsStep = 3; else if (freq.indexOf('semestr') >= 0) monthsStep = 6; }
+        for (var m = 12; m <= 240; m += monthsStep) { var d = new Date(subDate); d.setMonth(d.getMonth() + m); if (d.getTime() > now) { nextObs = d; break; } }
     }
-    // Pick the earliest: next observation or maturity
-    var eventDate = null;
-    var eventLabel = '';
-    if (nextObs && matDate) {
-        if (nextObs < matDate) { eventDate = nextObs; eventLabel = 'Obs'; }
-        else { eventDate = matDate; eventLabel = 'Mat'; }
-    } else if (nextObs) { eventDate = nextObs; eventLabel = 'Obs'; }
+    var eventDate = null, eventLabel = '';
+    if (nextObs && matDate) { if (nextObs < matDate) { eventDate = nextObs; eventLabel = 'Obs'; } else { eventDate = matDate; eventLabel = 'Mat'; } }
+    else if (nextObs) { eventDate = nextObs; eventLabel = 'Obs'; }
     else if (matDate) { eventDate = matDate; eventLabel = 'Mat'; }
     if (!eventDate) return { html: '<span style="color:var(--text-dim);font-size:10px">\u2014</span>', days: 9999 };
     var daysLeft = Math.ceil((eventDate.getTime() - Date.now()) / 86400000);
     var dateStr = eventDate.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
     var dc = daysLeft < 90 ? 'var(--red)' : daysLeft < 180 ? 'var(--orange)' : daysLeft < 365 ? '#4ECDC4' : 'var(--text-muted)';
     return { html: '<span style="font-size:10px"><span style="color:' + dc + ';font-weight:600">' + dateStr + '</span><br><span style="color:var(--text-dim);font-size:9px">' + eventLabel + ' ' + daysLeft + 'j</span></span>', days: daysLeft };
+}
+
+// ═══ LIQUIDIT\u00c9S DISPONIBLES ═════════════════════════════
+function _renderLiquiditesSection(state) {
+    var portfolio = state.portfolio || [];
+    if (typeof ENVELOPES === 'undefined' || !ENVELOPES) return '';
+
+    // Compute per-envelope: how much is already in structurés
+    var envelopeData = {};
+    ENVELOPES.forEach(function(e) {
+        if (!e.id) return;
+        envelopeData[e.id] = { label: e.label, icon: e.icon, color: e.color, structAmount: 0 };
+    });
+    var totalStruct = 0;
+    portfolio.forEach(function(p) {
+        var amount = parseFloat(p.investedAmount) || 0;
+        totalStruct += amount;
+        if (p.envelope && envelopeData[p.envelope]) {
+            envelopeData[p.envelope].structAmount += amount;
+        }
+    });
+
+    // CAT total (from catManager if available)
+    var catTotal = 0;
+    var catRate = 0;
+    if (typeof catManager !== 'undefined' && catManager.deposits) {
+        catManager.deposits.filter(function(d) { return d.status === 'active'; }).forEach(function(d) {
+            catTotal += parseFloat(d.amount) || 0;
+        });
+        // Get weighted rate
+        var catActive = catManager.deposits.filter(function(d) { return d.status === 'active'; });
+        if (catActive.length > 0) {
+            var totalW = 0, totalA = 0;
+            catActive.forEach(function(d) { var a = parseFloat(d.amount) || 0; totalW += a * (parseFloat(d.rate) || 0); totalA += a; });
+            if (totalA > 0) catRate = totalW / totalA;
+        }
+    }
+
+    // Total assets = CAT + Structurés + Liquidity remaining
+    // Liquidity = products tagged as grade '-' (cash)
+    var liquidityAmount = 0;
+    portfolio.forEach(function(p) {
+        if (p.grading && p.grading.grade === '-') liquidityAmount += parseFloat(p.investedAmount) || 0;
+    });
+    var structOnly = totalStruct - liquidityAmount;
+    var totalAssets = catTotal + totalStruct;
+    var toInvest = liquidityAmount;
+
+    // Build envelope cards
+    var envelopeIds = Object.keys(envelopeData);
+    if (envelopeIds.length === 0) return '';
+
+    var html = '<div style="margin-bottom:20px;padding:16px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius)" data-section="liquidites-disponibles">';
+    html += '<div style="font-size:13px;font-weight:700;color:var(--text-bright);margin-bottom:12px">Liquidit\u00e9s disponibles</div>';
+
+    // Envelope cards
+    html += '<div style="display:grid;grid-template-columns:repeat(' + envelopeIds.length + ',1fr);gap:12px;margin-bottom:12px">';
+    envelopeIds.forEach(function(id) {
+        var e = envelopeData[id];
+        // Available = total products in this envelope that are cash/liquidity
+        var envProducts = portfolio.filter(function(p) { return p.envelope === id; });
+        var envCash = envProducts.filter(function(p) { return p.grading && p.grading.grade === '-'; }).reduce(function(s, p) { return s + (parseFloat(p.investedAmount) || 0); }, 0);
+        var envStruct = envProducts.filter(function(p) { return !p.grading || p.grading.grade !== '-'; }).reduce(function(s, p) { return s + (parseFloat(p.investedAmount) || 0); }, 0);
+
+        html += '<div style="background:var(--bg-card);border:1px solid ' + e.color + '33;border-radius:var(--radius-sm);padding:12px;display:flex;justify-content:space-between;align-items:center">';
+        html += '<div><span style="color:' + e.color + ';font-weight:600;font-size:13px">' + e.icon + ' ' + e.label + '</span>';
+        if (envStruct > 0) html += '<div style="font-size:10px;color:var(--text-dim);margin-top:2px">D\u00e9j\u00e0 en structur\u00e9s : ' + formatNumber(envStruct) + '\u20ac</div>';
+        html += '</div>';
+        html += '<span style="font-family:var(--mono);font-size:20px;font-weight:800;color:' + e.color + '">' + formatNumber(envCash) + '\u20ac</span>';
+        html += '</div>';
+    });
+    html += '</div>';
+
+    // Progress bar: CAT / Structurés / À investir
+    if (totalAssets > 0 || toInvest > 0) {
+        var total = catTotal + structOnly + toInvest;
+        if (total > 0) {
+            var catPct = Math.round(catTotal / total * 100);
+            var structPct = Math.round(structOnly / total * 100);
+            var investPct = 100 - catPct - structPct;
+            html += '<div style="display:flex;height:8px;border-radius:4px;overflow:hidden;margin-bottom:6px">';
+            if (catPct > 0) html += '<div style="width:' + catPct + '%;background:var(--green)"></div>';
+            if (structPct > 0) html += '<div style="width:' + structPct + '%;background:var(--orange)"></div>';
+            if (investPct > 0) html += '<div style="width:' + investPct + '%;background:var(--cyan)"></div>';
+            html += '</div>';
+            html += '<div style="display:flex;gap:16px;font-size:10px;color:var(--text-dim)">';
+            if (catTotal > 0) html += '<span>\u25a0 CAT ' + formatNumber(catTotal) + '\u20ac' + (catRate > 0 ? ' (' + catRate.toFixed(1) + '%)' : '') + '</span>';
+            html += '<span>\u25a0 Structur\u00e9s ' + formatNumber(structOnly) + '\u20ac</span>';
+            if (toInvest > 0) html += '<span>\u25a0 \u00c0 investir ' + formatNumber(toInvest) + '\u20ac</span>';
+            html += '</div>';
+        }
+    }
+
+    html += '</div>';
+    return html;
 }
 
 // ═══ PORTFOLIO SUMMARY TABLE ═════════════════════════════
@@ -231,7 +310,7 @@ function _renderPortfolioSummaryTable(state) {
     return html;
 }
 
-// ═══ DASHBOARD BUTTONS + TABLE INJECTION ═════════════════
+// ═══ DASHBOARD BUTTONS + TABLE + LIQUIDIT\u00c9S INJECTION ═══
 (function() {
     var _btnInterval = setInterval(function() {
         if (typeof renderDashboard !== 'function') return;
@@ -239,19 +318,40 @@ function _renderPortfolioSummaryTable(state) {
         renderDashboard = function(container, state) {
             _prev(container, state);
             setTimeout(function() {
+                // ── Inject Liquidités disponibles ──
+                if (!container.querySelector('[data-section="liquidites-disponibles"]')) {
+                    var liqHtml = _renderLiquiditesSection(state);
+                    if (liqHtml) {
+                        var sections = container.querySelectorAll('.section');
+                        var portfolioSection = null;
+                        for (var j = 0; j < sections.length; j++) {
+                            var t = sections[j].querySelector('.section-title');
+                            if (t && (t.textContent || '').indexOf('Portefeuille') >= 0) { portfolioSection = sections[j]; break; }
+                        }
+                        if (portfolioSection) {
+                            var liqDiv = document.createElement('div');
+                            liqDiv.innerHTML = liqHtml;
+                            portfolioSection.parentNode.insertBefore(liqDiv.firstElementChild, portfolioSection);
+                        }
+                    }
+                }
+
+                // ── Inject Portfolio Summary Table ──
                 if (!container.querySelector('[data-section="portfolio-summary"]')) {
                     var tableHtml = _renderPortfolioSummaryTable(state);
                     if (tableHtml) {
-                        var sections = container.querySelectorAll('.section');
-                        for (var i = 0; i < sections.length; i++) {
-                            var title = sections[i].querySelector('.section-title');
+                        var sections2 = container.querySelectorAll('.section');
+                        for (var i = 0; i < sections2.length; i++) {
+                            var title = sections2[i].querySelector('.section-title');
                             if (title && (title.textContent || '').indexOf('Portefeuille') >= 0) {
                                 var div = document.createElement('div'); div.innerHTML = tableHtml;
-                                sections[i].appendChild(div.firstElementChild); break;
+                                sections2[i].appendChild(div.firstElementChild); break;
                             }
                         }
                     }
                 }
+
+                // ── Buttons ──
                 container.querySelectorAll('.section-header').forEach(function(header) {
                     var title = header.querySelector('.section-title'); if (!title) return;
                     var t = title.textContent || '';
@@ -299,4 +399,4 @@ function _renderPortfolioSummaryTable(state) {
     setTimeout(function() { clearInterval(_btnInterval); }, 8000);
 })();
 
-console.log('[StructBoard] Dashboard v5 \u2014 marge barri\u00e8re + prochaine date');
+console.log('[StructBoard] Dashboard v5.1 \u2014 Liquidit\u00e9s disponibles restored');
