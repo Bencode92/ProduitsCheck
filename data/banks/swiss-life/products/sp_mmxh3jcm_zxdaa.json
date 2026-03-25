@@ -16,7 +16,7 @@
   "coupon": {
     "rate": null,
     "type": "fixe",
-    "frequency": "Non spécifié",
+    "frequency": "annuel",
     "trigger": null,
     "triggerDetail": "Rendement adéquat sur période glissante de 12 mois",
     "memory": false,
@@ -40,7 +40,9 @@
     "frequency": "quotidien",
     "startYear": null,
     "stepDown": false,
-    "stepDownDetail": null
+    "stepDownDetail": null,
+    "hasAutocall": true,
+    "enabled": true
   },
   "scenarios": {
     "favorable": "Rendement annuel moyen de 0,5% - Pour 10 000 EUR investis, obtention de 10 050 EUR après 1 an (scénario observé entre septembre 2023 et septembre 2024)",
@@ -192,5 +194,6 @@
       "productType": "liquidity",
       "isInPortfolio": true
     }
-  }
+  },
+  "envelope": "cameleons"
 }
