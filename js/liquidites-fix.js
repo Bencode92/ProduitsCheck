@@ -1,5 +1,6 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Liquidités Fix v3: Clear legend + correct amounts
+// STRUCTBOARD — Liquidités Fix v4: Show "Liquidité structurés" per envelope
+// Shows cash products (grade "-") per envelope, not total structurés
 // ═══════════════════════════════════════════════════════════════
 
 (function() {
@@ -11,7 +12,6 @@
             var portfolio = state.portfolio || [];
             if (typeof ENVELOPES === 'undefined' || !ENVELOPES) return '';
 
-            // Read liquidity amounts from catManager.objectives
             var cashByCam = 0, cashCameleons = 0;
             if (typeof catManager !== 'undefined' && catManager.objectives) {
                 cashByCam = parseFloat(catManager.objectives.cashByCam) || 0;
@@ -20,15 +20,20 @@
             var totalLiquidity = cashByCam + cashCameleons;
             if (totalLiquidity === 0) return '';
 
-            // Per-envelope structurés already deployed
-            var structByCam = 0, structCameleons = 0, structNoEnv = 0;
+            // Per-envelope: cash products (grade "-") = liquidité structurés
+            var liqStructByCam = 0, liqStructCameleons = 0;
             portfolio.forEach(function(p) {
+                var isCash = p.grading && p.grading.grade === '-';
                 var amount = parseFloat(p.investedAmount) || 0;
-                if (p.envelope === 'bycam') structByCam += amount;
-                else if (p.envelope === 'cameleons') structCameleons += amount;
-                else structNoEnv += amount;
+                if (isCash) {
+                    if (p.envelope === 'bycam') liqStructByCam += amount;
+                    else if (p.envelope === 'cameleons') liqStructCameleons += amount;
+                }
             });
-            var totalStruct = structByCam + structCameleons + structNoEnv;
+
+            // Total structured (non-cash)
+            var totalStruct = portfolio.filter(function(p) { return !p.grading || p.grading.grade !== '-'; })
+                .reduce(function(s, p) { return s + (parseFloat(p.investedAmount) || 0); }, 0);
 
             // CAT total
             var catTotal = 0, catRate = 0;
@@ -56,7 +61,7 @@
             html += '<span style="color:' + bcColor + ';font-weight:600;font-size:13px">\ud83c\udfe6 ByCam</span>';
             html += '<span style="font-family:var(--mono);font-size:20px;font-weight:800;color:' + bcColor + '">' + formatNumber(cashByCam) + '\u20ac</span>';
             html += '</div>';
-            if (structByCam > 0) html += '<div style="font-size:10px;color:var(--text-dim);margin-top:4px">D\u00e9j\u00e0 en structur\u00e9s : ' + formatNumber(structByCam) + '\u20ac</div>';
+            if (liqStructByCam > 0) html += '<div style="font-size:10px;color:var(--text-dim);margin-top:4px">Liquidit\u00e9 structur\u00e9s : ' + formatNumber(liqStructByCam) + '\u20ac</div>';
             html += '</div>';
 
             // Caméléons card
@@ -65,24 +70,22 @@
             html += '<span style="color:' + camColor + ';font-weight:600;font-size:13px">\ud83e\udd8e Cam\u00e9l\u00e9ons</span>';
             html += '<span style="font-family:var(--mono);font-size:20px;font-weight:800;color:' + camColor + '">' + formatNumber(cashCameleons) + '\u20ac</span>';
             html += '</div>';
-            if (structCameleons > 0) html += '<div style="font-size:10px;color:var(--text-dim);margin-top:4px">D\u00e9j\u00e0 en structur\u00e9s : ' + formatNumber(structCameleons) + '\u20ac</div>';
+            if (liqStructCameleons > 0) html += '<div style="font-size:10px;color:var(--text-dim);margin-top:4px">Liquidit\u00e9 structur\u00e9s : ' + formatNumber(liqStructCameleons) + '\u20ac</div>';
             html += '</div>';
 
             html += '</div>';
 
             // ── Progress bar ──
-            var total = catTotal + totalStruct + totalLiquidity;
-            if (total > 0) {
-                var catPct = Math.round(catTotal / total * 100);
-                var structPct = Math.round(totalStruct / total * 100);
+            var totalAll = catTotal + totalStruct + totalLiquidity;
+            if (totalAll > 0) {
+                var catPct = Math.round(catTotal / totalAll * 100);
+                var structPct = Math.round(totalStruct / totalAll * 100);
                 var investPct = Math.max(0, 100 - catPct - structPct);
                 html += '<div style="display:flex;height:8px;border-radius:4px;overflow:hidden;margin-bottom:6px">';
                 if (catPct > 0) html += '<div style="width:' + catPct + '%;background:var(--green)"></div>';
                 if (structPct > 0) html += '<div style="width:' + structPct + '%;background:var(--orange)"></div>';
                 if (investPct > 0) html += '<div style="width:' + investPct + '%;background:var(--cyan)"></div>';
                 html += '</div>';
-
-                // ── Clear legend ──
                 html += '<div style="display:flex;flex-wrap:wrap;gap:12px;font-size:10px;color:var(--text-dim)">';
                 if (catTotal > 0) html += '<span><span style="color:var(--green)">\u25a0</span> CAT ' + formatNumber(catTotal) + '\u20ac' + (catRate > 0 ? ' (' + catRate.toFixed(1) + '%)' : '') + '</span>';
                 html += '<span><span style="color:var(--orange)">\u25a0</span> Structur\u00e9s ' + formatNumber(totalStruct) + '\u20ac</span>';
@@ -94,7 +97,7 @@
             return html;
         };
 
-        console.log('[StructBoard] Liquidit\u00e9s fix v3: clear legend');
+        console.log('[StructBoard] Liquidit\u00e9s fix v4: liquidit\u00e9 structur\u00e9s per envelope');
     }, 150);
     setTimeout(function() { clearInterval(_fixInterval); }, 8000);
 })();
