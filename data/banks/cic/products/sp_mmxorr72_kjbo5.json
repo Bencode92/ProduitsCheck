@@ -185,72 +185,72 @@
   },
   "grading": {
     "grade": "B",
-    "score": 64,
+    "score": 69,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 57,
+        "score": 72,
         "base": 67,
-        "delta": -10,
-        "reasoning": "Rendement: base 67 → -10 = 57 (Structure worst-of sans barrière protection mais coupon conditionnel à performance positive des deux sous-jacents, risque élevé de suspension coupons) | Coupon 6.15%, protégé"
+        "delta": 5,
+        "reasoning": "Rendement: base 67 → +5 = 72 (Coupon élevé à 6.15% compense bien le risque sur un WO sans barrière, LVMH très volatile mais CA plus stable.) | Coupon 6.15%, protégé"
       },
       "underlyingQuality": {
         "score": 62,
         "base": 74,
         "delta": -12,
-        "reasoning": "Qualité: base 74 → -12 = 62 (LVMH en forte baisse (-28.57% YTD) dans un secteur évité (consumer-discretionary), CA dans financials également évité, contexte macro défavorable) [B/Q 35%] | Worst: Crédit Agricole S.A. B:79"
+        "reasoning": "Qualité: base 74 → -12 = 62 (Secteurs évités en macro (finance/luxe), LVMH en forte baisse (-28.57% YTD), CA expose au stress bancaire européen.) [B/Q 35%] | Worst: Crédit Agricole S.A. B:79"
       },
       "portfolioFit": {
         "score": 72,
         "base": 80,
         "delta": -8,
-        "reasoning": "Fit: base 80 → -8 = 72 (Exposition à deux secteurs explicitement évités par la macro actuelle (consumer-discretionary et financials), inadéquation stratégique)"
+        "reasoning": "Fit: base 80 → -8 = 72 (Worst-of finance/luxe inadapté au contexte macro défavorable à ces secteurs, corrélation négative au portefeuille.)"
       },
       "riskPremium": {
-        "score": 68,
+        "score": 70,
         "base": 73,
-        "delta": -5,
-        "reasoning": "Prime: base 73 → -5 = 68 (Coupon 6.15% attractif mais structure digitale worst-of sans protection justifie une prime de risque plus élevée) | 6.15% vs CAT 2.5% (spread 3.7%)"
+        "delta": -3,
+        "reasoning": "Prime: base 73 → -3 = 70 (Structure digitale simple mais WO amplifie le risque sans compensation suffisante du spread vs complexité.) | 6.15% vs CAT 2.5% (spread 3.7%)"
       }
     },
-    "verdict": "Structure digitale worst-of exposée à deux secteurs défavorisés dans le contexte macro actuel. LVMH subit une correction sévère (-28.57% YTD) typique des valeurs luxe en ralentissement économique, tandis que CA évolue dans un secteur financier sous pression. Le coupon 6.15% compensateur mais conditionnel à la performance positive simultanée des deux titres augmente significativement le risque de suspension. Malgré un capital théoriquement protégé, l'absence de barrière formalisée et la structure worst-of créent une exposition asymétrique défavorable.",
+    "verdict": "Produit pénalisé par un panier inadapté au contexte macro avec deux secteurs explicitement évités. LVMH souffre du ralentissement du luxe (-28.57% YTD) et CA reste exposé aux tensions bancaires européennes. Le coupon attractif à 6.15% ne compense pas suffisamment le risque worst-of sur ces fondamentaux dégradés. Structure trop dépendante de secteurs hors-faveur.",
     "keyRisks": [
-      "Suspension prolongée des coupons en cas de sous-performance d'un des deux sous-jacents",
-      "Exposition concentrée aux secteurs évités (luxe et banque) dans un environnement macro défavorable"
+      "Worst-of amplifie l'exposition aux deux secteurs les plus pénalisés par le contexte macro (finance/luxe)",
+      "LVMH très volatile (29.47%) avec fondamentaux luxe sous pression, CA exposé au stress bancaire européen"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 6.15,
-        "return_eur": 18450,
+        "return_eur": 6150,
         "probability": 0.2,
-        "duration_years": 3
+        "duration_years": 1
       },
       "base": {
-        "return_pct": 3.5,
-        "return_eur": 10500,
+        "return_pct": 4.1,
+        "return_eur": 12300,
         "probability": 0.35,
         "duration_years": 3
       },
       "stress": {
-        "return_pct": 0.8,
-        "return_eur": 2400,
+        "return_pct": 0,
+        "return_eur": 0,
         "probability": 0.3,
-        "duration_years": 3
+        "duration_years": 5
       },
       "worst": {
         "return_pct": -8,
         "return_eur": -8000,
         "probability": 0.15,
-        "duration_years": 3
+        "duration_years": 5
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-25T08:21:11.250Z",
-      "durationMs": 12651,
+      "gradedAt": "2026-03-25T14:39:57.599Z",
+      "durationMs": 12635,
       "aiUsed": true,
       "version": "4.3",
       "productType": "standard",
@@ -270,11 +270,37 @@
       "baseScore": 73,
       "baseGrade": "B",
       "adjustments": {
-        "p1": -10,
+        "p1": 5,
         "p2": -12,
         "p3": -8,
-        "p4": -5
-      }
+        "p4": -3
+      },
+      "stockData": [
+        {
+          "name": "LVMH Moët Hennessy Louis Vuitton SA",
+          "ticker": "MC",
+          "sector": "Biens de consommation cycliques",
+          "perf_ytd": -28.57,
+          "perf_1y": -21.79,
+          "volatility_3y": 29.47,
+          "max_drawdown_3y": 51.49,
+          "buffett_score": 81,
+          "quality_score": 65,
+          "buffett_grade": "A"
+        },
+        {
+          "name": "Crédit Agricole S.A.",
+          "ticker": "ACA",
+          "sector": "Finance",
+          "perf_ytd": -8.23,
+          "perf_1y": -5.76,
+          "volatility_3y": 21.22,
+          "max_drawdown_3y": 21.42,
+          "buffett_score": null,
+          "quality_score": 79,
+          "buffett_grade": null
+        }
+      ]
     }
   }
 }
