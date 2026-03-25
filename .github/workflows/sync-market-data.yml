@@ -27,6 +27,33 @@ jobs:
             echo "$f: $(wc -c < data/market/$f) bytes"
           done
 
+      - name: Fetch latest Market Intelligence audit
+        run: |
+          # List files in market_intelligence_audit via GitHub API
+          MI_DIR="https://api.github.com/repos/Bencode92/stock-analysis-platform/contents/data/market_intelligence_audit"
+          echo "Fetching MI file list..."
+          FILES=$(curl -sL "$MI_DIR" | python3 -c "
+          import sys, json
+          data = json.load(sys.stdin)
+          if isinstance(data, list):
+              mi_files = [f for f in data if f['name'].startswith('mi_') and f['name'].endswith('.json')]
+              mi_files.sort(key=lambda x: x['name'], reverse=True)
+              if mi_files:
+                  print(mi_files[0]['download_url'])
+                  print(mi_files[0]['name'], file=sys.stderr)
+              else:
+                  print('', file=sys.stderr)
+          else:
+              print('API error', file=sys.stderr)
+          ")
+          if [ -n "$FILES" ] && [ "$FILES" != "" ]; then
+            echo "Downloading latest MI: $FILES"
+            curl -sL "$FILES" -o "data/market/market_intelligence.json"
+            echo "market_intelligence.json: $(wc -c < data/market/market_intelligence.json) bytes"
+          else
+            echo "No MI files found, skipping"
+          fi
+
       - name: Fetch ECB rate data
         run: python3 scripts/fetch-rates.py
 
@@ -142,6 +169,28 @@ jobs:
                   'regions': region_class,
               }
 
+          # ═══ MARKET INTELLIGENCE ═══
+          mi = {}
+          mip = 'data/market/market_intelligence.json'
+          if os.path.exists(mip):
+              with open(mip) as f: mi_data = json.load(f)
+              ai = mi_data.get('ai_response', {})
+              mi = {
+                  'timestamp': mi_data.get('timestamp', ''),
+                  'regime': ai.get('regime', ''),
+                  'regime_confidence': ai.get('regime_confidence', 0),
+                  'regime_rationale': ai.get('regime_rationale', ''),
+                  'warnings': ai.get('warnings', []),
+                  'bond_strategy': ai.get('bond_strategy', {}),
+                  'sector_momentum': mi_data.get('market_data_input', {}).get('sector_momentum_summary', ''),
+                  'favored_sectors': mi_data.get('market_data_input', {}).get('favored_sectors', ''),
+                  'avoided_sectors': mi_data.get('market_data_input', {}).get('avoided_sectors', ''),
+                  'stress_flags': mi_data.get('market_data_input', {}).get('_stress_flags', []),
+                  'vix': mi_data.get('market_data_input', {}).get('vix'),
+                  'brent': mi_data.get('market_data_input', {}).get('brent_usd'),
+              }
+              print(f'MI: regime={mi["regime"]} conf={mi["regime_confidence"]} warnings={len(mi["warnings"])}')
+
           # ═══ SECTORS ETFs ═══
           sectors_perf = {}
           sp = 'data/market/sectors.json'
@@ -166,6 +215,7 @@ jobs:
               'stocks': index,
               'markets': markets_summary,
               'context': context,
+              'market_intelligence': mi,
               'sectors_eu': sectors_perf,
           }
 
@@ -186,7 +236,7 @@ jobs:
           if git diff --staged --quiet; then
             echo 'No changes to commit'
           else
-            git commit -m "[Auto] Sync market data $(date +%Y-%m-%d-%H%M)"
+            git commit -m "[Auto] Sync market data + MI $(date +%Y-%m-%d-%H%M)"
             git push
             echo 'Market data synced!'
           fi
