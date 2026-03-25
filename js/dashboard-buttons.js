@@ -1,7 +1,36 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Dashboard Buttons + Portfolio Summary Table v2
-// Injects: Actualiser tout, Grader tout, Portfolio recap table
+// STRUCTBOARD — Dashboard Buttons + Portfolio Summary Table v3
+// VARIATION column is CLICKABLE — inline edit from dashboard
 // ═══════════════════════════════════════════════════════════════
+
+// ═══ QUICK VARIATION EDITOR ══════════════════════════════
+window._quickEditVariation = function(productId) {
+    var p = (app.state.portfolio || []).find(function(x) { return x.id === productId; });
+    if (!p) return;
+    var current = (p.tracking && p.tracking.level != null) ? (p.tracking.level - 100) : '';
+    var currentStr = current !== '' ? (current >= 0 ? '+' + current : '' + current) : '';
+    var input = prompt('Variation de ' + (p.name || 'Produit').substring(0, 30) + ' (%) :\nExemple: -6.7 ou +2.2', currentStr);
+    if (input === null) return;
+    var val = parseFloat(input);
+    if (isNaN(val) || val < -99 || val > 200) { showToast('Variation invalide', 'error'); return; }
+    var level = 100 + val;
+    if (!p.tracking) p.tracking = { history: [] };
+    if (!p.tracking.history) p.tracking.history = [];
+    p.tracking.level = level;
+    p.tracking.date = new Date().toISOString().split('T')[0];
+    // Add to history
+    var subDate = p.subscriptionDate ? new Date(p.subscriptionDate) : new Date(p.addedDate || Date.now());
+    var yearNum = Math.max(1, Math.ceil((Date.now() - subDate.getTime()) / (365.25 * 86400000)));
+    var idx = p.tracking.history.findIndex(function(h) { return h.year === yearNum; });
+    var entry = { date: p.tracking.date, level: level, year: yearNum };
+    if (idx >= 0) p.tracking.history[idx] = entry;
+    else { p.tracking.history.push(entry); p.tracking.history.sort(function(a, b) { return a.year - b.year; }); }
+    // Save
+    github.writeFile(CONFIG.DATA_PATH + '/portfolio.json', app.state.portfolio, '[StructBoard] Tracking: ' + (p.name || '').substring(0, 25) + ' ' + (val >= 0 ? '+' : '') + val + '%').then(function() {
+        showToast((p.name || 'Produit').substring(0, 20) + ': ' + (val >= 0 ? '+' : '') + val + '%', 'success');
+        app.render();
+    }).catch(function(e) { showToast('Erreur: ' + e.message, 'error'); });
+};
 
 // ═══ PORTFOLIO SUMMARY TABLE ═════════════════════════════
 function _renderPortfolioSummaryTable(state) {
@@ -22,7 +51,6 @@ function _renderPortfolioSummaryTable(state) {
         if (typeof BANKS !== 'undefined') { var b = BANKS.find(function(bk) { return bk.id === p.bankId; }); if (b) bankName = b.name; }
         bankName = bankName || p.bankId || '';
 
-        // Status
         var statusHtml = '', statusType = 'ok';
         if (grade === '-') {
             statusHtml = '<span style="color:#94A3B8;font-weight:600">$ CASH</span>';
@@ -41,21 +69,23 @@ function _renderPortfolioSummaryTable(state) {
             if (tracking.couponOK) couponsOK++;
         } else if (grade !== '-') {
             statusHtml = '<span style="color:var(--text-dim);font-size:10px">\u2014</span>';
-            if (coupon > 0) { couponsTotal++; couponsOK++; } // assume OK if no tracking
+            if (coupon > 0) { couponsTotal++; couponsOK++; }
         }
 
-        // Adjusted return based on tracking
         var effectiveReturn = annualReturn;
         if (tracking && !tracking.couponOK && !(p.coupon && p.coupon.memory)) effectiveReturn = 0;
 
         totalInvested += amount;
         if (grade !== '-') totalReturn += effectiveReturn;
 
-        var variationHtml = '\u2014';
+        // Variation cell — CLICKABLE to edit
+        var variationHtml;
         if (tracking) {
             var v = tracking.variation;
             var vc = v >= 5 ? 'var(--green)' : v >= 0 ? '#4ECDC4' : v >= -10 ? 'var(--orange)' : 'var(--red)';
-            variationHtml = '<span style="color:' + vc + ';font-weight:700">' + (v >= 0 ? '+' : '') + v.toFixed(1) + '%</span>';
+            variationHtml = '<span style="color:' + vc + ';font-weight:700;cursor:pointer" onclick="event.stopPropagation();_quickEditVariation(\'' + p.id + '\')" title="Cliquer pour modifier">' + (v >= 0 ? '+' : '') + v.toFixed(1) + '% \u270e</span>';
+        } else {
+            variationHtml = '<span style="cursor:pointer;color:var(--text-dim);border:1px dashed var(--border);padding:2px 8px;border-radius:4px;font-size:10px" onclick="event.stopPropagation();_quickEditVariation(\'' + p.id + '\')" title="Cliquer pour saisir la variation">\u270e Saisir</span>';
         }
 
         rows.push({
@@ -77,18 +107,16 @@ function _renderPortfolioSummaryTable(state) {
     html += '<div style="background:var(--bg-card);padding:14px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px">RENDEMENT/AN</div><div style="font-size:22px;font-weight:800;color:var(--green);font-family:var(--mono);margin-top:4px">' + formatNumber(totalReturn) + '\u20ac</div><div style="font-size:10px;color:var(--text-dim)">' + avgRate.toFixed(2) + '% moy.</div></div>';
     html += '<div style="background:var(--bg-card);padding:14px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px">COUPONS</div><div style="font-size:22px;font-weight:800;color:' + (lostCoupons > 0 ? 'var(--orange)' : 'var(--green)') + ';font-family:var(--mono);margin-top:4px">' + couponsOK + '/' + couponsTotal + '</div>' + (lostCoupons > 0 ? '<div style="font-size:10px;color:var(--orange)">' + lostCoupons + ' perdu' + (lostCoupons > 1 ? 's' : '') + '</div>' : '') + '</div>';
 
-    // Diversification
     var banks = {};
     rows.forEach(function(r) { if (r.bankName) banks[r.bankName] = (banks[r.bankName] || 0) + 1; });
     var bankCount = Object.keys(banks).length;
     var topBank = Object.entries(banks).sort(function(a, b) { return b[1] - a[1]; })[0];
     html += '<div style="background:var(--bg-card);padding:14px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px">DIVERSIFICATION</div><div style="font-size:22px;font-weight:800;color:var(--text-bright);margin-top:4px">' + bankCount + ' banque' + (bankCount > 1 ? 's' : '') + '</div>' + (topBank ? '<div style="font-size:10px;color:var(--text-dim)">' + topBank[0] + ' ' + Math.round(topBank[1] / rows.length * 100) + '%</div>' : '') + '</div>';
 
-    // Risk
-    var hasTracker = rows.some(function(r) { return r.statusType === 'lost'; });
+    var hasLost = rows.some(function(r) { return r.statusType === 'lost'; });
     var hasDanger = rows.some(function(r) { return r.statusType === 'danger'; });
-    var riskColor = hasDanger ? 'var(--red)' : hasTracker ? 'var(--orange)' : 'var(--green)';
-    var riskLabel = hasDanger ? '\ud83d\udd34 \u00c9lev\u00e9' : hasTracker ? '\ud83d\udfe0 Mod\u00e9r\u00e9' : '\ud83d\udfe2 Faible';
+    var riskColor = hasDanger ? 'var(--red)' : hasLost ? 'var(--orange)' : 'var(--green)';
+    var riskLabel = hasDanger ? '\ud83d\udd34 \u00c9lev\u00e9' : hasLost ? '\ud83d\udfe0 Mod\u00e9r\u00e9' : '\ud83d\udfe2 Faible';
     html += '<div style="background:var(--bg-card);padding:14px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px">RISQUE GLOBAL</div><div style="font-size:18px;font-weight:800;color:' + riskColor + ';margin-top:6px">' + riskLabel + '</div></div>';
     html += '</div>';
 
@@ -104,7 +132,6 @@ function _renderPortfolioSummaryTable(state) {
     html += '</tr></thead><tbody>';
 
     rows.forEach(function(r) {
-        var gc = { A:'#06D6A0', B:'#4ECDC4', C:'#FFB627', D:'#E85D04', F:'#EF233C', '-':'#94A3B8' }[r.grade] || '#888';
         html += '<tr style="border-bottom:1px solid var(--border);cursor:pointer" onclick="var p=(app.state.portfolio||[]).find(function(x){return x.id===\'' + r.productId + '\'});if(p)app.openProduct(p);">';
         html += '<td style="padding:10px 12px"><strong style="color:var(--text-bright)">' + r.name + '</strong><div style="font-size:10px;color:var(--text-dim)">' + r.bankName + '</div></td>';
         html += '<td style="padding:10px 8px;text-align:right;font-family:var(--mono);font-weight:600">' + formatNumber(r.amount) + '\u20ac</td>';
@@ -115,7 +142,6 @@ function _renderPortfolioSummaryTable(state) {
         html += '</tr>';
     });
 
-    // TOTAL row
     html += '<tr style="border-top:2px solid var(--border);background:var(--bg-elevated)"><td style="padding:10px 12px;font-weight:700;color:var(--text-bright)">TOTAL</td>';
     html += '<td style="padding:10px 8px;text-align:right;font-family:var(--mono);font-weight:700">' + formatNumber(totalInvested) + '\u20ac</td>';
     html += '<td style="padding:10px 8px;text-align:center;font-family:var(--mono);font-weight:700;color:var(--green)">' + avgRate.toFixed(2) + '%</td>';
@@ -134,11 +160,9 @@ function _renderPortfolioSummaryTable(state) {
         renderDashboard = function(container, state) {
             _prev(container, state);
             setTimeout(function() {
-                // ── Inject portfolio summary table after product cards ──
                 if (!container.querySelector('[data-section="portfolio-summary"]')) {
                     var tableHtml = _renderPortfolioSummaryTable(state);
                     if (tableHtml) {
-                        // Find the portfolio section and insert table after the product cards grid
                         var sections = container.querySelectorAll('.section');
                         for (var i = 0; i < sections.length; i++) {
                             var title = sections[i].querySelector('.section-title');
@@ -152,13 +176,11 @@ function _renderPortfolioSummaryTable(state) {
                     }
                 }
 
-                // ── Inject buttons ──
                 container.querySelectorAll('.section-header').forEach(function(header) {
                     var title = header.querySelector('.section-title');
                     if (!title) return;
                     var t = title.textContent || '';
 
-                    // PORTFOLIO: "\ud83d\udd04 Actualiser tout (N)" — ALL products
                     if (t.indexOf('Portefeuille') >= 0 && !header.querySelector('.btn-regrade-all')) {
                         if (typeof window.batchReGradeAll === 'function') {
                             var pf = (state.portfolio || []).filter(function(p) { return !p.grading || p.grading.grade !== '-'; });
@@ -177,7 +199,6 @@ function _renderPortfolioSummaryTable(state) {
                         }
                     }
 
-                    // PROPOSALS: "\ud83c\udfaf Grader tout (N)" — ungraded only
                     if (t.indexOf('Propositions') >= 0 && !header.querySelector('.btn-grade-all')) {
                         var ungraded = Object.values(state.proposals || {}).flat().filter(function(p) { return !p.grading; });
                         if (ungraded.length > 0 && typeof ProposalGrader !== 'undefined') {
@@ -211,4 +232,4 @@ function _renderPortfolioSummaryTable(state) {
     setTimeout(function() { clearInterval(_btnInterval); }, 8000);
 })();
 
-console.log('[StructBoard] Dashboard buttons + portfolio summary table v2');
+console.log('[StructBoard] Dashboard v3 \u2014 clickable variation column');
