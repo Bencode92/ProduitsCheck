@@ -39,7 +39,9 @@
       "frequency": "annuel",
       "startYear": 1,
       "stepDown": false,
-      "stepDownDetail": null
+      "stepDownDetail": null,
+      "hasAutocall": true,
+      "enabled": true
     },
     "scenarios": {
       "favorable": "Remboursement automatique anticipé dès la première année si ENI >= 100% du niveau initial, avec gain de 5,7% par année écoulée (Taux de Rendement Annuel Brut plafonné à 5,56%)",
@@ -261,7 +263,9 @@
           }
         ]
       }
-    }
+    },
+    "envelope": "cameleons",
+    "maturityYears": 12
   },
   {
     "id": "sp_mmxh3jcm_zxdaa",
