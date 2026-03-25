@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Dashboard Buttons + Portfolio Summary Table v3
-// VARIATION column is CLICKABLE — inline edit from dashboard
+// STRUCTBOARD — Dashboard Buttons + Portfolio Summary Table v4
+// Added ENVELOPPE column (ByCam / Caméléons)
 // ═══════════════════════════════════════════════════════════════
 
 // ═══ QUICK VARIATION EDITOR ══════════════════════════════
@@ -18,19 +18,25 @@ window._quickEditVariation = function(productId) {
     if (!p.tracking.history) p.tracking.history = [];
     p.tracking.level = level;
     p.tracking.date = new Date().toISOString().split('T')[0];
-    // Add to history
     var subDate = p.subscriptionDate ? new Date(p.subscriptionDate) : new Date(p.addedDate || Date.now());
     var yearNum = Math.max(1, Math.ceil((Date.now() - subDate.getTime()) / (365.25 * 86400000)));
     var idx = p.tracking.history.findIndex(function(h) { return h.year === yearNum; });
     var entry = { date: p.tracking.date, level: level, year: yearNum };
     if (idx >= 0) p.tracking.history[idx] = entry;
     else { p.tracking.history.push(entry); p.tracking.history.sort(function(a, b) { return a.year - b.year; }); }
-    // Save
     github.writeFile(CONFIG.DATA_PATH + '/portfolio.json', app.state.portfolio, '[StructBoard] Tracking: ' + (p.name || '').substring(0, 25) + ' ' + (val >= 0 ? '+' : '') + val + '%').then(function() {
         showToast((p.name || 'Produit').substring(0, 20) + ': ' + (val >= 0 ? '+' : '') + val + '%', 'success');
         app.render();
     }).catch(function(e) { showToast('Erreur: ' + e.message, 'error'); });
 };
+
+// ═══ ENVELOPE BADGE ══════════════════════════════════════
+function _envelopeBadge(envelope) {
+    if (!envelope) return '<span style="color:var(--text-dim);font-size:10px">\u2014</span>';
+    var info = typeof getEnvelopeInfo === 'function' ? getEnvelopeInfo(envelope) : null;
+    if (!info || !info.id) return '<span style="color:var(--text-dim);font-size:10px">\u2014</span>';
+    return '<span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;background:' + info.color + '22;color:' + info.color + ';border:1px solid ' + info.color + '33">' + info.icon + ' ' + info.label + '</span>';
+}
 
 // ═══ PORTFOLIO SUMMARY TABLE ═════════════════════════════
 function _renderPortfolioSummaryTable(state) {
@@ -78,7 +84,6 @@ function _renderPortfolioSummaryTable(state) {
         totalInvested += amount;
         if (grade !== '-') totalReturn += effectiveReturn;
 
-        // Variation cell — CLICKABLE to edit
         var variationHtml;
         if (tracking) {
             var v = tracking.variation;
@@ -93,6 +98,7 @@ function _renderPortfolioSummaryTable(state) {
             bankName: bankName, amount: amount, coupon: coupon,
             annualReturn: effectiveReturn, variation: variationHtml,
             statusHtml: statusHtml, statusType: statusType, grade: grade,
+            envelope: p.envelope || '',
             productId: p.id, bankId: p.bankId
         });
     });
@@ -124,6 +130,7 @@ function _renderPortfolioSummaryTable(state) {
     html += '<table style="width:100%;border-collapse:collapse;font-size:12px">';
     html += '<thead><tr style="border-bottom:2px solid var(--border)">';
     html += '<th style="padding:10px 12px;text-align:left;color:var(--text-muted);font-size:10px;text-transform:uppercase;font-weight:500">PRODUIT</th>';
+    html += '<th style="padding:10px 8px;text-align:center;color:var(--text-muted);font-size:10px;text-transform:uppercase;font-weight:500">ENVELOPPE</th>';
     html += '<th style="padding:10px 8px;text-align:right;color:var(--text-muted);font-size:10px;text-transform:uppercase;font-weight:500">MONTANT</th>';
     html += '<th style="padding:10px 8px;text-align:center;color:var(--text-muted);font-size:10px;text-transform:uppercase;font-weight:500">TAUX</th>';
     html += '<th style="padding:10px 8px;text-align:right;color:var(--text-muted);font-size:10px;text-transform:uppercase;font-weight:500">RDT/AN</th>';
@@ -134,6 +141,7 @@ function _renderPortfolioSummaryTable(state) {
     rows.forEach(function(r) {
         html += '<tr style="border-bottom:1px solid var(--border);cursor:pointer" onclick="var p=(app.state.portfolio||[]).find(function(x){return x.id===\'' + r.productId + '\'});if(p)app.openProduct(p);">';
         html += '<td style="padding:10px 12px"><strong style="color:var(--text-bright)">' + r.name + '</strong><div style="font-size:10px;color:var(--text-dim)">' + r.bankName + '</div></td>';
+        html += '<td style="padding:10px 8px;text-align:center">' + _envelopeBadge(r.envelope) + '</td>';
         html += '<td style="padding:10px 8px;text-align:right;font-family:var(--mono);font-weight:600">' + formatNumber(r.amount) + '\u20ac</td>';
         html += '<td style="padding:10px 8px;text-align:center;font-family:var(--mono);font-weight:700;color:' + (r.coupon > 0 ? 'var(--green)' : 'var(--text-dim)') + '">' + (r.coupon > 0 ? r.coupon + '%' : '\u2014') + '</td>';
         html += '<td style="padding:10px 8px;text-align:right;font-family:var(--mono);font-weight:600;color:' + (r.annualReturn > 0 ? 'var(--green)' : 'var(--text-dim)') + '">' + (r.annualReturn > 0 ? formatNumber(r.annualReturn) + '\u20ac' : '0\u20ac') + '</td>';
@@ -143,6 +151,7 @@ function _renderPortfolioSummaryTable(state) {
     });
 
     html += '<tr style="border-top:2px solid var(--border);background:var(--bg-elevated)"><td style="padding:10px 12px;font-weight:700;color:var(--text-bright)">TOTAL</td>';
+    html += '<td></td>';
     html += '<td style="padding:10px 8px;text-align:right;font-family:var(--mono);font-weight:700">' + formatNumber(totalInvested) + '\u20ac</td>';
     html += '<td style="padding:10px 8px;text-align:center;font-family:var(--mono);font-weight:700;color:var(--green)">' + avgRate.toFixed(2) + '%</td>';
     html += '<td style="padding:10px 8px;text-align:right;font-family:var(--mono);font-weight:700;color:var(--green)">' + formatNumber(totalReturn) + '\u20ac</td>';
@@ -232,4 +241,4 @@ function _renderPortfolioSummaryTable(state) {
     setTimeout(function() { clearInterval(_btnInterval); }, 8000);
 })();
 
-console.log('[StructBoard] Dashboard v3 \u2014 clickable variation column');
+console.log('[StructBoard] Dashboard v4 \u2014 envelope column (ByCam/Cam\u00e9l\u00e9ons)');
