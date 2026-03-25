@@ -1,30 +1,35 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Liquidités Fix: Use fixed envelope amounts
-// Overrides _renderLiquiditesSection from dashboard-buttons.js
+// STRUCTBOARD — Liquidités Fix v2: Read from catManager.objectives
+// ByCam/Caméléons amounts come from "Objectifs & Trésorerie" in CAT
 // ═══════════════════════════════════════════════════════════════
 
 (function() {
-    // Override after dashboard-buttons.js loads
     var _fixInterval = setInterval(function() {
         if (typeof _renderLiquiditesSection !== 'function') return;
         clearInterval(_fixInterval);
 
-        // Replace with fixed-amount version
         window._renderLiquiditesSection = _renderLiquiditesSection = function(state) {
             var portfolio = state.portfolio || [];
             if (typeof ENVELOPES === 'undefined' || !ENVELOPES) return '';
 
-            // Get envelopes with liquidity > 0
-            var envs = ENVELOPES.filter(function(e) { return e.id && e.liquidity > 0; });
-            if (envs.length === 0) return '';
+            // Read liquidity amounts from catManager.objectives (set in CAT > Objectifs)
+            var cashByCam = 0, cashCameleons = 0;
+            if (typeof catManager !== 'undefined' && catManager.objectives) {
+                cashByCam = parseFloat(catManager.objectives.cashByCam) || 0;
+                cashCameleons = parseFloat(catManager.objectives.cashCameleons) || 0;
+            }
+            var totalLiquidity = cashByCam + cashCameleons;
+            if (totalLiquidity === 0) return '';
+
+            // Map envelope id → configured liquidity
+            var envLiquidity = { bycam: cashByCam, cameleons: cashCameleons };
 
             // Compute per-envelope: how much is already deployed in structurés
-            var totalLiquidity = 0;
+            var envs = ENVELOPES.filter(function(e) { return e.id && envLiquidity[e.id] > 0; });
             var envData = envs.map(function(env) {
                 var envProducts = portfolio.filter(function(p) { return p.envelope === env.id; });
                 var envStruct = envProducts.reduce(function(s, p) { return s + (parseFloat(p.investedAmount) || 0); }, 0);
-                totalLiquidity += env.liquidity;
-                return { id: env.id, label: env.label, icon: env.icon, color: env.color, liquidity: env.liquidity, structAmount: envStruct };
+                return { id: env.id, label: env.label, icon: env.icon, color: env.color, liquidity: envLiquidity[env.id], structAmount: envStruct };
             });
 
             // CAT total
@@ -45,7 +50,7 @@
             var html = '<div style="margin-bottom:20px;padding:16px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius)" data-section="liquidites-disponibles">';
             html += '<div style="font-size:13px;font-weight:700;color:var(--text-bright);margin-bottom:12px">Liquidit\u00e9s disponibles</div>';
 
-            // Envelope cards — FIXED amounts from config
+            // Envelope cards
             html += '<div style="display:grid;grid-template-columns:repeat(' + envData.length + ',1fr);gap:12px;margin-bottom:12px">';
             envData.forEach(function(e) {
                 html += '<div style="background:var(--bg-card);border:1px solid ' + e.color + '33;border-radius:var(--radius-sm);padding:12px;display:flex;justify-content:space-between;align-items:center">';
@@ -57,7 +62,7 @@
             });
             html += '</div>';
 
-            // Progress bar: CAT / Structurés / À investir (liquidity)
+            // Progress bar
             var total = catTotal + totalStruct + totalLiquidity;
             if (total > 0) {
                 var catPct = Math.round(catTotal / total * 100);
@@ -79,7 +84,7 @@
             return html;
         };
 
-        console.log('[StructBoard] Liquidit\u00e9s fix: fixed 100K per envelope');
+        console.log('[StructBoard] Liquidit\u00e9s fix v2: reads from catManager.objectives');
     }, 150);
     setTimeout(function() { clearInterval(_fixInterval); }, 8000);
 })();
