@@ -139,7 +139,7 @@
   },
   "grading": {
     "grade": "C",
-    "score": 54,
+    "score": 50,
     "killCriteria": {
       "triggered": false,
       "reasons": []
@@ -149,13 +149,13 @@
         "score": 45,
         "base": 55,
         "delta": -10,
-        "reasoning": "Rendement: base 55 → -10 = 45 (Taux fixes 4% peu attractifs dans contexte possibles hausses futures, risque réinvestissement élevé si rappel précoce) | Coupon 4%, protégé"
+        "reasoning": "Rendement: base 55 → -10 = 45 (4% fixe peu attractif vs obligations d'État 10Y (~3%) avec prime risque crédit insuffisante) | Coupon 4%, protégé"
       },
       "underlyingQuality": {
         "score": 70,
         "base": 75,
         "delta": -5,
-        "reasoning": "Qualité: base 75 → -5 = 70 (Environnement taux incertain augmente risque crédit émetteur et probabilité rappel défavorable au client) [crédit]"
+        "reasoning": "Qualité: base 75 → -5 = 70 (Contexte taux élevés défavorise les émetteurs obligataires avec pression refinancement) [crédit]"
       },
       "portfolioFit": {
         "score": 70,
@@ -164,47 +164,47 @@
         "reasoning": "Fit: base 70"
       },
       "riskPremium": {
-        "score": 35,
+        "score": 20,
         "base": 30,
-        "delta": 5,
-        "reasoning": "Prime: base 30 → +5 = 35 (Structure callable favorable émetteur justifie partiellement le spread faible, pricing cohérent) | 4% vs CAT 2.5% (spread 1.5%)"
+        "delta": -10,
+        "reasoning": "Prime: base 30 → -10 = 20 (Spread crédit probablement sous-évalué pour compenser le risque de call anticipé) | 4% vs CAT 2.5% (spread 1.5%)"
       }
     },
-    "verdict": "Obligation callable 4% offre sécurité capitale mais rendement limité dans contexte macro incertain. Risque majeur : rappel précoce probable si taux baissent, forçant réinvestissement à conditions dégradées. Structure avantage clairement l'émetteur avec option de rappel unilatérale. Convient uniquement pour diversification défensive avec horizon flexible.",
+    "verdict": "Ce produit offre 4% annualisé avec protection du capital mais présente un profil risque/rendement déséquilibré. L'émetteur bénéficie d'une option gratuite de rappel anticipé quand les taux baissent, privant l'investisseur de la plus-value obligataire. La prime de 100bp vs taux sans risque semble insuffisante pour compenser le risque crédit et d'optionalité. Dans l'environnement actuel de taux élevés, des alternatives moins risquées offrent des rendements comparables.",
     "keyRisks": [
-      "Risque de réinvestissement : rappel précoce si taux baissent, obligeant replacement à rendements inférieurs",
-      "Risque crédit émetteur : défaut possible malgré protection capitale théorique"
+      "Risque de crédit émetteur avec perte totale du capital en cas de défaut",
+      "Risque de réinvestissement si rappel anticipé en environnement taux bas"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 20,
-        "return_eur": 20000,
+        "return_pct": 12,
+        "return_eur": 12000,
         "probability": 0.2,
-        "duration_years": 1
+        "duration_years": 2
       },
       "base": {
-        "return_pct": 16,
-        "return_eur": 16000,
+        "return_pct": 20,
+        "return_eur": 20000,
         "probability": 0.4,
         "duration_years": 4
       },
       "stress": {
-        "return_pct": 4,
-        "return_eur": 4000,
+        "return_pct": 24,
+        "return_eur": 24000,
         "probability": 0.3,
         "duration_years": 6
       },
       "worst": {
-        "return_pct": -80,
-        "return_eur": -80000,
+        "return_pct": -100,
+        "return_eur": -100000,
         "probability": 0.1,
-        "duration_years": 6
+        "duration_years": 3
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-24T17:03:43.100Z",
-      "durationMs": 11598,
+      "gradedAt": "2026-03-25T08:20:56.764Z",
+      "durationMs": 11165,
       "aiUsed": true,
       "version": "4.3",
       "productType": "fixed-rate-callable",
@@ -227,7 +227,7 @@
         "p1": -10,
         "p2": -5,
         "p3": 0,
-        "p4": 5
+        "p4": -10
       }
     }
   }
