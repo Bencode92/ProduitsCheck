@@ -141,29 +141,29 @@
   },
   "grading": {
     "grade": "B",
-    "score": 65,
+    "score": 63,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 67,
-        "base": 77,
+        "score": 59,
+        "base": 69,
         "delta": -10,
-        "reasoning": "Rendement: base 77 → -10 = 67 (Barrière à 60% agressive dans un contexte de volatilité bancaire persistante et régime neutre peu favorable aux financières) | Coupon 19.4% (9.7×2), barrière 60%"
+        "reasoning": "Rendement: base 69 → -10 = 59 (Barrière à 60% avec volatilité bancaire élevée réduit la probabilité de toucher le coupon en cas de stress financier.) | Coupon 19.4% (9.7×2), barrière 60%"
       },
       "underlyingQuality": {
         "score": 20,
         "base": 35,
         "delta": -15,
-        "reasoning": "Qualité: base 35 → -15 = 20 (Secteur financier explicitement évité dans le contexte macro actuel, forte sensibilité aux taux et risques systémiques) [vol/DD 30%]"
+        "reasoning": "Qualité: base 35 → -15 = 20 (Secteur financier explicitement évité en régime neutral, vulnérabilité aux taux et risques de crédit.) [vol/DD 30%]"
       },
       "portfolioFit": {
-        "score": 75,
+        "score": 80,
         "base": 80,
-        "delta": -5,
-        "reasoning": "Fit: base 80 → -5 = 75 (Concentration sectorielle excessive sur les banques européennes dans un environnement défavorable aux financières)"
+        "delta": 0,
+        "reasoning": "Fit: base 80"
       },
       "riskPremium": {
         "score": 99,
@@ -172,41 +172,42 @@
         "reasoning": "Prime: base 99 | 19.4% vs CAT 2.5% (spread 16.9%)"
       }
     },
-    "verdict": "Produit à éviter dans le contexte actuel avec le secteur financier explicitement déconseillé et un régime macro neutre. Le coupon attractif de 19.4% ne compense pas le risque concentré sur les banques européennes avec une barrière agressive à 60%. La probabilité d'autocall est réduite et le risque de franchissement de barrière est significatif sur 7 ans.",
+    "verdict": "Produit très risqué avec un coupon de 19.4% sur le secteur bancaire européen, explicitement évité dans le contexte macro actuel. La barrière à 60% offre peu de protection dans un secteur historiquement volatil et sensible aux crises systémiques. Le timing est défavorable avec les incertitudes sur les taux et la qualité des actifs bancaires. Convient uniquement aux investisseurs très agressifs acceptant un risque de perte en capital significatif.",
     "keyRisks": [
-      "Concentration mono-sectorielle sur financières en période défavorable",
-      "Barrière à 60% vulnérable aux chocs bancaires systémiques"
+      "Secteur bancaire évité dans le régime macro actuel",
+      "Forte sensibilité aux crises de crédit et taux d'intérêt",
+      "Barrière à 60% insuffisante pour la volatilité sectorielle"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 29.1,
-        "return_eur": 29100,
+        "return_pct": 19.4,
+        "return_eur": 19400,
         "probability": 0.2,
-        "duration_years": 1.5
+        "duration_years": 1
       },
       "base": {
-        "return_pct": 38.8,
-        "return_eur": 38800,
+        "return_pct": 9.7,
+        "return_eur": 29100,
         "probability": 0.3,
-        "duration_years": 2
+        "duration_years": 3
       },
       "stress": {
         "return_pct": 0,
         "return_eur": 0,
         "probability": 0.35,
-        "duration_years": 7
+        "duration_years": 6
       },
       "worst": {
         "return_pct": -30,
         "return_eur": -30000,
         "probability": 0.15,
-        "duration_years": 7
+        "duration_years": 6
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-25T15:40:56.394Z",
-      "durationMs": 15246,
+      "gradedAt": "2026-03-25T16:33:53.030Z",
+      "durationMs": 16023,
       "aiUsed": true,
       "version": "4.3",
       "productType": "standard",
@@ -223,12 +224,12 @@
       "expectedMaturity": 0,
       "maxMaturity": 0,
       "maxBeta": null,
-      "baseScore": 73,
+      "baseScore": 70,
       "baseGrade": "B",
       "adjustments": {
         "p1": -10,
         "p2": -15,
-        "p3": -5,
+        "p3": 0,
         "p4": 0
       }
     }
