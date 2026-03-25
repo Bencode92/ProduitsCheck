@@ -22,14 +22,13 @@ jobs:
         run: |
           mkdir -p data/market
           BASE="https://raw.githubusercontent.com/Bencode92/stock-analysis-platform/main/data"
-          for f in stocks_europe.json stocks_us.json markets.json sectors.json market_context.json; do
+          for f in stocks_europe.json stocks_us.json markets.json sectors.json market_context.json macro_indicators.json; do
             curl -sL "$BASE/$f" -o "data/market/$f"
             echo "$f: $(wc -c < data/market/$f) bytes"
           done
 
       - name: Fetch latest Market Intelligence audit
         run: |
-          # List files in market_intelligence_audit via GitHub API
           MI_DIR="https://api.github.com/repos/Bencode92/stock-analysis-platform/contents/data/market_intelligence_audit"
           echo "Fetching MI file list..."
           FILES=$(curl -sL "$MI_DIR" | python3 -c "
@@ -175,6 +174,7 @@ jobs:
           if os.path.exists(mip):
               with open(mip) as f: mi_data = json.load(f)
               ai = mi_data.get('ai_response', {})
+              mdi = mi_data.get('market_data_input', {})
               mi = {
                   'timestamp': mi_data.get('timestamp', ''),
                   'regime': ai.get('regime', ''),
@@ -182,14 +182,42 @@ jobs:
                   'regime_rationale': ai.get('regime_rationale', ''),
                   'warnings': ai.get('warnings', []),
                   'bond_strategy': ai.get('bond_strategy', {}),
-                  'sector_momentum': mi_data.get('market_data_input', {}).get('sector_momentum_summary', ''),
-                  'favored_sectors': mi_data.get('market_data_input', {}).get('favored_sectors', ''),
-                  'avoided_sectors': mi_data.get('market_data_input', {}).get('avoided_sectors', ''),
-                  'stress_flags': mi_data.get('market_data_input', {}).get('_stress_flags', []),
-                  'vix': mi_data.get('market_data_input', {}).get('vix'),
-                  'brent': mi_data.get('market_data_input', {}).get('brent_usd'),
+                  'sector_momentum': mdi.get('sector_momentum_summary', ''),
+                  'favored_sectors': mdi.get('favored_sectors', ''),
+                  'avoided_sectors': mdi.get('avoided_sectors', ''),
+                  'stress_flags': mdi.get('_stress_flags', []),
+                  'vix': mdi.get('vix'),
+                  'brent': mdi.get('brent_usd'),
+                  'gold': mdi.get('gold_usd') or mdi.get('gold_price'),
+                  'silver': mdi.get('silver_usd'),
               }
-              print(f'MI: regime={mi["regime"]} conf={mi["regime_confidence"]} warnings={len(mi["warnings"])}')
+              print(f'MI: regime={mi["regime"]} conf={mi["regime_confidence"]} gold={mi.get("gold")} brent={mi.get("brent")}')
+
+          # ═══ MACRO INDICATORS (for P2 commodity scoring) ═══
+          macro = {}
+          mcp = 'data/market/macro_indicators.json'
+          if os.path.exists(mcp):
+              with open(mcp) as f: mcd = json.load(f)
+              flat = mcd.get('_market_data_flat', {})
+              if flat:
+                  macro = {
+                      'gold_usd': flat.get('gold_usd'),
+                      'silver_usd': flat.get('silver_usd'),
+                      'brent_usd': flat.get('brent_usd'),
+                      'vix': flat.get('vix'),
+                      'fed_funds_rate': flat.get('fed_funds_rate'),
+                      'us_10y_yield': flat.get('us_10y_yield'),
+                      'dxy': flat.get('dxy'),
+                      'date': flat.get('date'),
+                  }
+                  print(f'Macro: gold=${macro.get("gold_usd")}, brent=${macro.get("brent_usd")}, vix={macro.get("vix")}')
+              # Fallback: merge gold/silver/brent into MI if MI didn't have them
+              if not mi.get('gold') and macro.get('gold_usd'):
+                  mi['gold'] = macro['gold_usd']
+              if not mi.get('silver') and macro.get('silver_usd'):
+                  mi['silver'] = macro['silver_usd']
+              if not mi.get('brent') and macro.get('brent_usd'):
+                  mi['brent'] = macro['brent_usd']
 
           # ═══ SECTORS ETFs ═══
           sectors_perf = {}
@@ -216,6 +244,7 @@ jobs:
               'markets': markets_summary,
               'context': context,
               'market_intelligence': mi,
+              'macro': macro,
               'sectors_eu': sectors_perf,
           }
 
@@ -236,7 +265,7 @@ jobs:
           if git diff --staged --quiet; then
             echo 'No changes to commit'
           else
-            git commit -m "[Auto] Sync market data + MI $(date +%Y-%m-%d-%H%M)"
+            git commit -m "[Auto] Sync market data + MI + macro $(date +%Y-%m-%d-%H%M)"
             git push
             echo 'Market data synced!'
           fi
