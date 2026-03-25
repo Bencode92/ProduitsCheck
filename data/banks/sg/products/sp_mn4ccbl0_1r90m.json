@@ -153,62 +153,62 @@
         "score": 80,
         "base": 90,
         "delta": -10,
-        "reasoning": "Rendement: base 90 → -10 = 80 (Barrière à 50% insuffisante face à la volatilité extrême des miners d'or (80%+), risque de franchissement élevé) | Coupon 18% (9×2), barrière 50%"
+        "reasoning": "Rendement: base 90 → -10 = 80 (Barrière à 50% trop généreuse pour un secteur volatile comme les minières aurifères, risque de suspension de coupon élevé) | Coupon 18% (9×2), barrière 50%"
       },
       "underlyingQuality": {
         "score": 40,
         "base": 35,
         "delta": 5,
-        "reasoning": "Qualité: base 35 → +5 = 40 (Secteur minier aurifère bénéficie du contexte géopolitique tendu et de l'inflation persistante, corrélation négative avec USD) [vol/DD 30%]"
+        "reasoning": "Qualité: base 35 → +5 = 40 (Secteur gold miners bénéficie du contexte macro neutral et de l'aversion au risque, corrélation négative avec marchés traditionnels) [vol/DD 30%]"
       },
       "portfolioFit": {
-        "score": 75,
+        "score": 80,
         "base": 80,
-        "delta": -5,
-        "reasoning": "Fit: base 80 → -5 = 75 (Exposition sectorielle très concentrée sur les miners d'or, manque de diversification pour un portefeuille équilibré)"
+        "delta": 0,
+        "reasoning": "Fit: base 80"
       },
       "riskPremium": {
-        "score": 99,
+        "score": 94,
         "base": 99,
-        "delta": 0,
-        "reasoning": "Prime: base 99 | 18% vs CAT 2.5% (spread 15.5%)"
+        "delta": -5,
+        "reasoning": "Prime: base 99 → -5 = 94 (Coupon 18% attractif mais prime de risque insuffisante compte tenu de la volatilité extrême des minières aurifères) | 18% vs CAT 2.5% (spread 15.5%)"
       }
     },
-    "verdict": "Produit très agressif sur un secteur cyclique volatile. Le coupon de 18% reflète justement les risques : les miners d'or peuvent chuter de 60-70% lors des corrections. La barrière à 50% offre une protection limitée face à cette volatilité. Intéressant pour diversification anti-corrélation mais uniquement en allocation réduite (5-10% max).",
+    "verdict": "Produit à haut rendement sur secteur défensif mais très volatil. Le coupon semestriel de 9% est attractif mais la barrière à 50% paraît optimiste pour des minières aurifères qui peuvent subir des corrections brutales de -60% ou plus. L'autocall à 95% est difficile à atteindre rapidement. Exposition intéressante pour diversification mais risque de capital élevé.",
     "keyRisks": [
-      "Volatilité extrême des miners d'or (>80%) avec risques de crash sectoriels brutaux",
-      "Corrélation parfaite entre sous-jacents lors des stress, barrière franchissable rapidement"
+      "Volatilité extrême des minières aurifères (corrections -50%+ fréquentes)",
+      "Corrélation positive paradoxale or/actions en cas de stress systémique"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 18,
-        "return_eur": 18000,
+        "return_pct": 12,
+        "return_eur": 12000,
         "probability": 0.2,
-        "duration_years": 1
+        "duration_years": 1.5
       },
       "base": {
-        "return_pct": 12,
-        "return_eur": 36000,
+        "return_pct": 8,
+        "return_eur": 24000,
         "probability": 0.3,
         "duration_years": 3
       },
       "stress": {
-        "return_pct": 0,
-        "return_eur": 0,
+        "return_pct": 2,
+        "return_eur": 12000,
         "probability": 0.35,
         "duration_years": 6
       },
       "worst": {
-        "return_pct": -40,
-        "return_eur": -40000,
+        "return_pct": -25,
+        "return_eur": -25000,
         "probability": 0.15,
         "duration_years": 6
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-24T17:03:18.164Z",
-      "durationMs": 10933,
+      "gradedAt": "2026-03-25T08:20:43.372Z",
+      "durationMs": 11773,
       "aiUsed": true,
       "version": "4.3",
       "productType": "standard",
@@ -230,8 +230,8 @@
       "adjustments": {
         "p1": -10,
         "p2": 5,
-        "p3": -5,
-        "p4": 0
+        "p3": 0,
+        "p4": -5
       }
     }
   }
