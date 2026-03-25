@@ -1,6 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Liquidités Fix v2: Read from catManager.objectives
-// ByCam/Caméléons amounts come from "Objectifs & Trésorerie" in CAT
+// STRUCTBOARD — Liquidités Fix v3: Clear legend + correct amounts
 // ═══════════════════════════════════════════════════════════════
 
 (function() {
@@ -12,7 +11,7 @@
             var portfolio = state.portfolio || [];
             if (typeof ENVELOPES === 'undefined' || !ENVELOPES) return '';
 
-            // Read liquidity amounts from catManager.objectives (set in CAT > Objectifs)
+            // Read liquidity amounts from catManager.objectives
             var cashByCam = 0, cashCameleons = 0;
             if (typeof catManager !== 'undefined' && catManager.objectives) {
                 cashByCam = parseFloat(catManager.objectives.cashByCam) || 0;
@@ -21,16 +20,15 @@
             var totalLiquidity = cashByCam + cashCameleons;
             if (totalLiquidity === 0) return '';
 
-            // Map envelope id → configured liquidity
-            var envLiquidity = { bycam: cashByCam, cameleons: cashCameleons };
-
-            // Compute per-envelope: how much is already deployed in structurés
-            var envs = ENVELOPES.filter(function(e) { return e.id && envLiquidity[e.id] > 0; });
-            var envData = envs.map(function(env) {
-                var envProducts = portfolio.filter(function(p) { return p.envelope === env.id; });
-                var envStruct = envProducts.reduce(function(s, p) { return s + (parseFloat(p.investedAmount) || 0); }, 0);
-                return { id: env.id, label: env.label, icon: env.icon, color: env.color, liquidity: envLiquidity[env.id], structAmount: envStruct };
+            // Per-envelope structurés already deployed
+            var structByCam = 0, structCameleons = 0, structNoEnv = 0;
+            portfolio.forEach(function(p) {
+                var amount = parseFloat(p.investedAmount) || 0;
+                if (p.envelope === 'bycam') structByCam += amount;
+                else if (p.envelope === 'cameleons') structCameleons += amount;
+                else structNoEnv += amount;
             });
+            var totalStruct = structByCam + structCameleons + structNoEnv;
 
             // CAT total
             var catTotal = 0, catRate = 0;
@@ -44,25 +42,35 @@
                 }
             }
 
-            var totalStruct = portfolio.reduce(function(s, p) { return s + (parseFloat(p.investedAmount) || 0); }, 0);
+            var bcColor = '#3B82F6', camColor = '#A855F7';
 
-            // Build HTML
             var html = '<div style="margin-bottom:20px;padding:16px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius)" data-section="liquidites-disponibles">';
             html += '<div style="font-size:13px;font-weight:700;color:var(--text-bright);margin-bottom:12px">Liquidit\u00e9s disponibles</div>';
 
-            // Envelope cards
-            html += '<div style="display:grid;grid-template-columns:repeat(' + envData.length + ',1fr);gap:12px;margin-bottom:12px">';
-            envData.forEach(function(e) {
-                html += '<div style="background:var(--bg-card);border:1px solid ' + e.color + '33;border-radius:var(--radius-sm);padding:12px;display:flex;justify-content:space-between;align-items:center">';
-                html += '<div><span style="color:' + e.color + ';font-weight:600;font-size:13px">' + e.icon + ' ' + e.label + '</span>';
-                if (e.structAmount > 0) html += '<div style="font-size:10px;color:var(--text-dim);margin-top:2px">D\u00e9j\u00e0 en structur\u00e9s : ' + formatNumber(e.structAmount) + '\u20ac</div>';
-                html += '</div>';
-                html += '<span style="font-family:var(--mono);font-size:20px;font-weight:800;color:' + e.color + '">' + formatNumber(e.liquidity) + '\u20ac</span>';
-                html += '</div>';
-            });
+            // ── Two envelope cards ──
+            html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">';
+
+            // ByCam card
+            html += '<div style="background:var(--bg-card);border:1px solid ' + bcColor + '33;border-radius:var(--radius-sm);padding:12px">';
+            html += '<div style="display:flex;justify-content:space-between;align-items:center">';
+            html += '<span style="color:' + bcColor + ';font-weight:600;font-size:13px">\ud83c\udfe6 ByCam</span>';
+            html += '<span style="font-family:var(--mono);font-size:20px;font-weight:800;color:' + bcColor + '">' + formatNumber(cashByCam) + '\u20ac</span>';
+            html += '</div>';
+            if (structByCam > 0) html += '<div style="font-size:10px;color:var(--text-dim);margin-top:4px">D\u00e9j\u00e0 en structur\u00e9s : ' + formatNumber(structByCam) + '\u20ac</div>';
             html += '</div>';
 
-            // Progress bar
+            // Caméléons card
+            html += '<div style="background:var(--bg-card);border:1px solid ' + camColor + '33;border-radius:var(--radius-sm);padding:12px">';
+            html += '<div style="display:flex;justify-content:space-between;align-items:center">';
+            html += '<span style="color:' + camColor + ';font-weight:600;font-size:13px">\ud83e\udd8e Cam\u00e9l\u00e9ons</span>';
+            html += '<span style="font-family:var(--mono);font-size:20px;font-weight:800;color:' + camColor + '">' + formatNumber(cashCameleons) + '\u20ac</span>';
+            html += '</div>';
+            if (structCameleons > 0) html += '<div style="font-size:10px;color:var(--text-dim);margin-top:4px">D\u00e9j\u00e0 en structur\u00e9s : ' + formatNumber(structCameleons) + '\u20ac</div>';
+            html += '</div>';
+
+            html += '</div>';
+
+            // ── Progress bar ──
             var total = catTotal + totalStruct + totalLiquidity;
             if (total > 0) {
                 var catPct = Math.round(catTotal / total * 100);
@@ -73,10 +81,12 @@
                 if (structPct > 0) html += '<div style="width:' + structPct + '%;background:var(--orange)"></div>';
                 if (investPct > 0) html += '<div style="width:' + investPct + '%;background:var(--cyan)"></div>';
                 html += '</div>';
-                html += '<div style="display:flex;gap:16px;font-size:10px;color:var(--text-dim)">';
-                if (catTotal > 0) html += '<span>\u25a0 CAT ' + formatNumber(catTotal) + '\u20ac' + (catRate > 0 ? ' (' + catRate.toFixed(1) + '%)' : '') + '</span>';
-                html += '<span>\u25a0 Structur\u00e9s ' + formatNumber(totalStruct) + '\u20ac</span>';
-                html += '<span>\u25a0 \u00c0 investir ' + formatNumber(totalLiquidity) + '\u20ac</span>';
+
+                // ── Clear legend ──
+                html += '<div style="display:flex;flex-wrap:wrap;gap:12px;font-size:10px;color:var(--text-dim)">';
+                if (catTotal > 0) html += '<span><span style="color:var(--green)">\u25a0</span> CAT ' + formatNumber(catTotal) + '\u20ac' + (catRate > 0 ? ' (' + catRate.toFixed(1) + '%)' : '') + '</span>';
+                html += '<span><span style="color:var(--orange)">\u25a0</span> Structur\u00e9s ' + formatNumber(totalStruct) + '\u20ac</span>';
+                html += '<span><span style="color:var(--cyan)">\u25a0</span> \u00c0 investir ' + formatNumber(totalLiquidity) + '\u20ac</span>';
                 html += '</div>';
             }
 
@@ -84,7 +94,7 @@
             return html;
         };
 
-        console.log('[StructBoard] Liquidit\u00e9s fix v2: reads from catManager.objectives');
+        console.log('[StructBoard] Liquidit\u00e9s fix v3: clear legend');
     }, 150);
     setTimeout(function() { clearInterval(_fixInterval); }, 8000);
 })();
