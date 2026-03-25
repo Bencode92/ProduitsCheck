@@ -138,23 +138,23 @@
   },
   "grading": {
     "grade": "D",
-    "score": 38,
+    "score": 33,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 17,
+        "score": 7,
         "base": 17,
-        "delta": 0,
-        "reasoning": "Rendement: base 17 | Coupon 4.17%"
+        "delta": -10,
+        "reasoning": "Rendement: base 17 → -10 = 7 (Sans barrière définie et avec des obligations comme sous-jacents en régime neutre, la probabilité de coupon est très incertaine et dépend de la qualité crédit non spécifiée) | Coupon 4.17%"
       },
       "underlyingQuality": {
-        "score": 35,
+        "score": 30,
         "base": 35,
-        "delta": 0,
-        "reasoning": "Qualité: base 35 [B/Q 35%]"
+        "delta": -5,
+        "reasoning": "Qualité: base 35 → -5 = 30 (Obligations internationales sans détail sur la qualité crédit ni duration dans un contexte de taux encore élevés présente un risque significatif) [B/Q 35%]"
       },
       "portfolioFit": {
         "score": 80,
@@ -163,20 +163,49 @@
         "reasoning": "Fit: base 80"
       },
       "riskPremium": {
-        "score": 33,
+        "score": 28,
         "base": 33,
-        "delta": 0,
-        "reasoning": "Prime: base 33 | 4.17% vs CAT 2.5% (spread 1.7%)"
+        "delta": -5,
+        "reasoning": "Prime: base 33 → -5 = 28 (Sans information sur le spread réel versus obligations directes, la prime de structuration semble excessive pour un simple panier obligataire) | 4.17% vs CAT 2.5% (spread 1.7%)"
       }
     },
-    "verdict": "Score 38/100 (base 38).",
-    "keyRisks": [],
+    "verdict": "Ce produit structuré sur obligations manque cruellement de transparence avec une barrière non définie et aucune information sur la qualité crédit ou duration des obligations sous-jacentes. En régime macro neutre avec des taux encore élevés, le rendement de 4.17% semble faible pour le risque pris sur du capital non protégé. L'absence de détails sur la composition du panier obligataire et les mécanismes d'autocall rend l'évaluation du couple rendement/risque impossible.",
+    "keyRisks": [
+      "Risque de crédit non défini sur les obligations sous-jacentes",
+      "Sensibilité aux taux d'intérêt dans un environnement de politique monétaire incertaine",
+      "Capital non protégé avec mécanisme de barrière non spécifié"
+    ],
     "negotiationPoints": [],
-    "scenarios": null,
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 4.17,
+        "return_eur": 4170,
+        "probability": 0.2,
+        "duration_years": 1
+      },
+      "base": {
+        "return_pct": 8.34,
+        "return_eur": 8340,
+        "probability": 0.35,
+        "duration_years": 2
+      },
+      "stress": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.3,
+        "duration_years": 3
+      },
+      "worst": {
+        "return_pct": -15,
+        "return_eur": -15000,
+        "probability": 0.15,
+        "duration_years": 3
+      }
+    },
     "metadata": {
-      "gradedAt": "2026-03-25T15:39:52.921Z",
-      "durationMs": 6555,
-      "aiUsed": false,
+      "gradedAt": "2026-03-25T17:06:54.440Z",
+      "durationMs": 16423,
+      "aiUsed": true,
       "version": "4.3",
       "productType": "standard",
       "marketDataAvailable": false,
@@ -194,7 +223,12 @@
       "maxBeta": null,
       "baseScore": 38,
       "baseGrade": "D",
-      "adjustments": null
+      "adjustments": {
+        "p1": -10,
+        "p2": -5,
+        "p3": 0,
+        "p4": -5
+      }
     }
   }
 }
