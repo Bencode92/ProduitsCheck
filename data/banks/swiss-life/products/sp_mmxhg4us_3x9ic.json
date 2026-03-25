@@ -26,7 +26,7 @@
     "totalReturn": "70% sur 10 ans maximum"
   },
   "capitalProtection": {
-    "protected": false,
+    "protected": true,
     "level": 60,
     "type": "conditionnelle-barriere",
     "barrier": 60,
@@ -41,7 +41,9 @@
     "triggerDetail": "panier équipondéré supérieur ou égal à 100% du niveau initial",
     "frequency": "annuel",
     "startYear": 1,
-    "stepDown": false
+    "stepDown": false,
+    "hasAutocall": true,
+    "enabled": true
   },
   "scenarios": {
     "favorable": "Remboursement automatique anticipé avec 7% par année écoulée si panier ≥ 100% du niveau initial",
@@ -284,5 +286,7 @@
         }
       ]
     }
-  }
+  },
+  "envelope": "cameleons",
+  "maturityYears": 10
 }
