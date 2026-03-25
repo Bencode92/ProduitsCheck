@@ -154,8 +154,8 @@
     "note": ""
   },
   "grading": {
-    "grade": "B",
-    "score": 62,
+    "grade": "C",
+    "score": 56,
     "killCriteria": {
       "triggered": false,
       "reasons": []
@@ -165,13 +165,13 @@
         "score": 65,
         "base": 57,
         "delta": 8,
-        "reasoning": "Rendement: base 57 → +8 = 65 (Autocall à 100% avec coupon 5.7% attractive, beta très faible 0.28 réduit la volatilité systémique) | Coupon 5.7%, protégé"
+        "reasoning": "Rendement: base 57 → +8 = 65 (Autocall à 100% sur sous-jacent unique à forte volatilité (20.48%) mais coupon généreux à 5.7%, probabilité de déclenchement correcte.) | Coupon 5.7%, protégé"
       },
       "underlyingQuality": {
-        "score": 60,
+        "score": 42,
         "base": 50,
-        "delta": 10,
-        "reasoning": "Qualité: base 50 → +10 = 60 (ENI bénéficie du régime macro favorable à l'énergie, fondamentaux solides malgré ROE modeste) [B/Q 35%] | Worst: ENI S.p.A. B:44"
+        "delta": -8,
+        "reasoning": "Qualité: base 50 → -8 = 42 (ENI affiche des fondamentaux faibles (ROE 5.06%, marge 3.11%) et reste exposé aux cycles énergétiques malgré le contexte macro favorable au secteur.) [B/Q 35%] | Worst: ENI S.p.A. B:44"
       },
       "portfolioFit": {
         "score": 75,
@@ -183,44 +183,44 @@
         "score": 61,
         "base": 64,
         "delta": -3,
-        "reasoning": "Prime: base 64 → -3 = 61 (Coupon 5.7% légèrement généreux compte tenu du beta très faible et volatilité modérée) | 5.7% vs CAT 2.5% (spread 3.2%)"
+        "reasoning": "Prime: base 64 → -3 = 61 (Coupon à 5.7% légèrement en retrait par rapport au niveau de risque porté par ENI en mono-sous-jacent.) | 5.7% vs CAT 2.5% (spread 3.2%)"
       }
     },
-    "verdict": "Produit attractif sur ENI avec autocall à 100% et coupon 5.7% annualisé. Le beta très faible (0.28) et le contexte macro favorable à l'énergie offrent un profil risque/rendement intéressant. La protection capital sans barrière sécurise l'investissement. Cependant, l'exposition mono-titre reste un point d'attention malgré la solidité d'ENI.",
+    "verdict": "Ce produit capitalise sur le momentum du secteur énergétique avec ENI en hausse de 61% sur 1 an, mais présente des fondamentaux préoccupants (ROE 5.06%, marge opérationnelle 3.11%). La structure autocall à 100% sans barrière désactivante sécurise le capital tout en offrant 5.7% de coupon annualisé. Le risque de concentration sur un seul titre énergétique reste notable malgré le contexte macro favorable. La volatilité élevée (20.48%) peut jouer en faveur d'un autocall rapide mais augmente l'incertitude.",
     "keyRisks": [
-      "Risque sectoriel énergie lié aux prix du pétrole/gaz et transitions énergétiques",
-      "Concentration sur un seul titre malgré la solidité d'ENI"
+      "Concentration extrême sur ENI, exposant à la volatilité sectorielle et aux chocs géopolitiques énergétiques",
+      "Fondamentaux dégradés d'ENI (ROE et marges faibles) fragilisant la performance à moyen terme"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 5.7,
         "return_eur": 1710,
-        "probability": 0.3,
+        "probability": 0.35,
         "duration_years": 1
       },
       "base": {
         "return_pct": 11.4,
         "return_eur": 3420,
-        "probability": 0.4,
+        "probability": 0.3,
         "duration_years": 2
       },
       "stress": {
         "return_pct": 0,
         "return_eur": 0,
         "probability": 0.25,
-        "duration_years": 3
+        "duration_years": 2
       },
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.05,
-        "duration_years": 3
+        "probability": 0.1,
+        "duration_years": 2
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-24T17:01:47.782Z",
-      "durationMs": 12190,
+      "gradedAt": "2026-03-25T08:19:21.482Z",
+      "durationMs": 13774,
       "aiUsed": true,
       "version": "4.3",
       "productType": "standard",
@@ -236,12 +236,12 @@
       "barrierPct": 0,
       "expectedMaturity": 0,
       "maxMaturity": 0,
-      "maxBeta": 0.28,
+      "maxBeta": 0.71,
       "baseScore": 57,
       "baseGrade": "C",
       "adjustments": {
         "p1": 8,
-        "p2": 10,
+        "p2": -8,
         "p3": 5,
         "p4": -3
       }
