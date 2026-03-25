@@ -143,23 +143,23 @@
   },
   "grading": {
     "grade": "B",
-    "score": 69,
+    "score": 72,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 80,
-        "base": 90,
+        "score": 79,
+        "base": 89,
         "delta": -10,
-        "reasoning": "Rendement: base 90 → -10 = 80 (Barrière à 50% sur un indice minier volatil avec décrément 5% réduit significativement la probabilité de percevoir les coupons sur la durée.) | Coupon 18% (9×2), barrière 50%"
+        "reasoning": "Rendement: base 89 → -10 = 79 (Volatilité extrême des minières aurifères (>35%) rend la barrière 50% vulnérable malgré son niveau, probabilité de coupon réduite en régime neutral sans catalyst or) | Coupon 18% (9×2), barrière 50%"
       },
       "underlyingQuality": {
         "score": 30,
         "base": 35,
         "delta": -5,
-        "reasoning": "Qualité: base 35 → -5 = 30 (Les minières aurifères restent très sensibles aux taux réels et au dollar US, avec une volatilité structurelle élevée malgré le régime macro neutre.) [vol/DD 30%]"
+        "reasoning": "Qualité: base 35 → -5 = 30 (Secteur minier non favorisé en régime neutral, corrélation inverse avec taux réels défavorable sans stress macro, concentration sectorielle élevée) [vol/DD 30%]"
       },
       "portfolioFit": {
         "score": 80,
@@ -168,48 +168,48 @@
         "reasoning": "Fit: base 80"
       },
       "riskPremium": {
-        "score": 84,
+        "score": 99,
         "base": 99,
-        "delta": -15,
-        "reasoning": "Prime: base 99 → -15 = 84 (Le décrément de 5% annuel ampute drastiquement le rendement réel et rend le produit structurellement perdant sur la durée.) | 18% vs CAT 2.5% (spread 15.5%)"
+        "delta": 0,
+        "reasoning": "Prime: base 99 | 18% vs CAT 2.5% (spread 15.5%)"
       }
     },
-    "verdict": "Ce produit présente un profil risque/rendement défavorable malgré un coupon facial attractif de 18%. Le décrément annuel de 5% érode mécaniquement la performance de l'indice, rendant l'autocall à 95% très difficile à atteindre après 2-3 ans. Sur 6 ans, l'indice doit surperformer de +30% juste pour compenser le décrément, avant même de générer un gain. La barrière à 50% sur un secteur volatil comme les minières aurifères offre une protection insuffisante.",
+    "verdict": "Produit à haut rendement sur un secteur volatil non favorisé par le régime macro actuel. Le coupon de 18% compense le risque mais la barrière 50% reste vulnérable face à la volatilité historique >35% des minières aurifères. En régime neutral sans catalyseur inflation/crise, la probabilité d'autocall rapide est limitée. Convient uniquement aux investisseurs anticipant un regain d'intérêt pour l'or.",
     "keyRisks": [
-      "Décrément de 5%/an qui rend l'autocall quasi-impossible après 3 ans",
-      "Volatilité élevée des minières aurifères (>30%) avec risque de toucher la barrière",
-      "Sensibilité extrême aux taux réels US et au dollar"
+      "Volatilité sectorielle >35% menace la barrière malgré son niveau",
+      "Corrélation inverse avec hausse des taux réels en régime neutral",
+      "Concentration sur un seul secteur sans diversification"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 18,
-        "return_eur": 18000,
+        "return_pct": 9,
+        "return_eur": 9000,
         "probability": 0.2,
-        "duration_years": 1
+        "duration_years": 0.5
       },
       "base": {
-        "return_pct": 4.5,
-        "return_eur": 13500,
-        "probability": 0.3,
+        "return_pct": 27,
+        "return_eur": 27000,
+        "probability": 0.35,
         "duration_years": 3
       },
       "stress": {
-        "return_pct": -3,
-        "return_eur": -3000,
-        "probability": 0.35,
-        "duration_years": 6
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.3,
+        "duration_years": 5
       },
       "worst": {
         "return_pct": -35,
         "return_eur": -35000,
         "probability": 0.15,
-        "duration_years": 6
+        "duration_years": 5
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-25T16:35:01.978Z",
-      "durationMs": 19423,
+      "gradedAt": "2026-03-25T16:37:01.489Z",
+      "durationMs": 18400,
       "aiUsed": true,
       "version": "4.3",
       "productType": "standard",
@@ -226,13 +226,13 @@
       "expectedMaturity": 0,
       "maxMaturity": 0,
       "maxBeta": null,
-      "baseScore": 77,
+      "baseScore": 76,
       "baseGrade": "A",
       "adjustments": {
         "p1": -10,
         "p2": -5,
         "p3": 0,
-        "p4": -15
+        "p4": 0
       }
     }
   }
