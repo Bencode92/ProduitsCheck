@@ -1,6 +1,6 @@
 {
-  "lastUpdated": "2026-03-25T08:24:10.605Z",
-  "summary": "## DÉPLOIEMENT LIQUIDITÉ - OPTIMISATION STRUCTURÉS\n\n**Résumé:** 109 000€ disponibles → 109 000€ à déployer → +16 554€/an\n\n**SOUSCRIPTIONS RECOMMANDÉES:**\n\n✅ **SL – PHOENIX MEMOIRE FAST** → 50 000€ à 14% = +7 000€/an vs CAT (+5 507€)\n\n✅ **ATHENA SUR INDICE SOLACTI** → 50 000€ à 18% = +9 000€/an vs CAT (+7 507€)\n\n✅ **EMTN Digitale WO LVMH Cré** → 9 000€ à 6,15% = +554€/an vs CAT (+285€)\n\n**REJETS:**\n\n❌ **NOTE TAUX FIXE CALLABLE B** — Grade C faible (54/100), rendement insuffisant à 4%\n\n❌ **Solution Court Terme Boos** — Grade C médiocre (51/100), profil risque/rendement inadéquat\n\n**ALLOCATION FINALE:**\n- **Portefeuille total:** 299 000€\n- **Rendement annuel:** +28 614€/an (9,57%)\n- **Surperformance vs CAT:** +19 685€/an\n- **Performance optimale:** Grades A-B privilégiés, diversification secteurs/échéances\n\n**Conclusion:** Votre allocation génère 19 685€ de plus annuellement qu'un placement CAT équivalent, avec un profil risque maîtrisé grâce aux grades élevés des produits sélectionnés.",
+  "lastUpdated": "2026-03-25T11:36:57.038Z",
+  "summary": "## ALLOCATION OPTIMISÉE DE LIQUIDITÉ\n\n**Résumé:** 109 000€ disponibles → 109 000€ à déployer → +16 554€/an\n\n### SOUSCRIPTIONS RECOMMANDÉES:\n✅ **SL – PHOENIX MEMOIRE FAST** → 50 000€ à 14% = +7 000€/an vs CAT (+5 507€)\n\n✅ **ATHENA SUR INDICE SOLACTI** → 50 000€ à 18% = +9 000€/an vs CAT (+7 505€)\n\n✅ **EMTN Digitale WO LVMH Cré** → 9 000€ à 6.15% = +554€/an vs CAT (+285€)\n\n### REJETS:\n❌ **Solution Court Terme Boost** — Grade C insuffisant (51/100) malgré 7% de coupon\n\n❌ **NOTE TAUX FIXE CALLABLE B** — Grade C faible (50/100) et coupon décevant à 4%\n\n### PERFORMANCE TOTALE:\n- **Portefeuille optimisé:** 299 000€ → +28 614€/an\n- **Avantage vs CAT:** +19 685€/an (+221% de surperformance)\n- **Diversification maintenue** avec grades A/B privilégiés\n- **Rendement portfolio global:** 9.57% vs 2.99% CAT\n\nVotre allocation génère un excédent annuel de **19 685€** par rapport au benchmark, soit une création de valeur significative sur vos liquidités disponibles.",
   "version": "1.1",
   "totalLiquidity": 109000,
   "totalPortfolioInvested": 190000,
@@ -16,7 +16,7 @@
   "portfolio": [
     {
       "name": "SL - ATHENA PRIVILEGE ENI DECEMBRE 2025",
-      "grade": "B",
+      "grade": "C",
       "amount": 30000,
       "coupon": 5.7,
       "annualReturn": 1710,
@@ -79,14 +79,14 @@
     {
       "name": "EMTN Digitale WO LVMH Crédit Agricole Avril 2029",
       "grade": "B",
-      "score": 66,
+      "score": 64,
       "allocatedAmount": 9000,
       "coupon": 6.15,
       "annualReturn": 554,
       "catReturn": 269,
       "excessVsCat": 285,
       "recommendation": "SOUSCRIRE",
-      "reason": "Grade B (66/100) — 9 000€ → +285€/an vs CAT"
+      "reason": "Grade B (64/100) — 9 000€ → +285€/an vs CAT"
     },
     {
       "name": "Autocall Euro Stoxx Banks Avril 2031",
@@ -101,18 +101,6 @@
       "reason": "Grade B (63/100) — 0€ → +0€/an vs CAT"
     },
     {
-      "name": "NOTE TAUX FIXE CALLABLE BONUS PAIEMENT À MATURITÉ",
-      "grade": "C",
-      "score": 54,
-      "allocatedAmount": 0,
-      "coupon": 4,
-      "annualReturn": 0,
-      "catReturn": 0,
-      "excessVsCat": 0,
-      "recommendation": "ATTENDRE",
-      "reason": "Grade C (54/100) — rendement insuffisant pour le risque"
-    },
-    {
       "name": "Solution Court Terme Boostée sur Panier d'Actions 3",
       "grade": "C",
       "score": 51,
@@ -123,6 +111,18 @@
       "excessVsCat": 0,
       "recommendation": "ATTENDRE",
       "reason": "Grade C (51/100) — rendement insuffisant pour le risque"
+    },
+    {
+      "name": "NOTE TAUX FIXE CALLABLE BONUS PAIEMENT À MATURITÉ",
+      "grade": "C",
+      "score": 50,
+      "allocatedAmount": 0,
+      "coupon": 4,
+      "annualReturn": 0,
+      "catReturn": 0,
+      "excessVsCat": 0,
+      "recommendation": "ATTENDRE",
+      "reason": "Grade C (50/100) — rendement insuffisant pour le risque"
     }
   ]
 }
