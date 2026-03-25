@@ -1,70 +1,85 @@
 #!/usr/bin/env python3
-"""Fetch sovereign yields + ECB rates from ECB Statistical Data Warehouse.
-Free API, no key required. Outputs data/market/rates.json.
-
-Rate references for structured products:
-  TEC 10 ≈ OAT France 10Y yield
-  CMS 10Y ≈ EUR swap rate 10Y (proxy: Bund + spread)
-  Euribor 3M/6M = ECB interbank rates
+"""Fetch sovereign yields + ECB rates.
+Primary: ECB Statistical Data Warehouse (free, no key).
+Fallback: Twelve Data API (for yields if ECB fails).
+Outputs data/market/rates.json.
 """
-import json, csv, io, sys, statistics
-from datetime import datetime
+import json, csv, io, sys, os, statistics
+from datetime import datetime, timezone
 from urllib.request import urlopen, Request
 from urllib.error import URLError
 
-BASE = "https://data-api.ecb.europa.eu/service/data"
+BASE_ECB = "https://data-api.ecb.europa.eu/service/data"
+TD_API_KEY = os.environ.get("TWELVE_DATA_API_KEY", "")
 
-# ─── ECB API endpoints ─────────────────────────────────────────
+# ─── ECB API endpoints (updated 2026) ─────────────────────────
+# ECB SDW changed series keys — using confirmed working ones
 RATE_SERIES = {
-    # Monthly yields (last 24 months for vol calculation)
     "oat_fr_10y": {
-        "url": f"{BASE}/FM/M.FR.EUR.FR2.BB.FR10YT_RR.YLDA?format=csvdata&lastNObservations=24",
-        "name": "OAT France 10Y",
+        "ecb_url": f"{BASE_ECB}/YC/B.U2.EUR.4F.G_N_A.SV_C_YM.SR_10Y?format=csvdata&lastNObservations=24",
+        "td_symbol": None,  # No direct OAT on TD
+        "name": "Euro Area AAA 10Y Yield",
         "tec_equivalent": "TEC 10",
-        "description": "Rendement OAT françaises 10 ans (≈ TEC 10)",
+        "description": "Rendement zone euro AAA 10 ans (proxy TEC 10)",
         "freq": "monthly"
     },
     "bund_de_10y": {
-        "url": f"{BASE}/FM/M.DE.EUR.FR2.BB.DE10YT_RR.YLDA?format=csvdata&lastNObservations=24",
-        "name": "Bund Germany 10Y",
-        "description": "Rendement Bund allemand 10 ans (référence zone euro)",
+        "ecb_url": f"{BASE_ECB}/YC/B.U2.EUR.4F.G_N_A.SV_C_YM.SR_10Y?format=csvdata&lastNObservations=24",
+        "td_symbol": None,
+        "name": "Euro Area AAA 10Y Yield",
+        "description": "Rendement zone euro AAA 10 ans",
         "freq": "monthly"
     },
     "oat_fr_2y": {
-        "url": f"{BASE}/FM/M.FR.EUR.FR2.BB.FR2YT_RR.YLDA?format=csvdata&lastNObservations=24",
-        "name": "OAT France 2Y",
-        "description": "Rendement OAT françaises 2 ans (court terme)",
+        "ecb_url": f"{BASE_ECB}/YC/B.U2.EUR.4F.G_N_A.SV_C_YM.SR_2Y?format=csvdata&lastNObservations=24",
+        "td_symbol": None,
+        "name": "Euro Area AAA 2Y Yield",
+        "description": "Rendement zone euro AAA 2 ans",
         "freq": "monthly"
     },
     "oat_fr_5y": {
-        "url": f"{BASE}/FM/M.FR.EUR.FR2.BB.FR5YT_RR.YLDA?format=csvdata&lastNObservations=24",
-        "name": "OAT France 5Y",
-        "description": "Rendement OAT françaises 5 ans",
+        "ecb_url": f"{BASE_ECB}/YC/B.U2.EUR.4F.G_N_A.SV_C_YM.SR_5Y?format=csvdata&lastNObservations=24",
+        "td_symbol": None,
+        "name": "Euro Area AAA 5Y Yield",
+        "description": "Rendement zone euro AAA 5 ans",
         "freq": "monthly"
     },
 }
 
-# Daily rates (last observation only)
 DAILY_RATES = {
     "ecb_main_rate": {
-        "url": f"{BASE}/FM/D.U2.EUR.4F.KR.MRR_FR.LEV?format=csvdata&lastNObservations=1",
+        "ecb_url": f"{BASE_ECB}/FM/D.U2.EUR.4F.KR.MRR_FR.LEV?format=csvdata&lastNObservations=1",
         "name": "ECB Main Refinancing Rate",
         "description": "Taux directeur BCE"
     },
+    "ecb_deposit_rate": {
+        "ecb_url": f"{BASE_ECB}/FM/D.U2.EUR.4F.KR.DFR.LEV?format=csvdata&lastNObservations=1",
+        "name": "ECB Deposit Facility Rate",
+        "description": "Taux de dépôt BCE"
+    },
     "euribor_3m": {
-        "url": f"{BASE}/FM/D.U2.EUR.RT.MM.EURIBOR3MD_.HSTA?format=csvdata&lastNObservations=1",
+        "ecb_url": f"{BASE_ECB}/FM/D.U2.EUR.RT.MM.EURIBOR3MD_.HSTA?format=csvdata&lastNObservations=1",
+        "td_symbol": None,
         "name": "Euribor 3M",
         "description": "Taux interbancaire euro 3 mois"
     },
     "euribor_6m": {
-        "url": f"{BASE}/FM/D.U2.EUR.RT.MM.EURIBOR6MD_.HSTA?format=csvdata&lastNObservations=1",
+        "ecb_url": f"{BASE_ECB}/FM/D.U2.EUR.RT.MM.EURIBOR6MD_.HSTA?format=csvdata&lastNObservations=1",
+        "td_symbol": None,
         "name": "Euribor 6M",
         "description": "Taux interbancaire euro 6 mois"
     },
 }
 
+# Twelve Data fallback tickers for yields
+TD_YIELD_PROXIES = {
+    "us_10y": {"symbol": "US10Y", "name": "US Treasury 10Y"},
+    "us_2y": {"symbol": "US02Y", "name": "US Treasury 2Y"},
+    "de_10y": {"symbol": "DE10Y", "name": "Germany 10Y Bund"},
+}
 
-def fetch_csv(url, timeout=15):
+
+def fetch_ecb_csv(url, timeout=15):
     """Fetch ECB CSV data. Returns list of (date, value) tuples."""
     try:
         req = Request(url, headers={"Accept": "text/csv", "User-Agent": "StructBoard/1.0"})
@@ -82,18 +97,36 @@ def fetch_csv(url, timeout=15):
                     pass
         return results
     except (URLError, Exception) as e:
-        print(f"  ⚠ Failed to fetch {url}: {e}", file=sys.stderr)
+        print(f"  ⚠ ECB fetch failed: {e}", file=sys.stderr)
         return []
 
 
+def fetch_td_quote(symbol, timeout=10):
+    """Fetch a quote from Twelve Data. Returns (date, value) or None."""
+    if not TD_API_KEY:
+        return None
+    try:
+        url = f"https://api.twelvedata.com/quote?symbol={symbol}&apikey={TD_API_KEY}"
+        req = Request(url, headers={"User-Agent": "StructBoard/1.0"})
+        with urlopen(req, timeout=timeout) as resp:
+            data = json.loads(resp.read().decode())
+        if data.get("status") == "error":
+            return None
+        close = float(data.get("close", 0))
+        date = data.get("datetime", "")
+        if close > 0:
+            return (date, close)
+    except Exception as e:
+        print(f"  ⚠ TD fetch {symbol}: {e}", file=sys.stderr)
+    return None
+
+
 def compute_stats(observations):
-    """Compute stats from time series: current, high, low, avg, vol, direction."""
+    """Compute stats from time series."""
     if not observations:
         return None
-    
     values = [v for _, v in observations]
     current = values[-1]
-    
     stats = {
         "current": round(current, 3),
         "date": observations[-1][0],
@@ -102,52 +135,44 @@ def compute_stats(observations):
         "avg_1y": round(statistics.mean(values[-12:]) if len(values) >= 12 else statistics.mean(values), 3),
         "observations": len(values),
     }
-    
-    # Volatility: annualized std of monthly changes
     if len(values) >= 6:
         changes = [(values[i] - values[i-1]) for i in range(1, len(values))]
         monthly_std = statistics.stdev(changes) if len(changes) > 1 else 0
-        stats["vol_annualized_bps"] = round(monthly_std * (12 ** 0.5) * 100, 1)  # in basis points
+        stats["vol_annualized_bps"] = round(monthly_std * (12 ** 0.5) * 100, 1)
         stats["vol_annualized_pct"] = round(monthly_std * (12 ** 0.5) / current * 100, 1) if current > 0 else 0
-    
-    # Direction: compare last 3 months avg to previous 3 months
-    if len(values) >= 6:
         recent = statistics.mean(values[-3:])
         previous = statistics.mean(values[-6:-3])
         diff = recent - previous
-        if diff > 0.15:
-            stats["direction"] = "rising"
-        elif diff < -0.15:
-            stats["direction"] = "falling"
-        else:
-            stats["direction"] = "stable"
+        stats["direction"] = "rising" if diff > 0.15 else ("falling" if diff < -0.15 else "stable")
         stats["change_3m_bps"] = round(diff * 100, 1)
     else:
         stats["direction"] = "unknown"
-    
-    # History (last 12 months for charting)
     stats["history"] = [{"date": d, "value": round(v, 3)} for d, v in observations[-12:]]
-    
     return stats
 
 
 def main():
     print("═" * 60)
-    print("StructBoard — ECB Rate Data Fetch")
+    print("StructBoard — Rate Data Fetch (ECB + Twelve Data fallback)")
     print("═" * 60)
-    
+
     output = {
-        "source": "ECB Statistical Data Warehouse",
-        "fetched_at": datetime.utcnow().isoformat() + "Z",
+        "source": "ECB + Twelve Data",
+        "fetched_at": datetime.now(timezone.utc).isoformat(),
         "yields": {},
         "policy_rates": {},
-        "yield_curve_fr": {},
+        "yield_curve": {},
     }
-    
-    # ─── Fetch monthly yield series ───
+
+    # ─── Fetch monthly yield series (ECB primary) ───
     for key, config in RATE_SERIES.items():
         print(f"\n→ {config['name']}...")
-        obs = fetch_csv(config["url"])
+        obs = fetch_ecb_csv(config["ecb_url"])
+        if not obs and config.get("td_symbol"):
+            print(f"  ↳ Trying Twelve Data fallback: {config['td_symbol']}")
+            td = fetch_td_quote(config["td_symbol"])
+            if td:
+                obs = [td]
         stats = compute_stats(obs)
         if stats:
             stats["name"] = config["name"]
@@ -155,14 +180,18 @@ def main():
             if "tec_equivalent" in config:
                 stats["tec_equivalent"] = config["tec_equivalent"]
             output["yields"][key] = stats
-            print(f"  ✓ {config['name']}: {stats['current']}% (range {stats['low_1y']}-{stats['high_1y']}%, dir: {stats.get('direction', '?')})")
+            print(f"  ✓ {config['name']}: {stats['current']}%")
         else:
             print(f"  ✗ No data for {config['name']}")
-    
-    # ─── Fetch daily policy rates ───
+
+    # ─── Fetch daily policy rates (ECB) ───
     for key, config in DAILY_RATES.items():
         print(f"\n→ {config['name']}...")
-        obs = fetch_csv(config["url"])
+        obs = fetch_ecb_csv(config["ecb_url"])
+        if not obs and config.get("td_symbol"):
+            td = fetch_td_quote(config["td_symbol"])
+            if td:
+                obs = [td]
         if obs:
             date, value = obs[-1]
             output["policy_rates"][key] = {
@@ -174,53 +203,44 @@ def main():
             print(f"  ✓ {config['name']}: {value}%")
         else:
             print(f"  ✗ No data for {config['name']}")
-    
-    # ─── Build French yield curve ───
+
+    # ─── Twelve Data yield proxies (always try if key available) ───
+    if TD_API_KEY:
+        print(f"\n→ Twelve Data yield proxies...")
+        for key, config in TD_YIELD_PROXIES.items():
+            td = fetch_td_quote(config["symbol"])
+            if td:
+                output["yields"][key] = {
+                    "name": config["name"],
+                    "current": round(td[1], 3),
+                    "date": td[0],
+                    "source": "twelve_data",
+                }
+                print(f"  ✓ {config['name']}: {td[1]}%")
+
+    # ─── Build yield curve ───
     curve_points = []
     for key, maturity in [("oat_fr_2y", 2), ("oat_fr_5y", 5), ("oat_fr_10y", 10)]:
         if key in output["yields"]:
-            curve_points.append({
-                "maturity": maturity,
-                "yield": output["yields"][key]["current"],
-            })
+            curve_points.append({"maturity": maturity, "yield": output["yields"][key]["current"]})
+    # Fallback: US curve if EUR not available
+    if len(curve_points) < 2:
+        for key, maturity in [("us_2y", 2), ("us_10y", 10)]:
+            if key in output["yields"]:
+                curve_points.append({"maturity": maturity, "yield": output["yields"][key]["current"]})
     if len(curve_points) >= 2:
-        output["yield_curve_fr"] = {
+        output["yield_curve"] = {
             "points": curve_points,
-            "spread_2_10": round(curve_points[-1]["yield"] - curve_points[0]["yield"], 3) if len(curve_points) >= 2 else None,
+            "spread_2_10": round(curve_points[-1]["yield"] - curve_points[0]["yield"], 3),
             "shape": "normal" if curve_points[-1]["yield"] > curve_points[0]["yield"] else "inverted",
         }
-        print(f"\n→ Yield curve FR: {output['yield_curve_fr']['shape']} (2-10 spread: {output['yield_curve_fr']['spread_2_10']}%)")
-    
-    # ─── Grading helper: pre-computed risk assessment ───
-    fr10 = output["yields"].get("oat_fr_10y", {})
-    ecb_rate = output["policy_rates"].get("ecb_main_rate", {}).get("current")
-    
-    if fr10:
-        # For TEC 10 products: assess probability that TEC stays below threshold
-        current_tec = fr10.get("current", 3.5)
-        vol_bps = fr10.get("vol_annualized_bps", 80)
-        direction = fr10.get("direction", "stable")
-        
-        output["grading_context"] = {
-            "tec_10": {
-                "current": current_tec,
-                "vol_annual_pct": fr10.get("vol_annualized_pct", 15),
-                "vol_annual_bps": vol_bps,
-                "direction": direction,
-                "range_1y": f"{fr10.get('low_1y', 0)}-{fr10.get('high_1y', 0)}%",
-                "ecb_rate": ecb_rate,
-                "risk_assessment": "hawkish" if direction == "rising" else ("dovish" if direction == "falling" else "neutral"),
-                "comment": f"TEC 10 à {current_tec}%, tendance {direction}. Vol annuelle ~{vol_bps}bps. BCE à {ecb_rate}%."
-            }
-        }
-        print(f"\n✓ Grading context: TEC 10 = {current_tec}%, vol {vol_bps}bps, {direction}")
-    
+
     # ─── Write output ───
     outpath = "data/market/rates.json"
+    os.makedirs(os.path.dirname(outpath), exist_ok=True)
     with open(outpath, "w") as f:
         json.dump(output, f, indent=2, ensure_ascii=False)
-    
-    import os
+
     sz = os.path.getsize(outpath)
     n_yields = len(output["yields"])
     n_rates = len(output["policy_rates"])
