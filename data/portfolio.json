@@ -1043,7 +1043,9 @@
       "triggerDetail": "Remboursement automatique si somme des coupons cumulés ≥ 24%",
       "frequency": "annuel",
       "startYear": 1,
-      "stepDown": false
+      "stepDown": false,
+      "hasAutocall": true,
+      "enabled": true
     },
     "scenarios": {
       "favorable": "Coupons garantis années 1-2 (12%), puis coupons conditionnels si TEC 10 ≤ 4,40%",
@@ -1243,6 +1245,8 @@
           "p4": -5
         }
       }
-    }
+    },
+    "envelope": "cameleons",
+    "maturityYears": 10
   }
 ]
