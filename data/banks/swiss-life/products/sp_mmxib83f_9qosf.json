@@ -147,72 +147,72 @@
   },
   "grading": {
     "grade": "B",
-    "score": 70,
+    "score": 65,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 54,
+        "score": 49,
         "base": 59,
-        "delta": -5,
-        "reasoning": "Rendement: base 59 → -5 = 54 (Volatilité 26% avec barrière 60% augmente le risque d'activation, distance de sécurité limitée pour autocall trimestriel) | Coupon 7.5% (1.875×4), barrière 60%"
+        "delta": -10,
+        "reasoning": "Rendement: base 59 → -10 = 49 (Volatilité élevée 26% + action unique sans diversification augmente le risque de non-paiement du coupon) | Coupon 7.5% (1.875×4), barrière 60%"
       },
       "underlyingQuality": {
-        "score": 73,
+        "score": 70,
         "base": 85,
-        "delta": -12,
-        "reasoning": "Qualité: base 85 → -12 = 73 (BNP dans secteur financier évité en régime macro neutral, beta 0.91 expose au risque systémique, ROE élevé mais momentum très négatif) [vol/DD 30%] | Worst: Action BNP Paribas (FR0000131104) B:100"
+        "delta": -15,
+        "reasoning": "Qualité: base 85 → -15 = 70 (Secteur financier explicitement évité en macro + performance catastrophique -33% sur 1Y expose à prolongation) [vol/DD 30%] | Worst: Action BNP Paribas (FR0000131104) B:100"
       },
       "portfolioFit": {
-        "score": 62,
+        "score": 70,
         "base": 70,
-        "delta": -8,
+        "delta": 0,
         "reasoning": "En portefeuille — neutre"
       },
       "riskPremium": {
-        "score": 84,
+        "score": 79,
         "base": 84,
-        "delta": 0,
-        "reasoning": "Prime: base 84 | 7.5% vs CAT 2.5% (spread 5.0%)"
+        "delta": -5,
+        "reasoning": "Prime: base 84 → -5 = 79 (Spread attractif mais compensé par risque concentration sur valeur financière malmenée) | 7.5% vs CAT 2.5% (spread 5.0%)"
       }
     },
-    "verdict": "Produit exposé à un actif bancaire français en difficulté (-34% sur 1 an) dans un contexte macro défavorable aux financières. Le coupon attractif de 7.5% compense partiellement le risque élevé, mais la concentration sur BNP limite l'attrait. La barrière à 60% offre une marge correcte mais la volatilité de 26% maintient un risque d'activation non négligeable. Structure acceptable uniquement pour investisseurs optimistes sur le secteur bancaire européen.",
+    "verdict": "Produit présentant un profil risque-rendement déséquilibré malgré un coupon attractif à 7,5%. L'exposition unique à BNP Paribas, secteur évité en contexte macro et performance désastreuse -33% sur 1 an, crée un risque majeur de prolongation au-delà de la maturité initiale. La barrière à 60% offre une marge correcte mais insuffisante face à la volatilité de 26% du sous-jacent. Le timing d'investissement apparaît défavorable sur une valeur financière en difficulté structurelle.",
     "keyRisks": [
-      "Exposition concentrée sur secteur bancaire français défavorisé par contexte macro neutral",
-      "Risque d'activation barrière amplifié par volatilité élevée 26% et momentum négatif persistant"
+      "Concentration sur secteur financier évité + performance -33% augmente probabilité de prolongation",
+      "Volatilité élevée 26% menace régularité des coupons trimestriels sur action unique"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 8,
-        "return_eur": 2400,
+        "return_pct": 7.5,
+        "return_eur": 2250,
         "probability": 0.2,
-        "duration_years": 1.25
+        "duration_years": 1
       },
       "base": {
-        "return_pct": 4,
-        "return_eur": 3600,
+        "return_pct": 4.5,
+        "return_eur": 4050,
         "probability": 0.3,
-        "duration_years": 2
+        "duration_years": 3
       },
       "stress": {
-        "return_pct": 0,
-        "return_eur": 0,
+        "return_pct": 1.5,
+        "return_eur": 675,
         "probability": 0.35,
-        "duration_years": 2
+        "duration_years": 6
       },
       "worst": {
         "return_pct": -25,
         "return_eur": -7500,
         "probability": 0.15,
-        "duration_years": 2
+        "duration_years": 6
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-24T17:02:17.064Z",
-      "durationMs": 13055,
+      "gradedAt": "2026-03-25T08:19:47.422Z",
+      "durationMs": 11564,
       "aiUsed": true,
       "version": "4.3",
       "productType": "standard",
@@ -228,14 +228,14 @@
       "barrierPct": 60,
       "expectedMaturity": 0,
       "maxMaturity": 0,
-      "maxBeta": 0.91,
+      "maxBeta": 0.96,
       "baseScore": 76,
       "baseGrade": "A",
       "adjustments": {
-        "p1": -5,
-        "p2": -12,
-        "p3": -8,
-        "p4": 0
+        "p1": -10,
+        "p2": -15,
+        "p3": 0,
+        "p4": -5
       }
     }
   }
