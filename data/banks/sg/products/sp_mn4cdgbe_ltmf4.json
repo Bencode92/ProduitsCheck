@@ -139,7 +139,7 @@
   },
   "grading": {
     "grade": "C",
-    "score": 50,
+    "score": 56,
     "killCriteria": {
       "triggered": false,
       "reasons": []
@@ -149,62 +149,62 @@
         "score": 45,
         "base": 55,
         "delta": -10,
-        "reasoning": "Rendement: base 55 → -10 = 45 (4% fixe peu attractif vs obligations d'État 10Y (~3%) avec prime risque crédit insuffisante) | Coupon 4%, protégé"
+        "reasoning": "Rendement: base 55 → -10 = 45 (Taux 4% faible dans contexte actuel où les OAT 10 ans sont à 3% et potentielle baisse des taux futures qui rendrait ce taux moins attractif) | Coupon 4%, protégé"
       },
       "underlyingQuality": {
         "score": 70,
         "base": 75,
         "delta": -5,
-        "reasoning": "Qualité: base 75 → -5 = 70 (Contexte taux élevés défavorise les émetteurs obligataires avec pression refinancement) [crédit]"
+        "reasoning": "Qualité: base 75 → -5 = 70 (Risque de crédit émetteur non précisé mais contexte macro neutre ne favorise pas particulièrement les obligations corporates) [crédit]"
       },
       "portfolioFit": {
-        "score": 70,
+        "score": 75,
         "base": 70,
-        "delta": 0,
-        "reasoning": "Fit: base 70"
+        "delta": 5,
+        "reasoning": "Fit: base 70 → +5 = 75 (Produit de taux cohérent avec allocation obligataire mais manque de diversification sur sous-jacents actions)"
       },
       "riskPremium": {
-        "score": 20,
+        "score": 40,
         "base": 30,
-        "delta": -10,
-        "reasoning": "Prime: base 30 → -10 = 20 (Spread crédit probablement sous-évalué pour compenser le risque de call anticipé) | 4% vs CAT 2.5% (spread 1.5%)"
+        "delta": 10,
+        "reasoning": "Prime: base 30 → +10 = 40 (Structure simple et transparente avec protection du capital, frais probablement contenus pour ce type de produit) | 4% vs CAT 2.5% (spread 1.5%)"
       }
     },
-    "verdict": "Ce produit offre 4% annualisé avec protection du capital mais présente un profil risque/rendement déséquilibré. L'émetteur bénéficie d'une option gratuite de rappel anticipé quand les taux baissent, privant l'investisseur de la plus-value obligataire. La prime de 100bp vs taux sans risque semble insuffisante pour compenser le risque crédit et d'optionalité. Dans l'environnement actuel de taux élevés, des alternatives moins risquées offrent des rendements comparables.",
+    "verdict": "Obligation callable offrant 4% annualisé avec protection du capital mais rendement modeste dans l'environnement actuel. Le risque principal réside dans le rappel anticipé par l'émetteur si les taux baissent, forçant un réinvestissement à des conditions moins favorables. La simplicité de la structure compense partiellement la faible attractivité du coupon. Produit défensif adapté aux investisseurs prudents cherchant de la visibilité.",
     "keyRisks": [
-      "Risque de crédit émetteur avec perte totale du capital en cas de défaut",
-      "Risque de réinvestissement si rappel anticipé en environnement taux bas"
+      "Risque de rappel anticipé si les taux baissent, obligeant à réinvestir à des conditions moins favorables",
+      "Risque de crédit de l'émetteur non précisé dans les données fournies"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 12,
-        "return_eur": 12000,
-        "probability": 0.2,
-        "duration_years": 2
+        "return_pct": 5,
+        "return_eur": 5000,
+        "probability": 0.25,
+        "duration_years": 1
       },
       "base": {
-        "return_pct": 20,
-        "return_eur": 20000,
+        "return_pct": 4,
+        "return_eur": 12000,
         "probability": 0.4,
-        "duration_years": 4
+        "duration_years": 3
       },
       "stress": {
-        "return_pct": 24,
-        "return_eur": 24000,
+        "return_pct": 4,
+        "return_eur": 32000,
         "probability": 0.3,
-        "duration_years": 6
+        "duration_years": 8
       },
       "worst": {
-        "return_pct": -100,
-        "return_eur": -100000,
-        "probability": 0.1,
-        "duration_years": 3
+        "return_pct": -80,
+        "return_eur": -80000,
+        "probability": 0.05,
+        "duration_years": 8
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-25T08:20:56.764Z",
-      "durationMs": 11165,
+      "gradedAt": "2026-03-25T14:40:58.410Z",
+      "durationMs": 12046,
       "aiUsed": true,
       "version": "4.3",
       "productType": "fixed-rate-callable",
@@ -226,8 +226,8 @@
       "adjustments": {
         "p1": -10,
         "p2": -5,
-        "p3": 0,
-        "p4": -10
+        "p3": 5,
+        "p4": 10
       }
     }
   }
