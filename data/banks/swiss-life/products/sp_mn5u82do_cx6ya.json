@@ -145,16 +145,16 @@
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 7,
+        "score": 12,
         "base": 17,
-        "delta": -10,
-        "reasoning": "Rendement: base 17 → -10 = 7 (Sans barrière définie et avec des obligations comme sous-jacents en régime neutre, la probabilité de coupon est très incertaine et dépend de la qualité crédit non spécifiée) | Coupon 4.17%"
+        "delta": -5,
+        "reasoning": "Rendement: base 17 → -5 = 12 (Produit obligataire sans barrière visible, rendement 4.17% faible dans le contexte actuel de taux élevés) | Coupon 4.17%"
       },
       "underlyingQuality": {
-        "score": 30,
+        "score": 25,
         "base": 35,
-        "delta": -5,
-        "reasoning": "Qualité: base 35 → -5 = 30 (Obligations internationales sans détail sur la qualité crédit ni duration dans un contexte de taux encore élevés présente un risque significatif) [B/Q 35%]"
+        "delta": -10,
+        "reasoning": "Qualité: base 35 → -10 = 25 (Obligations internationales en euros exposées aux financials (secteur évité) et sensibles aux taux en régime neutral) [B/Q 35%]"
       },
       "portfolioFit": {
         "score": 80,
@@ -166,45 +166,45 @@
         "score": 28,
         "base": 33,
         "delta": -5,
-        "reasoning": "Prime: base 33 → -5 = 28 (Sans information sur le spread réel versus obligations directes, la prime de structuration semble excessive pour un simple panier obligataire) | 4.17% vs CAT 2.5% (spread 1.7%)"
+        "reasoning": "Prime: base 33 → -5 = 28 (Structure autocall sur obligations peu attractive vs obligations directes avec liquidité supérieure) | 4.17% vs CAT 2.5% (spread 1.7%)"
       }
     },
-    "verdict": "Ce produit structuré sur obligations manque cruellement de transparence avec une barrière non définie et aucune information sur la qualité crédit ou duration des obligations sous-jacentes. En régime macro neutre avec des taux encore élevés, le rendement de 4.17% semble faible pour le risque pris sur du capital non protégé. L'absence de détails sur la composition du panier obligataire et les mécanismes d'autocall rend l'évaluation du couple rendement/risque impossible.",
+    "verdict": "Produit décevant offrant 4.17% annualisé via une structure complexe sur obligations, alors que des obligations investment grade directes offrent 3.5-4% avec liquidité quotidienne. L'autocall à 100% sur obligations internationales n'apporte pas de valeur ajoutée significative. En régime macro neutral avec les financials évitées, ce produit structuré obligataire présente un rapport risque/rendement défavorable pour 100k€.",
     "keyRisks": [
-      "Risque de crédit non défini sur les obligations sous-jacentes",
-      "Sensibilité aux taux d'intérêt dans un environnement de politique monétaire incertaine",
-      "Capital non protégé avec mécanisme de barrière non spécifié"
+      "Risque de taux important si hausse des taux BCE",
+      "Liquidité réduite vs obligations directes",
+      "Exposition probable aux financials européennes"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 4.17,
         "return_eur": 4170,
-        "probability": 0.2,
+        "probability": 0.25,
         "duration_years": 1
       },
       "base": {
-        "return_pct": 8.34,
-        "return_eur": 8340,
-        "probability": 0.35,
-        "duration_years": 2
+        "return_pct": 4.17,
+        "return_eur": 12510,
+        "probability": 0.4,
+        "duration_years": 3
       },
       "stress": {
-        "return_pct": 0,
-        "return_eur": 0,
-        "probability": 0.3,
-        "duration_years": 3
+        "return_pct": 2,
+        "return_eur": 8000,
+        "probability": 0.25,
+        "duration_years": 4
       },
       "worst": {
-        "return_pct": -15,
-        "return_eur": -15000,
-        "probability": 0.15,
-        "duration_years": 3
+        "return_pct": -10,
+        "return_eur": -10000,
+        "probability": 0.1,
+        "duration_years": 5
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-25T17:06:54.440Z",
-      "durationMs": 16423,
+      "gradedAt": "2026-03-25T17:16:00.348Z",
+      "durationMs": 16364,
       "aiUsed": true,
       "version": "4.3",
       "productType": "standard",
@@ -224,8 +224,8 @@
       "baseScore": 38,
       "baseGrade": "D",
       "adjustments": {
-        "p1": -10,
-        "p2": -5,
+        "p1": -5,
+        "p2": -10,
         "p3": 0,
         "p4": -5
       }
