@@ -8,6 +8,8 @@ const CONFIG = {
   DATA_PATH: 'data',
   BRANCH: 'main',
   AI_ENDPOINT: 'https://studyforge-proxy.benoit-comas.workers.dev',
+  AI_MODEL: 'claude-opus-4-20250514',  // Bug #8 fix: single source of truth
+  AI_MODEL_FALLBACK: 'claude-sonnet-4-20250514',
   PDFJS_CDN: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174',
 };
 
@@ -97,3 +99,24 @@ const SCORING_WEIGHTS = {
   NEW_PRODUCT_TYPE: 20, NEW_BANK: 15, FILLS_MATURITY_GAP: 15,
   BETTER_YIELD_RISK: 15, DECORRELATION_BONUS: 10,
 };
+
+// ═══ SHARED PRODUCT TYPE DETECTION ═══
+// Bug #4 fix: single unified function for all patches
+// Used by: grader-v5-patch.js, grader-rates-patch.js, proposal-grader.js
+function _isFixedRateOrCallable(p) {
+    if (!p) return false;
+    var name = (p.name || '').toLowerCase();
+    var type = (p.type || '').toLowerCase();
+    // Direct indicators from name/type
+    if (type.indexOf('taux fixe') >= 0 || type.indexOf('callable') >= 0) return true;
+    if (type.indexOf('obligation') >= 0 || type === 'cln') return true;
+    if (name.indexOf('taux fixe') >= 0 || name.indexOf('callable') >= 0) return true;
+    if (name.indexOf('fixed rate') >= 0 || name.indexOf('obligation') >= 0) return true;
+    if (name.indexOf('bond') >= 0 && name.indexOf('bond 12m') < 0) return true; // Not liquidity bond
+    if (name.indexOf('cln') >= 0) return true;
+    // Structural: no equity underlying + has coupon
+    var noEquity = !p.underlyings || p.underlyings.length === 0;
+    if (noEquity && p.coupon > 0) return true;
+    if (noEquity && (p.couponType === 'fixe' || p.couponType === 'garanti')) return true;
+    return false;
+}
