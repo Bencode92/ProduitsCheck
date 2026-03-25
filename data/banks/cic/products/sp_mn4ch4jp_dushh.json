@@ -151,19 +151,19 @@
         "score": 67,
         "base": 77,
         "delta": -10,
-        "reasoning": "Rendement: base 77 → -10 = 67 (Secteur bancaire européen hautement volatil avec corrélations élevées en stress, réduisant les chances de coupon régulier) | Coupon 19.4% (9.7×2), barrière 60%"
+        "reasoning": "Rendement: base 77 → -10 = 67 (Coupon de 19.4% sur secteur bancaire très volatil avec barrière à 60% expose à risque élevé de non-déclenchement) | Coupon 19.4% (9.7×2), barrière 60%"
       },
       "underlyingQuality": {
         "score": 20,
         "base": 35,
         "delta": -15,
-        "reasoning": "Qualité: base 35 → -15 = 20 (Financials explicitement évités dans contexte macro actuel, secteur bancaire européen sous pression réglementaire et taux) [vol/DD 30%]"
+        "reasoning": "Qualité: base 35 → -15 = 20 (Secteur bancaire explicitement évité en contexte macro neutral, exposition concentrée sur secteur défavorisé) [vol/DD 30%]"
       },
       "portfolioFit": {
         "score": 65,
         "base": 80,
         "delta": -15,
-        "reasoning": "Fit: base 80 → -15 = 65 (Exposition 100% aux financials va à l'encontre des recommandations macro d'évitement du secteur)"
+        "reasoning": "Fit: base 80 → -15 = 65 (Financials catégorisé comme secteur à éviter dans allocation stratégique actuelle)"
       },
       "riskPremium": {
         "score": 99,
@@ -172,10 +172,10 @@
         "reasoning": "Prime: base 99 | 19.4% vs CAT 2.5% (spread 16.9%)"
       }
     },
-    "verdict": "Ce produit sur l'EuroStoxx Banks présente un piège attractif avec 19.4% de coupon annualisé mais dans un secteur explicitement déconseillé. Les banques européennes font face à des défis structurels (taux, régulation, récession) créant une forte volatilité et corrélation en cas de stress. La barrière à 60% offre peu de protection face aux chocs sectoriels potentiels. Malgré le spread généreux, l'exposition 100% aux financials contredit la stratégie macro prudente.",
+    "verdict": "Ce produit présente un profil risque/rendement déséquilibré avec une exposition concentrée sur le secteur bancaire européen, explicitement défavorisé dans le contexte macro actuel. Le coupon annualisé de 19.4% reflète la volatilité élevée du secteur mais la probabilité de déclenchement régulier reste faible. La barrière à 60% offre une marge limitée face aux corrections sectorielles fréquentes. L'allocation sur un seul secteur défavorisé compromet la diversification du portefeuille.",
     "keyRisks": [
-      "Corrélation extrême des banques européennes en cas de crise systémique ou récession",
-      "Secteur financier explicitement évité par recommandations macro actuelles"
+      "Concentration sectorielle sur financials en période défavorable avec volatilité élevée",
+      "Risque systémique bancaire européen lié aux taux, crédit et régulation"
     ],
     "negotiationPoints": [],
     "scenarios": {
@@ -186,27 +186,27 @@
         "duration_years": 1
       },
       "base": {
-        "return_pct": 8,
-        "return_eur": 24000,
-        "probability": 0.3,
-        "duration_years": 3
+        "return_pct": 8.5,
+        "return_eur": 42500,
+        "probability": 0.25,
+        "duration_years": 5
       },
       "stress": {
         "return_pct": 0,
         "return_eur": 0,
         "probability": 0.4,
-        "duration_years": 6
+        "duration_years": 7
       },
       "worst": {
-        "return_pct": -35,
-        "return_eur": -35000,
-        "probability": 0.15,
-        "duration_years": 6
+        "return_pct": -25,
+        "return_eur": -25000,
+        "probability": 0.2,
+        "duration_years": 7
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-24T17:04:23.266Z",
-      "durationMs": 11682,
+      "gradedAt": "2026-03-25T08:21:25.419Z",
+      "durationMs": 11819,
       "aiUsed": true,
       "version": "4.3",
       "productType": "standard",
