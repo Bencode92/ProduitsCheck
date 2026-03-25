@@ -4,6 +4,8 @@ Fetch real metrics for underlying proxies via Twelve Data API.
 Reads underlying-map.json, calls API for each unique proxy ticker,
 computes: vol_3y, max_dd_3y, perf_ytd, perf_1y, perf_3m, beta vs SPY.
 Outputs: data/market/underlyings_extra.json
+
+v1.1: Replace USO (WTI futures contango) with BNO (Brent ETF) + XBR/USD fallback
 """
 
 import json, os, sys, math, time
@@ -45,7 +47,6 @@ def compute_metrics(values, bench_values=None):
     if not values or len(values) < 22:
         return None
     
-    # Sort oldest first
     vals = sorted(values, key=lambda x: x['datetime'])
     closes = [float(v['close']) for v in vals if float(v['close']) > 0]
     dates = [v['datetime'] for v in vals]
@@ -91,19 +92,17 @@ def compute_metrics(values, bench_values=None):
             max_dd = dd
     max_dd_3y = round(max_dd, 2)
     
-    # Beta vs SPY (if benchmark provided)
+    # Beta vs SPY
     beta = None
     if bench_values and len(bench_values) > 22:
         bench_sorted = sorted(bench_values, key=lambda x: x['datetime'])
         bench_map = {v['datetime']: float(v['close']) for v in bench_sorted if float(v['close']) > 0}
-        # Align by date
         aligned = []
         for i, v in enumerate(vals):
             if v['datetime'] in bench_map and float(v['close']) > 0:
                 aligned.append((float(v['close']), bench_map[v['datetime']]))
         
         if len(aligned) > 60:
-            # Use last 252 aligned points
             al = aligned[-253:]
             a_rets = [(al[i][0] / al[i-1][0] - 1) for i in range(1, len(al)) if al[i-1][0] > 0]
             b_rets = [(al[i][1] / al[i-1][1] - 1) for i in range(1, len(al)) if al[i-1][1] > 0]
@@ -131,13 +130,11 @@ def compute_metrics(values, bench_values=None):
 def main():
     if not API_KEY:
         print('\u26a0 TWELVE_DATA_API_KEY not set, skipping underlyings fetch')
-        # Write empty file so downstream doesn't fail
         os.makedirs(os.path.dirname(OUT), exist_ok=True)
         with open(OUT, 'w') as f:
             json.dump({'timestamp': datetime.now().isoformat(), 'tickers': {}}, f)
         return
     
-    # Load underlying map
     map_path = 'data/underlying-map.json'
     if not os.path.exists(map_path):
         print(f'\u26a0 {map_path} not found')
@@ -151,11 +148,13 @@ def main():
     for entry in (umap.get('indices', {}) or {}).values():
         if entry.get('proxy'):
             tickers.add(entry['proxy'])
-    # Add commodity proxies (GLD, SLV for real data)
+    
+    # v1.1: Commodity proxies — BNO for Brent (not USO which has contango issues)
+    # Try XBR/USD (Twelve Data Brent spot) first, BNO as fallback
     commodity_etfs = {
         'gold_usd': 'GLD',
         'silver_usd': 'SLV',
-        'brent_usd': 'USO',
+        'brent_usd': 'BNO',  # v1.1: United States Brent Oil Fund (was USO = WTI futures with contango)
     }
     for etf in commodity_etfs.values():
         tickers.add(etf)
@@ -179,7 +178,18 @@ def main():
         values = fetch_time_series(ticker) if ticker != 'SPY' else spy_values
         if not values:
             print('\u274c no data')
-            continue
+            # v1.1: If BNO fails, try XBR/USD (Brent spot on Twelve Data)
+            if ticker == 'BNO':
+                print(f'  \U0001f504 Trying XBR/USD (Brent spot) as fallback...')
+                values = fetch_time_series('XBR/USD')
+                if values:
+                    print(f'  \u2705 XBR/USD: {len(values)} data points')
+                    ticker = 'XBR/USD'  # Use as key
+                else:
+                    print(f'  \u274c XBR/USD also failed')
+                    continue
+            else:
+                continue
         
         metrics = compute_metrics(values, spy_values if ticker != 'SPY' else None)
         if metrics:
@@ -188,20 +198,22 @@ def main():
         else:
             print('\u26a0 insufficient data')
         
-        # Rate limit: Twelve Data free = 8 calls/min, paid = more
         time.sleep(1)
     
     # Map commodity ETFs back to macro_key
     commodity_metrics = {}
     for macro_key, etf in commodity_etfs.items():
-        if etf in results:
+        # Check both original ticker and XBR/USD fallback
+        actual_ticker = etf if etf in results else ('XBR/USD' if 'XBR/USD' in results and etf == 'BNO' else None)
+        if actual_ticker and actual_ticker in results:
             commodity_metrics[macro_key] = {
-                'proxy_etf': etf,
-                **results[etf]
+                'proxy_etf': actual_ticker,
+                **results[actual_ticker]
             }
     
     output = {
         'timestamp': datetime.now().isoformat(),
+        'version': '1.1',
         'tickers': results,
         'commodity_metrics': commodity_metrics,
         'benchmark': 'SPY',
