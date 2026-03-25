@@ -143,7 +143,7 @@
   },
   "grading": {
     "grade": "B",
-    "score": 74,
+    "score": 69,
     "killCriteria": {
       "triggered": false,
       "reasons": []
@@ -153,31 +153,32 @@
         "score": 80,
         "base": 90,
         "delta": -10,
-        "reasoning": "Rendement: base 90 → -10 = 80 (Coupon 18% sur or minier très attractif mais barrière 50% dangereuse avec volatilité minière extrême (40-60%)) | Coupon 18% (9×2), barrière 50%"
+        "reasoning": "Rendement: base 90 → -10 = 80 (Barrière à 50% sur un indice minier volatil avec décrément 5% réduit significativement la probabilité de percevoir les coupons sur la durée.) | Coupon 18% (9×2), barrière 50%"
       },
       "underlyingQuality": {
-        "score": 40,
+        "score": 30,
         "base": 35,
-        "delta": 5,
-        "reasoning": "Qualité: base 35 → +5 = 40 (Secteur minier aurifère bénéficie du contexte inflationniste et géopolitique, energy favorisé inclut commodités) [vol/DD 30%]"
+        "delta": -5,
+        "reasoning": "Qualité: base 35 → -5 = 30 (Les minières aurifères restent très sensibles aux taux réels et au dollar US, avec une volatilité structurelle élevée malgré le régime macro neutre.) [vol/DD 30%]"
       },
       "portfolioFit": {
-        "score": 75,
+        "score": 80,
         "base": 80,
-        "delta": -5,
-        "reasoning": "Fit: base 80 → -5 = 75 (Exposition minière pure concentrée géographiquement sans diversification sectorielle)"
+        "delta": 0,
+        "reasoning": "Fit: base 80"
       },
       "riskPremium": {
-        "score": 99,
+        "score": 84,
         "base": 99,
-        "delta": 0,
-        "reasoning": "Prime: base 99 | 18% vs CAT 2.5% (spread 15.5%)"
+        "delta": -15,
+        "reasoning": "Prime: base 99 → -15 = 84 (Le décrément de 5% annuel ampute drastiquement le rendement réel et rend le produit structurellement perdant sur la durée.) | 18% vs CAT 2.5% (spread 15.5%)"
       }
     },
-    "verdict": "Produit très agressif sur secteur minier aurifère avec coupon 18% séduisant mais barrière 50% périlleuse. La volatilité minière (GDX souvent 40-50% annuelle) rend l'autocall à 95% difficile et le franchissement de barrière probable. Secteur bénéficie du contexte macro mais concentration risquée. Réservé aux investisseurs acceptant forte probabilité de perte en capital.",
+    "verdict": "Ce produit présente un profil risque/rendement défavorable malgré un coupon facial attractif de 18%. Le décrément annuel de 5% érode mécaniquement la performance de l'indice, rendant l'autocall à 95% très difficile à atteindre après 2-3 ans. Sur 6 ans, l'indice doit surperformer de +30% juste pour compenser le décrément, avant même de générer un gain. La barrière à 50% sur un secteur volatil comme les minières aurifères offre une protection insuffisante.",
     "keyRisks": [
-      "Volatilité minière extrême pouvant franchir barrière 50% rapidement",
-      "Concentration sectorielle sans diversification géographique ni thématique"
+      "Décrément de 5%/an qui rend l'autocall quasi-impossible après 3 ans",
+      "Volatilité élevée des minières aurifères (>30%) avec risque de toucher la barrière",
+      "Sensibilité extrême aux taux réels US et au dollar"
     ],
     "negotiationPoints": [],
     "scenarios": {
@@ -188,27 +189,27 @@
         "duration_years": 1
       },
       "base": {
-        "return_pct": 9,
-        "return_eur": 27000,
+        "return_pct": 4.5,
+        "return_eur": 13500,
         "probability": 0.3,
         "duration_years": 3
       },
       "stress": {
-        "return_pct": 0,
-        "return_eur": 0,
-        "probability": 0.3,
+        "return_pct": -3,
+        "return_eur": -3000,
+        "probability": 0.35,
         "duration_years": 6
       },
       "worst": {
-        "return_pct": -25,
-        "return_eur": -25000,
-        "probability": 0.2,
+        "return_pct": -35,
+        "return_eur": -35000,
+        "probability": 0.15,
         "duration_years": 6
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-25T14:42:28.415Z",
-      "durationMs": 11766,
+      "gradedAt": "2026-03-25T16:35:01.978Z",
+      "durationMs": 19423,
       "aiUsed": true,
       "version": "4.3",
       "productType": "standard",
@@ -229,9 +230,9 @@
       "baseGrade": "A",
       "adjustments": {
         "p1": -10,
-        "p2": 5,
-        "p3": -5,
-        "p4": 0
+        "p2": -5,
+        "p3": 0,
+        "p4": -15
       }
     }
   }
