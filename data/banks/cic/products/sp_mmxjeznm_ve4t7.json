@@ -146,7 +146,7 @@
   },
   "grading": {
     "grade": "C",
-    "score": 47,
+    "score": 51,
     "killCriteria": {
       "triggered": false,
       "reasons": []
@@ -156,13 +156,13 @@
         "score": 50,
         "base": 60,
         "delta": -10,
-        "reasoning": "Rendement: base 60 → -10 = 50 (Autocall à seulement 24% sur indice actions belge volatile dans contexte macro neutral limite les chances de sortie rapide) | Coupon 6%, protégé"
+        "reasoning": "Rendement: base 60 → -10 = 50 (Coupon 6% attractif mais structure TARN complexifie la réalisation du rendement avec risque d'extinction prématurée) | Coupon 6%, protégé"
       },
       "underlyingQuality": {
-        "score": 30,
+        "score": 40,
         "base": 35,
-        "delta": -5,
-        "reasoning": "Qualité: base 35 → -5 = 30 (TEC 10 exposé aux secteurs évités (financials avec KBC/Ageas) dans un régime macro neutre défavorable) [B/Q 35%]"
+        "delta": 5,
+        "reasoning": "Qualité: base 35 → +5 = 40 (TEC 10 bénéficie du contexte macro neutral-energy favorable, exposition diversifiée européenne moins risquée que secteurs évités) [B/Q 35%]"
       },
       "portfolioFit": {
         "score": 70,
@@ -171,47 +171,47 @@
         "reasoning": "En portefeuille — neutre"
       },
       "riskPremium": {
-        "score": 62,
+        "score": 65,
         "base": 70,
-        "delta": -8,
-        "reasoning": "Prime: base 70 → -8 = 62 (Coupon 6% paraît généreux mais structure TARN avec autocall bas compense mal le risque actions belges) | 6% vs CAT 2.5% (spread 3.5%)"
+        "delta": -5,
+        "reasoning": "Prime: base 70 → -5 = 65 (Structure TARN génère une complexité tarifaire supplémentaire qui peut masquer des frais implicites) | 6% vs CAT 2.5% (spread 3.5%)"
       }
     },
-    "verdict": "Ce TARN sur TEC 10 offre un coupon attractif de 6% avec capital protégé, mais souffre de plusieurs handicaps structurels. L'autocall fixé à seulement 24% réduit drastiquement les chances de sortie anticipée profitable sur un indice belge naturellement volatil. L'exposition significative aux secteurs financials (KBC, Ageas) va à l'encontre des recommandations macro actuelles. La structure TARN complexifie l'évaluation du rendement réel esperé.",
+    "verdict": "Ce TARN sur TEC 10 offre un coupon attractif de 6% avec protection du capital, bénéficiant d'une exposition diversifiée européenne alignée avec le contexte macro favorable à l'énergie. Cependant, la structure TARN complexifie significativement la réalisation du rendement avec un risque d'extinction anticipée qui peut frustrer les attentes. Le seuil d'autocall élevé à 24% rend le déclenchement difficile dans un contexte de volatilité. L'investissement reste défendable pour la protection capital mais la complexité structurelle justifie une approche prudente.",
     "keyRisks": [
-      "Exposition importante aux financials belges (secteur évité) via KBC/Ageas qui représentent ~30% du TEC 10",
-      "Autocall très bas (24%) sur indice volatil risque de bloquer le produit pendant toute la durée"
+      "Extinction TARN prématurée limitant le rendement total réalisé",
+      "Seuil autocall 24% élevé rendant le déclenchement improbable en cas de volatilité"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 4.5,
-        "return_eur": 4500,
+        "return_pct": 8,
+        "return_eur": 8000,
         "probability": 0.2,
-        "duration_years": 1
+        "duration_years": 2
       },
       "base": {
-        "return_pct": 3.2,
-        "return_eur": 19200,
-        "probability": 0.35,
-        "duration_years": 6
+        "return_pct": 4,
+        "return_eur": 16000,
+        "probability": 0.4,
+        "duration_years": 4
       },
       "stress": {
-        "return_pct": 1.8,
-        "return_eur": 10800,
+        "return_pct": 1,
+        "return_eur": 6000,
         "probability": 0.3,
-        "duration_years": 11
+        "duration_years": 6
       },
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.15,
-        "duration_years": 11
+        "probability": 0.1,
+        "duration_years": 6
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-24T17:02:31.518Z",
-      "durationMs": 12954,
+      "gradedAt": "2026-03-25T08:20:00.763Z",
+      "durationMs": 11840,
       "aiUsed": true,
       "version": "4.3",
       "productType": "standard",
@@ -232,9 +232,9 @@
       "baseGrade": "C",
       "adjustments": {
         "p1": -10,
-        "p2": -5,
+        "p2": 5,
         "p3": 0,
-        "p4": -8
+        "p4": -5
       }
     }
   }
