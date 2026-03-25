@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Grader UI Patch v1.8 — Actualiser tout = ALL
-// FIX: button now re-grades portfolio + proposals (was portfolio only)
+// STRUCTBOARD — Grader UI Patch v1.9 — Keep sidebar actions
+// FIX: No longer removes navActions (Modifier/Valorisation/Archiver)
 // ═══════════════════════════════════════════════════════════════
 
 (function() {
@@ -22,7 +22,10 @@
     const _prevRPS = renderProductSheet; renderProductSheet = function(container, state) { _prevRPS(container, state); const p = state.currentProduct; if (!p) return; setTimeout(() => _cleanupProductSheet(container, p), 0); };
 
     function _cleanupProductSheet(container, p) {
-        const sheetMain = container.querySelector('.sheet-main'); const sidebar = container.querySelector('.sheet-sidebar'); const navActions = container.querySelector('.sheet-nav-actions'); if (navActions) navActions.remove();
+        const sheetMain = container.querySelector('.sheet-main');
+        const sidebar = container.querySelector('.sheet-sidebar');
+        // [v1.9] DO NOT remove navActions — it contains Modifier infos, Valorisation, Archiver
+        // const navActions = container.querySelector('.sheet-nav-actions'); if (navActions) navActions.remove();
         if (sheetMain) { sheetMain.querySelectorAll('.fiche-section').forEach(section => { const title = section.querySelector('.fiche-section-title'); if (!title) return; const t = title.textContent.trim().toLowerCase(); if (t.includes('analyse ia') || t.includes('r\u00e9sum\u00e9 ia') || t.includes('r\u00e9sum\u00e9 discussion') || t.includes('analyse approfondie') || t.includes('grading unifi')) section.remove(); }); sheetMain.querySelectorAll('.deep-analysis-section, [data-section="deep-analysis"]').forEach(s => s.remove()); sheetMain.querySelectorAll('.fiche-ai-summary').forEach(el => { const parent = el.closest('.fiche-section'); if (parent) parent.remove(); }); sheetMain.querySelectorAll('.fiche-section').forEach(section => { if (section.textContent.includes('Analyse approfondie')) section.remove(); }); }
         if (sidebar) { sidebar.querySelectorAll('.sheet-card').forEach(card => { const title = card.querySelector('.sheet-card-title, h3'); if (title) { const t = title.textContent.trim().toLowerCase(); if (t.includes('score') || t.includes('compatib')) card.remove(); } }); sidebar.querySelectorAll('.score-panel').forEach(el => el.remove()); }
         const scoreWidget = container.querySelector('.score-widget'); if (scoreWidget) { if (p.grading) { scoreWidget.outerHTML = ProposalGrader.renderBadge(p.grading.grade, p.grading.score, 'large'); } else { scoreWidget.outerHTML = '<div style="width:80px;height:80px;border-radius:50%;border:3px dashed var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0.5" onclick="triggerGrading(this)"><span style="font-size:20px;color:var(--text-muted)">?</span></div>'; } }
@@ -44,11 +47,8 @@
     if (_prevRBS) { renderBankSections = function(state) { var html = _prevRBS(state); Object.keys(state.proposals).forEach(function(bankId) { var graded = (state.proposals[bankId] || []).filter(function(p) { return p.grading && p.grading.grade; }); if (!graded.length) return; var counts = { A:0, B:0, C:0, D:0, F:0 }; graded.forEach(function(p) { if (counts[p.grading.grade] !== undefined) counts[p.grading.grade]++; }); var summary = Object.entries(counts).filter(function(e) { return e[1] > 0; }).map(function(e) { var clr = ProposalGrader.config.grades[e[0]]?.color || '#888'; return '<span style="display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;border-radius:4px;background:' + clr + '22;color:' + clr + ';font-weight:700;font-size:10px;padding:0 4px">' + e[1] + e[0] + '</span>'; }).join(' '); if (summary) { var bn = (BANKS.find(function(b) { return b.id === bankId; })?.name || bankId); var bs = html.indexOf(bn); if (bs > -1) { var ci = html.indexOf('<span class="bank-count">', bs); if (ci > -1) { var ec = html.indexOf('</span>', ci) + 7; html = html.substring(0, ec) + '<span style="margin-left:6px">' + summary + '</span>' + html.substring(ec); } } } }); return html; }; }
 
     var _origAP = app.addProposal.bind(app);
-    app.addProposal = async function(bankId, product) { var result = await _origAP(bankId, product); if (result && !result.grading) { try { var n = ProposalGrader.normalize(result); var pc = (app.state.portfolio || []).length > 0 ? { available: true, currentIssuerPct: 0, overlappingUnderlyings: [], totalProducts: app.state.portfolio.length } : { available: false }; var kc = ProposalGrader.checkKillCriteria(n, pc, { bestRate: 3.0 }); if (kc.killed) { result.grading = { grade: 'F', score: 0, killCriteria: { triggered: true, reasons: kc.reasons }, verdict: 'Rejet: ' + kc.reasons[0], metadata: { gradedAt: new Date().toISOString(), aiUsed: false, version: '1.8' } }; await app._saveProductFile(bankId, result); showToast('\u26d4 Grade F \u2014 ' + kc.reasons[0], 'error'); } } catch (e) {} } return result; };
+    app.addProposal = async function(bankId, product) { var result = await _origAP(bankId, product); if (result && !result.grading) { try { var n = ProposalGrader.normalize(result); var pc = (app.state.portfolio || []).length > 0 ? { available: true, currentIssuerPct: 0, overlappingUnderlyings: [], totalProducts: app.state.portfolio.length } : { available: false }; var kc = ProposalGrader.checkKillCriteria(n, pc, { bestRate: 3.0 }); if (kc.killed) { result.grading = { grade: 'F', score: 0, killCriteria: { triggered: true, reasons: kc.reasons }, verdict: 'Rejet: ' + kc.reasons[0], metadata: { gradedAt: new Date().toISOString(), aiUsed: false, version: '1.9' } }; await app._saveProductFile(bankId, result); showToast('\u26d4 Grade F \u2014 ' + kc.reasons[0], 'error'); } } catch (e) {} } return result; };
 
-    // ═══════════════════════════════════════════════════════════════
-    // 8. BATCH HANDLER — supports ungraded, portfolio, ALL
-    // ═══════════════════════════════════════════════════════════════
     async function _handleBatch(state, mode) {
         var products = [];
         var label = '';
@@ -81,13 +81,7 @@
         } catch(e) { showToast('Erreur: ' + e.message, 'error'); }
     }
 
-    // ═══ GLOBAL — exposed for structured-optimizer.js ═══
     window.batchReGradeAll = function() { _handleBatch(app.state, 'all'); };
 
-    // ═══ DASHBOARD PATCH — NOT USED (consolidated in structured-optimizer.js) ═══
-    // The "Actualiser tout" and "Grader tout" buttons are now injected by
-    // structured-optimizer.js in its single renderDashboard hook to avoid
-    // race conditions. This file only exposes batchReGradeAll().
-
-    console.log('[StructBoard] GraderUI v1.8 \u2014 batchReGradeAll = portfolio + proposals');
+    console.log('[StructBoard] GraderUI v1.9 \u2014 keep sidebar actions (Modifier/Valorisation/Archiver)');
 })();
