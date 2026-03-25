@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Dashboard Buttons + Portfolio Summary Table v4
-// Added ENVELOPPE column (ByCam / Caméléons)
+// STRUCTBOARD — Dashboard Buttons + Portfolio Summary Table v4.1
+// Added envelope badge on product CARDS + table
 // ═══════════════════════════════════════════════════════════════
 
 // ═══ QUICK VARIATION EDITOR ══════════════════════════════
@@ -30,13 +30,47 @@ window._quickEditVariation = function(productId) {
     }).catch(function(e) { showToast('Erreur: ' + e.message, 'error'); });
 };
 
-// ═══ ENVELOPE BADGE ══════════════════════════════════════
+// ═══ ENVELOPE BADGES ═════════════════════════════════════
 function _envelopeBadge(envelope) {
     if (!envelope) return '<span style="color:var(--text-dim);font-size:10px">\u2014</span>';
     var info = typeof getEnvelopeInfo === 'function' ? getEnvelopeInfo(envelope) : null;
     if (!info || !info.id) return '<span style="color:var(--text-dim);font-size:10px">\u2014</span>';
     return '<span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;background:' + info.color + '22;color:' + info.color + ';border:1px solid ' + info.color + '33">' + info.icon + ' ' + info.label + '</span>';
 }
+
+function _envelopeBadgeSmall(envelope) {
+    if (!envelope) return '';
+    var info = typeof getEnvelopeInfo === 'function' ? getEnvelopeInfo(envelope) : null;
+    if (!info || !info.id) return '';
+    return '<span style="display:inline-block;padding:1px 6px;border-radius:8px;font-size:9px;font-weight:600;background:' + info.color + '18;color:' + info.color + ';border:1px solid ' + info.color + '25;margin-left:4px">' + info.icon + ' ' + info.label + '</span>';
+}
+
+// ═══ PATCH renderProductCard — inject envelope badge on cards ═══
+(function() {
+    var _cardPatchInterval = setInterval(function() {
+        if (typeof renderProductCard !== 'function') return;
+        clearInterval(_cardPatchInterval);
+        var _prevCard = renderProductCard;
+        renderProductCard = function(product, context) {
+            var html = _prevCard(product, context);
+            if (product.envelope && typeof getEnvelopeInfo === 'function') {
+                var badge = _envelopeBadgeSmall(product.envelope);
+                if (badge) {
+                    // Insert after product-card-type div
+                    var typeIdx = html.indexOf('product-card-type');
+                    if (typeIdx > -1) {
+                        var closeDiv = html.indexOf('</div>', typeIdx);
+                        if (closeDiv > -1) {
+                            html = html.substring(0, closeDiv + 6) + '<div style="margin-top:2px">' + badge + '</div>' + html.substring(closeDiv + 6);
+                        }
+                    }
+                }
+            }
+            return html;
+        };
+    }, 100);
+    setTimeout(function() { clearInterval(_cardPatchInterval); }, 5000);
+})();
 
 // ═══ PORTFOLIO SUMMARY TABLE ═════════════════════════════
 function _renderPortfolioSummaryTable(state) {
@@ -241,4 +275,4 @@ function _renderPortfolioSummaryTable(state) {
     setTimeout(function() { clearInterval(_btnInterval); }, 8000);
 })();
 
-console.log('[StructBoard] Dashboard v4 \u2014 envelope column (ByCam/Cam\u00e9l\u00e9ons)');
+console.log('[StructBoard] Dashboard v4.1 \u2014 envelope badge on cards + table');
