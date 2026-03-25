@@ -138,73 +138,45 @@
   },
   "grading": {
     "grade": "D",
-    "score": 30,
+    "score": 38,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 7,
+        "score": 17,
         "base": 17,
-        "delta": -10,
-        "reasoning": "Rendement: base 17 → -10 = 7 (Coupon 4.17% faible pour obligations non protégées sans barrière définie, risque de défaut élevé) | Coupon 4.17%"
+        "delta": 0,
+        "reasoning": "Rendement: base 17 | Coupon 4.17%"
       },
       "underlyingQuality": {
-        "score": 20,
+        "score": 35,
         "base": 35,
-        "delta": -15,
-        "reasoning": "Qualité: base 35 → -15 = 20 (Obligations internationales exposées aux risques géopolitiques et de crédit dans un contexte macro neutre défavorable au fixed income) [B/Q 35%]"
+        "delta": 0,
+        "reasoning": "Qualité: base 35 [B/Q 35%]"
       },
       "portfolioFit": {
-        "score": 85,
+        "score": 80,
         "base": 80,
-        "delta": 5,
-        "reasoning": "Fit: base 80 → +5 = 85 (Diversification géographique euro pertinente mais manque de visibilité sur la sélection obligataire)"
+        "delta": 0,
+        "reasoning": "Fit: base 80"
       },
       "riskPremium": {
-        "score": 23,
+        "score": 33,
         "base": 33,
-        "delta": -10,
-        "reasoning": "Prime: base 33 → -10 = 23 (Spread insuffisant face aux risques cachés d'un produit obligataire international sans protection) | 4.17% vs CAT 2.5% (spread 1.7%)"
+        "delta": 0,
+        "reasoning": "Prime: base 33 | 4.17% vs CAT 2.5% (spread 1.7%)"
       }
     },
-    "verdict": "Produit défaillant avec score ajusté de 8/100. Le coupon de 4.17% ne compense pas l'absence totale de protection du capital sur des obligations internationales. Sans barrière définie ni garantie de capital, l'investisseur supporte l'intégralité du risque de crédit et de taux. La structure autocall à 100% offre peu de valeur ajoutée sur des obligations.",
-    "keyRisks": [
-      "Risque de crédit majeur sans protection : perte totale possible en cas de défaut des émetteurs",
-      "Exposition aux spreads de crédit internationaux et risques géopolitiques non maîtrisés"
-    ],
+    "verdict": "Score 38/100 (base 38).",
+    "keyRisks": [],
     "negotiationPoints": [],
-    "scenarios": {
-      "optimistic": {
-        "return_pct": 4.17,
-        "return_eur": 4170,
-        "probability": 0.15,
-        "duration_years": 1
-      },
-      "base": {
-        "return_pct": 2.5,
-        "return_eur": 7500,
-        "probability": 0.25,
-        "duration_years": 3
-      },
-      "stress": {
-        "return_pct": -5,
-        "return_eur": -30000,
-        "probability": 0.35,
-        "duration_years": 6
-      },
-      "worst": {
-        "return_pct": -40,
-        "return_eur": -240000,
-        "probability": 0.25,
-        "duration_years": 6
-      }
-    },
+    "scenarios": null,
     "metadata": {
-      "gradedAt": "2026-03-25T14:44:16.803Z",
-      "durationMs": 11707,
-      "aiUsed": true,
+      "gradedAt": "2026-03-25T15:39:52.921Z",
+      "durationMs": 6555,
+      "aiUsed": false,
       "version": "4.3",
       "productType": "standard",
       "marketDataAvailable": false,
@@ -222,12 +194,7 @@
       "maxBeta": null,
       "baseScore": 38,
       "baseGrade": "D",
-      "adjustments": {
-        "p1": -10,
-        "p2": -15,
-        "p3": 5,
-        "p4": -10
-      }
+      "adjustments": null
     }
   }
 }
