@@ -143,7 +143,7 @@
   },
   "grading": {
     "grade": "B",
-    "score": 72,
+    "score": 70,
     "killCriteria": {
       "triggered": false,
       "reasons": []
@@ -153,19 +153,19 @@
         "score": 79,
         "base": 89,
         "delta": -10,
-        "reasoning": "Rendement: base 89 → -10 = 79 (Volatilité extrême des minières aurifères (>35%) rend la barrière 50% vulnérable malgré son niveau, probabilité de coupon réduite en régime neutral sans catalyst or) | Coupon 18% (9×2), barrière 50%"
+        "reasoning": "Rendement: base 89 → -10 = 79 (La volatilité élevée du secteur aurifère (or/minières) réduit la probabilité de toucher régulièrement le coupon malgré la barrière à 50%) | Coupon 18% (9×2), barrière 50%"
       },
       "underlyingQuality": {
-        "score": 30,
+        "score": 20,
         "base": 35,
-        "delta": -5,
-        "reasoning": "Qualité: base 35 → -5 = 30 (Secteur minier non favorisé en régime neutral, corrélation inverse avec taux réels défavorable sans stress macro, concentration sectorielle élevée) [vol/DD 30%]"
+        "delta": -15,
+        "reasoning": "Qualité: base 35 → -15 = 20 (Le secteur des minières d'or est extrêmement sensible aux taux réels et au dollar US, avec un beta systémique très élevé en période d'incertitude) [vol/DD 30%]"
       },
       "portfolioFit": {
-        "score": 80,
+        "score": 85,
         "base": 80,
-        "delta": 0,
-        "reasoning": "Fit: base 80"
+        "delta": 5,
+        "reasoning": "Fit: base 80 → +5 = 85 (L'or offre une diversification intéressante en régime neutre, mais la concentration sectorielle reste un point d'attention)"
       },
       "riskPremium": {
         "score": 99,
@@ -174,23 +174,23 @@
         "reasoning": "Prime: base 99 | 18% vs CAT 2.5% (spread 15.5%)"
       }
     },
-    "verdict": "Produit à haut rendement sur un secteur volatil non favorisé par le régime macro actuel. Le coupon de 18% compense le risque mais la barrière 50% reste vulnérable face à la volatilité historique >35% des minières aurifères. En régime neutral sans catalyseur inflation/crise, la probabilité d'autocall rapide est limitée. Convient uniquement aux investisseurs anticipant un regain d'intérêt pour l'or.",
+    "verdict": "Ce produit offre un coupon élevé de 18% annualisé mais repose sur un secteur volatil et cyclique (minières d'or). La barrière à 50% offre une protection raisonnable, mais la nature très corrélée et volatile du secteur aurifère en fait un pari risqué. En régime macro neutre, les minières d'or peuvent sous-performer si les taux réels montent ou si le dollar se renforce. Le rapport risque/rendement reste attractif pour une allocation limitée (5-10% du portefeuille).",
     "keyRisks": [
-      "Volatilité sectorielle >35% menace la barrière malgré son niveau",
-      "Corrélation inverse avec hausse des taux réels en régime neutral",
+      "Forte sensibilité aux taux réels US et au dollar (corrélation négative)",
+      "Volatilité sectorielle extrême avec risque de drawdown rapide de 30-40%",
       "Concentration sur un seul secteur sans diversification"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 9,
-        "return_eur": 9000,
+        "return_pct": 18,
+        "return_eur": 18000,
         "probability": 0.2,
-        "duration_years": 0.5
+        "duration_years": 1
       },
       "base": {
-        "return_pct": 27,
-        "return_eur": 27000,
+        "return_pct": 10,
+        "return_eur": 30000,
         "probability": 0.35,
         "duration_years": 3
       },
@@ -198,18 +198,18 @@
         "return_pct": 0,
         "return_eur": 0,
         "probability": 0.3,
-        "duration_years": 5
+        "duration_years": 6
       },
       "worst": {
-        "return_pct": -35,
-        "return_eur": -35000,
+        "return_pct": -25,
+        "return_eur": -25000,
         "probability": 0.15,
-        "duration_years": 5
+        "duration_years": 6
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-25T16:37:01.489Z",
-      "durationMs": 18400,
+      "gradedAt": "2026-03-25T16:38:46.234Z",
+      "durationMs": 18150,
       "aiUsed": true,
       "version": "4.3",
       "productType": "standard",
@@ -230,8 +230,8 @@
       "baseGrade": "A",
       "adjustments": {
         "p1": -10,
-        "p2": -5,
-        "p3": 0,
+        "p2": -15,
+        "p3": 5,
         "p4": 0
       }
     }
