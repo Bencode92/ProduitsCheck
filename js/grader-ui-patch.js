@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Grader UI Patch v1.9 — Keep sidebar actions
-// FIX: No longer removes navActions (Modifier/Valorisation/Archiver)
+// STRUCTBOARD — Grader UI Patch v2.0 — Fix sidebar actions
+// Removes top duplicate buttons + injects missing sidebar buttons
 // ═══════════════════════════════════════════════════════════════
 
 (function() {
@@ -24,8 +24,11 @@
     function _cleanupProductSheet(container, p) {
         const sheetMain = container.querySelector('.sheet-main');
         const sidebar = container.querySelector('.sheet-sidebar');
-        // [v1.9] DO NOT remove navActions — it contains Modifier infos, Valorisation, Archiver
-        // const navActions = container.querySelector('.sheet-nav-actions'); if (navActions) navActions.remove();
+
+        // [v2.0] Remove top duplicate nav buttons (Discuter/Intégrer/Rejeter/Supprimer)
+        const navActions = container.querySelector('.sheet-nav-actions');
+        if (navActions) navActions.remove();
+
         if (sheetMain) { sheetMain.querySelectorAll('.fiche-section').forEach(section => { const title = section.querySelector('.fiche-section-title'); if (!title) return; const t = title.textContent.trim().toLowerCase(); if (t.includes('analyse ia') || t.includes('r\u00e9sum\u00e9 ia') || t.includes('r\u00e9sum\u00e9 discussion') || t.includes('analyse approfondie') || t.includes('grading unifi')) section.remove(); }); sheetMain.querySelectorAll('.deep-analysis-section, [data-section="deep-analysis"]').forEach(s => s.remove()); sheetMain.querySelectorAll('.fiche-ai-summary').forEach(el => { const parent = el.closest('.fiche-section'); if (parent) parent.remove(); }); sheetMain.querySelectorAll('.fiche-section').forEach(section => { if (section.textContent.includes('Analyse approfondie')) section.remove(); }); }
         if (sidebar) { sidebar.querySelectorAll('.sheet-card').forEach(card => { const title = card.querySelector('.sheet-card-title, h3'); if (title) { const t = title.textContent.trim().toLowerCase(); if (t.includes('score') || t.includes('compatib')) card.remove(); } }); sidebar.querySelectorAll('.score-panel').forEach(el => el.remove()); }
         const scoreWidget = container.querySelector('.score-widget'); if (scoreWidget) { if (p.grading) { scoreWidget.outerHTML = ProposalGrader.renderBadge(p.grading.grade, p.grading.score, 'large'); } else { scoreWidget.outerHTML = '<div style="width:80px;height:80px;border-radius:50%;border:3px dashed var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0.5" onclick="triggerGrading(this)"><span style="font-size:20px;color:var(--text-muted)">?</span></div>'; } }
@@ -33,7 +36,68 @@
             var gradingHtml = ProposalGrader.renderSection(p.grading);
             if (p.grading && p.grading.metadata && p.grading.metadata.stockData && p.grading.metadata.stockData.length > 0) { var stockTableHtml = _renderStockTable(p.grading.metadata.stockData); var insertPoint = gradingHtml.indexOf('grid-template-columns:repeat(4'); if (insertPoint > 0) { var divStart = gradingHtml.lastIndexOf('<div style="display:grid', insertPoint); if (divStart > 0) gradingHtml = gradingHtml.substring(0, divStart) + stockTableHtml + gradingHtml.substring(divStart); } else { var risksPoint = gradingHtml.indexOf('<strong>Risques'); if (risksPoint > 0) { var divR = gradingHtml.lastIndexOf('<div', risksPoint); if (divR > 0) gradingHtml = gradingHtml.substring(0, divR) + stockTableHtml + gradingHtml.substring(divR); } else { var footerPoint = gradingHtml.lastIndexOf('<div style="font-size:10px'); if (footerPoint > 0) gradingHtml = gradingHtml.substring(0, footerPoint) + stockTableHtml + gradingHtml.substring(footerPoint); } } }
             gd.innerHTML = '<div class="fiche-section-header" style="display:flex;align-items:center"><span class="fiche-section-icon">\ud83c\udfaf</span><span class="fiche-section-title">Grading Unifi\u00e9</span>' + btns + '</div><div class="fiche-section-body">' + gradingHtml + '</div>'; sheetMain.prepend(gd); }
-        if (sidebar) { const panel = document.createElement('div'); panel.innerHTML = _buildGradeSidebarPanel(p.grading); if (panel.firstElementChild) sidebar.insertBefore(panel.firstElementChild, sidebar.firstChild); }
+
+        // [v2.0] Inject missing sidebar buttons (Modifier infos + Valorisation)
+        // These are removed when navActions is deleted, so we re-add them
+        if (sidebar) {
+            const panel = document.createElement('div');
+            panel.innerHTML = _buildGradeSidebarPanel(p.grading);
+            if (panel.firstElementChild) sidebar.insertBefore(panel.firstElementChild, sidebar.firstChild);
+
+            // Check if ACTIONS card exists, if not create one with all buttons
+            var actionsCard = null;
+            sidebar.querySelectorAll('.sheet-card').forEach(function(card) {
+                var title = card.querySelector('.sheet-card-title, h3');
+                if (title && title.textContent.trim().toUpperCase() === 'ACTIONS') actionsCard = card;
+            });
+
+            // Ensure Modifier infos + Valorisation are present
+            if (actionsCard) {
+                // Check if buttons already exist
+                var hasModifier = actionsCard.innerHTML.indexOf('Modifier infos') >= 0;
+                var hasValorisation = actionsCard.innerHTML.indexOf('Valorisation') >= 0;
+                if (!hasModifier || !hasValorisation) {
+                    var extraBtns = '';
+                    if (!hasModifier) extraBtns += '<button class="btn" style="width:100%;margin-bottom:6px" onclick="if(typeof showEditModal===\'function\')showEditModal();">\u270e Modifier infos</button>';
+                    if (!hasValorisation) extraBtns += '<button class="btn" style="width:100%;margin-bottom:6px" onclick="if(typeof showTrackingModal===\'function\')showTrackingModal();">\ud83d\udccd Valorisation</button>';
+                    // Insert before "Discuter avec Claude"
+                    var discuterBtn = actionsCard.querySelector('.ai-glow, [onclick*="showChat"], [onclick*="openChat"]');
+                    if (discuterBtn) {
+                        var wrapper = document.createElement('div');
+                        wrapper.innerHTML = extraBtns;
+                        while (wrapper.firstChild) discuterBtn.parentNode.insertBefore(wrapper.firstChild, discuterBtn);
+                    } else {
+                        // Prepend to actions card body
+                        var cardBody = actionsCard.querySelector('.sheet-card-body') || actionsCard;
+                        var firstChild = cardBody.querySelector('button, a') || cardBody.firstChild;
+                        if (firstChild) {
+                            var wrapper2 = document.createElement('div');
+                            wrapper2.innerHTML = extraBtns;
+                            while (wrapper2.firstChild) firstChild.parentNode.insertBefore(wrapper2.firstChild, firstChild);
+                        } else {
+                            cardBody.insertAdjacentHTML('afterbegin', extraBtns);
+                        }
+                    }
+                }
+            } else {
+                // No ACTIONS card at all — create one
+                var actDiv = document.createElement('div');
+                actDiv.className = 'sheet-card';
+                actDiv.innerHTML = '<h3 class="sheet-card-title">ACTIONS</h3>' +
+                    '<button class="btn" style="width:100%;margin-bottom:6px" onclick="if(typeof showEditModal===\'function\')showEditModal();">\u270e Modifier infos</button>' +
+                    '<button class="btn" style="width:100%;margin-bottom:6px" onclick="if(typeof showTrackingModal===\'function\')showTrackingModal();">\ud83d\udccd Valorisation</button>' +
+                    '<button class="btn ai-glow" style="width:100%;margin-bottom:6px" onclick="if(typeof showProposalChat===\'function\')showProposalChat();">\ud83d\udcac Discuter avec Claude</button>' +
+                    (p.bankId ? '<button class="btn" style="width:100%;margin-bottom:6px" onclick="if(typeof integrateProduct===\'function\')integrateProduct();">\u2705 Int\u00e9grer</button>' : '') +
+                    '<button class="btn" style="width:100%;margin-bottom:6px;color:var(--red)" onclick="if(typeof rejectProduct===\'function\')rejectProduct();">\u274c Rejeter</button>' +
+                    '<button class="btn" style="width:100%;margin-bottom:6px;color:var(--text-dim)" onclick="if(typeof deleteProduct===\'function\')deleteProduct();">\ud83d\uddd1 Supprimer</button>' +
+                    '<button class="btn" style="width:100%;color:var(--orange)" onclick="if(typeof archiveProduct===\'function\')archiveProduct();">\ud83d\udce6 Archiver</button>';
+                sidebar.appendChild(actDiv);
+            }
+        } else if (sidebar) {
+            const panel = document.createElement('div');
+            panel.innerHTML = _buildGradeSidebarPanel(p.grading);
+            if (panel.firstElementChild) sidebar.insertBefore(panel.firstElementChild, sidebar.firstChild);
+        }
     }
 
     function _renderStockTable(stockData) { if (!stockData || stockData.length === 0) return ''; function _pc(v) { if (v == null) return '#888'; return v >= 10 ? '#06D6A0' : v >= 0 ? '#4ECDC4' : v >= -10 ? '#FFB627' : '#EF233C'; } function _sc(v) { if (v == null) return '#888'; return v >= 70 ? '#06D6A0' : v >= 50 ? '#4ECDC4' : v >= 30 ? '#FFB627' : '#EF233C'; } function _f(v, s) { if (v == null) return '<span style="color:#555">\u2014</span>'; var c = s === '%' ? _pc(v) : _sc(v); return '<span style="color:' + c + ';font-weight:600">' + (v >= 0 && s === '%' ? '+' : '') + v + (s || '') + '</span>'; } var cs = 'padding:4px 6px;font-size:11px;border-bottom:1px solid rgba(255,255,255,0.06);white-space:nowrap;'; var hs = cs + 'color:var(--text-muted);font-weight:500;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;'; var h = '<div style="margin:12px 0"><div style="font-size:11px;font-weight:600;color:var(--text-muted);margin-bottom:6px">\ud83d\udcca Sous-jacents</div><div style="overflow-x:auto;border-radius:8px;border:1px solid rgba(255,255,255,0.08)"><table style="width:100%;border-collapse:collapse;font-size:11px"><tr style="background:rgba(255,255,255,0.03)"><th style="' + hs + 'text-align:left">Nom</th><th style="' + hs + 'text-align:right">YTD</th><th style="' + hs + 'text-align:right">1 an</th><th style="' + hs + 'text-align:right">Vol 3Y</th><th style="' + hs + 'text-align:right">DD 3Y</th><th style="' + hs + 'text-align:right">Buffett</th><th style="' + hs + 'text-align:right">Quality</th></tr>'; stockData.forEach(function(s, i) { var bg = i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)'; h += '<tr style="background:' + bg + '"><td style="' + cs + 'text-align:left"><span style="font-weight:600;color:var(--text-primary,#e0e0e0)">' + s.name + '</span> <span style="color:#666;font-size:10px">' + s.ticker + '</span></td><td style="' + cs + 'text-align:right">' + _f(s.perf_ytd, '%') + '</td><td style="' + cs + 'text-align:right">' + _f(s.perf_1y, '%') + '</td><td style="' + cs + 'text-align:right">' + _f(s.volatility_3y, '%') + '</td><td style="' + cs + 'text-align:right">' + _f(s.max_drawdown_3y != null ? -Math.abs(s.max_drawdown_3y) : null, '%') + '</td><td style="' + cs + 'text-align:right">' + _f(s.buffett_score, '') + '<span style="font-size:9px;color:#666">/' + (s.buffett_grade || '?') + '</span></td><td style="' + cs + 'text-align:right">' + _f(s.quality_score, '') + '</td></tr>'; }); h += '</table></div></div>'; return h; }
@@ -47,26 +111,15 @@
     if (_prevRBS) { renderBankSections = function(state) { var html = _prevRBS(state); Object.keys(state.proposals).forEach(function(bankId) { var graded = (state.proposals[bankId] || []).filter(function(p) { return p.grading && p.grading.grade; }); if (!graded.length) return; var counts = { A:0, B:0, C:0, D:0, F:0 }; graded.forEach(function(p) { if (counts[p.grading.grade] !== undefined) counts[p.grading.grade]++; }); var summary = Object.entries(counts).filter(function(e) { return e[1] > 0; }).map(function(e) { var clr = ProposalGrader.config.grades[e[0]]?.color || '#888'; return '<span style="display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;border-radius:4px;background:' + clr + '22;color:' + clr + ';font-weight:700;font-size:10px;padding:0 4px">' + e[1] + e[0] + '</span>'; }).join(' '); if (summary) { var bn = (BANKS.find(function(b) { return b.id === bankId; })?.name || bankId); var bs = html.indexOf(bn); if (bs > -1) { var ci = html.indexOf('<span class="bank-count">', bs); if (ci > -1) { var ec = html.indexOf('</span>', ci) + 7; html = html.substring(0, ec) + '<span style="margin-left:6px">' + summary + '</span>' + html.substring(ec); } } } }); return html; }; }
 
     var _origAP = app.addProposal.bind(app);
-    app.addProposal = async function(bankId, product) { var result = await _origAP(bankId, product); if (result && !result.grading) { try { var n = ProposalGrader.normalize(result); var pc = (app.state.portfolio || []).length > 0 ? { available: true, currentIssuerPct: 0, overlappingUnderlyings: [], totalProducts: app.state.portfolio.length } : { available: false }; var kc = ProposalGrader.checkKillCriteria(n, pc, { bestRate: 3.0 }); if (kc.killed) { result.grading = { grade: 'F', score: 0, killCriteria: { triggered: true, reasons: kc.reasons }, verdict: 'Rejet: ' + kc.reasons[0], metadata: { gradedAt: new Date().toISOString(), aiUsed: false, version: '1.9' } }; await app._saveProductFile(bankId, result); showToast('\u26d4 Grade F \u2014 ' + kc.reasons[0], 'error'); } } catch (e) {} } return result; };
+    app.addProposal = async function(bankId, product) { var result = await _origAP(bankId, product); if (result && !result.grading) { try { var n = ProposalGrader.normalize(result); var pc = (app.state.portfolio || []).length > 0 ? { available: true, currentIssuerPct: 0, overlappingUnderlyings: [], totalProducts: app.state.portfolio.length } : { available: false }; var kc = ProposalGrader.checkKillCriteria(n, pc, { bestRate: 3.0 }); if (kc.killed) { result.grading = { grade: 'F', score: 0, killCriteria: { triggered: true, reasons: kc.reasons }, verdict: 'Rejet: ' + kc.reasons[0], metadata: { gradedAt: new Date().toISOString(), aiUsed: false, version: '2.0' } }; await app._saveProductFile(bankId, result); showToast('\u26d4 Grade F \u2014 ' + kc.reasons[0], 'error'); } } catch (e) {} } return result; };
 
     async function _handleBatch(state, mode) {
-        var products = [];
-        var label = '';
-        if (mode === 'ungraded') {
-            products = Object.values(state.proposals).flat().filter(function(p) { return !p.grading; });
-            label = products.length + ' propositions non grad\u00e9es';
-        } else if (mode === 'portfolio') {
-            products = (state.portfolio || []).filter(function(p) { return !p.grading || p.grading.grade !== '-'; });
-            label = products.length + ' produits portefeuille';
-        } else if (mode === 'all') {
-            var pf = (state.portfolio || []).filter(function(p) { return !p.grading || p.grading.grade !== '-'; });
-            var pr = Object.values(state.proposals || {}).flat().filter(function(p) { return !p.grading || (p.grading.grade !== '-' && p.grading.grade !== '?'); });
-            products = pf.concat(pr);
-            label = products.length + ' produits (portefeuille + propositions)';
-        }
+        var products = [], label = '';
+        if (mode === 'ungraded') { products = Object.values(state.proposals).flat().filter(function(p) { return !p.grading; }); label = products.length + ' propositions non grad\u00e9es'; }
+        else if (mode === 'portfolio') { products = (state.portfolio || []).filter(function(p) { return !p.grading || p.grading.grade !== '-'; }); label = products.length + ' produits portefeuille'; }
+        else if (mode === 'all') { var pf = (state.portfolio || []).filter(function(p) { return !p.grading || p.grading.grade !== '-'; }); var pr = Object.values(state.proposals || {}).flat().filter(function(p) { return !p.grading || (p.grading.grade !== '-' && p.grading.grade !== '?'); }); products = pf.concat(pr); label = products.length + ' produits (portefeuille + propositions)'; }
         if (!products.length) { showToast('Rien \u00e0 grader', 'info'); return; }
-        var duration = Math.ceil(products.length * 2.5 / 60);
-        if (!confirm('Actualiser ' + label + ' ?\nDur\u00e9e estim\u00e9e : ~' + duration + ' min (' + products.length + ' appels Claude)')) return;
+        if (!confirm('Actualiser ' + label + ' ?\nDur\u00e9e : ~' + Math.ceil(products.length * 2.5 / 60) + ' min (' + products.length + ' appels Claude)')) return;
         if (typeof _mktCache !== 'undefined') { _mktCache = null; _mktCacheTs = 0; }
         showToast('Grading de ' + label + '...', 'info');
         try {
@@ -83,5 +136,5 @@
 
     window.batchReGradeAll = function() { _handleBatch(app.state, 'all'); };
 
-    console.log('[StructBoard] GraderUI v1.9 \u2014 keep sidebar actions (Modifier/Valorisation/Archiver)');
+    console.log('[StructBoard] GraderUI v2.0 \u2014 sidebar actions restored');
 })();
