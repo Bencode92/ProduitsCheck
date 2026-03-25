@@ -13,7 +13,7 @@
   "strikeDate": "2026-01-09",
   "coupon": {
     "rate": 1.875,
-    "type": "memoire",
+    "type": "conditionnel",
     "frequency": "trimestriel",
     "trigger": 77,
     "triggerDetail": "Cours BNP Paribas >= 77% du niveau initial",
@@ -22,7 +22,7 @@
     "totalReturn": "1.875% par trimestre écoulé"
   },
   "capitalProtection": {
-    "protected": false,
+    "protected": true,
     "level": 60,
     "type": "conditionnelle-barriere",
     "barrier": 60,
@@ -37,7 +37,9 @@
     "triggerDetail": "Cours BNP Paribas >= 100% du niveau initial aux dates trimestrielles",
     "frequency": "trimestriel",
     "startYear": 1,
-    "stepDown": false
+    "stepDown": false,
+    "hasAutocall": true,
+    "enabled": true
   },
   "scenarios": {
     "favorable": "Remboursement automatique anticipé avec gain de 1.875% par trimestre écoulé si BNP >= 100%",
@@ -238,5 +240,7 @@
         "p4": -5
       }
     }
-  }
+  },
+  "envelope": "cameleons",
+  "maturityYears": 8
 }
