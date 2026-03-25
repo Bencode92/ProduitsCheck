@@ -1,6 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Grader UI Patch v2.0 — Fix sidebar actions
-// Removes top duplicate buttons + injects missing sidebar buttons
+// STRUCTBOARD — Grader UI Patch v2.1 — Fiche order: Suivi before Grading
+// For PORTFOLIO products: Suivi Performance → Grading ("où en suis-je" first)
+// For PROPOSALS: Grading first (no performance to track yet)
 // ═══════════════════════════════════════════════════════════════
 
 (function() {
@@ -25,64 +26,67 @@
         const sheetMain = container.querySelector('.sheet-main');
         const sidebar = container.querySelector('.sheet-sidebar');
 
-        // [v2.0] Remove top duplicate nav buttons (Discuter/Intégrer/Rejeter/Supprimer)
         const navActions = container.querySelector('.sheet-nav-actions');
         if (navActions) navActions.remove();
 
         if (sheetMain) { sheetMain.querySelectorAll('.fiche-section').forEach(section => { const title = section.querySelector('.fiche-section-title'); if (!title) return; const t = title.textContent.trim().toLowerCase(); if (t.includes('analyse ia') || t.includes('r\u00e9sum\u00e9 ia') || t.includes('r\u00e9sum\u00e9 discussion') || t.includes('analyse approfondie') || t.includes('grading unifi')) section.remove(); }); sheetMain.querySelectorAll('.deep-analysis-section, [data-section="deep-analysis"]').forEach(s => s.remove()); sheetMain.querySelectorAll('.fiche-ai-summary').forEach(el => { const parent = el.closest('.fiche-section'); if (parent) parent.remove(); }); sheetMain.querySelectorAll('.fiche-section').forEach(section => { if (section.textContent.includes('Analyse approfondie')) section.remove(); }); }
         if (sidebar) { sidebar.querySelectorAll('.sheet-card').forEach(card => { const title = card.querySelector('.sheet-card-title, h3'); if (title) { const t = title.textContent.trim().toLowerCase(); if (t.includes('score') || t.includes('compatib')) card.remove(); } }); sidebar.querySelectorAll('.score-panel').forEach(el => el.remove()); }
         const scoreWidget = container.querySelector('.score-widget'); if (scoreWidget) { if (p.grading) { scoreWidget.outerHTML = ProposalGrader.renderBadge(p.grading.grade, p.grading.score, 'large'); } else { scoreWidget.outerHTML = '<div style="width:80px;height:80px;border-radius:50%;border:3px dashed var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0.5" onclick="triggerGrading(this)"><span style="font-size:20px;color:var(--text-muted)">?</span></div>'; } }
-        if (sheetMain) { const gd = document.createElement('div'); gd.className = 'fiche-section'; gd.setAttribute('data-section', 'grading'); var btns = ''; if (p.grading) { btns = '<button onclick="triggerGrading(this)" style="margin-left:auto;padding:4px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;font-size:11px;display:flex;align-items:center;gap:4px">\ud83d\udd04 Actualiser</button>'; } if (!p.grading || (p.grading.grade !== '-')) { btns += '<button onclick="tagAsLiquidity(this)" style="padding:4px 12px;border-radius:6px;border:1px solid #94A3B844;background:transparent;color:#94A3B8;cursor:pointer;font-size:11px;margin-left:6px">$ Liquidit\u00e9</button>'; }
+
+        // Build grading section
+        if (sheetMain) {
+            const gd = document.createElement('div'); gd.className = 'fiche-section'; gd.setAttribute('data-section', 'grading');
+            var btns = ''; if (p.grading) { btns = '<button onclick="triggerGrading(this)" style="margin-left:auto;padding:4px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;font-size:11px;display:flex;align-items:center;gap:4px">\ud83d\udd04 Actualiser</button>'; } if (!p.grading || (p.grading.grade !== '-')) { btns += '<button onclick="tagAsLiquidity(this)" style="padding:4px 12px;border-radius:6px;border:1px solid #94A3B844;background:transparent;color:#94A3B8;cursor:pointer;font-size:11px;margin-left:6px">$ Liquidit\u00e9</button>'; }
             var gradingHtml = ProposalGrader.renderSection(p.grading);
             if (p.grading && p.grading.metadata && p.grading.metadata.stockData && p.grading.metadata.stockData.length > 0) { var stockTableHtml = _renderStockTable(p.grading.metadata.stockData); var insertPoint = gradingHtml.indexOf('grid-template-columns:repeat(4'); if (insertPoint > 0) { var divStart = gradingHtml.lastIndexOf('<div style="display:grid', insertPoint); if (divStart > 0) gradingHtml = gradingHtml.substring(0, divStart) + stockTableHtml + gradingHtml.substring(divStart); } else { var risksPoint = gradingHtml.indexOf('<strong>Risques'); if (risksPoint > 0) { var divR = gradingHtml.lastIndexOf('<div', risksPoint); if (divR > 0) gradingHtml = gradingHtml.substring(0, divR) + stockTableHtml + gradingHtml.substring(divR); } else { var footerPoint = gradingHtml.lastIndexOf('<div style="font-size:10px'); if (footerPoint > 0) gradingHtml = gradingHtml.substring(0, footerPoint) + stockTableHtml + gradingHtml.substring(footerPoint); } } }
-            gd.innerHTML = '<div class="fiche-section-header" style="display:flex;align-items:center"><span class="fiche-section-icon">\ud83c\udfaf</span><span class="fiche-section-title">Grading Unifi\u00e9</span>' + btns + '</div><div class="fiche-section-body">' + gradingHtml + '</div>'; sheetMain.prepend(gd); }
+            gd.innerHTML = '<div class="fiche-section-header" style="display:flex;align-items:center"><span class="fiche-section-icon">\ud83c\udfaf</span><span class="fiche-section-title">Grading Unifi\u00e9</span>' + btns + '</div><div class="fiche-section-body">' + gradingHtml + '</div>';
 
-        // [v2.0] Inject missing sidebar buttons (Modifier infos + Valorisation)
-        // These are removed when navActions is deleted, so we re-add them
+            // [v2.1] CONDITIONAL ORDER: Portfolio → Suivi before Grading | Proposals → Grading first
+            var isInPortfolio = (app.state.portfolio || []).some(function(x) { return x.id === p.id; });
+            if (isInPortfolio) {
+                // Find "Suivi Performance" section and insert grading AFTER it
+                var suiviSection = null;
+                sheetMain.querySelectorAll('.fiche-section').forEach(function(sec) {
+                    var title = sec.querySelector('.fiche-section-title');
+                    if (title && title.textContent.toLowerCase().indexOf('suivi') >= 0) suiviSection = sec;
+                });
+                if (suiviSection) {
+                    suiviSection.after(gd);
+                } else {
+                    // No suivi section found — prepend as fallback
+                    sheetMain.prepend(gd);
+                }
+            } else {
+                // Proposals: grading first (no performance to track)
+                sheetMain.prepend(gd);
+            }
+        }
+
+        // Sidebar: grade panel + actions
         if (sidebar) {
             const panel = document.createElement('div');
             panel.innerHTML = _buildGradeSidebarPanel(p.grading);
             if (panel.firstElementChild) sidebar.insertBefore(panel.firstElementChild, sidebar.firstChild);
 
-            // Check if ACTIONS card exists, if not create one with all buttons
             var actionsCard = null;
             sidebar.querySelectorAll('.sheet-card').forEach(function(card) {
                 var title = card.querySelector('.sheet-card-title, h3');
                 if (title && title.textContent.trim().toUpperCase() === 'ACTIONS') actionsCard = card;
             });
 
-            // Ensure Modifier infos + Valorisation are present
             if (actionsCard) {
-                // Check if buttons already exist
                 var hasModifier = actionsCard.innerHTML.indexOf('Modifier infos') >= 0;
                 var hasValorisation = actionsCard.innerHTML.indexOf('Valorisation') >= 0;
                 if (!hasModifier || !hasValorisation) {
                     var extraBtns = '';
                     if (!hasModifier) extraBtns += '<button class="btn" style="width:100%;margin-bottom:6px" onclick="if(typeof showEditModal===\'function\')showEditModal();">\u270e Modifier infos</button>';
                     if (!hasValorisation) extraBtns += '<button class="btn" style="width:100%;margin-bottom:6px" onclick="if(typeof showTrackingModal===\'function\')showTrackingModal();">\ud83d\udccd Valorisation</button>';
-                    // Insert before "Discuter avec Claude"
                     var discuterBtn = actionsCard.querySelector('.ai-glow, [onclick*="showChat"], [onclick*="openChat"]');
-                    if (discuterBtn) {
-                        var wrapper = document.createElement('div');
-                        wrapper.innerHTML = extraBtns;
-                        while (wrapper.firstChild) discuterBtn.parentNode.insertBefore(wrapper.firstChild, discuterBtn);
-                    } else {
-                        // Prepend to actions card body
-                        var cardBody = actionsCard.querySelector('.sheet-card-body') || actionsCard;
-                        var firstChild = cardBody.querySelector('button, a') || cardBody.firstChild;
-                        if (firstChild) {
-                            var wrapper2 = document.createElement('div');
-                            wrapper2.innerHTML = extraBtns;
-                            while (wrapper2.firstChild) firstChild.parentNode.insertBefore(wrapper2.firstChild, firstChild);
-                        } else {
-                            cardBody.insertAdjacentHTML('afterbegin', extraBtns);
-                        }
-                    }
+                    if (discuterBtn) { var wrapper = document.createElement('div'); wrapper.innerHTML = extraBtns; while (wrapper.firstChild) discuterBtn.parentNode.insertBefore(wrapper.firstChild, discuterBtn); }
+                    else { var cardBody = actionsCard.querySelector('.sheet-card-body') || actionsCard; var firstChild = cardBody.querySelector('button, a') || cardBody.firstChild; if (firstChild) { var wrapper2 = document.createElement('div'); wrapper2.innerHTML = extraBtns; while (wrapper2.firstChild) firstChild.parentNode.insertBefore(wrapper2.firstChild, firstChild); } else { cardBody.insertAdjacentHTML('afterbegin', extraBtns); } }
                 }
             } else {
-                // No ACTIONS card at all — create one
-                var actDiv = document.createElement('div');
-                actDiv.className = 'sheet-card';
+                var actDiv = document.createElement('div'); actDiv.className = 'sheet-card';
                 actDiv.innerHTML = '<h3 class="sheet-card-title">ACTIONS</h3>' +
                     '<button class="btn" style="width:100%;margin-bottom:6px" onclick="if(typeof showEditModal===\'function\')showEditModal();">\u270e Modifier infos</button>' +
                     '<button class="btn" style="width:100%;margin-bottom:6px" onclick="if(typeof showTrackingModal===\'function\')showTrackingModal();">\ud83d\udccd Valorisation</button>' +
@@ -93,10 +97,6 @@
                     '<button class="btn" style="width:100%;color:var(--orange)" onclick="if(typeof archiveProduct===\'function\')archiveProduct();">\ud83d\udce6 Archiver</button>';
                 sidebar.appendChild(actDiv);
             }
-        } else if (sidebar) {
-            const panel = document.createElement('div');
-            panel.innerHTML = _buildGradeSidebarPanel(p.grading);
-            if (panel.firstElementChild) sidebar.insertBefore(panel.firstElementChild, sidebar.firstChild);
         }
     }
 
@@ -111,7 +111,7 @@
     if (_prevRBS) { renderBankSections = function(state) { var html = _prevRBS(state); Object.keys(state.proposals).forEach(function(bankId) { var graded = (state.proposals[bankId] || []).filter(function(p) { return p.grading && p.grading.grade; }); if (!graded.length) return; var counts = { A:0, B:0, C:0, D:0, F:0 }; graded.forEach(function(p) { if (counts[p.grading.grade] !== undefined) counts[p.grading.grade]++; }); var summary = Object.entries(counts).filter(function(e) { return e[1] > 0; }).map(function(e) { var clr = ProposalGrader.config.grades[e[0]]?.color || '#888'; return '<span style="display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;border-radius:4px;background:' + clr + '22;color:' + clr + ';font-weight:700;font-size:10px;padding:0 4px">' + e[1] + e[0] + '</span>'; }).join(' '); if (summary) { var bn = (BANKS.find(function(b) { return b.id === bankId; })?.name || bankId); var bs = html.indexOf(bn); if (bs > -1) { var ci = html.indexOf('<span class="bank-count">', bs); if (ci > -1) { var ec = html.indexOf('</span>', ci) + 7; html = html.substring(0, ec) + '<span style="margin-left:6px">' + summary + '</span>' + html.substring(ec); } } } }); return html; }; }
 
     var _origAP = app.addProposal.bind(app);
-    app.addProposal = async function(bankId, product) { var result = await _origAP(bankId, product); if (result && !result.grading) { try { var n = ProposalGrader.normalize(result); var pc = (app.state.portfolio || []).length > 0 ? { available: true, currentIssuerPct: 0, overlappingUnderlyings: [], totalProducts: app.state.portfolio.length } : { available: false }; var kc = ProposalGrader.checkKillCriteria(n, pc, { bestRate: 3.0 }); if (kc.killed) { result.grading = { grade: 'F', score: 0, killCriteria: { triggered: true, reasons: kc.reasons }, verdict: 'Rejet: ' + kc.reasons[0], metadata: { gradedAt: new Date().toISOString(), aiUsed: false, version: '2.0' } }; await app._saveProductFile(bankId, result); showToast('\u26d4 Grade F \u2014 ' + kc.reasons[0], 'error'); } } catch (e) {} } return result; };
+    app.addProposal = async function(bankId, product) { var result = await _origAP(bankId, product); if (result && !result.grading) { try { var n = ProposalGrader.normalize(result); var pc = (app.state.portfolio || []).length > 0 ? { available: true, currentIssuerPct: 0, overlappingUnderlyings: [], totalProducts: app.state.portfolio.length } : { available: false }; var kc = ProposalGrader.checkKillCriteria(n, pc, { bestRate: 3.0 }); if (kc.killed) { result.grading = { grade: 'F', score: 0, killCriteria: { triggered: true, reasons: kc.reasons }, verdict: 'Rejet: ' + kc.reasons[0], metadata: { gradedAt: new Date().toISOString(), aiUsed: false, version: '2.1' } }; await app._saveProductFile(bankId, result); showToast('\u26d4 Grade F \u2014 ' + kc.reasons[0], 'error'); } } catch (e) {} } return result; };
 
     async function _handleBatch(state, mode) {
         var products = [], label = '';
@@ -136,5 +136,5 @@
 
     window.batchReGradeAll = function() { _handleBatch(app.state, 'all'); };
 
-    console.log('[StructBoard] GraderUI v2.0 \u2014 sidebar actions restored');
+    console.log('[StructBoard] GraderUI v2.1 \u2014 portfolio: suivi before grading');
 })();

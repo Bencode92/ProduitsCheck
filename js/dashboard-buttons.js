@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Dashboard Buttons + Portfolio Summary Table v4.1
-// Added envelope badge on product CARDS + table
+// STRUCTBOARD — Dashboard Buttons + Portfolio Summary Table v5
+// Added MARGE BARRIÈRE + PROCHAINE DATE columns
 // ═══════════════════════════════════════════════════════════════
 
 // ═══ QUICK VARIATION EDITOR ══════════════════════════════
@@ -37,7 +37,6 @@ function _envelopeBadge(envelope) {
     if (!info || !info.id) return '<span style="color:var(--text-dim);font-size:10px">\u2014</span>';
     return '<span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;background:' + info.color + '22;color:' + info.color + ';border:1px solid ' + info.color + '33">' + info.icon + ' ' + info.label + '</span>';
 }
-
 function _envelopeBadgeSmall(envelope) {
     if (!envelope) return '';
     var info = typeof getEnvelopeInfo === 'function' ? getEnvelopeInfo(envelope) : null;
@@ -45,7 +44,7 @@ function _envelopeBadgeSmall(envelope) {
     return '<span style="display:inline-block;padding:1px 6px;border-radius:8px;font-size:9px;font-weight:600;background:' + info.color + '18;color:' + info.color + ';border:1px solid ' + info.color + '25;margin-left:4px">' + info.icon + ' ' + info.label + '</span>';
 }
 
-// ═══ PATCH renderProductCard — inject envelope badge on cards ═══
+// ═══ PATCH renderProductCard — envelope badge on cards ═══
 (function() {
     var _cardPatchInterval = setInterval(function() {
         if (typeof renderProductCard !== 'function') return;
@@ -55,22 +54,69 @@ function _envelopeBadgeSmall(envelope) {
             var html = _prevCard(product, context);
             if (product.envelope && typeof getEnvelopeInfo === 'function') {
                 var badge = _envelopeBadgeSmall(product.envelope);
-                if (badge) {
-                    // Insert after product-card-type div
-                    var typeIdx = html.indexOf('product-card-type');
-                    if (typeIdx > -1) {
-                        var closeDiv = html.indexOf('</div>', typeIdx);
-                        if (closeDiv > -1) {
-                            html = html.substring(0, closeDiv + 6) + '<div style="margin-top:2px">' + badge + '</div>' + html.substring(closeDiv + 6);
-                        }
-                    }
-                }
+                if (badge) { var typeIdx = html.indexOf('product-card-type'); if (typeIdx > -1) { var closeDiv = html.indexOf('</div>', typeIdx); if (closeDiv > -1) { html = html.substring(0, closeDiv + 6) + '<div style="margin-top:2px">' + badge + '</div>' + html.substring(closeDiv + 6); } } }
             }
             return html;
         };
     }, 100);
     setTimeout(function() { clearInterval(_cardPatchInterval); }, 5000);
 })();
+
+// ═══ HELPERS: marge barrière + prochaine date ════════════
+function _computeMargeBarriere(p, tracking) {
+    var barrier = parseFloat(p.capitalProtection?.barrier) || 0;
+    var isProtected = p.capitalProtection?.protected === true || p.capitalProtection?.protected === 'true';
+    var grade = (p.grading && p.grading.grade) || '?';
+    if (grade === '-') return { html: '<span style="color:#94A3B8;font-size:10px">\u2014</span>', value: 999 };
+    if (isProtected && barrier === 0) return { html: '<span style="color:var(--green);font-weight:600;font-size:10px">\u2705 Prot\u00e9g\u00e9</span>', value: 999 };
+    if (barrier === 0) return { html: '<span style="color:var(--text-dim);font-size:10px">\u2014</span>', value: 999 };
+    if (!tracking) return { html: '<span style="color:var(--text-dim);font-size:10px">' + (100 - barrier) + '%</span>', value: 100 - barrier };
+    var marge = tracking.level - barrier;
+    var mc = marge > 25 ? 'var(--green)' : marge > 15 ? '#4ECDC4' : marge > 10 ? 'var(--orange)' : 'var(--red)';
+    return { html: '<span style="color:' + mc + ';font-weight:700;font-size:11px">' + marge.toFixed(0) + '%</span>', value: marge };
+}
+
+function _computeNextEvent(p) {
+    var grade = (p.grading && p.grading.grade) || '?';
+    if (grade === '-') return { html: '<span style="color:#94A3B8;font-size:10px">\u2014</span>', days: 9999 };
+    // Try maturityDate
+    var matDate = p.maturityDate ? new Date(p.maturityDate) : null;
+    if (!matDate && p.maturity) {
+        var yMatch = p.maturity.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+        if (yMatch) matDate = new Date(yMatch[3] + '-' + yMatch[2] + '-' + yMatch[1]);
+    }
+    // Try to find next autocall observation date
+    var subDate = p.subscriptionDate ? new Date(p.subscriptionDate) : (p.addedDate ? new Date(p.addedDate) : null);
+    var hasAutocall = p.earlyRedemption?.possible === true || p.earlyRedemption?.possible === 'true';
+    var nextObs = null;
+    if (subDate && hasAutocall) {
+        var now = Date.now();
+        var freq = p.earlyRedemption?.frequency || p.coupon?.frequency || 'annuel';
+        var monthsStep = 12;
+        if (typeof freq === 'string') {
+            if (freq.indexOf('trimestr') >= 0) monthsStep = 3;
+            else if (freq.indexOf('semestr') >= 0) monthsStep = 6;
+        }
+        for (var m = 12; m <= 240; m += monthsStep) {
+            var d = new Date(subDate);
+            d.setMonth(d.getMonth() + m);
+            if (d.getTime() > now) { nextObs = d; break; }
+        }
+    }
+    // Pick the earliest: next observation or maturity
+    var eventDate = null;
+    var eventLabel = '';
+    if (nextObs && matDate) {
+        if (nextObs < matDate) { eventDate = nextObs; eventLabel = 'Obs'; }
+        else { eventDate = matDate; eventLabel = 'Mat'; }
+    } else if (nextObs) { eventDate = nextObs; eventLabel = 'Obs'; }
+    else if (matDate) { eventDate = matDate; eventLabel = 'Mat'; }
+    if (!eventDate) return { html: '<span style="color:var(--text-dim);font-size:10px">\u2014</span>', days: 9999 };
+    var daysLeft = Math.ceil((eventDate.getTime() - Date.now()) / 86400000);
+    var dateStr = eventDate.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
+    var dc = daysLeft < 90 ? 'var(--red)' : daysLeft < 180 ? 'var(--orange)' : daysLeft < 365 ? '#4ECDC4' : 'var(--text-muted)';
+    return { html: '<span style="font-size:10px"><span style="color:' + dc + ';font-weight:600">' + dateStr + '</span><br><span style="color:var(--text-dim);font-size:9px">' + eventLabel + ' ' + daysLeft + 'j</span></span>', days: daysLeft };
+}
 
 // ═══ PORTFOLIO SUMMARY TABLE ═════════════════════════════
 function _renderPortfolioSummaryTable(state) {
@@ -92,29 +138,16 @@ function _renderPortfolioSummaryTable(state) {
         bankName = bankName || p.bankId || '';
 
         var statusHtml = '', statusType = 'ok';
-        if (grade === '-') {
-            statusHtml = '<span style="color:#94A3B8;font-weight:600">$ CASH</span>';
-            statusType = 'cash';
-        } else if (tracking) {
-            if (tracking.autocallOK) {
-                statusHtml = '<span style="background:rgba(76,175,80,0.15);color:#4CAF50;padding:2px 8px;border-radius:10px;font-weight:600;font-size:10px">\u2705 AUTOCALL</span>';
-                statusType = 'autocall';
-            } else if (!tracking.couponOK) {
-                statusHtml = '<span style="background:rgba(255,183,77,0.15);color:#FFB74D;padding:2px 8px;border-radius:10px;font-weight:600;font-size:10px">\u26a0 COUPON PERDU</span>';
-                statusType = 'lost';
-            } else {
-                statusHtml = '<span style="background:rgba(76,175,80,0.1);color:#81C784;padding:2px 8px;border-radius:10px;font-weight:600;font-size:10px">\ud83d\udfe2 OK</span>';
-            }
-            couponsTotal++;
-            if (tracking.couponOK) couponsOK++;
-        } else if (grade !== '-') {
-            statusHtml = '<span style="color:var(--text-dim);font-size:10px">\u2014</span>';
-            if (coupon > 0) { couponsTotal++; couponsOK++; }
-        }
+        if (grade === '-') { statusHtml = '<span style="color:#94A3B8;font-weight:600">$ CASH</span>'; statusType = 'cash'; }
+        else if (tracking) {
+            if (tracking.autocallOK) { statusHtml = '<span style="background:rgba(76,175,80,0.15);color:#4CAF50;padding:2px 8px;border-radius:10px;font-weight:600;font-size:10px">\u2705 AUTOCALL</span>'; statusType = 'autocall'; }
+            else if (!tracking.couponOK) { statusHtml = '<span style="background:rgba(255,183,77,0.15);color:#FFB74D;padding:2px 8px;border-radius:10px;font-weight:600;font-size:10px">\u26a0 COUPON PERDU</span>'; statusType = 'lost'; }
+            else { statusHtml = '<span style="background:rgba(76,175,80,0.1);color:#81C784;padding:2px 8px;border-radius:10px;font-weight:600;font-size:10px">\ud83d\udfe2 OK</span>'; }
+            couponsTotal++; if (tracking.couponOK) couponsOK++;
+        } else if (grade !== '-') { statusHtml = '<span style="color:var(--text-dim);font-size:10px">\u2014</span>'; if (coupon > 0) { couponsTotal++; couponsOK++; } }
 
         var effectiveReturn = annualReturn;
         if (tracking && !tracking.couponOK && !(p.coupon && p.coupon.memory)) effectiveReturn = 0;
-
         totalInvested += amount;
         if (grade !== '-') totalReturn += effectiveReturn;
 
@@ -122,17 +155,20 @@ function _renderPortfolioSummaryTable(state) {
         if (tracking) {
             var v = tracking.variation;
             var vc = v >= 5 ? 'var(--green)' : v >= 0 ? '#4ECDC4' : v >= -10 ? 'var(--orange)' : 'var(--red)';
-            variationHtml = '<span style="color:' + vc + ';font-weight:700;cursor:pointer" onclick="event.stopPropagation();_quickEditVariation(\'' + p.id + '\')" title="Cliquer pour modifier">' + (v >= 0 ? '+' : '') + v.toFixed(1) + '% \u270e</span>';
+            variationHtml = '<span style="color:' + vc + ';font-weight:700;cursor:pointer" onclick="event.stopPropagation();_quickEditVariation(\'' + p.id + '\')" title="Modifier">' + (v >= 0 ? '+' : '') + v.toFixed(1) + '% \u270e</span>';
         } else {
-            variationHtml = '<span style="cursor:pointer;color:var(--text-dim);border:1px dashed var(--border);padding:2px 8px;border-radius:4px;font-size:10px" onclick="event.stopPropagation();_quickEditVariation(\'' + p.id + '\')" title="Cliquer pour saisir la variation">\u270e Saisir</span>';
+            variationHtml = '<span style="cursor:pointer;color:var(--text-dim);border:1px dashed var(--border);padding:2px 8px;border-radius:4px;font-size:10px" onclick="event.stopPropagation();_quickEditVariation(\'' + p.id + '\')" title="Saisir">\u270e Saisir</span>';
         }
 
+        var marge = _computeMargeBarriere(p, tracking);
+        var nextEvt = _computeNextEvent(p);
+
         rows.push({
-            name: (p.name || 'Produit').substring(0, 35),
+            name: (p.name || 'Produit').substring(0, 30),
             bankName: bankName, amount: amount, coupon: coupon,
             annualReturn: effectiveReturn, variation: variationHtml,
             statusHtml: statusHtml, statusType: statusType, grade: grade,
-            envelope: p.envelope || '',
+            envelope: p.envelope || '', margeHtml: marge.html, nextEventHtml: nextEvt.html,
             productId: p.id, bankId: p.bankId
         });
     });
@@ -146,13 +182,9 @@ function _renderPortfolioSummaryTable(state) {
     html += '<div style="background:var(--bg-card);padding:14px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px">INVESTI</div><div style="font-size:22px;font-weight:800;color:var(--text-bright);font-family:var(--mono);margin-top:4px">' + formatNumber(totalInvested) + '\u20ac</div></div>';
     html += '<div style="background:var(--bg-card);padding:14px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px">RENDEMENT/AN</div><div style="font-size:22px;font-weight:800;color:var(--green);font-family:var(--mono);margin-top:4px">' + formatNumber(totalReturn) + '\u20ac</div><div style="font-size:10px;color:var(--text-dim)">' + avgRate.toFixed(2) + '% moy.</div></div>';
     html += '<div style="background:var(--bg-card);padding:14px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px">COUPONS</div><div style="font-size:22px;font-weight:800;color:' + (lostCoupons > 0 ? 'var(--orange)' : 'var(--green)') + ';font-family:var(--mono);margin-top:4px">' + couponsOK + '/' + couponsTotal + '</div>' + (lostCoupons > 0 ? '<div style="font-size:10px;color:var(--orange)">' + lostCoupons + ' perdu' + (lostCoupons > 1 ? 's' : '') + '</div>' : '') + '</div>';
-
-    var banks = {};
-    rows.forEach(function(r) { if (r.bankName) banks[r.bankName] = (banks[r.bankName] || 0) + 1; });
-    var bankCount = Object.keys(banks).length;
-    var topBank = Object.entries(banks).sort(function(a, b) { return b[1] - a[1]; })[0];
+    var banks = {}; rows.forEach(function(r) { if (r.bankName) banks[r.bankName] = (banks[r.bankName] || 0) + 1; });
+    var bankCount = Object.keys(banks).length; var topBank = Object.entries(banks).sort(function(a, b) { return b[1] - a[1]; })[0];
     html += '<div style="background:var(--bg-card);padding:14px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px">DIVERSIFICATION</div><div style="font-size:22px;font-weight:800;color:var(--text-bright);margin-top:4px">' + bankCount + ' banque' + (bankCount > 1 ? 's' : '') + '</div>' + (topBank ? '<div style="font-size:10px;color:var(--text-dim)">' + topBank[0] + ' ' + Math.round(topBank[1] / rows.length * 100) + '%</div>' : '') + '</div>';
-
     var hasLost = rows.some(function(r) { return r.statusType === 'lost'; });
     var hasDanger = rows.some(function(r) { return r.statusType === 'danger'; });
     var riskColor = hasDanger ? 'var(--red)' : hasLost ? 'var(--orange)' : 'var(--green)';
@@ -161,37 +193,41 @@ function _renderPortfolioSummaryTable(state) {
     html += '</div>';
 
     // ── Table ──
-    html += '<table style="width:100%;border-collapse:collapse;font-size:12px">';
+    var th = 'padding:8px 6px;text-align:center;color:var(--text-muted);font-size:9px;text-transform:uppercase;font-weight:500;letter-spacing:0.3px';
+    html += '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px">';
     html += '<thead><tr style="border-bottom:2px solid var(--border)">';
-    html += '<th style="padding:10px 12px;text-align:left;color:var(--text-muted);font-size:10px;text-transform:uppercase;font-weight:500">PRODUIT</th>';
-    html += '<th style="padding:10px 8px;text-align:center;color:var(--text-muted);font-size:10px;text-transform:uppercase;font-weight:500">ENVELOPPE</th>';
-    html += '<th style="padding:10px 8px;text-align:right;color:var(--text-muted);font-size:10px;text-transform:uppercase;font-weight:500">MONTANT</th>';
-    html += '<th style="padding:10px 8px;text-align:center;color:var(--text-muted);font-size:10px;text-transform:uppercase;font-weight:500">TAUX</th>';
-    html += '<th style="padding:10px 8px;text-align:right;color:var(--text-muted);font-size:10px;text-transform:uppercase;font-weight:500">RDT/AN</th>';
-    html += '<th style="padding:10px 8px;text-align:center;color:var(--text-muted);font-size:10px;text-transform:uppercase;font-weight:500">VARIATION</th>';
-    html += '<th style="padding:10px 8px;text-align:center;color:var(--text-muted);font-size:10px;text-transform:uppercase;font-weight:500">STATUT</th>';
+    html += '<th style="padding:8px 10px;text-align:left;color:var(--text-muted);font-size:9px;text-transform:uppercase;font-weight:500">PRODUIT</th>';
+    html += '<th style="' + th + '">ENVELOPPE</th>';
+    html += '<th style="' + th + ';text-align:right">MONTANT</th>';
+    html += '<th style="' + th + '">TAUX</th>';
+    html += '<th style="' + th + ';text-align:right">RDT/AN</th>';
+    html += '<th style="' + th + '">VARIATION</th>';
+    html += '<th style="' + th + '">MARGE</th>';
+    html += '<th style="' + th + '">PROCHAINE DATE</th>';
+    html += '<th style="' + th + '">STATUT</th>';
     html += '</tr></thead><tbody>';
 
     rows.forEach(function(r) {
         html += '<tr style="border-bottom:1px solid var(--border);cursor:pointer" onclick="var p=(app.state.portfolio||[]).find(function(x){return x.id===\'' + r.productId + '\'});if(p)app.openProduct(p);">';
-        html += '<td style="padding:10px 12px"><strong style="color:var(--text-bright)">' + r.name + '</strong><div style="font-size:10px;color:var(--text-dim)">' + r.bankName + '</div></td>';
-        html += '<td style="padding:10px 8px;text-align:center">' + _envelopeBadge(r.envelope) + '</td>';
-        html += '<td style="padding:10px 8px;text-align:right;font-family:var(--mono);font-weight:600">' + formatNumber(r.amount) + '\u20ac</td>';
-        html += '<td style="padding:10px 8px;text-align:center;font-family:var(--mono);font-weight:700;color:' + (r.coupon > 0 ? 'var(--green)' : 'var(--text-dim)') + '">' + (r.coupon > 0 ? r.coupon + '%' : '\u2014') + '</td>';
-        html += '<td style="padding:10px 8px;text-align:right;font-family:var(--mono);font-weight:600;color:' + (r.annualReturn > 0 ? 'var(--green)' : 'var(--text-dim)') + '">' + (r.annualReturn > 0 ? formatNumber(r.annualReturn) + '\u20ac' : '0\u20ac') + '</td>';
-        html += '<td style="padding:10px 8px;text-align:center;font-family:var(--mono)">' + r.variation + '</td>';
-        html += '<td style="padding:10px 8px;text-align:center">' + r.statusHtml + '</td>';
+        html += '<td style="padding:8px 10px"><strong style="color:var(--text-bright);font-size:11px">' + r.name + '</strong><div style="font-size:9px;color:var(--text-dim)">' + r.bankName + '</div></td>';
+        html += '<td style="padding:8px 6px;text-align:center">' + _envelopeBadge(r.envelope) + '</td>';
+        html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);font-weight:600;font-size:11px">' + formatNumber(r.amount) + '\u20ac</td>';
+        html += '<td style="padding:8px 6px;text-align:center;font-family:var(--mono);font-weight:700;color:' + (r.coupon > 0 ? 'var(--green)' : 'var(--text-dim)') + ';font-size:11px">' + (r.coupon > 0 ? r.coupon + '%' : '\u2014') + '</td>';
+        html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);font-weight:600;color:' + (r.annualReturn > 0 ? 'var(--green)' : 'var(--text-dim)') + ';font-size:11px">' + (r.annualReturn > 0 ? formatNumber(r.annualReturn) + '\u20ac' : '0\u20ac') + '</td>';
+        html += '<td style="padding:8px 6px;text-align:center;font-family:var(--mono)">' + r.variation + '</td>';
+        html += '<td style="padding:8px 6px;text-align:center">' + r.margeHtml + '</td>';
+        html += '<td style="padding:8px 6px;text-align:center">' + r.nextEventHtml + '</td>';
+        html += '<td style="padding:8px 6px;text-align:center">' + r.statusHtml + '</td>';
         html += '</tr>';
     });
 
-    html += '<tr style="border-top:2px solid var(--border);background:var(--bg-elevated)"><td style="padding:10px 12px;font-weight:700;color:var(--text-bright)">TOTAL</td>';
+    html += '<tr style="border-top:2px solid var(--border);background:var(--bg-elevated)"><td style="padding:8px 10px;font-weight:700;color:var(--text-bright)">TOTAL</td>';
     html += '<td></td>';
-    html += '<td style="padding:10px 8px;text-align:right;font-family:var(--mono);font-weight:700">' + formatNumber(totalInvested) + '\u20ac</td>';
-    html += '<td style="padding:10px 8px;text-align:center;font-family:var(--mono);font-weight:700;color:var(--green)">' + avgRate.toFixed(2) + '%</td>';
-    html += '<td style="padding:10px 8px;text-align:right;font-family:var(--mono);font-weight:700;color:var(--green)">' + formatNumber(totalReturn) + '\u20ac</td>';
-    html += '<td colspan="2"></td></tr>';
-    html += '</tbody></table></div>';
-
+    html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);font-weight:700">' + formatNumber(totalInvested) + '\u20ac</td>';
+    html += '<td style="padding:8px 6px;text-align:center;font-family:var(--mono);font-weight:700;color:var(--green)">' + avgRate.toFixed(2) + '%</td>';
+    html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);font-weight:700;color:var(--green)">' + formatNumber(totalReturn) + '\u20ac</td>';
+    html += '<td colspan="4"></td></tr>';
+    html += '</tbody></table></div></div>';
     return html;
 }
 
@@ -210,44 +246,32 @@ function _renderPortfolioSummaryTable(state) {
                         for (var i = 0; i < sections.length; i++) {
                             var title = sections[i].querySelector('.section-title');
                             if (title && (title.textContent || '').indexOf('Portefeuille') >= 0) {
-                                var div = document.createElement('div');
-                                div.innerHTML = tableHtml;
-                                sections[i].appendChild(div.firstElementChild);
-                                break;
+                                var div = document.createElement('div'); div.innerHTML = tableHtml;
+                                sections[i].appendChild(div.firstElementChild); break;
                             }
                         }
                     }
                 }
-
                 container.querySelectorAll('.section-header').forEach(function(header) {
-                    var title = header.querySelector('.section-title');
-                    if (!title) return;
+                    var title = header.querySelector('.section-title'); if (!title) return;
                     var t = title.textContent || '';
-
                     if (t.indexOf('Portefeuille') >= 0 && !header.querySelector('.btn-regrade-all')) {
                         if (typeof window.batchReGradeAll === 'function') {
                             var pf = (state.portfolio || []).filter(function(p) { return !p.grading || p.grading.grade !== '-'; });
                             var pr = Object.values(state.proposals || {}).flat().filter(function(p) { return !p.grading || (p.grading.grade !== '-' && p.grading.grade !== '?'); });
                             var total = pf.length + pr.length;
                             if (total > 0) {
-                                var btn = document.createElement('button');
-                                btn.className = 'btn btn-regrade-all';
-                                btn.style.cssText = 'margin-right:8px;white-space:nowrap';
-                                btn.innerHTML = '\ud83d\udd04 Actualiser tout (' + total + ')';
-                                btn.onclick = function() { window.batchReGradeAll(); };
+                                var btn = document.createElement('button'); btn.className = 'btn btn-regrade-all'; btn.style.cssText = 'margin-right:8px;white-space:nowrap';
+                                btn.innerHTML = '\ud83d\udd04 Actualiser tout (' + total + ')'; btn.onclick = function() { window.batchReGradeAll(); };
                                 var ref = header.querySelector('.btn-struct-opt') || header.querySelector('.btn.primary') || header.querySelector('.btn');
-                                if (ref) header.insertBefore(btn, ref);
-                                else header.appendChild(btn);
+                                if (ref) header.insertBefore(btn, ref); else header.appendChild(btn);
                             }
                         }
                     }
-
                     if (t.indexOf('Propositions') >= 0 && !header.querySelector('.btn-grade-all')) {
                         var ungraded = Object.values(state.proposals || {}).flat().filter(function(p) { return !p.grading; });
                         if (ungraded.length > 0 && typeof ProposalGrader !== 'undefined') {
-                            var gbtn = document.createElement('button');
-                            gbtn.className = 'btn btn-grade-all';
-                            gbtn.style.cssText = 'margin-right:8px;white-space:nowrap';
+                            var gbtn = document.createElement('button'); gbtn.className = 'btn btn-grade-all'; gbtn.style.cssText = 'margin-right:8px;white-space:nowrap';
                             gbtn.innerHTML = '\ud83c\udfaf Grader tout (' + ungraded.length + ')';
                             gbtn.onclick = function() {
                                 var toGrade = Object.values(app.state.proposals).flat().filter(function(p) { return !p.grading; });
@@ -275,4 +299,4 @@ function _renderPortfolioSummaryTable(state) {
     setTimeout(function() { clearInterval(_btnInterval); }, 8000);
 })();
 
-console.log('[StructBoard] Dashboard v4.1 \u2014 envelope badge on cards + table');
+console.log('[StructBoard] Dashboard v5 \u2014 marge barri\u00e8re + prochaine date');
