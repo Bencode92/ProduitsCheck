@@ -1,13 +1,13 @@
 {
-  "timestamp": "2026-03-25T15:36:44.630308",
+  "timestamp": "2026-03-25T16:11:10.491939",
   "version": "1.0.0",
   "model": "claude-opus-4-20250514",
   "market_data_input": {
     "date": "2026-03-25",
     "brent_usd": 101.04,
-    "brent_usd_avg5d": 102.363186,
-    "gold_usd": 4563.46811,
-    "silver_usd": 72.73681,
+    "brent_usd_avg5d": 102.498098,
+    "gold_usd": 4557.37925,
+    "silver_usd": 72.61633,
     "vix": 22.0,
     "fed_funds_rate": 3.64,
     "cpi_index": 327.46,
@@ -17,14 +17,14 @@
     "us_2y_yield": 3.83,
     "yield_curve_2s10s": 51.0,
     "breakeven_5y": 2.55,
-    "sp500_level": 658.175,
+    "sp500_level": 656.32,
     "dxy": 120.2757,
     "_stress_flags": [
       "energy_shock"
     ],
-    "gold_price": 4564.23669,
+    "gold_price": 4560.79275,
     "gold_ath_120d": 5330.94854,
-    "gold_drawdown_from_ath_pct": 14.382278205221628,
+    "gold_drawdown_from_ath_pct": 14.446880967265924,
     "fed_funds_rate_delta_6m": 0.0,
     "cpi_yoy_pct": 2.4,
     "radar_regime": "neutral",
@@ -72,18 +72,17 @@
       },
       {
         "type": "mandatory_hedge_delta",
-        "action": "gold +3%",
+        "action": "gold +2%",
         "params": {
           "hedge": "gold",
-          "delta_pct": 3
+          "delta_pct": 2
         },
         "profiles": [
-          "Agressif",
           "Modéré",
           "Stable"
         ],
         "conviction": 4,
-        "rationale": "Gold $4563 malgré DD 14.4%, hedge stagflation avec DXY fort à 120"
+        "rationale": "Gold $4557 malgré DD 14.4%, hedge stagflation avec DXY fort à 120"
       },
       {
         "type": "bond_preference",
@@ -96,7 +95,7 @@
           "Stable"
         ],
         "conviction": 5,
-        "rationale": "Breakeven 5Y 2.55% vs CPI 2.4%, TIPS protègent si oil shock diffuse dans core"
+        "rationale": "Breakeven 5Y 2.55% avec oil >$100, inflation va surprendre à la hausse"
       },
       {
         "type": "bond_preference",
@@ -109,52 +108,42 @@
           "Stable"
         ],
         "conviction": 4,
-        "rationale": "10Y 4.34% avec Fed en pause, risque asymétrique vers taux plus hauts si inflation persiste"
+        "rationale": "10Y 4.34% avec Fed en pause, risque asymétrique vers taux plus hauts"
       },
       {
         "type": "bond_floor_delta",
-        "action": "bonds +5%",
+        "action": "bonds +3%",
         "params": {
-          "delta_pct": 5
+          "delta_pct": 3
         },
         "profiles": [
           "Stable"
         ],
         "conviction": 3,
-        "rationale": "Stable à 38.8% bonds trop bas pour stagflation, cible 44% avec duration courte"
-      },
-      {
-        "type": "cash_tactical",
-        "action": "cash buffer 5%",
-        "params": {},
-        "profiles": [
-          "Modéré"
-        ],
-        "conviction": 3,
-        "rationale": "VIX 22 élevé mais pas extrême, garder poudre sèche pour acheter si VIX >30"
+        "rationale": "VIX 22 et spreads IG 135bps signalent stress modéré, augmenter protection"
       }
     ],
     "bond_strategy": {
-      "regime_summary": "Stagflation: TIPS courte duration, éviter HY (spread 319bps), privilégier T-bills <1Y",
+      "regime_summary": "Stagflation: privilégier TIPS courte duration, éviter HY/EM, T-bills pour liquidité",
       "prefer_tips": true,
       "prefer_treasury": false,
       "avoid_hy": true,
-      "avoid_securitized": true,
+      "avoid_securitized": false,
       "avoid_em_bonds": true,
       "max_duration_stable": 4.0,
       "max_duration_moderate": 6.0
     },
     "cash_allocation": {
       "_doc": "Cash tactique: poche à garder non investie pour opportunités futures ou protection",
-      "Agressif": 0,
+      "Agressif": 3,
       "Modéré": 5,
-      "Stable": 0,
-      "rationale": "Cash uniquement pour Modéré (flexibilité), Stable utilise T-bills productifs à 4%"
+      "Stable": 8,
+      "rationale": "VIX 22 et multiples secteurs avoided suggèrent rotation imminente, cash pour flexibilité"
     },
     "warnings": [
-      "Si Brent casse $105, probabilité Fed hike monte → réduire duration à 2Y max",
-      "RADAR montre 6 secteurs en momentum négatif 6M → rotation sectorielle imminente",
-      "DXY 120 historiquement élevé → risque de reversal brutal si Fed pivot"
+      "Si Brent casse $105, probabilité hike Fed monte → réduire duration à 2-3y max",
+      "Communication services -2.34% daily = signal de stress tech/media à surveiller",
+      "DXY 120 historiquement élevé, risque de crise EM si maintien >3 mois"
     ]
   },
   "adjustments_output": {
@@ -170,9 +159,8 @@
     },
     "hedge_deltas": {
       "gold": {
-        "Agressif": 3,
-        "Modéré": 3,
-        "Stable": 3
+        "Modéré": 2,
+        "Stable": 2
       }
     },
     "bond_preferences": [
@@ -194,18 +182,6 @@
         "max_dur": 4.0,
         "fund_types": [],
         "rule_id": "ai_stagflation"
-      },
-      {
-        "action": "avoid_fund_types",
-        "profiles": [
-          "Modéré",
-          "Stable"
-        ],
-        "fund_types": [
-          "Securitized Bond",
-          "Bank Loan"
-        ],
-        "rule_id": "ai_bond_strategy"
       },
       {
         "action": "avoid_fund_types",
@@ -250,25 +226,27 @@
       "ai_stagflation"
     ],
     "bond_floor_deltas": {
-      "Stable": 5
+      "Stable": 3
     },
     "cash_tactical": {
-      "Modéré": 5
+      "Agressif": 3,
+      "Modéré": 5,
+      "Stable": 8
     },
-    "cash_tactical_rationale": "Cash uniquement pour Modéré (flexibilité), Stable utilise T-bills productifs à 4%",
+    "cash_tactical_rationale": "VIX 22 et multiples secteurs avoided suggèrent rotation imminente, cash pour flexibilité",
     "ai_regime": "stagflation",
     "ai_regime_confidence": 4,
     "ai_warnings": [
-      "Si Brent casse $105, probabilité Fed hike monte → réduire duration à 2Y max",
-      "RADAR montre 6 secteurs en momentum négatif 6M → rotation sectorielle imminente",
-      "DXY 120 historiquement élevé → risque de reversal brutal si Fed pivot"
+      "Si Brent casse $105, probabilité hike Fed monte → réduire duration à 2-3y max",
+      "Communication services -2.34% daily = signal de stress tech/media à surveiller",
+      "DXY 120 historiquement élevé, risque de crise EM si maintien >3 mois"
     ],
     "ai_bond_strategy": {
-      "regime_summary": "Stagflation: TIPS courte duration, éviter HY (spread 319bps), privilégier T-bills <1Y",
+      "regime_summary": "Stagflation: privilégier TIPS courte duration, éviter HY/EM, T-bills pour liquidité",
       "prefer_tips": true,
       "prefer_treasury": false,
       "avoid_hy": true,
-      "avoid_securitized": true,
+      "avoid_securitized": false,
       "avoid_em_bonds": true,
       "max_duration_stable": 4.0,
       "max_duration_moderate": 6.0
@@ -276,8 +254,8 @@
   },
   "regime": "stagflation",
   "warnings": [
-    "Si Brent casse $105, probabilité Fed hike monte → réduire duration à 2Y max",
-    "RADAR montre 6 secteurs en momentum négatif 6M → rotation sectorielle imminente",
-    "DXY 120 historiquement élevé → risque de reversal brutal si Fed pivot"
+    "Si Brent casse $105, probabilité hike Fed monte → réduire duration à 2-3y max",
+    "Communication services -2.34% daily = signal de stress tech/media à surveiller",
+    "DXY 120 historiquement élevé, risque de crise EM si maintien >3 mois"
   ]
 }
