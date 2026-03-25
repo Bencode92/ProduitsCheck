@@ -53,7 +53,9 @@ jobs:
             echo "No MI files found, skipping"
           fi
 
-      - name: Fetch ECB rate data
+      - name: Fetch rate data (ECB + Twelve Data fallback)
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: python3 scripts/fetch-rates.py
 
       - name: Fetch underlying proxy metrics (Twelve Data API)
