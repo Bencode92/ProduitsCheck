@@ -1,13 +1,13 @@
 {
-  "timestamp": "2026-03-25T16:24:03.321205",
+  "timestamp": "2026-03-25T16:42:43.647934",
   "version": "1.0.0",
   "model": "claude-opus-4-20250514",
   "market_data_input": {
     "date": "2026-03-25",
     "brent_usd": 101.04,
-    "brent_usd_avg5d": 102.46174599999999,
-    "gold_usd": 4549.74479,
-    "silver_usd": 72.48033,
+    "brent_usd_avg5d": 102.32496599999999,
+    "gold_usd": 4556.55237,
+    "silver_usd": 72.73693,
     "vix": 22.0,
     "fed_funds_rate": 3.64,
     "cpi_index": 327.46,
@@ -17,14 +17,14 @@
     "us_2y_yield": 3.83,
     "yield_curve_2s10s": 51.0,
     "breakeven_5y": 2.55,
-    "sp500_level": 656.26,
+    "sp500_level": 658.18,
     "dxy": 120.2757,
     "_stress_flags": [
       "energy_shock"
     ],
-    "gold_price": 4547.7417,
+    "gold_price": 4559.55678,
     "gold_ath_120d": 5330.94854,
-    "gold_drawdown_from_ath_pct": 14.691697624228064,
+    "gold_drawdown_from_ath_pct": 14.470065771822297,
     "fed_funds_rate_delta_6m": 0.0,
     "cpi_yoy_pct": 2.4,
     "radar_regime": "neutral",
@@ -69,7 +69,7 @@
           "Stable"
         ],
         "conviction": 4,
-        "rationale": "Gold $4550 en correction 14.7% mais DXY 120 extrême, rebond imminent avec stagflation"
+        "rationale": "Gold en correction -14.5% mais reste hedge stagflation avec DXY élevé à 120"
       },
       {
         "type": "bond_preference",
@@ -82,7 +82,7 @@
           "Stable"
         ],
         "conviction": 5,
-        "rationale": "Breakeven 2.55% sous-estime risque inflation avec pétrole >$100, TIPS protègent rendement réel"
+        "rationale": "Breakeven 5Y à 2.55% avec pétrole >$100 suggère inflation sous-évaluée"
       },
       {
         "type": "bond_preference",
@@ -95,34 +95,36 @@
           "Stable"
         ],
         "conviction": 4,
-        "rationale": "10Y 4.34% avec Fed en pause, risque asymétrique vers taux plus hauts si inflation persiste"
+        "rationale": "10Y à 4.34% avec risque asymétrique de hausse si inflation persiste"
       },
       {
-        "type": "bond_floor_delta",
-        "action": "bonds +5%",
+        "type": "thematic_cap_delta",
+        "action": "dividend_value +3%",
         "params": {
-          "delta_pct": 5
+          "theme": "dividend_value",
+          "delta_pct": 3
         },
         "profiles": [
+          "Modéré",
           "Stable"
         ],
         "conviction": 3,
-        "rationale": "VIX 22 et spreads IG 135bps signalent stress modéré, augmenter protection capital"
+        "rationale": "Utilities momentum neutre mais défensif en stagflation avec pricing power"
       },
       {
         "type": "cash_tactical",
-        "action": "cash 5-10%",
+        "action": "cash buffer 5-8%",
         "params": {},
         "profiles": [
           "Modéré",
           "Stable"
         ],
         "conviction": 3,
-        "rationale": "Régime incertain avec S&P 656 élevé, garder poudre sèche pour opportunités si correction"
+        "rationale": "VIX 22 avec tech/comm services en difficulté, garder poudre sèche pour opportunités"
       }
     ],
     "bond_strategy": {
-      "regime_summary": "Stagflation: TIPS courte duration, éviter HY/EM, privilégier qualité IG et T-bills",
+      "regime_summary": "TIPS prioritaires, duration courte <5Y, éviter HY/EM avec spreads serrés",
       "prefer_tips": true,
       "prefer_treasury": false,
       "avoid_hy": true,
@@ -135,13 +137,13 @@
       "_doc": "Cash tactique: poche à garder non investie pour opportunités futures ou protection",
       "Agressif": 0,
       "Modéré": 5,
-      "Stable": 10,
-      "rationale": "T-bills 4%+ offrent rendement avec liquidité, alternative au cash pur en stagflation"
+      "Stable": 8,
+      "rationale": "Tech/comm services en correction avec VIX élevé, cash pour acheter la faiblesse"
     },
     "warnings": [
-      "DXY 120 niveau extrême historique, reversal violent possible → impact gold/commodities",
-      "Spread HY 319bps reste contenu, mais vulnérable si récession se matérialise",
-      "RADAR montre tech/comm services en difficulté (-1.09%/-2.34% daily), rotation sectorielle en cours"
+      "Si Brent casse $105, risque d'accélération inflation → Fed pourrait reprendre les hausses",
+      "Gold/silver ratio extrême (62.6) suggère rotation possible vers silver si inflation accélère",
+      "Spread IG/HY historiquement serré (184bps) → vulnérable à élargissement si récession"
     ]
   },
   "adjustments_output": {
@@ -149,6 +151,10 @@
       "energy_oil": {
         "Agressif": 5,
         "Modéré": 5
+      },
+      "dividend_value": {
+        "Modéré": 3,
+        "Stable": 3
       }
     },
     "hedge_deltas": {
@@ -220,23 +226,20 @@
     "active_rules": [
       "ai_stagflation"
     ],
-    "bond_floor_deltas": {
-      "Stable": 5
-    },
     "cash_tactical": {
       "Modéré": 5,
-      "Stable": 10
+      "Stable": 8
     },
-    "cash_tactical_rationale": "T-bills 4%+ offrent rendement avec liquidité, alternative au cash pur en stagflation",
+    "cash_tactical_rationale": "Tech/comm services en correction avec VIX élevé, cash pour acheter la faiblesse",
     "ai_regime": "stagflation",
     "ai_regime_confidence": 4,
     "ai_warnings": [
-      "DXY 120 niveau extrême historique, reversal violent possible → impact gold/commodities",
-      "Spread HY 319bps reste contenu, mais vulnérable si récession se matérialise",
-      "RADAR montre tech/comm services en difficulté (-1.09%/-2.34% daily), rotation sectorielle en cours"
+      "Si Brent casse $105, risque d'accélération inflation → Fed pourrait reprendre les hausses",
+      "Gold/silver ratio extrême (62.6) suggère rotation possible vers silver si inflation accélère",
+      "Spread IG/HY historiquement serré (184bps) → vulnérable à élargissement si récession"
     ],
     "ai_bond_strategy": {
-      "regime_summary": "Stagflation: TIPS courte duration, éviter HY/EM, privilégier qualité IG et T-bills",
+      "regime_summary": "TIPS prioritaires, duration courte <5Y, éviter HY/EM avec spreads serrés",
       "prefer_tips": true,
       "prefer_treasury": false,
       "avoid_hy": true,
@@ -248,8 +251,8 @@
   },
   "regime": "stagflation",
   "warnings": [
-    "DXY 120 niveau extrême historique, reversal violent possible → impact gold/commodities",
-    "Spread HY 319bps reste contenu, mais vulnérable si récession se matérialise",
-    "RADAR montre tech/comm services en difficulté (-1.09%/-2.34% daily), rotation sectorielle en cours"
+    "Si Brent casse $105, risque d'accélération inflation → Fed pourrait reprendre les hausses",
+    "Gold/silver ratio extrême (62.6) suggère rotation possible vers silver si inflation accélère",
+    "Spread IG/HY historiquement serré (184bps) → vulnérable à élargissement si récession"
   ]
 }
