@@ -1,11 +1,11 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Edit Modal v1.1 — with Envelope (ByCam/Caméléons)
+// STRUCTBOARD — Edit Modal v1.2 — Envelope with fixed liquidity
 // ═══════════════════════════════════════════════════════════════
 
 var ENVELOPES = [
-    { id: '', label: '— Aucune —', color: '#94A3B8', icon: '' },
-    { id: 'bycam', label: 'ByCam', color: '#3B82F6', icon: '🏦' },
-    { id: 'cameleons', label: 'Caméléons', color: '#A855F7', icon: '🦎' }
+    { id: '', label: '\u2014 Aucune \u2014', color: '#94A3B8', icon: '', liquidity: 0 },
+    { id: 'bycam', label: 'ByCam', color: '#3B82F6', icon: '\ud83c\udfe6', liquidity: 100000 },
+    { id: 'cameleons', label: 'Cam\u00e9l\u00e9ons', color: '#A855F7', icon: '\ud83e\udd8e', liquidity: 100000 }
 ];
 
 window.getEnvelopeInfo = function(id) {
@@ -59,8 +59,6 @@ window.handleEditSave = async function() {
 
     var newName = document.getElementById('fe-name')?.value;
     if (newName) p.name = newName;
-
-    // Envelope
     p.envelope = document.getElementById('fe-envelope')?.value || '';
 
     var newCoupon = document.getElementById('fe-coupon')?.value;
@@ -120,4 +118,4 @@ function escapeAttr(str) {
     return (str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;');
 }
 
-console.log('[StructBoard] Edit Modal v1.1 \u2014 with envelope ByCam/Cam\u00e9l\u00e9ons');
+console.log('[StructBoard] Edit Modal v1.2 \u2014 envelope with fixed liquidity');
