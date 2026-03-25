@@ -1,6 +1,132 @@
-// ═══ DASHBOARD BUTTONS PATCH ═══
-// Adds "Actualiser tout" + "Grader tout" buttons via the same
-// renderDashboard hook as "Optimiser" — no race conditions
+// ═══════════════════════════════════════════════════════════════
+// STRUCTBOARD — Dashboard Buttons + Portfolio Summary Table v2
+// Injects: Actualiser tout, Grader tout, Portfolio recap table
+// ═══════════════════════════════════════════════════════════════
+
+// ═══ PORTFOLIO SUMMARY TABLE ═════════════════════════════
+function _renderPortfolioSummaryTable(state) {
+    var portfolio = state.portfolio || [];
+    if (portfolio.length === 0) return '';
+
+    var totalInvested = 0, totalReturn = 0, couponsOK = 0, couponsTotal = 0;
+    var rows = [];
+
+    portfolio.forEach(function(p) {
+        var norm = typeof _graderNormalize === 'function' ? _graderNormalize(p) : { coupon: 0 };
+        var amount = parseFloat(p.investedAmount) || 0;
+        var coupon = norm.coupon || 0;
+        var annualReturn = Math.round(amount * coupon / 100);
+        var tracking = typeof getTrackingStatus === 'function' ? getTrackingStatus(p) : null;
+        var grade = (p.grading && p.grading.grade) || '?';
+        var bankName = '';
+        if (typeof BANKS !== 'undefined') { var b = BANKS.find(function(bk) { return bk.id === p.bankId; }); if (b) bankName = b.name; }
+        bankName = bankName || p.bankId || '';
+
+        // Status
+        var statusHtml = '', statusType = 'ok';
+        if (grade === '-') {
+            statusHtml = '<span style="color:#94A3B8;font-weight:600">$ CASH</span>';
+            statusType = 'cash';
+        } else if (tracking) {
+            if (tracking.autocallOK) {
+                statusHtml = '<span style="background:rgba(76,175,80,0.15);color:#4CAF50;padding:2px 8px;border-radius:10px;font-weight:600;font-size:10px">\u2705 AUTOCALL</span>';
+                statusType = 'autocall';
+            } else if (!tracking.couponOK) {
+                statusHtml = '<span style="background:rgba(255,183,77,0.15);color:#FFB74D;padding:2px 8px;border-radius:10px;font-weight:600;font-size:10px">\u26a0 COUPON PERDU</span>';
+                statusType = 'lost';
+            } else {
+                statusHtml = '<span style="background:rgba(76,175,80,0.1);color:#81C784;padding:2px 8px;border-radius:10px;font-weight:600;font-size:10px">\ud83d\udfe2 OK</span>';
+            }
+            couponsTotal++;
+            if (tracking.couponOK) couponsOK++;
+        } else if (grade !== '-') {
+            statusHtml = '<span style="color:var(--text-dim);font-size:10px">\u2014</span>';
+            if (coupon > 0) { couponsTotal++; couponsOK++; } // assume OK if no tracking
+        }
+
+        // Adjusted return based on tracking
+        var effectiveReturn = annualReturn;
+        if (tracking && !tracking.couponOK && !(p.coupon && p.coupon.memory)) effectiveReturn = 0;
+
+        totalInvested += amount;
+        if (grade !== '-') totalReturn += effectiveReturn;
+
+        var variationHtml = '\u2014';
+        if (tracking) {
+            var v = tracking.variation;
+            var vc = v >= 5 ? 'var(--green)' : v >= 0 ? '#4ECDC4' : v >= -10 ? 'var(--orange)' : 'var(--red)';
+            variationHtml = '<span style="color:' + vc + ';font-weight:700">' + (v >= 0 ? '+' : '') + v.toFixed(1) + '%</span>';
+        }
+
+        rows.push({
+            name: (p.name || 'Produit').substring(0, 35),
+            bankName: bankName, amount: amount, coupon: coupon,
+            annualReturn: effectiveReturn, variation: variationHtml,
+            statusHtml: statusHtml, statusType: statusType, grade: grade,
+            productId: p.id, bankId: p.bankId
+        });
+    });
+
+    var avgRate = totalInvested > 0 ? (totalReturn / totalInvested * 100) : 0;
+    var lostCoupons = couponsTotal - couponsOK;
+
+    // ── Summary cards ──
+    var html = '<div style="margin:20px 0;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden" data-section="portfolio-summary">';
+    html += '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border)">';
+    html += '<div style="background:var(--bg-card);padding:14px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px">INVESTI</div><div style="font-size:22px;font-weight:800;color:var(--text-bright);font-family:var(--mono);margin-top:4px">' + formatNumber(totalInvested) + '\u20ac</div></div>';
+    html += '<div style="background:var(--bg-card);padding:14px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px">RENDEMENT/AN</div><div style="font-size:22px;font-weight:800;color:var(--green);font-family:var(--mono);margin-top:4px">' + formatNumber(totalReturn) + '\u20ac</div><div style="font-size:10px;color:var(--text-dim)">' + avgRate.toFixed(2) + '% moy.</div></div>';
+    html += '<div style="background:var(--bg-card);padding:14px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px">COUPONS</div><div style="font-size:22px;font-weight:800;color:' + (lostCoupons > 0 ? 'var(--orange)' : 'var(--green)') + ';font-family:var(--mono);margin-top:4px">' + couponsOK + '/' + couponsTotal + '</div>' + (lostCoupons > 0 ? '<div style="font-size:10px;color:var(--orange)">' + lostCoupons + ' perdu' + (lostCoupons > 1 ? 's' : '') + '</div>' : '') + '</div>';
+
+    // Diversification
+    var banks = {};
+    rows.forEach(function(r) { if (r.bankName) banks[r.bankName] = (banks[r.bankName] || 0) + 1; });
+    var bankCount = Object.keys(banks).length;
+    var topBank = Object.entries(banks).sort(function(a, b) { return b[1] - a[1]; })[0];
+    html += '<div style="background:var(--bg-card);padding:14px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px">DIVERSIFICATION</div><div style="font-size:22px;font-weight:800;color:var(--text-bright);margin-top:4px">' + bankCount + ' banque' + (bankCount > 1 ? 's' : '') + '</div>' + (topBank ? '<div style="font-size:10px;color:var(--text-dim)">' + topBank[0] + ' ' + Math.round(topBank[1] / rows.length * 100) + '%</div>' : '') + '</div>';
+
+    // Risk
+    var hasTracker = rows.some(function(r) { return r.statusType === 'lost'; });
+    var hasDanger = rows.some(function(r) { return r.statusType === 'danger'; });
+    var riskColor = hasDanger ? 'var(--red)' : hasTracker ? 'var(--orange)' : 'var(--green)';
+    var riskLabel = hasDanger ? '\ud83d\udd34 \u00c9lev\u00e9' : hasTracker ? '\ud83d\udfe0 Mod\u00e9r\u00e9' : '\ud83d\udfe2 Faible';
+    html += '<div style="background:var(--bg-card);padding:14px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px">RISQUE GLOBAL</div><div style="font-size:18px;font-weight:800;color:' + riskColor + ';margin-top:6px">' + riskLabel + '</div></div>';
+    html += '</div>';
+
+    // ── Table ──
+    html += '<table style="width:100%;border-collapse:collapse;font-size:12px">';
+    html += '<thead><tr style="border-bottom:2px solid var(--border)">';
+    html += '<th style="padding:10px 12px;text-align:left;color:var(--text-muted);font-size:10px;text-transform:uppercase;font-weight:500">PRODUIT</th>';
+    html += '<th style="padding:10px 8px;text-align:right;color:var(--text-muted);font-size:10px;text-transform:uppercase;font-weight:500">MONTANT</th>';
+    html += '<th style="padding:10px 8px;text-align:center;color:var(--text-muted);font-size:10px;text-transform:uppercase;font-weight:500">TAUX</th>';
+    html += '<th style="padding:10px 8px;text-align:right;color:var(--text-muted);font-size:10px;text-transform:uppercase;font-weight:500">RDT/AN</th>';
+    html += '<th style="padding:10px 8px;text-align:center;color:var(--text-muted);font-size:10px;text-transform:uppercase;font-weight:500">VARIATION</th>';
+    html += '<th style="padding:10px 8px;text-align:center;color:var(--text-muted);font-size:10px;text-transform:uppercase;font-weight:500">STATUT</th>';
+    html += '</tr></thead><tbody>';
+
+    rows.forEach(function(r) {
+        var gc = { A:'#06D6A0', B:'#4ECDC4', C:'#FFB627', D:'#E85D04', F:'#EF233C', '-':'#94A3B8' }[r.grade] || '#888';
+        html += '<tr style="border-bottom:1px solid var(--border);cursor:pointer" onclick="var p=(app.state.portfolio||[]).find(function(x){return x.id===\'' + r.productId + '\'});if(p)app.openProduct(p);">';
+        html += '<td style="padding:10px 12px"><strong style="color:var(--text-bright)">' + r.name + '</strong><div style="font-size:10px;color:var(--text-dim)">' + r.bankName + '</div></td>';
+        html += '<td style="padding:10px 8px;text-align:right;font-family:var(--mono);font-weight:600">' + formatNumber(r.amount) + '\u20ac</td>';
+        html += '<td style="padding:10px 8px;text-align:center;font-family:var(--mono);font-weight:700;color:' + (r.coupon > 0 ? 'var(--green)' : 'var(--text-dim)') + '">' + (r.coupon > 0 ? r.coupon + '%' : '\u2014') + '</td>';
+        html += '<td style="padding:10px 8px;text-align:right;font-family:var(--mono);font-weight:600;color:' + (r.annualReturn > 0 ? 'var(--green)' : 'var(--text-dim)') + '">' + (r.annualReturn > 0 ? formatNumber(r.annualReturn) + '\u20ac' : '0\u20ac') + '</td>';
+        html += '<td style="padding:10px 8px;text-align:center;font-family:var(--mono)">' + r.variation + '</td>';
+        html += '<td style="padding:10px 8px;text-align:center">' + r.statusHtml + '</td>';
+        html += '</tr>';
+    });
+
+    // TOTAL row
+    html += '<tr style="border-top:2px solid var(--border);background:var(--bg-elevated)"><td style="padding:10px 12px;font-weight:700;color:var(--text-bright)">TOTAL</td>';
+    html += '<td style="padding:10px 8px;text-align:right;font-family:var(--mono);font-weight:700">' + formatNumber(totalInvested) + '\u20ac</td>';
+    html += '<td style="padding:10px 8px;text-align:center;font-family:var(--mono);font-weight:700;color:var(--green)">' + avgRate.toFixed(2) + '%</td>';
+    html += '<td style="padding:10px 8px;text-align:right;font-family:var(--mono);font-weight:700;color:var(--green)">' + formatNumber(totalReturn) + '\u20ac</td>';
+    html += '<td colspan="2"></td></tr>';
+    html += '</tbody></table></div>';
+
+    return html;
+}
+
+// ═══ DASHBOARD BUTTONS + TABLE INJECTION ═════════════════
 (function() {
     var _btnInterval = setInterval(function() {
         if (typeof renderDashboard !== 'function') return;
@@ -8,12 +134,31 @@
         renderDashboard = function(container, state) {
             _prev(container, state);
             setTimeout(function() {
+                // ── Inject portfolio summary table after product cards ──
+                if (!container.querySelector('[data-section="portfolio-summary"]')) {
+                    var tableHtml = _renderPortfolioSummaryTable(state);
+                    if (tableHtml) {
+                        // Find the portfolio section and insert table after the product cards grid
+                        var sections = container.querySelectorAll('.section');
+                        for (var i = 0; i < sections.length; i++) {
+                            var title = sections[i].querySelector('.section-title');
+                            if (title && (title.textContent || '').indexOf('Portefeuille') >= 0) {
+                                var div = document.createElement('div');
+                                div.innerHTML = tableHtml;
+                                sections[i].appendChild(div.firstElementChild);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                // ── Inject buttons ──
                 container.querySelectorAll('.section-header').forEach(function(header) {
                     var title = header.querySelector('.section-title');
                     if (!title) return;
                     var t = title.textContent || '';
 
-                    // PORTFOLIO: "🔄 Actualiser tout (N)" — ALL products
+                    // PORTFOLIO: "\ud83d\udd04 Actualiser tout (N)" — ALL products
                     if (t.indexOf('Portefeuille') >= 0 && !header.querySelector('.btn-regrade-all')) {
                         if (typeof window.batchReGradeAll === 'function') {
                             var pf = (state.portfolio || []).filter(function(p) { return !p.grading || p.grading.grade !== '-'; });
@@ -32,16 +177,15 @@
                         }
                     }
 
-                    // PROPOSALS: "🎯 Grader tout (N)" — ungraded only
+                    // PROPOSALS: "\ud83c\udfaf Grader tout (N)" — ungraded only
                     if (t.indexOf('Propositions') >= 0 && !header.querySelector('.btn-grade-all')) {
                         var ungraded = Object.values(state.proposals || {}).flat().filter(function(p) { return !p.grading; });
-                        if (ungraded.length > 0 && typeof window.batchReGradeAll === 'function') {
+                        if (ungraded.length > 0 && typeof ProposalGrader !== 'undefined') {
                             var gbtn = document.createElement('button');
                             gbtn.className = 'btn btn-grade-all';
                             gbtn.style.cssText = 'margin-right:8px;white-space:nowrap';
                             gbtn.innerHTML = '\ud83c\udfaf Grader tout (' + ungraded.length + ')';
                             gbtn.onclick = function() {
-                                if (typeof ProposalGrader === 'undefined') return;
                                 var toGrade = Object.values(app.state.proposals).flat().filter(function(p) { return !p.grading; });
                                 if (!toGrade.length) { showToast('Tout grad\u00e9', 'info'); return; }
                                 if (!confirm('Grader ' + toGrade.length + ' propositions ?')) return;
@@ -60,10 +204,11 @@
                         }
                     }
                 });
-            }, 120); // 120ms = after structured-optimizer's 80ms hook
+            }, 120);
         };
         clearInterval(_btnInterval);
-    }, 300); // 300ms = after structured-optimizer's 200ms interval
+    }, 300);
     setTimeout(function() { clearInterval(_btnInterval); }, 8000);
 })();
-console.log('[StructBoard] Dashboard buttons patch \u2014 Actualiser tout + Grader tout');
+
+console.log('[StructBoard] Dashboard buttons + portfolio summary table v2');
