@@ -1,6 +1,6 @@
 {
-  "_version": "1.0",
-  "_doc": "Mapping sous-jacent brochure → proxy ticker dans markets.json ou macro",
+  "_version": "1.1",
+  "_doc": "Mapping sous-jacent brochure → proxy ticker dans markets.json ou macro. v1.1: Added sector indices + gold miners",
   "indices": {
     "eurostoxx 50": { "proxy": "FEZ", "name": "SPDR EURO STOXX 50 ETF", "default_vol": 18, "default_beta": 1.0 },
     "euro stoxx 50": { "proxy": "FEZ", "name": "SPDR EURO STOXX 50 ETF", "default_vol": 18, "default_beta": 1.0 },
@@ -34,7 +34,47 @@
     "sensex": { "proxy": "INDA", "name": "iShares MSCI India ETF", "default_vol": 20, "default_beta": 0.8 },
     "nifty 50": { "proxy": "INDA", "name": "iShares MSCI India ETF", "default_vol": 20, "default_beta": 0.8 },
     "bovespa": { "proxy": "EWZ", "name": "iShares MSCI Brazil ETF", "default_vol": 30, "default_beta": 1.2 },
-    "asx 200": { "proxy": "EWA", "name": "iShares MSCI Australia ETF", "default_vol": 18, "default_beta": 0.85 }
+    "asx 200": { "proxy": "EWA", "name": "iShares MSCI Australia ETF", "default_vol": 18, "default_beta": 0.85 },
+
+    "eurostoxx banks": { "proxy": "EUFN", "name": "iShares MSCI Europe Financials ETF", "default_vol": 28, "default_beta": 1.3 },
+    "euro stoxx banks": { "proxy": "EUFN", "name": "iShares MSCI Europe Financials ETF", "default_vol": 28, "default_beta": 1.3 },
+    "stoxx banks": { "proxy": "EUFN", "name": "iShares MSCI Europe Financials ETF", "default_vol": 28, "default_beta": 1.3 },
+    "stoxx europe 600 banks": { "proxy": "EUFN", "name": "iShares MSCI Europe Financials ETF", "default_vol": 28, "default_beta": 1.3 },
+    "sx7e": { "proxy": "EUFN", "name": "iShares MSCI Europe Financials ETF", "default_vol": 28, "default_beta": 1.3 },
+
+    "eurostoxx oil & gas": { "proxy": "XLE", "name": "Energy Select Sector SPDR", "default_vol": 30, "default_beta": 1.1 },
+    "stoxx europe 600 oil & gas": { "proxy": "XLE", "name": "Energy Select Sector SPDR", "default_vol": 30, "default_beta": 1.1 },
+    "eurostoxx oil": { "proxy": "XLE", "name": "Energy Select Sector SPDR", "default_vol": 30, "default_beta": 1.1 },
+
+    "eurostoxx technology": { "proxy": "XLK", "name": "Technology Select Sector SPDR", "default_vol": 24, "default_beta": 1.15 },
+    "stoxx europe 600 technology": { "proxy": "XLK", "name": "Technology Select Sector SPDR", "default_vol": 24, "default_beta": 1.15 },
+
+    "eurostoxx healthcare": { "proxy": "XLV", "name": "Health Care Select Sector SPDR", "default_vol": 16, "default_beta": 0.75 },
+    "stoxx europe 600 health care": { "proxy": "XLV", "name": "Health Care Select Sector SPDR", "default_vol": 16, "default_beta": 0.75 },
+
+    "eurostoxx utilities": { "proxy": "XLU", "name": "Utilities Select Sector SPDR", "default_vol": 18, "default_beta": 0.55 },
+    "stoxx europe 600 utilities": { "proxy": "XLU", "name": "Utilities Select Sector SPDR", "default_vol": 18, "default_beta": 0.55 },
+
+    "eurostoxx auto": { "proxy": "CARZ", "name": "First Trust S-Network Future Vehicles ETF", "default_vol": 28, "default_beta": 1.2 },
+    "stoxx europe 600 automobiles": { "proxy": "CARZ", "name": "First Trust S-Network Future Vehicles ETF", "default_vol": 28, "default_beta": 1.2 },
+
+    "solactive gdx": { "proxy": "GDX", "name": "VanEck Gold Miners ETF", "default_vol": 35, "default_beta": 0.3 },
+    "indice solactive gdx": { "proxy": "GDX", "name": "VanEck Gold Miners ETF", "default_vol": 35, "default_beta": 0.3 },
+    "gdx": { "proxy": "GDX", "name": "VanEck Gold Miners ETF", "default_vol": 35, "default_beta": 0.3 },
+    "gold miners": { "proxy": "GDX", "name": "VanEck Gold Miners ETF", "default_vol": 35, "default_beta": 0.3 },
+    "minieres or": { "proxy": "GDX", "name": "VanEck Gold Miners ETF", "default_vol": 35, "default_beta": 0.3 },
+
+    "solactive silver miners": { "proxy": "SIL", "name": "Global X Silver Miners ETF", "default_vol": 40, "default_beta": 0.4 },
+    "silver miners": { "proxy": "SIL", "name": "Global X Silver Miners ETF", "default_vol": 40, "default_beta": 0.4 },
+
+    "msci emerging markets": { "proxy": "EEM", "name": "iShares MSCI Emerging Markets ETF", "default_vol": 20, "default_beta": 0.8 },
+    "msci em": { "proxy": "EEM", "name": "iShares MSCI Emerging Markets ETF", "default_vol": 20, "default_beta": 0.8 },
+
+    "s&p 500 equal weight": { "proxy": "RSP", "name": "Invesco S&P 500 Equal Weight ETF", "default_vol": 18, "default_beta": 1.0 },
+    "s&p 500 esg": { "proxy": "EFIV", "name": "SPDR S&P 500 ESG ETF", "default_vol": 17, "default_beta": 1.0 },
+
+    "msci acwi": { "proxy": "ACWI", "name": "iShares MSCI ACWI ETF", "default_vol": 16, "default_beta": 0.95 },
+    "msci all country world": { "proxy": "ACWI", "name": "iShares MSCI ACWI ETF", "default_vol": 16, "default_beta": 0.95 }
   },
   "commodities": {
     "or": { "macro_key": "gold_usd", "name": "Gold XAU/USD", "default_vol": 15, "default_beta": 0.05, "default_dd": 15 },
