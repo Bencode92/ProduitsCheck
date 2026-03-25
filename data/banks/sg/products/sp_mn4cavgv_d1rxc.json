@@ -164,7 +164,7 @@
   },
   "grading": {
     "grade": "C",
-    "score": 54,
+    "score": 55,
     "killCriteria": {
       "triggered": false,
       "reasons": []
@@ -174,62 +174,62 @@
         "score": 34,
         "base": 39,
         "delta": -5,
-        "reasoning": "Rendement: base 39 → -5 = 34 (Capital protégé mais absence de barrière claire et volatilité extrême de Tesla (57.64%) compromettent fortement la probabilité du coupon 7% [MI capé ±5]) | Coupon 7%, protégé"
+        "reasoning": "Rendement: base 39 → -5 = 34 (Produit capital garanti mais manque de transparence sur mécanisme de protection et durée, rendement modeste pour un panier incluant Tesla avec vol 57.64% [MI capé ±5]) | Coupon 7%, protégé"
       },
       "underlyingQuality": {
         "score": 42,
         "base": 47,
         "delta": -5,
-        "reasoning": "Qualité: base 47 → -5 = 42 (Exposition massive au secteur communication (3/8 titres) évité en régime neutral, plus Tesla très fragile (ROE 4.93%, marge 4.07%) [MI capé ±5]) [B/Q 35%] | Worst: Tesla B:54"
+        "reasoning": "Qualité: base 47 → -5 = 42 (Surexposition aux secteurs évités (META, NFLX, GOOGL en communication; AMZN, TSLA en conso cyclique) et Tesla avec ROE 4.93% est un risque majeur dans le worst-of [MI capé ±5]) [B/Q 35%] | Worst: Tesla B:54"
       },
       "portfolioFit": {
-        "score": 72,
+        "score": 67,
         "base": 72,
-        "delta": 0,
-        "reasoning": "Fit: base 72"
+        "delta": -5,
+        "reasoning": "Fit: base 72 → -5 = 67 (Panier trop concentré en tech US avec betas élevés (NVDA 1.92, TSLA 1.62), manque de diversification géographique et sectorielle)"
       },
       "riskPremium": {
-        "score": 77,
+        "score": 82,
         "base": 82,
-        "delta": -5,
-        "reasoning": "Prime: base 82 → -5 = 77 (Protection du capital attractive mais opacité sur la barrière et mécanisme de coupon suspect) | 7% vs CAT 2.5% (spread 4.5%)"
+        "delta": 0,
+        "reasoning": "Prime: base 82 | 7% vs CAT 2.5% (spread 4.5%)"
       }
     },
-    "verdict": "Produit à capital protégé mais profil risque/rendement défavorable avec un worst-of sur 8 actions incluant Tesla (vol 57.64%, beta 1.62) qui compromet sérieusement l'obtention du coupon 7%. L'exposition concentrée aux secteurs communication (37.5%) et tech, tous deux sous pression en régime neutral, aggrave le risque. La protection du capital est le seul point positif face à une probabilité de coupon très faible sur cette structure worst-of volatile.",
+    "verdict": "Produit décevant malgré la garantie du capital. Le rendement de 7% annualisé est insuffisant face au risque worst-of incluant Tesla (vol 57.64%, ROE 4.93%). La surexposition aux secteurs défavorisés (5/8 titres) en régime macro neutre et l'absence de clarté sur la durée et le mécanisme de protection rendent ce produit peu attractif.",
     "keyRisks": [
-      "Tesla maillon faible critique : volatilité 57.64%, fondamentaux dégradés, probabilité élevée de bloquer les coupons",
-      "Surexposition sectorielle défavorable : 62.5% tech/comm en régime macro défavorable à ces secteurs"
+      "Tesla maillon faible avec fondamentaux dégradés (ROE 4.93%, marge 4.07%)",
+      "75% du panier dans des secteurs évités par le contexte macro actuel"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 7,
-        "return_eur": 7000,
-        "probability": 0.15,
-        "duration_years": 1
-      },
-      "base": {
-        "return_pct": 2,
-        "return_eur": 4000,
-        "probability": 0.4,
+        "return_eur": 14000,
+        "probability": 0.2,
         "duration_years": 2
       },
-      "stress": {
-        "return_pct": 0,
-        "return_eur": 0,
-        "probability": 0.35,
+      "base": {
+        "return_pct": 7,
+        "return_eur": 21000,
+        "probability": 0.4,
         "duration_years": 3
+      },
+      "stress": {
+        "return_pct": 3,
+        "return_eur": 12000,
+        "probability": 0.3,
+        "duration_years": 4
       },
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
         "probability": 0.1,
-        "duration_years": 3
+        "duration_years": 5
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-25T17:06:11.952Z",
-      "durationMs": 21165,
+      "gradedAt": "2026-03-25T17:06:46.490Z",
+      "durationMs": 18854,
       "aiUsed": true,
       "version": "4.3",
       "productType": "standard",
@@ -251,8 +251,8 @@
       "adjustments": {
         "p1": -5,
         "p2": -5,
-        "p3": 0,
-        "p4": -5
+        "p3": -5,
+        "p4": 0
       },
       "stockData": [
         {
