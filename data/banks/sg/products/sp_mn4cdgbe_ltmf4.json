@@ -139,7 +139,7 @@
   },
   "grading": {
     "grade": "C",
-    "score": 57,
+    "score": 56,
     "killCriteria": {
       "triggered": false,
       "reasons": []
@@ -152,10 +152,10 @@
         "reasoning": "Rendement: base 55 | Coupon 4%, protégé"
       },
       "underlyingQuality": {
-        "score": 75,
-        "base": 75,
+        "score": 66,
+        "base": 66,
         "delta": 0,
-        "reasoning": "Qualité: base 75 [crédit]"
+        "reasoning": "Qualité: base 66 [crédit]"
       },
       "portfolioFit": {
         "score": 70,
@@ -164,19 +164,19 @@
         "reasoning": "Fit: base 70"
       },
       "riskPremium": {
-        "score": 30,
-        "base": 30,
+        "score": 34,
+        "base": 34,
         "delta": 0,
-        "reasoning": "Prime: base 30 | 4% vs CAT 2.5% (spread 1.5%)"
+        "reasoning": "Prime: base 34 | 4% vs CAT 2.5% (spread 1.5%)"
       }
     },
-    "verdict": "Score 57/100 (base 57).",
+    "verdict": "Score 56/100 (base 56).",
     "keyRisks": [],
     "negotiationPoints": [],
     "scenarios": null,
     "metadata": {
-      "gradedAt": "2026-03-25T17:05:12.613Z",
-      "durationMs": 16729,
+      "gradedAt": "2026-03-25T17:14:31.958Z",
+      "durationMs": 21358,
       "aiUsed": false,
       "version": "4.3",
       "productType": "fixed-rate-callable",
@@ -193,7 +193,7 @@
       "expectedMaturity": 0,
       "maxMaturity": 0,
       "maxBeta": null,
-      "baseScore": 57,
+      "baseScore": 56,
       "baseGrade": "C",
       "adjustments": null
     }
