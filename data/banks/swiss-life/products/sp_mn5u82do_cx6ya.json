@@ -135,5 +135,66 @@
       "redundancy": 24,
       "complementarity": 10
     }
+  },
+  "grading": {
+    "grade": "D",
+    "score": 38,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 17,
+        "base": 17,
+        "delta": 0,
+        "reasoning": "Rendement: base 17 | Coupon 4.17%"
+      },
+      "underlyingQuality": {
+        "score": 35,
+        "base": 35,
+        "delta": 0,
+        "reasoning": "Qualité: base 35 [B/Q 35%]"
+      },
+      "portfolioFit": {
+        "score": 80,
+        "base": 80,
+        "delta": 0,
+        "reasoning": "Fit: base 80"
+      },
+      "riskPremium": {
+        "score": 33,
+        "base": 33,
+        "delta": 0,
+        "reasoning": "Prime: base 33 | 4.17% vs CAT 2.5% (spread 1.7%)"
+      }
+    },
+    "verdict": "Score 38/100 (base 38).",
+    "keyRisks": [],
+    "negotiationPoints": [],
+    "scenarios": null,
+    "metadata": {
+      "gradedAt": "2026-03-25T09:38:07.532Z",
+      "durationMs": 12842,
+      "aiUsed": false,
+      "version": "4.3",
+      "productType": "standard",
+      "marketDataAvailable": false,
+      "catBenchmark": 2.5,
+      "catSource": "fallback-2026",
+      "couponAnnualized": 4.17,
+      "couponRaw": 4.17,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": false,
+      "barrierPct": 0,
+      "expectedMaturity": 0,
+      "maxMaturity": 0,
+      "maxBeta": null,
+      "baseScore": 38,
+      "baseGrade": "D",
+      "adjustments": null
+    }
   }
 }
