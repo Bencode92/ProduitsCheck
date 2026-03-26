@@ -1024,7 +1024,15 @@
       }
     },
     "envelope": "cameleons",
-    "maturityYears": 8
+    "maturityYears": 8,
+    "strikePrice": 75.39,
+    "_strikePriceAll": null,
+    "_strikePriceNotFound": null,
+    "strikePrices": {
+      "Action BNP Paribas (FR0000131104)": 75.39
+    },
+    "_strikePriceSource": "confirmed",
+    "_strikePriceDate": "2026-03-26"
   },
   {
     "id": "sp_mmxjeznm_ve4t7",
