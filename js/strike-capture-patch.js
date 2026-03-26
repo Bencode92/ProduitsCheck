@@ -1,10 +1,17 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Strike Price Auto-Capture v2.1
-// v2.1: Twelve Data API for HISTORICAL prices at subscription date
+// STRUCTBOARD — Strike Price Auto-Capture v2.2
+// v2.2: Fix European tickers (ENI:MIL, BNP:EPA, etc.)
 // ═══════════════════════════════════════════════════════════════
 
 (function() {
     'use strict';
+
+    // MIC code → Twelve Data exchange suffix
+    var MIC_TO_EXCHANGE = {
+        'XPAR': 'EPA', 'XAMS': 'AMS', 'XMIL': 'MIL', 'XETR': 'XETR',
+        'XLON': 'LSE', 'XCSE': 'CPH', 'XMAD': 'BME', 'XBRU': 'EBR',
+        'XLIS': 'ELI', 'XHEL': 'HEL', 'XSTO': 'STO', 'XOSL': 'OSL',
+    };
 
     function _cleanName(raw) {
         var s = (raw || '').toLowerCase();
@@ -16,7 +23,7 @@
         return s;
     }
 
-    // ═══ FIND TICKER FOR AN UNDERLYING ═══
+    // ═══ FIND TICKER + EXCHANGE FOR AN UNDERLYING ═══
     function _findTickerForUnderlying(uj, marketData) {
         var ujClean = _cleanName(uj);
         var ujWords = ujClean.split(' ').filter(function(w) { return w.length >= 2; });
@@ -28,85 +35,104 @@
             var nc = _cleanName(stock.name || '');
             var nac = _cleanName(stock.name_api || '');
             var tl = ticker.toLowerCase();
+            var score = 0;
+
             for (var w = 0; w < ujWords.length; w++) {
-                if (ujWords[w] === tl && ujWords[w].length >= 2)
-                    if (stock.price > 0 && (!best || best.score < 100))
-                        best = { ticker: ticker, price: stock.price, score: 100 };
+                if (ujWords[w] === tl && ujWords[w].length >= 2) score = Math.max(score, 100);
             }
-            if (nc && ujClean && (nc.indexOf(ujClean) >= 0 || ujClean.indexOf(nc) >= 0))
-                if (stock.price > 0 && (!best || best.score < 90))
-                    best = { ticker: ticker, price: stock.price, score: 90 };
-            if (nac && ujClean && (nac.indexOf(ujClean) >= 0 || ujClean.indexOf(nac) >= 0))
-                if (stock.price > 0 && (!best || best.score < 85))
-                    best = { ticker: ticker, price: stock.price, score: 85 };
+            if (nc && ujClean && (nc.indexOf(ujClean) >= 0 || ujClean.indexOf(nc) >= 0)) score = Math.max(score, 90);
+            if (nac && ujClean && (nac.indexOf(ujClean) >= 0 || ujClean.indexOf(nac) >= 0)) score = Math.max(score, 85);
             if (ujWords.length >= 2) {
                 var mc = 0, ft = nc + ' ' + nac + ' ' + tl;
                 for (var ww = 0; ww < ujWords.length; ww++) if (ft.indexOf(ujWords[ww]) >= 0) mc++;
-                if (mc >= 2 && mc / ujWords.length >= 0.5) {
-                    var ws = Math.round(mc / ujWords.length * 80);
-                    if (stock.price > 0 && (!best || best.score < ws))
-                        best = { ticker: ticker, price: stock.price, score: ws };
-                }
+                if (mc >= 2 && mc / ujWords.length >= 0.5) score = Math.max(score, Math.round(mc / ujWords.length * 80));
+            }
+
+            if (score > 0 && stock.price > 0 && (!best || best.score < score)) {
+                // Get exchange info for Twelve Data
+                var mic = stock.data_mic || '';
+                var tdExchange = MIC_TO_EXCHANGE[mic] || '';
+                var tdSymbol = tdExchange ? (ticker + ':' + tdExchange) : ticker;
+
+                best = {
+                    ticker: ticker,
+                    tdSymbol: tdSymbol,
+                    exchange: tdExchange,
+                    mic: mic,
+                    price: stock.price,
+                    score: score
+                };
             }
         }
         return best;
     }
 
     // ═══ FETCH HISTORICAL PRICE FROM TWELVE DATA ═══
-    async function _fetchHistoricalPrice(ticker, dateStr) {
+    async function _fetchHistoricalPrice(tdSymbol, dateStr, fallbackTicker) {
         var apiKey = CONFIG.TWELVE_DATA_API_KEY;
-        if (!apiKey || !ticker || !dateStr) return null;
+        if (!apiKey || !tdSymbol || !dateStr) return null;
 
-        try {
-            var target = new Date(dateStr);
-            var start = new Date(target); start.setDate(start.getDate() - 5);
-            var end = new Date(target); end.setDate(end.getDate() + 5);
-            var startStr = start.toISOString().split('T')[0];
-            var endStr = end.toISOString().split('T')[0];
+        var target = new Date(dateStr);
+        var start = new Date(target); start.setDate(start.getDate() - 5);
+        var end = new Date(target); end.setDate(end.getDate() + 5);
+        var startStr = start.toISOString().split('T')[0];
+        var endStr = end.toISOString().split('T')[0];
 
-            var url = 'https://api.twelvedata.com/time_series?symbol=' + ticker +
-                '&interval=1day&start_date=' + startStr + '&end_date=' + endStr +
-                '&outputsize=10&apikey=' + apiKey;
+        // Try with exchange suffix first, then without
+        var symbolsToTry = [tdSymbol];
+        if (fallbackTicker && fallbackTicker !== tdSymbol) symbolsToTry.push(fallbackTicker);
 
-            console.log('[Strike] Fetching historical: ' + ticker + ' @ ' + dateStr);
-            var response = await fetch(url);
-            var data = await response.json();
+        for (var s = 0; s < symbolsToTry.length; s++) {
+            var symbol = symbolsToTry[s];
+            try {
+                var url = 'https://api.twelvedata.com/time_series?symbol=' + encodeURIComponent(symbol) +
+                    '&interval=1day&start_date=' + startStr + '&end_date=' + endStr +
+                    '&outputsize=10&apikey=' + apiKey;
 
-            if (data.status === 'error') {
-                console.warn('[Strike] API error for ' + ticker + ': ' + (data.message || ''));
-                return null;
+                console.log('[Strike] Trying: ' + symbol + ' @ ' + dateStr);
+                var response = await fetch(url);
+                var data = await response.json();
+
+                if (data.status === 'error') {
+                    console.warn('[Strike] ' + symbol + ': ' + (data.message || 'error'));
+                    continue; // Try next symbol
+                }
+
+                var values = data.values || [];
+                if (values.length === 0) {
+                    console.warn('[Strike] ' + symbol + ': no data points');
+                    continue;
+                }
+
+                // Find closest date
+                var targetTime = target.getTime();
+                var bestVal = null, bestDiff = 999999999;
+                for (var i = 0; i < values.length; i++) {
+                    var vDate = new Date(values[i].datetime);
+                    var diff = Math.abs(vDate.getTime() - targetTime);
+                    if (diff < bestDiff) { bestDiff = diff; bestVal = values[i]; }
+                }
+
+                if (bestVal && parseFloat(bestVal.close) > 0) {
+                    console.log('[Strike] SUCCESS: ' + symbol + ' @ ' + bestVal.datetime + ' = ' + bestVal.close);
+                    return {
+                        close: Math.round(parseFloat(bestVal.close) * 100) / 100,
+                        date: bestVal.datetime.split(' ')[0],
+                        symbol: symbol,
+                        open: Math.round(parseFloat(bestVal.open || 0) * 100) / 100,
+                        high: Math.round(parseFloat(bestVal.high || 0) * 100) / 100,
+                        low: Math.round(parseFloat(bestVal.low || 0) * 100) / 100,
+                    };
+                }
+            } catch(e) {
+                console.warn('[Strike] Fetch error ' + symbol + ': ' + e.message);
+                continue;
             }
-
-            var values = data.values || [];
-            if (values.length === 0) return null;
-
-            // Find closest date to target
-            var targetTime = target.getTime();
-            var bestVal = null;
-            var bestDiff = 999999999;
-            for (var i = 0; i < values.length; i++) {
-                var vDate = new Date(values[i].datetime);
-                var diff = Math.abs(vDate.getTime() - targetTime);
-                if (diff < bestDiff) { bestDiff = diff; bestVal = values[i]; }
-            }
-
-            if (bestVal && parseFloat(bestVal.close) > 0) {
-                return {
-                    close: Math.round(parseFloat(bestVal.close) * 100) / 100,
-                    date: bestVal.datetime.split(' ')[0],
-                    open: Math.round(parseFloat(bestVal.open || 0) * 100) / 100,
-                    high: Math.round(parseFloat(bestVal.high || 0) * 100) / 100,
-                    low: Math.round(parseFloat(bestVal.low || 0) * 100) / 100,
-                };
-            }
-            return null;
-        } catch(e) {
-            console.warn('[Strike] Fetch error: ' + e.message);
-            return null;
         }
+        return null;
     }
 
-    // ═══ CAPTURE ALL STRIKES (HISTORICAL OR CURRENT) ═══
+    // ═══ CAPTURE ALL STRIKES ═══
     window._captureAllStrikes = async function(product) {
         if (!product) return [];
         var underlyings = product.underlyings || [];
@@ -122,33 +148,30 @@
         for (var i = 0; i < underlyings.length; i++) {
             var uj = underlyings[i];
             var match = _findTickerForUnderlying(uj, marketData);
-            var result = { underlying: uj, price: null, source: null, ticker: null, found: false, historical: false };
+            var result = { underlying: uj, price: null, source: null, ticker: null, found: false, historical: false, error: null };
 
             if (match) {
                 result.ticker = match.ticker;
                 result.currentPrice = match.price;
 
-                // If historical + API key available → fetch real historical price
                 if (isHistorical && hasApiKey) {
-                    showToast('Twelve Data: ' + match.ticker + ' @ ' + subDate + '...', 'info');
-                    var hist = await _fetchHistoricalPrice(match.ticker, subDate);
+                    showToast('Twelve Data: ' + match.tdSymbol + ' @ ' + subDate + '...', 'info');
+                    var hist = await _fetchHistoricalPrice(match.tdSymbol, subDate, match.ticker);
                     if (hist) {
                         result.price = hist.close;
                         result.source = 'twelve_data';
                         result.found = true;
                         result.historical = true;
                         result.histDate = hist.date;
-                        result.ohlc = hist;
-                        console.log('[Strike] Historical ' + match.ticker + ' @ ' + hist.date + ' = ' + hist.close);
+                        result.tdSymbol = hist.symbol;
                     } else {
-                        // Fallback to current price
                         result.price = match.price;
                         result.source = 'stock_current';
                         result.found = true;
                         result.historical = false;
+                        result.error = 'API: pas de donn\u00e9es historiques pour ' + match.tdSymbol;
                     }
                 } else {
-                    // Use current price (new product or no API key)
                     result.price = match.price;
                     result.source = isHistorical ? 'stock_current' : 'stock';
                     result.found = true;
@@ -163,7 +186,6 @@
                             for (var key in umap.indices) {
                                 if (ujClean.indexOf(key) >= 0 || key.indexOf(ujClean) >= 0) {
                                     var proxyTicker = umap.indices[key].proxy;
-                                    // Try historical for proxy too
                                     if (isHistorical && hasApiKey) {
                                         var histProxy = await _fetchHistoricalPrice(proxyTicker, subDate);
                                         if (histProxy) {
@@ -192,11 +214,9 @@
                 }
             }
 
-            // Restore saved value if exists
             if (product.strikePrices && product.strikePrices[uj]) {
                 result.savedStrike = product.strikePrices[uj];
             }
-
             results.push(result);
         }
         return results;
@@ -268,17 +288,21 @@
         results.forEach(function(r, idx) {
             var displayVal = r.savedStrike || r.price || '';
             var statusIcon = r.found ? '\u2705' : '\u274c';
+            var priceInfo = '', borderColor = 'var(--border)';
 
-            var priceInfo = '';
             if (r.found && r.historical) {
-                priceInfo = '<strong style="color:var(--green)">' + r.price + '</strong> <span style="color:var(--text-dim);font-size:10px">(close ' + r.histDate + ' via Twelve Data)</span>';
+                priceInfo = '<strong style="color:var(--green)">' + r.price + '</strong> <span style="color:var(--text-dim);font-size:10px">(close ' + r.histDate + ' via Twelve Data ' + (r.tdSymbol || '') + ')</span>';
+                borderColor = 'var(--green)';
+            } else if (r.found && r.error) {
+                priceInfo = '<span style="color:var(--orange)">' + r.price + '</span> <span style="color:var(--text-dim);font-size:10px">(prix actuel \u2014 ' + r.error + ')</span>';
+                borderColor = 'var(--orange)';
             } else if (r.found) {
                 priceInfo = '<span style="color:var(--orange)">' + r.price + '</span> <span style="color:var(--text-dim);font-size:10px">(prix actuel ' + r.ticker + ')</span>';
+                borderColor = 'var(--orange)';
             } else {
-                priceInfo = '<span style="color:var(--orange)">non trouv\u00e9 \u2014 entrer manuellement</span>';
+                priceInfo = '<span style="color:var(--red)">non trouv\u00e9 \u2014 entrer manuellement</span>';
+                borderColor = 'var(--red)';
             }
-
-            var borderColor = r.found && r.historical ? 'var(--green)' : r.found ? 'var(--orange)' : 'var(--red)';
 
             rowsHtml += '<div style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;margin-bottom:8px;background:var(--bg-elevated)">';
             rowsHtml += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:4px">';
@@ -296,24 +320,16 @@
         var missingCount = results.filter(function(r) { return !r.found; }).length;
 
         var statusHtml = '';
-        if (histCount > 0) {
-            statusHtml += '<div style="background:rgba(6,214,160,0.08);border:1px solid rgba(6,214,160,0.2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:8px;font-size:11px;color:var(--green)">' +
-                '\u2705 <strong>' + histCount + ' prix historique(s)</strong> r\u00e9cup\u00e9r\u00e9(s) via Twelve Data \u00e0 la date de souscription</div>';
-        }
-        if (currentCount > 0) {
-            statusHtml += '<div style="background:rgba(255,166,0,0.08);border:1px solid rgba(255,166,0,0.2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:8px;font-size:11px;color:var(--orange)">' +
-                '\u26a0 <strong>' + currentCount + ' prix actuel(s)</strong> \u2014 v\u00e9rifiez dans la brochure ("Niveau Initial")</div>';
-        }
-        if (missingCount > 0) {
-            statusHtml += '<div style="background:rgba(239,35,60,0.08);border:1px solid rgba(239,35,60,0.2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:8px;font-size:11px;color:var(--red)">' +
-                '\u274c <strong>' + missingCount + ' non trouv\u00e9(s)</strong> \u2014 entrez la valeur manuellement depuis la brochure</div>';
-        }
+        if (histCount > 0)
+            statusHtml += '<div style="background:rgba(6,214,160,0.08);border:1px solid rgba(6,214,160,0.2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:8px;font-size:11px;color:var(--green)">\u2705 <strong>' + histCount + ' prix historique(s)</strong> r\u00e9cup\u00e9r\u00e9(s) via Twelve Data \u00e0 la date de souscription</div>';
+        if (currentCount > 0)
+            statusHtml += '<div style="background:rgba(255,166,0,0.08);border:1px solid rgba(255,166,0,0.2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:8px;font-size:11px;color:var(--orange)">\u26a0 <strong>' + currentCount + ' prix actuel(s)</strong> \u2014 corrigez avec la brochure ("Niveau Initial")</div>';
+        if (missingCount > 0)
+            statusHtml += '<div style="background:rgba(239,35,60,0.08);border:1px solid rgba(239,35,60,0.2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:8px;font-size:11px;color:var(--red)">\u274c <strong>' + missingCount + ' non trouv\u00e9(s)</strong> \u2014 entrez manuellement depuis la brochure</div>';
 
         var explainHtml = isMulti ?
-            '<div style="background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.15);border-radius:var(--radius-sm);padding:10px;margin-bottom:12px;font-size:11px;color:var(--text-muted)">' +
-            '\ud83d\udca1 <strong>Worst-of:</strong> chaque action a son propre niveau initial. La barri\u00e8re se mesure sur le pire performeur par rapport \u00e0 son propre strike.</div>' :
-            '<div style="background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.15);border-radius:var(--radius-sm);padding:10px;margin-bottom:12px;font-size:11px;color:var(--text-muted)">' +
-            '\ud83d\udca1 Le strike = prix du sous-jacent le jour de la souscription.</div>';
+            '<div style="background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.15);border-radius:var(--radius-sm);padding:10px;margin-bottom:12px;font-size:11px;color:var(--text-muted)">\ud83d\udca1 <strong>Worst-of:</strong> chaque action a son propre strike. La barri\u00e8re se mesure sur le pire performeur.</div>' :
+            '<div style="background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.15);border-radius:var(--radius-sm);padding:10px;margin-bottom:12px;font-size:11px;color:var(--text-muted)">\ud83d\udca1 Le strike = prix du sous-jacent le jour de la souscription.</div>';
 
         var modal = document.getElementById('modal');
         modal.innerHTML = '<div class="modal-overlay" onclick="closeModal()"><div class="modal-content" onclick="event.stopPropagation()" style="max-width:520px;max-height:90vh;overflow-y:auto">' +
@@ -322,9 +338,7 @@
             '<div style="margin-bottom:4px"><strong>Produit:</strong> ' + (product.name || '?').substring(0, 50) + '</div>' +
             '<div style="margin-bottom:4px"><strong>Date souscription:</strong> ' + subDate + '</div>' +
             (isMulti ? '<div style="margin-bottom:4px"><strong>Type:</strong> Worst-of ' + underlyings.length + ' actifs</div>' : '') +
-            '</div>' +
-            statusHtml +
-            explainHtml +
+            '</div>' + statusHtml + explainHtml +
             '<div style="margin-bottom:12px">' + rowsHtml + '</div>' +
             '<div class="modal-actions">' +
             '<button class="btn" onclick="closeModal()">Annuler</button>' +
@@ -334,18 +348,16 @@
         setTimeout(function() {
             for (var i = 0; i < results.length; i++) {
                 var inp = document.getElementById('strike-' + i);
-                if (inp && (!inp.value || !results[i].found)) { inp.focus(); inp.select(); break; }
+                if (inp && (!inp.value || !results[i].found)) { inp.focus(); break; }
             }
         }, 100);
     };
 
-    // ═══ SAVE FROM MODAL ═══
     window._saveStrikesFromModal = async function(count) {
         var p = app.state.currentProduct;
         if (!p) return;
         var underlyings = p.underlyings || [];
-        var strikePrices = {};
-        var firstPrice = null;
+        var strikePrices = {}, firstPrice = null;
         for (var i = 0; i < count; i++) {
             var val = parseFloat(document.getElementById('strike-' + i)?.value);
             if (!val || val <= 0) continue;
@@ -397,5 +409,5 @@
         _showStrikeButton();
     }, 800);
 
-    console.log('[StructBoard] Strike Capture v2.1 \u2014 Twelve Data historical prices');
+    console.log('[StructBoard] Strike Capture v2.2 \u2014 European exchange fix');
 })();
