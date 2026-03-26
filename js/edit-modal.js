@@ -1,8 +1,6 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Edit Modal v1.4 — Structure Type + Strike + Envelope
-// v1.4: Added structureType dropdown
-//   Types: autocall, phoenix, dispersion, taux_fixe, capital_garanti,
-//          reverse, participation, other
+// STRUCTBOARD — Edit Modal v1.5 — Structure Type + Strike + Envelope
+// v1.5: Added "À maturité" freq + "Participation" coupon type
 // ═══════════════════════════════════════════════════════════════
 
 var ENVELOPES = [
@@ -37,9 +35,12 @@ window.showEditModal = function() {
     var p = app.state.currentProduct;
     if (!p) { showToast('Aucun produit', 'error'); return; }
 
-    var couponRate = p.coupon?.rate || '';
+    var couponRate = p.coupon?.rate || p.participationRate || '';
     var couponType = p.coupon?.type || 'conditionnel';
+    var couponFreq = p.coupon?.frequency || p.coupon?.paymentTiming || 'annuel';
     var barrier = p.capitalProtection?.barrier || '';
+    // Don't show 100 as barrier — 100 means no barrier
+    if (barrier === 100 && p.capitalProtection?.level === 100) barrier = '';
     var protection = p.capitalProtection?.level || (p.capitalProtection?.protected ? '100' : '');
     var autocall = (p.earlyRedemption?.possible === true || p.earlyRedemption?.possible === 'true') ? 'true' : 'false';
     var autocallTrigger = p.earlyRedemption?.trigger || '';
@@ -57,20 +58,41 @@ window.showEditModal = function() {
         return '<option value="' + t.id + '"' + (structureType === t.id ? ' selected' : '') + '>' + t.label + '</option>';
     }).join('');
 
+    // Coupon type options (v1.5: added participation)
+    var couponTypeOptions = [
+        { id: 'conditionnel', label: 'Conditionnel' },
+        { id: 'fixe', label: 'Fixe' },
+        { id: 'garanti', label: 'Garanti' },
+        { id: 'participation', label: 'Participation (%)' }
+    ].map(function(t) {
+        return '<option value="' + t.id + '"' + (couponType === t.id ? ' selected' : '') + '>' + t.label + '</option>';
+    }).join('');
+
+    // Frequency options (v1.5: added maturity)
+    var freqOptions = [
+        { id: 'annuel', label: 'Annuel' },
+        { id: 'semestriel', label: 'Semestriel' },
+        { id: 'trimestriel', label: 'Trimestriel' },
+        { id: 'mensuel', label: 'Mensuel' },
+        { id: 'maturity', label: '\u00c0 maturit\u00e9' }
+    ].map(function(f) {
+        var sel = couponFreq.indexOf(f.id) >= 0 || (f.id === 'maturity' && couponFreq === 'maturity');
+        return '<option value="' + f.id + '"' + (sel ? ' selected' : '') + '>' + f.label + '</option>';
+    }).join('');
+
     var modal = document.getElementById('modal');
     modal.innerHTML = '<div class="modal-overlay" onclick="closeModal()"><div class="modal-content modal-large" onclick="event.stopPropagation()">' +
         '<h2 class="modal-title">\u270e Modifier les informations</h2>' +
         '<div style="color:var(--text-muted);font-size:12px;margin-bottom:16px">' + (p.name || 'Produit') + '</div>' +
         '<div class="form-grid">' +
         '<div class="form-field full"><label>Nom du produit</label><input id="fe-name" value="' + escapeAttr(p.name || '') + '"></div>' +
-        // v1.4: Structure type + Envelope on same row
         '<div class="form-field"><label>Type de structure</label><select id="fe-structure-type">' + structTypeOptions + '</select></div>' +
         '<div class="form-field"><label>Enveloppe</label><select id="fe-envelope">' + envelopeOptions + '</select></div>' +
         '<div class="form-field"><label>Montant investi (\u20ac)</label><input id="fe-invested" type="number" value="' + amount + '"></div>' +
-        '<div class="form-field"><label>Coupon (%)</label><input id="fe-coupon" type="number" step="0.01" value="' + couponRate + '"></div>' +
-        '<div class="form-field"><label>Type coupon</label><select id="fe-coupon-type"><option value="conditionnel"' + (couponType === 'conditionnel' ? ' selected' : '') + '>Conditionnel</option><option value="fixe"' + (couponType === 'fixe' ? ' selected' : '') + '>Fixe</option><option value="garanti"' + (couponType === 'garanti' ? ' selected' : '') + '>Garanti</option></select></div>' +
-        '<div class="form-field"><label>Fr\u00e9quence coupon</label><select id="fe-coupon-freq"><option value="annuel"' + ((p.coupon?.frequency || '').indexOf('annuel') >= 0 ? ' selected' : '') + '>Annuel</option><option value="semestriel"' + ((p.coupon?.frequency || '').indexOf('semestr') >= 0 ? ' selected' : '') + '>Semestriel</option><option value="trimestriel"' + ((p.coupon?.frequency || '').indexOf('trimestr') >= 0 ? ' selected' : '') + '>Trimestriel</option></select></div>' +
-        '<div class="form-field"><label>Barri\u00e8re capital (%)</label><input id="fe-barrier" type="number" step="0.1" value="' + barrier + '"></div>' +
+        '<div class="form-field"><label>Coupon / Participation (%)</label><input id="fe-coupon" type="number" step="0.01" value="' + couponRate + '"></div>' +
+        '<div class="form-field"><label>Type coupon</label><select id="fe-coupon-type">' + couponTypeOptions + '</select></div>' +
+        '<div class="form-field"><label>Fr\u00e9quence paiement</label><select id="fe-coupon-freq">' + freqOptions + '</select></div>' +
+        '<div class="form-field"><label>Barri\u00e8re capital (%)</label><input id="fe-barrier" type="number" step="0.1" value="' + barrier + '" placeholder="Ex: 60 (vide si aucune)"></div>' +
         '<div class="form-field"><label>Protection capital (%)</label><input id="fe-protection" type="number" step="0.1" value="' + protection + '"></div>' +
         '<div class="form-field"><label>Maturit\u00e9</label><input id="fe-maturity" value="' + escapeAttr(p.maturity || '') + '"></div>' +
         '<div class="form-field"><label>Autocall</label><select id="fe-autocall"><option value="true"' + (autocall === 'true' ? ' selected' : '') + '>Oui</option><option value="false"' + (autocall === 'false' ? ' selected' : '') + '>Non</option></select></div>' +
@@ -78,9 +100,10 @@ window.showEditModal = function() {
         '<div class="form-field"><label>Niveau initial (strike) <span style="font-size:9px;color:var(--text-dim)">\ud83d\udcca pts ou \u20ac</span></label><input id="fe-strike-price" type="number" step="0.01" value="' + strikePrice + '" placeholder="Ex: 4950"></div>' +
         '<div class="form-field full"><label>Sous-jacents (s\u00e9par\u00e9s par virgule)</label><input id="fe-underlyings" value="' + escapeAttr(underlyings) + '"></div>' +
         '</div>' +
-        // Info boxes
-        (structureType === 'dispersion' ? '<div style="background:rgba(6,214,160,0.08);border:1px solid rgba(6,214,160,0.2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:12px;font-size:10px;color:var(--green)">\u2705 <strong>Dispersion</strong> : le grading tiendra compte du fait que la volatilit\u00e9 \u00e9lev\u00e9e augmente le rendement (pas le risque), et que le capital est garanti.</div>' : '') +
-        (strikePrice ? '' : '<div style="background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.15);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:12px;font-size:10px;color:var(--text-muted)">\ud83d\udca1 <strong>Niveau initial (strike)</strong> : renseignez la valeur du sous-jacent \u00e0 la date de souscription pour am\u00e9liorer le calcul du risque barri\u00e8re (distance en \u03c3).</div>') +
+        // Dynamic info boxes
+        (structureType === 'dispersion' ? '<div style="background:rgba(6,214,160,0.08);border:1px solid rgba(6,214,160,0.2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:12px;font-size:10px;color:var(--green)">\u2705 <strong>Dispersion</strong> : le grading valorisera la volatilit\u00e9 (moteur de rendement) et consid\u00e8rera le capital comme garanti.</div>' : '') +
+        (structureType === 'taux_fixe' ? '<div style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:12px;font-size:10px;color:var(--accent)">\ud83c\udfdb <strong>Taux fixe</strong> : le grading comparera le coupon au taux sans risque BCE et \u00e9valuera le spread.</div>' : '') +
+        (strikePrice ? '' : '<div style="background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.15);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:12px;font-size:10px;color:var(--text-muted)">\ud83d\udca1 <strong>Strike</strong> : renseignez la valeur du SJ \u00e0 la souscription pour am\u00e9liorer le calcul barri\u00e8re (\u03c3).</div>') +
         '<div class="modal-actions"><button class="btn" onclick="closeModal()">Annuler</button><button class="btn primary" onclick="handleEditSave()">\ud83d\udcbe Enregistrer</button></div>' +
         '</div></div>';
     modal.classList.add('visible');
@@ -93,8 +116,6 @@ window.handleEditSave = async function() {
     var newName = document.getElementById('fe-name')?.value;
     if (newName) p.name = newName;
     p.envelope = document.getElementById('fe-envelope')?.value || '';
-
-    // v1.4: Structure type
     p.structureType = document.getElementById('fe-structure-type')?.value || '';
 
     var newCoupon = document.getElementById('fe-coupon')?.value;
@@ -103,9 +124,19 @@ window.handleEditSave = async function() {
     p.coupon.type = document.getElementById('fe-coupon-type')?.value || p.coupon.type;
     p.coupon.frequency = document.getElementById('fe-coupon-freq')?.value || p.coupon.frequency;
 
+    // If participation type, also save as participationRate
+    if (p.coupon.type === 'participation' && newCoupon !== '') {
+        p.participationRate = parseFloat(newCoupon);
+    }
+
     var newBarrier = document.getElementById('fe-barrier')?.value;
     if (!p.capitalProtection) p.capitalProtection = {};
-    if (newBarrier !== '') p.capitalProtection.barrier = parseFloat(newBarrier);
+    if (newBarrier !== '' && newBarrier !== null) {
+        p.capitalProtection.barrier = parseFloat(newBarrier);
+    } else {
+        // Empty barrier = no barrier
+        delete p.capitalProtection.barrier;
+    }
 
     var newProtection = document.getElementById('fe-protection')?.value;
     if (newProtection !== '') {
@@ -157,4 +188,4 @@ function escapeAttr(str) {
     return (str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;');
 }
 
-console.log('[StructBoard] Edit Modal v1.4 \u2014 structureType + strike + envelope');
+console.log('[StructBoard] Edit Modal v1.5 \u2014 structureType + participation + maturity freq');
