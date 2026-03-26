@@ -266,5 +266,12 @@
         }
       ]
     }
-  }
+  },
+  "_strikePriceAll": null,
+  "_strikePriceNotFound": null,
+  "strikePrices": {
+    "ENI S.p.A.": 16
+  },
+  "_strikePriceSource": "confirmed",
+  "_strikePriceDate": "2026-03-26"
 }
