@@ -1,11 +1,9 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Optimizer v3.3 Patch (fixed)
-// v3.3d: FIX — cashByCam/cashCameleons are ALREADY external
-//   They do NOT include structured products (Bond 12M)
-//   No subtraction needed!
-//   Caméleons: struct=109K + ext=100K = 209K total
-//   ByCam: struct=0 + ext=200K = 200K total
-//   All: struct=109K + ext=300K = 409K total
+// STRUCTBOARD — Optimizer v3.4 Patch
+// v3.3d: cashXxx are already external, no subtraction
+// v3.4: Tag each allocation with _sourceEntity (bycam/cameleons)
+//       + save per-entity external breakdown
+//       + split external pools by entity in "Toutes" mode
 // ═══════════════════════════════════════════════════════════════
 
 (function() {
@@ -32,10 +30,7 @@
         return products.filter(function(p) { return p.entity === entity; });
     }
 
-    // ═══ LIQUIDITY SOURCES ═══
-    // cashByCam / cashCameleons = external liquidity (CAT, comptes)
-    // These are SEPARATE from structured products (Bond 12M etc.)
-    // NO subtraction needed — they are already the external amount
+    // ═══ LIQUIDITY SOURCES — now returns per-entity breakdown ═══
     function _identifyLiquiditySources(portfolio, entity) {
         var filtered = _filterByEntity(portfolio, entity);
 
@@ -55,27 +50,25 @@
         });
         var totalStruct = structLiq.reduce(function(s, p) { return s + (parseFloat(p.investedAmount) || 0); }, 0);
 
-        // 2. External = catManager.objectives.cashXxx
-        // These are ALREADY separate from structured — NO subtraction
-        var externalLiq = 0;
+        // 2. External = catManager.objectives.cashXxx (already separate from structured)
         var cashByCam = 0, cashCameleons = 0;
-
         try {
             if (typeof catManager !== 'undefined' && catManager.objectives) {
                 cashByCam = parseFloat(catManager.objectives.cashByCam) || 0;
                 cashCameleons = parseFloat(catManager.objectives.cashCameleons) || 0;
-
-                if (entity === 'bycam') externalLiq = cashByCam;
-                else if (entity === 'cameleons') externalLiq = cashCameleons;
-                else externalLiq = cashByCam + cashCameleons;
             }
         } catch(e) {}
 
-        console.log('[LiqSources] entity=' + entity + ' | struct=' + formatNumber(totalStruct) + '\u20ac | external=' + formatNumber(externalLiq) + '\u20ac | cashByCam=' + formatNumber(cashByCam) + ' cashCam=' + formatNumber(cashCameleons));
+        var externalLiq = 0;
+        if (entity === 'bycam') externalLiq = cashByCam;
+        else if (entity === 'cameleons') externalLiq = cashCameleons;
+        else externalLiq = cashByCam + cashCameleons;
+
+        console.log('[LiqSources] entity=' + entity + ' | struct=' + formatNumber(totalStruct) + '\u20ac | ext=' + formatNumber(externalLiq) + '\u20ac (BC=' + formatNumber(cashByCam) + ' CM=' + formatNumber(cashCameleons) + ')');
 
         return {
             structured: { total: totalStruct, byBank: byBank, products: structLiq },
-            external: { total: externalLiq },
+            external: { total: externalLiq, byCam: cashByCam, cameleons: cashCameleons },
             combined: totalStruct + externalLiq
         };
     }
@@ -127,7 +120,7 @@
 
             var modal = document.getElementById('modal');
             modal.innerHTML = '<div class="modal-overlay" onclick="closeModal()"><div class="modal-content modal-large" onclick="event.stopPropagation()" style="max-height:90vh;overflow-y:auto">' +
-                '<h2 class="modal-title">\ud83d\udcca Optimiseur Structur\u00e9s v3.3</h2>' +
+                '<h2 class="modal-title">\ud83d\udcca Optimiseur Structur\u00e9s v3.4</h2>' +
 
                 '<div style="margin-bottom:12px"><label style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;display:block;margin-bottom:6px">\ud83c\udfe2 Entit\u00e9</label>' +
                 '<div style="display:flex;gap:6px;flex-wrap:wrap">' +
@@ -144,17 +137,19 @@
                 '<div style="padding:12px 14px">' +
                 '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">' +
 
-                '<div style="background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.15);border-radius:var(--radius-sm);padding:10px">' +
-                '<div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">\ud83c\udfe6 Structur\u00e9s</div>' +
-                '<div style="font-size:18px;font-weight:800;color:var(--accent);font-family:var(--mono)">' + formatNumber(structMax) + '\u20ac</div>' +
+                '<div style="background:rgba(168,85,247,0.05);border:1px solid rgba(168,85,247,0.15);border-radius:var(--radius-sm);padding:10px">' +
+                '<div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">\ud83e\udd8e Structur\u00e9s (Cam\u00e9leons)</div>' +
+                '<div style="font-size:18px;font-weight:800;color:#A855F7;font-family:var(--mono)">' + formatNumber(structMax) + '\u20ac</div>' +
                 structBankHtml +
                 (bankNames ? '<div style="font-size:9px;color:var(--orange);margin-top:4px">\u2192 ' + bankNames + ' uniquement</div>' : '') +
                 '</div>' +
 
                 '<div style="background:rgba(6,214,160,0.05);border:1px solid rgba(6,214,160,0.15);border-radius:var(--radius-sm);padding:10px">' +
-                '<div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">\ud83d\udcb5 Externe (CAT)</div>' +
+                '<div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">\ud83d\udcb5 Externe</div>' +
                 '<div style="font-size:18px;font-weight:800;color:var(--green);font-family:var(--mono)">' + formatNumber(sources.external.total) + '\u20ac</div>' +
-                '<div style="font-size:10px;color:var(--text-dim);margin-top:4px">\u2192 Toutes banques</div>' +
+                (sources.external.byCam > 0 ? '<div style="font-size:10px;color:#3B82F6;margin-top:4px">\ud83c\udfe2 ByCam: ' + formatNumber(sources.external.byCam) + '\u20ac</div>' : '') +
+                (sources.external.cameleons > 0 ? '<div style="font-size:10px;color:#A855F7;margin-top:4px">\ud83e\udd8e Cam.: ' + formatNumber(sources.external.cameleons) + '\u20ac</div>' : '') +
+                '<div style="font-size:9px;color:var(--text-dim);margin-top:4px">\u2192 Toutes banques</div>' +
                 '</div></div>' +
 
                 '<div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap">' +
@@ -162,7 +157,6 @@
                 _sourceBtn('structured', 'Structur\u00e9s seuls', opts.liquiditySource) +
                 _sourceBtn('external', 'Externe seul', opts.liquiditySource) +
                 '</div>' +
-                '<div style="font-size:11px;color:var(--text-muted);padding:6px 0">\ud83e\udd16 <strong>Mode auto</strong> : l\'optimiseur d\u00e9cide le montant optimal par produit.</div>' +
                 '</div></div>' +
 
                 '<div style="margin-bottom:16px"><label style="display:flex;align-items:center;gap:8px;cursor:pointer" onclick="_toggleLiqPriority()">' +
@@ -177,11 +171,11 @@
                 '</div></div>';
             modal.classList.add('visible');
         };
-        console.log('[StructBoard] Optimizer v3.3d \u2014 cashXxx are already external, no subtraction');
+        console.log('[StructBoard] Optimizer v3.4 \u2014 entity source tracking');
     }, 250);
     setTimeout(function() { clearInterval(_waitModal); }, 10000);
 
-    // ═══ ALLOCATION ═══
+    // ═══ ALLOCATION — tags _sourceEntity on each product ═══
     var _waitBuild = setInterval(function() {
         if (typeof buildStructuredOptimization !== 'function') return;
         if (typeof _allocateWithConstraints !== 'function') return;
@@ -207,6 +201,8 @@
             analysis.totalLiquidity = structDeploy + externalDeploy;
             analysis._structuredLiquidity = structDeploy;
             analysis._externalLiquidity = externalDeploy;
+            analysis._extByCam = (opts.liquiditySource !== 'structured') ? sources.external.byCam : 0;
+            analysis._extCameleons = (opts.liquiditySource !== 'structured') ? sources.external.cameleons : 0;
             analysis._structuredByBank = sources.structured.byBank;
 
             var proposals = analysis.allocationPlan.slice();
@@ -229,6 +225,10 @@
             }
 
             var remainStruct = structDeploy * 0.90;
+            // Split external by entity for tracking
+            var remainExtByCam = analysis._extByCam * 0.90;
+            var remainExtCameleons = analysis._extCameleons * 0.90;
+            // For single-entity mode, lump it
             var remainExternal = externalDeploy * 0.90;
             var warnings = analysis.constraintWarnings || [];
             var totalAssets = analysis.totalPortfolioInvested + analysis.totalLiquidity;
@@ -237,22 +237,57 @@
                 if (p.recommendation !== 'SOUSCRIRE' && p.recommendation !== 'ENVISAGER') {
                     p.allocatedAmount = 0; p.annualReturn = 0; p.expectedReturn = 0; p.catReturn = 0; p.excessVsCat = 0; return;
                 }
-                var pool = null, poolLabel = '';
-                if (p._canUseStructured && remainStruct > 0) { pool = 'structured'; poolLabel = '\ud83c\udfe6'; }
-                else if (p._canUseExternal && remainExternal > 0) { pool = 'external'; poolLabel = '\ud83d\udcb5'; }
+
+                // Determine pool + source entity
+                var pool = null, sourceEntity = null;
+
+                // Priority 1: structured (from Caméleons Bond 12M → same bank only)
+                if (p._canUseStructured && remainStruct > 0) {
+                    pool = 'structured';
+                    sourceEntity = 'cameleons'; // Structured is always Caméleons in current portfolio
+                }
+                // Priority 2: external — try ByCam first (larger pool), then Caméleons
+                else if (p._canUseExternal) {
+                    if (opts.entity === 'all') {
+                        // In "Toutes" mode: use ByCam first (usually larger pool)
+                        if (remainExtByCam > 0) { pool = 'external'; sourceEntity = 'bycam'; }
+                        else if (remainExtCameleons > 0) { pool = 'external'; sourceEntity = 'cameleons'; }
+                    } else if (opts.entity === 'bycam' && remainExternal > 0) {
+                        pool = 'external'; sourceEntity = 'bycam';
+                    } else if (opts.entity === 'cameleons' && remainExternal > 0) {
+                        pool = 'external'; sourceEntity = 'cameleons';
+                    } else if (remainExternal > 0) {
+                        pool = 'external'; sourceEntity = opts.entity || 'unknown';
+                    }
+                }
+
                 if (!pool) {
                     p.allocatedAmount = 0; p.annualReturn = 0; p.expectedReturn = 0; p.catReturn = 0; p.excessVsCat = 0;
                     if (!p._canUseStructured && !p._canUseExternal) warnings.push(p.name.substring(0, 25) + ': pas de liquidit\u00e9 pour cette banque');
-                    else p.reason = 'Liquidit\u00e9 \u00e9puis\u00e9e'; return;
+                    else p.reason = 'Liquidit\u00e9 \u00e9puis\u00e9e';
+                    return;
                 }
-                var remaining = pool === 'structured' ? remainStruct : remainExternal;
+
+                // Calculate available remaining from the specific pool
+                var remaining;
+                if (pool === 'structured') remaining = remainStruct;
+                else if (opts.entity === 'all') remaining = sourceEntity === 'bycam' ? remainExtByCam : remainExtCameleons;
+                else remaining = remainExternal;
+
                 var baseAmount = p.nominal > 0 ? p.nominal : 30000;
                 var gradeMultiplier = Math.max(0.6, Math.min(1.3, (p.score || 50) / 75));
                 var targetAmount = Math.round(baseAmount * gradeMultiplier);
                 targetAmount = Math.min(targetAmount, totalAssets * 0.30, remaining);
                 if (targetAmount < 5000) { p.allocatedAmount = 0; p.annualReturn = 0; p.expectedReturn = 0; p.catReturn = 0; p.excessVsCat = 0; return; }
 
-                if (pool === 'structured') remainStruct -= targetAmount; else remainExternal -= targetAmount;
+                // Deduct from the right pool
+                if (pool === 'structured') remainStruct -= targetAmount;
+                else if (opts.entity === 'all') {
+                    if (sourceEntity === 'bycam') remainExtByCam -= targetAmount;
+                    else remainExtCameleons -= targetAmount;
+                } else {
+                    remainExternal -= targetAmount;
+                }
 
                 var probCoupon = typeof _estimateCouponProbability === 'function' ? _estimateCouponProbability(p) : 0.75;
                 var annualReturn = Math.round(targetAmount * p.coupon / 100);
@@ -261,10 +296,19 @@
 
                 p.allocatedAmount = targetAmount; p.annualReturn = annualReturn; p.expectedReturn = expectedReturn;
                 p.probCoupon = probCoupon; p.catReturn = catReturn; p.excessVsCat = expectedReturn - catReturn;
-                p._pool = pool; p._poolLabel = poolLabel; p._gradeMultiplier = gradeMultiplier;
+                p._pool = pool; p._gradeMultiplier = gradeMultiplier;
+                p._sourceEntity = sourceEntity; // NEW: tracks which entity funds this
+
+                // Clear label
+                var srcLabel = '';
+                if (sourceEntity === 'cameleons' && pool === 'structured') srcLabel = '\ud83e\udd8e Struct.';
+                else if (sourceEntity === 'bycam') srcLabel = '\ud83c\udfe2 ByCam';
+                else if (sourceEntity === 'cameleons') srcLabel = '\ud83e\udd8e Cam.';
+                else srcLabel = '\ud83d\udcb5 Ext.';
+                p._poolLabel = srcLabel;
 
                 var liqTag = opts.liquidityPriority ? p._liquidityLabel + ' ' : '';
-                p.reason = liqTag + poolLabel + ' Grade ' + p.grade + ' (' + p.score + '/100) \u00d7' + gradeMultiplier.toFixed(2) +
+                p.reason = liqTag + srcLabel + ' Grade ' + p.grade + ' (' + p.score + '/100) \u00d7' + gradeMultiplier.toFixed(2) +
                     ' \u2014 ' + formatNumber(targetAmount) + '\u20ac \u2192 +' + formatNumber(expectedReturn) + '\u20ac/an' +
                     (p.excessVsCat > 0 ? ' +' + formatNumber(p.excessVsCat) + '\u20ac vs CAT' : ' \u26a0 < CAT');
             });
@@ -279,7 +323,7 @@
             analysis._liquidityPriority = opts.liquidityPriority;
             analysis._liquiditySource = opts.liquiditySource;
 
-            console.log('[Optimizer v3.3d] Struct: ' + formatNumber(structDeploy) + '\u20ac, Ext: ' + formatNumber(externalDeploy) + '\u20ac, Deployed: ' + formatNumber(analysis.deployedAmount) + '\u20ac');
+            console.log('[Optimizer v3.4] Struct: ' + formatNumber(structDeploy) + '\u20ac, ExtBC: ' + formatNumber(analysis._extByCam) + '\u20ac, ExtCM: ' + formatNumber(analysis._extCameleons) + '\u20ac, Deployed: ' + formatNumber(analysis.deployedAmount) + '\u20ac');
             return analysis;
         };
     }, 300);
