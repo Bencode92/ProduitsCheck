@@ -264,5 +264,6 @@
     }
   },
   "envelope": "cameleons",
-  "maturityYears": 12
+  "maturityYears": 12,
+  "strikePrice": 16
 }
