@@ -141,23 +141,23 @@
   },
   "grading": {
     "grade": "A",
-    "score": 77,
+    "score": 76,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 64,
-        "base": 69,
+        "score": 61,
+        "base": 66,
         "delta": -5,
-        "reasoning": "Rendement: base 69 → -5 = 64 (Volatilité modérée (19.74%) mais barrière à 60% reste exposée dans un secteur bancaire actuellement évité par le régime macro) | Coupon 19.4% (9.7×2), barrière 60%"
+        "reasoning": "Rendement: base 66 → -5 = 61 (Vol à 19.75% et DD à -16% augmentent le risque de toucher la barrière 60%, réduisant la probabilité de coupons réguliers) | Coupon 19.4% (9.7×2), barrière 60%"
       },
       "underlyingQuality": {
         "score": 70,
         "base": 80,
         "delta": -10,
-        "reasoning": "Qualité: base 80 → -10 = 70 (Secteur financier explicitement évité en régime neutral, beta 0.83 amplifie l'exposition systémique, DD historique de -15.95% confirme la vulnérabilité) [vol/DD 30%] | Worst: EuroStoxx Banks B:50"
+        "reasoning": "Qualité: base 80 → -10 = 70 (Secteur financier explicitement évité en régime neutral, beta 0.83 reste sensible aux chocs macro) [vol/DD 30%] | Worst: EuroStoxx Banks B:50"
       },
       "portfolioFit": {
         "score": 80,
@@ -166,16 +166,16 @@
         "reasoning": "Fit: base 80"
       },
       "riskPremium": {
-        "score": 99,
-        "base": 99,
+        "score": 96,
+        "base": 96,
         "delta": 0,
-        "reasoning": "Prime: base 99 | 19.4% vs CAT 2.5% (spread 16.9%)"
+        "reasoning": "Prime: base 96 | 19.4% vs CAT 2.5% (spread 16.9%)"
       }
     },
-    "verdict": "Produit à coupon attractif (19.4% annualisé) sur un secteur bancaire européen actuellement sous pression avec YTD -8.09% et explicitement évité par le régime macro neutral. La barrière à 60% offre une marge de sécurité correcte face à la volatilité de 19.74%, mais le drawdown historique de -15.95% et le beta de 0.83 exposent à des corrections sectorielles potentielles. Le ratio rendement/risque reste acceptable pour une allocation limitée malgré le contexte défavorable.",
+    "verdict": "En régime macro neutral avec le secteur financier évité, ce produit offre un coupon attractif de 19.4% annualisé mais présente des risques significatifs. La barrière à 60% offre une marge de sécurité correcte face à la volatilité de 19.75%, mais le drawdown récent de -16% et la performance YTD négative (-8.15%) alertent sur la fragilité du secteur bancaire européen. Le score ajusté de 65/100 (B) reflète un profil risque/rendement acceptable uniquement pour les investisseurs ayant une conviction forte sur la résilience des banques européennes.",
     "keyRisks": [
-      "Secteur financier évité en régime macro actuel avec risque de sous-performance prolongée",
-      "Sensibilité aux taux d'intérêt et risque de récession impactant les marges bancaires"
+      "Exposition concentrée sur un secteur actuellement évité avec volatilité élevée",
+      "Risque de non-versement des coupons si l'indice reste sous 100% aux dates d'observation"
     ],
     "negotiationPoints": [],
     "scenarios": {
@@ -186,7 +186,7 @@
         "duration_years": 1
       },
       "base": {
-        "return_pct": 9.7,
+        "return_pct": 29.1,
         "return_eur": 29100,
         "probability": 0.4,
         "duration_years": 3
@@ -194,19 +194,19 @@
       "stress": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.25,
+        "probability": 0.3,
         "duration_years": 6
       },
       "worst": {
-        "return_pct": -15,
-        "return_eur": -15000,
-        "probability": 0.15,
+        "return_pct": -25,
+        "return_eur": -25000,
+        "probability": 0.1,
         "duration_years": 6
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-25T17:04:05.169Z",
-      "durationMs": 17650,
+      "gradedAt": "2026-03-26T08:27:09.394Z",
+      "durationMs": 18012,
       "aiUsed": true,
       "version": "4.3",
       "productType": "standard",
@@ -223,7 +223,7 @@
       "expectedMaturity": 0,
       "maxMaturity": 0,
       "maxBeta": 0.83,
-      "baseScore": 81,
+      "baseScore": 80,
       "baseGrade": "A",
       "adjustments": {
         "p1": -5,
@@ -236,9 +236,9 @@
           "name": "EuroStoxx Banks",
           "ticker": "EUFN",
           "sector": "Index",
-          "perf_ytd": -8.09,
-          "perf_1y": 17.13,
-          "volatility_3y": 19.74,
+          "perf_ytd": -8.15,
+          "perf_1y": 17.05,
+          "volatility_3y": 19.75,
           "max_drawdown_3y": -15.95
         }
       ]
