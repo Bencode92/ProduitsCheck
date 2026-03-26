@@ -170,13 +170,13 @@
         "score": 57,
         "base": 62,
         "delta": -5,
-        "reasoning": "Rendement: base 62 → -5 = 57 (Capital protégé mais probabilité autocall 45% modérée avec vol 20.37% et seuil 100%, rendement réel incertain) | Coupon 5.7%, protégé | Mat espérée: ~2.2a (max 12a, prob mat: 0%)"
+        "reasoning": "Rendement: base 62 → -5 = 57 (Malgré le Buffett de 44%, la volatilité de 20.37% et l'autocall à 100% réduisent la probabilité de percevoir les coupons régulièrement.) | Coupon 5.7%, protégé | Mat espérée: ~2.2a (max 12a, prob mat: 0%)"
       },
       "underlyingQuality": {
         "score": 58,
         "base": 50,
         "delta": 8,
-        "reasoning": "Qualité: base 50 → +8 = 58 (Secteur energy favorisé en régime neutral, beta défensif 0.71, mais fondamentaux faibles (ROE 5%, marge 3%)) [B/Q 35%] | Worst: ENI S.p.A. B:44"
+        "reasoning": "Qualité: base 50 → +8 = 58 (ENI bénéficie du régime neutral avec le secteur energy favorisé, compensant largement les fondamentaux moyens (ROE 5%, marge 3%).) [B/Q 35%] | Worst: ENI S.p.A. B:44"
       },
       "portfolioFit": {
         "score": 70,
@@ -188,19 +188,19 @@
         "score": 44,
         "base": 39,
         "delta": 5,
-        "reasoning": "Prime: base 39 → +5 = 44 (Spread implicite compensé par protection capitale et secteur favorisé) | 5.7% vs CAT 2.5% (spread 3.2%)"
+        "reasoning": "Prime: base 39 → +5 = 44 (Le spread de 5.7% reste attractif dans le contexte actuel pour un produit à capital protégé sur 12 ans.) | 5.7% vs CAT 2.5% (spread 3.2%)"
       }
     },
-    "verdict": "Produit défensif avec protection capitale sur ENI, acteur energy bénéficiant du régime macro favorable au secteur. Le coupon de 5.7% est modeste mais le capital protégé limite drastiquement le risque baisse. La probabilité d'autocall de 45% suggère une sortie probable en 2-3 ans, mais la volatilité de 20.37% et les fondamentaux moyens d'ENI (ROE 5%, marge 3%) tempèrent l'optimisme.",
+    "verdict": "Produit défensif adapté au contexte macro favorable à l'énergie, avec un rendement de 5.7% sur capital protégé. La probabilité d'autocall de 45% suggère une durée effective de 2.2 ans, limitant l'exposition longue. Cependant, les fondamentaux moyens d'ENI (ROE 5%, marge 3%) et la volatilité élevée (20%) tempèrent l'attrait malgré le secteur porteur.",
     "keyRisks": [
-      "Risque d'immobilisation longue si ENI reste sous 100% (prob 55%)",
-      "Coût d'opportunité élevé si rally energy se poursuit au-delà du cap 100%"
+      "Volatilité du pétrole impactant directement ENI et retardant l'autocall",
+      "Transition énergétique pesant sur les valorisations pétrolières à moyen terme"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 12.54,
-        "return_eur": 3762,
+        "return_pct": 12.5,
+        "return_eur": 3750,
         "probability": 0.25,
         "duration_years": 2.2
       },
@@ -211,21 +211,21 @@
         "duration_years": 3
       },
       "stress": {
-        "return_pct": 34.2,
-        "return_eur": 10260,
-        "probability": 0.3,
-        "duration_years": 6
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.25,
+        "duration_years": 12
       },
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.05,
+        "probability": 0.1,
         "duration_years": 12
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-26T08:44:16.327Z",
-      "durationMs": 20378,
+      "gradedAt": "2026-03-26T08:44:41.968Z",
+      "durationMs": 16844,
       "aiUsed": true,
       "version": "4.3",
       "productType": "standard",
