@@ -63,12 +63,16 @@ jobs:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: python3 scripts/fetch-underlyings.py
 
+      - name: Auto-fetch strike prices for new products
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+        run: python3 scripts/fetch-strike-prices.py
+
       - name: Build enriched index
         run: |
           cat > /tmp/build_index.py << 'PYEOF'
           import json, os
 
-          # ═══ STOCKS ═══
           index = {}
           ts = ''
           for region_file in ['stocks_europe.json', 'stocks_us.json']:
@@ -115,7 +119,6 @@ jobs:
                       'region': stock.get('region', ''),
                   }
 
-          # ═══ MARKETS ═══
           markets_summary = {}
           mp = 'data/market/markets.json'
           if os.path.exists(mp):
@@ -134,73 +137,31 @@ jobs:
                           'trend': idx.get('trend'),
                       }
 
-          # ═══ MARKET CONTEXT ═══
           context = {}
           cp = 'data/market/market_context.json'
           if os.path.exists(cp):
               with open(cp) as f: ctx = json.load(f)
               tilts = ctx.get('macro_tilts', {})
               diag = ctx.get('_meta', {}).get('diagnostics', {})
-              sector_class = {}
-              for sc in diag.get('sector_classifications', []):
-                  sector_class[sc['key']] = {
-                      'classification': sc.get('classification'),
-                      'ytd': sc.get('ytd'),
-                      'm3': sc.get('m3'),
-                      'm6': sc.get('m6'),
-                      'w52': sc.get('w52'),
-                      'momentum': sc.get('effective_momentum'),
-                  }
-              region_class = {}
-              for rc in diag.get('region_classifications', []):
-                  region_class[rc['key']] = {
-                      'classification': rc.get('classification'),
-                      'ytd': rc.get('ytd'),
-                      'm3': rc.get('m3'),
-                      'm6': rc.get('m6'),
-                      'w52': rc.get('w52'),
-                      'momentum': rc.get('effective_momentum'),
-                  }
-              context = {
-                  'regime': ctx.get('market_regime'),
-                  'confidence': ctx.get('confidence'),
-                  'as_of': ctx.get('as_of'),
-                  'favored_sectors': tilts.get('favored_sectors', []),
-                  'avoided_sectors': tilts.get('avoided_sectors', []),
-                  'favored_regions': tilts.get('favored_regions', []),
-                  'avoided_regions': tilts.get('avoided_regions', []),
-                  'key_trends': ctx.get('key_trends', []),
-                  'risks': ctx.get('risks', []),
-                  'sectors': sector_class,
-                  'regions': region_class,
-              }
+              sector_class = {sc['key']: {'classification': sc.get('classification'), 'ytd': sc.get('ytd'), 'm3': sc.get('m3'), 'momentum': sc.get('effective_momentum')} for sc in diag.get('sector_classifications', [])}
+              region_class = {rc['key']: {'classification': rc.get('classification'), 'ytd': rc.get('ytd'), 'momentum': rc.get('effective_momentum')} for rc in diag.get('region_classifications', [])}
+              context = {'regime': ctx.get('market_regime'), 'confidence': ctx.get('confidence'), 'as_of': ctx.get('as_of'),
+                  'favored_sectors': tilts.get('favored_sectors', []), 'avoided_sectors': tilts.get('avoided_sectors', []),
+                  'favored_regions': tilts.get('favored_regions', []), 'avoided_regions': tilts.get('avoided_regions', []),
+                  'key_trends': ctx.get('key_trends', []), 'risks': ctx.get('risks', []), 'sectors': sector_class, 'regions': region_class}
 
-          # ═══ MARKET INTELLIGENCE ═══
           mi = {}
           mip = 'data/market/market_intelligence.json'
           if os.path.exists(mip):
               with open(mip) as f: mi_data = json.load(f)
               ai = mi_data.get('ai_response', {})
               mdi = mi_data.get('market_data_input', {})
-              mi = {
-                  'timestamp': mi_data.get('timestamp', ''),
-                  'regime': ai.get('regime', ''),
-                  'regime_confidence': ai.get('regime_confidence', 0),
-                  'regime_rationale': ai.get('regime_rationale', ''),
-                  'warnings': ai.get('warnings', []),
-                  'bond_strategy': ai.get('bond_strategy', {}),
-                  'sector_momentum': mdi.get('sector_momentum_summary', ''),
-                  'favored_sectors': mdi.get('favored_sectors', ''),
-                  'avoided_sectors': mdi.get('avoided_sectors', ''),
-                  'stress_flags': mdi.get('_stress_flags', []),
-                  'vix': mdi.get('vix'),
-                  'brent': mdi.get('brent_usd'),
-                  'gold': mdi.get('gold_usd') or mdi.get('gold_price'),
-                  'silver': mdi.get('silver_usd'),
-              }
-              print(f'MI: regime={mi["regime"]} conf={mi["regime_confidence"]}')
+              mi = {'timestamp': mi_data.get('timestamp', ''), 'regime': ai.get('regime', ''), 'regime_confidence': ai.get('regime_confidence', 0),
+                  'regime_rationale': ai.get('regime_rationale', ''), 'warnings': ai.get('warnings', []), 'bond_strategy': ai.get('bond_strategy', {}),
+                  'sector_momentum': mdi.get('sector_momentum_summary', ''), 'favored_sectors': mdi.get('favored_sectors', ''),
+                  'avoided_sectors': mdi.get('avoided_sectors', ''), 'stress_flags': mdi.get('_stress_flags', []),
+                  'vix': mdi.get('vix'), 'brent': mdi.get('brent_usd'), 'gold': mdi.get('gold_usd') or mdi.get('gold_price'), 'silver': mdi.get('silver_usd')}
 
-          # ═══ MACRO INDICATORS ═══
           macro = {}
           mcp = 'data/market/macro_indicators.json'
           if os.path.exists(mcp):
@@ -212,15 +173,13 @@ jobs:
               if not mi.get('silver') and macro.get('silver_usd'): mi['silver'] = macro['silver_usd']
               if not mi.get('brent') and macro.get('brent_usd'): mi['brent'] = macro['brent_usd']
 
-          # ═══ UNDERLYINGS EXTRA (from Twelve Data API) ═══
           underlyings_extra = {}
           uep = 'data/market/underlyings_extra.json'
           if os.path.exists(uep):
               with open(uep) as f: ue = json.load(f)
               underlyings_extra = ue.get('tickers', {})
-              print(f'Underlyings extra: {len(underlyings_extra)} tickers with real metrics')
+              print(f'Underlyings extra: {len(underlyings_extra)} tickers')
 
-          # ═══ SECTORS ETFs ═══
           sectors_perf = {}
           sp = 'data/market/sectors.json'
           if os.path.exists(sp):
@@ -228,33 +187,16 @@ jobs:
               for sector_key, etfs in sdata.get('sectors', {}).items():
                   eu_etfs = [e for e in etfs if e.get('region') == 'Europe']
                   if eu_etfs:
-                      sectors_perf[sector_key] = [{
-                          'name': e.get('display_fr', e.get('name', '')),
-                          'ytd': e.get('ytd_num'),
-                          'm3': e.get('m3_num'),
-                          'w52': e.get('w52_num'),
-                          'trend': e.get('trend'),
-                      } for e in eu_etfs[:2]]
+                      sectors_perf[sector_key] = [{'name': e.get('display_fr', e.get('name', '')), 'ytd': e.get('ytd_num'), 'trend': e.get('trend')} for e in eu_etfs[:2]]
 
-          # ═══ OUTPUT ═══
-          output = {
-              'timestamp': ts,
-              'stocks_count': len(index),
-              'markets_count': len(markets_summary),
-              'stocks': index,
-              'markets': markets_summary,
-              'context': context,
-              'market_intelligence': mi,
-              'macro': macro,
-              'underlyings_extra': underlyings_extra,
-              'sectors_eu': sectors_perf,
-          }
+          output = {'timestamp': ts, 'stocks_count': len(index), 'markets_count': len(markets_summary),
+              'stocks': index, 'markets': markets_summary, 'context': context, 'market_intelligence': mi,
+              'macro': macro, 'underlyings_extra': underlyings_extra, 'sectors_eu': sectors_perf}
 
           with open('data/market/index.json', 'w') as f:
               json.dump(output, f, separators=(',', ':'))
-
           sz = os.path.getsize('data/market/index.json')
-          print(f'Index: {len(index)} stocks, {len(markets_summary)} markets, {len(underlyings_extra)} underlyings extra')
+          print(f'Index: {len(index)} stocks, {len(markets_summary)} markets, {len(underlyings_extra)} underlyings')
           print(f'Size: {sz:,} bytes ({sz/1024:.0f} KB)')
           PYEOF
           python3 /tmp/build_index.py
@@ -263,11 +205,11 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
-          git add data/market/
+          git add data/
           if git diff --staged --quiet; then
             echo 'No changes to commit'
           else
-            git commit -m "[Auto] Sync market data + MI + underlyings $(date +%Y-%m-%d-%H%M)"
+            git commit -m "[Auto] Sync market data + strike prices $(date +%Y-%m-%d-%H%M)"
             git push
-            echo 'Market data synced!'
+            echo 'Market data + strike prices synced!'
           fi
