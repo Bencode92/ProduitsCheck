@@ -89,6 +89,12 @@ jobs:
                       'sector': stock.get('sector', ''),
                       'industry': stock.get('industry', ''),
                       'country': stock.get('country', ''),
+                      # v2: Exchange & MIC for Twelve Data API calls (strike capture)
+                      'exchange': stock.get('exchange', ''),
+                      'data_mic': stock.get('data_mic'),
+                      'data_exchange': stock.get('data_exchange'),
+                      'data_currency': stock.get('data_currency'),
+                      'resolved_symbol': stock.get('resolved_symbol'),
                       'price': stock.get('price'),
                       'change_pct': stock.get('change_percent'),
                       'perf_1m': stock.get('perf_1m'),
