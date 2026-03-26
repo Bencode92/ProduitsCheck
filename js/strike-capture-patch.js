@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Strike Price Auto-Capture v1.4
-// v1.4: Always open modal for confirmation when SJ missing or historical
+// STRUCTBOARD — Strike Price Auto-Capture v1.5
+// v1.5: Green button also re-runs capture to show found/not-found
 // ═══════════════════════════════════════════════════════════════
 
 (function() {
@@ -23,8 +23,7 @@
         if (underlyings.length === 0) return null;
         var marketData = null;
         try { marketData = await github.readFile('data/market/index.json'); } catch(e) { return null; }
-        var prices = [];
-        var notFound = [];
+        var prices = [], notFound = [];
         for (var i = 0; i < underlyings.length; i++) {
             var uj = underlyings[i];
             var ujClean = _cleanUnderlyingName(uj);
@@ -38,29 +37,23 @@
                     var nameApiClean = _cleanUnderlyingName(stock.name_api || '');
                     var tickerLow = ticker.toLowerCase();
                     for (var w = 0; w < ujWords.length; w++) {
-                        if (ujWords[w] === tickerLow && ujWords[w].length >= 2) {
+                        if (ujWords[w] === tickerLow && ujWords[w].length >= 2)
                             if (stock.price > 0 && (!bestMatch || bestMatch.score < 100))
                                 bestMatch = { price: stock.price, source: 'stock:' + ticker, score: 100 };
-                        }
                     }
-                    if (nameClean && ujClean && (nameClean.indexOf(ujClean) >= 0 || ujClean.indexOf(nameClean) >= 0)) {
+                    if (nameClean && ujClean && (nameClean.indexOf(ujClean) >= 0 || ujClean.indexOf(nameClean) >= 0))
                         if (stock.price > 0 && (!bestMatch || bestMatch.score < 90))
                             bestMatch = { price: stock.price, source: 'stock:' + ticker, score: 90 };
-                    }
-                    if (nameApiClean && ujClean && (nameApiClean.indexOf(ujClean) >= 0 || ujClean.indexOf(nameApiClean) >= 0)) {
+                    if (nameApiClean && ujClean && (nameApiClean.indexOf(ujClean) >= 0 || ujClean.indexOf(nameApiClean) >= 0))
                         if (stock.price > 0 && (!bestMatch || bestMatch.score < 85))
                             bestMatch = { price: stock.price, source: 'stock:' + ticker, score: 85 };
-                    }
                     if (ujWords.length >= 2) {
-                        var matchCount = 0;
-                        var fullText = (nameClean + ' ' + nameApiClean + ' ' + tickerLow);
-                        for (var ww = 0; ww < ujWords.length; ww++) {
-                            if (fullText.indexOf(ujWords[ww]) >= 0) matchCount++;
-                        }
-                        if (matchCount >= 2 && matchCount / ujWords.length >= 0.5) {
-                            var wordScore = Math.round(matchCount / ujWords.length * 80);
-                            if (stock.price > 0 && (!bestMatch || bestMatch.score < wordScore))
-                                bestMatch = { price: stock.price, source: 'stock:' + ticker, score: wordScore };
+                        var mc = 0, ft = (nameClean + ' ' + nameApiClean + ' ' + tickerLow);
+                        for (var ww = 0; ww < ujWords.length; ww++) if (ft.indexOf(ujWords[ww]) >= 0) mc++;
+                        if (mc >= 2 && mc / ujWords.length >= 0.5) {
+                            var ws = Math.round(mc / ujWords.length * 80);
+                            if (stock.price > 0 && (!bestMatch || bestMatch.score < ws))
+                                bestMatch = { price: stock.price, source: 'stock:' + ticker, score: ws };
                         }
                     }
                 }
@@ -72,20 +65,17 @@
                     if (umap && umap.indices) {
                         for (var key in umap.indices) {
                             if (ujClean.indexOf(key) >= 0 || key.indexOf(ujClean) >= 0) {
-                                var proxyTicker = umap.indices[key].proxy;
-                                var extra = marketData.underlyings_extra[proxyTicker];
-                                if (extra && extra.last_close > 0) { price = extra.last_close; source = 'proxy:' + proxyTicker; }
+                                var pt = umap.indices[key].proxy;
+                                var ex = marketData.underlyings_extra[pt];
+                                if (ex && ex.last_close > 0) { price = ex.last_close; source = 'proxy:' + pt; }
                                 break;
                             }
                         }
                     }
                 } catch(e) {}
             }
-            if (price) {
-                prices.push({ underlying: uj, price: price, source: source });
-            } else {
-                notFound.push(uj);
-            }
+            if (price) prices.push({ underlying: uj, price: price, source: source });
+            else notFound.push(uj);
         }
         if (prices.length === 0) return null;
         product.strikePrice = Math.round(prices[0].price * 100) / 100;
@@ -145,7 +135,8 @@
         if (p.strikePrice && p.strikePrice > 0) {
             btn.innerHTML = '\ud83d\udccd Strike: ' + p.strikePrice;
             btn.style.cssText += 'color:var(--green);border-color:var(--green);';
-            btn.onclick = function() { _promptStrikeEdit(p); };
+            // v1.5: ALWAYS re-run capture on click so user sees found/not-found details
+            btn.onclick = function() { _triggerStrikeCapture(p); };
         } else {
             btn.innerHTML = '\ud83d\udccd Capturer Strike';
             btn.style.cssText += 'color:var(--orange);border-color:var(--orange);';
@@ -154,29 +145,25 @@
         anchor.parentNode.insertBefore(btn, anchor.nextSibling);
     };
 
-    // ═══ TRIGGER: ALWAYS OPEN MODAL IF ISSUES ═══
+    // ═══ TRIGGER: ALWAYS RESET + SEARCH + OPEN MODAL ═══
     window._triggerStrikeCapture = async function(product) {
         if (!product) return;
         showToast('Recherche du prix initial...', 'info');
-        product.strikePrice = null;
-        var strike = await _captureStrikePrice(product);
-        var isHistorical = product.subscriptionDate && new Date(product.subscriptionDate) < new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-        var hasMissing = product._strikePriceNotFound && product._strikePriceNotFound.length > 0;
 
-        if (strike && !hasMissing && !isHistorical) {
-            // All SJ found + recent product → auto-save, no confirmation needed
-            showToast('\u2705 Strike captur\u00e9: ' + strike, 'success');
-            await _saveStrikePrice(product);
-            document.querySelectorAll('.btn-strike').forEach(function(b) { b.remove(); });
-            _showStrikeButton();
-        } else {
-            // SJ missing OR historical → ALWAYS open modal for user confirmation
-            if (!strike) {
-                var pdfStrike = _extractStrikeFromPDF(product);
-                if (pdfStrike) { product.strikePrice = pdfStrike; product._strikePriceSource = 'pdf_extraction'; }
-            }
-            _promptStrikeEdit(product);
+        // ALWAYS reset to force re-search
+        product.strikePrice = null;
+        product._strikePriceAll = null;
+        product._strikePriceNotFound = null;
+
+        var strike = await _captureStrikePrice(product);
+
+        if (!strike) {
+            var pdfStrike = _extractStrikeFromPDF(product);
+            if (pdfStrike) { product.strikePrice = pdfStrike; product._strikePriceSource = 'pdf_extraction'; }
         }
+
+        // ALWAYS open modal — user confirms
+        _promptStrikeEdit(product);
     };
 
     // ═══ MODAL ═══
@@ -186,7 +173,6 @@
         var subDate = product.subscriptionDate || product.addedDate || '?';
         var isHistorical = product.subscriptionDate && new Date(product.subscriptionDate) < new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
-        // Build found/not-found summary
         var foundHtml = '';
         if (product._strikePriceAll && product._strikePriceAll.length > 0) {
             foundHtml = '<div style="background:rgba(6,214,160,0.08);border:1px solid rgba(6,214,160,0.2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:12px;font-size:11px">';
@@ -210,8 +196,8 @@
         var historicalWarning = '';
         if (isHistorical) {
             historicalWarning = '<div style="background:rgba(255,166,0,0.08);border:1px solid rgba(255,166,0,0.2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:12px;font-size:11px;color:var(--orange)">' +
-                '\u26a0 <strong>Souscrit le ' + subDate + '</strong> \u2014 le prix ci-dessous est le prix actuel. ' +
-                'V\u00e9rifiez dans la brochure (\"Niveau Initial\") le prix \u00e0 la date de souscription et corrigez si n\u00e9cessaire.</div>';
+                '\u26a0 <strong>Souscrit le ' + subDate + '</strong> \u2014 les prix ci-dessus sont actuels. ' +
+                'V\u00e9rifiez dans la brochure ("Niveau Initial") le prix \u00e0 la date de souscription et corrigez si besoin.</div>';
         }
 
         var modal = document.getElementById('modal');
@@ -278,5 +264,5 @@
         _showStrikeButton();
     }, 800);
 
-    console.log('[StructBoard] Strike Capture v1.4 \u2014 modal confirmation flow');
+    console.log('[StructBoard] Strike Capture v1.5 \u2014 always re-search + confirm');
 })();
