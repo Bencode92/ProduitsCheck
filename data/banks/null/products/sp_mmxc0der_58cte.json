@@ -105,5 +105,10 @@
   "sourceFile": "Brochure ATHENA PRIVILEGE ENI DECEMBRE 2025 (2).pdf",
   "investedAmount": 29640,
   "addedDate": "2026-03-19",
-  "status": "active"
+  "status": "active",
+  "strikePrice": 23.85,
+  "_strikePriceDate": "2026-03-19",
+  "_strikePriceSource": "twelve_data:ENI",
+  "_strikePriceOpen": 23.24,
+  "_strikePriceRequested": "2026-03-19"
 }
