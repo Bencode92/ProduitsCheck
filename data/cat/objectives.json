@@ -1,9 +1,9 @@
 {
   "monthlyNeed": 0,
   "liquidityReserve": 0,
-  "availableCash": 300000,
-  "cashByCam": 200000,
-  "cashCameleons": 100000,
+  "availableCash": 177000,
+  "cashByCam": 177000,
+  "cashCameleons": 0,
   "maxPerBank": 100000,
   "targetRate": 0,
   "notes": ""
