@@ -164,61 +164,62 @@
   },
   "grading": {
     "grade": "C",
-    "score": 55,
+    "score": 47,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 34,
+        "score": 29,
         "base": 39,
-        "delta": -5,
-        "reasoning": "Rendement: base 39 → -5 = 34 (Produit capital garanti mais manque de transparence sur mécanisme de protection et durée, rendement modeste pour un panier incluant Tesla avec vol 57.64% [MI capé ±5]) | Coupon 7%, protégé"
+        "delta": -10,
+        "reasoning": "Rendement: base 39 → -10 = 29 (Structure worst-of 8 sous-jacents avec Tesla ultra-volatile (57% vol) et plusieurs tech stocks en correction YTD rend le coupon très incertain) | Coupon 7%, protégé"
       },
       "underlyingQuality": {
-        "score": 42,
+        "score": 35,
         "base": 47,
-        "delta": -5,
-        "reasoning": "Qualité: base 47 → -5 = 42 (Surexposition aux secteurs évités (META, NFLX, GOOGL en communication; AMZN, TSLA en conso cyclique) et Tesla avec ROE 4.93% est un risque majeur dans le worst-of [MI capé ±5]) [B/Q 35%] | Worst: Tesla B:54"
+        "delta": -12,
+        "reasoning": "Qualité: base 47 → -12 = 35 (Surexposition communication (3/8) et consumer discretionary (2/8) en régime neutral défavorable, avec Tesla faible (ROE 5%) et betas élevés) [B/Q 35%] | Worst: Tesla B:54"
       },
       "portfolioFit": {
-        "score": 67,
+        "score": 72,
         "base": 72,
-        "delta": -5,
-        "reasoning": "Fit: base 72 → -5 = 67 (Panier trop concentré en tech US avec betas élevés (NVDA 1.92, TSLA 1.62), manque de diversification géographique et sectorielle)"
+        "delta": 0,
+        "reasoning": "Fit: base 72"
       },
       "riskPremium": {
-        "score": 82,
-        "base": 82,
+        "score": 60,
+        "base": 60,
         "delta": 0,
-        "reasoning": "Prime: base 82 | 7% vs CAT 2.5% (spread 4.5%)"
+        "reasoning": "Prime: base 60 | 7% vs CAT 2.5% (spread 4.5%)"
       }
     },
-    "verdict": "Produit décevant malgré la garantie du capital. Le rendement de 7% annualisé est insuffisant face au risque worst-of incluant Tesla (vol 57.64%, ROE 4.93%). La surexposition aux secteurs défavorisés (5/8 titres) en régime macro neutre et l'absence de clarté sur la durée et le mécanisme de protection rendent ce produit peu attractif.",
+    "verdict": "Produit à capital protégé mais structure worst-of 8 actions très pénalisante en régime macro défavorable aux secteurs surreprésentés (5/8 en communication et consumer discretionary). Tesla constitue un talon d'Achille majeur avec 57% de volatilité et des fondamentaux faibles (ROE 5%, marge 4%). La probabilité de toucher le coupon de 7% est très faible avec 8 barrières à respecter simultanément dans un contexte de correction tech (MSFT -23% YTD).",
     "keyRisks": [
-      "Tesla maillon faible avec fondamentaux dégradés (ROE 4.93%, marge 4.07%)",
-      "75% du panier dans des secteurs évités par le contexte macro actuel"
+      "Structure worst-of 8 SJ multiplie drastiquement le risque de non-paiement du coupon",
+      "Surexposition aux secteurs évités (communication 37.5%, consumer discretionary 25%)",
+      "Tesla point faible évident avec volatilité extrême et fondamentaux dégradés"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 7,
-        "return_eur": 14000,
-        "probability": 0.2,
-        "duration_years": 2
+        "return_eur": 7000,
+        "probability": 0.15,
+        "duration_years": 1
       },
       "base": {
-        "return_pct": 7,
-        "return_eur": 21000,
-        "probability": 0.4,
+        "return_pct": 2,
+        "return_eur": 6000,
+        "probability": 0.35,
         "duration_years": 3
       },
       "stress": {
-        "return_pct": 3,
-        "return_eur": 12000,
-        "probability": 0.3,
-        "duration_years": 4
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.4,
+        "duration_years": 5
       },
       "worst": {
         "return_pct": 0,
@@ -228,8 +229,8 @@
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-25T17:06:46.490Z",
-      "durationMs": 18854,
+      "gradedAt": "2026-03-26T16:32:42.811Z",
+      "durationMs": 22728,
       "aiUsed": true,
       "version": "4.3",
       "productType": "standard",
@@ -246,12 +247,12 @@
       "expectedMaturity": 0,
       "maxMaturity": 0,
       "maxBeta": 1.92,
-      "baseScore": 58,
+      "baseScore": 53,
       "baseGrade": "C",
       "adjustments": {
-        "p1": -5,
-        "p2": -5,
-        "p3": -5,
+        "p1": -10,
+        "p2": -12,
+        "p3": 0,
         "p4": 0
       },
       "stockData": [
@@ -259,9 +260,9 @@
           "name": "NVIDIA",
           "ticker": "NVDA",
           "sector": "Technologie de l'information",
-          "perf_ytd": -6.39,
-          "perf_1y": 48.33,
-          "volatility_3y": 48,
+          "perf_ytd": -4.19,
+          "perf_1y": 47.17,
+          "volatility_3y": 48.01,
           "max_drawdown_3y": 36.89,
           "buffett_score": 94,
           "quality_score": 74,
@@ -271,9 +272,9 @@
           "name": "Meta Platforms",
           "ticker": "META",
           "sector": "La communication",
-          "perf_ytd": -10.24,
-          "perf_1y": -0.63,
-          "volatility_3y": 35.13,
+          "perf_ytd": -9.88,
+          "perf_1y": -3.87,
+          "volatility_3y": 35.11,
           "max_drawdown_3y": 34.21,
           "buffett_score": 100,
           "quality_score": 68,
@@ -283,9 +284,9 @@
           "name": "Netflix",
           "ticker": "NFLX",
           "sector": "La communication",
-          "perf_ytd": -2.05,
-          "perf_1y": -4.36,
-          "volatility_3y": 33.84,
+          "perf_ytd": -1.58,
+          "perf_1y": -5.06,
+          "volatility_3y": 33.87,
           "max_drawdown_3y": 43.35,
           "buffett_score": 94,
           "quality_score": 51,
@@ -295,9 +296,9 @@
           "name": "Amazon.com",
           "ticker": "AMZN",
           "sector": "Biens de consommation cycliques",
-          "perf_ytd": -10.32,
-          "perf_1y": 5.49,
-          "volatility_3y": 31.06,
+          "perf_ytd": -8.28,
+          "perf_1y": 4.16,
+          "volatility_3y": 31.04,
           "max_drawdown_3y": 30.88,
           "buffett_score": 81,
           "quality_score": 62,
@@ -307,9 +308,9 @@
           "name": "Alphabet (Ex Google)",
           "ticker": "GOOGL",
           "sector": "La communication",
-          "perf_ytd": -6.53,
-          "perf_1y": 78.41,
-          "volatility_3y": 28.93,
+          "perf_ytd": -7.05,
+          "perf_1y": 73.5,
+          "volatility_3y": 28.89,
           "max_drawdown_3y": 29.89,
           "buffett_score": 100,
           "quality_score": 63,
@@ -319,21 +320,21 @@
           "name": "Microsoft",
           "ticker": "MSFT",
           "sector": "Technologie de l'information",
-          "perf_ytd": -22.93,
-          "perf_1y": -4.73,
+          "perf_ytd": -23.28,
+          "perf_1y": -5.61,
           "volatility_3y": 23.44,
-          "max_drawdown_3y": 31.24,
+          "max_drawdown_3y": 31.55,
           "buffett_score": 100,
-          "quality_score": 78,
+          "quality_score": 79,
           "buffett_grade": "A"
         },
         {
           "name": "Apple",
           "ticker": "AAPL",
           "sector": "Technologie de l'information",
-          "perf_ytd": -6.94,
-          "perf_1y": 15.91,
-          "volatility_3y": 25.48,
+          "perf_ytd": -7.08,
+          "perf_1y": 14.45,
+          "volatility_3y": 25.47,
           "max_drawdown_3y": 33.43,
           "buffett_score": 90,
           "quality_score": 68,
@@ -343,12 +344,12 @@
           "name": "Tesla",
           "ticker": "TSLA",
           "sector": "Biens de consommation cycliques",
-          "perf_ytd": -15.21,
-          "perf_1y": 53.32,
-          "volatility_3y": 57.64,
+          "perf_ytd": -14.18,
+          "perf_1y": 38.64,
+          "volatility_3y": 57.48,
           "max_drawdown_3y": 53.77,
           "buffett_score": 54,
-          "quality_score": 49,
+          "quality_score": 48,
           "buffett_grade": "C"
         }
       ]
