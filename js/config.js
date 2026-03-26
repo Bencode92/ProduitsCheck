@@ -11,7 +11,8 @@ const CONFIG = {
   AI_MODEL: 'claude-opus-4-20250514',
   AI_MODEL_FALLBACK: 'claude-sonnet-4-20250514',
   PDFJS_CDN: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174',
-  TWELVE_DATA_API_KEY: 'e694dd04e3e843e4935bc8e0a2be9e20',
+  // Twelve Data via Cloudflare Worker proxy (API key stays in env vars)
+  TWELVE_DATA_PROXY: 'https://studyforge-proxy.benoit-comas.workers.dev/twelvedata',
 };
 
 const MY_ENTITIES = [
