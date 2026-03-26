@@ -1,16 +1,18 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Strike Price Auto-Capture v2.2
-// v2.2: Fix European tickers (ENI:MIL, BNP:EPA, etc.)
+// STRUCTBOARD — Strike Price Auto-Capture v2.3
+// v2.3: Use data_mic from index.json (from stock-analysis-platform)
 // ═══════════════════════════════════════════════════════════════
 
 (function() {
     'use strict';
 
-    // MIC code → Twelve Data exchange suffix
-    var MIC_TO_EXCHANGE = {
+    // MIC → Twelve Data exchange suffix (for historical API calls)
+    var MIC_TO_TD = {
         'XPAR': 'EPA', 'XAMS': 'AMS', 'XMIL': 'MIL', 'XETR': 'XETR',
         'XLON': 'LSE', 'XCSE': 'CPH', 'XMAD': 'BME', 'XBRU': 'EBR',
         'XLIS': 'ELI', 'XHEL': 'HEL', 'XSTO': 'STO', 'XOSL': 'OSL',
+        'XSWX': 'SIX', 'XWBO': 'VSE', 'XFRA': 'FSX',
+        'XNAS': 'NASDAQ', 'XNYS': 'NYSE', 'BATS': 'BATS',
     };
 
     function _cleanName(raw) {
@@ -23,7 +25,7 @@
         return s;
     }
 
-    // ═══ FIND TICKER + EXCHANGE FOR AN UNDERLYING ═══
+    // ═══ FIND TICKER + MIC FOR AN UNDERLYING ═══
     function _findTickerForUnderlying(uj, marketData) {
         var ujClean = _cleanName(uj);
         var ujWords = ujClean.split(' ').filter(function(w) { return w.length >= 2; });
@@ -49,15 +51,14 @@
             }
 
             if (score > 0 && stock.price > 0 && (!best || best.score < score)) {
-                // Get exchange info for Twelve Data
-                var mic = stock.data_mic || '';
-                var tdExchange = MIC_TO_EXCHANGE[mic] || '';
-                var tdSymbol = tdExchange ? (ticker + ':' + tdExchange) : ticker;
+                // Build Twelve Data symbol from data_mic (from stock-analysis-platform)
+                var mic = stock.data_mic || null;
+                var tdSuffix = mic ? (MIC_TO_TD[mic] || mic) : '';
+                var tdSymbol = tdSuffix ? (ticker + ':' + tdSuffix) : ticker;
 
                 best = {
                     ticker: ticker,
                     tdSymbol: tdSymbol,
-                    exchange: tdExchange,
                     mic: mic,
                     price: stock.price,
                     score: score
@@ -78,7 +79,6 @@
         var startStr = start.toISOString().split('T')[0];
         var endStr = end.toISOString().split('T')[0];
 
-        // Try with exchange suffix first, then without
         var symbolsToTry = [tdSymbol];
         if (fallbackTicker && fallbackTicker !== tdSymbol) symbolsToTry.push(fallbackTicker);
 
@@ -89,22 +89,18 @@
                     '&interval=1day&start_date=' + startStr + '&end_date=' + endStr +
                     '&outputsize=10&apikey=' + apiKey;
 
-                console.log('[Strike] Trying: ' + symbol + ' @ ' + dateStr);
+                console.log('[Strike] Fetching: ' + symbol + ' @ ' + dateStr);
                 var response = await fetch(url);
                 var data = await response.json();
 
                 if (data.status === 'error') {
                     console.warn('[Strike] ' + symbol + ': ' + (data.message || 'error'));
-                    continue; // Try next symbol
-                }
-
-                var values = data.values || [];
-                if (values.length === 0) {
-                    console.warn('[Strike] ' + symbol + ': no data points');
                     continue;
                 }
 
-                // Find closest date
+                var values = data.values || [];
+                if (values.length === 0) continue;
+
                 var targetTime = target.getTime();
                 var bestVal = null, bestDiff = 999999999;
                 for (var i = 0; i < values.length; i++) {
@@ -114,18 +110,15 @@
                 }
 
                 if (bestVal && parseFloat(bestVal.close) > 0) {
-                    console.log('[Strike] SUCCESS: ' + symbol + ' @ ' + bestVal.datetime + ' = ' + bestVal.close);
+                    console.log('[Strike] OK: ' + symbol + ' @ ' + bestVal.datetime + ' = ' + bestVal.close);
                     return {
                         close: Math.round(parseFloat(bestVal.close) * 100) / 100,
                         date: bestVal.datetime.split(' ')[0],
                         symbol: symbol,
-                        open: Math.round(parseFloat(bestVal.open || 0) * 100) / 100,
-                        high: Math.round(parseFloat(bestVal.high || 0) * 100) / 100,
-                        low: Math.round(parseFloat(bestVal.low || 0) * 100) / 100,
                     };
                 }
             } catch(e) {
-                console.warn('[Strike] Fetch error ' + symbol + ': ' + e.message);
+                console.warn('[Strike] Error ' + symbol + ': ' + e.message);
                 continue;
             }
         }
@@ -168,8 +161,7 @@
                         result.price = match.price;
                         result.source = 'stock_current';
                         result.found = true;
-                        result.historical = false;
-                        result.error = 'API: pas de donn\u00e9es historiques pour ' + match.tdSymbol;
+                        result.error = 'API: pas de donn\u00e9es pour ' + match.tdSymbol;
                     }
                 } else {
                     result.price = match.price;
@@ -291,13 +283,13 @@
             var priceInfo = '', borderColor = 'var(--border)';
 
             if (r.found && r.historical) {
-                priceInfo = '<strong style="color:var(--green)">' + r.price + '</strong> <span style="color:var(--text-dim);font-size:10px">(close ' + r.histDate + ' via Twelve Data ' + (r.tdSymbol || '') + ')</span>';
+                priceInfo = '<strong style="color:var(--green)">' + r.price + '</strong> <span style="color:var(--text-dim);font-size:10px">(close ' + r.histDate + ' via ' + (r.tdSymbol || r.ticker) + ')</span>';
                 borderColor = 'var(--green)';
             } else if (r.found && r.error) {
-                priceInfo = '<span style="color:var(--orange)">' + r.price + '</span> <span style="color:var(--text-dim);font-size:10px">(prix actuel \u2014 ' + r.error + ')</span>';
+                priceInfo = '<span style="color:var(--orange)">' + r.price + '</span> <span style="color:var(--text-dim);font-size:10px">(actuel \u2014 ' + r.error + ')</span>';
                 borderColor = 'var(--orange)';
             } else if (r.found) {
-                priceInfo = '<span style="color:var(--orange)">' + r.price + '</span> <span style="color:var(--text-dim);font-size:10px">(prix actuel ' + r.ticker + ')</span>';
+                priceInfo = '<span style="color:var(--orange)">' + r.price + '</span> <span style="color:var(--text-dim);font-size:10px">(actuel ' + r.ticker + ')</span>';
                 borderColor = 'var(--orange)';
             } else {
                 priceInfo = '<span style="color:var(--red)">non trouv\u00e9 \u2014 entrer manuellement</span>';
@@ -309,8 +301,7 @@
             rowsHtml += '<span style="font-weight:600;color:var(--text-bright);font-size:12px">' + statusIcon + ' ' + r.underlying + '</span>';
             rowsHtml += '<span style="font-size:10px">' + priceInfo + '</span>';
             rowsHtml += '</div>';
-            rowsHtml += '<input id="strike-' + idx + '" type="number" step="0.01" value="' + displayVal + '" ';
-            rowsHtml += 'placeholder="Prix au ' + subDate + '" ';
+            rowsHtml += '<input id="strike-' + idx + '" type="number" step="0.01" value="' + displayVal + '" placeholder="Prix au ' + subDate + '" ';
             rowsHtml += 'style="width:100%;padding:8px;font-size:14px;font-weight:700;background:var(--bg-card);border:2px solid ' + borderColor + ';border-radius:var(--radius-sm);color:var(--text-bright)">';
             rowsHtml += '</div>';
         });
@@ -321,15 +312,15 @@
 
         var statusHtml = '';
         if (histCount > 0)
-            statusHtml += '<div style="background:rgba(6,214,160,0.08);border:1px solid rgba(6,214,160,0.2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:8px;font-size:11px;color:var(--green)">\u2705 <strong>' + histCount + ' prix historique(s)</strong> r\u00e9cup\u00e9r\u00e9(s) via Twelve Data \u00e0 la date de souscription</div>';
+            statusHtml += '<div style="background:rgba(6,214,160,0.08);border:1px solid rgba(6,214,160,0.2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:8px;font-size:11px;color:var(--green)">\u2705 <strong>' + histCount + ' prix historique(s)</strong> r\u00e9cup\u00e9r\u00e9(s) via Twelve Data</div>';
         if (currentCount > 0)
-            statusHtml += '<div style="background:rgba(255,166,0,0.08);border:1px solid rgba(255,166,0,0.2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:8px;font-size:11px;color:var(--orange)">\u26a0 <strong>' + currentCount + ' prix actuel(s)</strong> \u2014 corrigez avec la brochure ("Niveau Initial")</div>';
+            statusHtml += '<div style="background:rgba(255,166,0,0.08);border:1px solid rgba(255,166,0,0.2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:8px;font-size:11px;color:var(--orange)">\u26a0 <strong>' + currentCount + ' prix actuel(s)</strong> \u2014 corrigez avec la brochure</div>';
         if (missingCount > 0)
-            statusHtml += '<div style="background:rgba(239,35,60,0.08);border:1px solid rgba(239,35,60,0.2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:8px;font-size:11px;color:var(--red)">\u274c <strong>' + missingCount + ' non trouv\u00e9(s)</strong> \u2014 entrez manuellement depuis la brochure</div>';
+            statusHtml += '<div style="background:rgba(239,35,60,0.08);border:1px solid rgba(239,35,60,0.2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:8px;font-size:11px;color:var(--red)">\u274c <strong>' + missingCount + ' non trouv\u00e9(s)</strong> \u2014 entrez manuellement</div>';
 
         var explainHtml = isMulti ?
-            '<div style="background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.15);border-radius:var(--radius-sm);padding:10px;margin-bottom:12px;font-size:11px;color:var(--text-muted)">\ud83d\udca1 <strong>Worst-of:</strong> chaque action a son propre strike. La barri\u00e8re se mesure sur le pire performeur.</div>' :
-            '<div style="background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.15);border-radius:var(--radius-sm);padding:10px;margin-bottom:12px;font-size:11px;color:var(--text-muted)">\ud83d\udca1 Le strike = prix du sous-jacent le jour de la souscription.</div>';
+            '<div style="background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.15);border-radius:var(--radius-sm);padding:10px;margin-bottom:12px;font-size:11px;color:var(--text-muted)">\ud83d\udca1 <strong>Worst-of:</strong> chaque action a son propre strike.</div>' :
+            '<div style="background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.15);border-radius:var(--radius-sm);padding:10px;margin-bottom:12px;font-size:11px;color:var(--text-muted)">\ud83d\udca1 Strike = prix du sous-jacent au jour de la souscription.</div>';
 
         var modal = document.getElementById('modal');
         modal.innerHTML = '<div class="modal-overlay" onclick="closeModal()"><div class="modal-content" onclick="event.stopPropagation()" style="max-width:520px;max-height:90vh;overflow-y:auto">' +
@@ -409,5 +400,5 @@
         _showStrikeButton();
     }, 800);
 
-    console.log('[StructBoard] Strike Capture v2.2 \u2014 European exchange fix');
+    console.log('[StructBoard] Strike Capture v2.3 \u2014 data_mic from stock-analysis-platform');
 })();
