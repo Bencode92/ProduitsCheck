@@ -1,9 +1,11 @@
 // ═══════════════════════════════════════════════════════════════
 // STRUCTBOARD — Optimizer v3.3 Patch (fixed)
-// v3.3c: FIX — remove CAT deposits fallback that added 1.46M€
-//   Caméleons: cashCameleons(100K) - struct(109K) = 0€ external ✓
-//   ByCam: cashByCam(200K) - 0 struct = 200K€ external ✓
-//   All: (200K+100K) - 109K = 191K€ external ✓
+// v3.3d: FIX — cashByCam/cashCameleons are ALREADY external
+//   They do NOT include structured products (Bond 12M)
+//   No subtraction needed!
+//   Caméleons: struct=109K + ext=100K = 209K total
+//   ByCam: struct=0 + ext=200K = 200K total
+//   All: struct=109K + ext=300K = 409K total
 // ═══════════════════════════════════════════════════════════════
 
 (function() {
@@ -30,7 +32,10 @@
         return products.filter(function(p) { return p.entity === entity; });
     }
 
-    // ═══ LIQUIDITY SOURCES — catManager.objectives ONLY ═══
+    // ═══ LIQUIDITY SOURCES ═══
+    // cashByCam / cashCameleons = external liquidity (CAT, comptes)
+    // These are SEPARATE from structured products (Bond 12M etc.)
+    // NO subtraction needed — they are already the external amount
     function _identifyLiquiditySources(portfolio, entity) {
         var filtered = _filterByEntity(portfolio, entity);
 
@@ -50,8 +55,8 @@
         });
         var totalStruct = structLiq.reduce(function(s, p) { return s + (parseFloat(p.investedAmount) || 0); }, 0);
 
-        // 2. External = catManager.objectives (same source as dashboard)
-        // NO FALLBACK to CAT deposits — those are not available for structured products
+        // 2. External = catManager.objectives.cashXxx
+        // These are ALREADY separate from structured — NO subtraction
         var externalLiq = 0;
         var cashByCam = 0, cashCameleons = 0;
 
@@ -60,16 +65,9 @@
                 cashByCam = parseFloat(catManager.objectives.cashByCam) || 0;
                 cashCameleons = parseFloat(catManager.objectives.cashCameleons) || 0;
 
-                if (entity === 'bycam') {
-                    // ByCam: no structured liquidity (Bond 12M is Caméleons)
-                    externalLiq = cashByCam;
-                } else if (entity === 'cameleons') {
-                    // Caméleons: cashCameleons INCLUDES the Bond 12M → subtract structured
-                    externalLiq = Math.max(0, cashCameleons - totalStruct);
-                } else {
-                    // All: total cash minus structured (avoid double-counting)
-                    externalLiq = Math.max(0, (cashByCam + cashCameleons) - totalStruct);
-                }
+                if (entity === 'bycam') externalLiq = cashByCam;
+                else if (entity === 'cameleons') externalLiq = cashCameleons;
+                else externalLiq = cashByCam + cashCameleons;
             }
         } catch(e) {}
 
@@ -154,7 +152,7 @@
                 '</div>' +
 
                 '<div style="background:rgba(6,214,160,0.05);border:1px solid rgba(6,214,160,0.15);border-radius:var(--radius-sm);padding:10px">' +
-                '<div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">\ud83d\udcb5 Externe</div>' +
+                '<div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">\ud83d\udcb5 Externe (CAT)</div>' +
                 '<div style="font-size:18px;font-weight:800;color:var(--green);font-family:var(--mono)">' + formatNumber(sources.external.total) + '\u20ac</div>' +
                 '<div style="font-size:10px;color:var(--text-dim);margin-top:4px">\u2192 Toutes banques</div>' +
                 '</div></div>' +
@@ -179,7 +177,7 @@
                 '</div></div>';
             modal.classList.add('visible');
         };
-        console.log('[StructBoard] Optimizer v3.3c \u2014 no CAT deposits fallback');
+        console.log('[StructBoard] Optimizer v3.3d \u2014 cashXxx are already external, no subtraction');
     }, 250);
     setTimeout(function() { clearInterval(_waitModal); }, 10000);
 
@@ -281,7 +279,7 @@
             analysis._liquidityPriority = opts.liquidityPriority;
             analysis._liquiditySource = opts.liquiditySource;
 
-            console.log('[Optimizer v3.3c] Struct: ' + formatNumber(structDeploy) + '\u20ac, Ext: ' + formatNumber(externalDeploy) + '\u20ac, Deployed: ' + formatNumber(analysis.deployedAmount) + '\u20ac');
+            console.log('[Optimizer v3.3d] Struct: ' + formatNumber(structDeploy) + '\u20ac, Ext: ' + formatNumber(externalDeploy) + '\u20ac, Deployed: ' + formatNumber(analysis.deployedAmount) + '\u20ac');
             return analysis;
         };
     }, 300);
