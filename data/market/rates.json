@@ -1,72 +1,7 @@
 {
   "source": "ECB + Twelve Data",
-  "fetched_at": "2026-03-26T12:59:17.396381+00:00",
+  "fetched_at": "2026-03-26T13:21:24.216447+00:00",
   "yields": {
-    "oat_fr_10y": {
-      "current": 3.012,
-      "date": "2026-03-25",
-      "high_1y": 3.076,
-      "low_1y": 2.897,
-      "avg_1y": 3.003,
-      "observations": 24,
-      "vol_annualized_bps": 13.2,
-      "vol_annualized_pct": 4.4,
-      "direction": "stable",
-      "change_3m_bps": 0.6,
-      "history": [
-        {
-          "date": "2026-03-10",
-          "value": 2.897
-        },
-        {
-          "date": "2026-03-11",
-          "value": 2.974
-        },
-        {
-          "date": "2026-03-12",
-          "value": 2.998
-        },
-        {
-          "date": "2026-03-13",
-          "value": 3.011
-        },
-        {
-          "date": "2026-03-16",
-          "value": 2.988
-        },
-        {
-          "date": "2026-03-17",
-          "value": 2.967
-        },
-        {
-          "date": "2026-03-18",
-          "value": 3.0
-        },
-        {
-          "date": "2026-03-19",
-          "value": 3.012
-        },
-        {
-          "date": "2026-03-20",
-          "value": 3.076
-        },
-        {
-          "date": "2026-03-23",
-          "value": 3.033
-        },
-        {
-          "date": "2026-03-24",
-          "value": 3.062
-        },
-        {
-          "date": "2026-03-25",
-          "value": 3.012
-        }
-      ],
-      "name": "Euro Area AAA 10Y Yield",
-      "description": "Rendement zone euro AAA 10 ans (proxy TEC 10)",
-      "tec_equivalent": "TEC 10"
-    },
     "bund_de_10y": {
       "current": 3.012,
       "date": "2026-03-25",
@@ -283,13 +218,9 @@
       {
         "maturity": 5,
         "yield": 2.662
-      },
-      {
-        "maturity": 10,
-        "yield": 3.012
       }
     ],
-    "spread_2_10": 0.455,
+    "spread_2_10": 0.105,
     "shape": "normal"
   }
 }
