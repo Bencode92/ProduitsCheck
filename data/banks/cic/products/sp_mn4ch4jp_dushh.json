@@ -151,13 +151,13 @@
         "score": 61,
         "base": 66,
         "delta": -5,
-        "reasoning": "Rendement: base 66 → -5 = 61 (Vol à 19.75% et barrière 60% dans un secteur bancaire évité par le contexte macro réduit la probabilité de toucher les coupons régulièrement) | Coupon 19.4% (9.7×2), barrière 60%"
+        "reasoning": "Rendement: base 66 → -5 = 61 (Distance barrière 40% confortable mais vol 19.75% et secteur financier évité réduisent la probabilité de coupons réguliers) | Coupon 19.4% (9.7×2), barrière 60%"
       },
       "underlyingQuality": {
         "score": 70,
         "base": 80,
         "delta": -10,
-        "reasoning": "Qualité: base 80 → -10 = 70 (Secteur financials explicitement évité en contexte macro neutre, beta 0.83 expose aux chocs systémiques bancaires) [vol/DD 30%] | Worst: EuroStoxx Banks B:50"
+        "reasoning": "Qualité: base 80 → -10 = 70 (Secteur financier explicitement évité en régime neutral, beta 0.83 modéré mais exposition aux risques de taux défavorable) [vol/DD 30%] | Worst: EuroStoxx Banks B:50"
       },
       "portfolioFit": {
         "score": 80,
@@ -172,11 +172,10 @@
         "reasoning": "Prime: base 96 | 19.4% vs CAT 2.5% (spread 16.9%)"
       }
     },
-    "verdict": "Produit offrant un coupon attractif de 19.4% annualisé mais fortement pénalisé par le contexte macro défavorable aux financials. La volatilité de 19.75% et le drawdown récent de -16% augmentent le risque de franchissement de la barrière à 60%. Score ajusté à 65/100 (B) reflétant un rapport rendement/risque dégradé dans l'environnement actuel.",
+    "verdict": "Produit risqué avec coupon élevé de 19.4% sur le secteur bancaire européen, actuellement évité par le consensus macro. La barrière à 60% offre une marge de sécurité correcte mais la volatilité de 19.75% et le drawdown récent de -15.95% indiquent des risques significatifs. Le timing est défavorable avec le secteur financier sous pression (-8.15% YTD) dans un régime macro neutral où les banques restent vulnérables aux politiques monétaires.",
     "keyRisks": [
-      "Secteur bancaire évité par le contexte macro actuel",
-      "Volatilité élevée (19.75%) augmente le risque sur la barrière 60%",
-      "Concentration totale sur un seul secteur cyclique"
+      "Secteur financier évité dans le contexte macro actuel avec risques de taux persistants",
+      "Volatilité élevée (19.75%) pouvant déclencher la barrière malgré les 40% de marge"
     ],
     "negotiationPoints": [],
     "scenarios": {
@@ -187,10 +186,10 @@
         "duration_years": 1
       },
       "base": {
-        "return_pct": 29.1,
+        "return_pct": 9.7,
         "return_eur": 29100,
         "probability": 0.35,
-        "duration_years": 1.5
+        "duration_years": 3
       },
       "stress": {
         "return_pct": 0,
@@ -199,15 +198,15 @@
         "duration_years": 6
       },
       "worst": {
-        "return_pct": -25,
-        "return_eur": -25000,
+        "return_pct": -20,
+        "return_eur": -20000,
         "probability": 0.15,
         "duration_years": 6
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-26T14:33:49.701Z",
-      "durationMs": 16832,
+      "gradedAt": "2026-03-26T16:12:14.772Z",
+      "durationMs": 17762,
       "aiUsed": true,
       "version": "4.3",
       "productType": "standard",
