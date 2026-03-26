@@ -151,13 +151,13 @@
         "score": 61,
         "base": 66,
         "delta": -5,
-        "reasoning": "Rendement: base 66 → -5 = 61 (Vol à 19.75% et DD à -16% augmentent le risque de toucher la barrière 60%, réduisant la probabilité de coupons réguliers) | Coupon 19.4% (9.7×2), barrière 60%"
+        "reasoning": "Rendement: base 66 → -5 = 61 (Vol à 19.75% et barrière 60% dans un secteur bancaire évité par le contexte macro réduit la probabilité de toucher les coupons régulièrement) | Coupon 19.4% (9.7×2), barrière 60%"
       },
       "underlyingQuality": {
         "score": 70,
         "base": 80,
         "delta": -10,
-        "reasoning": "Qualité: base 80 → -10 = 70 (Secteur financier explicitement évité en régime neutral, beta 0.83 reste sensible aux chocs macro) [vol/DD 30%] | Worst: EuroStoxx Banks B:50"
+        "reasoning": "Qualité: base 80 → -10 = 70 (Secteur financials explicitement évité en contexte macro neutre, beta 0.83 expose aux chocs systémiques bancaires) [vol/DD 30%] | Worst: EuroStoxx Banks B:50"
       },
       "portfolioFit": {
         "score": 80,
@@ -172,10 +172,11 @@
         "reasoning": "Prime: base 96 | 19.4% vs CAT 2.5% (spread 16.9%)"
       }
     },
-    "verdict": "En régime macro neutral avec le secteur financier évité, ce produit offre un coupon attractif de 19.4% annualisé mais présente des risques significatifs. La barrière à 60% offre une marge de sécurité correcte face à la volatilité de 19.75%, mais le drawdown récent de -16% et la performance YTD négative (-8.15%) alertent sur la fragilité du secteur bancaire européen. Le score ajusté de 65/100 (B) reflète un profil risque/rendement acceptable uniquement pour les investisseurs ayant une conviction forte sur la résilience des banques européennes.",
+    "verdict": "Produit offrant un coupon attractif de 19.4% annualisé mais fortement pénalisé par le contexte macro défavorable aux financials. La volatilité de 19.75% et le drawdown récent de -16% augmentent le risque de franchissement de la barrière à 60%. Score ajusté à 65/100 (B) reflétant un rapport rendement/risque dégradé dans l'environnement actuel.",
     "keyRisks": [
-      "Exposition concentrée sur un secteur actuellement évité avec volatilité élevée",
-      "Risque de non-versement des coupons si l'indice reste sous 100% aux dates d'observation"
+      "Secteur bancaire évité par le contexte macro actuel",
+      "Volatilité élevée (19.75%) augmente le risque sur la barrière 60%",
+      "Concentration totale sur un seul secteur cyclique"
     ],
     "negotiationPoints": [],
     "scenarios": {
@@ -188,8 +189,8 @@
       "base": {
         "return_pct": 29.1,
         "return_eur": 29100,
-        "probability": 0.4,
-        "duration_years": 3
+        "probability": 0.35,
+        "duration_years": 1.5
       },
       "stress": {
         "return_pct": 0,
@@ -200,13 +201,13 @@
       "worst": {
         "return_pct": -25,
         "return_eur": -25000,
-        "probability": 0.1,
+        "probability": 0.15,
         "duration_years": 6
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-26T08:27:09.394Z",
-      "durationMs": 18012,
+      "gradedAt": "2026-03-26T14:33:49.701Z",
+      "durationMs": 16832,
       "aiUsed": true,
       "version": "4.3",
       "productType": "standard",
