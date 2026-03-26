@@ -145,31 +145,10 @@
   "entityName": "Caméleons",
   "envelope": "cameleons",
   "maturityYears": 10,
-  "strikePrice": 7.65,
-  "_strikePriceSource": "stock:BMPS",
+  "strikePrice": 9.13,
+  "_strikePriceSource": "confirmed",
   "_strikePriceDate": "2026-03-26",
-  "_strikePriceAll": [
-    {
-      "underlying": "Banca Monte dei Paschi di Siena SpA",
-      "price": 7.649,
-      "source": "stock:BMPS"
-    },
-    {
-      "underlying": "Enel SpA",
-      "price": 9.295,
-      "source": "stock:ENEL"
-    },
-    {
-      "underlying": "UniCredit SpA",
-      "price": 62.39,
-      "source": "stock:UCG"
-    },
-    {
-      "underlying": "Veolia Environnement SA",
-      "price": 32.34,
-      "source": "stock:VIE"
-    }
-  ],
+  "_strikePriceAll": null,
   "grading": {
     "grade": "C",
     "score": 47,
@@ -321,5 +300,13 @@
         }
       ]
     }
+  },
+  "_strikePriceNotFound": null,
+  "strikePrices": {
+    "Banca Monte dei Paschi di Siena SpA": 9.13,
+    "Enel SpA": 9.3,
+    "Novo Nordisk A": 50.1,
+    "UniCredit SpA": 72.38,
+    "Veolia Environnement SA": 14.93
   }
 }
