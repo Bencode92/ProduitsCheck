@@ -1,19 +1,10 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Strike Price Auto-Capture v2.3
-// v2.3: Use data_mic from index.json (from stock-analysis-platform)
+// STRUCTBOARD — Strike Price Auto-Capture v2.4
+// v2.4: Use resolved_symbol from stock-analysis-platform (fixes Italian cross-listings)
 // ═══════════════════════════════════════════════════════════════
 
 (function() {
     'use strict';
-
-    // MIC → Twelve Data exchange suffix (for historical API calls)
-    var MIC_TO_TD = {
-        'XPAR': 'EPA', 'XAMS': 'AMS', 'XMIL': 'MIL', 'XETR': 'XETR',
-        'XLON': 'LSE', 'XCSE': 'CPH', 'XMAD': 'BME', 'XBRU': 'EBR',
-        'XLIS': 'ELI', 'XHEL': 'HEL', 'XSTO': 'STO', 'XOSL': 'OSL',
-        'XSWX': 'SIX', 'XWBO': 'VSE', 'XFRA': 'FSX',
-        'XNAS': 'NASDAQ', 'XNYS': 'NYSE', 'BATS': 'BATS',
-    };
 
     function _cleanName(raw) {
         var s = (raw || '').toLowerCase();
@@ -25,7 +16,8 @@
         return s;
     }
 
-    // ═══ FIND TICKER + MIC FOR AN UNDERLYING ═══
+    // ═══ FIND TICKER FOR AN UNDERLYING ═══
+    // Uses resolved_symbol from stock-analysis-platform (already validated against Twelve Data)
     function _findTickerForUnderlying(uj, marketData) {
         var ujClean = _cleanName(uj);
         var ujWords = ujClean.split(' ').filter(function(w) { return w.length >= 2; });
@@ -51,15 +43,13 @@
             }
 
             if (score > 0 && stock.price > 0 && (!best || best.score < score)) {
-                // Build Twelve Data symbol from data_mic (from stock-analysis-platform)
-                var mic = stock.data_mic || null;
-                var tdSuffix = mic ? (MIC_TO_TD[mic] || mic) : '';
-                var tdSymbol = tdSuffix ? (ticker + ':' + tdSuffix) : ticker;
+                // v2.4: Use resolved_symbol directly — it's already the correct Twelve Data symbol
+                // Examples: BMPS → "MPI0:XETR", ENEL → "ENL:XETR", BNP → "BNP:XPAR"
+                var tdSymbol = stock.resolved_symbol || ticker;
 
                 best = {
                     ticker: ticker,
                     tdSymbol: tdSymbol,
-                    mic: mic,
                     price: stock.price,
                     score: score
                 };
@@ -169,7 +159,6 @@
                     result.found = true;
                 }
             } else {
-                // Try proxy ETF
                 if (marketData.underlyings_extra) {
                     try {
                         var ujClean = _cleanName(uj);
@@ -259,7 +248,6 @@
         anchor.parentNode.insertBefore(btn, anchor.nextSibling);
     };
 
-    // ═══ TRIGGER ═══
     window._triggerStrikeCapture = async function(product) {
         if (!product) return;
         showToast('Recherche des prix historiques...', 'info');
@@ -400,5 +388,5 @@
         _showStrikeButton();
     }, 800);
 
-    console.log('[StructBoard] Strike Capture v2.3 \u2014 data_mic from stock-analysis-platform');
+    console.log('[StructBoard] Strike Capture v2.4 \u2014 resolved_symbol from stock-analysis-platform');
 })();
