@@ -1,11 +1,12 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Edit Modal v1.2 — Envelope with fixed liquidity
+// STRUCTBOARD — Edit Modal v1.3 — Strike Price + Envelope
+// v1.3: Added strikePrice field for barrier sigma calculation
 // ═══════════════════════════════════════════════════════════════
 
 var ENVELOPES = [
     { id: '', label: '\u2014 Aucune \u2014', color: '#94A3B8', icon: '', liquidity: 0 },
     { id: 'bycam', label: 'ByCam', color: '#3B82F6', icon: '\ud83c\udfe6', liquidity: 100000 },
-    { id: 'cameleons', label: 'Cam\u00e9l\u00e9ons', color: '#A855F7', icon: '\ud83e\udd8e', liquidity: 100000 }
+    { id: 'cameleons', label: 'Cam\u00e9leons', color: '#A855F7', icon: '\ud83e\udd8e', liquidity: 100000 }
 ];
 
 window.getEnvelopeInfo = function(id) {
@@ -25,6 +26,7 @@ window.showEditModal = function() {
     var amount = p.investedAmount || '';
     var underlyings = (p.underlyings || []).join(', ');
     var currentEnvelope = p.envelope || '';
+    var strikePrice = p.strikePrice || '';
 
     var envelopeOptions = ENVELOPES.map(function(e) {
         return '<option value="' + e.id + '"' + (currentEnvelope === e.id ? ' selected' : '') + '>' + (e.icon ? e.icon + ' ' : '') + e.label + '</option>';
@@ -46,8 +48,12 @@ window.showEditModal = function() {
         '<div class="form-field"><label>Maturit\u00e9</label><input id="fe-maturity" value="' + escapeAttr(p.maturity || '') + '"></div>' +
         '<div class="form-field"><label>Autocall</label><select id="fe-autocall"><option value="true"' + (autocall === 'true' ? ' selected' : '') + '>Oui</option><option value="false"' + (autocall === 'false' ? ' selected' : '') + '>Non</option></select></div>' +
         '<div class="form-field"><label>Seuil autocall (%)</label><input id="fe-autocall-trigger" type="number" step="1" value="' + autocallTrigger + '"></div>' +
+        // v1.3: Strike Price field
+        '<div class="form-field"><label>Niveau initial (strike) <span style="font-size:9px;color:var(--text-dim)" title="Valeur du sous-jacent \u00e0 la date de souscription. Ex: 4950 pour Eurostoxx 50. Utilis\u00e9 pour calculer la distance barri\u00e8re en \u03c3.">\u2139\ufe0f pts ou \u20ac</span></label><input id="fe-strike-price" type="number" step="0.01" value="' + strikePrice + '" placeholder="Ex: 4950"></div>' +
         '<div class="form-field full"><label>Sous-jacents (s\u00e9par\u00e9s par virgule)</label><input id="fe-underlyings" value="' + escapeAttr(underlyings) + '"></div>' +
         '</div>' +
+        // v1.3: Info box about strike price
+        (strikePrice ? '' : '<div style="background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.15);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:12px;font-size:10px;color:var(--text-muted)">\ud83d\udca1 <strong>Niveau initial (strike)</strong> : renseignez la valeur du sous-jacent \u00e0 la date de souscription pour am\u00e9liorer le calcul du risque barri\u00e8re (distance en \u03c3). Vous la trouvez dans la brochure sous \"Niveau Initial\" ou \"Strike\".</div>') +
         '<div class="modal-actions"><button class="btn" onclick="closeModal()">Annuler</button><button class="btn primary" onclick="handleEditSave()">\ud83d\udcbe Enregistrer</button></div>' +
         '</div></div>';
     modal.classList.add('visible');
@@ -94,6 +100,12 @@ window.handleEditSave = async function() {
     var newAmount = document.getElementById('fe-invested')?.value;
     if (newAmount !== '') p.investedAmount = parseFloat(newAmount);
 
+    // v1.3: Strike Price
+    var newStrike = document.getElementById('fe-strike-price')?.value;
+    if (newStrike !== '' && newStrike !== null) {
+        p.strikePrice = parseFloat(newStrike);
+    }
+
     var newUnderlyings = document.getElementById('fe-underlyings')?.value;
     if (newUnderlyings) {
         p.underlyings = newUnderlyings.split(/[,;]/).map(function(s) { return s.trim(); }).filter(Boolean);
@@ -118,4 +130,4 @@ function escapeAttr(str) {
     return (str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;');
 }
 
-console.log('[StructBoard] Edit Modal v1.2 \u2014 envelope with fixed liquidity');
+console.log('[StructBoard] Edit Modal v1.3 \u2014 strike price + envelope');
