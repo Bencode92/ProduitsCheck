@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Strike Price Auto-Capture v1.1
+// STRUCTBOARD — Strike Price Auto-Capture v1.2
 // - Auto-captures spot price at integration time
-// - Button on product page to manually trigger/view strike
+// - Button on product page next to Actualiser/Liquidité
 // - PDF extraction fallback
 // ═══════════════════════════════════════════════════════════════
 
@@ -12,22 +12,17 @@
     window._captureStrikePrice = async function(product) {
         if (!product) return null;
         if (product.strikePrice && product.strikePrice > 0) {
-            console.log('[Strike] Already set: ' + product.strikePrice);
             return product.strikePrice;
         }
-
         var underlyings = product.underlyings || [];
         if (underlyings.length === 0) return null;
-
         var marketData = null;
         try { marketData = await github.readFile('data/market/index.json'); } catch(e) { return null; }
-
         var prices = [];
         for (var i = 0; i < underlyings.length; i++) {
             var uj = underlyings[i];
             var ujNorm = uj.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
             var price = null, source = null;
-
             if (marketData.stocks) {
                 for (var ticker in marketData.stocks) {
                     var stock = marketData.stocks[ticker];
@@ -40,7 +35,6 @@
                     }
                 }
             }
-
             if (!price && marketData.underlyings_extra) {
                 try {
                     var umap = await github.readFile('data/underlying-map.json');
@@ -56,20 +50,13 @@
                     }
                 } catch(e) {}
             }
-
-            if (price) {
-                prices.push({ underlying: uj, price: price, source: source });
-                console.log('[Strike] ' + uj + ' \u2192 ' + price + ' (' + source + ')');
-            }
+            if (price) prices.push({ underlying: uj, price: price, source: source });
         }
-
         if (prices.length === 0) return null;
-
         product.strikePrice = Math.round(prices[0].price * 100) / 100;
         product._strikePriceSource = prices[0].source;
         product._strikePriceDate = new Date().toISOString().split('T')[0];
         product._strikePriceAll = prices;
-        console.log('[Strike] Auto-captured: ' + product.strikePrice);
         return product.strikePrice;
     };
 
@@ -77,7 +64,6 @@
     var _strikeInterval = setInterval(function() {
         if (typeof app === 'undefined' || !app.integrateProposal) return;
         clearInterval(_strikeInterval);
-
         var _origIntegrate = app.integrateProposal;
         app.integrateProposal = async function(product) {
             if (product && (!product.strikePrice || product.strikePrice <= 0)) {
@@ -87,14 +73,13 @@
             }
             return _origIntegrate.call(app, product);
         };
-        console.log('[Strike] Integration hook installed');
     }, 300);
     setTimeout(function() { clearInterval(_strikeInterval); }, 10000);
 
     // ═══ PDF EXTRACTION ═══
     window._extractStrikeFromPDF = function(product) {
         if (!product || !product.rawText) return null;
-        var text = product.rawText.toLowerCase();
+        var text = product.rawText;
         var patterns = [
             /niveau\s*initial\s*[:=]?\s*([\d\s,.]+)/i,
             /fixing\s*initial\s*[:=]?\s*([\d\s,.]+)/i,
@@ -112,59 +97,59 @@
         return null;
     };
 
-    // ═══ UI: STRIKE BUTTON ON PRODUCT PAGE ═══
-    // Adds a "📍 Strike" button next to "Actualiser" and "$ Liquidité"
+    // ═══ UI: STRIKE BUTTON — ROBUST INSERTION ═══
+    // Strategy: find ANY button on the page that contains "Actualiser" or "Liquidit"
+    // and insert our button next to it. This works regardless of DOM structure.
     window._showStrikeButton = function() {
-        // Find the grading header where Actualiser / Liquidité buttons are
-        var headers = document.querySelectorAll('.section-header, [class*="grading"]');
-        headers.forEach(function(header) {
-            var title = header.textContent || '';
-            if (title.indexOf('Grading') >= 0 && !header.querySelector('.btn-strike')) {
-                var p = app.state.currentProduct;
-                if (!p) return;
+        if (document.querySelector('.btn-strike')) return; // Already added
+        var p = app && app.state && app.state.currentProduct;
+        if (!p) return;
 
-                var btn = document.createElement('button');
-                btn.className = 'btn sm btn-strike';
-                btn.style.cssText = 'margin-left:6px;white-space:nowrap;';
-
-                if (p.strikePrice && p.strikePrice > 0) {
-                    btn.innerHTML = '\ud83d\udccd Strike: ' + p.strikePrice;
-                    btn.style.cssText += 'color:var(--green);border-color:var(--green);';
-                    btn.title = 'Strike enregistr\u00e9 le ' + (p._strikePriceDate || '?') + ' (' + (p._strikePriceSource || 'manuel') + '). Cliquer pour modifier.';
-                    btn.onclick = function() { _promptStrikeEdit(p); };
-                } else {
-                    btn.innerHTML = '\ud83d\udccd Capturer Strike';
-                    btn.style.cssText += 'color:var(--orange);border-color:var(--orange);';
-                    btn.title = 'Chercher automatiquement le prix du sous-jacent \u00e0 la date de souscription';
-                    btn.onclick = function() { _triggerStrikeCapture(p); };
-                }
-
-                // Insert after last button in header
-                var lastBtn = header.querySelector('.btn:last-of-type');
-                if (lastBtn) lastBtn.parentNode.insertBefore(btn, lastBtn.nextSibling);
-                else header.appendChild(btn);
+        // Find anchor: the "Actualiser" or "Liquidité" button
+        var anchor = null;
+        var allButtons = document.querySelectorAll('button');
+        for (var i = 0; i < allButtons.length; i++) {
+            var txt = allButtons[i].textContent || '';
+            if (txt.indexOf('Liquidit') >= 0 || txt.indexOf('Actualiser') >= 0) {
+                anchor = allButtons[i];
+                // Prefer the last matching button (Liquidité comes after Actualiser)
             }
-        });
+        }
+
+        if (!anchor) return; // Not on product page
+
+        var btn = document.createElement('button');
+        btn.className = 'btn sm btn-strike';
+        btn.style.cssText = 'margin-left:6px;white-space:nowrap;';
+
+        if (p.strikePrice && p.strikePrice > 0) {
+            btn.innerHTML = '\ud83d\udccd Strike: ' + p.strikePrice;
+            btn.style.cssText += 'color:var(--green);border-color:var(--green);';
+            btn.title = 'Strike enregistr\u00e9 (' + (p._strikePriceSource || 'manuel') + '). Cliquer pour modifier.';
+            btn.onclick = function() { _promptStrikeEdit(p); };
+        } else {
+            btn.innerHTML = '\ud83d\udccd Capturer Strike';
+            btn.style.cssText += 'color:var(--orange);border-color:var(--orange);';
+            btn.title = 'Chercher le prix du sous-jacent \u00e0 la date de souscription';
+            btn.onclick = function() { _triggerStrikeCapture(p); };
+        }
+
+        // Insert right after the anchor button
+        anchor.parentNode.insertBefore(btn, anchor.nextSibling);
+        console.log('[Strike] Button injected next to: ' + (anchor.textContent || '').trim());
     };
 
     // Trigger auto-capture from button click
     window._triggerStrikeCapture = async function(product) {
         if (!product) return;
-
         showToast('Recherche du prix initial...', 'info');
-
-        // Try auto-capture from current market data
         var strike = await _captureStrikePrice(product);
-
         if (strike) {
-            showToast('\u2705 Strike captur\u00e9: ' + strike + ' (prix actuel)', 'success');
-            // Save to product file and portfolio
+            showToast('\u2705 Strike captur\u00e9: ' + strike, 'success');
             await _saveStrikePrice(product);
-            // Refresh the button display
             document.querySelectorAll('.btn-strike').forEach(function(b) { b.remove(); });
             _showStrikeButton();
         } else {
-            // Fallback: try PDF extraction
             var pdfStrike = _extractStrikeFromPDF(product);
             if (pdfStrike) {
                 product.strikePrice = pdfStrike;
@@ -175,18 +160,16 @@
                 document.querySelectorAll('.btn-strike').forEach(function(b) { b.remove(); });
                 _showStrikeButton();
             } else {
-                // Manual entry fallback
                 _promptStrikeEdit(product);
             }
         }
     };
 
-    // Manual strike entry via prompt
+    // Manual strike entry modal
     window._promptStrikeEdit = function(product) {
         var current = product.strikePrice || '';
         var underlyings = (product.underlyings || []).join(', ');
         var subDate = product.subscriptionDate || product.addedDate || '?';
-
         var modal = document.getElementById('modal');
         modal.innerHTML = '<div class="modal-overlay" onclick="closeModal()"><div class="modal-content" onclick="event.stopPropagation()" style="max-width:450px">' +
             '<h2 class="modal-title">\ud83d\udccd Niveau Initial (Strike)</h2>' +
@@ -194,7 +177,7 @@
             '<div style="margin-bottom:8px"><strong>Produit:</strong> ' + (product.name || '?').substring(0, 50) + '</div>' +
             '<div style="margin-bottom:8px"><strong>Sous-jacent:</strong> ' + underlyings + '</div>' +
             '<div style="margin-bottom:8px"><strong>Date souscription:</strong> ' + subDate + '</div>' +
-            (product._strikePriceSource ? '<div style="margin-bottom:8px"><strong>Source actuelle:</strong> ' + product._strikePriceSource + ' (' + (product._strikePriceDate || '') + ')</div>' : '') +
+            (product._strikePriceSource ? '<div style="margin-bottom:8px"><strong>Source:</strong> ' + product._strikePriceSource + ' (' + (product._strikePriceDate || '') + ')</div>' : '') +
             '</div>' +
             '<div style="background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.15);border-radius:var(--radius-sm);padding:10px;margin-bottom:16px;font-size:11px;color:var(--text-muted)">' +
             '\ud83d\udca1 Le strike = prix du sous-jacent le jour de la souscription. Cherchez dans la brochure: "Niveau Initial", "Fixing Initial", ou "Cours Initial".' +
@@ -207,41 +190,31 @@
             '<button class="btn primary" onclick="_saveStrikeFromModal()">\ud83d\udcbe Enregistrer</button>' +
             '</div></div></div>';
         modal.classList.add('visible');
-
-        // Focus input
         setTimeout(function() { var inp = document.getElementById('strike-input'); if (inp) inp.focus(); }, 100);
     };
 
-    // Save strike from modal input
     window._saveStrikeFromModal = async function() {
         var p = app.state.currentProduct;
         if (!p) return;
         var val = parseFloat(document.getElementById('strike-input')?.value);
         if (!val || val <= 0) { showToast('Valeur invalide', 'error'); return; }
-
         p.strikePrice = Math.round(val * 100) / 100;
         p._strikePriceSource = 'manual';
         p._strikePriceDate = new Date().toISOString().split('T')[0];
-
         closeModal();
         await _saveStrikePrice(p);
         showToast('\u2705 Strike enregistr\u00e9: ' + p.strikePrice, 'success');
-
-        // Refresh button
         document.querySelectorAll('.btn-strike').forEach(function(b) { b.remove(); });
         _showStrikeButton();
     };
 
-    // Save strike to product file + portfolio
     window._saveStrikePrice = async function(product) {
         if (!product) return;
         try {
-            // Save to product file
             var bankId = product.bankId;
             if (bankId && typeof app._saveProductFile === 'function') {
                 await app._saveProductFile(bankId, product);
             }
-            // Save to portfolio
             var portfolio = app.state.portfolio || [];
             var pfProduct = portfolio.find(function(x) { return x.id === product.id; });
             if (pfProduct) {
@@ -252,32 +225,15 @@
                 await github.writeFile(CONFIG.DATA_PATH + '/portfolio.json', portfolio,
                     '[StructBoard] Strike: ' + product.strikePrice + ' for ' + (product.name || product.id).substring(0, 30));
             }
-        } catch(e) {
-            console.warn('[Strike] Save error:', e);
-        }
+        } catch(e) { console.warn('[Strike] Save error:', e); }
     };
 
-    // ═══ AUTO-INJECT BUTTON ON PRODUCT PAGE ═══
-    var _strikeUIInterval = setInterval(function() {
-        if (typeof app === 'undefined' || !app.state) return;
-        if (!app.state.currentProduct) return;
-        if (!document.querySelector('.section-header, [class*="grading"]')) return;
-        if (document.querySelector('.btn-strike')) return; // Already added
+    // ═══ AUTO-INJECT: poll for the anchor button ═══
+    setInterval(function() {
+        if (typeof app === 'undefined' || !app.state || !app.state.currentProduct) return;
+        if (document.querySelector('.btn-strike')) return;
         _showStrikeButton();
-    }, 500);
-    // Don't clear this interval — it needs to re-check when navigating between products
-    // But limit CPU impact
-    var _strikeUICount = 0;
-    var _origStrikeUI = _strikeUIInterval;
-    // After 60 seconds, slow down to every 2 seconds
-    setTimeout(function() {
-        clearInterval(_strikeUIInterval);
-        setInterval(function() {
-            if (!app.state.currentProduct) return;
-            if (document.querySelector('.btn-strike')) return;
-            _showStrikeButton();
-        }, 2000);
-    }, 60000);
+    }, 800);
 
-    console.log('[StructBoard] Strike Capture v1.1 \u2014 auto-capture + UI button + PDF extraction');
+    console.log('[StructBoard] Strike Capture v1.2 \u2014 robust button injection');
 })();
