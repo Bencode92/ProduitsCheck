@@ -1,5 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Main Application (V2 — Fixed product loading)
+// STRUCTBOARD — Main Application (V2.1 — structureType + V7 fields)
+// V2.1: handlePDFUpload copies structureType, participationRate,
+//        historicalSimulations, guarantorRating, mechanism from parser
 // ═══════════════════════════════════════════════════════════════
 
 class StructBoard {
@@ -15,11 +17,9 @@ class StructBoard {
   async init() {
     this.setState({ loading: true });
     try {
-      // Charger portfolio
       const portfolio = await github.readFile(`${CONFIG.DATA_PATH}/portfolio.json`);
       this.state.portfolio = portfolio || [];
 
-      // Charger propositions — LIRE LES FICHES COMPLÈTES, pas juste l'index
       const proposals = {};
       for (const bank of BANKS) {
         const bankData = await github.readFile(`${CONFIG.DATA_PATH}/banks/${bank.id}/index.json`);
@@ -27,13 +27,11 @@ class StructBoard {
           const fullProducts = [];
           for (const summary of bankData.products) {
             try {
-              // Charger la fiche complète depuis products/{id}.json
               const fullProduct = await github.readFile(`${CONFIG.DATA_PATH}/banks/${bank.id}/products/${summary.id}.json`);
               if (fullProduct && fullProduct.id) {
                 fullProducts.push(fullProduct);
               } else {
-                // Fallback: utiliser le résumé de l'index (pas idéal mais évite la perte)
-                console.warn(`Fiche complète introuvable pour ${summary.id}, utilisation du résumé`);
+                console.warn(`Fiche introuvable pour ${summary.id}, utilisation du résumé`);
                 fullProducts.push({ ...summary, bankId: bank.id });
               }
             } catch (e) {
@@ -45,7 +43,6 @@ class StructBoard {
         }
       }
 
-      // Charger CAT
       await catManager.load();
 
       this.setState({ proposals, loading: false, initialized: true });
@@ -91,8 +88,6 @@ class StructBoard {
     proposals[idx].status = status;
     proposals[idx].decision = status;
     proposals[idx].decisionReason = reason || null;
-
-    // Sauvegarder l'index ET la fiche complète
     await this._saveBankIndex(bankId);
     await this._saveProductFile(bankId, proposals[idx]);
     this.setState({ proposals: { ...this.state.proposals } });
@@ -100,13 +95,8 @@ class StructBoard {
 
   async removeProposal(bankId, productId) {
     const proposals = this.state.proposals[bankId]; if (!proposals) return;
-    // Retirer uniquement CE produit
     this.state.proposals[bankId] = proposals.filter(p => p.id !== productId);
-    // Si plus aucune proposition pour cette banque, supprimer l'entrée
-    if (this.state.proposals[bankId].length === 0) {
-      delete this.state.proposals[bankId];
-    }
-    // Mettre à jour l'index (sans le produit supprimé)
+    if (this.state.proposals[bankId].length === 0) delete this.state.proposals[bankId];
     await this._saveBankIndex(bankId);
     this.setState({ proposals: { ...this.state.proposals } });
     showToast('Proposition supprimée', 'success');
@@ -131,7 +121,30 @@ class StructBoard {
         earlyRedemption: parsed.earlyRedemption || {}, scenarios: parsed.scenarios || {},
         risks: parsed.risks || [], rawText: rawText.substring(0, 5000),
         aiParsed: parsed, aiSummary: summary, sourceFile: file.name,
+
+        // ═══ V2.1: NEW FIELDS from PDF parser V7 ═══
+        structureType: parsed.structureType || '',
+        participationRate: parsed.participationRate || null,
+        historicalSimulations: parsed.historicalSimulations || null,
+        guarantorRating: parsed.guarantorRating || null,
+        mechanism: parsed.mechanism || null,
+        nPairs: parsed.nPairs || null,
+        nUnderlyings: parsed.nUnderlyings || null,
       };
+
+      // V2.1: If structureType detected, log it
+      if (product.structureType) {
+        console.log('[handlePDFUpload] Detected structureType: ' + product.structureType);
+        showToast('Structure détectée: ' + (typeof getStructureTypeLabel === 'function' ? getStructureTypeLabel(product.structureType) : product.structureType), 'success');
+      }
+
+      // V2.1: If maturityYears not set, extract from maturity string
+      if (parsed.maturityYears) product.maturityYears = parsed.maturityYears;
+      else if (parsed.maturity) {
+        const ym = parsed.maturity.match(/(\d+)/);
+        if (ym) product.maturityYears = parseInt(ym[1]);
+      }
+
       this.setState({ loading: false }); return product;
     } catch (e) { this.setState({ loading: false }); showToast('Erreur: ' + e.message, 'error'); throw e; }
   }
@@ -164,21 +177,15 @@ class StructBoard {
       bankId,
       bankName: bankConfig?.name || bankId,
       lastUpdated: new Date().toISOString(),
-      // L'index ne contient que les RÉSUMÉS — les données complètes sont dans products/{id}.json
       products: proposals.map(p => ({
-        id: p.id,
-        name: p.name,
-        type: p.type,
-        status: p.status,
-        score: p.score?.score || null,
-        receivedDate: p.receivedDate,
+        id: p.id, name: p.name, type: p.type, status: p.status,
+        score: p.score?.score || null, receivedDate: p.receivedDate,
       })),
     };
     await github.writeFile(`${CONFIG.DATA_PATH}/banks/${bankId}/index.json`, index, `[StructBoard] Update ${bankConfig?.name || bankId}`);
   }
 
   async _saveProductFile(bankId, product) {
-    // Ne sauvegarder que si le produit a des données substantielles (pas un résumé d'index)
     if (!product || !product.id) return;
     await github.writeFile(`${CONFIG.DATA_PATH}/banks/${bankId}/products/${product.id}.json`, product, `[StructBoard] Save ${product.id}`);
   }
