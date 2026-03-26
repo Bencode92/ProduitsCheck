@@ -143,42 +143,42 @@
   },
   "grading": {
     "grade": "A",
-    "score": 77,
+    "score": 79,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 79,
-        "base": 89,
+        "score": 75,
+        "base": 85,
         "delta": -10,
-        "reasoning": "Rendement: base 89 → -10 = 79 (Volatilité extrême (38.85%) et drawdown historique de -30.84% réduisent fortement la probabilité de toucher les coupons malgré la barrière à 50%) | Coupon 18% (9×2), barrière 50%"
+        "reasoning": "Rendement: base 85 → -10 = 75 (Volatilité extrême de 38.85% et drawdown historique de -30.84% réduisent significativement la probabilité de toucher les coupons malgré la barrière à 50%) | Coupon 18% (9×2), barrière 50%"
       },
       "underlyingQuality": {
-        "score": 54,
+        "score": 64,
         "base": 69,
-        "delta": -15,
-        "reasoning": "Qualité: base 69 → -15 = 54 (Indice sectoriel ultra-concentré sur les minières aurifères avec beta faible (0.53) mais volatilité destructrice, aucune diversification) [vol/DD 30%] | Worst: Indice Solactive GDX EUR AR 5% B:50"
+        "delta": -5,
+        "reasoning": "Qualité: base 69 → -5 = 64 (L'or minier reste très sensible aux taux et au dollar en régime neutral, avec un beta faible (0.53) qui reflète sa décorrélation mais aussi sa volatilité idiosyncratique) [vol/DD 30%] | Worst: Indice Solactive GDX EUR AR 5% B:50"
       },
       "portfolioFit": {
-        "score": 75,
+        "score": 80,
         "base": 80,
-        "delta": -5,
-        "reasoning": "Fit: base 80 → -5 = 75 (Exposition mono-sectorielle aux mines d'or inadaptée pour un portefeuille diversifié, convient uniquement aux spéculateurs sur l'or)"
+        "delta": 0,
+        "reasoning": "Fit: base 80"
       },
       "riskPremium": {
-        "score": 99,
-        "base": 99,
+        "score": 98,
+        "base": 98,
         "delta": 0,
-        "reasoning": "Prime: base 99 | 18% vs CAT 2.5% (spread 15.5%)"
+        "reasoning": "Prime: base 98 | 18% vs CAT 2.5% (spread 15.5%)"
       }
     },
-    "verdict": "Produit hautement spéculatif offrant 18% annualisés sur un indice de minières aurifères avec volatilité destructrice de 38.85% et drawdown historique de -30.84%. La barrière à 50% sera régulièrement testée malgré le beta défensif de 0.53, car le secteur reste ultra-cyclique et dépendant du prix de l'or. En régime macro neutre, l'absence de catalyseur haussier pour l'or rend le profil rendement/risque défavorable pour un investisseur prudent.",
+    "verdict": "Produit très risqué sur un secteur volatil (vol 38.85%) offrant 18% annualisé grâce au décrément 5%. En régime macro neutral, les mines d'or restent imprévisibles avec des swings violents liés au dollar et aux taux réels. La barrière à 50% offre une marge mais le drawdown historique de -30.84% montre que le risque de perte en capital est réel. Convient uniquement aux investisseurs agressifs cherchant du rendement avec une forte tolérance au risque.",
     "keyRisks": [
-      "Volatilité extrême de 38.85% avec franchissement probable de la barrière 50%",
-      "Exposition mono-sectorielle aux minières d'or sans diversification",
-      "Sensibilité élevée aux taux réels et au dollar US"
+      "Volatilité extrême du secteur minier aurifère (38.85%) avec risque de drawdown sévère",
+      "Sensibilité élevée aux variations du dollar US et des taux réels en régime neutral",
+      "Décrément 5% amplifie les baisses en cas de correction du marché"
     ],
     "negotiationPoints": [],
     "scenarios": {
@@ -191,25 +191,25 @@
       "base": {
         "return_pct": 9,
         "return_eur": 27000,
-        "probability": 0.3,
+        "probability": 0.35,
         "duration_years": 3
       },
       "stress": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.35,
+        "probability": 0.3,
         "duration_years": 6
       },
       "worst": {
-        "return_pct": -40,
-        "return_eur": -40000,
+        "return_pct": -25,
+        "return_eur": -25000,
         "probability": 0.15,
         "duration_years": 6
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-25T17:02:34.340Z",
-      "durationMs": 19089,
+      "gradedAt": "2026-03-26T08:28:02.919Z",
+      "durationMs": 20456,
       "aiUsed": true,
       "version": "4.3",
       "productType": "standard",
@@ -226,12 +226,12 @@
       "expectedMaturity": 0,
       "maxMaturity": 0,
       "maxBeta": 0.53,
-      "baseScore": 85,
+      "baseScore": 83,
       "baseGrade": "A",
       "adjustments": {
         "p1": -10,
-        "p2": -15,
-        "p3": -5,
+        "p2": -5,
+        "p3": 0,
         "p4": 0
       },
       "stockData": [
@@ -239,8 +239,8 @@
           "name": "Indice Solactive GDX EUR AR 5%",
           "ticker": "GDX",
           "sector": "Index",
-          "perf_ytd": 1.12,
-          "perf_1y": 92.56,
+          "perf_ytd": 0.69,
+          "perf_1y": 91.74,
           "volatility_3y": 38.85,
           "max_drawdown_3y": -30.84
         }
