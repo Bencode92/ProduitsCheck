@@ -758,7 +758,32 @@
       }
     },
     "envelope": "cameleons",
-    "maturityYears": 10
+    "maturityYears": 10,
+    "strikePrice": 7.65,
+    "_strikePriceSource": "stock:BMPS",
+    "_strikePriceDate": "2026-03-26",
+    "_strikePriceAll": [
+      {
+        "underlying": "Banca Monte dei Paschi di Siena SpA",
+        "price": 7.649,
+        "source": "stock:BMPS"
+      },
+      {
+        "underlying": "Enel SpA",
+        "price": 9.295,
+        "source": "stock:ENEL"
+      },
+      {
+        "underlying": "UniCredit SpA",
+        "price": 62.39,
+        "source": "stock:UCG"
+      },
+      {
+        "underlying": "Veolia Environnement SA",
+        "price": 32.34,
+        "source": "stock:VIE"
+      }
+    ]
   },
   {
     "id": "sp_mmxib83f_9qosf",
