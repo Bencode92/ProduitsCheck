@@ -143,150 +143,6 @@
   "integrationNotes": "",
   "entity": "cameleons",
   "entityName": "Caméleons",
-  "grading": {
-    "grade": "C",
-    "score": 50,
-    "killCriteria": {
-      "triggered": false,
-      "reasons": []
-    },
-    "pillars": {
-      "adjustedReturn": {
-        "score": 27,
-        "base": 37,
-        "delta": -10,
-        "reasoning": "Rendement: base 37 → -10 = 27 (Panier très volatil (vol moyenne ~26%) avec 2 bancaires italiennes fragiles, distance barrière 40% insuffisante pour ce niveau de risque.) | Coupon 7%, barrière 60%"
-      },
-      "underlyingQuality": {
-        "score": 50,
-        "base": 65,
-        "delta": -15,
-        "reasoning": "Qualité: base 65 → -15 = 50 (Secteur financier évité en macro + BMPS qualité catastrophique (48) + UCG en chute -13.5% YTD, exposition bancaire italienne excessive.) [vol/DD 30%] | Worst: Veolia Environnement SA B:28"
-      },
-      "portfolioFit": {
-        "score": 70,
-        "base": 70,
-        "delta": 0,
-        "reasoning": "En portefeuille — neutre"
-      },
-      "riskPremium": {
-        "score": 77,
-        "base": 82,
-        "delta": -5,
-        "reasoning": "Prime: base 82 → -5 = 77 (Coupon 7% paraît généreux mais ne compense pas suffisamment le risque systémique bancaire italien concentré.) | 7% vs CAT 2.5% (spread 4.5%)"
-      }
-    },
-    "verdict": "Produit très risqué avec 40% d'exposition bancaire italienne (BMPS qualité 48, UCG en baisse). Novo Nordisk absent des données aggrave l'incertitude. Secteur financier évité en contexte macro actuel, volatilité élevée du panier (26% moyenne) vs barrière 60% inadéquate. Coupon 7% ne justifie pas ce niveau de risque concentré.",
-    "keyRisks": [
-      "Concentration bancaire italienne : 40% du panier sur 2 banques dont BMPS très fragile",
-      "Volatilité excessive : panier à 26% de vol moyenne, risque d'activation barrière élevé"
-    ],
-    "negotiationPoints": [],
-    "scenarios": {
-      "optimistic": {
-        "return_pct": 7,
-        "return_eur": 2100,
-        "probability": 0.15,
-        "duration_years": 1
-      },
-      "base": {
-        "return_pct": 3.5,
-        "return_eur": 3150,
-        "probability": 0.3,
-        "duration_years": 1.5
-      },
-      "stress": {
-        "return_pct": 0,
-        "return_eur": 0,
-        "probability": 0.35,
-        "duration_years": 1.5
-      },
-      "worst": {
-        "return_pct": -25,
-        "return_eur": -7500,
-        "probability": 0.2,
-        "duration_years": 1.5
-      }
-    },
-    "metadata": {
-      "gradedAt": "2026-03-25T12:36:22.977Z",
-      "durationMs": 12774,
-      "aiUsed": true,
-      "version": "4.3",
-      "productType": "standard",
-      "marketDataAvailable": true,
-      "catBenchmark": 2.5,
-      "catSource": "fallback-2026",
-      "couponAnnualized": 7,
-      "couponRaw": 7,
-      "couponMultiplier": 1,
-      "couponFrequency": "annuel",
-      "isInPortfolio": true,
-      "hasBarrier": true,
-      "barrierPct": 60,
-      "expectedMaturity": 0,
-      "maxMaturity": 0,
-      "maxBeta": 1.03,
-      "baseScore": 60,
-      "baseGrade": "B",
-      "adjustments": {
-        "p1": -10,
-        "p2": -15,
-        "p3": 0,
-        "p4": -5
-      },
-      "stockData": [
-        {
-          "name": "Banca Monte dei Paschi di Siena SpA",
-          "ticker": "BMPS",
-          "sector": "Finance",
-          "perf_ytd": -20.4,
-          "perf_1y": null,
-          "volatility_3y": 36.68,
-          "max_drawdown_3y": 25.51,
-          "buffett_score": null,
-          "quality_score": 48,
-          "buffett_grade": null
-        },
-        {
-          "name": "Enel SpA",
-          "ticker": "ENEL",
-          "sector": "Services publics",
-          "perf_ytd": 4.16,
-          "perf_1y": 27,
-          "volatility_3y": 18.95,
-          "max_drawdown_3y": 16.27,
-          "buffett_score": 30,
-          "quality_score": 49,
-          "buffett_grade": "D"
-        },
-        {
-          "name": "UniCredit SpA",
-          "ticker": "UCG",
-          "sector": "Finance",
-          "perf_ytd": -13.48,
-          "perf_1y": 11.2,
-          "volatility_3y": 30.09,
-          "max_drawdown_3y": 24.12,
-          "buffett_score": null,
-          "quality_score": 83,
-          "buffett_grade": null
-        },
-        {
-          "name": "Veolia Environnement SA",
-          "ticker": "VIE",
-          "sector": "Services publics",
-          "perf_ytd": 6.56,
-          "perf_1y": -1.34,
-          "volatility_3y": 19.19,
-          "max_drawdown_3y": 16.28,
-          "buffett_score": 28,
-          "quality_score": 62,
-          "buffett_grade": "D"
-        }
-      ]
-    }
-  },
   "envelope": "cameleons",
   "maturityYears": 10,
   "strikePrice": 7.65,
@@ -313,5 +169,157 @@
       "price": 32.34,
       "source": "stock:VIE"
     }
-  ]
+  ],
+  "grading": {
+    "grade": "C",
+    "score": 47,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 52,
+        "base": 57,
+        "delta": -5,
+        "reasoning": "Rendement: base 57 → -5 = 52 (Avec 4 banques sur 5 SJ et le secteur financier évité en régime neutral, la probabilité de toucher le coupon est réduite malgré la barrière à 60%) | Coupon 7%, protégé | Mat espérée: ~5a (max 10a, prob mat: 16%)"
+      },
+      "underlyingQuality": {
+        "score": 34,
+        "base": 44,
+        "delta": -10,
+        "reasoning": "Qualité: base 44 → -10 = 34 (Surpondération Finance (60% du panier) dans un secteur macro défavorable, avec des volatilités élevées (BMPS 37%, UCG 30%) amplifiant le risque systémique) [B/Q 35%] | Worst: Veolia Environnement SA B:28"
+      },
+      "portfolioFit": {
+        "score": 70,
+        "base": 70,
+        "delta": 0,
+        "reasoning": "En portefeuille — neutre"
+      },
+      "riskPremium": {
+        "score": 55,
+        "base": 55,
+        "delta": 0,
+        "reasoning": "Prime: base 55 | 7% vs CAT 2.5% (spread 4.5%)"
+      }
+    },
+    "verdict": "Ce produit présente un profil risque/rendement dégradé avec 60% d'exposition au secteur Finance, explicitement évité en régime macro neutral. La volatilité moyenne pondérée de 25% et les DD importants (BMPS -25.5%, UCG -24.1%) créent un risque élevé de non-paiement des coupons malgré la barrière à 60%. Le coupon de 7% ne compense pas suffisamment l'exposition concentrée à un secteur en difficulté, avec un score final de 37/100 justifiant une recommandation négative.",
+    "keyRisks": [
+      "Concentration sectorielle Finance (4/5 SJ) dans un environnement macro défavorable",
+      "Volatilité élevée du panier (moyenne 25%) augmentant le risque de franchissement temporaire"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 7,
+        "return_eur": 10500,
+        "probability": 0.2,
+        "duration_years": 5
+      },
+      "base": {
+        "return_pct": 3.5,
+        "return_eur": 5250,
+        "probability": 0.35,
+        "duration_years": 5
+      },
+      "stress": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.3,
+        "duration_years": 10
+      },
+      "worst": {
+        "return_pct": -15,
+        "return_eur": -4500,
+        "probability": 0.15,
+        "duration_years": 10
+      }
+    },
+    "metadata": {
+      "gradedAt": "2026-03-26T09:59:45.228Z",
+      "durationMs": 20957,
+      "aiUsed": true,
+      "version": "4.3",
+      "productType": "standard",
+      "marketDataAvailable": true,
+      "catBenchmark": 2.5,
+      "catSource": "fallback-2026",
+      "couponAnnualized": 7,
+      "couponRaw": 7,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": true,
+      "hasBarrier": false,
+      "barrierPct": 60,
+      "expectedMaturity": 5,
+      "maxMaturity": 10,
+      "probReachMaturity": 16,
+      "maxBeta": 1.03,
+      "baseScore": 52,
+      "baseGrade": "C",
+      "adjustments": {
+        "p1": -5,
+        "p2": -10,
+        "p3": 0,
+        "p4": 0
+      },
+      "stockData": [
+        {
+          "name": "Banca Monte dei Paschi di Siena SpA",
+          "ticker": "BMPS",
+          "sector": "Finance",
+          "perf_ytd": -16.39,
+          "perf_1y": null,
+          "volatility_3y": 37.14,
+          "max_drawdown_3y": 25.51,
+          "buffett_score": null,
+          "quality_score": 48,
+          "buffett_grade": null
+        },
+        {
+          "name": "Enel SpA",
+          "ticker": "ENEL",
+          "sector": "Services publics",
+          "perf_ytd": 5.17,
+          "perf_1y": 27.52,
+          "volatility_3y": 18.95,
+          "max_drawdown_3y": 16.27,
+          "buffett_score": 30,
+          "quality_score": 38,
+          "buffett_grade": "D"
+        },
+        {
+          "name": "Novo Nordisk A",
+          "ticker": "NOVO NORDISK A",
+          "sector": "Commodity",
+          "volatility_3y": 22.01,
+          "max_drawdown_3y": -18.52
+        },
+        {
+          "name": "UniCredit SpA",
+          "ticker": "UCG",
+          "sector": "Finance",
+          "perf_ytd": -12.15,
+          "perf_1y": 13.35,
+          "volatility_3y": 30.04,
+          "max_drawdown_3y": 24.12,
+          "buffett_score": null,
+          "quality_score": 83,
+          "buffett_grade": null
+        },
+        {
+          "name": "Veolia Environnement SA",
+          "ticker": "VIE",
+          "sector": "Services publics",
+          "perf_ytd": 8.82,
+          "perf_1y": 0.59,
+          "volatility_3y": 19.2,
+          "max_drawdown_3y": 16.28,
+          "buffett_score": 28,
+          "quality_score": 64,
+          "buffett_grade": "D"
+        }
+      ]
+    }
+  }
 }
