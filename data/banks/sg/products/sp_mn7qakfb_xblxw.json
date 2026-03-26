@@ -21,7 +21,7 @@
   "coupon": {
     "rate": 7,
     "type": "participation",
-    "frequency": null,
+    "frequency": "maturity",
     "trigger": null,
     "memory": false,
     "paymentTiming": "maturity"
@@ -29,7 +29,6 @@
   "capitalProtection": {
     "protected": true,
     "level": 100,
-    "barrier": null,
     "barrierType": null,
     "couponFloor": false
   },
@@ -38,7 +37,9 @@
     "type": null,
     "trigger": null,
     "frequency": null,
-    "startYear": null
+    "startYear": null,
+    "hasAutocall": false,
+    "enabled": false
   },
   "scenarios": {
     "favorable": "Performance relative moyenne 124%, remboursement 108,68%",
@@ -86,7 +87,7 @@
     "coupon": {
       "rate": 7,
       "type": "participation",
-      "frequency": null,
+      "frequency": "maturity",
       "trigger": null,
       "memory": false,
       "paymentTiming": "maturity"
@@ -95,7 +96,6 @@
     "capitalProtection": {
       "protected": true,
       "level": 100,
-      "barrier": null,
       "barrierType": null,
       "couponFloor": false
     },
@@ -104,7 +104,9 @@
       "type": null,
       "trigger": null,
       "frequency": null,
-      "startYear": null
+      "startYear": null,
+      "hasAutocall": false,
+      "enabled": false
     },
     "historicalSimulations": {
       "nSimulations": 3120,
@@ -196,5 +198,6 @@
       "redundancy": 8,
       "complementarity": 40
     }
-  }
+  },
+  "envelope": ""
 }
