@@ -1,8 +1,9 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Optimizer UI Patch v6
-// v5: clear source labels + entity breakdown
-// v6: FIX save — post-enrich _lastStructOptResult after save
-//     so dashboard has _savedAllocation, _extByCam, etc.
+// STRUCTBOARD — Optimizer UI Patch v7
+// v6: save enrichment + source column
+// v7: Add "Rdt structurés" row (PF only → PF + nouveaux)
+//     + Bond 12M arbitrage detail
+//     + clearer table structure
 // ═══════════════════════════════════════════════════════════════
 
 (function() {
@@ -18,6 +19,16 @@
             '<td style="padding:10px 8px;text-align:center;font-family:var(--mono);color:var(--text-muted);font-size:13px">' + before + '</td>' +
             '<td style="padding:10px 8px;text-align:center;font-family:var(--mono);font-weight:700;color:var(--text-bright);font-size:13px">' + after + '</td>' +
             '<td style="padding:10px 8px;text-align:center;font-family:var(--mono);font-weight:700;color:' + cc + ';font-size:13px">' + diff + '</td></tr>';
+    }
+
+    // Big highlight row for key metrics
+    function _bigRow(label, before, after, diff, diffColor) {
+        var cc = diffColor === 'green' ? 'var(--green)' : diffColor === 'red' ? 'var(--red)' : 'var(--text-dim)';
+        return '<tr style="border-bottom:2px solid var(--border);background:rgba(6,214,160,0.04)">' +
+            '<td style="padding:12px 16px;font-weight:700;color:var(--text-bright);font-size:14px">' + label + '</td>' +
+            '<td style="padding:12px 8px;text-align:center;font-family:var(--mono);color:var(--text-muted);font-size:15px;font-weight:600">' + before + '</td>' +
+            '<td style="padding:12px 8px;text-align:center;font-family:var(--mono);font-weight:800;color:var(--green);font-size:15px">' + after + '</td>' +
+            '<td style="padding:12px 8px;text-align:center;font-family:var(--mono);font-weight:800;color:' + cc + ';font-size:15px">' + diff + '</td></tr>';
     }
 
     function _entityLabel(entity) {
@@ -39,14 +50,12 @@
         return '<span style="font-size:9px;color:var(--text-dim)">\u2014</span>';
     }
 
-    // ═══ FIX v6: Override save to POST-ENRICH _lastStructOptResult ═══
+    // ═══ SAVE ENRICHMENT ═══
     function _tryOverrideSave() {
         if (typeof saveStructOptimizerResult !== 'function') return false;
         var _origSave = saveStructOptimizerResult;
         saveStructOptimizerResult = async function(summary, analysis) {
-            // Call original save first
             await _origSave(summary, analysis);
-            // POST-ENRICH: add our fields directly to _lastStructOptResult
             if (typeof _lastStructOptResult !== 'undefined' && _lastStructOptResult) {
                 _lastStructOptResult._savedAllocation = (analysis.allocationPlan || []).map(function(a) {
                     return {
@@ -56,8 +65,7 @@
                         catReturn: a.catReturn, excessVsCat: a.excessVsCat,
                         recommendation: a.recommendation, reason: a.reason, bankName: a.bankName,
                         probCoupon: a.probCoupon || null,
-                        _pool: a._pool || null,
-                        _poolLabel: a._poolLabel || null,
+                        _pool: a._pool || null, _poolLabel: a._poolLabel || null,
                         _sourceEntity: a._sourceEntity || null,
                     };
                 });
@@ -67,7 +75,6 @@
                 _lastStructOptResult._savedExtLiq = analysis._externalLiquidity || 0;
                 _lastStructOptResult._savedExtByCam = analysis._extByCam || 0;
                 _lastStructOptResult._savedExtCameleons = analysis._extCameleons || 0;
-                console.log('[OptimizerUI] v6 save enriched: entity=' + _lastStructOptResult._savedEntity + ' struct=' + _lastStructOptResult._savedStructLiq + ' extBC=' + _lastStructOptResult._savedExtByCam + ' extCM=' + _lastStructOptResult._savedExtCameleons);
             }
         };
         return true;
@@ -81,22 +88,23 @@
         var catRate = a.catBenchmark || 2.5;
         var liqReturn = Math.round(liqTotal * catRate / 100);
 
-        var beforeReturn = pfReturn + liqReturn;
-        var beforeTotal = pfInvested + liqTotal;
-        var beforeYield = beforeTotal > 0 ? (beforeReturn / beforeTotal * 100) : 0;
-
         var deployedAmount = a.deployedAmount || 0;
         var deployedReturn = a.deployedReturn || 0;
         var remainCash = a.remainingCash || 0;
         var remainCashReturn = Math.round(remainCash * catRate / 100);
 
         var afterInvested = pfInvested + deployedAmount;
-        var afterReturn = pfReturn + deployedReturn + remainCashReturn;
-        var afterTotal = pfInvested + deployedAmount + remainCash;
-        var afterYield = afterTotal > 0 ? (afterReturn / afterTotal * 100) : 0;
+        // Rendement structurés = PF existant + nouveaux produits (pas le cash)
+        var structReturnBefore = pfReturn;
+        var structReturnAfter = pfReturn + deployedReturn;
 
-        var diffReturn = afterReturn - beforeReturn;
-        var diffYield = afterYield - beforeYield;
+        // Rendement total = structurés + CAT sur le cash restant
+        var totalReturnBefore = pfReturn + liqReturn;
+        var totalReturnAfter = pfReturn + deployedReturn + remainCashReturn;
+        var totalBefore = pfInvested + liqTotal;
+        var totalAfter = pfInvested + deployedAmount + remainCash;
+        var yieldBefore = totalBefore > 0 ? (totalReturnBefore / totalBefore * 100) : 0;
+        var yieldAfter = totalAfter > 0 ? (totalReturnAfter / totalAfter * 100) : 0;
 
         var liqStruct = a._structuredLiquidity || a._savedStructLiq || 0;
         var liqExternal = a._externalLiquidity || a._savedExtLiq || 0;
@@ -133,23 +141,44 @@
         html += '<th style="padding:12px 8px;text-align:center;color:var(--accent);font-weight:700;width:22%;font-size:11px;text-transform:uppercase">\u2192 Apr\u00e8s</th>';
         html += '<th style="padding:12px 8px;text-align:center;width:18%;font-size:11px;text-transform:uppercase;font-weight:600;color:var(--text-muted)">Diff.</th>';
         html += '</tr></thead><tbody>';
-        html += _row('\ud83c\udfe6 Investi structur\u00e9s', fmt(pfInvested) + '\u20ac', fmt(afterInvested) + '\u20ac', '+' + fmt(deployedAmount) + '\u20ac', deployedAmount > 0 ? 'green' : 'dim');
-        html += _row('\ud83d\udcb0 Liquidit\u00e9 restante', fmt(liqTotal) + '\u20ac', fmt(remainCash) + '\u20ac', '-' + fmt(liqTotal - remainCash) + '\u20ac', 'orange');
-        html += _row('\ud83d\udcc8 Rendement /an', '+' + fmt(beforeReturn) + '\u20ac', '+' + fmt(afterReturn) + '\u20ac', (diffReturn >= 0 ? '+' : '') + fmt(diffReturn) + '\u20ac', diffReturn >= 0 ? 'green' : 'red', true);
-        html += _row('\ud83d\udcca Rendement %', beforeYield.toFixed(2) + '%', afterYield.toFixed(2) + '%', (diffYield >= 0 ? '+' : '') + diffYield.toFixed(2) + '%', diffYield >= 0 ? 'green' : 'red', true);
 
-        // Arbitrage row with per-source breakdown
+        // Investi structurés
+        html += _row('\ud83c\udfe6 Investi structur\u00e9s', fmt(pfInvested) + '\u20ac', fmt(afterInvested) + '\u20ac', '+' + fmt(deployedAmount) + '\u20ac', deployedAmount > 0 ? 'green' : 'dim');
+
+        // Liquidité restante
+        html += _row('\ud83d\udcb0 Liquidit\u00e9 restante', fmt(liqTotal) + '\u20ac', fmt(remainCash) + '\u20ac', '-' + fmt(liqTotal - remainCash) + '\u20ac', 'orange');
+
+        // ★ NEW: Rendement structurés /an (PF only → PF + nouveaux, sans CAT)
+        html += _bigRow('\ud83d\udce6 Rdt structur\u00e9s /an', '+' + fmt(structReturnBefore) + '\u20ac', '+' + fmt(structReturnAfter) + '\u20ac', '+' + fmt(deployedReturn) + '\u20ac', 'green');
+
+        // Rendement total (includes CAT sur cash restant)
+        html += _row('\ud83d\udcc8 Rdt total /an (+ cash)', '+' + fmt(totalReturnBefore) + '\u20ac', '+' + fmt(totalReturnAfter) + '\u20ac', (totalReturnAfter - totalReturnBefore >= 0 ? '+' : '') + fmt(totalReturnAfter - totalReturnBefore) + '\u20ac', totalReturnAfter - totalReturnBefore >= 0 ? 'green' : 'red');
+
+        // Rendement %
+        html += _row('\ud83d\udcca Rendement %', yieldBefore.toFixed(2) + '%', yieldAfter.toFixed(2) + '%', (yieldAfter - yieldBefore >= 0 ? '+' : '') + (yieldAfter - yieldBefore).toFixed(2) + '%', yieldAfter - yieldBefore >= 0 ? 'green' : 'red', true);
+
+        // ★ ARBITRAGE ROW — shows Bond 12M and sources clearly
         html += '<tr style="border-top:2px solid var(--accent);background:rgba(59,130,246,0.06)">';
         html += '<td style="padding:12px 16px;font-weight:700;color:var(--accent);font-size:13px">\ud83d\udd04 Arbitrage</td>';
         html += '<td colspan="3" style="padding:12px 16px;text-align:center">';
         html += '<div style="font-size:18px;font-weight:800;color:var(--cyan);font-family:var(--mono)">' + fmt(deployedAmount) + '\u20ac \u00e0 d\u00e9ployer</div>';
-        var parts = [];
-        if (liqStruct > 0) { var us = Math.min(deployedAmount, liqStruct); if (us > 0) parts.push('<span style="color:#A855F7">\ud83e\udd8e ' + fmt(us) + '\u20ac struct.</span>'); }
-        var ue = Math.max(0, deployedAmount - Math.min(deployedAmount, liqStruct));
-        if (ue > 0 && extByCam > 0) parts.push('<span style="color:#3B82F6">\ud83c\udfe2 ' + fmt(Math.min(ue, extByCam)) + '\u20ac ByCam</span>');
-        if (ue > 0 && extCameleons > 0) parts.push('<span style="color:#A855F7">\ud83e\udd8e ' + fmt(Math.min(ue, extCameleons)) + '\u20ac ext.</span>');
-        if (ue > 0 && extByCam === 0 && extCameleons === 0 && liqExternal > 0) parts.push('<span style="color:var(--green)">\ud83d\udcb5 ' + fmt(ue) + '\u20ac ext.</span>');
-        if (parts.length > 0) html += '<div style="font-size:11px;color:var(--text-dim);margin-top:4px">' + parts.join(' + ') + '</div>';
+
+        // Detail: Bond 12M arbitraged + ByCam
+        var details = [];
+        if (liqStruct > 0) {
+            var usedStruct = Math.min(deployedAmount, liqStruct);
+            if (usedStruct > 0) details.push('<span style="color:#A855F7">\ud83e\udd8e Bond 12M arbitr\u00e9 \u2192 ' + fmt(usedStruct) + '\u20ac vers produits Swiss Life</span>');
+        }
+        var usedExt = Math.max(0, deployedAmount - Math.min(deployedAmount, liqStruct));
+        if (usedExt > 0 && extByCam > 0) details.push('<span style="color:#3B82F6">\ud83c\udfe2 ByCam \u2192 ' + fmt(Math.min(usedExt, extByCam)) + '\u20ac vers autres banques</span>');
+        if (usedExt > 0 && extCameleons > 0) details.push('<span style="color:#A855F7">\ud83e\udd8e Ext. Cam. \u2192 ' + fmt(Math.min(usedExt, extCameleons)) + '\u20ac</span>');
+        if (usedExt > 0 && extByCam === 0 && extCameleons === 0 && liqExternal > 0) details.push('<span style="color:var(--green)">\ud83d\udcb5 Externe \u2192 ' + fmt(usedExt) + '\u20ac</span>');
+
+        if (details.length > 0) {
+            html += '<div style="margin-top:6px;font-size:11px;text-align:left;display:inline-block">';
+            details.forEach(function(d) { html += '<div style="padding:2px 0">' + d + '</div>'; });
+            html += '</div>';
+        }
         html += '</td></tr></tbody></table></div>';
 
         // ═══ SUBSCRIPTION PLAN ═══
@@ -205,7 +234,7 @@
             var a = analysis;
             if (a.portfolioAnalysis && a.portfolioAnalysis.length > 0) {
                 html += '<div style="border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:16px">';
-                html += '<div style="padding:8px 14px;background:var(--bg-elevated);border-bottom:1px solid var(--border);display:flex;justify-content:space-between">';
+                html += '<div style="padding:8px 14px;background:var(--bg-elevated);display:flex;justify-content:space-between">';
                 html += '<span style="font-size:11px;font-weight:600;color:var(--text-dim)">\ud83d\udd12 Portefeuille</span>';
                 html += '<span style="font-size:10px;color:var(--text-dim)">' + fmt(r.pfInvested) + '\u20ac \u2192 +' + fmt(r.pfReturn) + '\u20ac/an</span></div>';
                 html += '<div style="padding:6px 14px;max-height:120px;overflow-y:auto">';
@@ -265,7 +294,6 @@
             html += '<div class="section-header"><div class="section-title"><span class="dot" style="background:var(--cyan)"></span>\ud83d\udcca Optimisation Structur\u00e9s</div>';
             html += '<div style="display:flex;gap:8px;align-items:center"><span style="font-size:10px;color:var(--text-dim)">' + ds + '</span>';
             html += '<button class="btn sm ai-glow" onclick="showStructuredOptimizer()">\ud83d\udd04</button></div></div>';
-
             html += result.html;
 
             if (result.nonAlloc.length > 0) {
@@ -304,5 +332,5 @@
         setTimeout(function() { clearInterval(_w); }, 12000);
     }
 
-    console.log('[StructBoard] Optimizer UI v6 \u2014 fixed save enrichment + source column');
+    console.log('[StructBoard] Optimizer UI v7 \u2014 Rdt structur\u00e9s row + Bond 12M arbitrage detail');
 })();
