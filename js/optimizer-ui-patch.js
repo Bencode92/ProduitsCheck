@@ -1,8 +1,9 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Optimizer UI Patch v4
-// v3: Dashboard shows table + plan + Claude
-// v4: Entity label visible + save enriched data + Source column on dashboard
-//     + structured liquidity priority indicator
+// STRUCTBOARD — Optimizer UI Patch v5
+// v4: Entity labels + enriched save + Source column on dashboard
+// v5: Clear source labels (🦎 Struct. / 🏢 ByCam / etc.)
+//     + entity breakdown in header
+//     + pool tracks entity origin, not just struct/external
 // ═══════════════════════════════════════════════════════════════
 
 (function() {
@@ -20,28 +21,46 @@
             '<td style="padding:10px 8px;text-align:center;font-family:var(--mono);font-weight:700;color:' + cc + ';font-size:13px">' + diff + '</td></tr>';
     }
 
-    function _entityBadge(entity) {
-        if (!entity) return '';
-        if (entity === 'bycam') return '<span style="display:inline-block;padding:1px 6px;border-radius:8px;font-size:8px;font-weight:600;background:rgba(59,130,246,0.15);color:#3B82F6;margin-left:4px">\ud83c\udfe2 BC</span>';
-        if (entity === 'cameleons') return '<span style="display:inline-block;padding:1px 6px;border-radius:8px;font-size:8px;font-weight:600;background:rgba(168,85,247,0.15);color:#A855F7;margin-left:4px">\ud83e\udd8e CM</span>';
-        return '';
-    }
-
     function _entityLabel(entity) {
         if (entity === 'bycam') return '\ud83c\udfe2 ByCam';
         if (entity === 'cameleons') return '\ud83e\udd8e Cam\u00e9leons';
         return 'Toutes entit\u00e9s';
     }
 
+    // ═══ SOURCE LABEL — shows WHERE the money comes from ═══
+    // Instead of just 🏦/💵, show entity + type
+    function _sourceLabel(p, entityMode) {
+        var pool = p._pool || '';
+        var srcEntity = p._sourceEntity || '';
+
+        // If we have explicit source entity
+        if (srcEntity === 'cameleons' && pool === 'structured') return '<span style="font-size:9px;color:#A855F7;font-weight:600">\ud83e\udd8e Struct.</span>';
+        if (srcEntity === 'cameleons' && pool === 'external') return '<span style="font-size:9px;color:#A855F7;font-weight:600">\ud83e\udd8e Ext.</span>';
+        if (srcEntity === 'bycam') return '<span style="font-size:9px;color:#3B82F6;font-weight:600">\ud83c\udfe2 ByCam</span>';
+
+        // Fallback: infer from pool type
+        if (pool === 'structured') return '<span style="font-size:9px;color:#A855F7;font-weight:600">\ud83e\udd8e Struct.</span>';
+        if (pool === 'external') {
+            // In single-entity mode, we know which entity
+            if (entityMode === 'bycam') return '<span style="font-size:9px;color:#3B82F6;font-weight:600">\ud83c\udfe2 ByCam</span>';
+            if (entityMode === 'cameleons') return '<span style="font-size:9px;color:#A855F7;font-weight:600">\ud83e\udd8e Cam.</span>';
+            return '<span style="font-size:9px;color:var(--green);font-weight:600">\ud83d\udcb5 Externe</span>';
+        }
+
+        // Last fallback
+        var poolLabel = p._poolLabel || '';
+        if (poolLabel) return '<span style="font-size:9px;color:var(--text-dim)">' + poolLabel + '</span>';
+        return '<span style="font-size:9px;color:var(--text-dim)">\u2014</span>';
+    }
+
     // ═══════════════════════════════════════════════════════════
-    // OVERRIDE saveStructOptimizerResult — save pool, entity, probCoupon
+    // OVERRIDE saveStructOptimizerResult — enrich with entity source
     // ═══════════════════════════════════════════════════════════
     function _tryOverrideSave() {
         if (typeof saveStructOptimizerResult !== 'function') return false;
 
         var _origSave = saveStructOptimizerResult;
         saveStructOptimizerResult = async function(summary, analysis) {
-            // Enrich allocation data before saving
             if (analysis.allocationPlan) {
                 analysis._savedAllocation = analysis.allocationPlan.map(function(a) {
                     return {
@@ -51,24 +70,25 @@
                         catReturn: a.catReturn, excessVsCat: a.excessVsCat,
                         recommendation: a.recommendation, reason: a.reason,
                         bankName: a.bankName,
-                        // NEW: enriched fields
                         probCoupon: a.probCoupon || null,
                         _pool: a._pool || null,
                         _poolLabel: a._poolLabel || null,
+                        _sourceEntity: a._sourceEntity || null,
                         _gradeMultiplier: a._gradeMultiplier || null,
                         entity: a.entity || null,
                     };
                 });
             }
-            // Save extra metadata
             analysis._savedEntity = analysis._entity || (window._optimizerOptions || {}).entity || 'all';
             analysis._savedEntityLabel = analysis._entityLabel || _entityLabel(analysis._savedEntity);
             analysis._savedStructLiq = analysis._structuredLiquidity || 0;
             analysis._savedExtLiq = analysis._externalLiquidity || 0;
+            // Save per-entity breakdown
+            analysis._savedExtByCam = analysis._extByCam || 0;
+            analysis._savedExtCameleons = analysis._extCameleons || 0;
 
             return _origSave(summary, analysis);
         };
-        console.log('[OptimizerUI] v4 save override OK — enriched allocation data');
         return true;
     }
 
@@ -101,7 +121,8 @@
 
         var liqStruct = a._structuredLiquidity || a._savedStructLiq || 0;
         var liqExternal = a._externalLiquidity || a._savedExtLiq || 0;
-        // Fallback: if neither is set, assume all liquidity is structured
+        var extByCam = a._extByCam || a._savedExtByCam || 0;
+        var extCameleons = a._extCameleons || a._savedExtCameleons || 0;
         if (liqStruct === 0 && liqExternal === 0 && liqTotal > 0) liqStruct = liqTotal;
 
         var allItems = a.allocationPlan || a._savedAllocation || a.allocation || [];
@@ -113,14 +134,15 @@
 
         var html = '';
 
-        // ═══ ENTITY HEADER ═══
-        html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding:8px 14px;background:var(--bg-elevated);border-radius:var(--radius-sm);border:1px solid var(--border)">';
-        html += '<span style="font-size:12px;font-weight:600;color:var(--text-bright)">' + entityLabelStr + '</span>';
-        html += '<span style="font-size:11px;color:var(--text-dim)">';
-        if (liqStruct > 0) html += '\ud83c\udfe6 ' + fmt(liqStruct) + '\u20ac struct.';
-        if (liqStruct > 0 && liqExternal > 0) html += ' + ';
-        if (liqExternal > 0) html += '\ud83d\udcb5 ' + fmt(liqExternal) + '\u20ac ext.';
-        html += '</span></div>';
+        // ═══ ENTITY + SOURCE HEADER ═══
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding:10px 14px;background:var(--bg-elevated);border-radius:var(--radius-sm);border:1px solid var(--border)">';
+        html += '<span style="font-size:13px;font-weight:700;color:var(--text-bright)">' + entityLabelStr + '</span>';
+        html += '<div style="display:flex;gap:12px;font-size:11px">';
+        if (liqStruct > 0) html += '<span style="color:#A855F7;font-weight:600">\ud83e\udd8e Struct. ' + fmt(liqStruct) + '\u20ac</span>';
+        if (extByCam > 0) html += '<span style="color:#3B82F6;font-weight:600">\ud83c\udfe2 ByCam ' + fmt(extByCam) + '\u20ac</span>';
+        if (extCameleons > 0) html += '<span style="color:#A855F7;font-weight:600">\ud83e\udd8e Ext. ' + fmt(extCameleons) + '\u20ac</span>';
+        if (liqExternal > 0 && extByCam === 0 && extCameleons === 0) html += '<span style="color:var(--green);font-weight:600">\ud83d\udcb5 Ext. ' + fmt(liqExternal) + '\u20ac</span>';
+        html += '</div></div>';
 
         // ═══ 1. BEFORE / AFTER TABLE ═══
         html += '<div style="border:2px solid var(--accent);border-radius:var(--radius);overflow:hidden;margin-bottom:16px">';
@@ -140,19 +162,22 @@
         html += _row('\ud83d\udcc8 Rendement /an', '+' + fmt(beforeReturn) + '\u20ac', '+' + fmt(afterReturn) + '\u20ac', (diffReturn >= 0 ? '+' : '') + fmt(diffReturn) + '\u20ac', diffReturn >= 0 ? 'green' : 'red', true);
         html += _row('\ud83d\udcca Rendement %', beforeYield.toFixed(2) + '%', afterYield.toFixed(2) + '%', (diffYield >= 0 ? '+' : '') + diffYield.toFixed(2) + '%', diffYield >= 0 ? 'green' : 'red', true);
 
-        // Arbitrage row
-        var arbStruct = Math.min(deployedAmount, liqStruct);
-        var arbExternal = Math.max(0, deployedAmount - arbStruct);
-        var arbDetail = '';
-        if (arbStruct > 0 && arbExternal > 0) arbDetail = '\ud83c\udfe6 ' + fmt(arbStruct) + '\u20ac struct. + \ud83d\udcb5 ' + fmt(arbExternal) + '\u20ac externe';
-        else if (arbStruct > 0) arbDetail = '\ud83c\udfe6 ' + fmt(arbStruct) + '\u20ac structur\u00e9s (prioritaire)';
-        else if (arbExternal > 0) arbDetail = '\ud83d\udcb5 ' + fmt(arbExternal) + '\u20ac externe';
-
+        // Arbitrage row — breakdown by source
         html += '<tr style="border-top:2px solid var(--accent);background:rgba(59,130,246,0.06)">';
         html += '<td style="padding:12px 16px;font-weight:700;color:var(--accent);font-size:13px">\ud83d\udd04 Arbitrage</td>';
         html += '<td colspan="3" style="padding:12px 16px;text-align:center">';
         html += '<div style="font-size:18px;font-weight:800;color:var(--cyan);font-family:var(--mono)">' + fmt(deployedAmount) + '\u20ac \u00e0 d\u00e9ployer</div>';
-        if (arbDetail) html += '<div style="font-size:11px;color:var(--text-dim);margin-top:4px">' + arbDetail + '</div>';
+        // Show per-source breakdown
+        var arbParts = [];
+        if (liqStruct > 0) {
+            var usedStruct = Math.min(deployedAmount, liqStruct);
+            if (usedStruct > 0) arbParts.push('<span style="color:#A855F7">\ud83e\udd8e ' + fmt(usedStruct) + '\u20ac struct.</span>');
+        }
+        var usedExternal = Math.max(0, deployedAmount - Math.min(deployedAmount, liqStruct));
+        if (usedExternal > 0 && extByCam > 0) arbParts.push('<span style="color:#3B82F6">\ud83c\udfe2 ' + fmt(Math.min(usedExternal, extByCam)) + '\u20ac ByCam</span>');
+        if (usedExternal > 0 && extCameleons > 0) arbParts.push('<span style="color:#A855F7">\ud83e\udd8e ' + fmt(Math.min(usedExternal, extCameleons)) + '\u20ac ext. Cam.</span>');
+        if (usedExternal > 0 && extByCam === 0 && extCameleons === 0 && liqExternal > 0) arbParts.push('<span style="color:var(--green)">\ud83d\udcb5 ' + fmt(usedExternal) + '\u20ac externe</span>');
+        if (arbParts.length > 0) html += '<div style="font-size:11px;color:var(--text-dim);margin-top:4px">' + arbParts.join(' + ') + '</div>';
         html += '</td></tr>';
         html += '</tbody></table></div>';
 
@@ -175,24 +200,22 @@
 
             subscriptions.forEach(function(p) {
                 var gc = { A:'#06D6A0', B:'#4ECDC4', C:'#FFB627', D:'#E85D04', F:'#EF233C' }[p.grade] || '#888';
-                var poolIcon = p._poolLabel || (p._pool === 'structured' ? '\ud83c\udfe6' : p._pool === 'external' ? '\ud83d\udcb5' : '\ud83d\udcb5');
+                var srcHtml = _sourceLabel(p, entityStr);
                 var probText = p.probCoupon ? ' (P=' + Math.round(p.probCoupon * 100) + '%)' : '';
-                var entBadge = _entityBadge(p.entity);
                 var expectedRet = p.expectedReturn || p.annualReturn || 0;
 
                 html += '<tr style="border-bottom:1px solid var(--border)">';
-                html += '<td style="padding:10px 12px"><strong style="color:var(--text-bright)">' + (p.name || '').substring(0, 30) + '</strong>' + entBadge;
+                html += '<td style="padding:10px 12px"><strong style="color:var(--text-bright)">' + (p.name || '').substring(0, 30) + '</strong>';
                 html += '<div style="font-size:9px;color:var(--text-dim)">' + (p.bankName || '') + probText + '</div></td>';
                 html += '<td style="padding:10px 6px;text-align:center"><span style="display:inline-block;width:26px;height:26px;line-height:26px;text-align:center;border-radius:6px;background:' + gc + '22;color:' + gc + ';font-weight:700;font-size:13px">' + p.grade + '</span></td>';
                 html += '<td style="padding:10px 6px;text-align:center;font-family:var(--mono);font-weight:700;color:var(--green);font-size:13px">' + p.coupon + '%</td>';
                 html += '<td style="padding:10px 6px;text-align:right;font-family:var(--mono);font-weight:700;color:var(--cyan);font-size:13px">' + fmt(p.allocatedAmount) + '\u20ac</td>';
                 html += '<td style="padding:10px 6px;text-align:right;font-family:var(--mono);font-weight:600;color:var(--green)">+' + fmt(expectedRet) + '\u20ac</td>';
                 html += '<td style="padding:10px 6px;text-align:right;font-family:var(--mono);font-weight:600;color:' + ((p.excessVsCat || 0) >= 0 ? 'var(--green)' : 'var(--red)') + '">' + ((p.excessVsCat || 0) >= 0 ? '+' : '') + fmt(p.excessVsCat || 0) + '\u20ac</td>';
-                html += '<td style="padding:10px 6px;text-align:center;font-size:16px">' + poolIcon + '</td>';
+                html += '<td style="padding:10px 6px;text-align:center">' + srcHtml + '</td>';
                 html += '</tr>';
             });
 
-            // TOTAL row
             var totalExcess = subscriptions.reduce(function(s, p) { return s + (p.excessVsCat || 0); }, 0);
             html += '<tr style="border-top:2px solid var(--accent);background:var(--bg-elevated)">';
             html += '<td style="padding:10px 12px;font-weight:800;color:var(--text-bright);font-size:12px" colspan="3">TOTAL</td>';
@@ -203,7 +226,7 @@
             html += '</tbody></table></div></div>';
         }
 
-        return { html: html, subscriptions: subscriptions, nonAlloc: nonAlloc, pfInvested: pfInvested, pfReturn: pfReturn, entityStr: entityStr, entityLabelStr: entityLabelStr };
+        return { html: html, subscriptions: subscriptions, nonAlloc: nonAlloc, pfInvested: pfInvested, pfReturn: pfReturn, entityStr: entityStr };
     }
 
     // ═══════════════════════════════════════════════════════════
@@ -234,7 +257,7 @@
                 html += '</div></div>';
             }
 
-            // Non-allocated compact
+            // Non-allocated
             if (result.nonAlloc.length > 0) {
                 html += '<div style="border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:16px">';
                 html += '<div style="padding:8px 14px;background:var(--bg-elevated);border-bottom:1px solid var(--border)">';
@@ -250,19 +273,18 @@
                 html += '</div></div>';
             }
 
-            // Empty states
             var liqTotal = a.totalLiquidity || 0;
             if ((a.allocationPlan || []).length === 0 && liqTotal > 0) html += '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:12px">' + fmt(liqTotal) + '\u20ac disponibles mais aucune proposition grad\u00e9e.</div>';
             if (liqTotal === 0) html += '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:12px">Aucune liquidit\u00e9 d\u00e9tect\u00e9e.</div>';
 
             return html;
         };
-        console.log('[OptimizerUI] v4 modal override OK');
+        console.log('[OptimizerUI] v5 modal override OK');
         return true;
     }
 
     // ═══════════════════════════════════════════════════════════
-    // PART B: DASHBOARD WIDGET — full table + plan + entity + Claude
+    // PART B: DASHBOARD WIDGET
     // ═══════════════════════════════════════════════════════════
     function _tryOverrideDashboard() {
         if (typeof renderStructOptimizerDashboard !== 'function') return false;
@@ -273,7 +295,6 @@
             var dt = r.lastUpdated ? new Date(r.lastUpdated) : null;
             var ds = dt ? dt.toLocaleDateString('fr-FR') + ' ' + dt.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '';
 
-            // Rebuild analysis from saved result
             var analysis = {
                 totalPortfolioInvested: r.totalPortfolioInvested || 0,
                 totalPortfolioReturn: r.totalPortfolioReturn || 0,
@@ -286,14 +307,14 @@
                 remainingCash: r.remainingCash || 0,
                 _structuredLiquidity: r._savedStructLiq || r._structuredLiquidity || 0,
                 _externalLiquidity: r._savedExtLiq || r._externalLiquidity || 0,
+                _extByCam: r._savedExtByCam || r._extByCam || 0,
+                _extCameleons: r._savedExtCameleons || r._extCameleons || 0,
                 _entity: r._savedEntity || 'all',
                 _entityLabel: r._savedEntityLabel || _entityLabel(r._savedEntity || 'all'),
-                // Use enriched allocation if available, else fallback
                 allocationPlan: r._savedAllocation || r.allocation || []
             };
 
             var result = _buildTableHTML(analysis);
-            var entityLbl = result.entityLabelStr;
 
             var html = '<div class="section">';
             html += '<div class="section-header"><div class="section-title"><span class="dot" style="background:var(--cyan)"></span>\ud83d\udcca Optimisation Structur\u00e9s</div>';
@@ -302,10 +323,9 @@
             html += '<button class="btn sm ai-glow" onclick="showStructuredOptimizer()">\ud83d\udd04</button>';
             html += '</div></div>';
 
-            // Full table + plan
             html += result.html;
 
-            // Non-alloués compact
+            // Non-alloués
             if (result.nonAlloc.length > 0) {
                 html += '<div style="border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:16px">';
                 html += '<div style="padding:6px 14px;background:var(--bg-elevated);border-bottom:1px solid var(--border)">';
@@ -332,7 +352,7 @@
             html += '</div>';
             return html;
         };
-        console.log('[OptimizerUI] v4 dashboard override OK');
+        console.log('[OptimizerUI] v5 dashboard override OK');
         return true;
     }
 
@@ -340,17 +360,16 @@
     function _tryAll() {
         var a = _tryOverrideModal();
         var b = _tryOverrideDashboard();
-        var c = _tryOverrideSave();
-        return a && b; // save override is optional (may not exist yet at init)
+        _tryOverrideSave();
+        return a && b;
     }
     if (!_tryAll()) {
         var _w = setInterval(function() {
             _tryAll();
-            _tryOverrideSave(); // Keep retrying save override
             if (typeof renderStructOptimizationTable === 'function' && typeof renderStructOptimizerDashboard === 'function') clearInterval(_w);
         }, 100);
         setTimeout(function() { clearInterval(_w); }, 12000);
     }
 
-    console.log('[StructBoard] Optimizer UI v4 \u2014 entity + enriched save + source column on dashboard');
+    console.log('[StructBoard] Optimizer UI v5 \u2014 clear source labels + entity breakdown');
 })();
