@@ -212,19 +212,19 @@
         "score": 34,
         "base": 44,
         "delta": -10,
-        "reasoning": "Rendement: base 44 → -10 = 34 (Capital protégé mais 8 sous-jacents worst-of avec Tesla très volatil (vol 57.48%) et plusieurs titres en drawdown >30%, probabilité de toucher barrière très élevée) | Coupon 7%, protégé"
+        "reasoning": "Rendement: base 44 → -10 = 34 (Capital protégé mais coupon 7% fixe sur 3 ans seulement, sans barrière ni autocall, dans un contexte de volatilité élevée (Tesla 57%, NVDA 48%)) | Coupon 7%, protégé"
       },
       "underlyingQuality": {
         "score": 35,
         "base": 47,
         "delta": -12,
-        "reasoning": "Qualité: base 47 → -12 = 35 (Exposition massive aux secteurs évités (3 titres communication + 2 consumer discretionary sur 8) en régime neutral, avec Tesla maillon faible (ROE 4.93%, Quality 48)) [B/Q 35%] | Worst: Tesla B:54"
+        "reasoning": "Qualité: base 47 → -12 = 35 (Exposition massive au secteur communication (3/8 titres) explicitement évité en régime neutral, avec Tesla comme maillon faible (ROE 4.93%, marge 4.07%)) [B/Q 35%] | Worst: Tesla B:54"
       },
       "portfolioFit": {
         "score": 67,
         "base": 72,
         "delta": -5,
-        "reasoning": "Fit: base 72 → -5 = 67 (Surpondération tech/communication inadaptée au contexte macro actuel favorisant energy, concentration excessive GAFAM)"
+        "reasoning": "Fit: base 72 → -5 = 67 (Surexposition tech/communication (6/8 titres) peu diversifiée pour un portefeuille équilibré, aucune exposition aux secteurs favorisés (energy))"
       },
       "riskPremium": {
         "score": 61,
@@ -233,41 +233,41 @@
         "reasoning": "Prime: base 61 | 7% vs CAT 2.5% (spread 4.5%)"
       }
     },
-    "verdict": "Produit mal adapté au contexte macro avec 62.5% des sous-jacents dans des secteurs évités (communication/consumer discretionary). Le worst-of sur 8 titres incluant Tesla (vol 57.48%, beta 1.62) rend le coupon de 7% très incertain malgré la protection du capital. La concentration GAFAM offre peu de diversification sectorielle dans un régime neutral favorisant l'énergie.",
+    "verdict": "Ce produit offre une protection du capital mais avec un rendement fixe de 7% annualisé limité à 3 ans, soit 21% maximum. L'exposition est dangereusement concentrée sur des secteurs évités (communication 37.5%, tech 37.5%) avec Tesla comme point faible majeur (volatilité 57.48%, ROE 4.93%). Dans un contexte macro neutre favorisant l'énergie, cette allocation sectorielle est inadaptée et le rendement insuffisant pour compenser le coût d'opportunité sur 3 ans.",
     "keyRisks": [
-      "Exposition concentrée aux secteurs évités par le marché (5/8 titres)",
-      "Tesla maillon faible avec volatilité extrême pouvant bloquer les coupons"
+      "Rendement plafonné à 21% sur 3 ans vs potentiel haussier des sous-jacents",
+      "Surexposition aux secteurs évités (75% tech/communication) dans le régime macro actuel"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 7,
+        "return_pct": 21,
         "return_eur": 21000,
-        "probability": 0.2,
+        "probability": 0.95,
         "duration_years": 3
       },
       "base": {
-        "return_pct": 2.5,
-        "return_eur": 7500,
-        "probability": 0.35,
+        "return_pct": 21,
+        "return_eur": 21000,
+        "probability": 0.95,
         "duration_years": 3
       },
       "stress": {
-        "return_pct": 0,
-        "return_eur": 0,
-        "probability": 0.3,
+        "return_pct": 21,
+        "return_eur": 21000,
+        "probability": 0.95,
         "duration_years": 3
       },
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.15,
+        "probability": 0.05,
         "duration_years": 3
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-26T17:16:38.882Z",
-      "durationMs": 20623,
+      "gradedAt": "2026-03-26T21:25:13.439Z",
+      "durationMs": 22813,
       "aiUsed": true,
       "version": "4.3",
       "productType": "standard",
