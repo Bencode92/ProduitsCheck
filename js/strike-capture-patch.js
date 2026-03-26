@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Strike Price Auto-Capture v2.0
-// v2.0: Multi-asset support — one strike per underlying
+// STRUCTBOARD — Strike Price Auto-Capture v2.1
+// v2.1: Twelve Data API for HISTORICAL prices at subscription date
 // ═══════════════════════════════════════════════════════════════
 
 (function() {
@@ -16,64 +16,97 @@
         return s;
     }
 
-    // ═══ SEARCH PRICE FOR ONE UNDERLYING ═══
-    async function _findPriceForUnderlying(uj, marketData) {
+    // ═══ FIND TICKER FOR AN UNDERLYING ═══
+    function _findTickerForUnderlying(uj, marketData) {
         var ujClean = _cleanName(uj);
         var ujWords = ujClean.split(' ').filter(function(w) { return w.length >= 2; });
-        var price = null, source = null, ticker = null;
+        if (!marketData || !marketData.stocks) return null;
 
-        if (marketData.stocks) {
-            var best = null;
-            for (var t in marketData.stocks) {
-                var s = marketData.stocks[t];
-                var nc = _cleanName(s.name || '');
-                var nac = _cleanName(s.name_api || '');
-                var tl = t.toLowerCase();
-                for (var w = 0; w < ujWords.length; w++) {
-                    if (ujWords[w] === tl && ujWords[w].length >= 2)
-                        if (s.price > 0 && (!best || best.score < 100))
-                            best = { price: s.price, source: 'stock', ticker: t, score: 100 };
-                }
-                if (nc && ujClean && (nc.indexOf(ujClean) >= 0 || ujClean.indexOf(nc) >= 0))
-                    if (s.price > 0 && (!best || best.score < 90))
-                        best = { price: s.price, source: 'stock', ticker: t, score: 90 };
-                if (nac && ujClean && (nac.indexOf(ujClean) >= 0 || ujClean.indexOf(nac) >= 0))
-                    if (s.price > 0 && (!best || best.score < 85))
-                        best = { price: s.price, source: 'stock', ticker: t, score: 85 };
-                if (ujWords.length >= 2) {
-                    var mc = 0, ft = nc + ' ' + nac + ' ' + tl;
-                    for (var ww = 0; ww < ujWords.length; ww++) if (ft.indexOf(ujWords[ww]) >= 0) mc++;
-                    if (mc >= 2 && mc / ujWords.length >= 0.5) {
-                        var ws = Math.round(mc / ujWords.length * 80);
-                        if (s.price > 0 && (!best || best.score < ws))
-                            best = { price: s.price, source: 'stock', ticker: t, score: ws };
-                    }
+        var best = null;
+        for (var ticker in marketData.stocks) {
+            var stock = marketData.stocks[ticker];
+            var nc = _cleanName(stock.name || '');
+            var nac = _cleanName(stock.name_api || '');
+            var tl = ticker.toLowerCase();
+            for (var w = 0; w < ujWords.length; w++) {
+                if (ujWords[w] === tl && ujWords[w].length >= 2)
+                    if (stock.price > 0 && (!best || best.score < 100))
+                        best = { ticker: ticker, price: stock.price, score: 100 };
+            }
+            if (nc && ujClean && (nc.indexOf(ujClean) >= 0 || ujClean.indexOf(nc) >= 0))
+                if (stock.price > 0 && (!best || best.score < 90))
+                    best = { ticker: ticker, price: stock.price, score: 90 };
+            if (nac && ujClean && (nac.indexOf(ujClean) >= 0 || ujClean.indexOf(nac) >= 0))
+                if (stock.price > 0 && (!best || best.score < 85))
+                    best = { ticker: ticker, price: stock.price, score: 85 };
+            if (ujWords.length >= 2) {
+                var mc = 0, ft = nc + ' ' + nac + ' ' + tl;
+                for (var ww = 0; ww < ujWords.length; ww++) if (ft.indexOf(ujWords[ww]) >= 0) mc++;
+                if (mc >= 2 && mc / ujWords.length >= 0.5) {
+                    var ws = Math.round(mc / ujWords.length * 80);
+                    if (stock.price > 0 && (!best || best.score < ws))
+                        best = { ticker: ticker, price: stock.price, score: ws };
                 }
             }
-            if (best) { price = best.price; source = best.source; ticker = best.ticker; }
         }
-
-        if (!price && marketData.underlyings_extra) {
-            try {
-                var umap = await github.readFile('data/underlying-map.json');
-                if (umap && umap.indices) {
-                    for (var key in umap.indices) {
-                        if (ujClean.indexOf(key) >= 0 || key.indexOf(ujClean) >= 0) {
-                            var pt = umap.indices[key].proxy;
-                            var ex = marketData.underlyings_extra[pt];
-                            if (ex && ex.last_close > 0) { price = ex.last_close; source = 'proxy'; ticker = pt; }
-                            break;
-                        }
-                    }
-                }
-            } catch(e) {}
-        }
-
-        return price ? { underlying: uj, price: Math.round(price * 100) / 100, source: source, ticker: ticker, found: true }
-                      : { underlying: uj, price: null, source: null, ticker: null, found: false };
+        return best;
     }
 
-    // ═══ CAPTURE ALL STRIKES ═══
+    // ═══ FETCH HISTORICAL PRICE FROM TWELVE DATA ═══
+    async function _fetchHistoricalPrice(ticker, dateStr) {
+        var apiKey = CONFIG.TWELVE_DATA_API_KEY;
+        if (!apiKey || !ticker || !dateStr) return null;
+
+        try {
+            var target = new Date(dateStr);
+            var start = new Date(target); start.setDate(start.getDate() - 5);
+            var end = new Date(target); end.setDate(end.getDate() + 5);
+            var startStr = start.toISOString().split('T')[0];
+            var endStr = end.toISOString().split('T')[0];
+
+            var url = 'https://api.twelvedata.com/time_series?symbol=' + ticker +
+                '&interval=1day&start_date=' + startStr + '&end_date=' + endStr +
+                '&outputsize=10&apikey=' + apiKey;
+
+            console.log('[Strike] Fetching historical: ' + ticker + ' @ ' + dateStr);
+            var response = await fetch(url);
+            var data = await response.json();
+
+            if (data.status === 'error') {
+                console.warn('[Strike] API error for ' + ticker + ': ' + (data.message || ''));
+                return null;
+            }
+
+            var values = data.values || [];
+            if (values.length === 0) return null;
+
+            // Find closest date to target
+            var targetTime = target.getTime();
+            var bestVal = null;
+            var bestDiff = 999999999;
+            for (var i = 0; i < values.length; i++) {
+                var vDate = new Date(values[i].datetime);
+                var diff = Math.abs(vDate.getTime() - targetTime);
+                if (diff < bestDiff) { bestDiff = diff; bestVal = values[i]; }
+            }
+
+            if (bestVal && parseFloat(bestVal.close) > 0) {
+                return {
+                    close: Math.round(parseFloat(bestVal.close) * 100) / 100,
+                    date: bestVal.datetime.split(' ')[0],
+                    open: Math.round(parseFloat(bestVal.open || 0) * 100) / 100,
+                    high: Math.round(parseFloat(bestVal.high || 0) * 100) / 100,
+                    low: Math.round(parseFloat(bestVal.low || 0) * 100) / 100,
+                };
+            }
+            return null;
+        } catch(e) {
+            console.warn('[Strike] Fetch error: ' + e.message);
+            return null;
+        }
+    }
+
+    // ═══ CAPTURE ALL STRIKES (HISTORICAL OR CURRENT) ═══
     window._captureAllStrikes = async function(product) {
         if (!product) return [];
         var underlyings = product.underlyings || [];
@@ -81,73 +114,130 @@
         var marketData = null;
         try { marketData = await github.readFile('data/market/index.json'); } catch(e) { return []; }
 
+        var subDate = product.subscriptionDate || product.addedDate || null;
+        var isHistorical = subDate && new Date(subDate) < new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+        var hasApiKey = !!(CONFIG.TWELVE_DATA_API_KEY);
         var results = [];
+
         for (var i = 0; i < underlyings.length; i++) {
-            var r = await _findPriceForUnderlying(underlyings[i], marketData);
-            // If we have existing strikes saved, use them as defaults
-            if (product.strikePrices && product.strikePrices[underlyings[i]]) {
-                r.savedStrike = product.strikePrices[underlyings[i]];
+            var uj = underlyings[i];
+            var match = _findTickerForUnderlying(uj, marketData);
+            var result = { underlying: uj, price: null, source: null, ticker: null, found: false, historical: false };
+
+            if (match) {
+                result.ticker = match.ticker;
+                result.currentPrice = match.price;
+
+                // If historical + API key available → fetch real historical price
+                if (isHistorical && hasApiKey) {
+                    showToast('Twelve Data: ' + match.ticker + ' @ ' + subDate + '...', 'info');
+                    var hist = await _fetchHistoricalPrice(match.ticker, subDate);
+                    if (hist) {
+                        result.price = hist.close;
+                        result.source = 'twelve_data';
+                        result.found = true;
+                        result.historical = true;
+                        result.histDate = hist.date;
+                        result.ohlc = hist;
+                        console.log('[Strike] Historical ' + match.ticker + ' @ ' + hist.date + ' = ' + hist.close);
+                    } else {
+                        // Fallback to current price
+                        result.price = match.price;
+                        result.source = 'stock_current';
+                        result.found = true;
+                        result.historical = false;
+                    }
+                } else {
+                    // Use current price (new product or no API key)
+                    result.price = match.price;
+                    result.source = isHistorical ? 'stock_current' : 'stock';
+                    result.found = true;
+                }
+            } else {
+                // Try proxy ETF
+                if (marketData.underlyings_extra) {
+                    try {
+                        var ujClean = _cleanName(uj);
+                        var umap = await github.readFile('data/underlying-map.json');
+                        if (umap && umap.indices) {
+                            for (var key in umap.indices) {
+                                if (ujClean.indexOf(key) >= 0 || key.indexOf(ujClean) >= 0) {
+                                    var proxyTicker = umap.indices[key].proxy;
+                                    // Try historical for proxy too
+                                    if (isHistorical && hasApiKey) {
+                                        var histProxy = await _fetchHistoricalPrice(proxyTicker, subDate);
+                                        if (histProxy) {
+                                            result.price = histProxy.close;
+                                            result.source = 'twelve_data_proxy';
+                                            result.ticker = proxyTicker;
+                                            result.found = true;
+                                            result.historical = true;
+                                            result.histDate = histProxy.date;
+                                        }
+                                    }
+                                    if (!result.found) {
+                                        var ex = marketData.underlyings_extra[proxyTicker];
+                                        if (ex && ex.last_close > 0) {
+                                            result.price = ex.last_close;
+                                            result.source = 'proxy_current';
+                                            result.ticker = proxyTicker;
+                                            result.found = true;
+                                        }
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                    } catch(e) {}
+                }
             }
-            results.push(r);
+
+            // Restore saved value if exists
+            if (product.strikePrices && product.strikePrices[uj]) {
+                result.savedStrike = product.strikePrices[uj];
+            }
+
+            results.push(result);
         }
         return results;
     };
 
     // ═══ HOOK INTO INTEGRATION ═══
-    var _strikeInterval = setInterval(function() {
+    var _si = setInterval(function() {
         if (typeof app === 'undefined' || !app.integrateProposal) return;
-        clearInterval(_strikeInterval);
-        var _origIntegrate = app.integrateProposal;
+        clearInterval(_si);
+        var _orig = app.integrateProposal;
         app.integrateProposal = async function(product) {
             if (product && (!product.strikePrice || product.strikePrice <= 0)) {
                 var results = await _captureAllStrikes(product);
-                var allFound = results.every(function(r) { return r.found; });
-                if (allFound && results.length > 0) {
-                    // All found → auto-save for new products
+                if (results.length > 0 && results.every(function(r) { return r.found; })) {
                     _saveStrikesFromResults(product, results);
-                    showToast('Strikes captur\u00e9s: ' + results.map(function(r) { return r.ticker + '=' + r.price; }).join(', '), 'success');
+                    showToast('Strikes captur\u00e9s', 'success');
                 }
             }
-            return _origIntegrate.call(app, product);
+            return _orig.call(app, product);
         };
     }, 300);
-    setTimeout(function() { clearInterval(_strikeInterval); }, 10000);
+    setTimeout(function() { clearInterval(_si); }, 10000);
 
-    // ═══ PDF EXTRACTION ═══
-    window._extractStrikeFromPDF = function(product) {
-        if (!product || !product.rawText) return null;
-        var patterns = [/niveau\s*initial\s*[:=]?\s*([\d\s,.]+)/i, /fixing\s*initial\s*[:=]?\s*([\d\s,.]+)/i,
-            /cours\s*initial\s*[:=]?\s*([\d\s,.]+)/i];
-        for (var i = 0; i < patterns.length; i++) {
-            var match = product.rawText.match(patterns[i]);
-            if (match && match[1]) {
-                var num = parseFloat(match[1].replace(/\s/g, '').replace(',', '.'));
-                if (num > 0 && num < 100000) return num;
-            }
-        }
-        return null;
-    };
-
-    // ═══ UI: STRIKE BUTTON ═══
+    // ═══ UI: BUTTON ═══
     window._showStrikeButton = function() {
         if (document.querySelector('.btn-strike')) return;
         var p = app && app.state && app.state.currentProduct;
         if (!p) return;
         var anchor = null;
-        var allButtons = document.querySelectorAll('button');
-        for (var i = 0; i < allButtons.length; i++) {
-            var txt = allButtons[i].textContent || '';
-            if (txt.indexOf('Liquidit') >= 0 || txt.indexOf('Actualiser') >= 0) anchor = allButtons[i];
-        }
+        document.querySelectorAll('button').forEach(function(b) {
+            var t = b.textContent || '';
+            if (t.indexOf('Liquidit') >= 0 || t.indexOf('Actualiser') >= 0) anchor = b;
+        });
         if (!anchor) return;
         var btn = document.createElement('button');
         btn.className = 'btn sm btn-strike';
         btn.style.cssText = 'margin-left:6px;white-space:nowrap;';
-        var hasStrikes = p.strikePrices && Object.keys(p.strikePrices).length > 0;
-        var hasSingle = p.strikePrice && p.strikePrice > 0;
-        if (hasStrikes || hasSingle) {
-            var label = hasStrikes ? Object.keys(p.strikePrices).length + ' strikes' : p.strikePrice;
-            btn.innerHTML = '\ud83d\udccd ' + label;
+        var has = (p.strikePrices && Object.keys(p.strikePrices).length > 0) || (p.strikePrice && p.strikePrice > 0);
+        if (has) {
+            var lbl = p.strikePrices ? Object.keys(p.strikePrices).length + ' strikes' : p.strikePrice;
+            btn.innerHTML = '\ud83d\udccd ' + lbl;
             btn.style.cssText += 'color:var(--green);border-color:var(--green);';
         } else {
             btn.innerHTML = '\ud83d\udccd Capturer Strike';
@@ -160,50 +250,70 @@
     // ═══ TRIGGER ═══
     window._triggerStrikeCapture = async function(product) {
         if (!product) return;
-        showToast('Recherche des prix initiaux...', 'info');
+        showToast('Recherche des prix historiques...', 'info');
+        product.strikePrice = null;
+        product._strikePriceAll = null;
+        product._strikePriceNotFound = null;
         var results = await _captureAllStrikes(product);
         _showStrikeModal(product, results);
     };
 
-    // ═══ MODAL — ONE FIELD PER UNDERLYING ═══
+    // ═══ MODAL ═══
     window._showStrikeModal = function(product, results) {
         var underlyings = product.underlyings || [];
         var subDate = product.subscriptionDate || product.addedDate || '?';
-        var isHistorical = product.subscriptionDate && new Date(product.subscriptionDate) < new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
         var isMulti = underlyings.length > 1;
 
         var rowsHtml = '';
         results.forEach(function(r, idx) {
-            var savedVal = (product.strikePrices && product.strikePrices[r.underlying]) || r.price || '';
+            var displayVal = r.savedStrike || r.price || '';
             var statusIcon = r.found ? '\u2705' : '\u274c';
-            var statusColor = r.found ? 'var(--green)' : 'var(--orange)';
-            var priceInfo = r.found ? r.price + ' <span style="color:var(--text-dim);font-size:10px">(' + r.source + ':' + r.ticker + ' prix actuel)</span>' : '<span style="color:var(--orange)">non trouv\u00e9 \u2014 entrer manuellement</span>';
+
+            var priceInfo = '';
+            if (r.found && r.historical) {
+                priceInfo = '<strong style="color:var(--green)">' + r.price + '</strong> <span style="color:var(--text-dim);font-size:10px">(close ' + r.histDate + ' via Twelve Data)</span>';
+            } else if (r.found) {
+                priceInfo = '<span style="color:var(--orange)">' + r.price + '</span> <span style="color:var(--text-dim);font-size:10px">(prix actuel ' + r.ticker + ')</span>';
+            } else {
+                priceInfo = '<span style="color:var(--orange)">non trouv\u00e9 \u2014 entrer manuellement</span>';
+            }
+
+            var borderColor = r.found && r.historical ? 'var(--green)' : r.found ? 'var(--orange)' : 'var(--red)';
 
             rowsHtml += '<div style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;margin-bottom:8px;background:var(--bg-elevated)">';
-            rowsHtml += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">';
+            rowsHtml += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:4px">';
             rowsHtml += '<span style="font-weight:600;color:var(--text-bright);font-size:12px">' + statusIcon + ' ' + r.underlying + '</span>';
-            rowsHtml += '<span style="font-size:10px;color:' + statusColor + '">' + priceInfo + '</span>';
+            rowsHtml += '<span style="font-size:10px">' + priceInfo + '</span>';
             rowsHtml += '</div>';
-            rowsHtml += '<input id="strike-' + idx + '" type="number" step="0.01" value="' + savedVal + '" ';
+            rowsHtml += '<input id="strike-' + idx + '" type="number" step="0.01" value="' + displayVal + '" ';
             rowsHtml += 'placeholder="Prix au ' + subDate + '" ';
-            rowsHtml += 'style="width:100%;padding:8px;font-size:14px;font-weight:700;background:var(--bg-card);border:1px solid ' + (r.found ? 'var(--border)' : 'var(--orange)') + ';border-radius:var(--radius-sm);color:var(--text-bright)">';
+            rowsHtml += 'style="width:100%;padding:8px;font-size:14px;font-weight:700;background:var(--bg-card);border:2px solid ' + borderColor + ';border-radius:var(--radius-sm);color:var(--text-bright)">';
             rowsHtml += '</div>';
         });
 
-        var historicalWarning = '';
-        if (isHistorical) {
-            historicalWarning = '<div style="background:rgba(255,166,0,0.08);border:1px solid rgba(255,166,0,0.2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:12px;font-size:11px;color:var(--orange)">' +
-                '\u26a0 <strong>Souscrit le ' + subDate + '</strong> \u2014 les prix affich\u00e9s sont actuels. Corrigez avec les prix de la brochure ("Niveau Initial") \u00e0 la date de souscription.</div>';
+        var histCount = results.filter(function(r) { return r.historical; }).length;
+        var currentCount = results.filter(function(r) { return r.found && !r.historical; }).length;
+        var missingCount = results.filter(function(r) { return !r.found; }).length;
+
+        var statusHtml = '';
+        if (histCount > 0) {
+            statusHtml += '<div style="background:rgba(6,214,160,0.08);border:1px solid rgba(6,214,160,0.2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:8px;font-size:11px;color:var(--green)">' +
+                '\u2705 <strong>' + histCount + ' prix historique(s)</strong> r\u00e9cup\u00e9r\u00e9(s) via Twelve Data \u00e0 la date de souscription</div>';
+        }
+        if (currentCount > 0) {
+            statusHtml += '<div style="background:rgba(255,166,0,0.08);border:1px solid rgba(255,166,0,0.2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:8px;font-size:11px;color:var(--orange)">' +
+                '\u26a0 <strong>' + currentCount + ' prix actuel(s)</strong> \u2014 v\u00e9rifiez dans la brochure ("Niveau Initial")</div>';
+        }
+        if (missingCount > 0) {
+            statusHtml += '<div style="background:rgba(239,35,60,0.08);border:1px solid rgba(239,35,60,0.2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:8px;font-size:11px;color:var(--red)">' +
+                '\u274c <strong>' + missingCount + ' non trouv\u00e9(s)</strong> \u2014 entrez la valeur manuellement depuis la brochure</div>';
         }
 
-        var explainHtml = '';
-        if (isMulti) {
-            explainHtml = '<div style="background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.15);border-radius:var(--radius-sm);padding:10px;margin-bottom:12px;font-size:11px;color:var(--text-muted)">' +
-                '\ud83d\udca1 <strong>Worst-of multi-actifs:</strong> chaque action a son propre niveau initial (strike). La barri\u00e8re se mesure sur le pire performeur par rapport \u00e0 son propre strike. Entrez le prix de chaque action au jour de la souscription.</div>';
-        } else {
-            explainHtml = '<div style="background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.15);border-radius:var(--radius-sm);padding:10px;margin-bottom:12px;font-size:11px;color:var(--text-muted)">' +
-                '\ud83d\udca1 Le strike = prix du sous-jacent le jour de la souscription. Cherchez "Niveau Initial" ou "Fixing Initial" dans la brochure.</div>';
-        }
+        var explainHtml = isMulti ?
+            '<div style="background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.15);border-radius:var(--radius-sm);padding:10px;margin-bottom:12px;font-size:11px;color:var(--text-muted)">' +
+            '\ud83d\udca1 <strong>Worst-of:</strong> chaque action a son propre niveau initial. La barri\u00e8re se mesure sur le pire performeur par rapport \u00e0 son propre strike.</div>' :
+            '<div style="background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.15);border-radius:var(--radius-sm);padding:10px;margin-bottom:12px;font-size:11px;color:var(--text-muted)">' +
+            '\ud83d\udca1 Le strike = prix du sous-jacent le jour de la souscription.</div>';
 
         var modal = document.getElementById('modal');
         modal.innerHTML = '<div class="modal-overlay" onclick="closeModal()"><div class="modal-content" onclick="event.stopPropagation()" style="max-width:520px;max-height:90vh;overflow-y:auto">' +
@@ -213,7 +323,7 @@
             '<div style="margin-bottom:4px"><strong>Date souscription:</strong> ' + subDate + '</div>' +
             (isMulti ? '<div style="margin-bottom:4px"><strong>Type:</strong> Worst-of ' + underlyings.length + ' actifs</div>' : '') +
             '</div>' +
-            historicalWarning +
+            statusHtml +
             explainHtml +
             '<div style="margin-bottom:12px">' + rowsHtml + '</div>' +
             '<div class="modal-actions">' +
@@ -221,8 +331,6 @@
             '<button class="btn primary" onclick="_saveStrikesFromModal(' + results.length + ')" style="font-size:14px;padding:10px 24px">\ud83d\udcbe Confirmer</button>' +
             '</div></div></div>';
         modal.classList.add('visible');
-
-        // Focus first empty or not-found input
         setTimeout(function() {
             for (var i = 0; i < results.length; i++) {
                 var inp = document.getElementById('strike-' + i);
@@ -237,31 +345,18 @@
         if (!p) return;
         var underlyings = p.underlyings || [];
         var strikePrices = {};
-        var allValid = true;
         var firstPrice = null;
-
         for (var i = 0; i < count; i++) {
             var val = parseFloat(document.getElementById('strike-' + i)?.value);
-            if (!val || val <= 0) {
-                // Allow empty for rate/commodity underlyings
-                continue;
-            }
+            if (!val || val <= 0) continue;
             if (!firstPrice) firstPrice = val;
             if (underlyings[i]) strikePrices[underlyings[i]] = Math.round(val * 100) / 100;
         }
-
-        if (Object.keys(strikePrices).length === 0) {
-            showToast('Au moins un strike requis', 'error');
-            return;
-        }
-
-        // Save individual strikes
+        if (Object.keys(strikePrices).length === 0) { showToast('Au moins un strike requis', 'error'); return; }
         p.strikePrices = strikePrices;
-        // Keep backward-compatible single strikePrice (first underlying)
         p.strikePrice = firstPrice;
-        p._strikePriceSource = 'manual';
+        p._strikePriceSource = 'confirmed';
         p._strikePriceDate = new Date().toISOString().split('T')[0];
-
         closeModal();
         await _saveStrikePrice(p);
         showToast('\u2705 ' + Object.keys(strikePrices).length + ' strike(s) confirm\u00e9(s)', 'success');
@@ -269,43 +364,38 @@
         _showStrikeButton();
     };
 
-    // ═══ HELPER: save results directly ═══
     function _saveStrikesFromResults(product, results) {
-        var strikePrices = {};
-        results.forEach(function(r) {
-            if (r.found && r.price) strikePrices[r.underlying] = r.price;
-        });
-        product.strikePrices = strikePrices;
+        var sp = {};
+        results.forEach(function(r) { if (r.found && r.price) sp[r.underlying] = r.price; });
+        product.strikePrices = sp;
         if (results[0] && results[0].price) product.strikePrice = results[0].price;
         product._strikePriceSource = 'auto';
         product._strikePriceDate = new Date().toISOString().split('T')[0];
     }
 
-    // ═══ SAVE TO FILES ═══
     window._saveStrikePrice = async function(product) {
         if (!product) return;
         try {
             var bankId = product.bankId;
             if (bankId && typeof app._saveProductFile === 'function') await app._saveProductFile(bankId, product);
             var portfolio = app.state.portfolio || [];
-            var pfProduct = portfolio.find(function(x) { return x.id === product.id; });
-            if (pfProduct) {
-                pfProduct.strikePrice = product.strikePrice;
-                pfProduct.strikePrices = product.strikePrices;
-                pfProduct._strikePriceSource = product._strikePriceSource;
-                pfProduct._strikePriceDate = product._strikePriceDate;
+            var pf = portfolio.find(function(x) { return x.id === product.id; });
+            if (pf) {
+                pf.strikePrice = product.strikePrice;
+                pf.strikePrices = product.strikePrices;
+                pf._strikePriceSource = product._strikePriceSource;
+                pf._strikePriceDate = product._strikePriceDate;
                 await github.writeFile(CONFIG.DATA_PATH + '/portfolio.json', portfolio,
                     '[StructBoard] Strikes for ' + (product.name || product.id).substring(0, 30));
             }
         } catch(e) { console.warn('[Strike] Save error:', e); }
     };
 
-    // ═══ AUTO-INJECT ═══
     setInterval(function() {
         if (typeof app === 'undefined' || !app.state || !app.state.currentProduct) return;
         if (document.querySelector('.btn-strike')) return;
         _showStrikeButton();
     }, 800);
 
-    console.log('[StructBoard] Strike Capture v2.0 \u2014 multi-asset strikes');
+    console.log('[StructBoard] Strike Capture v2.1 \u2014 Twelve Data historical prices');
 })();
