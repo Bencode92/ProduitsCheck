@@ -1,19 +1,56 @@
 {
-  "lastUpdated": "2026-03-26T15:31:15.242Z",
-  "summary": "## RÉSUMÉ ALLOCATION LIQUIDITÉ\n**177 000€ disponibles → 122 800€ à déployer → +17 035€/an**\n\n### SOUSCRIPTIONS RECOMMANDÉES ✅\n\n✅ **SL PHOENIX MEMOIRE FAST** → 33 200€ à 14% = +4 648€/an vs CAT (+3 657€)\n\n✅ **ATHENA SUR INDICE SOLACTI** → 31 600€ à 18% = +5 688€/an vs CAT (+4 744€)\n\n✅ **Autocall Euro Stoxx Banks** → 30 400€ à 19.4% = +5 898€/an vs CAT (+4 990€)\n\n✅ **EMTN Digitale WO LVMH** → 27 600€ à 6.15% = +1 697€/an vs CAT (+873€)\n\n### REJETS ❌\n\n❌ **Solution Court Terme Boost** — Grade C, seulement 7% de rendement\n❌ **NOTE TAUX FIXE CALLABLE B** — Grade C, rendement insuffisant à 4%\n❌ **Income Euro Selection** — Grade D critique, performance décevante\n\n### CONCLUSION\n**Allocation optimisée : +13 368€/an de surperformance vs CAT**\n\nStratégie équilibrée privilégiant les produits Grade A avec coupons attractifs (14-19.4%). Reste 54 200€ en cash pour opportunités futures. Performance globale : +17 035€/an vs +13 368€ en placement CAT traditionnel.\n\n**Gain net annuel supplémentaire : +3 667€**",
+  "lastUpdated": "2026-03-26T15:31:58.327Z",
+  "summary": "## RÉSUMÉ ALLOCATION\n**286 000€ disponibles → 122 800€ à déployer → +17 931€/an**\n\n### SOUSCRIPTIONS RECOMMANDÉES\n\n✅ **SL – PHOENIX MEMOIRE FAST** → 33 200€ à 14% = +4 648€/an vs CAT (+991€)\n\n✅ **ATHENA SUR INDICE SOLACTI** → 31 600€ à 18% = +5 688€/an vs CAT (+944€)\n\n✅ **Autocall Euro Stoxx Banks** → 30 400€ à 19.4% = +5 898€/an vs CAT (+908€)\n\n✅ **EMTN Digitale WO LVMH** → 27 600€ à 6.15% = +1 697€/an vs CAT (+824€)\n\n### REJETS\n\n❌ **Solution Court Terme Boost** — Grade C insuffisant, rendement 7% peu attractif\n\n❌ **NOTE TAUX FIXE CALLABLE** — Grade C, rendement 4% trop faible vs risque\n\n❌ **Income Euro Selection** — Grade D critique, sous-performance notable\n\n### CONCLUSION\n**Allocation totale finale :** 312 800€ générant **29 095€/an**\n**Surperformance vs CAT :** +9 341€/an (excédent de +19 754€/an)\n**Cash résiduel :** 163 200€ en attente d'opportunités Grade A/B\n\nStratégie privilégiant les produits Grade A (rendements 14-19.4%) pour maximiser l'alpha tout en conservant une liquidité substantielle pour futures opportunités.\n\n⚠ **Contraintes appliquées:**\n- SL – PHOENIX MEMOIRE FAST: limité émetteur swiss life (90000€ déjà)\n- ⚠ FGDR: SL – PHOENIX MEMOIRE FAST → 10000€ max\n- Autocall Euro Stoxx Banks: limité émetteur cic (100000€ déjà)\n- ⚠ FGDR: Autocall Euro Stoxx Banks → 0€ max\n- EMTN Digitale WO LVMH Cré: limité émetteur cic (100000€ déjà)\n- ⚠ FGDR: EMTN Digitale WO LVMH Cré → 0€ max\n",
   "version": "1.1",
-  "totalLiquidity": 177000,
-  "totalPortfolioInvested": 0,
-  "totalPortfolioReturn": 0,
+  "totalLiquidity": 286000,
+  "totalPortfolioInvested": 190000,
+  "totalPortfolioReturn": 12060,
   "catBenchmark": 2.9863356164383563,
   "deployedAmount": 122800,
   "deployedReturn": 17035,
   "deployedCatReturn": 3667,
   "deployedExcess": 13368,
-  "remainingCash": 54200,
-  "portfolioCount": 0,
+  "remainingCash": 163200,
+  "portfolioCount": 4,
   "subscribeCount": 4,
-  "portfolio": [],
+  "portfolio": [
+    {
+      "name": "SL - ATHENA PRIVILEGE ENI DECEMBRE 2025",
+      "grade": "C",
+      "amount": 30000,
+      "coupon": 5.7,
+      "annualReturn": 1710,
+      "catReturn": 896,
+      "excessVsCat": 814
+    },
+    {
+      "name": "Oxygène Objectif Mars 2026",
+      "grade": "C",
+      "amount": 30000,
+      "coupon": 7,
+      "annualReturn": 2100,
+      "catReturn": 896,
+      "excessVsCat": 1204
+    },
+    {
+      "name": "SL - PHOENIX MEMOIRE TRIMESTRIEL BNP JANVIER 2026",
+      "grade": "B",
+      "amount": 30000,
+      "coupon": 7.5,
+      "annualReturn": 2250,
+      "catReturn": 896,
+      "excessVsCat": 1354
+    },
+    {
+      "name": "TARN TEC 10 Décembre 2035 B",
+      "grade": "C",
+      "amount": 100000,
+      "coupon": 6,
+      "annualReturn": 6000,
+      "catReturn": 2986,
+      "excessVsCat": 3014
+    }
+  ],
   "allocation": [
     {
       "name": "SL – PHOENIX MEMOIRE FAST SEMESTRIEL ASML AVRIL 2026",
@@ -25,7 +62,7 @@
       "catReturn": 991,
       "excessVsCat": 3425,
       "recommendation": "SOUSCRIRE",
-      "reason": "💵 Grade A (83/100) ×1.11 — 33 200€ → +4 416€/an +3 425€ vs CAT"
+      "reason": "🏦 Grade A (83/100) ×1.11 — 33 200€ → +4 416€/an +3 425€ vs CAT"
     },
     {
       "name": "ATHENA SUR INDICE SOLACTIVE GOLD MINERS À DÉCRÉMENT 2",
