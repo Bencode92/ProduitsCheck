@@ -1,0 +1,182 @@
+{
+  "id": "sp_mn7pqqz0_5des1",
+  "name": "Solution Court Terme Boostée sur Panier d'Actions 3",
+  "bankId": "sg",
+  "type": "autre",
+  "underlyingType": "autre",
+  "underlyings": [
+    "NVIDIA",
+    "Meta Platforms",
+    "Netflix",
+    "Amazon.com",
+    "Alphabet (Ex Google)",
+    "Microsoft",
+    "Apple",
+    "Tesla"
+  ],
+  "currency": "EUR",
+  "maturity": "3 ans",
+  "maturityDate": null,
+  "strikeDate": null,
+  "coupon": {
+    "rate": 7,
+    "type": "participation",
+    "frequency": null,
+    "trigger": null,
+    "memory": false,
+    "paymentTiming": "maturity"
+  },
+  "capitalProtection": {
+    "protected": true,
+    "level": 100,
+    "barrier": null,
+    "barrierType": null,
+    "couponFloor": false
+  },
+  "earlyRedemption": {
+    "possible": false,
+    "type": null,
+    "trigger": null,
+    "frequency": null,
+    "startYear": null
+  },
+  "scenarios": {
+    "favorable": "Performance Relative Moyenne 124%, remboursement 108,68%",
+    "median": "Performance Relative Moyenne 31%, remboursement 102,17%",
+    "defavorable": "Performance Relative Moyenne faible, remboursement minimum 100%"
+  },
+  "risks": [
+    "Protection totale du capital uniquement à échéance",
+    "Risque de crédit Société Générale",
+    "Pas de dividendes",
+    "Prix de revente anticipée imprévisible",
+    "Rendement dépend des différences de performance entre actions"
+  ],
+  "rawText": "--- PAGE 1 ---\nSOLUTION COURT  TERME BOOSTÉE  SUR PANIER  D’ACTIONS  3\n--- PAGE 2 ---\nPOINTS   CLÉS     Le   sous - jacent   du   produit   est   composé   d'un   panier   de   16   paires  d’actions   des   entreprises   technologiques   américaines   (voir   la  composition   des   paires   sur   la   page   1 5 ) .     À   maturité :  ➢   On   calcule   la   Performance   de   chaque   action   du   panier .  ➢   Pour   chaque   paire   d’actions,   on   calcule   la   différence   de  performance   entre   l'action   ayant   la   meilleure   performance   et  l’action   ayant   la   pire   performance   (la   Performance   Relative) .  ➢   Par   la   suite,   on   calcule   la   Performance   Relative   Moyenne   sur  l’ensemble   des   16   paires   d’actions   comme   Moyenne  arithmétique   des   Performances   Relatives .  ➢   L'investisseur   reçoit   son   capital   initial   plus   une   participation   de  7 , 00 %   basée   sur   la   Moyenne   arithmétique   des   Performances  Relatives .     Un   remboursement   de   100 %   du   capital   investi   à   l'échéance  uniquement .  SOLUTION COURT TERME BOOSTÉE SUR PANIER D’ACTIONS  PRÉSENTATION   CONFIDENTIELLE   │   13  Format   Titre de créance de  droit français  Émetteur   SG   Issuer  Garant   Société Générale  (Moody’s : A1 ; S&P : A)*  Maturité   3   ans  Devise   EUR  Protection du  Capital   100% à maturité  Coupons   Non Capitalisés  Période  d’observation   Annuelle  Fréquence de  Paiement   À Maturité  Risques   Voir   page   1 4     CALCUL DE LA PERFORMANCE DE CHAQUE ACTION  –   À maturité, la Performance de chaque action est calculée comme :     CALCUL DE LA PERFORMANCE RELATIVE  –   Pour chaque paire d’actions (1 et 2), si l’on note 1 l’action ayant la meilleure performance, alors la Performance  Relative est calculée comme :  MÉCANISME   DU   PRODUIT  Performance de l’Action 1   –   Performance de l’Action 2  La performance (%) =   Prix Final de l’action   –   Prix   Initial de l’action  Prix   Initial de l’action  → La Performance Relative ne peut pas être négative  Les   données   chiffrées   utilisées   dans   ces   exemples   n'ont   qu'une   valeur   indicative   et   informative,   l'objectif   étant   de   décrire   le   mécanisme   du   produit .   Elles   ne  préjugent   en   rien   de   résultats   futurs   et   ne   sauraient   constituer   en   aucune   manière   une   offre   commerciale   de   la   part   de   Société   Générale .  •   REMBOURSEMENT FINAL  –   A maturité, l’investisseur reçoit   (1)   :  100% du Capital Initial + Participation de 7,00% x Performance Relative Moyenne  Avec un minimum de 100% du Capital Initial  SCÉNARIO 1   SCÉNARIO 2  •   La   Performance   de   l’Action   1   =   23 %  •   La   Performance   de   l’Action   2   =   5 %  → les Performances des deux Actions sont  positives  Performance Relative = 23%   -   5% = 18%  •   La   Performance   de   l’Action   1   =   23 %  •   La   Performance   de   l’Action   2   =   - 5 %  → la Performance de l’action 1 est positive,  la Performance de l’action 2 est négative  Performance Relative = 23%   -   ( - 5%) = 28%  *Source : Bloomberg,   1 3 /03/2026 .  (1) Hors frais et fiscalité applicable au cadre d’investissement  Sauf en cas de défaut de paiement ou faillite de Société  Générale.  x 100\n--- PAGE 3 ---\nSOLUTION COURT TERME   BOOSTÉE   SUR PANIER D’ACTIONS  PRÉSENTATION   CONFIDENTIELLE   │   14  ▪   Ce   produit   comporte   une   protection   totale   du   Capital .   Cette   protection   ne   vaut   qu’à   la   date   d’échéance .   La  valeur   du   produit   peut,   pendant   la   durée   de   vie   de   ce   dernier,   être   inférieure   au   montant   de   la   protection   du  Capital .   En   conséquence,   l’investisseur   peut   perdre   tout   ou   partie   du   montant   investi   si   le   produit   est   vendu   avant  la   date   d’échéance .  ▪   L’investisseur   supporte   un   risque   de   crédit   Société   Générale   en   tant   que   garant   de   l’émetteur   et   peut   donc   perdre  son   investissement   en   cas   de   défaut   de   l’émetteur   et   de   Société   Générale .  ▪   L’investisseur   ne   bénéficie   pas   des   dividendes   éventuellement   détachés   par   les   actions   composant   le   panier .  ▪   En   cas   de   revente   du   produit   par   l’investisseur   avant   la   date   d'échéance ,   il   est   impossible   de   mesurer   à   l’avance  le   gain   ou   la   perte   possible   de   son   investissement,   le   prix   appliqué   par   l’Emetteur   dépendant   alors   des   données   de  marché   du   jour   pouvant   entraîner   une   dégradation   du   prix   du   produit .  ▪   L'attention   de   l'investisseur   est   attirée   sur   le   fait   que   le   rendement   du   produit   est   indexé   à   la   moyenne   des  différences   entre   les   performances   des   actions   au   sein   des   paniers   et   non   pas   à   la   performance   du   secteur  Technologique",
+  "aiParsed": {
+    "name": "Solution Court Terme Boostée sur Panier d'Actions 3",
+    "type": "dispersion",
+    "structureType": "dispersion",
+    "emitter": "SG Issuer",
+    "guarantor": "Société Générale",
+    "guarantorRating": {
+      "moodys": "A1",
+      "sp": "A",
+      "fitch": null
+    },
+    "isin": null,
+    "underlyings": [
+      "NVIDIA",
+      "Meta Platforms",
+      "Netflix",
+      "Amazon.com",
+      "Alphabet (Ex Google)",
+      "Microsoft",
+      "Apple",
+      "Tesla"
+    ],
+    "underlyingType": "pairs",
+    "nUnderlyings": 8,
+    "nPairs": 16,
+    "currency": "EUR",
+    "maturity": "3 ans",
+    "maturityYears": 3,
+    "maturityDate": null,
+    "strikeDate": null,
+    "coupon": {
+      "rate": 7,
+      "type": "participation",
+      "frequency": null,
+      "trigger": null,
+      "memory": false,
+      "paymentTiming": "maturity"
+    },
+    "participationRate": 7,
+    "capitalProtection": {
+      "protected": true,
+      "level": 100,
+      "barrier": null,
+      "barrierType": null,
+      "couponFloor": false
+    },
+    "earlyRedemption": {
+      "possible": false,
+      "type": null,
+      "trigger": null,
+      "frequency": null,
+      "startYear": null
+    },
+    "historicalSimulations": {
+      "nSimulations": 3120,
+      "min": 2.83,
+      "max": 39.27,
+      "median": 11.47,
+      "mean": 13.1
+    },
+    "scenarios": {
+      "favorable": "Performance Relative Moyenne 124%, remboursement 108,68%",
+      "median": "Performance Relative Moyenne 31%, remboursement 102,17%",
+      "defavorable": "Performance Relative Moyenne faible, remboursement minimum 100%"
+    },
+    "risks": [
+      "Protection totale du capital uniquement à échéance",
+      "Risque de crédit Société Générale",
+      "Pas de dividendes",
+      "Prix de revente anticipée imprévisible",
+      "Rendement dépend des différences de performance entre actions"
+    ],
+    "mechanism": "Participation 7% sur moyenne des différences de performance entre 16 paires d'actions tech US",
+    "summary": "Produit 3 ans sur dispersion d'actions tech US, participation 7%, capital garanti à maturité uniquement"
+  },
+  "aiSummary": "## DESCRIPTION\n**Solution Court Terme Boostée sur Panier d'Actions 3**\n- Type : Produit structuré à dispersion\n- Émetteur : SG Issuer (Société Générale)\n- Maturité : 3 ans\n- Sous-jacents : 8 actions tech US (NVIDIA, Meta, Netflix, Amazon, Alphabet, Microsoft, Apple, Tesla)\n\n## MÉCANISME\nParticipation à 7% sur la moyenne des différences de performance entre 16 paires d'actions du panier. Le produit exploite les écarts de performance relatifs entre les différentes valeurs technologiques plutôt que leur performance absolue.\n\n## RENDEMENT\n- **Taux de participation** : 7%\n- **Paiement** : À l'échéance uniquement\n- **Simulations historiques** (3 120 simulations) :\n  - Minimum : 2,83%\n  - Maximum : 39,27%\n  - Médiane : 11,47%\n  - Moyenne : 13,1%\n\n## PROTECTION\n- **Capital protégé** : 100% à l'échéance\n- **Niveau de protection** : Totale\n- **Barrière** : Aucune\n- **Plancher coupon** : Non\n\n## REMBOURSEMENT ANTICIPÉ\n**Non possible** - Le produit ne prévoit aucun mécanisme de remboursement anticipé automatique.\n\n## SCÉNARIOS\n- **Favorable** : Performance relative moyenne 124% → Remboursement 108,68%\n- **Médian** : Performance relative moyenne 31% → Remboursement 102,17%\n- **Défavorable** : Performance relative faible → Remboursement minimum 100%\n\n## POINTS D'ATTENTION\n- Protection du capital uniquement garantie à l'échéance (3 ans)\n- Risque de crédit Société Générale\n- Absence de perception des dividendes\n- Prix de revente anticipée imprévisible\n- Rendement dépendant exclusivement des écarts de performance entre actions",
+  "sourceFile": "Produit_3_Solution_Court_Terme_Boostee.pdf",
+  "aiCategory": "capital-protege",
+  "aiCategoryLabel": "🛡️ Capital Protégé",
+  "aiCategoryColor": "#4CAF50",
+  "aiOpinion": "Produit offrant une protection totale du capital avec un potentiel de rendement de 7% par an sur un panier de mega-caps technologiques américaines de qualité. Le couple rendement/risque est attractif grâce à la protection, mais l'exposition concentrée sur le secteur tech et la dépendance à la participation peuvent limiter les gains en cas de forte hausse.",
+  "aiAnalyzedAt": "2026-03-26T16:55:10.313Z",
+  "status": "analyzing",
+  "receivedDate": "2026-03-26",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null,
+  "score": {
+    "score": 82,
+    "details": [
+      {
+        "type": "positive",
+        "icon": "✅",
+        "text": "Nouvelle contrepartie — diversification émetteur",
+        "impact": 15,
+        "category": "complementarity"
+      },
+      {
+        "type": "positive",
+        "icon": "📈",
+        "text": "Coupon (7%) > moyenne du book (4.1%)",
+        "impact": 15,
+        "category": "complementarity"
+      },
+      {
+        "type": "positive",
+        "icon": "🔀",
+        "text": "Faible corrélation moyenne (30%) — diversification",
+        "impact": 10,
+        "category": "complementarity"
+      },
+      {
+        "type": "warning",
+        "icon": "📦",
+        "text": "Même type que 1 produit(s) — 20% du book en \"Autre\"",
+        "impact": 8,
+        "category": "redundancy"
+      }
+    ],
+    "verdict": "🟢 Excellent candidat — forte complémentarité avec le book.",
+    "breakdown": {
+      "redundancy": 8,
+      "complementarity": 40
+    }
+  }
+}
