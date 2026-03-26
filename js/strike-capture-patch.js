@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Strike Price Auto-Capture v2.4
-// v2.4: Use resolved_symbol from stock-analysis-platform (fixes Italian cross-listings)
+// STRUCTBOARD — Strike Price Auto-Capture v2.5
+// v2.5: Twelve Data via Cloudflare Worker proxy (no API key in frontend)
 // ═══════════════════════════════════════════════════════════════
 
 (function() {
@@ -16,8 +16,6 @@
         return s;
     }
 
-    // ═══ FIND TICKER FOR AN UNDERLYING ═══
-    // Uses resolved_symbol from stock-analysis-platform (already validated against Twelve Data)
     function _findTickerForUnderlying(uj, marketData) {
         var ujClean = _cleanName(uj);
         var ujWords = ujClean.split(' ').filter(function(w) { return w.length >= 2; });
@@ -43,13 +41,9 @@
             }
 
             if (score > 0 && stock.price > 0 && (!best || best.score < score)) {
-                // v2.4: Use resolved_symbol directly — it's already the correct Twelve Data symbol
-                // Examples: BMPS → "MPI0:XETR", ENEL → "ENL:XETR", BNP → "BNP:XPAR"
-                var tdSymbol = stock.resolved_symbol || ticker;
-
                 best = {
                     ticker: ticker,
-                    tdSymbol: tdSymbol,
+                    tdSymbol: stock.resolved_symbol || ticker,
                     price: stock.price,
                     score: score
                 };
@@ -58,10 +52,10 @@
         return best;
     }
 
-    // ═══ FETCH HISTORICAL PRICE FROM TWELVE DATA ═══
+    // ═══ FETCH HISTORICAL PRICE VIA CLOUDFLARE PROXY ═══
     async function _fetchHistoricalPrice(tdSymbol, dateStr, fallbackTicker) {
-        var apiKey = CONFIG.TWELVE_DATA_API_KEY;
-        if (!apiKey || !tdSymbol || !dateStr) return null;
+        var proxyBase = CONFIG.TWELVE_DATA_PROXY;
+        if (!proxyBase || !tdSymbol || !dateStr) return null;
 
         var target = new Date(dateStr);
         var start = new Date(target); start.setDate(start.getDate() - 5);
@@ -75,11 +69,11 @@
         for (var s = 0; s < symbolsToTry.length; s++) {
             var symbol = symbolsToTry[s];
             try {
-                var url = 'https://api.twelvedata.com/time_series?symbol=' + encodeURIComponent(symbol) +
-                    '&interval=1day&start_date=' + startStr + '&end_date=' + endStr +
-                    '&outputsize=10&apikey=' + apiKey;
+                // Call via Cloudflare Worker proxy — API key added server-side
+                var url = proxyBase + '/time_series?symbol=' + encodeURIComponent(symbol) +
+                    '&interval=1day&start_date=' + startStr + '&end_date=' + endStr + '&outputsize=10';
 
-                console.log('[Strike] Fetching: ' + symbol + ' @ ' + dateStr);
+                console.log('[Strike] Proxy fetch: ' + symbol + ' @ ' + dateStr);
                 var response = await fetch(url);
                 var data = await response.json();
 
@@ -115,7 +109,6 @@
         return null;
     }
 
-    // ═══ CAPTURE ALL STRIKES ═══
     window._captureAllStrikes = async function(product) {
         if (!product) return [];
         var underlyings = product.underlyings || [];
@@ -125,7 +118,7 @@
 
         var subDate = product.subscriptionDate || product.addedDate || null;
         var isHistorical = subDate && new Date(subDate) < new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-        var hasApiKey = !!(CONFIG.TWELVE_DATA_API_KEY);
+        var hasProxy = !!(CONFIG.TWELVE_DATA_PROXY);
         var results = [];
 
         for (var i = 0; i < underlyings.length; i++) {
@@ -137,7 +130,7 @@
                 result.ticker = match.ticker;
                 result.currentPrice = match.price;
 
-                if (isHistorical && hasApiKey) {
+                if (isHistorical && hasProxy) {
                     showToast('Twelve Data: ' + match.tdSymbol + ' @ ' + subDate + '...', 'info');
                     var hist = await _fetchHistoricalPrice(match.tdSymbol, subDate, match.ticker);
                     if (hist) {
@@ -167,7 +160,7 @@
                             for (var key in umap.indices) {
                                 if (ujClean.indexOf(key) >= 0 || key.indexOf(ujClean) >= 0) {
                                     var proxyTicker = umap.indices[key].proxy;
-                                    if (isHistorical && hasApiKey) {
+                                    if (isHistorical && hasProxy) {
                                         var histProxy = await _fetchHistoricalPrice(proxyTicker, subDate);
                                         if (histProxy) {
                                             result.price = histProxy.close;
@@ -203,7 +196,6 @@
         return results;
     };
 
-    // ═══ HOOK INTO INTEGRATION ═══
     var _si = setInterval(function() {
         if (typeof app === 'undefined' || !app.integrateProposal) return;
         clearInterval(_si);
@@ -221,7 +213,6 @@
     }, 300);
     setTimeout(function() { clearInterval(_si); }, 10000);
 
-    // ═══ UI: BUTTON ═══
     window._showStrikeButton = function() {
         if (document.querySelector('.btn-strike')) return;
         var p = app && app.state && app.state.currentProduct;
@@ -258,7 +249,6 @@
         _showStrikeModal(product, results);
     };
 
-    // ═══ MODAL ═══
     window._showStrikeModal = function(product, results) {
         var underlyings = product.underlyings || [];
         var subDate = product.subscriptionDate || product.addedDate || '?';
@@ -388,5 +378,5 @@
         _showStrikeButton();
     }, 800);
 
-    console.log('[StructBoard] Strike Capture v2.4 \u2014 resolved_symbol from stock-analysis-platform');
+    console.log('[StructBoard] Strike Capture v2.5 \u2014 Cloudflare Worker proxy');
 })();
