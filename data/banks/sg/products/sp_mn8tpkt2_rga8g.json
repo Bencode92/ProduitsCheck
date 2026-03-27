@@ -178,84 +178,84 @@
   },
   "grading": {
     "grade": "C",
-    "score": 57,
+    "score": 51,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 64,
-        "base": 74,
+        "score": 38,
+        "base": 48,
         "delta": -10,
-        "reasoning": "Rendement: base 74 → -10 = 64 (Vol élevée 38.93% et drag décrément 4%/an réduisent fortement la probabilité d'autocall rapide malgré le seuil à 95%) | Coupon 9%, barrière 50% | Barr.coupon 60% | Mat espérée: ~2.6a (prob mat: 2%)"
+        "reasoning": "Rendement: base 48 → -10 = 38 (Autocall à 95% difficile avec vol 39% et drag 4%/an, probabilité réelle du coupon fortement dégradée par le décrément) | Coupon 9%, barrière 50% | Barr.coupon 60% | Mat espérée: ~2.6a (prob mat: 2%)"
       },
       "underlyingQuality": {
         "score": 52,
         "base": 37,
         "delta": 15,
-        "reasoning": "Qualité: base 37 → +15 = 52 (En stagflation, l'or et minières aurifères surperforment historiquement comme hedge inflation avec beta défensif 0.55) [vol/DD 30%] | Worst: Indice Solactive GDX EUR AR 5% B:35"
+        "reasoning": "Qualité: base 37 → +15 = 52 (Or = hedge stagflation optimal, beta 0.55 protecteur, secteur minier bénéficiaire direct inflation/USD faible) [vol/DD 30%] | Worst: Indice Solactive GDX EUR AR 5% B:35"
       },
       "portfolioFit": {
         "score": 85,
         "base": 80,
         "delta": 5,
-        "reasoning": "Fit: base 80 → +5 = 85 (Excellente diversification en régime stagflationniste, protection contre débasement monétaire et tensions géopolitiques)"
+        "reasoning": "Fit: base 80 → +5 = 85 (Exposition or particulièrement pertinente en régime stagflationniste, diversification excellente vs actions traditionnelles)"
       },
       "riskPremium": {
-        "score": 31,
-        "base": 46,
+        "score": 38,
+        "base": 53,
         "delta": -15,
-        "reasoning": "Prime: base 46 → -15 = 31 (Drag décrément 4%/an est extrêmement punitif vs dividendes réels 0.97%, détruit 20% de valeur sur 5 ans) | 9% vs CAT 2.5% (spread 6.5%)"
+        "reasoning": "Prime: base 53 → -15 = 38 (Décrément 5% vs dividende 0.97% = drag annuel 4%, structure très défavorable qui érode massivement la performance) | 9% vs CAT 2.5% (spread 6.5%)"
       }
     },
-    "verdict": "Produit défensif adapté au contexte stagflationniste grâce à l'exposition aurifère (beta 0.55), mais fortement pénalisé par le décrément 5% qui absorbe 4 points de performance annuelle. Le coupon 9% compense partiellement ce drag mais la volatilité élevée (38.93%) rend improbable un autocall rapide. Convient uniquement aux investisseurs convaincus d'une hausse durable de l'or >$2500/oz.",
+    "verdict": "Produit paradoxal avec un sous-jacent parfaitement adapté au contexte stagflationniste (or/miniers) mais une structure toxique. Le décrément de 5% crée un drag annuel de 4% qui rend l'autocall à 95% quasi-impossible avec une volatilité de 39%. Malgré le coupon attractif de 9%, la probabilité de le toucher régulièrement est faible. Le beta défensif de 0.55 et l'exposition or sont des atouts majeurs dans le régime actuel, mais insuffisants pour compenser le handicap structurel du décrément excessif.",
     "keyRisks": [
-      "Drag décrément 4%/an ampute structurellement la performance",
-      "Volatilité 38.93% peut maintenir l'indice sous le seuil autocall 95% malgré hausse sous-jacent",
-      "Baisse dollar et taux réels positifs pénaliseraient fortement les minières aurifères",
+      "Drag annuel de 4% rend l'autocall très improbable",
+      "Volatilité élevée (39%) augmente le risque de franchissement barrière capitale 50%",
+      "Dollar fort (warnings DXY 120) peut peser sur les minières aurifères",
       "Barrière à 0.8σ (Danger) — vol 38.93%"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 9,
-        "return_eur": 23400,
-        "probability": 0.2,
-        "duration_years": 2.6
+        "return_pct": 18,
+        "return_eur": 18000,
+        "probability": 0.15,
+        "duration_years": 2
       },
       "base": {
-        "return_pct": 4.5,
-        "return_eur": 18000,
-        "probability": 0.35,
-        "duration_years": 4
+        "return_pct": 13.5,
+        "return_eur": 13500,
+        "probability": 0.3,
+        "duration_years": 3
       },
       "stress": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.3,
+        "probability": 0.35,
         "duration_years": 5
       },
       "worst": {
         "return_pct": -25,
         "return_eur": -25000,
-        "probability": 0.15,
+        "probability": 0.2,
         "duration_years": 5
       }
     },
     "confidenceInterval": {
-      "low": 47,
-      "high": 67,
+      "low": 41,
+      "high": 61,
       "halfWidth": 10,
       "gradeStable": false,
-      "gradeRange": "C-B",
-      "label": "C [47-67]"
+      "gradeRange": "D-B",
+      "label": "C [41-61]"
     },
     "metadata": {
-      "gradedAt": "2026-03-27T15:13:28.529Z",
-      "durationMs": 21647,
+      "gradedAt": "2026-03-27T16:52:24.117Z",
+      "durationMs": 19522,
       "aiUsed": true,
-      "version": "5.1",
+      "version": "5.2",
       "productType": "autocall",
       "marketDataAvailable": true,
       "catBenchmark": 2.5,
@@ -273,7 +273,7 @@
       "maxMaturity": 5,
       "probReachMaturity": 2,
       "maxBeta": 0.55,
-      "baseScore": 59,
+      "baseScore": 53,
       "baseGrade": "C",
       "adjustments": {
         "p1": -10,
@@ -287,13 +287,12 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 47,
-      "ci_high": 67,
-      "ci_label": "C [47-67]",
+      "ci_low": 41,
+      "ci_high": 61,
+      "ci_label": "C [41-61]",
       "issuer_rating": "A",
       "issuer_tier": "IG",
       "issuer_cds_proxy": 70,
-      "issuer_cap_applied": false,
       "hasDecrement": true,
       "decrementDrag": 4.03,
       "structureType": "autocall",
