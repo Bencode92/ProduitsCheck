@@ -37,7 +37,9 @@
     "startSemester": 2,
     "startYear": null,
     "stepDown": false,
-    "stepDownPct": null
+    "stepDownPct": null,
+    "hasAutocall": true,
+    "enabled": true
   },
   "scenarios": {
     "favorable": "Rappel S2 avec gain 9.7% (2 sem x 4.85%)",
@@ -98,7 +100,9 @@
       "startSemester": 2,
       "startYear": null,
       "stepDown": false,
-      "stepDownPct": null
+      "stepDownPct": null,
+      "hasAutocall": true,
+      "enabled": true
     },
     "decrementPct": null,
     "actualDividendYield": null,
@@ -180,5 +184,6 @@
       "redundancy": 24,
       "complementarity": 25
     }
-  }
+  },
+  "envelope": ""
 }
