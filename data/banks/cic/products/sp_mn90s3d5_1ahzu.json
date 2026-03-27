@@ -192,55 +192,54 @@
     }
   },
   "grading": {
-    "grade": "B",
-    "score": 74,
+    "grade": "C",
+    "score": 50,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 84,
-        "base": 86,
-        "delta": -2,
-        "reasoning": "Rendement: base 86 → -2 = 84 (Capital protégé mais coupon 6.15% faible en stagflation avec inflation élevée, rendement réel potentiellement négatif) | Coupon 6.15%, protégé"
+        "score": 39,
+        "base": 44,
+        "delta": -5,
+        "reasoning": "Rendement: base 44 → -5 = 39 (Prob coupon 48% dans un contexte stagflationniste défavorable au luxe (MC) et financials (ACA), barrière à 100% exigeante) | Coupon 6.15%, protégé | Barr.coupon 100% prob~48%"
       },
       "underlyingQuality": {
-        "score": 72,
+        "score": 69,
         "base": 74,
-        "delta": -2,
-        "reasoning": "Qualité: base 74 → -2 = 72 (Worst-of sur luxe et finance, deux secteurs explicitement évités en stagflation, avec risque dollar fort sur LVMH) [B/Q 35%] | Worst: Crédit Agricole S.A. B:79"
+        "delta": -5,
+        "reasoning": "Qualité: base 74 → -5 = 69 (Worst-of sur deux secteurs évités (consumer-discretionary/financials), DD élevé LVMH (51%), dollar fort pénalisant pour le luxe) [B/Q 35%] | Worst: Crédit Agricole S.A. B:79"
       },
       "portfolioFit": {
-        "score": 78,
+        "score": 85,
         "base": 80,
-        "delta": -2,
-        "reasoning": "Fit: base 80 → -2 = 78 (Protection capital pertinente mais exposition sectorielle inadaptée au régime macro actuel)"
+        "delta": 5,
+        "reasoning": "Fit: base 80 → +5 = 85 (Capital 100% garanti offre protection totale dans un régime incertain, coupon 6.15% attractif si conditions remplies)"
       },
       "riskPremium": {
-        "score": 59,
-        "base": 59,
+        "score": 18,
+        "base": 18,
         "delta": 0,
-        "reasoning": "Prime: base 59 | 6.15% vs CAT 2.5% (spread 3.7%)"
+        "reasoning": "Prime: base 18 | 6.15% vs CAT 2.5% (spread 3.7%)"
       }
     },
-    "verdict": "Produit mal adapté au contexte stagflationniste actuel. Le worst-of combine deux secteurs à éviter (luxe cyclique et finance) avec un coupon de 6.15% insuffisant face à l'inflation. Le capital protégé limite les pertes mais le rendement réel sera probablement négatif. Avec un VIX à 22 et des risques géopolitiques élevés, l'exposition au luxe européen face à un dollar fort (DXY 120) est particulièrement risquée.",
+    "verdict": "Produit à capital garanti offrant 6.15% annuel si les deux sous-jacents terminent au-dessus du strike, mais avec seulement 48% de probabilité dans un contexte macro très défavorable. Le worst-of combine deux secteurs explicitement évités en stagflation (luxe et banques), avec LVMH montrant un DD de 51% et vulnérable au dollar fort. Malgré la protection du capital, le risque de ne toucher aucun coupon sur 3 ans est élevé (52%), rendant le profil rendement/risque peu attractif.",
     "keyRisks": [
-      "Rendement réel négatif si inflation >6%",
-      "Dollar fort impacte fortement les marges LVMH",
-      "Secteur financier vulnérable si récession"
+      "Probabilité élevée (52%) de 0% de rendement sur 3 ans malgré capital garanti",
+      "Exposition worst-of à deux secteurs défavorisés en stagflation avec DD importants"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 6.15,
+        "return_pct": 18.45,
         "return_eur": 18450,
-        "probability": 0.2,
+        "probability": 0.25,
         "duration_years": 3
       },
       "base": {
-        "return_pct": 3,
-        "return_eur": 9000,
+        "return_pct": 0,
+        "return_eur": 0,
         "probability": 0.4,
         "duration_years": 3
       },
@@ -251,25 +250,25 @@
         "duration_years": 3
       },
       "worst": {
-        "return_pct": -2,
-        "return_eur": -6000,
-        "probability": 0.1,
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.05,
         "duration_years": 3
       }
     },
     "confidenceInterval": {
-      "low": 68,
-      "high": 80,
-      "halfWidth": 6,
+      "low": 43,
+      "high": 57,
+      "halfWidth": 7,
       "gradeStable": false,
-      "gradeRange": "B-A",
-      "label": "B [68-80]"
+      "gradeRange": "D-C",
+      "label": "C [43-57]"
     },
     "metadata": {
-      "gradedAt": "2026-03-27T14:52:21.979Z",
-      "durationMs": 17025,
+      "gradedAt": "2026-03-27T15:12:15.703Z",
+      "durationMs": 19351,
       "aiUsed": true,
-      "version": "5.0",
+      "version": "5.1",
       "productType": "capital_garanti",
       "marketDataAvailable": true,
       "catBenchmark": 2.5,
@@ -281,15 +280,17 @@
       "isInPortfolio": false,
       "hasBarrier": false,
       "barrierPct": 0,
+      "barrierCouponPct": 100,
+      "couponProbability": 48,
       "expectedMaturity": 3,
       "maxMaturity": 3,
       "maxBeta": 0.89,
-      "baseScore": 75,
-      "baseGrade": "A",
+      "baseScore": 52,
+      "baseGrade": "C",
       "adjustments": {
-        "p1": -2,
-        "p2": -2,
-        "p3": -2,
+        "p1": -5,
+        "p2": -5,
+        "p3": 5,
         "p4": 0
       },
       "barrier_sigma": null,
@@ -298,9 +299,9 @@
       "liquidity_level": "L4",
       "liquidity_score": 10,
       "liquidity_label": "Illiquide (999M)",
-      "ci_low": 68,
-      "ci_high": 80,
-      "ci_label": "B [68-80]",
+      "ci_low": 43,
+      "ci_high": 57,
+      "ci_label": "C [43-57]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "issuer_cds_proxy": 55,
