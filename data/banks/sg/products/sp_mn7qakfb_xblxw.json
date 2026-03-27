@@ -212,19 +212,19 @@
         "score": 34,
         "base": 44,
         "delta": -10,
-        "reasoning": "Rendement: base 44 → -10 = 34 (Capital protégé mais coupon 7% sur worst-of 8 actions avec Tesla (vol 57%) comme maillon faible = probabilité de coupon très réduite) | Coupon 7%, protégé"
+        "reasoning": "Rendement: base 44 → -10 = 34 (Capital protégé mais coupon 7% sur worst-of 8 valeurs avec Tesla ultra-volatile (vol 57%, DD 54%) rend le coupon très incertain) | Coupon 7%, protégé"
       },
       "underlyingQuality": {
         "score": 73,
         "base": 85,
         "delta": -12,
-        "reasoning": "Qualité: base 85 → -12 = 73 (Surexposition communication (3/8) et consumer discretionary (2/8) en régime évité, plus betas élevés NVDA/TSLA augmentent risque systémique) [B/Q 35%] | Worst: Tesla B:54"
+        "reasoning": "Qualité: base 85 → -12 = 73 (Surexposition communication (3/8) et conso cyclique (2/8) en régime neutral défavorable, Tesla faible (ROE 5%, marge 4%)) [B/Q 35%] | Worst: Tesla B:54"
       },
       "portfolioFit": {
         "score": 67,
         "base": 72,
         "delta": -5,
-        "reasoning": "Fit: base 72 → -5 = 67 (Concentration tech/comm excessive (75%) inadaptée au régime macro neutral favorisant l'énergie)"
+        "reasoning": "Fit: base 72 → -5 = 67 (Panier trop large (8 valeurs) avec profils hétérogènes, Tesla décorrélé des GAFAM créant un risque asymétrique)"
       },
       "riskPremium": {
         "score": 61,
@@ -233,41 +233,41 @@
         "reasoning": "Prime: base 61 | 7% vs CAT 2.5% (spread 4.5%)"
       }
     },
-    "verdict": "Produit déséquilibré malgré la protection capital : le worst-of 8 actions dominé par Tesla (vol 57%, ROE 5%) réduit drastiquement la probabilité de toucher le coupon 7%. L'exposition massive aux secteurs évités (communication 37.5%, consumer discretionary 25%) en régime macro neutral est problématique. Avec un beta moyen pondéré de 1.32 et des performances YTD négatives pour 8/8 sous-jacents, le risque de non-paiement des coupons est élevé malgré le capital garanti.",
+    "verdict": "Produit à capital protégé mais profil risqué avec worst-of sur 8 valeurs incluant Tesla (vol 57%, beta 1.62) qui plombe la probabilité du coupon 7%. L'exposition concentrée sur les secteurs évités (communication 37.5%, conso cyclique 25%) en régime macro neutral fragilise davantage. Malgré la protection du capital, le rapport rendement/risque est défavorable avec une probabilité élevée de ne percevoir aucun coupon sur 3 ans.",
     "keyRisks": [
-      "Probabilité <30% de toucher les coupons avec Tesla comme maillon faible",
-      "75% d'exposition aux secteurs évités par le régime macro actuel"
+      "Tesla maillon faible critique : volatilité 57%, drawdown 54%, fondamentaux dégradés",
+      "Surexposition secteurs évités (62.5% du panier) en contexte macro défavorable"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 7,
         "return_eur": 21000,
-        "probability": 0.25,
+        "probability": 0.2,
         "duration_years": 3
       },
       "base": {
         "return_pct": 2.3,
         "return_eur": 7000,
-        "probability": 0.4,
+        "probability": 0.35,
         "duration_years": 3
       },
       "stress": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.3,
+        "probability": 0.35,
         "duration_years": 3
       },
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.05,
+        "probability": 0.1,
         "duration_years": 3
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-27T10:06:52.882Z",
-      "durationMs": 21456,
+      "gradedAt": "2026-03-27T10:09:23.214Z",
+      "durationMs": 20474,
       "aiUsed": true,
       "version": "4.3",
       "productType": "standard",
