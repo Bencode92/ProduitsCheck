@@ -1,7 +1,7 @@
 {
   "bankId": "sg",
   "bankName": "Société Générale",
-  "lastUpdated": "2026-03-27T11:35:20.148Z",
+  "lastUpdated": "2026-03-27T11:37:03.253Z",
   "products": [
     {
       "id": "sp_mn8tpkt2_rga8g",
@@ -17,6 +17,14 @@
       "type": "autre",
       "status": "analyzing",
       "score": 82,
+      "receivedDate": "2026-03-27"
+    },
+    {
+      "id": "sp_mn8tths2_jnf9s",
+      "name": "NOTE TAUX FIXE CALLABLE BONUS PAIEMENT À MATURITÉ",
+      "type": "autre",
+      "status": "analyzing",
+      "score": 61,
       "receivedDate": "2026-03-27"
     }
   ]
