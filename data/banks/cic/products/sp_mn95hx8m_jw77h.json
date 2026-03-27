@@ -12,7 +12,7 @@
   "maturityDate": null,
   "strikeDate": null,
   "coupon": {
-    "rate": 9.7,
+    "rate": 4.85,
     "rateIfCalled": null,
     "rateIfMaturity": null,
     "type": "conditionnel",
@@ -197,22 +197,22 @@
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 43,
+        "score": 38,
         "base": 48,
-        "delta": -5,
-        "reasoning": "Rendement: base 48 → -5 = 43 (Coupon à 80% sur un indice bancaire avec vol 19.85% en stagflation réduit la probabilité de paiement régulier) | Coupon 19.4%, barrière 60% | Barr.coupon 80% | Mat espérée: ~1.6a (prob mat: 0%)"
+        "delta": -10,
+        "reasoning": "Rendement: base 48 → -10 = 38 (Barrière coupon à 80% insuffisante avec vol 19.85% et régime stagflation défavorable aux banques) | Coupon 19.4%, barrière 60% | Barr.coupon 80% | Mat espérée: ~1.6a (prob mat: 0%)"
       },
       "underlyingQuality": {
         "score": 36,
         "base": 51,
         "delta": -15,
-        "reasoning": "Qualité: base 51 → -15 = 36 (Secteur financier explicitement évité en stagflation, beta 0.83 amplifie les mouvements baissiers, VIX 22 signale stress) [vol/DD 30%] | Worst: Indice EuroStoxx Banks B:35"
+        "reasoning": "Qualité: base 51 → -15 = 36 (Secteur financials explicitement évité en stagflation, beta 0.83 amplifie la baisse, hausse des taux pénalise les valorisations bancaires) [vol/DD 30%] | Worst: Indice EuroStoxx Banks B:35"
       },
       "portfolioFit": {
-        "score": 70,
+        "score": 75,
         "base": 80,
-        "delta": -10,
-        "reasoning": "Fit: base 80 → -10 = 70 (Exposition sectorielle concentrée sur les banques inadaptée au régime macro actuel)"
+        "delta": -5,
+        "reasoning": "Fit: base 80 → -5 = 75 (Surexposition sectorielle risquée dans un contexte macro hostile aux financières)"
       },
       "riskPremium": {
         "score": 82,
@@ -221,35 +221,36 @@
         "reasoning": "Prime: base 82 | 19.4% vs CAT 2.5% (spread 16.9%)"
       }
     },
-    "verdict": "Produit risqué avec exposition au secteur bancaire en pleine stagflation. Le coupon élevé de 19.4% reflète le risque accru sur un secteur explicitement défavorisé par le régime macro. La barrière coupon à 80% offre peu de marge dans un contexte de volatilité élevée (19.85%). Score final ajusté à 44/100 (D) justifie l'évitement.",
+    "verdict": "Produit très risqué dans le contexte actuel avec score ajusté de 44/100. Le secteur bancaire européen est particulièrement vulnérable en stagflation (hausse des défauts, compression des marges) et le régime macro est explicitement défavorable aux financières. La barrière coupon à 80% sera difficile à maintenir avec une volatilité de 19.85% et un drawdown historique de -15.95%.",
     "keyRisks": [
-      "Secteur bancaire vulnérable en stagflation avec hausse des défauts",
-      "Risque de non-paiement du coupon élevé avec barrière à 80%"
+      "Secteur bancaire vulnérable aux défauts de crédit en stagflation",
+      "Barrière coupon élevée (80%) avec forte volatilité",
+      "Concentration sur un seul secteur explicitement évité par le régime macro"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 19.4,
         "return_eur": 19400,
-        "probability": 0.15,
+        "probability": 0.2,
         "duration_years": 1
       },
       "base": {
-        "return_pct": 6.5,
-        "return_eur": 19500,
-        "probability": 0.3,
-        "duration_years": 3
-      },
-      "stress": {
         "return_pct": 0,
         "return_eur": 0,
         "probability": 0.35,
         "duration_years": 5
       },
+      "stress": {
+        "return_pct": -3,
+        "return_eur": -3000,
+        "probability": 0.3,
+        "duration_years": 5
+      },
       "worst": {
         "return_pct": -25,
         "return_eur": -25000,
-        "probability": 0.2,
+        "probability": 0.15,
         "duration_years": 5
       }
     },
@@ -262,8 +263,8 @@
       "label": "C [46-66]"
     },
     "metadata": {
-      "gradedAt": "2026-03-27T17:15:40.174Z",
-      "durationMs": 15828,
+      "gradedAt": "2026-03-27T17:09:18.325Z",
+      "durationMs": 14465,
       "aiUsed": true,
       "version": "5.2",
       "productType": "autocall",
@@ -286,9 +287,9 @@
       "baseScore": 64,
       "baseGrade": "B",
       "adjustments": {
-        "p1": -5,
+        "p1": -10,
         "p2": -15,
-        "p3": -10,
+        "p3": -5,
         "p4": 0
       },
       "barrier_sigma": 1.15,
