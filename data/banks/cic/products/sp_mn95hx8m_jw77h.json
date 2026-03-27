@@ -189,38 +189,134 @@
   },
   "envelope": "",
   "grading": {
-    "grade": "-",
-    "score": null,
+    "grade": "D",
+    "score": 30,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": null
+        "score": 16,
+        "base": 26,
+        "delta": -10,
+        "reasoning": "Rendement: base 26 → -10 = 16 (Barrière coupon à 80% très contraignante avec vol 19.85%, probabilité de toucher les coupons très faible dans ce contexte volatil) | Coupon 4.85%, barrière 60% | Barr.coupon 80% | Mat espérée: ~1.6a (prob mat: 0%)"
       },
       "underlyingQuality": {
-        "score": null
+        "score": 36,
+        "base": 51,
+        "delta": -15,
+        "reasoning": "Qualité: base 51 → -15 = 36 (Secteur financier explicitement évité en stagflation, banques européennes très sensibles aux marges d'intérêt et risque crédit) [vol/DD 30%] | Worst: Indice EuroStoxx Banks B:35"
       },
       "portfolioFit": {
-        "score": null
+        "score": 75,
+        "base": 80,
+        "delta": -5,
+        "reasoning": "Fit: base 80 → -5 = 75 (Diversification sectorielle nulle sur un seul indice bancaire, concentration excessive du risque)"
       },
       "riskPremium": {
-        "score": null
+        "score": 4,
+        "base": 4,
+        "delta": 0,
+        "reasoning": "Prime: base 4 | 4.85% vs CAT 2.5% (spread 2.3%)"
       }
     },
-    "verdict": "Produit de liquidité / parking cash.",
+    "verdict": "Produit très mal adapté au contexte de stagflation avec un secteur bancaire explicitement défavorisé. La barrière coupon à 80% combinée à la volatilité de 19.85% rend les coupons quasi-inaccessibles. Le rendement de 4.85% ne compense absolument pas le risque concentré sur un seul secteur cyclique avec beta 0.83. Score final ajusté: 23/100.",
     "keyRisks": [
-      "Rendement très faible"
+      "Exposition 100% au secteur bancaire en régime défavorable de stagflation",
+      "Barrière coupon à 80% irréaliste avec volatilité 20%, probabilité de non-paiement très élevée"
     ],
-    "scenarios": null,
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 4.85,
+        "return_eur": 4850,
+        "probability": 0.2,
+        "duration_years": 1
+      },
+      "base": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.4,
+        "duration_years": 5
+      },
+      "stress": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.3,
+        "duration_years": 5
+      },
+      "worst": {
+        "return_pct": -25,
+        "return_eur": -25000,
+        "probability": 0.1,
+        "duration_years": 5
+      }
+    },
+    "confidenceInterval": {
+      "low": 20,
+      "high": 40,
+      "halfWidth": 10,
+      "gradeStable": false,
+      "gradeRange": "F-D",
+      "label": "D [20-40]"
+    },
     "metadata": {
-      "gradedAt": "2026-03-27T17:13:25.461Z",
-      "durationMs": 0,
-      "aiUsed": false,
-      "version": "4.1",
-      "productType": "liquidity",
-      "isInPortfolio": true
+      "gradedAt": "2026-03-27T17:13:46.332Z",
+      "durationMs": 17121,
+      "aiUsed": true,
+      "version": "5.2",
+      "productType": "autocall",
+      "marketDataAvailable": true,
+      "catBenchmark": 2.5,
+      "catSource": "fallback-2026",
+      "couponAnnualized": 4.85,
+      "couponRaw": 4.85,
+      "couponMultiplier": 1,
+      "couponFrequency": "semestriel",
+      "isInPortfolio": false,
+      "hasBarrier": true,
+      "barrierPct": 60,
+      "barrierCouponPct": 80,
+      "couponProbability": null,
+      "expectedMaturity": 1.6,
+      "maxMaturity": 5,
+      "probReachMaturity": 0,
+      "maxBeta": 0.83,
+      "baseScore": 38,
+      "baseGrade": "D",
+      "adjustments": {
+        "p1": -10,
+        "p2": -15,
+        "p3": -5,
+        "p4": 0
+      },
+      "barrier_sigma": 1.15,
+      "barrier_sigma_label": "Attention",
+      "barrier_sigma_danger": false,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Rappelable 12M",
+      "ci_low": 20,
+      "ci_high": 40,
+      "ci_label": "D [20-40]",
+      "issuer_rating": "A+",
+      "issuer_tier": "IG",
+      "issuer_cds_proxy": 55,
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "autocall",
+      "stockData": [
+        {
+          "name": "Indice EuroStoxx Banks",
+          "ticker": "EUFN",
+          "sector": "Index",
+          "perf_ytd": -10.6,
+          "perf_1y": 15.57,
+          "volatility_3y": 19.85,
+          "max_drawdown_3y": -15.95
+        }
+      ]
     }
   }
 }
