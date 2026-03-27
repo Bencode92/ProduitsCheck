@@ -1,5 +1,6 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Edit Modal v1.6 — barrierCoupon field
+// STRUCTBOARD — Edit Modal v1.7 — fix coupon-as-number bug
+// v1.7: Fix coupon saved as primitive number → frequency not persisted
 // v1.6: Added "Barrière Coupon (%)" field for digitale products
 // v1.5: Added "À maturité" freq + "Participation" coupon type
 // ═══════════════════════════════════════════════════════════════
@@ -36,9 +37,13 @@ window.showEditModal = function() {
     var p = app.state.currentProduct;
     if (!p) { showToast('Aucun produit', 'error'); return; }
 
-    var couponRate = p.coupon?.rate || p.participationRate || '';
-    var couponType = p.coupon?.type || 'conditionnel';
-    var couponFreq = p.coupon?.frequency || p.coupon?.paymentTiming || 'annuel';
+    // v1.7: Ensure coupon is an object before reading fields
+    var couponObj = (p.coupon && typeof p.coupon === 'object') ? p.coupon : {};
+    if (typeof p.coupon === 'number') couponObj.rate = p.coupon;
+
+    var couponRate = couponObj.rate || p.participationRate || '';
+    var couponType = couponObj.type || 'conditionnel';
+    var couponFreq = couponObj.frequency || couponObj.paymentTiming || 'annuel';
     var barrier = p.capitalProtection?.barrier || '';
     // Don't show 100 as barrier — 100 means no barrier
     if (barrier === 100 && p.capitalProtection?.level === 100) barrier = '';
@@ -60,7 +65,6 @@ window.showEditModal = function() {
         return '<option value="' + t.id + '"' + (structureType === t.id ? ' selected' : '') + '>' + t.label + '</option>';
     }).join('');
 
-    // Coupon type options (v1.5: added participation)
     var couponTypeOptions = [
         { id: 'conditionnel', label: 'Conditionnel' },
         { id: 'fixe', label: 'Fixe' },
@@ -70,7 +74,6 @@ window.showEditModal = function() {
         return '<option value="' + t.id + '"' + (couponType === t.id ? ' selected' : '') + '>' + t.label + '</option>';
     }).join('');
 
-    // Frequency options (v1.5: added maturity)
     var freqOptions = [
         { id: 'annuel', label: 'Annuel' },
         { id: 'semestriel', label: 'Semestriel' },
@@ -103,11 +106,9 @@ window.showEditModal = function() {
         '<div class="form-field"><label>Niveau initial (strike) <span style="font-size:9px;color:var(--text-dim)">📊 pts ou €</span></label><input id="fe-strike-price" type="number" step="0.01" value="' + strikePrice + '" placeholder="Ex: 4950"></div>' +
         '<div class="form-field full"><label>Sous-jacents (séparés par virgule)</label><input id="fe-underlyings" value="' + escapeAttr(underlyings) + '"></div>' +
         '</div>' +
-        // Dynamic info boxes
         (structureType === 'dispersion' ? '<div style="background:rgba(6,214,160,0.08);border:1px solid rgba(6,214,160,0.2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:12px;font-size:10px;color:var(--green)">✅ <strong>Dispersion</strong> : le grading valorisera la volatilité (moteur de rendement) et considèrera le capital comme garanti.</div>' : '') +
         (structureType === 'taux_fixe' ? '<div style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:12px;font-size:10px;color:var(--accent)">🏛 <strong>Taux fixe</strong> : le grading comparera le coupon au taux sans risque BCE et évaluera le spread.</div>' : '') +
         (strikePrice ? '' : '<div style="background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.15);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:12px;font-size:10px;color:var(--text-muted)">💡 <strong>Strike</strong> : renseignez la valeur du SJ à la souscription pour améliorer le calcul barrière (σ).</div>') +
-        // v1.6: info box for barrierCoupon
         (barrierCoupon ? '<div style="background:rgba(255,182,39,0.08);border:1px solid rgba(255,182,39,0.2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:12px;font-size:10px;color:var(--orange)">🎯 <strong>Digitale</strong> : barrière coupon à ' + barrierCoupon + '%. Le grading estimera la probabilité de toucher le coupon.</div>' : '') +
         '<div class="modal-actions"><button class="btn" onclick="closeModal()">Annuler</button><button class="btn primary" onclick="handleEditSave()">💾 Enregistrer</button></div>' +
         '</div></div>';
@@ -124,7 +125,15 @@ window.handleEditSave = async function() {
     p.structureType = document.getElementById('fe-structure-type')?.value || '';
 
     var newCoupon = document.getElementById('fe-coupon')?.value;
-    if (!p.coupon) p.coupon = {};
+
+    // v1.7 FIX: Force coupon to be an object (not a primitive number)
+    // If coupon was stored as a number (e.g. 4.85), convert to {rate: 4.85}
+    if (!p.coupon || typeof p.coupon !== 'object') {
+        var oldRate = typeof p.coupon === 'number' ? p.coupon : null;
+        p.coupon = {};
+        if (oldRate !== null) p.coupon.rate = oldRate;
+    }
+
     if (newCoupon !== '') p.coupon.rate = parseFloat(newCoupon);
     p.coupon.type = document.getElementById('fe-coupon-type')?.value || p.coupon.type;
     p.coupon.frequency = document.getElementById('fe-coupon-freq')?.value || p.coupon.frequency;
@@ -139,7 +148,6 @@ window.handleEditSave = async function() {
     if (newBarrier !== '' && newBarrier !== null) {
         p.capitalProtection.barrier = parseFloat(newBarrier);
     } else {
-        // Empty barrier = no barrier
         delete p.capitalProtection.barrier;
     }
 
@@ -201,4 +209,4 @@ function escapeAttr(str) {
     return (str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;');
 }
 
-console.log('[StructBoard] Edit Modal v1.6 — barrierCoupon field for digitale products');
+console.log('[StructBoard] Edit Modal v1.7 — fix coupon-as-number bug');
