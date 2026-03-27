@@ -180,81 +180,89 @@
     }
   },
   "grading": {
-    "grade": "D",
-    "score": 39,
+    "grade": "C",
+    "score": 45,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 32,
-        "base": 42,
-        "delta": -10,
-        "reasoning": "Rendement: base 42 → -10 = 32 (Coupon 3.45% avec paiement uniquement à maturité réduit la valeur actuelle à ~2.8% effectif vs 3.01% taux sans risque 10Y) | Coupon 3.45%, protégé | Mat espérée: ~2.2a (max 10a, prob mat: 0%)"
+        "score": 43,
+        "base": 44,
+        "delta": -1,
+        "reasoning": "Rendement: base 44 → -1 = 43 (Taux 3.68% à peine supérieur au AAA 10Y (3.01%), peu attractif en stagflation où l'inflation érode le pouvoir d'achat) | Coupon 3.68%, protégé | Mat espérée: ~2.2a (prob mat: 0%)"
       },
       "underlyingQuality": {
-        "score": 55,
+        "score": 59,
         "base": 60,
-        "delta": -5,
-        "reasoning": "Qualité: base 60 → -5 = 55 (Environnement taux stable mais risque de réinvestissement élevé avec 45% probabilité de call précoce dans un contexte de baisse potentielle) [crédit]"
+        "delta": -1,
+        "reasoning": "Qualité: base 60 → -1 = 59 (Produit taux fixe inadapté en stagflation: inflation élevée détruit le rendement réel, risque de hausse des taux dévalorise l'obligation) [crédit]"
       },
       "portfolioFit": {
-        "score": 70,
+        "score": 69,
         "base": 70,
-        "delta": 0,
-        "reasoning": "Fit: base 70"
+        "delta": -1,
+        "reasoning": "Fit: base 70 → -1 = 69 (Protection capital OK mais aucun flux pendant potentiellement 10 ans problématique pour la liquidité en période inflationniste)"
       },
       "riskPremium": {
-        "score": 6,
-        "base": 11,
-        "delta": -5,
-        "reasoning": "Prime: base 11 → -5 = 6 (Spread effectif de 44bps insuffisant pour compenser l'illiquidité et le risque crédit sur 10 ans) | 3.45% vs CAT 2.5% (spread 1.0%)"
+        "score": 15,
+        "base": 15,
+        "delta": 0,
+        "reasoning": "Prime: base 15 | 3.68% vs CAT 2.5% (spread 1.2%)"
       }
     },
-    "verdict": "Ce callable offre un rendement décevant de 3.45% (paiement in fine) pour une maturité de 10 ans, soit à peine 44bps au-dessus du taux sans risque AAA 10Y (3.01%). La probabilité de call à 45% dans ~2.2 ans créerait un risque de réinvestissement majeur dans un environnement de taux potentiellement plus bas. Avec un rendement effectif inférieur au taux sans risque après actualisation, ce produit n'offre pas de compensation suffisante pour l'illiquidité et le risque crédit émetteur.",
+    "verdict": "Produit très mal adapté au contexte de stagflation avec un rendement de 3.68% qui sera probablement négatif en réel sur 10 ans. L'absence totale de flux intermédiaires est particulièrement pénalisante quand l'inflation érode le pouvoir d'achat. Avec des taux AAA 10Y à 3.01%, la prime de risque de 0.67% est insuffisante pour un engagement aussi long sans liquidité.",
     "keyRisks": [
-      "Risque de réinvestissement élevé (45% call dans 2.2 ans) avec taux potentiellement inférieurs",
-      "Rendement effectif ~2.8% inférieur au taux sans risque 10Y après actualisation du paiement in fine",
-      "Risque crédit émetteur sur 10 ans pour seulement 44bps de spread"
+      "Inflation érodant totalement le rendement réel (3.68% - inflation >5% = rendement réel négatif)",
+      "Risque de hausse des taux dégradant la valeur de marché si besoin de sortie anticipée",
+      "Absence totale de flux pendant potentiellement 10 ans"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 7.6,
-        "return_eur": 7590,
+        "return_pct": 5,
+        "return_eur": 11000,
         "probability": 0.2,
         "duration_years": 2.2
       },
       "base": {
-        "return_pct": 5.5,
-        "return_eur": 16500,
+        "return_pct": 4.5,
+        "return_eur": 22500,
         "probability": 0.35,
-        "duration_years": 3
+        "duration_years": 5
       },
       "stress": {
-        "return_pct": 3.45,
-        "return_eur": 34500,
-        "probability": 0.35,
+        "return_pct": 4,
+        "return_eur": 40000,
+        "probability": 0.3,
         "duration_years": 10
       },
       "worst": {
-        "return_pct": -20,
-        "return_eur": -20000,
-        "probability": 0.1,
-        "duration_years": 5
+        "return_pct": -2,
+        "return_eur": -2000,
+        "probability": 0.15,
+        "duration_years": 10
       }
     },
+    "confidenceInterval": {
+      "low": 37,
+      "high": 53,
+      "halfWidth": 8,
+      "gradeStable": false,
+      "gradeRange": "D-C",
+      "label": "C [37-53]"
+    },
     "metadata": {
-      "gradedAt": "2026-03-27T11:55:15.031Z",
-      "durationMs": 21200,
+      "gradedAt": "2026-03-27T14:32:49.809Z",
+      "durationMs": 18345,
       "aiUsed": true,
-      "version": "4.3",
-      "productType": "fixed-rate-callable",
+      "version": "5.0",
+      "productType": "taux_fixe",
       "marketDataAvailable": false,
       "catBenchmark": 2.5,
       "catSource": "fallback-2026",
-      "couponAnnualized": 3.45,
+      "couponAnnualized": 3.68,
       "couponRaw": 4,
       "couponMultiplier": 1,
       "couponFrequency": "annuel",
@@ -265,14 +273,30 @@
       "maxMaturity": 10,
       "probReachMaturity": 0,
       "maxBeta": null,
-      "baseScore": 44,
-      "baseGrade": "D",
+      "baseScore": 46,
+      "baseGrade": "C",
       "adjustments": {
-        "p1": -10,
-        "p2": -5,
-        "p3": 0,
-        "p4": -5
-      }
+        "p1": -1,
+        "p2": -1,
+        "p3": -1,
+        "p4": 0
+      },
+      "barrier_sigma": null,
+      "barrier_sigma_label": null,
+      "barrier_sigma_danger": null,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Callable long terme",
+      "ci_low": 37,
+      "ci_high": 53,
+      "ci_label": "C [37-53]",
+      "issuer_rating": "A",
+      "issuer_tier": "IG",
+      "issuer_cds_proxy": 70,
+      "issuer_cap_applied": false,
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "taux_fixe"
     }
   }
 }
