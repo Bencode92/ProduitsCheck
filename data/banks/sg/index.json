@@ -1,7 +1,7 @@
 {
   "bankId": "sg",
   "bankName": "Société Générale",
-  "lastUpdated": "2026-03-27T11:29:02.767Z",
+  "lastUpdated": "2026-03-27T11:31:35.040Z",
   "products": [
     {
       "id": "sp_mn4cavgv_d1rxc",
@@ -26,6 +26,14 @@
       "status": "analyzing",
       "score": 89,
       "receivedDate": "2026-03-24"
+    },
+    {
+      "id": "sp_mn8tmgr7_k3abl",
+      "name": "Note Taux Fixe Callable Bonus Paiement à Maturité",
+      "type": "autre",
+      "status": "analyzing",
+      "score": 61,
+      "receivedDate": "2026-03-27"
     }
   ]
 }
