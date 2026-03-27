@@ -24,7 +24,7 @@
   "capitalProtection": {
     "protected": false,
     "level": null,
-    "barrier": 40,
+    "barrier": 60,
     "barrierCoupon": 80,
     "barrierType": "européenne",
     "couponFloor": false
@@ -37,7 +37,9 @@
     "startSemester": 2,
     "startYear": null,
     "stepDown": false,
-    "stepDownPct": null
+    "stepDownPct": null,
+    "hasAutocall": true,
+    "enabled": true
   },
   "scenarios": {
     "favorable": "Remboursement anticipé avec gain de 4,85% par semestre si indice stable ou en hausse",
@@ -85,7 +87,7 @@
     "capitalProtection": {
       "protected": false,
       "level": null,
-      "barrier": 40,
+      "barrier": 60,
       "barrierCoupon": 80,
       "barrierType": "européenne",
       "couponFloor": false
@@ -98,7 +100,9 @@
       "startSemester": 2,
       "startYear": null,
       "stepDown": false,
-      "stepDownPct": null
+      "stepDownPct": null,
+      "hasAutocall": true,
+      "enabled": true
     },
     "decrementPct": null,
     "actualDividendYield": null,
@@ -180,5 +184,6 @@
       "redundancy": 24,
       "complementarity": 25
     }
-  }
+  },
+  "envelope": ""
 }
