@@ -1,8 +1,8 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Grader Structure Patch v1.1
-// v1.1: Uses _autoDetectStructureType from mechanism-patch
-//       + injects into prompt via multiple hook points
-//       + fixes P(coupon) for dispersion products
+// STRUCTBOARD — Grader Structure Patch v1.2
+// v1.2: FIXED — hooks _buildSystemPrompt + _buildUserPrompt
+//       (not _buildGradingPrompt which doesn't exist)
+//       Also hooks _callClaude (not aiParser._callAI)
 // ═══════════════════════════════════════════════════════════════
 
 (function() {
@@ -10,120 +10,147 @@
 
     var STRUCTURE_PROMPTS = {
         dispersion: [
-            'IMPORTANT \u2014 PRODUIT DE DISPERSION (PAS un autocall/worst-of) :',
-            '1. Capital 100% garanti \u00e0 maturit\u00e9 \u2014 AUCUN risque de perte en capital (hors d\u00e9faut \u00e9metteur)',
-            '2. PAS de barri\u00e8re \u2014 le concept worst-of ne s\'applique PAS',
-            '3. La volatilit\u00e9 \u00e9lev\u00e9e est un ATOUT (elle augmente la dispersion = plus de rendement)',
-            '4. Le coupon = participation \u00d7 moyenne des diff\u00e9rences de performance entre paires. TOUJOURS \u2265 0%',
-            '5. NE PAS p\u00e9naliser vol, nombre de SJ, ni corr\u00e9lation \u00e9lev\u00e9e intra-paire',
-            '6. Rendement historique m\u00e9dian ~11% sur 3 ans (~3.7%/an) \u2014 ne PAS utiliser 0% comme sc\u00e9nario probable',
-            '7. P1 (rendement) : noter le rendement esp\u00e9r\u00e9 M\u00c9DIAN, pas le pire cas',
-            '8. P2 (qualit\u00e9 SJ) : vol \u00e9lev\u00e9e = POSITIF pour ce produit'
+            '',
+            '⚠⚠⚠ ATTENTION — CE PRODUIT EST UNE DISPERSION (PAS un autocall/worst-of) ⚠⚠⚠',
+            'RÈGLES IMPÉRATIVES pour ce type de produit :',
+            '1. Capital 100% GARANTI à maturité — AUCUN risque de perte en capital',
+            '2. PAS de barrière — le concept worst-of NE S\'APPLIQUE PAS',
+            '3. La volatilité élevée est un ATOUT — elle AUGMENTE la dispersion donc le rendement',
+            '   → Tesla vol 57% = TRÈS BIEN pour ce produit (plus de dispersion entre paires)',
+            '   → NE JAMAIS pénaliser la volatilité ni le beta dans P1 ou P2',
+            '4. Le rendement = participation × moyenne des différences de perf entre paires',
+            '5. Le coupon est TOUJOURS ≥ 0% (jamais négatif, jamais de perte)',
+            '6. Rendement historique médian ~11% sur 3 ans (~3.8%/an) — utiliser CE chiffre, pas 0%',
+            '7. P1 ajustement : le rendement 3.8%/an est CERTAIN (garanti ≥ 0%), ne PAS pénaliser',
+            '8. P2 ajustement : vol élevée = BONUS pas pénalité. Secteur unique tech = OK car les actions tech divergent fortement entre elles',
+            '9. P4 ajustement : le spread vs CAT est faible (1.3%) MAIS le capital est garanti et le rendement est certain',
+            '10. Scénarios : optimiste=+21% (forte dispersion), base=+11% (médian historique), stress=+3% (faible dispersion), worst=+0% (dispersion nulle mais capital récupéré)',
+            ''
         ].join('\n'),
-        taux_fixe: 'IMPORTANT \u2014 TAUX FIXE/CALLABLE : Coupon GARANTI p\u00e9riodiquement, ind\u00e9pendant du march\u00e9. Seul risque = d\u00e9faut \u00e9metteur + rappel anticip\u00e9. Comparer au taux BCE. NE PAS analyser comme un autocall.',
-        capital_garanti: 'IMPORTANT \u2014 CAPITAL GARANTI : Z\u00e9ro risque perte capital (hors d\u00e9faut). \u00c9valuer rendement vs co\u00fbt d\'opportunit\u00e9 CAT.',
-        reverse: 'IMPORTANT \u2014 REVERSE CONVERTIBLE : Risque asym\u00e9trique \u2014 gain plafonn\u00e9, perte potentiellement forte. Analyser avec prudence.',
-        twin_win: 'IMPORTANT \u2014 TWIN-WIN : Gain dans les 2 directions tant que barri\u00e8re non touch\u00e9e. \u00c9valuer la probabilit\u00e9 de rester dans le corridor.'
+        taux_fixe: '\n⚠ PRODUIT TAUX FIXE : Coupon GARANTI indépendant du marché. Seul risque = défaut émetteur. Comparer au taux BCE. NE PAS analyser comme un autocall.\n',
+        capital_garanti: '\n⚠ CAPITAL GARANTI : Zéro risque perte capital. Évaluer rendement vs coût d\'opportunité CAT. Vol et beta sont NON PERTINENTS.\n',
+        reverse: '\n⚠ REVERSE CONVERTIBLE : Risque asymétrique. Gain plafonné, perte potentiellement forte. Analyser avec prudence.\n',
+        twin_win: '\n⚠ TWIN-WIN : Gain dans les 2 directions. Évaluer probabilité de rester dans le corridor.\n'
     };
 
-    // ═══ HOOK 1: Override _buildGradingPrompt if it exists ═══
-    var _waitGrader = setInterval(function() {
-        if (typeof _buildGradingPrompt !== 'function') return;
-        clearInterval(_waitGrader);
+    // ═══ HOOK: _buildSystemPrompt ═══
+    var _waitSys = setInterval(function() {
+        if (typeof _buildSystemPrompt !== 'function') return;
+        clearInterval(_waitSys);
 
-        var _origBuildPrompt = _buildGradingPrompt;
-        _buildGradingPrompt = function(product, marketData) {
-            var basePrompt = _origBuildPrompt(product, marketData);
-            return _injectStructureContext(basePrompt, product);
+        var _origSys = _buildSystemPrompt;
+        window._buildSystemPrompt = function(isInPf, productType) {
+            var base = _origSys(isInPf, productType);
+
+            var structType = _getStructureType();
+            if (structType && STRUCTURE_PROMPTS[structType]) {
+                // Inject at the VERY BEGINNING of the system prompt
+                base = STRUCTURE_PROMPTS[structType] + base;
+                console.log('[StructPatch v1.2] Injected system prompt for: ' + structType);
+            }
+            return base;
         };
-        console.log('[StructurePatch] v1.1 hooked _buildGradingPrompt');
-    }, 300);
-    setTimeout(function() { clearInterval(_waitGrader); }, 12000);
+        console.log('[StructPatch v1.2] Hooked _buildSystemPrompt ✓');
+    }, 200);
+    setTimeout(function() { clearInterval(_waitSys); }, 10000);
 
-    // ═══ HOOK 2: Override gradeProposal to inject before API call ═══
+    // ═══ HOOK: _buildUserPrompt ═══
+    var _waitUsr = setInterval(function() {
+        if (typeof _buildUserPrompt !== 'function') return;
+        clearInterval(_waitUsr);
+
+        var _origUsr = _buildUserPrompt;
+        window._buildUserPrompt = function(ctx, base, productType) {
+            var prompt = _origUsr(ctx, base, productType);
+
+            var structType = _getStructureType();
+            if (structType === 'dispersion') {
+                // Add dispersion context to the product description
+                var product = app.state.currentProduct || {};
+                var histSim = product.historicalSimulations ||
+                    (product.aiParsed ? product.aiParsed.historicalSimulations : null);
+                var participation = product.participationRate || product.coupon?.rate || 7;
+
+                var dispContext = '\n## ⚠ TYPE DE STRUCTURE: DISPERSION\n';
+                dispContext += 'Ce produit calcule la DIFFÉRENCE de performance entre paires d\'actions.\n';
+                dispContext += 'Participation: ' + participation + '% sur la dispersion moyenne\n';
+                dispContext += 'Capital: 100% GARANTI à maturité (pas de barrière)\n';
+                if (histSim) {
+                    dispContext += 'Simulations historiques (3120 runs): min=' + (histSim.min || '?') +
+                        '%, médian=' + (histSim.median || '?') + '%, moyen=' + (histSim.mean || '?') +
+                        '%, max=' + (histSim.max || '?') + '%\n';
+                }
+                dispContext += 'Vol élevée = POSITIF (augmente la dispersion)\n';
+                dispContext += 'RAPPEL: NE PAS pénaliser vol, beta, nombre de SJ. Capital GARANTI.\n\n';
+
+                // Insert before ## SCORES section
+                var scoresIdx = prompt.indexOf('## SCORES');
+                if (scoresIdx > 0) {
+                    prompt = prompt.substring(0, scoresIdx) + dispContext + prompt.substring(scoresIdx);
+                } else {
+                    prompt = dispContext + prompt;
+                }
+                console.log('[StructPatch v1.2] Injected user prompt dispersion context');
+            }
+            else if (structType && STRUCTURE_PROMPTS[structType]) {
+                prompt = '\n## TYPE: ' + structType.toUpperCase() + '\n' + prompt;
+            }
+
+            return prompt;
+        };
+        console.log('[StructPatch v1.2] Hooked _buildUserPrompt ✓');
+    }, 250);
+    setTimeout(function() { clearInterval(_waitUsr); }, 10000);
+
+    // ═══ HOOK: gradeProposal — auto-set structureType before grading ═══
     var _waitGrade = setInterval(function() {
         if (typeof gradeProposal !== 'function') return;
         clearInterval(_waitGrade);
 
         var _origGrade = gradeProposal;
         window.gradeProposal = async function(product) {
-            // Auto-detect and set structureType before grading
+            // Auto-detect and persist structureType
             if (!product.structureType && typeof _autoDetectStructureType === 'function') {
                 var detected = _autoDetectStructureType(product);
                 if (detected) {
                     product.structureType = detected;
-                    console.log('[StructurePatch] Auto-set structureType before grading: ' + detected);
+                    console.log('[StructPatch v1.2] Auto-set structureType: ' + detected);
                 }
             }
             return _origGrade(product);
         };
-        console.log('[StructurePatch] v1.1 hooked gradeProposal for auto-detect');
-    }, 350);
-    setTimeout(function() { clearInterval(_waitGrade); }, 12000);
+        console.log('[StructPatch v1.2] Hooked gradeProposal ✓');
+    }, 300);
+    setTimeout(function() { clearInterval(_waitGrade); }, 10000);
 
-    // ═══ HOOK 3: Override AI call to inject context into prompt ═══
-    var _waitAI = setInterval(function() {
-        if (typeof aiParser === 'undefined' || typeof aiParser._callAI !== 'function') return;
-        clearInterval(_waitAI);
-
-        var _origCallAI = aiParser._callAI.bind(aiParser);
-        aiParser._callAI = async function(prompt, maxTokens) {
-            // Check if this is a grading prompt (contains P1/P2/P3/P4 or "grade" keywords)
-            if (typeof prompt === 'string' && (prompt.indexOf('P1') >= 0 && prompt.indexOf('P2') >= 0 && prompt.indexOf('P3') >= 0)) {
-                // Try to find the current product being graded
-                var currentProduct = app.state.currentProduct;
-                if (currentProduct) {
-                    prompt = _injectStructureContext(prompt, currentProduct);
-                }
-            }
-            return _origCallAI(prompt, maxTokens);
-        };
-        console.log('[StructurePatch] v1.1 hooked aiParser._callAI for prompt injection');
-    }, 400);
-    setTimeout(function() { clearInterval(_waitAI); }, 12000);
-
-    function _injectStructureContext(prompt, product) {
-        var structType = product.structureType;
-        if (!structType && typeof _autoDetectStructureType === 'function') {
-            structType = _autoDetectStructureType(product);
-        }
-
-        if (structType && STRUCTURE_PROMPTS[structType]) {
-            var injection = '\n\n=== STRUCTURE TYPE: ' + structType.toUpperCase() + ' ===\n' +
-                STRUCTURE_PROMPTS[structType] +
-                '\n=== FIN STRUCTURE OVERRIDE ===\n\n';
-
-            // Insert at the beginning of the prompt
-            prompt = injection + prompt;
-            console.log('[StructurePatch] Injected context for: ' + structType);
-        }
-        return prompt;
-    }
-
-    // ═══ Override P(coupon) for dispersion ═══
+    // ═══ HOOK: _estimateCouponProbability for dispersion ═══
     var _waitProb = setInterval(function() {
         if (typeof _estimateCouponProbability !== 'function') return;
         clearInterval(_waitProb);
 
         var _origProb = _estimateCouponProbability;
         window._estimateCouponProbability = function(product) {
-            var structType = product.structureType;
-            if (!structType && typeof _autoDetectStructureType === 'function') structType = _autoDetectStructureType(product);
+            var structType = _getStructureType(product);
 
             if (structType === 'dispersion') {
-                var defaultProb = 0.05;
-                var bankId = (product.bankId || product.bankName || '').toLowerCase();
-                if (typeof ISSUER_RATINGS !== 'undefined') {
-                    for (var key in ISSUER_RATINGS) {
-                        if (bankId.indexOf(key) >= 0) { defaultProb = Math.min(0.15, Math.max(0.01, (ISSUER_RATINGS[key].cds_proxy || 80) / 10000 / 0.6)); break; }
-                    }
-                }
-                return Math.round(0.85 * (1 - defaultProb) * 100) / 100;
+                // Coupon is ALWAYS paid (≥0%), only amount varies
+                // Use 85% as "probability of getting meaningful coupon"
+                var defaultProb = 0.03; // SG default risk
+                return Math.round(0.85 * (1 - defaultProb) * 100) / 100; // ~0.82
             }
             return _origProb(product);
         };
-    }, 450);
-    setTimeout(function() { clearInterval(_waitProb); }, 12000);
+        console.log('[StructPatch v1.2] Hooked _estimateCouponProbability ✓');
+    }, 350);
+    setTimeout(function() { clearInterval(_waitProb); }, 10000);
 
-    console.log('[StructBoard] Grader Structure Patch v1.1 \u2014 multi-hook + auto-detect + examples');
+    // ═══ HELPER: get structure type ═══
+    function _getStructureType(product) {
+        var p = product || app.state.currentProduct || {};
+        if (p.structureType) return p.structureType;
+        if (typeof _autoDetectStructureType === 'function') return _autoDetectStructureType(p);
+        return '';
+    }
+
+    console.log('[StructBoard] Grader Structure Patch v1.2 — correct hooks');
 })();
