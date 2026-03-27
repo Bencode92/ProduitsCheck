@@ -528,16 +528,7 @@ async function gradeProposal(product){
     var cr=null,final=base,aiUsed=false;
     try{cr=await _callClaude(ctx,base,type);if(cr&&cr.adjustments){final=_applyAdj(base,cr.adjustments,w,type,p);aiUsed=true;}}catch(e){console.warn('[Grader v5.2] AI fallback:',e.message);}
     var matI=p._maturityInfo||_estimateExpectedMaturity(p);var sigma=_computeBarrierSigma(p,ctx.market);var liq=_computeLiquidityScore(product);var ci=_computeCI(final.total,ctx);
-    var iss=ISSUER_RATINGS[product.bankId||''];var isCapped=false;
-    // v5.2: Progressive CDS degradation (-5pts/20bps above 60bps, max -25)
-    if(iss&&iss.cds_proxy>60){
-        var cdsDeduction=Math.min(25,Math.round((iss.cds_proxy-60)/20)*5);
-        if(cdsDeduction>0&&final.total>25){
-            final.total=Math.max(25,final.total-cdsDeduction);
-            final.grade=_letterGrade(final.total);
-            isCapped=true;
-        }
-    }
+    var iss=ISSUER_RATINGS[product.bankId||''];
     function _r(k,n){var s=n+': base '+base[k];if(aiUsed&&final.deltas&&final.deltas[k]!==0){s+=' → '+(final.deltas[k]>0?'+':'')+final.deltas[k]+' = '+final[k];if(final.reasons[k])s+=' ('+final.reasons[k]+')';}return s;}
     var matN=matI.isEstimated?' | Mat espérée: ~'+matI.expected+'a (prob mat: '+matI.probReachMaturity+'%)':'';
     var betaN=(ctx.market.worstMetrics&&ctx.market.worstMetrics.max_beta>1.0&&!p.capitalProtection&&p.barrier>0)?' | β'+ctx.market.worstMetrics.max_beta:'';
@@ -550,10 +541,8 @@ async function gradeProposal(product){
         verdict:cr&&cr.verdict?cr.verdict:'Score '+final.total+'/100 (base '+base.total+').',
         keyRisks:cr&&cr.keyRisks?cr.keyRisks:[],negotiationPoints:cr&&cr.negotiationPoints?cr.negotiationPoints:[],
         scenarios:cr&&cr.scenarios?cr.scenarios:null,confidenceInterval:ci,
-        metadata:{gradedAt:new Date().toISOString(),durationMs:Date.now()-t0,aiUsed:aiUsed,version:'5.2',productType:type,marketDataAvailable:ctx.market.available,catBenchmark:ctx.cat.bestRate,catSource:ctx.cat.source,couponAnnualized:p.coupon,couponRaw:p.couponRaw,couponMultiplier:p.couponMultiplier,couponFrequency:p.couponFrequency,isInPortfolio:ctx.isInPortfolio,hasBarrier:!p.capitalProtection&&p.barrier>0,barrierPct:p.barrier,barrierCouponPct:p.barrierCoupon||null,couponProbability:p._couponProbability||null,expectedMaturity:matI.expected,maxMaturity:matI.max,probReachMaturity:matI.probReachMaturity,maxBeta:ctx.market.worstMetrics?ctx.market.worstMetrics.max_beta:null,baseScore:base.total,baseGrade:base.grade,adjustments:aiUsed?final.deltas:null,barrier_sigma:sigma?sigma.sigma:null,barrier_sigma_label:sigma?sigma.label:null,barrier_sigma_danger:sigma?sigma.danger:null,liquidity_level:liq.level,liquidity_score:liq.score,liquidity_label:liq.label,ci_low:ci?ci.low:null,ci_high:ci?ci.high:null,ci_label:ci?ci.label:null,issuer_rating:iss?iss.rating:(product.bankId?'NR':null),issuer_tier:iss?iss.tier:null,issuer_cds_proxy:iss?iss.cds_proxy:null,issuer_cap_applied:isCapped,issuer_cds_deduction:isCapped?(iss?Math.min(25,Math.round((iss.cds_proxy-60)/20)*5):0):0,hasDecrement:p._hasDecrement||false,decrementDrag:p._decrementDrag||0,structureType:p._structureType||null}};
-    if(iss&&iss.cds_proxy>80&&result.keyRisks&&!result.keyRisks.some(function(r){return r.indexOf('émetteur')>=0}))result.keyRisks.push('Risque crédit émetteur '+iss.rating+' (CDS ~'+iss.cds_proxy+'bps)');
+        metadata:{gradedAt:new Date().toISOString(),durationMs:Date.now()-t0,aiUsed:aiUsed,version:'5.2',productType:type,marketDataAvailable:ctx.market.available,catBenchmark:ctx.cat.bestRate,catSource:ctx.cat.source,couponAnnualized:p.coupon,couponRaw:p.couponRaw,couponMultiplier:p.couponMultiplier,couponFrequency:p.couponFrequency,isInPortfolio:ctx.isInPortfolio,hasBarrier:!p.capitalProtection&&p.barrier>0,barrierPct:p.barrier,barrierCouponPct:p.barrierCoupon||null,couponProbability:p._couponProbability||null,expectedMaturity:matI.expected,maxMaturity:matI.max,probReachMaturity:matI.probReachMaturity,maxBeta:ctx.market.worstMetrics?ctx.market.worstMetrics.max_beta:null,baseScore:base.total,baseGrade:base.grade,adjustments:aiUsed?final.deltas:null,barrier_sigma:sigma?sigma.sigma:null,barrier_sigma_label:sigma?sigma.label:null,barrier_sigma_danger:sigma?sigma.danger:null,liquidity_level:liq.level,liquidity_score:liq.score,liquidity_label:liq.label,ci_low:ci?ci.low:null,ci_high:ci?ci.high:null,ci_label:ci?ci.label:null,issuer_rating:iss?iss.rating:(product.bankId?'NR':null),issuer_tier:iss?iss.tier:null,issuer_cds_proxy:iss?iss.cds_proxy:null,hasDecrement:p._hasDecrement||false,decrementDrag:p._decrementDrag||0,structureType:p._structureType||null}};
     if(sigma&&sigma.danger&&result.keyRisks)result.keyRisks.push('Barrière à '+sigma.sigma+'σ ('+sigma.label+') — vol '+sigma.vol+'%');
-    if(isCapped)result.verdict=(result.verdict||'')+' ⚠ Risque émetteur élevé — grade dégradé.';
     product.grading=result;return result;
 }
 
