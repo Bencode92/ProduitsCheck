@@ -1,6 +1,11 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — PDF Extraction & AI Parsing V7.1
-// V7.1: Added décrément extraction + stepDown detection
+// STRUCTBOARD — PDF Extraction & AI Parsing V7.2
+// V7.2: 5 critical missing fields:
+//   1. Double coupon (rappel vs maturité)
+//   2. Double barrière (coupon vs capital)
+//   3. Décrément + div yield
+//   4. Observation start period
+//   5. Coupon per-period vs annualized
 // ═══════════════════════════════════════════════════════════════
 
 class PDFExtractor {
@@ -54,7 +59,6 @@ function repairJSON(str) {
   if (start >= 0 && depth > 0) {
     let partial = str.substring(start).replace(/,\s*$/, '');
     for (let i = 0; i < depth; i++) partial += '}';
-    partial = partial.replace(/,\s*}/g, '}').replace(/,\s*]/g, ']');
     jsonMatches.push(partial);
   }
   const sorted = jsonMatches.sort((a, b) => b.length - a.length);
@@ -62,10 +66,7 @@ function repairJSON(str) {
     let clean = candidate.replace(/,\s*}/g, '}').replace(/,\s*]/g, ']').replace(/([\[{,])\s*,/g, '$1').replace(/\n/g, ' ');
     try { return JSON.parse(clean); } catch(e) {}
     const quoteCount = (clean.match(/"/g) || []).length;
-    if (quoteCount % 2 !== 0) {
-      clean = clean.replace(/,\s*$/, '') + '"}';
-      try { return JSON.parse(clean); } catch(e) {}
-    }
+    if (quoteCount % 2 !== 0) { clean = clean.replace(/,\s*$/, '') + '"}'.replace(/,\s*}/g, '}'); try { return JSON.parse(clean); } catch(e) {} }
     for (let i = clean.length - 1; i > Math.max(10, clean.length - 200); i--) {
       if (clean[i] === '}') { try { return JSON.parse(clean.substring(0, i + 1)); } catch(e) {} }
     }
@@ -76,8 +77,7 @@ function repairJSON(str) {
     fixed = fixed.substring(firstBrace);
     const stack = []; inStr = false; prevChar = '';
     for (let i = 0; i < fixed.length; i++) {
-      const c = fixed[i];
-      if (c === '"' && prevChar !== '\\') inStr = !inStr;
+      const c = fixed[i]; if (c === '"' && prevChar !== '\\') inStr = !inStr;
       if (!inStr) { if (c === '{') stack.push('}'); else if (c === '[') stack.push(']'); else if ((c === '}' || c === ']') && stack.length > 0) stack.pop(); }
       prevChar = c;
     }
@@ -107,17 +107,20 @@ R\u00c8GLES D'EXTRACTION CRITIQUES:
 4. "participation de X%" = participationRate X (PAS un coupon)
 5. "taux fixe" ou "callable" = structureType "taux_fixe"
 6. "capital garanti" ou "protection 100%" sans barri\u00e8re SJ = structureType "capital_garanti"
-7. Si le produit calcule des DIFFERENCES de performance entre actions = structureType "dispersion"
-8. Si le coupon est "\u00e0 maturit\u00e9" (pas p\u00e9riodique) = paymentTiming "maturity"
-9. Extraire les simulations historiques si pr\u00e9sentes (min, max, median, mean)
-10. Extraire le rating de l'\u00e9metteur/garant (Moody's, S&P, Fitch)
-11. D\u00c9CR\u00c9MENT: si l'indice a un "pr\u00e9l\u00e8vement forfaitaire" ou "d\u00e9cr\u00e9ment" de X% par an, extraire decrementPct=X et actualDividendYield si mentionn\u00e9
-12. STEP-DOWN: si la barri\u00e8re de rappel est "d\u00e9gressive" ou "step-down", extraire stepDown=true et stepDownPct (% de baisse par p\u00e9riode)
-13. COUPON ATTENTION: si la brochure donne \u00e0 la fois un taux par p\u00e9riode ET un taux annualis\u00e9 (ex: "4.50% par semestre (9.00% p.a.)"), mettre coupon.rate = taux PAR P\u00c9RIODE (4.50), PAS le taux annualis\u00e9
+7. Si DIFFERENCES de performance entre actions = structureType "dispersion"
+8. Si paiement "\u00e0 maturit\u00e9" = paymentTiming "maturity"
+9. Extraire simulations historiques (min, max, median, mean)
+10. Extraire rating \u00e9metteur/garant (Moody's, S&P)
+11. D\u00c9CR\u00c9MENT: "pr\u00e9l\u00e8vement forfaitaire X%" ou "d\u00e9cr\u00e9ment X%" \u2192 decrementPct=X. Si dividendes r\u00e9els mentionn\u00e9s \u2192 actualDividendYield
+12. STEP-DOWN: barri\u00e8re "d\u00e9gressive" \u2192 stepDown=true, stepDownPct=baisse par p\u00e9riode
+13. COUPON PAR P\u00c9RIODE: si "X% par semestre (Y% p.a.)" \u2192 coupon.rate = X (par p\u00e9riode), PAS Y
+14. DOUBLE COUPON: si rappel\u00e9 = Z%/an et maturit\u00e9 = W%/an (Z\u2260W), extraire coupon.rateIfCalled=Z et coupon.rateIfMaturity=W
+15. DOUBLE BARRI\u00c8RE: si barri\u00e8re coupon \u2260 barri\u00e8re capital, extraire capitalProtection.barrierCoupon ET capitalProtection.barrier (capital)
+16. OBSERVATION START: si observations commencent au semestre X ou ann\u00e9e Y (pas S1/Y1), extraire earlyRedemption.startSemester ou startYear
 
-R\u00e9ponds UNIQUEMENT avec un objet JSON. Aucun texte avant ou apr\u00e8s. Pas de backticks.
+R\u00e9ponds UNIQUEMENT avec un objet JSON. Aucun texte avant ou apr\u00e8s.
 
-{"name":"Nom","type":"autocall ou dispersion ou taux-fixe...","structureType":"autocall ou dispersion ou taux_fixe...","emitter":"\u00c9metteur","guarantor":"Garant","guarantorRating":{"moodys":"A1","sp":"A"},"isin":"ISIN","underlyings":["sous-jacent"],"underlyingType":"single-index ou basket ou pairs","nUnderlyings":1,"nPairs":null,"currency":"EUR","maturity":"5 ans","maturityYears":5,"coupon":{"rate":4.5,"type":"conditionnel","frequency":"semestriel","trigger":60,"memory":false,"paymentTiming":"periodic"},"participationRate":null,"capitalProtection":{"protected":false,"level":null,"barrier":50,"barrierType":"europeenne","couponFloor":false},"earlyRedemption":{"possible":true,"type":"autocall","trigger":95,"frequency":"semestriel","startYear":2,"stepDown":true,"stepDownPct":2.5},"decrementPct":5.0,"actualDividendYield":0.97,"historicalSimulations":null,"scenarios":{"favorable":"...","median":"...","defavorable":"..."},"risks":["risque1"],"mechanism":"Description courte","summary":"max 100 car"}`;
+{"name":"Nom","type":"autocall ou dispersion ou taux-fixe...","structureType":"autocall ou dispersion ou taux_fixe...","emitter":"\u00c9metteur","guarantor":"Garant","guarantorRating":{"moodys":"A1","sp":"A"},"isin":"ISIN","underlyings":["sous-jacent"],"underlyingType":"single-index ou basket ou pairs","nUnderlyings":1,"nPairs":null,"currency":"EUR","maturity":"5 ans","maturityYears":5,"coupon":{"rate":4.5,"rateIfCalled":5.0,"rateIfMaturity":4.0,"type":"conditionnel","frequency":"semestriel","trigger":60,"memory":false,"paymentTiming":"periodic"},"participationRate":null,"capitalProtection":{"protected":false,"level":null,"barrier":50,"barrierCoupon":60,"barrierType":"europeenne","couponFloor":false},"earlyRedemption":{"possible":true,"type":"autocall","trigger":95,"frequency":"semestriel","startSemester":4,"startYear":2,"stepDown":true,"stepDownPct":2.5},"decrementPct":5.0,"actualDividendYield":0.97,"historicalSimulations":null,"scenarios":{"favorable":"...","median":"...","defavorable":"..."},"risks":["risque1"],"mechanism":"Description courte","summary":"max 100 car"}`;
 
     try {
       const response = await this._callAI(prompt, MAX_TOKENS);
@@ -129,10 +132,9 @@ R\u00e9ponds UNIQUEMENT avec un objet JSON. Aucun texte avant ou apr\u00e8s. Pas
         else if (parsed.type === 'taux-fixe') parsed.structureType = 'taux_fixe';
         else if (parsed.type === 'capital-protege' && parsed.capitalProtection?.level === 100) parsed.structureType = 'capital_garanti';
         else if (parsed.type === 'reverse') parsed.structureType = 'reverse';
-        else if (parsed.type === 'participation') parsed.structureType = 'participation';
       }
 
-      // Auto-detect dispersion from keywords
+      // Auto-detect dispersion
       if (!parsed.structureType) {
         var allText = JSON.stringify(parsed).toLowerCase();
         if (allText.indexOf('performance relative') >= 0 || allText.indexOf('paire') >= 0 || allText.indexOf('dispersion') >= 0) {
@@ -148,23 +150,27 @@ R\u00e9ponds UNIQUEMENT avec un objet JSON. Aucun texte avant ou apr\u00e8s. Pas
         parsed.coupon.paymentTiming = 'maturity';
       }
 
-      // Post-process d\u00e9cr\u00e9ment from rawText if parser missed it
+      // Post-process d\u00e9cr\u00e9ment from rawText
       if (!parsed.decrementPct) {
-        var decMatch = rawText.match(/(?:pr\u00e9l\u00e8vement forfaitaire|d\u00e9cr\u00e9ment|decrement|AR)\s*(?:de\s*)?(?:fixe\s*(?:annuel\s*)?(?:de\s*)?)?([\d][\d.,]*)\s*%/i);
-        if (decMatch) {
-          parsed.decrementPct = parseFloat(decMatch[1].replace(',', '.'));
-          console.log('[parseBrochure] Post-process d\u00e9cr\u00e9ment detected: ' + parsed.decrementPct + '%');
+        var decMatch = rawText.match(/(?:pr\u00e9l\u00e8vement forfaitaire|d\u00e9cr\u00e9ment|decrement)\s*(?:de\s*)?(?:fixe\s*(?:annuel\s*)?(?:de\s*)?)?([\d][\d.,]*)\s*%/i);
+        if (!decMatch) {
+          // Also try "AR X%" in underlying name
+          var arMatch = rawText.match(/AR\s*(\d+[.,]?\d*)\s*%/i);
+          if (arMatch) decMatch = arMatch;
         }
-      }
-      // Detect actual dividend from rawText
-      if (parsed.decrementPct && !parsed.actualDividendYield) {
-        var divMatch = rawText.match(/dividendes?\s*(?:nets?\s*)?(?:distribu)?.*?(\d+[.,]\d+)\s*%/i);
-        if (divMatch) {
-          parsed.actualDividendYield = parseFloat(divMatch[1].replace(',', '.'));
+        if (decMatch) {
+          parsed.decrementPct = parseFloat((decMatch[1] || '').replace(',', '.'));
+          console.log('[parseBrochure] Post-process d\u00e9cr\u00e9ment: ' + parsed.decrementPct + '%');
         }
       }
 
-      // Post-process step-down from rawText
+      // Detect actual dividend
+      if (parsed.decrementPct && !parsed.actualDividendYield) {
+        var divMatch = rawText.match(/dividendes?\s*(?:nets?\s*)?(?:distribu)?[^.]{0,80}?(\d+[.,]\d+)\s*%/i);
+        if (divMatch) parsed.actualDividendYield = parseFloat(divMatch[1].replace(',', '.'));
+      }
+
+      // Post-process step-down
       if (parsed.earlyRedemption && !parsed.earlyRedemption.stepDown) {
         if (rawText.indexOf('d\u00e9gressive') >= 0 || rawText.indexOf('step-down') >= 0 || rawText.indexOf('step down') >= 0) {
           parsed.earlyRedemption.stepDown = true;
@@ -173,9 +179,24 @@ R\u00e9ponds UNIQUEMENT avec un objet JSON. Aucun texte avant ou apr\u00e8s. Pas
         }
       }
 
-      console.log('[parseBrochure] structureType:', parsed.structureType,
-        'decrement:', parsed.decrementPct || 'none',
-        'stepDown:', parsed.earlyRedemption?.stepDown || false);
+      // Post-process double barrier from rawText
+      if (parsed.capitalProtection && !parsed.capitalProtection.barrierCoupon) {
+        var bcMatch = rawText.match(/barri\u00e8re\s*(?:de\s*)?coupon[^.]{0,30}?(\d+[.,]?\d*)\s*%/i);
+        if (bcMatch) parsed.capitalProtection.barrierCoupon = parseFloat(bcMatch[1].replace(',', '.'));
+      }
+
+      // Post-process observation start
+      if (parsed.earlyRedemption && !parsed.earlyRedemption.startSemester) {
+        var startMatch = rawText.match(/(?:\u00e0 l'issue|\u00e0 partir)\s*(?:des?\s*)?(?:semestre?s?\s*)(\d+)/i);
+        if (startMatch) parsed.earlyRedemption.startSemester = parseInt(startMatch[1]);
+      }
+
+      console.log('[parseBrochure V7.2] type:', parsed.structureType,
+        '| decrement:', parsed.decrementPct || 'none',
+        '| stepDown:', parsed.earlyRedemption?.stepDown || false,
+        '| barrierCoupon:', parsed.capitalProtection?.barrierCoupon || 'none',
+        '| startSem:', parsed.earlyRedemption?.startSemester || 'S1',
+        '| rateIfCalled:', parsed.coupon?.rateIfCalled || 'same');
       return parsed;
     } catch (e) {
       console.error('[parseBrochure] Error:', e);
@@ -208,7 +229,7 @@ R\u00e9ponds UNIQUEMENT avec un objet JSON. Aucun texte avant ou apr\u00e8s. Pas
     if (!res.ok) { const err = await res.text(); throw new Error('AI API ' + res.status + ': ' + err.substring(0, 200)); }
     const data = await res.json();
     const text = data.content?.map(b => b.text || '').join('\n') || '';
-    if (!text) throw new Error('R\u00e9ponse IA vide (stop_reason: ' + data.stop_reason + ')');
+    if (!text) throw new Error('R\u00e9ponse IA vide');
     return text;
   }
 
