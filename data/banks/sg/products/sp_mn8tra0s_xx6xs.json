@@ -209,56 +209,56 @@
         "score": 74,
         "base": 72,
         "delta": 2,
-        "reasoning": "Rendement: base 72 → +2 = 74 (Volatilité élevée (TSLA 57%, NVDA 48%) très favorable pour la dispersion avec capital garanti, historique médian à 11.47% confirme forte probabilité de surperformance.) | Coupon 3.8233333333333337%, protégé"
+        "reasoning": "Rendement: base 72 → +2 = 74 (Participation 7% avec historique médian à 11.47% offre une probabilité élevée de surperformance dans un produit à capital garanti) | Coupon 3.8233333333333337%, protégé"
       },
       "underlyingQuality": {
         "score": 78,
         "base": 80,
         "delta": -2,
-        "reasoning": "Qualité: base 80 → -2 = 78 (Stagflation défavorable aux tech/communication (6/8 titres), VIX 22 et warnings macro créent incertitude mais dispersion atténue l'impact directionnel.) [B/Q 35%] | Worst: Tesla B:54"
+        "reasoning": "Qualité: base 80 → -2 = 78 (Surexposition tech (62.5%) et communication (37.5%) en stagflation avec 3 titres évités, betas élevés amplifient la vulnérabilité) [B/Q 35%] | Worst: Tesla B:54"
       },
       "portfolioFit": {
         "score": 74,
         "base": 72,
         "delta": 2,
-        "reasoning": "Fit: base 72 → +2 = 74 (Protection capital cruciale en stagflation, exposition tech diversifiée capture dispersion sans risque de perte, complément défensif idéal.)"
+        "reasoning": "Fit: base 72 → +2 = 74 (Dispersion élevée entre NVDA (vol 48%) et MSFT (vol 23%) favorise la capture de performance relative sur 3 ans)"
       },
       "riskPremium": {
-        "score": 34,
+        "score": 32,
         "base": 32,
-        "delta": 2,
-        "reasoning": "Prime: base 32 → +2 = 34 (Produit dispersion avec capital 100% garanti justifie pleinement les frais, participation 7% alignée avec le profil de risque nul.) | 3.8233333333333337% vs CAT 2.5% (spread 1.3%)"
+        "delta": 0,
+        "reasoning": "Prime: base 32 | 3.8233333333333337% vs CAT 2.5% (spread 1.3%)"
       }
     },
-    "verdict": "Produit dispersion attractif avec capital 100% garanti offrant un rendement médian historique de 11.47% sur 3 ans. La volatilité élevée du panier (TSLA 57%, NVDA 48%) est un atout majeur pour générer de la dispersion, avec une participation de 7% bien calibrée. En contexte stagflationniste, la protection totale du capital et l'exposition non-directionnelle via dispersion constituent une solution défensive intelligente, malgré le biais sectoriel tech/communication.",
+    "verdict": "Produit dispersion offrant un potentiel intéressant (médian historique 11.47%) avec capital 100% garanti, mais fortement exposé aux secteurs défavorisés en stagflation. La volatilité élevée du panier (moy 35.6%) est un atout pour la dispersion, compensant partiellement le risque sectoriel. Sur 3 ans, la probabilité d'obtenir au moins 3.82% annualisé est élevée malgré le contexte macro adverse.",
     "keyRisks": [
-      "Corrélation élevée entre les tech FAANG pourrait limiter la dispersion en cas de mouvement sectoriel uniforme",
-      "Participation limitée à 7% capte peu la volatilité extrême de TSLA/NVDA vs rendement médian historique"
+      "Concentration tech/comm (100%) vulnérable en stagflation avec VIX à 22",
+      "Corrélation élevée du panier peut réduire la dispersion en cas de choc systémique"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 21,
-        "return_eur": 6300,
+        "return_eur": 21000,
         "probability": 0.25,
         "duration_years": 3
       },
       "base": {
         "return_pct": 11,
-        "return_eur": 3300,
+        "return_eur": 11000,
         "probability": 0.4,
         "duration_years": 3
       },
       "stress": {
         "return_pct": 3,
-        "return_eur": 900,
-        "probability": 0.25,
+        "return_eur": 3000,
+        "probability": 0.3,
         "duration_years": 3
       },
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.1,
+        "probability": 0.05,
         "duration_years": 3
       }
     },
@@ -271,10 +271,10 @@
       "label": "B [59-71]"
     },
     "metadata": {
-      "gradedAt": "2026-03-27T14:32:15.457Z",
-      "durationMs": 21407,
+      "gradedAt": "2026-03-27T16:51:47.918Z",
+      "durationMs": 18373,
       "aiUsed": true,
-      "version": "5.0",
+      "version": "5.2",
       "productType": "dispersion",
       "marketDataAvailable": true,
       "catBenchmark": 2.5,
@@ -286,6 +286,8 @@
       "isInPortfolio": false,
       "hasBarrier": false,
       "barrierPct": 0,
+      "barrierCouponPct": null,
+      "couponProbability": null,
       "expectedMaturity": 3,
       "maxMaturity": 3,
       "maxBeta": 1.92,
@@ -295,7 +297,7 @@
         "p1": 2,
         "p2": -2,
         "p3": 2,
-        "p4": 2
+        "p4": 0
       },
       "barrier_sigma": null,
       "barrier_sigma_label": null,
@@ -309,7 +311,6 @@
       "issuer_rating": "A",
       "issuer_tier": "IG",
       "issuer_cds_proxy": 70,
-      "issuer_cap_applied": false,
       "hasDecrement": false,
       "decrementDrag": 0,
       "structureType": "dispersion",
