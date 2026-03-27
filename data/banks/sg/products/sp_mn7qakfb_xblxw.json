@@ -202,79 +202,80 @@
   "envelope": "",
   "grading": {
     "grade": "C",
-    "score": 57,
+    "score": 54,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 34,
-        "base": 44,
-        "delta": -10,
-        "reasoning": "Rendement: base 44 → -10 = 34 (Capital protégé mais coupon 7% sur worst-of 8 valeurs avec Tesla ultra-volatile (vol 57%, DD 54%) rend le coupon très incertain) | Coupon 7%, protégé"
+        "score": 50,
+        "base": 55,
+        "delta": -5,
+        "reasoning": "Rendement: base 55 → -5 = 50 (Malgré le capital protégé, le rendement de 3.82% est faible pour un panier incluant des valeurs très volatiles (NVDA 48%, TSLA 57%) qui limitent la prévisibilité) | Coupon 3.8233333333333337%, protégé"
       },
       "underlyingQuality": {
-        "score": 73,
-        "base": 85,
-        "delta": -12,
-        "reasoning": "Qualité: base 85 → -12 = 73 (Surexposition communication (3/8) et conso cyclique (2/8) en régime neutral défavorable, Tesla faible (ROE 5%, marge 4%)) [B/Q 35%] | Worst: Tesla B:54"
+        "score": 70,
+        "base": 80,
+        "delta": -10,
+        "reasoning": "Qualité: base 80 → -10 = 70 (3 des 8 sous-jacents (META, NFLX, GOOGL) sont dans le secteur communication évité en régime neutral, et 2 autres (AMZN, TSLA) dans la conso cyclique également évitée) [B/Q 35%] | Worst: Tesla B:54"
       },
       "portfolioFit": {
-        "score": 67,
+        "score": 72,
         "base": 72,
-        "delta": -5,
-        "reasoning": "Fit: base 72 → -5 = 67 (Panier trop large (8 valeurs) avec profils hétérogènes, Tesla décorrélé des GAFAM créant un risque asymétrique)"
+        "delta": 0,
+        "reasoning": "Fit: base 72"
       },
       "riskPremium": {
-        "score": 61,
-        "base": 61,
-        "delta": 0,
-        "reasoning": "Prime: base 61 | 7% vs CAT 2.5% (spread 4.5%)"
+        "score": 27,
+        "base": 32,
+        "delta": -5,
+        "reasoning": "Prime: base 32 → -5 = 27 (Structure très simple sans autocall ni barrière visible, le rendement faible ne compense pas l'immobilisation sur 3 ans) | 3.8233333333333337% vs CAT 2.5% (spread 1.3%)"
       }
     },
-    "verdict": "Produit à capital protégé mais profil risqué avec worst-of sur 8 valeurs incluant Tesla (vol 57%, beta 1.62) qui plombe la probabilité du coupon 7%. L'exposition concentrée sur les secteurs évités (communication 37.5%, conso cyclique 25%) en régime macro neutral fragilise davantage. Malgré la protection du capital, le rapport rendement/risque est défavorable avec une probabilité élevée de ne percevoir aucun coupon sur 3 ans.",
+    "verdict": "Produit décevant offrant seulement 3.82% annualisés sur 3 ans avec un panier surexposé aux secteurs évités (62.5% des positions). La protection du capital est le seul atout face à des volatilités extrêmes (NVDA 48%, TSLA 57%) et des betas élevés. En régime macro neutre avec 5 sous-jacents dans des secteurs défavorisés, le couple rendement/risque est peu attractif pour une immobilisation de 100k€ sur 3 ans.",
     "keyRisks": [
-      "Tesla maillon faible critique : volatilité 57%, drawdown 54%, fondamentaux dégradés",
-      "Surexposition secteurs évités (62.5% du panier) en contexte macro défavorable"
+      "Rendement réel négatif si inflation >3.82%",
+      "Surexposition sectorielle avec 62.5% dans les secteurs évités",
+      "Coût d'opportunité élevé vs obligations d'État à 3.5%"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 7,
-        "return_eur": 21000,
-        "probability": 0.2,
+        "return_pct": 3.82,
+        "return_eur": 11460,
+        "probability": 0.3,
         "duration_years": 3
       },
       "base": {
-        "return_pct": 2.3,
-        "return_eur": 7000,
-        "probability": 0.35,
+        "return_pct": 3.82,
+        "return_eur": 11460,
+        "probability": 0.4,
         "duration_years": 3
       },
       "stress": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.35,
+        "probability": 0.25,
         "duration_years": 3
       },
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.1,
+        "probability": 0.05,
         "duration_years": 3
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-27T10:09:23.214Z",
-      "durationMs": 20474,
+      "gradedAt": "2026-03-27T10:13:30.494Z",
+      "durationMs": 21990,
       "aiUsed": true,
       "version": "4.3",
       "productType": "standard",
       "marketDataAvailable": true,
       "catBenchmark": 2.5,
       "catSource": "fallback-2026",
-      "couponAnnualized": 7,
+      "couponAnnualized": 3.8233333333333337,
       "couponRaw": 7,
       "couponMultiplier": 1,
       "couponFrequency": "annuel",
@@ -284,13 +285,13 @@
       "expectedMaturity": 3,
       "maxMaturity": 3,
       "maxBeta": 1.92,
-      "baseScore": 64,
-      "baseGrade": "B",
+      "baseScore": 59,
+      "baseGrade": "C",
       "adjustments": {
-        "p1": -10,
-        "p2": -12,
-        "p3": -5,
-        "p4": 0
+        "p1": -5,
+        "p2": -10,
+        "p3": 0,
+        "p4": -5
       },
       "stockData": [
         {
