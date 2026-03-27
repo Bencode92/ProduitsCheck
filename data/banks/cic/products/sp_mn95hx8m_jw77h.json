@@ -12,7 +12,7 @@
   "maturityDate": null,
   "strikeDate": null,
   "coupon": {
-    "rate": 4.85,
+    "rate": 9.7,
     "rateIfCalled": null,
     "rateIfMaturity": null,
     "type": "conditionnel",
@@ -75,7 +75,7 @@
     "maturity": "5 ans",
     "maturityYears": 5,
     "coupon": {
-      "rate": 4.85,
+      "rate": 9.7,
       "rateIfCalled": null,
       "rateIfMaturity": null,
       "type": "conditionnel",
