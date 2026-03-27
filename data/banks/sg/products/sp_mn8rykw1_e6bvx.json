@@ -176,5 +176,101 @@
       "redundancy": 14,
       "complementarity": 25
     }
+  },
+  "grading": {
+    "grade": "D",
+    "score": 26,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 0,
+        "base": 0,
+        "delta": -15,
+        "reasoning": "Rendement: base 0 → -15 = 0 (Coupon 0% vs taux sans risque 10Y à 3.01% = spread négatif de -301bps, paiement unique à maturité sans flux intermédiaires) | Coupon 0%, protégé | Mat espérée: ~2.2a (max 10a, prob mat: 0%)"
+      },
+      "underlyingQuality": {
+        "score": 50,
+        "base": 60,
+        "delta": -10,
+        "reasoning": "Qualité: base 60 → -10 = 50 (Environnement de taux stables mais élevés (3.01% sur 10Y), risque de durée maximal sur 10 ans sans compensation par le coupon) [crédit]"
+      },
+      "portfolioFit": {
+        "score": 65,
+        "base": 70,
+        "delta": -5,
+        "reasoning": "Fit: base 70 → -5 = 65 (Produit inadapté en régime neutral avec taux élevés, aucun avantage vs obligations classiques ou CAT à 2%)"
+      },
+      "riskPremium": {
+        "score": 0,
+        "base": 5,
+        "delta": -15,
+        "reasoning": "Prime: base 5 → -15 = 0 (Spread effectif catastrophique (-301bps vs sans risque), prime d'illiquidité non compensée par le rendement) | 0% vs CAT 2.5% (spread -2.5%)"
+      }
+    },
+    "verdict": "Produit totalement inadapté avec un coupon 0% face à des taux sans risque 10Y à 3.01%. L'investisseur subit une perte d'opportunité de 301bps annuels sans aucune compensation, avec en plus les risques crédit émetteur et durée. Même en cas de call anticipé (45% de probabilité), le rendement reste nul alors que les CAT offrent 2% sans risque.",
+    "keyRisks": [
+      "Perte d'opportunité massive: -3.01% annuel vs taux sans risque équivalent",
+      "Risque crédit émetteur sur 10 ans sans prime de risque",
+      "Risque de durée maximal (DV01 ~10bps) sans compensation coupon"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.45,
+        "duration_years": 2.2
+      },
+      "base": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.4,
+        "duration_years": 5
+      },
+      "stress": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.1,
+        "duration_years": 10
+      },
+      "worst": {
+        "return_pct": -20,
+        "return_eur": -20000,
+        "probability": 0.05,
+        "duration_years": 10
+      }
+    },
+    "metadata": {
+      "gradedAt": "2026-03-27T10:46:09.093Z",
+      "durationMs": 19844,
+      "aiUsed": true,
+      "version": "4.3",
+      "productType": "fixed-rate-callable",
+      "marketDataAvailable": false,
+      "catBenchmark": 2.5,
+      "catSource": "fallback-2026",
+      "couponAnnualized": 0,
+      "couponRaw": 0,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": false,
+      "barrierPct": 0,
+      "expectedMaturity": 2.2,
+      "maxMaturity": 10,
+      "probReachMaturity": 0,
+      "maxBeta": null,
+      "baseScore": 30,
+      "baseGrade": "D",
+      "adjustments": {
+        "p1": -15,
+        "p2": -10,
+        "p3": -5,
+        "p4": -15
+      }
+    }
   }
 }
