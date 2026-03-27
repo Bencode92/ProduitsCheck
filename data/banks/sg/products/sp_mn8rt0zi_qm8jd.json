@@ -181,5 +181,112 @@
       "redundancy": 20,
       "complementarity": 25
     }
+  },
+  "grading": {
+    "grade": "B",
+    "score": 63,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 59,
+        "base": 74,
+        "delta": -15,
+        "reasoning": "Rendement: base 74 → -15 = 59 (Décrément synthétique de 99%/an rend l'autocall quasi-impossible et augmente drastiquement le risque barrière avec 38.93% de volatilité) | Coupon 9% (4.5×2), barrière 50% | Mat espérée: ~1.1a (max 5a, prob mat: 0%)"
+      },
+      "underlyingQuality": {
+        "score": 59,
+        "base": 69,
+        "delta": -10,
+        "reasoning": "Qualité: base 69 → -10 = 59 (Indice gold miners très volatil (DD -30.84%) avec décrément artificiel créant un biais structurel baissier majeur) [vol/DD 30%] | Worst: Indice Solactive GDX EUR AR 5% B:50"
+      },
+      "portfolioFit": {
+        "score": 75,
+        "base": 80,
+        "delta": -5,
+        "reasoning": "Fit: base 80 → -5 = 75 (Exposition mono-sectorielle sur un indice à décrément synthétique inadapté pour un portefeuille diversifié)"
+      },
+      "riskPremium": {
+        "score": 63,
+        "base": 73,
+        "delta": -10,
+        "reasoning": "Prime: base 73 → -10 = 63 (Coupon de 9% trompeur car le décrément de 99%/an garantit quasi-systématiquement une perte en capital) | 9% vs CAT 2.5% (spread 6.5%)"
+      }
+    },
+    "verdict": "Produit extrêmement défavorable avec un décrément synthétique de 99%/an qui rend l'autocall quasi-impossible et garantit presque une touche de la barrière à 50%. Malgré un coupon affiché de 9%, la structure est conçue pour perdre : avec une volatilité de 38.93% et un prélèvement annuel de 99%, le sous-jacent devrait surperformer de +108%/an juste pour maintenir son niveau. En régime macro neutre, ce produit représente un piège à rendement manifeste.",
+    "keyRisks": [
+      "Décrément synthétique de 99%/an garantit quasi-systématiquement une perte en capital",
+      "Volatilité de 38.93% combinée au décrément rend la barrière 50% très vulnérable",
+      "Autocall à 95% mathématiquement quasi-impossible avec ce niveau de prélèvement"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 4.5,
+        "return_eur": 4500,
+        "probability": 0.05,
+        "duration_years": 0.5
+      },
+      "base": {
+        "return_pct": -30,
+        "return_eur": -30000,
+        "probability": 0.4,
+        "duration_years": 3
+      },
+      "stress": {
+        "return_pct": -50,
+        "return_eur": -50000,
+        "probability": 0.4,
+        "duration_years": 5
+      },
+      "worst": {
+        "return_pct": -70,
+        "return_eur": -70000,
+        "probability": 0.15,
+        "duration_years": 5
+      }
+    },
+    "metadata": {
+      "gradedAt": "2026-03-27T10:42:28.138Z",
+      "durationMs": 18567,
+      "aiUsed": true,
+      "version": "4.3",
+      "productType": "standard",
+      "marketDataAvailable": true,
+      "catBenchmark": 2.5,
+      "catSource": "fallback-2026",
+      "couponAnnualized": 9,
+      "couponRaw": 4.5,
+      "couponMultiplier": 2,
+      "couponFrequency": "semestriel",
+      "isInPortfolio": false,
+      "hasBarrier": true,
+      "barrierPct": 50,
+      "expectedMaturity": 1.1,
+      "maxMaturity": 5,
+      "probReachMaturity": 0,
+      "maxBeta": 0.55,
+      "baseScore": 74,
+      "baseGrade": "B",
+      "adjustments": {
+        "p1": -15,
+        "p2": -10,
+        "p3": -5,
+        "p4": -10
+      },
+      "stockData": [
+        {
+          "name": "Indice Solactive GDX EUR AR 5%",
+          "ticker": "GDX",
+          "sector": "Index",
+          "perf_ytd": -3.9,
+          "perf_1y": 84.44,
+          "volatility_3y": 38.93,
+          "max_drawdown_3y": -30.84
+        }
+      ]
+    }
   }
 }
