@@ -183,25 +183,26 @@
       "complementarity": 45
     }
   },
+  "structureType": "capital_garanti",
   "grading": {
     "grade": "B",
-    "score": 69,
+    "score": 68,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 62,
-        "base": 67,
+        "score": 76,
+        "base": 81,
         "delta": -5,
-        "reasoning": "Rendement: base 67 → -5 = 62 (Capital protégé compense l'absence de barrière mais coupon 6.15% faible vs volatilité LVMH 29.47%) | Coupon 6.15%, protégé"
+        "reasoning": "Rendement: base 81 → -5 = 76 (Capital garanti élimine le risque, mais rendement de 6.15% modeste dans contexte de taux actuels) | Coupon 6.15%, protégé"
       },
       "underlyingQuality": {
-        "score": 69,
+        "score": 62,
         "base": 74,
-        "delta": -5,
-        "reasoning": "Qualité: base 74 → -5 = 69 (Les 2 sous-jacents dans secteurs évités (consumer-discretionary + financials) avec perfs négatives -28.57% et -8.23% YTD [MI capé ±5]) [B/Q 35%] | Worst: Crédit Agricole S.A. B:79"
+        "delta": -12,
+        "reasoning": "Qualité: base 74 → -12 = 62 (LVMH dans secteur évité (consumer-discretionary) avec -29% YTD, ACA également évité (financials) en régime neutral) [B/Q 35%] | Worst: Crédit Agricole S.A. B:79"
       },
       "portfolioFit": {
         "score": 80,
@@ -210,47 +211,47 @@
         "reasoning": "Fit: base 80"
       },
       "riskPremium": {
-        "score": 70,
-        "base": 73,
-        "delta": -3,
-        "reasoning": "Prime: base 73 → -3 = 70 (Structure digitale simple mais rendement 6.15% peu attractif pour 5 ans sans autocall) | 6.15% vs CAT 2.5% (spread 3.7%)"
+        "score": 54,
+        "base": 59,
+        "delta": -5,
+        "reasoning": "Prime: base 59 → -5 = 54 (Spread de 615pb attractif mais reflète la faiblesse actuelle des deux secteurs) | 6.15% vs CAT 2.5% (spread 3.7%)"
       }
     },
-    "verdict": "Produit défensif avec capital protégé mais mal positionné dans le contexte actuel. Les deux sous-jacents évoluent dans des secteurs évités par le marché avec LVMH en fort repli (-28.57% YTD) et une volatilité élevée à 29.47%. Le coupon de 6.15% annualisé reste modeste pour une durée de 5 ans sans mécanisme d'autocall, offrant un rendement total maximal de 30.75% sur la période.",
+    "verdict": "Ce produit à capital garanti offre un rendement fixe de 6.15% sur 5 ans, supérieur aux obligations d'État (~3-4%) mais inférieur aux rendements structurés classiques. Les deux sous-jacents évoluent dans des secteurs actuellement défavorisés (luxe et banque) avec des performances négatives importantes, particulièrement LVMH (-29% YTD). La protection totale du capital élimine le risque de perte mais limite le potentiel de gain dans un contexte où d'autres produits structurés offrent 8-10% avec protection partielle.",
     "keyRisks": [
-      "Exposition à deux secteurs actuellement évités par le marché",
-      "Absence d'autocall bloquant le capital 5 ans pour un rendement limité"
+      "Coût d'opportunité élevé vs produits avec barrière à 60-70% offrant 8-10%",
+      "Exposition à deux secteurs évités en régime macro neutral"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 30.75,
+        "return_pct": 6.15,
         "return_eur": 30750,
-        "probability": 0.25,
+        "probability": 0.95,
         "duration_years": 5
       },
       "base": {
-        "return_pct": 30.75,
+        "return_pct": 6.15,
         "return_eur": 30750,
-        "probability": 0.4,
+        "probability": 0.95,
         "duration_years": 5
       },
       "stress": {
-        "return_pct": 15,
-        "return_eur": 15000,
-        "probability": 0.25,
+        "return_pct": 6.15,
+        "return_eur": 30750,
+        "probability": 0.95,
         "duration_years": 5
       },
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.1,
+        "probability": 0.05,
         "duration_years": 5
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-25T17:04:38.018Z",
-      "durationMs": 16334,
+      "gradedAt": "2026-03-27T12:16:52.089Z",
+      "durationMs": 17775,
       "aiUsed": true,
       "version": "4.3",
       "productType": "standard",
@@ -267,22 +268,22 @@
       "expectedMaturity": 0,
       "maxMaturity": 0,
       "maxBeta": 0.89,
-      "baseScore": 73,
+      "baseScore": 74,
       "baseGrade": "B",
       "adjustments": {
         "p1": -5,
-        "p2": -5,
+        "p2": -12,
         "p3": 0,
-        "p4": -3
+        "p4": -5
       },
       "stockData": [
         {
           "name": "LVMH Moët Hennessy Louis Vuitton SA",
           "ticker": "MC",
           "sector": "Biens de consommation cycliques",
-          "perf_ytd": -28.57,
-          "perf_1y": -21.79,
-          "volatility_3y": 29.47,
+          "perf_ytd": -29.02,
+          "perf_1y": -19.91,
+          "volatility_3y": 29.46,
           "max_drawdown_3y": 51.49,
           "buffett_score": 81,
           "quality_score": 65,
@@ -292,9 +293,9 @@
           "name": "Crédit Agricole S.A.",
           "ticker": "ACA",
           "sector": "Finance",
-          "perf_ytd": -8.23,
-          "perf_1y": -5.76,
-          "volatility_3y": 21.22,
+          "perf_ytd": -9.09,
+          "perf_1y": -4.89,
+          "volatility_3y": 21.27,
           "max_drawdown_3y": 21.42,
           "buffett_score": null,
           "quality_score": 79,
