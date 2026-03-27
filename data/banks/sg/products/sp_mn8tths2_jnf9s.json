@@ -178,5 +178,67 @@
       "redundancy": 14,
       "complementarity": 25
     }
+  },
+  "grading": {
+    "grade": "D",
+    "score": 44,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 42,
+        "base": 42,
+        "delta": 0,
+        "reasoning": "Rendement: base 42 | Coupon 3.45%, protégé | Mat espérée: ~2.2a (max 10a, prob mat: 0%)"
+      },
+      "underlyingQuality": {
+        "score": 60,
+        "base": 60,
+        "delta": 0,
+        "reasoning": "Qualité: base 60 [crédit]"
+      },
+      "portfolioFit": {
+        "score": 70,
+        "base": 70,
+        "delta": 0,
+        "reasoning": "Fit: base 70"
+      },
+      "riskPremium": {
+        "score": 11,
+        "base": 11,
+        "delta": 0,
+        "reasoning": "Prime: base 11 | 3.45% vs CAT 2.5% (spread 1.0%)"
+      }
+    },
+    "verdict": "Score 44/100 (base 44).",
+    "keyRisks": [],
+    "negotiationPoints": [],
+    "scenarios": null,
+    "metadata": {
+      "gradedAt": "2026-03-27T11:37:12.160Z",
+      "durationMs": 1615,
+      "aiUsed": false,
+      "version": "4.3",
+      "productType": "fixed-rate-callable",
+      "marketDataAvailable": false,
+      "catBenchmark": 2.5,
+      "catSource": "fallback-2026",
+      "couponAnnualized": 3.45,
+      "couponRaw": 4,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": false,
+      "barrierPct": 0,
+      "expectedMaturity": 2.2,
+      "maxMaturity": 10,
+      "probReachMaturity": 0,
+      "maxBeta": null,
+      "baseScore": 44,
+      "baseGrade": "D",
+      "adjustments": null
+    }
   }
 }
