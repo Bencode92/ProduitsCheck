@@ -50,7 +50,13 @@ function _annualizeCoupon(raw,obj,name){if(!raw||raw<=0)return{annual:0,raw:0,mu
 function _graderNormalize(product){
     var p=product||{},ai=p.aiParsed||{};var co=p.coupon||ai.coupon||{};
     var raw=typeof co==='number'?co:parseFloat(co.rate||co.annualized||co.taux)||0;
-    var ci=_annualizeCoupon(raw,typeof co==='object'?co:{},p.name||ai.name||'');
+   // v5.2 fix: if coupon has no frequency, inherit from earlyRedemption
+    var couponObj=typeof co==='object'?co:{};
+    if(!couponObj.frequency&&!couponObj.frequence){
+        var arFreq=(ar.frequency||ar.frequence||'').toLowerCase().trim();
+        if(arFreq&&FREQUENCY_MULTIPLIERS[arFreq]){couponObj.frequency=arFreq;console.log('[Grader v5.2] Coupon freq inherited from autocall: '+arFreq);}
+    }
+    var ci=_annualizeCoupon(raw,couponObj,p.name||ai.name||'');
     var pr=p.capitalProtection||ai.capitalProtection||{};var ar=p.earlyRedemption||ai.earlyRedemption||{};
     var und=_normalizeUnderlyings(p.underlyings||ai.underlyings||[]);
     var rawText=(p.rawText||'').toLowerCase();var name=(p.name||'').toLowerCase();
