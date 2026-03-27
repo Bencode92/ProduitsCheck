@@ -199,59 +199,59 @@
   },
   "grading": {
     "grade": "B",
-    "score": 64,
+    "score": 65,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 70,
-        "base": 55,
-        "delta": 15,
-        "reasoning": "Rendement: base 55 → +15 = 70 (Rendement historique médian de 11.47% sur 3 ans avec capital 100% garanti, aucun risque de perte) | Coupon 3.8233333333333337%, protégé"
+        "score": 74,
+        "base": 72,
+        "delta": 2,
+        "reasoning": "Rendement: base 72 → +2 = 74 (Volatilité élevée (TSLA 57%, NVDA 48%) très favorable pour la dispersion avec capital garanti, historique médian à 11.47% confirme forte probabilité de surperformance.) | Coupon 3.8233333333333337%, protégé"
       },
       "underlyingQuality": {
-        "score": 70,
+        "score": 78,
         "base": 80,
-        "delta": -10,
-        "reasoning": "Qualité: base 80 → -10 = 70 (Surreprésentation du secteur communication (3/8 actions) évité en régime neutral, beta élevé de NVDA (1.92)) [B/Q 35%] | Worst: Tesla B:54"
+        "delta": -2,
+        "reasoning": "Qualité: base 80 → -2 = 78 (Stagflation défavorable aux tech/communication (6/8 titres), VIX 22 et warnings macro créent incertitude mais dispersion atténue l'impact directionnel.) [B/Q 35%] | Worst: Tesla B:54"
       },
       "portfolioFit": {
-        "score": 77,
+        "score": 74,
         "base": 72,
-        "delta": 5,
-        "reasoning": "Fit: base 72 → +5 = 77 (Produit de dispersion unique offrant une diversification innovante, adapté aux portefeuilles prudents)"
+        "delta": 2,
+        "reasoning": "Fit: base 72 → +2 = 74 (Protection capital cruciale en stagflation, exposition tech diversifiée capture dispersion sans risque de perte, complément défensif idéal.)"
       },
       "riskPremium": {
-        "score": 42,
+        "score": 34,
         "base": 32,
-        "delta": 10,
-        "reasoning": "Prime: base 32 → +10 = 42 (Spread faible mais justifié par la garantie totale du capital et le rendement positif certain) | 3.8233333333333337% vs CAT 2.5% (spread 1.3%)"
+        "delta": 2,
+        "reasoning": "Prime: base 32 → +2 = 34 (Produit dispersion avec capital 100% garanti justifie pleinement les frais, participation 7% alignée avec le profil de risque nul.) | 3.8233333333333337% vs CAT 2.5% (spread 1.3%)"
       }
     },
-    "verdict": "Ce produit de dispersion offre une opportunité rare : capital 100% garanti avec un rendement médian historique de 11.47% sur 3 ans. La volatilité élevée du panier (notamment Tesla à 57%) est un atout qui maximise la dispersion entre les paires. Malgré la surexposition au secteur communication évité (37.5% du panier), la protection intégrale du capital et le mécanisme de dispersion compensent largement ce biais sectoriel.",
+    "verdict": "Produit dispersion attractif avec capital 100% garanti offrant un rendement médian historique de 11.47% sur 3 ans. La volatilité élevée du panier (TSLA 57%, NVDA 48%) est un atout majeur pour générer de la dispersion, avec une participation de 7% bien calibrée. En contexte stagflationniste, la protection totale du capital et l'exposition non-directionnelle via dispersion constituent une solution défensive intelligente, malgré le biais sectoriel tech/communication.",
     "keyRisks": [
-      "Concentration sectorielle tech/communication limitant la dispersion en cas de mouvement directionnel",
-      "Rendement plafonné à 7% de participation sur la dispersion moyenne"
+      "Corrélation élevée entre les tech FAANG pourrait limiter la dispersion en cas de mouvement sectoriel uniforme",
+      "Participation limitée à 7% capte peu la volatilité extrême de TSLA/NVDA vs rendement médian historique"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 21,
-        "return_eur": 21000,
+        "return_eur": 6300,
         "probability": 0.25,
         "duration_years": 3
       },
       "base": {
-        "return_pct": 11.5,
-        "return_eur": 11500,
+        "return_pct": 11,
+        "return_eur": 3300,
         "probability": 0.4,
         "duration_years": 3
       },
       "stress": {
         "return_pct": 3,
-        "return_eur": 3000,
+        "return_eur": 900,
         "probability": 0.25,
         "duration_years": 3
       },
@@ -262,12 +262,20 @@
         "duration_years": 3
       }
     },
+    "confidenceInterval": {
+      "low": 59,
+      "high": 71,
+      "halfWidth": 6,
+      "gradeStable": false,
+      "gradeRange": "C-B",
+      "label": "B [59-71]"
+    },
     "metadata": {
-      "gradedAt": "2026-03-27T11:36:07.387Z",
-      "durationMs": 17639,
+      "gradedAt": "2026-03-27T14:32:15.457Z",
+      "durationMs": 21407,
       "aiUsed": true,
-      "version": "4.3",
-      "productType": "standard",
+      "version": "5.0",
+      "productType": "dispersion",
       "marketDataAvailable": true,
       "catBenchmark": 2.5,
       "catSource": "fallback-2026",
@@ -281,14 +289,30 @@
       "expectedMaturity": 3,
       "maxMaturity": 3,
       "maxBeta": 1.92,
-      "baseScore": 59,
-      "baseGrade": "C",
+      "baseScore": 64,
+      "baseGrade": "B",
       "adjustments": {
-        "p1": 15,
-        "p2": -10,
-        "p3": 5,
-        "p4": 10
+        "p1": 2,
+        "p2": -2,
+        "p3": 2,
+        "p4": 2
       },
+      "barrier_sigma": null,
+      "barrier_sigma_label": null,
+      "barrier_sigma_danger": null,
+      "liquidity_level": "L4",
+      "liquidity_score": 10,
+      "liquidity_label": "Illiquide (999M)",
+      "ci_low": 59,
+      "ci_high": 71,
+      "ci_label": "B [59-71]",
+      "issuer_rating": "A",
+      "issuer_tier": "IG",
+      "issuer_cds_proxy": 70,
+      "issuer_cap_applied": false,
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "dispersion",
       "stockData": [
         {
           "name": "NVIDIA",
