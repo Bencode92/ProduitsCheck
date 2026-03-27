@@ -137,52 +137,52 @@
       "complementarity": 45
     }
   },
+  "structureType": "taux_fixe",
   "grading": {
     "grade": "C",
-    "score": 55,
+    "score": 51,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 53,
+        "score": 45,
         "base": 55,
-        "delta": -2,
-        "reasoning": "Rendement: base 55 → -2 = 53 (Coupon 4% vs taux AAA 5Y 2.70% donne un spread de 1.30%, attractif mais volatilité taux (17.8bps) et risque callable réduisent la visibilité du rendement effectif [MI capé ±2]) | Coupon 4%, protégé"
+        "delta": -10,
+        "reasoning": "Rendement: base 55 → -10 = 45 (Coupon 4% vs AAA 5Y 2.66% = spread 134bps insuffisant pour compenser risque callable et illiquidité dans environnement stable) | Coupon 4%, protégé"
       },
       "underlyingQuality": {
-        "score": 64,
+        "score": 61,
         "base": 66,
-        "delta": -2,
-        "reasoning": "Qualité: base 66 → -2 = 64 (Environnement taux directionnels haussiers (2Y rising) défavorable aux obligations longues, risque de durée élevé sur 5 ans avec DV01 ~5bps par 1% de hausse des taux [MI capé ±2]) [crédit]"
+        "delta": -5,
+        "reasoning": "Qualité: base 66 → -5 = 61 (Risque de réinvestissement élevé avec courbe normale et taux BCE à 2.15% - probable rappel si taux baissent) [crédit]"
       },
       "portfolioFit": {
-        "score": 70,
+        "score": 65,
         "base": 70,
-        "delta": 0,
-        "reasoning": "Fit: base 70"
+        "delta": -5,
+        "reasoning": "Fit: base 70 → -5 = 65 (Produit peu flexible en régime neutral avec volatilité taux modérée (18-20bps) - CAT 5Y plus liquide pour même horizon)"
       },
       "riskPremium": {
-        "score": 36,
-        "base": 34,
-        "delta": 2,
-        "reasoning": "Prime: base 34 → +2 = 36 (Spread 1.30% vs AAA compense partiellement l'illiquidité, mais prime reste insuffisante face au risque callable et crédit émetteur [MI capé ±2]) | 4% vs CAT 2.5% (spread 1.5%)"
+        "score": 35,
+        "base": 35,
+        "delta": 0,
+        "reasoning": "Prime: base 35 | 4% vs CAT 2.5% (spread 1.5%)"
       }
     },
-    "verdict": "Produit offrant un spread de 1.30% vs taux AAA 5Y (2.70%), mais fortement pénalisé par l'environnement de taux haussiers et le risque callable qui limite le potentiel de gain. Avec des taux 2Y en hausse (2.589% rising) et une volatilité élevée (19.4bps), le risque de durée sur 5 ans est significatif. Le rendement de 4% reste supérieur au taux directeur BCE (2.15%) mais l'option callable favorise l'émetteur si les taux baissent.",
+    "verdict": "Produit offrant un rendement de 4% sur une obligation callable sans sous-jacent action, soit un spread de seulement 134bps vs taux sans risque AAA 5Y (2.66%). Dans un environnement de taux stable avec courbe normale, le risque de rappel anticipé est élevé si les taux baissent, limitant le potentiel de gain tout en immobilisant le capital. Le ratio rendement/risque est défavorable comparé à une OAT 5Y liquide offrant 2.66% sans risque crédit ni callable.",
     "keyRisks": [
-      "Risque de réinvestissement si callable exercé après baisse des taux (actuellement peu probable)",
-      "Risque de durée avec DV01 ~5bps dans un contexte de taux directionnels haussiers",
-      "Risque crédit émetteur non précisé sur obligation sans sous-jacent action"
+      "Risque de réinvestissement si rappel anticipé avec taux plus bas",
+      "Risque crédit émetteur (non précisé) sur 100k€ sans diversification"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 5,
-        "return_eur": 5000,
-        "probability": 0.2,
-        "duration_years": 1
+        "return_eur": 15000,
+        "probability": 0.25,
+        "duration_years": 3
       },
       "base": {
         "return_pct": 4,
@@ -191,21 +191,21 @@
         "duration_years": 5
       },
       "stress": {
-        "return_pct": 2,
-        "return_eur": 10000,
-        "probability": 0.3,
-        "duration_years": 5
+        "return_pct": 2.5,
+        "return_eur": 2500,
+        "probability": 0.25,
+        "duration_years": 1
       },
       "worst": {
-        "return_pct": -15,
-        "return_eur": -15000,
+        "return_pct": -50,
+        "return_eur": -50000,
         "probability": 0.1,
-        "duration_years": 3
+        "duration_years": 2
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-25T17:15:22.076Z",
-      "durationMs": 20292,
+      "gradedAt": "2026-03-27T10:19:45.466Z",
+      "durationMs": 20397,
       "aiUsed": true,
       "version": "4.3",
       "productType": "fixed-rate-callable",
@@ -225,10 +225,10 @@
       "baseScore": 56,
       "baseGrade": "C",
       "adjustments": {
-        "p1": -2,
-        "p2": -2,
-        "p3": 0,
-        "p4": 2
+        "p1": -10,
+        "p2": -5,
+        "p3": -5,
+        "p4": 0
       }
     }
   }
