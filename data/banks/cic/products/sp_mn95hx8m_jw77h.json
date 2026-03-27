@@ -24,8 +24,8 @@
   "capitalProtection": {
     "protected": false,
     "level": null,
-    "barrier": 40,
-    "barrierCoupon": null,
+    "barrier": 60,
+    "barrierCoupon": 80,
     "barrierType": "europeenne",
     "couponFloor": false
   },
@@ -37,7 +37,9 @@
     "startSemester": 2,
     "startYear": 1,
     "stepDown": false,
-    "stepDownPct": null
+    "stepDownPct": null,
+    "hasAutocall": true,
+    "enabled": true
   },
   "scenarios": {
     "favorable": "Remboursement automatique anticipé avec gain de 9,70% par an",
@@ -86,8 +88,8 @@
     "capitalProtection": {
       "protected": false,
       "level": null,
-      "barrier": 40,
-      "barrierCoupon": null,
+      "barrier": 60,
+      "barrierCoupon": 80,
       "barrierType": "europeenne",
       "couponFloor": false
     },
@@ -99,7 +101,9 @@
       "startSemester": 2,
       "startYear": 1,
       "stepDown": false,
-      "stepDownPct": null
+      "stepDownPct": null,
+      "hasAutocall": true,
+      "enabled": true
     },
     "decrementPct": null,
     "actualDividendYield": null,
@@ -182,5 +186,6 @@
       "redundancy": 24,
       "complementarity": 25
     }
-  }
+  },
+  "envelope": ""
 }
