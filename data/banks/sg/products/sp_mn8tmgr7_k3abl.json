@@ -168,5 +168,100 @@
       "redundancy": 14,
       "complementarity": 25
     }
+  },
+  "grading": {
+    "grade": "D",
+    "score": 39,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 32,
+        "base": 42,
+        "delta": -10,
+        "reasoning": "Rendement: base 42 → -10 = 32 (Coupon 3.45% vs AAA 10Y 3.01% = spread 44bps insuffisant + paiement unique à maturité réduit la valeur actuelle du rendement) | Coupon 3.45%, protégé | Mat espérée: ~2.2a (max 10a, prob mat: 0%)"
+      },
+      "underlyingQuality": {
+        "score": 55,
+        "base": 60,
+        "delta": -5,
+        "reasoning": "Qualité: base 60 → -5 = 55 (Environnement taux stable mais risque de baisse (courbe normale) augmente probabilité de call précoce et réinvestissement défavorable) [crédit]"
+      },
+      "portfolioFit": {
+        "score": 65,
+        "base": 70,
+        "delta": -5,
+        "reasoning": "Fit: base 70 → -5 = 65 (Duration longue (10Y) peu adaptée dans un contexte de taux encore élevés avec potentiel de remontée)"
+      },
+      "riskPremium": {
+        "score": 11,
+        "base": 11,
+        "delta": 0,
+        "reasoning": "Prime: base 11 | 3.45% vs CAT 2.5% (spread 1.0%)"
+      }
+    },
+    "verdict": "Ce callable offre un rendement de 3.45% annualisé vs 3.01% pour l'AAA 10Y, soit un spread crédit de seulement 44bps pour un produit structuré complexe avec paiement unique à maturité. La probabilité de call à 45% dans ~2.2 ans expose fortement au risque de réinvestissement dans un contexte de taux potentiellement plus bas. L'absence de flux intermédiaires et la duration longue en font un placement peu attractif avec un score final de 34/100.",
+    "keyRisks": [
+      "Risque de réinvestissement élevé (45% de call précoce) dans un environnement de taux baissiers",
+      "Spread crédit de 44bps insuffisant pour compenser l'illiquidité et la complexité du produit"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 7.6,
+        "return_eur": 7600,
+        "probability": 0.25,
+        "duration_years": 2.2
+      },
+      "base": {
+        "return_pct": 5.2,
+        "return_eur": 10400,
+        "probability": 0.4,
+        "duration_years": 4
+      },
+      "stress": {
+        "return_pct": 34.5,
+        "return_eur": 34500,
+        "probability": 0.3,
+        "duration_years": 10
+      },
+      "worst": {
+        "return_pct": -15,
+        "return_eur": -15000,
+        "probability": 0.05,
+        "duration_years": 5
+      }
+    },
+    "metadata": {
+      "gradedAt": "2026-03-27T11:32:01.636Z",
+      "durationMs": 19598,
+      "aiUsed": true,
+      "version": "4.3",
+      "productType": "fixed-rate-callable",
+      "marketDataAvailable": false,
+      "catBenchmark": 2.5,
+      "catSource": "fallback-2026",
+      "couponAnnualized": 3.45,
+      "couponRaw": 4,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": false,
+      "barrierPct": 0,
+      "expectedMaturity": 2.2,
+      "maxMaturity": 10,
+      "probReachMaturity": 0,
+      "maxBeta": null,
+      "baseScore": 44,
+      "baseGrade": "D",
+      "adjustments": {
+        "p1": -10,
+        "p2": -5,
+        "p3": -5,
+        "p4": 0
+      }
+    }
   }
 }
