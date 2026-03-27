@@ -1,6 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Main Application V2.2
-// V2.2: rawText 10K + décrément + stepDown fields from parser
+// STRUCTBOARD — Main Application V2.3
+// V2.3: Fix coupon.rate fallback from rateIfCalled/rateIfMaturity
+//       + copy all V7.2 parser fields (barrierCoupon, startSemester)
 // ═══════════════════════════════════════════════════════════════
 
 class StructBoard {
@@ -101,15 +102,25 @@ class StructBoard {
       const parsed = await aiParser.parseBrochure(rawText);
       showToast('G\u00e9n\u00e9ration du r\u00e9sum\u00e9...', 'info');
       const summary = await aiParser.generateSummary(parsed);
+
+      // V2.3: Fix coupon.rate fallback
+      // If parser extracted rateIfCalled/rateIfMaturity but not rate, use rateIfMaturity as default
+      const coupon = parsed.coupon || {};
+      if (!coupon.rate && (coupon.rateIfCalled || coupon.rateIfMaturity)) {
+        coupon.rate = coupon.rateIfMaturity || coupon.rateIfCalled;
+        console.log('[handlePDFUpload] Coupon rate fallback: ' + coupon.rate + 
+          ' (ifCalled=' + (coupon.rateIfCalled || '?') + ', ifMaturity=' + (coupon.rateIfMaturity || '?') + ')');
+      }
+
       const product = {
         id: this._uid(), name: parsed.name || file.name.replace('.pdf', ''), bankId,
         type: this._matchType(parsed.type), underlyingType: this._matchUnderlying(parsed.underlyingType, parsed.underlyings),
         underlyings: parsed.underlyings || [], currency: parsed.currency || 'EUR',
         maturity: parsed.maturity || null, maturityDate: parsed.maturityDate || null, strikeDate: parsed.strikeDate || null,
-        coupon: parsed.coupon || {}, capitalProtection: parsed.capitalProtection || {},
+        coupon: coupon, capitalProtection: parsed.capitalProtection || {},
         earlyRedemption: parsed.earlyRedemption || {}, scenarios: parsed.scenarios || {},
         risks: parsed.risks || [],
-        // V2.2: rawText increased to 10K for d\u00e9cr\u00e9ment detection
+        // V2.2: rawText 10K
         rawText: rawText.substring(0, 10000),
         aiParsed: parsed, aiSummary: summary, sourceFile: file.name,
         // V2.1: Structure fields
@@ -120,7 +131,7 @@ class StructBoard {
         mechanism: parsed.mechanism || null,
         nPairs: parsed.nPairs || null,
         nUnderlyings: parsed.nUnderlyings || null,
-        // V2.2: D\u00e9cr\u00e9ment + step-down fields
+        // V2.2: D\u00e9cr\u00e9ment + step-down
         decrementPct: parsed.decrementPct || null,
         actualDividendYield: parsed.actualDividendYield || null,
       };
@@ -133,6 +144,17 @@ class StructBoard {
       if (product.decrementPct) {
         console.log('[handlePDFUpload] D\u00e9cr\u00e9ment: ' + product.decrementPct + '% (div r\u00e9el: ' + (product.actualDividendYield || '?') + '%)');
         showToast('\u26a0 D\u00e9cr\u00e9ment d\u00e9tect\u00e9: ' + product.decrementPct + '%/an', 'info');
+      }
+      // V2.3: Log double coupon
+      if (coupon.rateIfCalled && coupon.rateIfMaturity && coupon.rateIfCalled !== coupon.rateIfMaturity) {
+        console.log('[handlePDFUpload] Double coupon: rappel=' + coupon.rateIfCalled + '%/an, maturit\u00e9=' + coupon.rateIfMaturity + '%/an');
+        showToast('Coupon: ' + coupon.rateIfCalled + '% si rappel\u00e9, ' + coupon.rateIfMaturity + '% sinon', 'info');
+      }
+      // V2.3: Log double barrier
+      var cp = parsed.capitalProtection || {};
+      if (cp.barrier && cp.barrierCoupon && cp.barrier !== cp.barrierCoupon) {
+        console.log('[handlePDFUpload] Double barri\u00e8re: capital=' + cp.barrier + '%, coupon=' + cp.barrierCoupon + '%');
+        showToast('Barri\u00e8res: capital ' + cp.barrier + '%, coupon ' + cp.barrierCoupon + '%', 'info');
       }
 
       if (parsed.maturityYears) product.maturityYears = parsed.maturityYears;
