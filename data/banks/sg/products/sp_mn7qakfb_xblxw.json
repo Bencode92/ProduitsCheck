@@ -212,19 +212,19 @@
         "score": 34,
         "base": 44,
         "delta": -10,
-        "reasoning": "Rendement: base 44 → -10 = 34 (Capital protégé mais coupon 7% fixe sur 3 ans seulement, sans barrière ni autocall, dans un contexte de volatilité élevée (Tesla 57%, NVDA 48%)) | Coupon 7%, protégé"
+        "reasoning": "Rendement: base 44 → -10 = 34 (Structure opaque sans barrière ni autocall explicite, coupon de 7% sur 3 ans avec worst-of sur 8 valeurs tech volatiles (Tesla vol 57%) rend le rendement très incertain) | Coupon 7%, protégé"
       },
       "underlyingQuality": {
         "score": 35,
         "base": 47,
         "delta": -12,
-        "reasoning": "Qualité: base 47 → -12 = 35 (Exposition massive au secteur communication (3/8 titres) explicitement évité en régime neutral, avec Tesla comme maillon faible (ROE 4.93%, marge 4.07%)) [B/Q 35%] | Worst: Tesla B:54"
+        "reasoning": "Qualité: base 47 → -12 = 35 (Exposition massive aux secteurs évités (6/8 en communication/consumer discretionary), avec Tesla comme maillon faible (ROE 5%, marge 4%) dans un contexte macro défavorable) [B/Q 35%] | Worst: Tesla B:54"
       },
       "portfolioFit": {
         "score": 67,
         "base": 72,
         "delta": -5,
-        "reasoning": "Fit: base 72 → -5 = 67 (Surexposition tech/communication (6/8 titres) peu diversifiée pour un portefeuille équilibré, aucune exposition aux secteurs favorisés (energy))"
+        "reasoning": "Fit: base 72 → -5 = 67 (Surexposition tech (75% du panier) avec des corrélations élevées et performances YTD négatives (-7% à -23%), diversification illusoire)"
       },
       "riskPremium": {
         "score": 61,
@@ -233,41 +233,42 @@
         "reasoning": "Prime: base 61 | 7% vs CAT 2.5% (spread 4.5%)"
       }
     },
-    "verdict": "Ce produit offre une protection du capital mais avec un rendement fixe de 7% annualisé limité à 3 ans, soit 21% maximum. L'exposition est dangereusement concentrée sur des secteurs évités (communication 37.5%, tech 37.5%) avec Tesla comme point faible majeur (volatilité 57.48%, ROE 4.93%). Dans un contexte macro neutre favorisant l'énergie, cette allocation sectorielle est inadaptée et le rendement insuffisant pour compenser le coût d'opportunité sur 3 ans.",
+    "verdict": "Produit risqué malgré la protection capitale affichée. Le worst-of sur 8 valeurs tech volatiles (Tesla à 57% de vol) dans des secteurs évités par le régime macro actuel rend le coupon de 7% très hypothétique. La structure opaque sans barrière ni autocall claire et la concentration sectorielle excessive (75% tech, 37% communication) créent un profil asymétrique défavorable. Score final: 38/100 (D), à éviter sauf conviction forte sur rebond tech coordonné.",
     "keyRisks": [
-      "Rendement plafonné à 21% sur 3 ans vs potentiel haussier des sous-jacents",
-      "Surexposition aux secteurs évités (75% tech/communication) dans le régime macro actuel"
+      "Worst-of sur Tesla (vol 57%, ROE 5%) peut annuler tous les coupons sur 3 ans",
+      "6 sous-jacents sur 8 dans des secteurs évités en régime macro neutral",
+      "Structure opaque sans visibilité sur mécanisme exact de versement des coupons"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 21,
+        "return_pct": 7,
         "return_eur": 21000,
-        "probability": 0.95,
+        "probability": 0.2,
         "duration_years": 3
       },
       "base": {
-        "return_pct": 21,
-        "return_eur": 21000,
-        "probability": 0.95,
+        "return_pct": 2,
+        "return_eur": 6000,
+        "probability": 0.35,
         "duration_years": 3
       },
       "stress": {
-        "return_pct": 21,
-        "return_eur": 21000,
-        "probability": 0.95,
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.3,
         "duration_years": 3
       },
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.05,
+        "probability": 0.15,
         "duration_years": 3
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-26T21:25:13.439Z",
-      "durationMs": 22813,
+      "gradedAt": "2026-03-27T08:46:49.168Z",
+      "durationMs": 24183,
       "aiUsed": true,
       "version": "4.3",
       "productType": "standard",
