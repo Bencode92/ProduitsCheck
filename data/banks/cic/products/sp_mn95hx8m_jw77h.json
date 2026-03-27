@@ -197,22 +197,22 @@
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 38,
+        "score": 43,
         "base": 48,
-        "delta": -10,
-        "reasoning": "Rendement: base 48 → -10 = 38 (Barrière coupon à 80% vulnérable avec vol 19.85% et DD -15.95%, probabilité de toucher régulièrement 19.4% annuel très optimiste) | Coupon 19.4%, barrière 60% | Barr.coupon 80% | Mat espérée: ~1.6a (prob mat: 0%)"
+        "delta": -5,
+        "reasoning": "Rendement: base 48 → -5 = 43 (Coupon à 80% sur un indice bancaire avec vol 19.85% en stagflation réduit la probabilité de paiement régulier) | Coupon 19.4%, barrière 60% | Barr.coupon 80% | Mat espérée: ~1.6a (prob mat: 0%)"
       },
       "underlyingQuality": {
         "score": 36,
         "base": 51,
         "delta": -15,
-        "reasoning": "Qualité: base 51 → -15 = 36 (Secteur bancaire explicitement évité en stagflation, beta 0.83 amplifie les mouvements baissiers avec VIX à 22) [vol/DD 30%] | Worst: Indice EuroStoxx Banks B:35"
+        "reasoning": "Qualité: base 51 → -15 = 36 (Secteur financier explicitement évité en stagflation, beta 0.83 amplifie les mouvements baissiers, VIX 22 signale stress) [vol/DD 30%] | Worst: Indice EuroStoxx Banks B:35"
       },
       "portfolioFit": {
-        "score": 75,
+        "score": 70,
         "base": 80,
-        "delta": -5,
-        "reasoning": "Fit: base 80 → -5 = 75 (Exposition sectorielle concentrée sur financials inadaptée au régime macro actuel)"
+        "delta": -10,
+        "reasoning": "Fit: base 80 → -10 = 70 (Exposition sectorielle concentrée sur les banques inadaptée au régime macro actuel)"
       },
       "riskPremium": {
         "score": 82,
@@ -221,10 +221,10 @@
         "reasoning": "Prime: base 82 | 19.4% vs CAT 2.5% (spread 16.9%)"
       }
     },
-    "verdict": "Produit très risqué avec un indice bancaire en régime stagflationniste défavorable. Le coupon de 19.4% annualisé reflète ce risque élevé mais la barrière à 80% sera difficile à maintenir avec une volatilité de 19.85%. La probabilité d'autocall rapide est faible vu le contexte macro hostile aux financials. Score ajusté: 34/100 (D).",
+    "verdict": "Produit risqué avec exposition au secteur bancaire en pleine stagflation. Le coupon élevé de 19.4% reflète le risque accru sur un secteur explicitement défavorisé par le régime macro. La barrière coupon à 80% offre peu de marge dans un contexte de volatilité élevée (19.85%). Score final ajusté à 44/100 (D) justifie l'évitement.",
     "keyRisks": [
-      "Secteur bancaire particulièrement vulnérable en stagflation avec hausse des taux et ralentissement économique",
-      "Barrière coupon à 80% très exposée avec volatilité 19.85% et drawdown historique -15.95%"
+      "Secteur bancaire vulnérable en stagflation avec hausse des défauts",
+      "Risque de non-paiement du coupon élevé avec barrière à 80%"
     ],
     "negotiationPoints": [],
     "scenarios": {
@@ -235,9 +235,9 @@
         "duration_years": 1
       },
       "base": {
-        "return_pct": 3.2,
-        "return_eur": 9700,
-        "probability": 0.35,
+        "return_pct": 6.5,
+        "return_eur": 19500,
+        "probability": 0.3,
         "duration_years": 3
       },
       "stress": {
@@ -247,9 +247,9 @@
         "duration_years": 5
       },
       "worst": {
-        "return_pct": -20,
-        "return_eur": -20000,
-        "probability": 0.15,
+        "return_pct": -25,
+        "return_eur": -25000,
+        "probability": 0.2,
         "duration_years": 5
       }
     },
@@ -262,8 +262,8 @@
       "label": "C [46-66]"
     },
     "metadata": {
-      "gradedAt": "2026-03-27T17:14:24.725Z",
-      "durationMs": 16978,
+      "gradedAt": "2026-03-27T17:15:40.174Z",
+      "durationMs": 15828,
       "aiUsed": true,
       "version": "5.2",
       "productType": "autocall",
@@ -286,9 +286,9 @@
       "baseScore": 64,
       "baseGrade": "B",
       "adjustments": {
-        "p1": -10,
+        "p1": -5,
         "p2": -15,
-        "p3": -5,
+        "p3": -10,
         "p4": 0
       },
       "barrier_sigma": 1.15,
