@@ -2,7 +2,7 @@
 // STRUCTBOARD — Proposal Grader v5.2 — Consolidated Pipeline
 // ALL 13 patches merged. NO setInterval, NO override chains.
 // Pipeline: NORMALIZE → COLLECT → TYPE → SCORE → ENRICH → AI → FINALIZE
-// v5.2: calibrated probabilities, σ-based barrier, progressive CDS, worst-of correlation
+// v5.2: Fix coupon annualization (ar/pr hoisting), barrier inversion robustness
 // v5.1: barrierCoupon support for capital_garanti digitales
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -17,14 +17,13 @@ const GRADING_CONFIG = {
 
 var ISSUER_RATINGS={'swiss-life':{rating:'A+',tier:'IG',cds_proxy:60},'sg':{rating:'A',tier:'IG',cds_proxy:70},'bnp':{rating:'A+',tier:'IG',cds_proxy:55},'natixis':{rating:'A+',tier:'IG',cds_proxy:60},'cic':{rating:'A+',tier:'IG',cds_proxy:55},'ca-cib':{rating:'A+',tier:'IG',cds_proxy:50},'goldman':{rating:'A+',tier:'IG',cds_proxy:65},'jpmorgan':{rating:'A+',tier:'IG',cds_proxy:45},'morgan-stanley':{rating:'A-',tier:'IG',cds_proxy:70},'barclays':{rating:'A',tier:'IG',cds_proxy:75},'ubs':{rating:'A+',tier:'IG',cds_proxy:55},'hsbc':{rating:'A+',tier:'IG',cds_proxy:50},'leonteq':{rating:'BBB',tier:'IG',cds_proxy:150},'vontobel':{rating:'A-',tier:'IG',cds_proxy:80},'banque-populaire':{rating:'A+',tier:'IG',cds_proxy:55},'credit-mutuel':{rating:'AA-',tier:'IG',cds_proxy:40},'caisse-epargne':{rating:'A+',tier:'IG',cds_proxy:55},'lcl':{rating:'A+',tier:'IG',cds_proxy:50}};
 
-var STOCK_ALIASES={'DANONE':'BN','ENI':'ENI','TOTALENERGIES':'TTE','TOTAL':'TTE','LVMH':'MC','SCHNEIDER':'SU','ASML':'ASML','TESLA':'TSLA','ESTEE LAUDER':'EL','PHILIP MORRIS':'MO','FASTENAL':'FAST','PERNOD RICARD':'RI','BNP':'BNP','SOCIETE GENERALE':'GLE','AXA':'CS','SANOFI':'SAN','AIR LIQUIDE':'AI','CREDIT AGRICOLE':'ACA','CRÉDIT AGRICOLE':'ACA','CA':'ACA','SOCIÉTÉ GÉNÉRALE':'GLE','SOCGEN':'GLE','SG':'GLE','BNP PARIBAS':'BNP','BNPP':'BNP','SAINT GOBAIN':'SGO','SAINT-GOBAIN':'SGO','SCHNEIDER ELECTRIC':'SU','CAPGEMINI':'CAP','HERMES':'RMS','HERMÈS':'RMS','KERING':'KER','ORANGE':'ORA','VEOLIA':'VIE','BOUYGUES':'EN','MICHELIN':'ML','RENAULT':'RNO','STELLANTIS':'STLAP','UNIBAIL':'URW','VOLKSWAGEN':'VOW3','VW':'VOW3','SIEMENS':'SIE','SAP':'SAP','ADIDAS':'ADS','BAYER':'BAYN','BASF':'BAS','ALLIANZ':'ALV','DEUTSCHE BANK':'DBK','BMW':'BMW','MERCEDES':'MBG','NESTLE':'NESN','NESTLÉ':'NESN','NOVARTIS':'NOVN','ROCHE':'ROG','UBS':'UBSG','ABB':'ABBN','ENEL':'ENEL','UNICREDIT':'UCG','INTESA':'ISP','MONTE PASCHI':'BMPS','BANCA MONTE':'BMPS','NOVO NORDISK':'NOVO-B','NOVO':'NOVO-B','SHELL':'SHEL','BP':'BP','UNILEVER':'ULVR','ASTRAZENECA':'AZN','GSK':'GSK','HSBC':'HSBA','BARCLAYS':'BARC','APPLE':'AAPL','MICROSOFT':'MSFT','GOOGLE':'GOOGL','ALPHABET':'GOOGL','AMAZON':'AMZN','META':'META','NVIDIA':'NVDA','AMD':'AMD','INTEL':'INTC','JPMORGAN':'JPM','JP MORGAN':'JPM','GOLDMAN SACHS':'GS','COCA-COLA':'KO','PEPSICO':'PEP','PFIZER':'PFE','PROCTER & GAMBLE':'PG','DISNEY':'DIS','VISA':'V','MASTERCARD':'MA','NETFLIX':'NFLX'};
+var STOCK_ALIASES={'DANONE':'BN','ENI':'ENI','TOTALENERGIES':'TTE','TOTAL':'TTE','LVMH':'MC','SCHNEIDER':'SU','ASML':'ASML','TESLA':'TSLA','ESTEE LAUDER':'EL','PHILIP MORRIS':'MO','FASTENAL':'FAST','PERNOD RICARD':'RI','BNP':'BNP','SOCIETE GENERALE':'GLE','AXA':'CS','SANOFI':'SAN','AIR LIQUIDE':'AI','CREDIT AGRICOLE':'ACA','CA':'ACA','BNP PARIBAS':'BNP','BNPP':'BNP','SAINT GOBAIN':'SGO','SAINT-GOBAIN':'SGO','SCHNEIDER ELECTRIC':'SU','CAPGEMINI':'CAP','HERMES':'RMS','KERING':'KER','ORANGE':'ORA','VEOLIA':'VIE','BOUYGUES':'EN','MICHELIN':'ML','RENAULT':'RNO','STELLANTIS':'STLAP','UNIBAIL':'URW','VOLKSWAGEN':'VOW3','VW':'VOW3','SIEMENS':'SIE','SAP':'SAP','ADIDAS':'ADS','BAYER':'BAYN','BASF':'BAS','ALLIANZ':'ALV','DEUTSCHE BANK':'DBK','BMW':'BMW','MERCEDES':'MBG','NESTLE':'NESN','NOVARTIS':'NOVN','ROCHE':'ROG','UBS':'UBSG','ABB':'ABBN','ENEL':'ENEL','UNICREDIT':'UCG','INTESA':'ISP','NOVO NORDISK':'NOVO-B','NOVO':'NOVO-B','SHELL':'SHEL','BP':'BP','UNILEVER':'ULVR','ASTRAZENECA':'AZN','GSK':'GSK','HSBC':'HSBA','BARCLAYS':'BARC','APPLE':'AAPL','MICROSOFT':'MSFT','GOOGLE':'GOOGL','ALPHABET':'GOOGL','AMAZON':'AMZN','META':'META','NVIDIA':'NVDA','AMD':'AMD','INTEL':'INTC','JPMORGAN':'JPM','JP MORGAN':'JPM','GOLDMAN SACHS':'GS','COCA-COLA':'KO','PEPSICO':'PEP','PFIZER':'PFE','DISNEY':'DIS','VISA':'V','MASTERCARD':'MA','NETFLIX':'NFLX'};
 
-var UNDERLYING_CORR_GROUPS={'eurostoxx 50':'eu-eq','euro stoxx 50':'eu-eq','stoxx 50':'eu-eq','sx5e':'eu-eq','cac 40':'eu-eq','cac40':'eu-eq','dax':'eu-eq','dax 40':'eu-eq','stoxx europe 600':'eu-eq','msci europe':'eu-eq','ftse mib':'eu-peri','ibex 35':'eu-peri','ftse 100':'uk-eq','ftse100':'uk-eq','s&p 500':'us-eq','s&p500':'us-eq','sp500':'us-eq','nasdaq 100':'us-tech','nasdaq100':'us-tech','nasdaq':'us-tech','dow jones':'us-eq','russell 2000':'us-sm','nikkei 225':'jp-eq','nikkei':'jp-eq','hang seng':'cn-eq','kospi':'kr-eq','sensex':'in-eq','nifty 50':'in-eq','or':'gold','gold':'gold','xau':'gold','argent':'silver','silver':'silver','pétrole':'oil','brent':'oil','wti':'oil'};
+var UNDERLYING_CORR_GROUPS={'eurostoxx 50':'eu-eq','euro stoxx 50':'eu-eq','stoxx 50':'eu-eq','sx5e':'eu-eq','cac 40':'eu-eq','cac40':'eu-eq','dax':'eu-eq','dax 40':'eu-eq','stoxx europe 600':'eu-eq','msci europe':'eu-eq','ftse mib':'eu-peri','ibex 35':'eu-peri','ftse 100':'uk-eq','ftse100':'uk-eq','s&p 500':'us-eq','s&p500':'us-eq','sp500':'us-eq','nasdaq 100':'us-tech','nasdaq100':'us-tech','nasdaq':'us-tech','dow jones':'us-eq','russell 2000':'us-sm','nikkei 225':'jp-eq','nikkei':'jp-eq','hang seng':'cn-eq','kospi':'kr-eq','sensex':'in-eq','nifty 50':'in-eq','or':'gold','gold':'gold','xau':'gold','argent':'silver','silver':'silver','brent':'oil','wti':'oil'};
 var GROUP_CORR={'eu-eq|eu-eq':0.95,'eu-eq|eu-peri':0.85,'eu-eq|uk-eq':0.80,'eu-eq|us-eq':0.75,'eu-eq|us-tech':0.70,'eu-eq|us-sm':0.65,'eu-eq|jp-eq':0.55,'eu-eq|cn-eq':0.40,'eu-eq|gold':0.05,'eu-eq|oil':0.30,'us-eq|us-eq':0.95,'us-eq|us-tech':0.90,'us-eq|us-sm':0.85,'us-eq|jp-eq':0.55,'us-eq|gold':0.05,'us-eq|oil':0.25,'us-tech|us-tech':0.95,'jp-eq|kr-eq':0.65,'gold|gold':1.0,'gold|silver':0.80,'gold|oil':0.20,'oil|oil':1.0};
 
 var FREQUENCY_MULTIPLIERS={'trimestriel':4,'trimestrielle':4,'trimestre':4,'quarterly':4,'q':4,'3m':4,'3 mois':4,'semestriel':2,'semestrielle':2,'semestre':2,'semi-annual':2,'semi-annuel':2,'6m':2,'6 mois':2,'mensuel':12,'mensuelle':12,'monthly':12,'1m':12,'mois':12,'annuel':1,'annuelle':1,'annual':1,'yearly':1,'an':1,'12m':1,'12 mois':1};
-var LIQUIDITY_KW=['bond 12m','compartiment','fonds monetaire','fonds monétaire','money market','cash fund','tresorerie','trésorerie','sicav monetaire','opcvm monetaire','livret','compte a terme'];
-var FIXED_RATE_KW=['taux fixe','fixed rate','callable bonus','note callable','obligation callable'];
+var LIQUIDITY_KW=['bond 12m','compartiment','fonds monetaire','money market','cash fund','tresorerie','sicav monetaire','opcvm monetaire','livret','compte a terme'];
 var RATE_KW=['TEC','CMS','EURIBOR','EONIA','ESTER','EUR3M','EUR6M','LIBOR','SOFR','OAT','BUND','SWAP','TAUX','RATE','INDICE TEC'];
 
 // ═══ SECTION 2: UTILITIES ═══
@@ -33,7 +32,7 @@ function _safeParse(d){if(!d)return null;if(typeof d==='string'){try{return JSON
 function _resolveAlias(n){var u=n.toUpperCase().trim();if(typeof BANK_ALIASES!=='undefined'&&BANK_ALIASES[u])return BANK_ALIASES[u];if(STOCK_ALIASES[u])return STOCK_ALIASES[u];var s=_stripAccents(u);if(STOCK_ALIASES[s])return STOCK_ALIASES[s];return u;}
 function _normalizeUnderlyings(u){if(typeof u==='string')return u.split(/[,;\\/]/).map(function(s){return s.trim()}).filter(Boolean);if(Array.isArray(u))return u.map(function(x){return typeof x==='string'?x.trim():(x.name||x.ticker||x.isin||'')}).filter(Boolean);return[];}
 function _isLiquidityProduct(p){var n=((p.name||'')+' '+(p.type||'')).toLowerCase();return LIQUIDITY_KW.some(function(k){return n.indexOf(k)>=0});}
-function _isFixedRateProduct(p){if(!p)return false;var n=(p.name||'').toLowerCase(),t=(p.type||'').toLowerCase();if(t.indexOf('taux fixe')>=0||t.indexOf('callable')>=0||t.indexOf('obligation')>=0)return true;if(n.indexOf('taux fixe')>=0||n.indexOf('callable')>=0||n.indexOf('fixed rate')>=0||n.indexOf('obligation')>=0||n.indexOf('bond')>=0||n.indexOf('cln')>=0)return true;if(p.underlyings&&p.underlyings.length===0&&p.coupon>0)return true;if((!p.underlyings||p.underlyings.length===0)&&(p.couponType==='fixe'||p.couponType==='garanti'))return true;return false;}
+function _isFixedRateProduct(p){if(!p)return false;var n=(p.name||'').toLowerCase(),t=(p.type||'').toLowerCase();if(t.indexOf('taux fixe')>=0||t.indexOf('callable')>=0||t.indexOf('obligation')>=0)return true;if(n.indexOf('taux fixe')>=0||n.indexOf('callable')>=0||n.indexOf('fixed rate')>=0||n.indexOf('obligation')>=0||n.indexOf('bond')>=0||n.indexOf('cln')>=0)return true;return false;}
 window._isFixedRateOrCallable=_isFixedRateProduct;
 function _isRateProduct(p){var u=(p.underlyings||[]).concat(p.name?[p.name]:[]);return u.some(function(x){var up=x.toUpperCase();return RATE_KW.some(function(k){return up.indexOf(k)>=0})});}
 function _getUndGroup(n){var nm=(n||'').toLowerCase().replace(/[éèê]/g,'e').trim();if(UNDERLYING_CORR_GROUPS[nm])return UNDERLYING_CORR_GROUPS[nm];for(var k in UNDERLYING_CORR_GROUPS){if(nm.indexOf(k)>=0||k.indexOf(nm)>=0)return UNDERLYING_CORR_GROUPS[k];}return'unk-'+nm.substring(0,10);}
@@ -49,15 +48,17 @@ function _annualizeCoupon(raw,obj,name){if(!raw||raw<=0)return{annual:0,raw:0,mu
 // ═══ SECTION 4: NORMALIZE ═══
 function _graderNormalize(product){
     var p=product||{},ai=p.aiParsed||{};var co=p.coupon||ai.coupon||{};
-    var raw=typeof co==='number'?co:parseFloat(co.rate||co.annualized||co.taux)||0;
-   // v5.2 fix: if coupon has no frequency, inherit from earlyRedemption
-    var couponObj=typeof co==='object'?co:{};
-    if(!couponObj.frequency&&!couponObj.frequence){
-        var arFreq=(ar.frequency||ar.frequence||'').toLowerCase().trim();
-        if(arFreq&&FREQUENCY_MULTIPLIERS[arFreq]){couponObj.frequency=arFreq;console.log('[Grader v5.2] Coupon freq inherited from autocall: '+arFreq);}
-    }
-    var ci=_annualizeCoupon(raw,couponObj,p.name||ai.name||'');
+    // v5.2 FIX: Declare pr and ar BEFORE _annualizeCoupon so we can inherit frequency
     var pr=p.capitalProtection||ai.capitalProtection||{};var ar=p.earlyRedemption||ai.earlyRedemption||{};
+    // v5.2 FIX: If co is a primitive (number or string), convert to object
+    if(typeof co==='number'||typeof co==='string'){var _oldRate=parseFloat(co)||0;co={rate:_oldRate};p.coupon=co;}
+    // v5.2 FIX: Inherit frequency from earlyRedemption into coupon if missing
+    if(typeof co==='object'&&!co.frequency&&!co.frequence){
+        var _arFreq=(ar.frequency||ar.frequence||'').toLowerCase().trim();
+        if(_arFreq&&FREQUENCY_MULTIPLIERS[_arFreq]){co.frequency=_arFreq;console.log('[Grader v5.2] Coupon freq inherited from autocall: '+_arFreq);}
+    }
+    var raw=typeof co==='number'?co:parseFloat(co.rate||co.annualized||co.taux)||0;
+    var ci=_annualizeCoupon(raw,typeof co==='object'?co:{},p.name||ai.name||'');
     var und=_normalizeUnderlyings(p.underlyings||ai.underlyings||[]);
     var rawText=(p.rawText||'').toLowerCase();var name=(p.name||'').toLowerCase();
     var acFreq=(ar.frequency||ar.frequence||'').toLowerCase().trim();var acObs=1;
@@ -87,17 +88,9 @@ function _graderNormalize(product){
         if(isAC.indexOf('autocall')>=0||isAC.indexOf('phoenix')>=0){norm._barrierUnparsed=true;norm.barrier=60;}
     }
 
-    if(st==='dispersion'){
-        norm.worstOf=false;norm.capitalProtection=true;norm.barrier=0;norm.couponType='garanti';norm.autocall=false;
-        var hs=p.historicalSimulations||(ai.historicalSimulations);var my=norm.maturityYears||3;
-        if(hs&&hs.median){norm.coupon=hs.median/my;norm._dispersionMedian=hs.median;}
-        else{var part=p.participationRate||norm.coupon||7;norm.coupon=(part*1.3)/my;norm._dispersionMedian=part*1.3;}
-        norm._originalCoupon=p.participationRate||raw;
-    } else if(st==='capital_garanti'){
-        norm.capitalProtection=true;norm.barrier=0;if(norm.couponType!=='fixe'&&!norm.barrierCoupon)norm.couponType='garanti';
-    } else if(st==='taux_fixe'){
-        norm.capitalProtection=true;norm.barrier=0;norm.couponType='fixe';norm.worstOf=false;
-    }
+    if(st==='dispersion'){norm.worstOf=false;norm.capitalProtection=true;norm.barrier=0;norm.couponType='garanti';norm.autocall=false;var hs=p.historicalSimulations||(ai.historicalSimulations);var my=norm.maturityYears||3;if(hs&&hs.median){norm.coupon=hs.median/my;norm._dispersionMedian=hs.median;}else{var part=p.participationRate||norm.coupon||7;norm.coupon=(part*1.3)/my;norm._dispersionMedian=part*1.3;}norm._originalCoupon=p.participationRate||raw;
+    } else if(st==='capital_garanti'){norm.capitalProtection=true;norm.barrier=0;if(norm.couponType!=='fixe'&&!norm.barrierCoupon)norm.couponType='garanti';
+    } else if(st==='taux_fixe'){norm.capitalProtection=true;norm.barrier=0;norm.couponType='fixe';norm.worstOf=false;}
 
     var decPct=parseFloat(p.decrementPct)||0;
     if(!decPct){var undStr=(und.join(' ')).toLowerCase();var am=undStr.match(/\bar\s*(\d+[.,]?\d*)\s*%/i);if(am)decPct=parseFloat(am[1].replace(',','.'));}
@@ -112,473 +105,89 @@ function _graderNormalize(product){
         norm._isCallable=isCbl;
     }
 
-    if(ar.stepDown===true||ar.stepDown==='true'||rawText.indexOf('dégressive')>=0||rawText.indexOf('step-down')>=0){
-        norm._hasStepDown=true;var sdm=rawText.match(/dégressive\s*(?:de\s*)?[-–]?\s*(\d+[.,]?\d*)\s*%/i);
-        if(sdm)norm._stepDownPct=parseFloat(sdm[1].replace(',','.'));
-    }
+    if(ar.stepDown===true||ar.stepDown==='true'||rawText.indexOf('dégressive')>=0||rawText.indexOf('step-down')>=0){norm._hasStepDown=true;var sdm=rawText.match(/dégressive\s*(?:de\s*)?[-–]?\s*(\d+[.,]?\d*)\s*%/i);if(sdm)norm._stepDownPct=parseFloat(sdm[1].replace(',','.'));}
 
-    if(norm.couponMultiplier>1&&st!=='dispersion'){
-        var ap=rawText.match(/(\d+[.,]?\d*)\s*%\s*(?:p\.?a\.?|annualis|par an|annuel)/i);
-        if(ap){var sa=parseFloat(ap[1].replace(',','.'));if(Math.abs(sa-norm.couponRaw)<0.5){norm.coupon=norm.couponRaw;norm.couponMultiplier=1;norm.couponFrequencySource='already-annual';}}
-    }
+    if(norm.couponMultiplier>1&&st!=='dispersion'){var ap=rawText.match(/(\d+[.,]?\d*)\s*%\s*(?:p\.?a\.?|annualis|par an|annuel)/i);if(ap){var sa=parseFloat(ap[1].replace(',','.'));if(Math.abs(sa-norm.couponRaw)<0.5){norm.coupon=norm.couponRaw;norm.couponMultiplier=1;norm.couponFrequencySource='already-annual';}}}
 
     norm._lockupYears=norm.maturityYears||5;
     return norm;
 }
 
 // ═══ SECTION 5: EXPECTED MATURITY ═══
-function _estimateExpectedMaturity(p){
-    var mm=p.maturityYears||0;if(mm<=0)return{expected:0,max:0,isEstimated:false};
-    if(!p.autocall)return{expected:mm,max:mm,isEstimated:false};
-    var th=p.autocallThreshold||100;if(p._hasStepDown)th=Math.max(80,th-10);
-    var pc;if(th<=100)pc=0.45;else if(th<=105)pc=0.36;else if(th<=110)pc=0.32;else pc=0.28;
-    if(p.worstOf&&p.underlyings.length>1)pc=Math.pow(pc,Math.sqrt(p.underlyings.length));
-    var obs=p.autocallObsPerYear||1;var tot=Math.floor(mm*obs);if(tot<=0)return{expected:mm,max:mm,isEstimated:false};
-    var fy=1.0/obs;if(fy<0.5)fy=1;if(p.startSemester>1&&obs>=2)fy=p.startSemester/obs;
-    var em=0,ps=1.0;for(var i=0;i<tot;i++){var dy=fy+(i/obs);if(dy>mm)break;var ph=ps*pc;em+=ph*dy;ps*=(1-pc);}
-    em+=ps*mm;em=Math.round(em*10)/10;
-    return{expected:em,max:mm,isEstimated:true,probCallPerDate:Math.round(pc*100),probReachMaturity:Math.round(ps*100),totalObsDates:tot};
-}
+function _estimateExpectedMaturity(p){var mm=p.maturityYears||0;if(mm<=0)return{expected:0,max:0,isEstimated:false};if(!p.autocall)return{expected:mm,max:mm,isEstimated:false};var th=p.autocallThreshold||100;if(p._hasStepDown)th=Math.max(80,th-10);var pc;if(th<=100)pc=0.45;else if(th<=105)pc=0.36;else if(th<=110)pc=0.32;else pc=0.28;if(p.worstOf&&p.underlyings.length>1)pc=Math.pow(pc,Math.sqrt(p.underlyings.length));var obs=p.autocallObsPerYear||1;var tot=Math.floor(mm*obs);if(tot<=0)return{expected:mm,max:mm,isEstimated:false};var fy=1.0/obs;if(fy<0.5)fy=1;if(p.startSemester>1&&obs>=2)fy=p.startSemester/obs;var em=0,ps=1.0;for(var i=0;i<tot;i++){var dy=fy+(i/obs);if(dy>mm)break;var ph=ps*pc;em+=ph*dy;ps*=(1-pc);}em+=ps*mm;em=Math.round(em*10)/10;return{expected:em,max:mm,isEstimated:true,probCallPerDate:Math.round(pc*100),probReachMaturity:Math.round(ps*100),totalObsDates:tot};}
 
 // ═══ SECTION 6: PROBABILITY ESTIMATORS ═══
+function _worstOfExponent(underlyings){if(!underlyings||underlyings.length<=1)return 1.0;var n=underlyings.length;var groups=underlyings.map(function(u){return _getUndGroup(u)});var totalCorr=0,pairs=0;for(var i=0;i<groups.length;i++){for(var j=i+1;j<groups.length;j++){totalCorr+=_getGrpCorr(groups[i],groups[j]);pairs++;}}var avgCorr=pairs>0?totalCorr/pairs:0.50;return 1+(n-1)*(1-avgCorr);}
 
-// v5.2: Correlation-aware worst-of exponent
-function _worstOfExponent(underlyings){
-    if(!underlyings||underlyings.length<=1)return 1.0;
-    var n=underlyings.length;
-    var groups=underlyings.map(function(u){return _getUndGroup(u)});
-    var totalCorr=0,pairs=0;
-    for(var i=0;i<groups.length;i++){
-        for(var j=i+1;j<groups.length;j++){
-            totalCorr+=_getGrpCorr(groups[i],groups[j]);
-            pairs++;
-        }
-    }
-    var avgCorr=pairs>0?totalCorr/pairs:0.50;
-    var exp=1+(n-1)*(1-avgCorr);
-    return exp;
-}
+function _calibratedBarrierProb(barrier_pct,T){var grid=[[50,[0.97,0.95,0.93,0.90,0.87,0.84]],[60,[0.93,0.89,0.85,0.80,0.75,0.70]],[70,[0.85,0.78,0.72,0.65,0.58,0.52]],[80,[0.72,0.63,0.57,0.50,0.43,0.37]],[90,[0.60,0.52,0.46,0.40,0.35,0.30]],[100,[0.52,0.45,0.40,0.35,0.30,0.26]]];var matBuckets=[1,2,3,5,7,10];function interpMat(row){if(T<=matBuckets[0])return row[0];if(T>=matBuckets[matBuckets.length-1])return row[matBuckets.length-1];for(var i=0;i<matBuckets.length-1;i++){if(T>=matBuckets[i]&&T<=matBuckets[i+1]){var f=(T-matBuckets[i])/(matBuckets[i+1]-matBuckets[i]);return row[i]+f*(row[i+1]-row[i]);}}return row[0];}var b=Math.max(50,Math.min(100,barrier_pct));for(var i=0;i<grid.length-1;i++){if(b>=grid[i][0]&&b<=grid[i+1][0]){var f=(b-grid[i][0])/(grid[i+1][0]-grid[i][0]);return Math.round((interpMat(grid[i][1])+f*(interpMat(grid[i+1][1])-interpMat(grid[i][1])))*100)/100;}}return b<=50?interpMat(grid[0][1]):interpMat(grid[grid.length-1][1]);}
+function _calibratedLossProb(barrier_pct,T){return Math.max(0.005,Math.min(0.50,1.0-_calibratedBarrierProb(barrier_pct,T)));}
 
-// v5.2: Historically calibrated P(spot >= barrier%) on EU indices
-function _calibratedBarrierProb(barrier_pct, T){
-    var grid = [
-        [50, [0.97, 0.95, 0.93, 0.90, 0.87, 0.84]],
-        [60, [0.93, 0.89, 0.85, 0.80, 0.75, 0.70]],
-        [70, [0.85, 0.78, 0.72, 0.65, 0.58, 0.52]],
-        [80, [0.72, 0.63, 0.57, 0.50, 0.43, 0.37]],
-        [90, [0.60, 0.52, 0.46, 0.40, 0.35, 0.30]],
-        [100,[0.52, 0.45, 0.40, 0.35, 0.30, 0.26]]
-    ];
-    var matBuckets = [1, 2, 3, 5, 7, 10];
-    function interpMat(row){
-        if(T<=matBuckets[0]) return row[0];
-        if(T>=matBuckets[matBuckets.length-1]) return row[matBuckets.length-1];
-        for(var i=0;i<matBuckets.length-1;i++){
-            if(T>=matBuckets[i]&&T<=matBuckets[i+1]){
-                var f=(T-matBuckets[i])/(matBuckets[i+1]-matBuckets[i]);
-                return row[i]+f*(row[i+1]-row[i]);
-            }
-        }
-        return row[0];
-    }
-    var b=Math.max(50,Math.min(100,barrier_pct));
-    for(var i=0;i<grid.length-1;i++){
-        if(b>=grid[i][0]&&b<=grid[i+1][0]){
-            var f=(b-grid[i][0])/(grid[i+1][0]-grid[i][0]);
-            var v1=interpMat(grid[i][1]);
-            var v2=interpMat(grid[i+1][1]);
-            return Math.round((v1+f*(v2-v1))*100)/100;
-        }
-    }
-    return b<=50?interpMat(grid[0][1]):interpMat(grid[grid.length-1][1]);
-}
+window._estimateCouponProb=function(p){if(!p)return 0.70;var ct=(p.couponType||'').toLowerCase();if(ct==='garanti'||ct==='fixe')return 0.95;if(p.capitalProtection&&!p.barrierCoupon)return 0.85;var b=p.barrierCoupon||p.barrier||60;var T=p.maturityYears||5;var pr=_calibratedBarrierProb(b,T);if(p.hasMemory)pr=Math.min(0.95,pr+0.08);var n=(p.underlyings||[]).length;if(n>1){var woe=_worstOfExponent(p.underlyings||[]);pr=Math.max(0.10,Math.pow(pr,woe));}return Math.round(pr*100)/100;};
+window._estimateLossProb=function(p){if(!p)return 0.05;if(p.capitalProtection)return 0.02;var ct=(p.couponType||'').toLowerCase();if(ct==='garanti'||ct==='fixe')return 0.03;var b=p.barrier||60;var T=p.maturityYears||5;var pr=_calibratedLossProb(b,T);var n=(p.underlyings||[]).length;if(n>1){var woe=_worstOfExponent(p.underlyings||[]);pr=Math.min(0.50,1.0-Math.pow(1.0-pr,1.0/woe));}return Math.min(0.50,Math.round(pr*100)/100);};
 
-function _calibratedLossProb(barrier_pct, T){
-    return Math.max(0.005, Math.min(0.50, 1.0 - _calibratedBarrierProb(barrier_pct, T)));
-}
-
-// v5.2: Calibrated coupon probability using historical data
-window._estimateCouponProb=function(p){
-    if(!p)return 0.70;
-    var ct=(p.couponType||'').toLowerCase();
-    if(ct==='garanti'||ct==='fixe')return 0.95;
-    if(p.capitalProtection&&!p.barrierCoupon)return 0.85;
-    var b=p.barrierCoupon||p.barrier||60;
-    var T=p.maturityYears||5;
-    var pr=_calibratedBarrierProb(b, T);
-    if(p.hasMemory)pr=Math.min(0.95,pr+0.08);
-    var n=(p.underlyings||[]).length;
-    if(n>1){var woe=_worstOfExponent(p.underlyings||[]);pr=Math.max(0.10,Math.pow(pr,woe));}
-    return Math.round(pr*100)/100;
-};
-window._estimateLossProb=function(p){
-    if(!p)return 0.05;
-    if(p.capitalProtection)return 0.02;
-    var ct=(p.couponType||'').toLowerCase();
-    if(ct==='garanti'||ct==='fixe')return 0.03;
-    var b=p.barrier||60;
-    var T=p.maturityYears||5;
-    var pr=_calibratedLossProb(b, T);
-    var n=(p.underlyings||[]).length;
-    if(n>1){var woe=_worstOfExponent(p.underlyings||[]);pr=Math.min(0.50,1.0-Math.pow(1.0-pr,1.0/woe));}
-    return Math.min(0.50,Math.round(pr*100)/100);
-};
-
-// ═══ SECTION 7: MARKET DATA ═══
+// ═══ SECTION 7-8: MARKET DATA & STOCK EXTRACTION ═══
 var _mktCache=null,_mktCacheTs=0,_underlyingMap=null,_underlyingsExtra=null,_ratesData=null;
-
-async function _loadAllMarketData(){
-    if(_mktCache&&_mktCacheTs>Date.now()-3600000)return _mktCache;
-    var r=await Promise.all([github.readFile('data/market/stocks_europe.json').catch(function(){return null}),github.readFile('data/market/stocks_us.json').catch(function(){return null}),github.readFile('data/market/sectors.json').catch(function(){return null}),github.readFile('data/market/markets.json').catch(function(){return null}),github.readFile('data/market/market_context.json').catch(function(){return null})]);
-    var eu=_safeParse(r[0]),us=_safeParse(r[1]),sec=_safeParse(r[2]),mkt=_safeParse(r[3]),ctx=_safeParse(r[4]);
-    _mktCache={stocksEurope:(eu&&eu.stocks)?eu.stocks:[],stocksUS:(us&&us.stocks)?us.stocks:[],sectors:(sec&&sec.sectors)?sec.sectors:{},indices:(mkt&&mkt.indices)?mkt.indices:{},context:ctx||{}};
-    try{var idx=await github.readFile('data/market/index.json');if(idx){if(idx.market_intelligence)_mktCache._mi=idx.market_intelligence;if(idx.markets)_mktCache._marketsSummary=idx.markets;if(idx.underlyings_extra&&Object.keys(idx.underlyings_extra).length>0)_underlyingsExtra=idx.underlyings_extra;}}catch(e){}
-    if(!_mktCache._mi){try{var mi=await github.readFile('data/market/market_intelligence.json');if(mi&&mi.ai_response){_mktCache._mi={regime:mi.ai_response.regime,regime_confidence:mi.ai_response.regime_confidence,regime_rationale:mi.ai_response.regime_rationale,warnings:mi.ai_response.warnings||[],bond_strategy:mi.ai_response.bond_strategy||{},sector_momentum:(mi.market_data_input||{}).sector_momentum_summary||'',favored_sectors:(mi.market_data_input||{}).favored_sectors||'',avoided_sectors:(mi.market_data_input||{}).avoided_sectors||'',stress_flags:(mi.market_data_input||{})._stress_flags||[],vix:(mi.market_data_input||{}).vix,brent:(mi.market_data_input||{}).brent_usd};}}catch(e){}}
-    if(!_underlyingsExtra){try{var ue=await github.readFile('data/market/underlyings_extra.json');if(ue&&ue.tickers)_underlyingsExtra=ue.tickers;}catch(e){}}
-    if(!_underlyingsExtra)_underlyingsExtra={};
-    _mktCacheTs=Date.now();return _mktCache;
-}
+async function _loadAllMarketData(){if(_mktCache&&_mktCacheTs>Date.now()-3600000)return _mktCache;var r=await Promise.all([github.readFile('data/market/stocks_europe.json').catch(function(){return null}),github.readFile('data/market/stocks_us.json').catch(function(){return null}),github.readFile('data/market/sectors.json').catch(function(){return null}),github.readFile('data/market/markets.json').catch(function(){return null}),github.readFile('data/market/market_context.json').catch(function(){return null})]);var eu=_safeParse(r[0]),us=_safeParse(r[1]),sec=_safeParse(r[2]),mkt=_safeParse(r[3]),ctx=_safeParse(r[4]);_mktCache={stocksEurope:(eu&&eu.stocks)?eu.stocks:[],stocksUS:(us&&us.stocks)?us.stocks:[],sectors:(sec&&sec.sectors)?sec.sectors:{},indices:(mkt&&mkt.indices)?mkt.indices:{},context:ctx||{}};try{var idx=await github.readFile('data/market/index.json');if(idx){if(idx.market_intelligence)_mktCache._mi=idx.market_intelligence;if(idx.underlyings_extra&&Object.keys(idx.underlyings_extra).length>0)_underlyingsExtra=idx.underlyings_extra;}}catch(e){}if(!_mktCache._mi){try{var mi=await github.readFile('data/market/market_intelligence.json');if(mi&&mi.ai_response){_mktCache._mi={regime:mi.ai_response.regime,regime_confidence:mi.ai_response.regime_confidence,warnings:mi.ai_response.warnings||[],favored_sectors:(mi.market_data_input||{}).favored_sectors||'',avoided_sectors:(mi.market_data_input||{}).avoided_sectors||'',vix:(mi.market_data_input||{}).vix,brent:(mi.market_data_input||{}).brent_usd};}}catch(e){}}if(!_underlyingsExtra){try{var ue=await github.readFile('data/market/underlyings_extra.json');if(ue&&ue.tickers)_underlyingsExtra=ue.tickers;}catch(e){}}if(!_underlyingsExtra)_underlyingsExtra={};_mktCacheTs=Date.now();return _mktCache;}
 async function _loadUnderlyingMap(){if(_underlyingMap)return _underlyingMap;try{_underlyingMap=await github.readFile('data/underlying-map.json');}catch(e){_underlyingMap={indices:{},commodities:{}};}return _underlyingMap;}
 async function _loadRatesData(){if(_ratesData)return _ratesData;try{_ratesData=await github.readFile('data/market/rates.json');}catch(e){_ratesData={yields:{},policy_rates:{},yield_curve:{}};}return _ratesData;}
-
 function _getRealMetrics(tk,def){var r=_underlyingsExtra?_underlyingsExtra[tk]:null;if(!r)return def;return{vol:r.vol_3y!=null?r.vol_3y:def.vol,dd:r.max_dd_3y!=null?r.max_dd_3y:def.dd,beta:r.beta!=null?r.beta:def.beta,perf_ytd:r.perf_ytd,perf_1y:r.perf_1y,perf_3m:r.perf_3m,_source:'twelve_data'};}
 function _getYieldForMat(my){if(!_ratesData||!_ratesData.yield_curve||!_ratesData.yield_curve.points)return null;var pts=_ratesData.yield_curve.points;if(!pts.length)return null;pts.sort(function(a,b){return a.maturity-b.maturity});for(var i=0;i<pts.length;i++)if(pts[i].maturity===my)return pts[i].yield;if(my<=pts[0].maturity)return pts[0].yield;if(my>=pts[pts.length-1].maturity)return pts[pts.length-1].yield;for(var j=0;j<pts.length-1;j++){if(my>=pts[j].maturity&&my<=pts[j+1].maturity){var f=(my-pts[j].maturity)/(pts[j+1].maturity-pts[j].maturity);return pts[j].yield+f*(pts[j+1].yield-pts[j].yield);}}return null;}
 function _getECBDepo(){if(!_ratesData||!_ratesData.policy_rates)return 2.0;var d=_ratesData.policy_rates.ecb_deposit_rate;return d?d.current:2.0;}
 function _getRateDir(my){if(!_ratesData||!_ratesData.yields)return'unknown';if(my<=3)return(_ratesData.yields.oat_fr_2y||{}).direction||'unknown';if(my<=7)return(_ratesData.yields.oat_fr_5y||{}).direction||'unknown';return(_ratesData.yields.oat_fr_10y||{}).direction||'unknown';}
 function _getRateVol(my){if(!_ratesData||!_ratesData.yields)return 0;if(my<=3)return(_ratesData.yields.oat_fr_2y||{}).vol_annualized_bps||0;if(my<=7)return(_ratesData.yields.oat_fr_5y||{}).vol_annualized_bps||0;return(_ratesData.yields.oat_fr_10y||{}).vol_annualized_bps||0;}
 
-// ═══ SECTION 8: STOCK DATA EXTRACTION ═══
-function _extractStockData(product,mkt){
-    var all=[].concat(mkt.stocksEurope,mkt.stocksUS);var result={available:false,stocks:[],worstMetrics:null,marketContext:null};
-    product.underlyings.forEach(function(und){
-        var tk=_resolveAlias(und);
-        var s=all.find(function(x){return x.ticker===tk||x.ticker===und.toUpperCase()||(x.name&&x.name.toUpperCase().indexOf(und.toUpperCase())>=0)||(x.name_api&&x.name_api.toUpperCase().indexOf(und.toUpperCase())>=0)});
-        if(!s){var sn=_stripAccents(und.toUpperCase().trim());s=all.find(function(x){var t=(x.ticker||'').toUpperCase();var n=_stripAccents((x.name||'').toUpperCase());var na=_stripAccents((x.name_api||'').toUpperCase());if(t===sn)return true;if(n.indexOf(sn)>=0||na.indexOf(sn)>=0)return true;var fw=sn.split(/\s+/)[0];if(fw.length>=4&&(n.indexOf(fw)>=0||na.indexOf(fw)>=0))return true;return false});}
-        if(s){result.available=true;result.stocks.push({name:und,ticker:s.ticker,found:true,price:s.price,change_pct:s.change_percent,perf_ytd:s.perf_ytd,perf_1y:s.perf_1y,perf_3y:s.perf_3y,beta:s.beta,volatility_3y:s.volatility_3y,max_drawdown_3y:s.max_drawdown_3y,distance_52w_high:s.distance_52w_high,pe_ratio:s.pe_ratio,roe:s.roe,de_ratio:s.de_ratio,net_margin:s.net_margin,fcf_yield:s.fcf_yield,dividend_yield:s.dividend_yield,buffett_score:s.buffett_score,buffett_grade:s.buffett_grade,quality_score:s.quality_score,quality_subscores:s.quality_subscores,sector:s.sector,sector_api:s.sector_api,industry:s.industry,country:s.country,region:s.region});}
-        else{var px=_tryProxy(und,mkt);if(px){result.available=true;result.stocks.push(px);}else{result.stocks.push({name:und,ticker:tk,found:false});}}
-    });
-    var found=result.stocks.filter(function(s){return s.found});
-    if(found.length>0){result.worstMetrics={worst_buffett:Math.min.apply(null,found.map(function(s){return _bestBuffett(s)})),worst_quality:Math.min.apply(null,found.map(function(s){return s.quality_score!=null?s.quality_score:(s._proxyType?50:35)})),max_volatility:Math.max.apply(null,found.map(function(s){return s.volatility_3y||30})),max_drawdown:Math.max.apply(null,found.map(function(s){return Math.abs(s.max_drawdown_3y||30)})),max_beta:Math.max.apply(null,found.map(function(s){return s.beta||1})),worst_name:found.reduce(function(w,s){return _bestBuffett(s)<_bestBuffett(w)?s:w}).name};}
-    result.marketContext=mkt.context||null;return result;
-}
+function _extractStockData(product,mkt){var all=[].concat(mkt.stocksEurope,mkt.stocksUS);var result={available:false,stocks:[],worstMetrics:null,marketContext:null};product.underlyings.forEach(function(und){var tk=_resolveAlias(und);var s=all.find(function(x){return x.ticker===tk||x.ticker===und.toUpperCase()||(x.name&&x.name.toUpperCase().indexOf(und.toUpperCase())>=0)||(x.name_api&&x.name_api.toUpperCase().indexOf(und.toUpperCase())>=0)});if(!s){var sn=_stripAccents(und.toUpperCase().trim());s=all.find(function(x){var t=(x.ticker||'').toUpperCase();var n=_stripAccents((x.name||'').toUpperCase());var na=_stripAccents((x.name_api||'').toUpperCase());if(t===sn)return true;if(n.indexOf(sn)>=0||na.indexOf(sn)>=0)return true;var fw=sn.split(/\s+/)[0];if(fw.length>=4&&(n.indexOf(fw)>=0||na.indexOf(fw)>=0))return true;return false});}if(s){result.available=true;result.stocks.push({name:und,ticker:s.ticker,found:true,price:s.price,change_pct:s.change_percent,perf_ytd:s.perf_ytd,perf_1y:s.perf_1y,perf_3y:s.perf_3y,beta:s.beta,volatility_3y:s.volatility_3y,max_drawdown_3y:s.max_drawdown_3y,distance_52w_high:s.distance_52w_high,pe_ratio:s.pe_ratio,roe:s.roe,de_ratio:s.de_ratio,net_margin:s.net_margin,fcf_yield:s.fcf_yield,dividend_yield:s.dividend_yield,buffett_score:s.buffett_score,buffett_grade:s.buffett_grade,quality_score:s.quality_score,quality_subscores:s.quality_subscores,sector:s.sector,sector_api:s.sector_api,industry:s.industry,country:s.country,region:s.region});}else{var px=_tryProxy(und,mkt);if(px){result.available=true;result.stocks.push(px);}else{result.stocks.push({name:und,ticker:tk,found:false});}}});var found=result.stocks.filter(function(s){return s.found});if(found.length>0){result.worstMetrics={worst_buffett:Math.min.apply(null,found.map(function(s){return _bestBuffett(s)})),worst_quality:Math.min.apply(null,found.map(function(s){return s.quality_score!=null?s.quality_score:(s._proxyType?50:35)})),max_volatility:Math.max.apply(null,found.map(function(s){return s.volatility_3y||30})),max_drawdown:Math.max.apply(null,found.map(function(s){return Math.abs(s.max_drawdown_3y||30)})),max_beta:Math.max.apply(null,found.map(function(s){return s.beta||1})),worst_name:found.reduce(function(w,s){return _bestBuffett(s)<_bestBuffett(w)?s:w}).name};}result.marketContext=mkt.context||null;return result;}
+function _tryProxy(und,mkt){if(!_underlyingMap)return null;var nm=und.toLowerCase().replace(/[éèê]/g,'e').replace(/[^a-z0-9&\s]/g,'').trim();if(_underlyingMap.indices){var ie=_underlyingMap.indices[nm];if(!ie){var ks=Object.keys(_underlyingMap.indices);for(var i=0;i<ks.length;i++){if(nm.indexOf(ks[i])>=0||ks[i].indexOf(nm)>=0){ie=_underlyingMap.indices[ks[i]];break;}}}if(ie){var rm=_getRealMetrics(ie.proxy,{vol:ie.default_vol,dd:ie.default_vol*1.5,beta:ie.default_beta});return{name:und,ticker:ie.proxy,found:true,_proxyType:'index',_proxy:{name:ie.name,proxy:ie.proxy,default_vol:rm.vol,default_beta:rm.beta,default_dd:rm.dd,_realMetrics:rm,_hasRealData:rm._source==='twelve_data'},sector:'Index',volatility_3y:rm.vol,beta:rm.beta,max_drawdown_3y:-(rm.dd||rm.vol*1.5),perf_ytd:rm.perf_ytd,perf_1y:rm.perf_1y};}}if(_underlyingMap.commodities){var ce=_underlyingMap.commodities[nm];if(!ce){var cks=Object.keys(_underlyingMap.commodities);for(var j=0;j<cks.length;j++){if(nm.indexOf(cks[j])>=0||cks[j].indexOf(nm)>=0){ce=_underlyingMap.commodities[cks[j]];break;}}}if(ce){var cEtf={'gold_usd':'GLD','silver_usd':'SLV','brent_usd':'BNO'};var et=cEtf[ce.macro_key];var crm=et?_getRealMetrics(et,{vol:ce.default_vol,dd:ce.default_dd,beta:ce.default_beta}):{vol:ce.default_vol,dd:ce.default_dd,beta:ce.default_beta};return{name:und,ticker:und.toUpperCase(),found:true,_proxyType:'commodity',_proxy:{name:ce.name,default_vol:crm.vol,default_beta:crm.beta,default_dd:crm.dd},sector:'Commodity',volatility_3y:crm.vol,beta:crm.beta,max_drawdown_3y:-(crm.dd||20)};}}return null;}
 
-function _tryProxy(und,mkt){
-    if(!_underlyingMap)return null;var nm=und.toLowerCase().replace(/[éèê]/g,'e').replace(/[^a-z0-9&\s]/g,'').trim();
-    if(_underlyingMap.indices){var ie=_underlyingMap.indices[nm];if(!ie){var ks=Object.keys(_underlyingMap.indices);for(var i=0;i<ks.length;i++){if(nm.indexOf(ks[i])>=0||ks[i].indexOf(nm)>=0){ie=_underlyingMap.indices[ks[i]];break;}}}
-    if(ie){var rm=_getRealMetrics(ie.proxy,{vol:ie.default_vol,dd:ie.default_vol*1.5,beta:ie.default_beta});return{name:und,ticker:ie.proxy,found:true,_proxyType:'index',_proxy:{name:ie.name,proxy:ie.proxy,default_vol:rm.vol,default_beta:rm.beta,default_dd:rm.dd,_realMetrics:rm,_hasRealData:rm._source==='twelve_data'},sector:'Index',volatility_3y:rm.vol,beta:rm.beta,max_drawdown_3y:-(rm.dd||rm.vol*1.5),perf_ytd:rm.perf_ytd,perf_1y:rm.perf_1y};}}
-    if(_underlyingMap.commodities){var ce=_underlyingMap.commodities[nm];if(!ce){var cks=Object.keys(_underlyingMap.commodities);for(var j=0;j<cks.length;j++){if(nm.indexOf(cks[j])>=0||cks[j].indexOf(nm)>=0){ce=_underlyingMap.commodities[cks[j]];break;}}}
-    if(ce){var cEtf={'gold_usd':'GLD','silver_usd':'SLV','brent_usd':'BNO'};var et=cEtf[ce.macro_key];var crm=et?_getRealMetrics(et,{vol:ce.default_vol,dd:ce.default_dd,beta:ce.default_beta}):{vol:ce.default_vol,dd:ce.default_dd,beta:ce.default_beta};return{name:und,ticker:und.toUpperCase(),found:true,_proxyType:'commodity',_proxy:{name:ce.name,default_vol:crm.vol,default_beta:crm.beta,default_dd:crm.dd},sector:'Commodity',volatility_3y:crm.vol,beta:crm.beta,max_drawdown_3y:-(crm.dd||20)};}}
-    return null;
-}
-
-// ═══ SECTION 9: CAT BENCHMARK ═══
+// ═══ SECTIONS 9-11: CAT, CONTEXT, TYPE ═══
 async function _loadCatBenchmark(){try{var r=await github.readFile('data/cat-market-rates.json');if(r){var l=Array.isArray(r.rates||r)?(r.rates||r):[];var b=l.reduce(function(b,r){var v=parseFloat(r.rate||r.taux)||0;return v>b.rate?{rate:v,bank:r.bank||r.banque}:b},{rate:0});if(b.rate>0)return{bestRate:b.rate,bestBank:b.bank,source:'market-rates'};}}catch(e){}try{var d=await github.readFile('data/cat-deposits.json');if(d){var dl=Array.isArray(d.deposits||d)?(d.deposits||d):[];var rs=dl.map(function(x){return parseFloat(x.rate||x.taux)||0}).filter(function(r){return r>0});if(rs.length>0)return{bestRate:Math.max.apply(null,rs),source:'portfolio-cat'};}}catch(e){}return{bestRate:2.5,source:'fallback-2026'};}
-
-// ═══ SECTION 10: COLLECT CONTEXT ═══
-async function _collectContext(product){
-    await Promise.all([_loadUnderlyingMap(),_loadRatesData()]);
-    var n=_graderNormalize(product);var ctx={product:n,market:{available:false},portfolio:{available:false},cat:{bestRate:2.5,source:'fallback-2026'},isInPortfolio:_isInPf(product.id)};
-    try{var mkt=await _loadAllMarketData();if(mkt)ctx.market=_extractStockData(n,mkt);}catch(e){}
-    if(_mktCache&&_mktCache._mi)ctx.market._mi=_mktCache._mi;
-    if(!ctx.isInPortfolio){try{var pf=app.state.portfolio||[];if(pf.length>0){var eu={};pf.forEach(function(p){_normalizeUnderlyings(p.underlyings||(p.aiParsed&&p.aiParsed.underlyings)||[]).forEach(function(u){eu[u.toUpperCase()]=1})});ctx.portfolio={available:true,totalProducts:pf.length,existingUnderlyings:Object.keys(eu),overlappingUnderlyings:n.underlyings.map(function(u){return u.toUpperCase()}).filter(function(u){return eu[u]})};}}catch(e){}}
-    try{ctx.cat=await _loadCatBenchmark();}catch(e){}return ctx;
-}
-
-// ═══ SECTION 11: TYPE DETECTION ═══
+async function _collectContext(product){await Promise.all([_loadUnderlyingMap(),_loadRatesData()]);var n=_graderNormalize(product);var ctx={product:n,market:{available:false},portfolio:{available:false},cat:{bestRate:2.5,source:'fallback-2026'},isInPortfolio:_isInPf(product.id)};try{var mkt=await _loadAllMarketData();if(mkt)ctx.market=_extractStockData(n,mkt);}catch(e){}if(_mktCache&&_mktCache._mi)ctx.market._mi=_mktCache._mi;if(!ctx.isInPortfolio){try{var pf=app.state.portfolio||[];if(pf.length>0){var eu={};pf.forEach(function(p){_normalizeUnderlyings(p.underlyings||(p.aiParsed&&p.aiParsed.underlyings)||[]).forEach(function(u){eu[u.toUpperCase()]=1})});ctx.portfolio={available:true,totalProducts:pf.length,existingUnderlyings:Object.keys(eu),overlappingUnderlyings:n.underlyings.map(function(u){return u.toUpperCase()}).filter(function(u){return eu[u]})};}}catch(e){}}try{ctx.cat=await _loadCatBenchmark();}catch(e){}return ctx;}
 function _detectType(norm,product){if(norm._structureType==='dispersion')return'dispersion';if(norm._structureType==='taux_fixe')return'taux_fixe';if(norm._structureType==='capital_garanti')return'capital_garanti';if(_isFixedRateProduct(norm))return'taux_fixe';if(_isRateProduct(product||norm))return'rate';return'autocall';}
 
-// ═══ SECTION 12: P1 — RENDEMENT AJUSTÉ ═══
-function _computeP1(p,type){
-    if(type==='dispersion')return _p1Disp(p);
-    if(type==='taux_fixe'||type==='rate')return _p1Rate(p);
-    if(type==='capital_garanti'&&p.barrierCoupon>0)return _p1CapGaranti(p);
-    return _p1Auto(p);
-}
-function _p1Auto(p){
-    var c=p.coupon||0;var s;if(c<=8)s=Math.min(100,c*10);else s=Math.min(100,Math.round(80+20*Math.log(c/8)/Math.log(3)));
-    if(!p.capitalProtection){if(p.barrier>0&&p.barrier<100){
-        // v5.2: σ-based continuous barrier penalty (replaces quadratic cliff)
-        var _bVol=30;
-        var _bMat=p.maturityYears||p._maturityInfo&&p._maturityInfo.expected||5;
-        var _bSigma=-Math.log(p.barrier/100)/(_bVol/100*Math.sqrt(Math.max(0.25,_bMat)));
-        var _penaltyFactor=Math.min(1.0,0.15+0.85*(1-Math.exp(-_bSigma/1.8)));
-        s=Math.round(s*_penaltyFactor);
-        p._barrierSigmaP1=Math.round(_bSigma*100)/100;
-        p._barrierPenaltyFactor=Math.round(_penaltyFactor*100)/100;
-    }else if(!p._barrierUnparsed){s-=25;}}
-    if(p.worstOf&&p.underlyings.length>2)s-=Math.round(3*Math.pow(p.underlyings.length-2,1.3));
-    if(p.hasMemory)s+=5;
-    if(p.couponType==='garanti'||p.couponType==='fixe')s+=Math.min(18,8+Math.round(c*1.0));
-    var mi=_estimateExpectedMaturity(p);var my=mi.expected||p.maturityYears||0;
-    if(my>0&&my<=3)s+=5;else if(my>6&&my<=10)s-=5;else if(my>10)s-=10;
-    p._maturityInfo=mi;return Math.max(0,Math.min(100,Math.round(s)));
-}
-function _p1Disp(p){
-    var er=p._dispersionMedian||(p.coupon*(p.maturityYears||3));var my=p.maturityYears||3;var ar=er/my;
-    var s=Math.min(95,ar*15);if(p.capitalProtection)s+=10;var part=p._originalCoupon||7;
-    if(part>=10)s+=5;else if(part<=5)s-=5;if(my<=3)s+=5;else if(my>6)s-=5;
-    p._maturityInfo={expected:my,max:my,isEstimated:false};return Math.max(0,Math.min(100,Math.round(s)));
-}
-function _p1Rate(p){
-    var c=p.coupon||0;var mt=p.maturityYears||5;var s=Math.min(100,c*10);
-    var rf=_getYieldForMat(mt);if(rf!=null){var sp=c-rf;if(sp>3)s+=10;else if(sp>2)s+=5;else if(sp>0)s-=5;else s-=15;}
-    if(p.autocall||p._isCallable){var d=_getRateDir(mt);if(d==='falling')s-=8;else if(d==='rising')s+=5;}
-    if(p.couponType==='garanti'||p.couponType==='fixe')s+=15;
-    if(mt<=2)s+=8;else if(mt<=3)s+=5;else if(mt>5&&mt<=8)s-=5;else if(mt>8)s-=Math.round(5*Math.log(mt/5));
-    p._maturityInfo=_estimateExpectedMaturity(p);return Math.max(0,Math.min(100,Math.round(s)));
-}
-function _p1CapGaranti(p){
-    var c=p.coupon||0;var bc=p.barrierCoupon||100;
-    var probPerDate=Math.max(0.20,Math.min(0.90,1.0-(bc-40)*0.01));
-    // v5.2: correlation-aware worst-of exponent
-    if(p.worstOf&&p.underlyings.length>1){var woe=_worstOfExponent(p.underlyings);probPerDate=Math.pow(probPerDate,woe);}
-    var my=p.maturityYears||3;var probTotal=probPerDate;
-    if(p.hasMemory&&my>1){var probNever=Math.pow(1-probPerDate,my);probTotal=probPerDate*0.4+(1-probNever)*0.6;}
-    var expectedCoupon=c*probTotal;
-    var s;if(expectedCoupon<=8)s=Math.min(100,expectedCoupon*10);else s=Math.min(100,Math.round(80+20*Math.log(expectedCoupon/8)/Math.log(3)));
-    s+=10;
-    if(my<=3)s+=5;else if(my>6)s-=5;
-    p._maturityInfo={expected:my,max:my,isEstimated:false};
-    p._couponProbability=Math.round(probTotal*100);
-    console.log('[Grader v5.2] P1.capGaranti: coupon '+c+'% × prob '+Math.round(probTotal*100)+'% = expected '+expectedCoupon.toFixed(1)+'% → P1='+Math.round(s));
-    return Math.max(0,Math.min(100,Math.round(s)));
-}
+// ═══ SECTION 12: P1 ═══
+function _computeP1(p,type){if(type==='dispersion')return _p1Disp(p);if(type==='taux_fixe'||type==='rate')return _p1Rate(p);if(type==='capital_garanti'&&p.barrierCoupon>0)return _p1CapGaranti(p);return _p1Auto(p);}
+function _p1Auto(p){var c=p.coupon||0;var s;if(c<=8)s=Math.min(100,c*10);else s=Math.min(100,Math.round(80+20*Math.log(c/8)/Math.log(3)));if(!p.capitalProtection){if(p.barrier>0&&p.barrier<100){var _bVol=30;var _bMat=p.maturityYears||5;var _bSigma=-Math.log(p.barrier/100)/(_bVol/100*Math.sqrt(Math.max(0.25,_bMat)));var _penaltyFactor=Math.min(1.0,0.15+0.85*(1-Math.exp(-_bSigma/1.8)));s=Math.round(s*_penaltyFactor);p._barrierSigmaP1=Math.round(_bSigma*100)/100;p._barrierPenaltyFactor=Math.round(_penaltyFactor*100)/100;}else if(!p._barrierUnparsed){s-=25;}}if(p.worstOf&&p.underlyings.length>2)s-=Math.round(3*Math.pow(p.underlyings.length-2,1.3));if(p.hasMemory)s+=5;if(p.couponType==='garanti'||p.couponType==='fixe')s+=Math.min(18,8+Math.round(c*1.0));var mi=_estimateExpectedMaturity(p);var my=mi.expected||p.maturityYears||0;if(my>0&&my<=3)s+=5;else if(my>6&&my<=10)s-=5;else if(my>10)s-=10;p._maturityInfo=mi;return Math.max(0,Math.min(100,Math.round(s)));}
+function _p1Disp(p){var er=p._dispersionMedian||(p.coupon*(p.maturityYears||3));var my=p.maturityYears||3;var ar2=er/my;var s=Math.min(95,ar2*15);if(p.capitalProtection)s+=10;var part=p._originalCoupon||7;if(part>=10)s+=5;else if(part<=5)s-=5;if(my<=3)s+=5;else if(my>6)s-=5;p._maturityInfo={expected:my,max:my,isEstimated:false};return Math.max(0,Math.min(100,Math.round(s)));}
+function _p1Rate(p){var c=p.coupon||0;var mt=p.maturityYears||5;var s=Math.min(100,c*10);var rf=_getYieldForMat(mt);if(rf!=null){var sp=c-rf;if(sp>3)s+=10;else if(sp>2)s+=5;else if(sp>0)s-=5;else s-=15;}if(p.autocall||p._isCallable){var d=_getRateDir(mt);if(d==='falling')s-=8;else if(d==='rising')s+=5;}if(p.couponType==='garanti'||p.couponType==='fixe')s+=15;if(mt<=2)s+=8;else if(mt<=3)s+=5;else if(mt>5&&mt<=8)s-=5;else if(mt>8)s-=Math.round(5*Math.log(mt/5));p._maturityInfo=_estimateExpectedMaturity(p);return Math.max(0,Math.min(100,Math.round(s)));}
+function _p1CapGaranti(p){var c=p.coupon||0;var bc=p.barrierCoupon||100;var probPerDate=Math.max(0.20,Math.min(0.90,1.0-(bc-40)*0.01));if(p.worstOf&&p.underlyings.length>1){var woe=_worstOfExponent(p.underlyings);probPerDate=Math.pow(probPerDate,woe);}var my=p.maturityYears||3;var probTotal=probPerDate;if(p.hasMemory&&my>1){var probNever=Math.pow(1-probPerDate,my);probTotal=probPerDate*0.4+(1-probNever)*0.6;}var expectedCoupon=c*probTotal;var s;if(expectedCoupon<=8)s=Math.min(100,expectedCoupon*10);else s=Math.min(100,Math.round(80+20*Math.log(expectedCoupon/8)/Math.log(3)));s+=10;if(my<=3)s+=5;else if(my>6)s-=5;p._maturityInfo={expected:my,max:my,isEstimated:false};p._couponProbability=Math.round(probTotal*100);return Math.max(0,Math.min(100,Math.round(s)));}
 
-// ═══ SECTION 13: P2 — QUALITÉ SOUS-JACENT ═══
-function _computeP2(p,market,type){
-    if(type==='dispersion')return _p2Disp(p,market);
-    if(type==='taux_fixe'||type==='rate')return _p2Rate(p);
-    return _p2Auto(p,market);
-}
-function _p2Auto(p,market){
-    if(!market.available||!market.worstMetrics)return 35;var wm=market.worstMetrics;
-    var allPx=market.stocks&&market.stocks.every(function(s){return!s.found||s._proxyType});
-    if(allPx&&market.stocks&&market.stocks.some(function(s){return s._proxyType}))return _p2Index(p,market);
-    var hb=!p.capitalProtection&&p.barrier>0;var wB,wQ,wV,wD;
-    if(hb){wB=0.20;wQ=0.20;wV=0.30;wD=0.30;}else{wB=0.35;wQ=0.35;wV=0.15;wD=0.15;}
-    var vc=Math.max(0,100-Math.max(0,(wm.max_volatility||30)-20)*1.5);var dc=Math.max(0,100-Math.max(0,(wm.max_drawdown||30)-25)*1.2);
-    var s=(wm.worst_buffett||35)*wB+(wm.worst_quality||35)*wQ+vc*wV+dc*wD;
-    if(market.stocks&&market.stocks.length>1){var fd=market.stocks.filter(function(x){return x.found});if(fd.length>1){var sc={};fd.forEach(function(x){sc[(x.sector_api||'?').toLowerCase()]=1});var sr=Object.keys(sc).length/fd.length;s-=Math.round(10*(1-sr));}}
-    if(hb&&wm.max_beta>1.0)s-=Math.round(Math.pow(Math.max(0,wm.max_beta-1.0),1.5)*12);
-    return Math.max(0,Math.min(100,Math.round(s)));
-}
-function _p2Index(p,market){
-    var scores=[];market.stocks.forEach(function(s){
-        if(!s.found||!s._proxy)return;var px=s._proxy;var rm=px._realMetrics||{};
-        var vol=px.default_vol||rm.vol||18;var dd=px.default_dd||rm.dd||(vol*1.5);var beta=px.default_beta||rm.beta||1.0;
-        var hb=!p.capitalProtection&&p.barrier>0;
-        var vsc=Math.max(0,Math.min(100,Math.round(100-vol*2.0)));var dsc=Math.max(0,Math.min(100,Math.round(100-dd*1.8)));
-        var qc=Math.round(vsc*0.55+dsc*0.45);
-        var ytd=rm.perf_ytd||s.perf_ytd||0;var m3=rm.perf_3m||0;var w52=rm.perf_1y||s.perf_1y||0;
-        var conv=1.0/(1+vol/25);var mr=50;
-        if(ytd>10)mr+=15;else if(ytd>0)mr+=8;else if(ytd>-10)mr-=5;else mr-=15;
-        if(m3>5)mr+=8;else if(m3<-10)mr-=10;else if(m3<-5)mr-=5;
-        if(w52>20)mr+=5;else if(w52<-10)mr-=10;
-        var mc=Math.max(10,Math.min(90,Math.round(50+(mr-50)*conv)));
-        var sc=hb?50:70;
-        if(hb&&p.barrier>0){var sqT=Math.sqrt(Math.max(0.5,p.maturityYears||5));var ds=-Math.log(p.barrier/100)/(vol/100*sqT);if(ds>2.5)sc=90;else if(ds>2.0)sc=75;else if(ds>1.5)sc=60;else if(ds>1.0)sc=40;else if(ds>0.5)sc=20;else sc=5;}
-        var vix=(_mktCache&&_mktCache._mi)?_mktCache._mi.vix:null;var va=0;
-        if(vix&&vol){var vr=vix/vol;if(vr>1.3)va=-Math.round((vr-1.3)*15);else if(vr<0.8)va=3;}
-        var score=Math.round(qc*0.50+mc*0.30+sc*0.20)+va;
-        if(hb&&beta>1.1)score-=Math.round((beta-1.0)*8);
-        scores.push(Math.max(0,Math.min(100,score)));
-    });
-    return scores.length===0?35:Math.min.apply(null,scores);
-}
-function _p2Disp(p,market){
-    if(!market.available||!market.worstMetrics)return 60;var wm=market.worstMetrics;
-    var vb=Math.min(20,Math.max(0,(wm.max_volatility||20)-15)*0.7);
-    var qa=((wm.worst_buffett||50)+(wm.worst_quality||50))/2;
-    var fd=market.stocks?market.stocks.filter(function(x){return x.found}):[];
-    var db=fd.length>=6?10:fd.length>=4?5:0;
-    var s=qa*0.4+vb+30+db;return Math.max(0,Math.min(100,Math.round(s)));
-}
-function _p2Rate(p){
-    var mt=p.maturityYears||5;var b=p.capitalProtection?70:55;
-    var dp=mt>3?Math.round(Math.min(15,(mt-3)*2.5)):0;b-=dp;
-    var rv=_getRateVol(mt);if(rv>25)b-=8;else if(rv>15)b-=4;
-    if(_ratesData&&_ratesData.yield_curve){if(_ratesData.yield_curve.shape==='inverted')b-=10;else if(_ratesData.yield_curve.shape==='normal'&&(_ratesData.yield_curve.spread_2_10||0)>0.5)b+=5;}
-    var d=_getRateDir(mt);if(d==='rising')b-=5;else if(d==='falling')b+=3;
-    if(p.autocall||p._isCallable)b+=5;return Math.max(0,Math.min(100,Math.round(b)));
-}
+// ═══ SECTION 13: P2 ═══
+function _computeP2(p,market,type){if(type==='dispersion')return _p2Disp(p,market);if(type==='taux_fixe'||type==='rate')return _p2Rate(p);return _p2Auto(p,market);}
+function _p2Auto(p,market){if(!market.available||!market.worstMetrics)return 35;var wm=market.worstMetrics;var allPx=market.stocks&&market.stocks.every(function(s){return!s.found||s._proxyType});if(allPx&&market.stocks&&market.stocks.some(function(s){return s._proxyType}))return _p2Index(p,market);var hb=!p.capitalProtection&&p.barrier>0;var wB,wQ,wV,wD;if(hb){wB=0.20;wQ=0.20;wV=0.30;wD=0.30;}else{wB=0.35;wQ=0.35;wV=0.15;wD=0.15;}var vc=Math.max(0,100-Math.max(0,(wm.max_volatility||30)-20)*1.5);var dc=Math.max(0,100-Math.max(0,(wm.max_drawdown||30)-25)*1.2);var s=(wm.worst_buffett||35)*wB+(wm.worst_quality||35)*wQ+vc*wV+dc*wD;if(hb&&wm.max_beta>1.0)s-=Math.round(Math.pow(Math.max(0,wm.max_beta-1.0),1.5)*12);return Math.max(0,Math.min(100,Math.round(s)));}
+function _p2Index(p,market){var scores=[];market.stocks.forEach(function(s){if(!s.found||!s._proxy)return;var px=s._proxy;var rm=px._realMetrics||{};var vol=px.default_vol||rm.vol||18;var dd=px.default_dd||rm.dd||(vol*1.5);var beta=px.default_beta||rm.beta||1.0;var hb=!p.capitalProtection&&p.barrier>0;var vsc=Math.max(0,Math.min(100,Math.round(100-vol*2.0)));var dsc=Math.max(0,Math.min(100,Math.round(100-dd*1.8)));var qc=Math.round(vsc*0.55+dsc*0.45);var ytd=rm.perf_ytd||s.perf_ytd||0;var m3=rm.perf_3m||0;var w52=rm.perf_1y||s.perf_1y||0;var conv=1.0/(1+vol/25);var mr=50;if(ytd>10)mr+=15;else if(ytd>0)mr+=8;else if(ytd>-10)mr-=5;else mr-=15;if(m3>5)mr+=8;else if(m3<-10)mr-=10;else if(m3<-5)mr-=5;if(w52>20)mr+=5;else if(w52<-10)mr-=10;var mc=Math.max(10,Math.min(90,Math.round(50+(mr-50)*conv)));var sc=hb?50:70;if(hb&&p.barrier>0){var sqT=Math.sqrt(Math.max(0.5,p.maturityYears||5));var ds=-Math.log(p.barrier/100)/(vol/100*sqT);if(ds>2.5)sc=90;else if(ds>2.0)sc=75;else if(ds>1.5)sc=60;else if(ds>1.0)sc=40;else if(ds>0.5)sc=20;else sc=5;}var vix=(_mktCache&&_mktCache._mi)?_mktCache._mi.vix:null;var va=0;if(vix&&vol){var vr=vix/vol;if(vr>1.3)va=-Math.round((vr-1.3)*15);else if(vr<0.8)va=3;}var score=Math.round(qc*0.50+mc*0.30+sc*0.20)+va;if(hb&&beta>1.1)score-=Math.round((beta-1.0)*8);scores.push(Math.max(0,Math.min(100,score)));});return scores.length===0?35:Math.min.apply(null,scores);}
+function _p2Disp(p,market){if(!market.available||!market.worstMetrics)return 60;var wm=market.worstMetrics;var vb=Math.min(20,Math.max(0,(wm.max_volatility||20)-15)*0.7);var qa=((wm.worst_buffett||50)+(wm.worst_quality||50))/2;var fd=market.stocks?market.stocks.filter(function(x){return x.found}):[];var db=fd.length>=6?10:fd.length>=4?5:0;var s=qa*0.4+vb+30+db;return Math.max(0,Math.min(100,Math.round(s)));}
+function _p2Rate(p){var mt=p.maturityYears||5;var b=p.capitalProtection?70:55;var dp=mt>3?Math.round(Math.min(15,(mt-3)*2.5)):0;b-=dp;var rv=_getRateVol(mt);if(rv>25)b-=8;else if(rv>15)b-=4;if(_ratesData&&_ratesData.yield_curve){if(_ratesData.yield_curve.shape==='inverted')b-=10;else if(_ratesData.yield_curve.shape==='normal'&&(_ratesData.yield_curve.spread_2_10||0)>0.5)b+=5;}var d=_getRateDir(mt);if(d==='rising')b-=5;else if(d==='falling')b+=3;if(p.autocall||p._isCallable)b+=5;return Math.max(0,Math.min(100,Math.round(b)));}
 
-// ═══ SECTION 14: P3 — FIT PORTEFEUILLE ═══
-function _computeP3(p,portfolio,isInPf){
-    if(isInPf)return 70;if(!portfolio||!portfolio.available)return 70;var s=70;
-    var eo=portfolio.overlappingUnderlyings||[];for(var i=0;i<eo.length;i++)s-=10+(i*5);
-    var ng=(p.underlyings||[]).map(function(u){return _getUndGroup(u)});
-    var eg=(portfolio.existingUnderlyings||[]).map(function(u){return _getUndGroup(u)});
-    var cp=0;ng.forEach(function(n){eg.forEach(function(e){var isEx=eo.some(function(o){return _getUndGroup(o)===n});if(isEx)return;var c=_getGrpCorr(n,e);if(c>=0.85)cp+=8;else if(c>=0.70)cp+=4;})});
-    s-=Math.min(20,cp);
-    var nu=(p.underlyings||[]).filter(function(u){var g=_getUndGroup(u);return!eg.some(function(e){return _getGrpCorr(g,e)>=0.70})});
-    if(nu.length>0)s+=10;return Math.max(0,Math.min(100,Math.round(s)));
-}
-
-// ═══ SECTION 15: P4 — PRIME VS CAT ═══
-function _computeP4(p,catRate,type){
-    if(type==='taux_fixe'||type==='rate')return _p4Rate(p,catRate);
-    return _p4Auto(p,catRate,type);
-}
-function _p4Auto(p,catRate,type){
-    var c=p.coupon||0;var cat=catRate||2.5;var mt=p.maturityYears||5;
-    var pc=_estimateCouponProb(p);var pl=_estimateLossProb(p);var al=(p.barrier||60)/100;
-    // v5.2 fix: loss = (1-barrier)×1.3, not barrier×100
-    var lossGivenBreach=(1-al)*100*1.3;
-    var ec=c*pc;var el=lossGivenBreach*pl/Math.max(1,mt);var er=ec-el;
-    var ip=0.5+0.10*Math.max(0,mt-2);var es=er-cat-ip;
-    var s;if(es<=0)s=Math.max(5,30+Math.round(es*12));else if(es<=4)s=Math.min(80,Math.round(30+es*12.5));else s=Math.round(80+20*(1-Math.exp(-(es-4)/4)));
-    if(!p._isCallable&&type!=='dispersion'){var spy=mt>0?(c-cat)/mt:(c-cat);if(spy<0.5&&mt>3)s-=Math.min(15,Math.round((0.5-spy)*20));}
-    if(p._hasDecrement&&p._decrementDrag>0)s-=Math.min(12,Math.round(p._decrementDrag*2.5));
-    return Math.max(0,Math.min(100,Math.round(s)));
-}
-function _p4Rate(p,catRate){
-    var c=p.coupon||0;var mt=p.maturityYears||5;var rf=_getYieldForMat(mt);var ecb=_getECBDepo();
-    var bm=Math.max(catRate||2.5,rf||0,ecb);var ip=0.5+0.15*Math.max(0,mt-2);var es=c-bm-ip;
-    var s;if(es<=0)s=Math.max(5,30+Math.round(es*15));else if(es<=4)s=Math.min(80,Math.round(30+es*12.5));else s=Math.round(80+20*(1-Math.exp(-(es-4)/4)));
-    return Math.max(0,Math.min(100,Math.round(s)));
-}
-
-// ═══ SECTION 16: KILL CRITERIA ═══
-function _checkKillCriteria(p){
-    if(p._structureType==='dispersion'||p._structureType==='capital_garanti'||p._structureType==='taux_fixe')return{killed:false,reasons:[]};
-    var r=[];if(p.worstOf&&p.underlyings.length>GRADING_CONFIG.killCriteria.maxWorstOfUnderlyings)r.push('Worst-of '+p.underlyings.length+' sous-jacents (max '+GRADING_CONFIG.killCriteria.maxWorstOfUnderlyings+')');
-    return{killed:r.length>0,reasons:r};
-}
+// ═══ SECTIONS 14-16: P3, P4, KILL ═══
+function _computeP3(p,portfolio,isInPf){if(isInPf)return 70;if(!portfolio||!portfolio.available)return 70;var s=70;var eo=portfolio.overlappingUnderlyings||[];for(var i=0;i<eo.length;i++)s-=10+(i*5);var ng=(p.underlyings||[]).map(function(u){return _getUndGroup(u)});var eg=(portfolio.existingUnderlyings||[]).map(function(u){return _getUndGroup(u)});var cp=0;ng.forEach(function(n){eg.forEach(function(e){var isEx=eo.some(function(o){return _getUndGroup(o)===n});if(isEx)return;var c=_getGrpCorr(n,e);if(c>=0.85)cp+=8;else if(c>=0.70)cp+=4;})});s-=Math.min(20,cp);var nu=(p.underlyings||[]).filter(function(u){var g=_getUndGroup(u);return!eg.some(function(e){return _getGrpCorr(g,e)>=0.70})});if(nu.length>0)s+=10;return Math.max(0,Math.min(100,Math.round(s)));}
+function _computeP4(p,catRate,type){if(type==='taux_fixe'||type==='rate')return _p4Rate(p,catRate);return _p4Auto(p,catRate,type);}
+function _p4Auto(p,catRate,type){var c=p.coupon||0;var cat=catRate||2.5;var mt=p.maturityYears||5;var pc=_estimateCouponProb(p);var pl=_estimateLossProb(p);var al=(p.barrier||60)/100;var lossGivenBreach=(1-al)*100*1.3;var ec=c*pc;var el=lossGivenBreach*pl/Math.max(1,mt);var er=ec-el;var ip=0.5+0.10*Math.max(0,mt-2);var es=er-cat-ip;var s;if(es<=0)s=Math.max(5,30+Math.round(es*12));else if(es<=4)s=Math.min(80,Math.round(30+es*12.5));else s=Math.round(80+20*(1-Math.exp(-(es-4)/4)));if(!p._isCallable&&type!=='dispersion'){var spy=mt>0?(c-cat)/mt:(c-cat);if(spy<0.5&&mt>3)s-=Math.min(15,Math.round((0.5-spy)*20));}if(p._hasDecrement&&p._decrementDrag>0)s-=Math.min(12,Math.round(p._decrementDrag*2.5));return Math.max(0,Math.min(100,Math.round(s)));}
+function _p4Rate(p,catRate){var c=p.coupon||0;var mt=p.maturityYears||5;var rf=_getYieldForMat(mt);var ecb=_getECBDepo();var bm=Math.max(catRate||2.5,rf||0,ecb);var ip=0.5+0.15*Math.max(0,mt-2);var es=c-bm-ip;var s;if(es<=0)s=Math.max(5,30+Math.round(es*15));else if(es<=4)s=Math.min(80,Math.round(30+es*12.5));else s=Math.round(80+20*(1-Math.exp(-(es-4)/4)));return Math.max(0,Math.min(100,Math.round(s)));}
+function _checkKillCriteria(p){if(p._structureType==='dispersion'||p._structureType==='capital_garanti'||p._structureType==='taux_fixe')return{killed:false,reasons:[]};var r=[];if(p.worstOf&&p.underlyings.length>GRADING_CONFIG.killCriteria.maxWorstOfUnderlyings)r.push('Worst-of '+p.underlyings.length+' sous-jacents');return{killed:r.length>0,reasons:r};}
 
 // ═══ SECTION 17: ENRICHMENT ═══
-window._computeBarrierSigma=function(p,m){if(!p)return null;var b=p.barrier||0;if(b<=0||b>=100||p.capitalProtection)return null;var mt=p.maturityYears||p._maturityInfo&&p._maturityInfo.expected||5;var vol=null;if(m&&m.stocks)m.stocks.forEach(function(s){if(!s.found)return;var sv=s.volatility_3y||(s._proxy&&s._proxy.default_vol)||null;if(sv&&(vol===null||sv>vol))vol=sv;});if(!vol)return null;var eb=b/100;if(eb>=1.0)return{sigma:0,label:'BARRIÈRE TOUCHÉE',danger:true,vol:vol,mat:mt};var sq=Math.sqrt(Math.max(0.25,mt));var sg=-Math.log(eb)/(vol/100*sq);var lb=sg>2.5?'Très safe':sg>2.0?'Confortable':sg>1.5?'Adéquat':sg>1.0?'Attention':sg>0.5?'Danger':'Critique';return{sigma:Math.round(sg*100)/100,label:lb,danger:sg<1.0,vol:vol,mat:mt};};
-
-window._computeLiquidityScore=function(p){if(!p)return{level:'L4',score:10,label:'Bloqué'};if(_isLiquidityProduct(p))return{level:'L1',score:100,label:'Cash'};var er=p.earlyRedemption||{};var ha=er.possible||p.autocall;var md=p.maturityDate?new Date(p.maturityDate):null;var now=new Date();var rm=md?Math.max(0,(md-now)/(1000*60*60*24*30)):999;if(_isFixedRateProduct(p)){if(!ha&&rm>12)return{level:'L4',score:10,label:'Bloqué ('+Math.round(rm)+'M)'};if(ha&&rm<=12)return{level:'L2',score:75,label:'Callable <12M'};if(rm<=6)return{level:'L2',score:80,label:'Maturité <6M'};return{level:'L3',score:40,label:'Callable long terme'};}if(ha){var sy=er.startYear||1;var sd=p.subscriptionDate?new Date(p.subscriptionDate):now;var fc=new Date(sd);fc.setFullYear(fc.getFullYear()+sy);var mc=Math.max(0,(fc-now)/(1000*60*60*24*30));if(fc<=now){var fq=(er.frequency||'').toLowerCase();if(fq.indexOf('trimestr')>=0)mc=3;else if(fq.indexOf('semestr')>=0)mc=6;else mc=12;}if(mc<=6)return{level:'L2',score:75,label:'Rappelable '+Math.round(mc)+'M'};if(mc<=18)return{level:'L3',score:40,label:'Rappelable '+Math.round(mc)+'M'};return{level:'L4',score:15,label:'Pas de rappel avant '+Math.round(mc)+'M'};}if(rm<=12)return{level:'L3',score:40,label:'Maturité <12M'};return{level:'L4',score:10,label:'Illiquide ('+Math.round(rm)+'M)'};};
-
+window._computeBarrierSigma=function(p,m){if(!p)return null;var b=p.barrier||0;if(b<=0||b>=100||p.capitalProtection)return null;var mt=p.maturityYears||5;var vol=null;if(m&&m.stocks)m.stocks.forEach(function(s){if(!s.found)return;var sv=s.volatility_3y||(s._proxy&&s._proxy.default_vol)||null;if(sv&&(vol===null||sv>vol))vol=sv;});if(!vol)return null;var eb=b/100;if(eb>=1.0)return{sigma:0,label:'TOUCHÉE',danger:true,vol:vol,mat:mt};var sq=Math.sqrt(Math.max(0.25,mt));var sg=-Math.log(eb)/(vol/100*sq);var lb=sg>2.5?'Très safe':sg>2.0?'Confortable':sg>1.5?'Adéquat':sg>1.0?'Attention':sg>0.5?'Danger':'Critique';return{sigma:Math.round(sg*100)/100,label:lb,danger:sg<1.0,vol:vol,mat:mt};};
+window._computeLiquidityScore=function(p){if(!p)return{level:'L4',score:10,label:'Bloqué'};if(_isLiquidityProduct(p))return{level:'L1',score:100,label:'Cash'};var er=p.earlyRedemption||{};var ha=er.possible||p.autocall;var md=p.maturityDate?new Date(p.maturityDate):null;var now=new Date();var rm=md?Math.max(0,(md-now)/(1000*60*60*24*30)):999;if(_isFixedRateProduct(p)){if(!ha&&rm>12)return{level:'L4',score:10,label:'Bloqué'};if(ha&&rm<=12)return{level:'L2',score:75,label:'Callable <12M'};if(rm<=6)return{level:'L2',score:80,label:'Mat <6M'};return{level:'L3',score:40,label:'Callable LT'};}if(ha){var sy=er.startYear||1;var sd=p.subscriptionDate?new Date(p.subscriptionDate):now;var fc=new Date(sd);fc.setFullYear(fc.getFullYear()+sy);var mc=Math.max(0,(fc-now)/(1000*60*60*24*30));if(fc<=now){var fq=(er.frequency||'').toLowerCase();if(fq.indexOf('trimestr')>=0)mc=3;else if(fq.indexOf('semestr')>=0)mc=6;else mc=12;}if(mc<=6)return{level:'L2',score:75,label:'Rappelable '+Math.round(mc)+'M'};if(mc<=18)return{level:'L3',score:40,label:'Rappelable '+Math.round(mc)+'M'};return{level:'L4',score:15,label:'Pas rappel avant '+Math.round(mc)+'M'};}if(rm<=12)return{level:'L3',score:40,label:'Mat <12M'};return{level:'L4',score:10,label:'Illiquide'};};
 window._computePortfolioLiquidityRatio=function(pf){if(!pf||!pf.length)return{ratio:0,details:[]};var tn=0,wl=0,dt=[];pf.forEach(function(p){var a=parseFloat(p.investedAmount)||0;if(a<=0)return;var l=_computeLiquidityScore(p);tn+=a;wl+=a*l.score;dt.push({name:(p.name||'?').substring(0,30),amount:a,level:l.level,score:l.score});});return{ratio:tn>0?Math.round(wl/tn):0,totalNotional:tn,details:dt,target:40,healthy:tn>0?(wl/tn>=40):true};};
-
-function _computeCI(score,ctx){if(score===null||score===undefined)return null;var hw=5;if(ctx&&ctx.market&&ctx.market.stocks&&ctx.market.stocks.some(function(s){return s._proxyType}))hw+=2;if(!ctx||!ctx.market||!ctx.market.available)hw+=4;var p=ctx?ctx.product:null;if(p&&p.worstOf&&p.underlyings&&p.underlyings.length>1)hw+=Math.min(4,p.underlyings.length-1);if(p&&p.capitalProtection)hw=Math.round(hw*0.7);if(p&&(p.couponType==='garanti'||p.couponType==='fixe'))hw=Math.round(hw*0.8);hw+=3;var lo=Math.max(0,score-hw),hi=Math.min(100,score+hw);var gl=_letterGrade(hi),gh=_letterGrade(lo);return{low:lo,high:hi,halfWidth:hw,gradeStable:gl===gh,gradeRange:gl===gh?_letterGrade(score):gh+'-'+gl,label:_letterGrade(score)+' ['+lo+'-'+hi+']'};}
+function _computeCI(score,ctx){if(score===null||score===undefined)return null;var hw=5;if(ctx&&ctx.market&&ctx.market.stocks&&ctx.market.stocks.some(function(s){return s._proxyType}))hw+=2;if(!ctx||!ctx.market||!ctx.market.available)hw+=4;var p=ctx?ctx.product:null;if(p&&p.worstOf&&p.underlyings&&p.underlyings.length>1)hw+=Math.min(4,p.underlyings.length-1);if(p&&p.capitalProtection)hw=Math.round(hw*0.7);hw+=3;var lo=Math.max(0,score-hw),hi=Math.min(100,score+hw);var gl=_letterGrade(hi),gh=_letterGrade(lo);return{low:lo,high:hi,halfWidth:hw,gradeStable:gl===gh,gradeRange:gl===gh?_letterGrade(score):gh+'-'+gl,label:_letterGrade(score)+' ['+lo+'-'+hi+']'};}
 
 // ═══ SECTION 18: CLAUDE PROMPT ═══
-function _buildSystemPrompt(isInPf,type){
-    var b="Tu es un analyste de produits structurés expert.\n\nUn scoring de base a été calculé. Tu dois :\n1. AJUSTER chaque pilier de -15 à +15 points selon le CONTEXTE MARCHÉ\n2. JUSTIFIER chaque ajustement en 1 phrase\n3. VERDICT de 3-4 phrases avec données concrètes\n4. 2-3 RISQUES CLÉS\n5. SCÉNARIOS chiffrés en €\n\nSCÉNARIOS — GUIDE :\n- Optimiste : autocall rapide / coupon max (proba 20-30%)\n- Base : scénario le plus probable (proba 30-40%)\n- Stress : marché en baisse mais capital OK (proba 20-30%)\n- Worst : crash, barrière franchie (proba 5-15%)\n\nRÈGLES D'AJUSTEMENT :\n- P1: probabilité RÉELLE du coupon\n- P2: contexte macro, fondamentaux, BETA\n- P4: ajuste si spread trompeur\n";
-    if(type==='taux_fixe'||type==='rate')b+="\n⚠ PRODUIT TAUX FIXE CALLABLE:\n- Pas de sous-jacent action — OBLIGATION\n- Risque = CRÉDIT ÉMETTEUR + RÉINVESTISSEMENT\n- Scénarios : optimiste=rappelé an 1-3, base=rappelé an 4-6, stress=maturité, worst=défaut\n";
-    if(type==='dispersion')b+="\n⚠⚠⚠ DISPERSION (PAS un autocall/worst-of) ⚠⚠⚠\n- Capital 100% GARANTI — AUCUN risque de perte\n- Vol élevée = ATOUT (augmente la dispersion)\n- NE JAMAIS pénaliser vol/beta\n- Coupon TOUJOURS ≥ 0%\n- Scénarios: optimiste=+21%, base=+11%, stress=+3%, worst=+0%\n";
-    if(type==='capital_garanti')b+="\n⚠ CAPITAL GARANTI avec coupon conditionnel (digitale):\n- Capital 100% GARANTI à maturité — AUCUNE perte en capital possible\n- Le coupon est CONDITIONNEL (dépend du niveau des SJ vs strike)\n- Worst case = 0% de coupon (PAS de perte capital)\n- La vol et le DD impactent la PROBABILITÉ du coupon, pas le capital\n- Scénarios: optimiste=coupon max, base=coupon partiel, stress=0% coupon, worst=0% + défaut émetteur\n";
-    b+=(isInPf?"\n- Produit en portefeuille.\n":"\n- P3: pertinence portefeuille\n");
-    b+="\n⚠ ANTI-MOMENTUM: NE PAS utiliser perf YTD/1Y comme justification POSITIVE pour P2.\nCOUPON: le champ 'coupon' est DÉJÀ ANNUALISÉ.\n\nMARKET INTELLIGENCE: Si un bloc MI est présent, intègre le régime macro dans tes ajustements.\n";
-    b+='\nJSON UNIQUEMENT:\n{"adjustments":{"p1":{"delta":5,"reason":"..."},"p2":{"delta":-10,"reason":"..."},"p3":{"delta":0,"reason":"..."},"p4":{"delta":-5,"reason":"..."}},"verdict":"3-4 phrases...","keyRisks":["r1","r2"],"negotiationPoints":[],"scenarios":{"optimistic":{"return_pct":7,"return_eur":7000,"probability":0.25,"duration_years":1},"base":{"return_pct":5,"return_eur":15000,"probability":0.35,"duration_years":3},"stress":{"return_pct":0,"return_eur":0,"probability":0.25,"duration_years":6},"worst":{"return_pct":-5,"return_eur":-5000,"probability":0.15,"duration_years":6}}}';
-    return b;
-}
-
-function _buildUserPrompt(ctx,base,type){
-    var p=ctx.product,m=ctx.market;var nom=p.nominal>0?p.nominal:100000;
-    var pr='## PRODUIT (nominal: '+formatNumber(nom)+'€)\n';
-    if(type==='taux_fixe'||type==='rate')pr+='⚠ TYPE: OBLIGATION TAUX FIXE CALLABLE\n';
-    if(type==='dispersion')pr+='⚠ TYPE: DISPERSION (PERFORMANCE RELATIVE)\n';
-    if(type==='capital_garanti')pr+='⚠ TYPE: CAPITAL GARANTI — coupon conditionnel (digitale)\n';
-    pr+='Nom: '+p.name+'\nCoupon annualisé: '+p.coupon+'%';
-    if(p.couponMultiplier>1)pr+=' ('+p.couponRaw+'% × '+p.couponMultiplier+' '+p.couponFrequency+')';
-    if(p.barrierCoupon>0)pr+='\nBarrière COUPON: '+p.barrierCoupon+'% (SJ doit être ≥ '+p.barrierCoupon+'% du strike pour toucher le coupon)';
-    pr+='\nBarrière capital: '+(p.barrier||'N/A')+'%'+' | Capital: '+(p.capitalProtection?'100% GARANTI':'non protégé');
-    if(p._couponProbability)pr+=' | Prob coupon: ~'+p._couponProbability+'%';
-    var mi=p._maturityInfo||_estimateExpectedMaturity(p);
-    pr+='\nMaturité: '+(p.maturityYears||'?')+'a';if(mi.isEstimated)pr+=' (espérée: ~'+mi.expected+'a, prob mat: '+mi.probReachMaturity+'%)';
-    pr+=' | Autocall: '+(p.autocall?'oui seuil '+p.autocallThreshold+'%':'non');
-    pr+='\nSous-jacents: '+(p.underlyings.length>0?p.underlyings.join(', '):'AUCUN (taux)')+(p.worstOf?' (worst-of)':'')+'\n\n';
-    if(type==='dispersion'){var prod=app.state.currentProduct||{};var hs=prod.historicalSimulations||(prod.aiParsed?prod.aiParsed.historicalSimulations:null);
-        pr+='## TYPE: DISPERSION\nParticipation: '+(prod.participationRate||7)+'%\nCapital: 100% GARANTI\n';
-        if(hs)pr+='Simulations historiques: min='+(hs.min||'?')+'%, médian='+(hs.median||'?')+'%, max='+(hs.max||'?')+'%\n';
-        pr+='Vol élevée = POSITIF. NE PAS pénaliser vol/beta.\n\n';}
-    var prod2=app.state.currentProduct||{};var dec=parseFloat(prod2.decrementPct)||0;
-    if(dec>0){var adiv=parseFloat(prod2.actualDividendYield)||1.0;var drag=dec-adiv;pr+='⚠ DÉCRÉMENT: EXACTEMENT '+dec+'%/an. Div réels: '+adiv+'%. Drag: '+drag.toFixed(1)+'%/an.\n\n';}
-    if(prod2.name&&prod2.name.toLowerCase().indexOf('paiement à maturité')>=0){var cObj=prod2.coupon||{};pr+='⚠ PAIEMENT À MATURITÉ: Aucun flux avant échéance.\n';if(cObj.rateIfCalled&&cObj.rateIfMaturity)pr+='Si rappelé: '+cObj.rateIfCalled+'%/an | Si non rappelé: '+cObj.rateIfMaturity+'%/an\n';pr+='\n';}
-    if(m.available&&m.stocks&&m.stocks.length>0){pr+='## DONNÉES MARCHÉ\n';m.stocks.forEach(function(s){if(!s.found){pr+='- '+s.name+': NON TROUVÉ\n';return;}pr+='- '+s.name+' ('+s.ticker+', '+(s.sector||'?')+'): ';if(s.buffett_score!=null)pr+='Buffett='+s.buffett_score+', ';if(s.quality_score!=null)pr+='Quality='+s.quality_score+', ';pr+='vol='+(s.volatility_3y||'?')+'%, DD='+(s.max_drawdown_3y||'?')+'%, beta='+(s.beta||'?')+'\n';});if(m.worstMetrics)pr+='Worst: '+m.worstMetrics.worst_name+' | Beta max: '+m.worstMetrics.max_beta+'\n';}
-    var mii=m._mi;if(mii&&mii.regime){pr+='\n## MARKET INTELLIGENCE\nRégime: '+mii.regime.toUpperCase()+' (conf: '+mii.regime_confidence+'/5)\n';if(mii.favored_sectors)pr+='Favorisés: '+mii.favored_sectors+'\n';if(mii.avoided_sectors)pr+='Évités: '+mii.avoided_sectors+'\n';if(mii.warnings&&mii.warnings.length>0)pr+='Warnings: '+mii.warnings.join('; ')+'\n';if(mii.vix)pr+='VIX: '+mii.vix;if(mii.brent)pr+=' | Brent: $'+mii.brent;pr+='\n';}
-    if((type==='taux_fixe'||type==='rate')&&_ratesData&&_ratesData.yields){pr+='\n## TAUX\n';var ecb=(_ratesData.policy_rates||{}).ecb_deposit_rate;if(ecb)pr+='BCE: '+ecb.current+'%\n';var y=_ratesData.yields;if(y.oat_fr_5y)pr+='AAA 5Y: '+y.oat_fr_5y.current+'%\n';if(y.oat_fr_10y)pr+='AAA 10Y: '+y.oat_fr_10y.current+'%\n';}
-    pr+='\n## SCORES DE BASE (v5.2)\nP1: '+base.p1+'/100 | P2: '+base.p2+'/100 | P3: '+base.p3+'/100 | P4: '+base.p4+'/100\n';
-    pr+='Score: '+base.total+'/100 → '+base.grade+'\nAJUSTE ±15 pts/pilier. Nominal: '+formatNumber(nom)+'€\n';return pr;
-}
+function _buildSystemPrompt(isInPf,type){var b="Tu es un analyste de produits structurés expert.\n\nUn scoring de base a été calculé. Tu dois :\n1. AJUSTER chaque pilier de -15 à +15 points selon le CONTEXTE MARCHÉ\n2. JUSTIFIER chaque ajustement en 1 phrase\n3. VERDICT de 3-4 phrases avec données concrètes\n4. 2-3 RISQUES CLÉS\n5. SCÉNARIOS chiffrés en €\n\nRÈGLES D'AJUSTEMENT :\n- P1: probabilité RÉELLE du coupon\n- P2: contexte macro, fondamentaux, BETA\n- P4: ajuste si spread trompeur\n";if(type==='taux_fixe'||type==='rate')b+="\n⚠ PRODUIT TAUX FIXE CALLABLE\n";if(type==='dispersion')b+="\n⚠ DISPERSION: Capital GARANTI, vol=ATOUT\n";if(type==='capital_garanti')b+="\n⚠ CAPITAL GARANTI: coupon conditionnel, worst=0% coupon\n";b+=(isInPf?"\n- Produit en portefeuille.\n":"\n- P3: pertinence portefeuille\n");b+="\nCOUPON: le champ 'coupon' est DÉJÀ ANNUALISÉ.\n";b+='\nJSON UNIQUEMENT:\n{"adjustments":{"p1":{"delta":5,"reason":"..."},"p2":{"delta":-10,"reason":"..."},"p3":{"delta":0,"reason":"..."},"p4":{"delta":-5,"reason":"..."}},"verdict":"3-4 phrases...","keyRisks":["r1","r2"],"negotiationPoints":[],"scenarios":{"optimistic":{"return_pct":7,"return_eur":7000,"probability":0.25,"duration_years":1},"base":{"return_pct":5,"return_eur":15000,"probability":0.35,"duration_years":3},"stress":{"return_pct":0,"return_eur":0,"probability":0.25,"duration_years":6},"worst":{"return_pct":-5,"return_eur":-5000,"probability":0.15,"duration_years":6}}}';return b;}
+function _buildUserPrompt(ctx,base,type){var p=ctx.product,m=ctx.market;var nom=p.nominal>0?p.nominal:100000;var pr='## PRODUIT (nominal: '+formatNumber(nom)+'€)\n';if(type==='taux_fixe'||type==='rate')pr+='⚠ TYPE: TAUX FIXE CALLABLE\n';if(type==='dispersion')pr+='⚠ TYPE: DISPERSION\n';if(type==='capital_garanti')pr+='⚠ TYPE: CAPITAL GARANTI\n';pr+='Nom: '+p.name+'\nCoupon annualisé: '+p.coupon+'%';if(p.couponMultiplier>1)pr+=' ('+p.couponRaw+'% × '+p.couponMultiplier+' '+p.couponFrequency+')';if(p.barrierCoupon>0)pr+='\nBarrière COUPON: '+p.barrierCoupon+'%';pr+='\nBarrière capital: '+(p.barrier||'N/A')+'% | Capital: '+(p.capitalProtection?'GARANTI':'non protégé');if(p._couponProbability)pr+=' | Prob coupon: ~'+p._couponProbability+'%';var mi=p._maturityInfo||_estimateExpectedMaturity(p);pr+='\nMaturité: '+(p.maturityYears||'?')+'a';if(mi.isEstimated)pr+=' (espérée: ~'+mi.expected+'a, prob mat: '+mi.probReachMaturity+'%)';pr+=' | Autocall: '+(p.autocall?'oui seuil '+p.autocallThreshold+'%':'non');pr+='\nSous-jacents: '+(p.underlyings.length>0?p.underlyings.join(', '):'AUCUN')+(p.worstOf?' (worst-of)':'')+'\n\n';if(m.available&&m.stocks&&m.stocks.length>0){pr+='## DONNÉES MARCHÉ\n';m.stocks.forEach(function(s){if(!s.found)return;pr+='- '+s.name+' ('+s.ticker+'): ';if(s.buffett_score!=null)pr+='B='+s.buffett_score+', ';pr+='vol='+(s.volatility_3y||'?')+'%, DD='+(s.max_drawdown_3y||'?')+'%, beta='+(s.beta||'?')+'\n';});if(m.worstMetrics)pr+='Worst: '+m.worstMetrics.worst_name+'\n';}var mii=m._mi;if(mii&&mii.regime){pr+='\n## MI\nRégime: '+mii.regime.toUpperCase();if(mii.vix)pr+=' | VIX: '+mii.vix;pr+='\n';}pr+='\n## SCORES BASE\nP1: '+base.p1+' | P2: '+base.p2+' | P3: '+base.p3+' | P4: '+base.p4+' → '+base.total+' ('+base.grade+')\nNominal: '+formatNumber(nom)+'€\n';return pr;}
 
 // ═══ SECTION 19: AI CALL ═══
 function _parseJSON(t){var c=t.replace(/```json\s*/g,'').replace(/```\s*/g,'').trim();try{return JSON.parse(c)}catch(e){}var f=c.indexOf('{'),l=c.lastIndexOf('}');if(f!==-1&&l>f)c=c.slice(f,l+1);c=c.replace(/,\s*([}\]])/g,'$1');return JSON.parse(c);}
+async function _callClaude(ctx,base,type){var model=(typeof CONFIG!=='undefined'&&CONFIG.AI_MODEL)?CONFIG.AI_MODEL:'claude-opus-4-20250514';var sys=_buildSystemPrompt(ctx.isInPortfolio,type);var usr=_buildUserPrompt(ctx,base,type);try{var r=await fetch(CONFIG.AI_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:model,max_tokens:1500,system:sys,messages:[{role:'user',content:usr}]})});if(!r.ok&&CONFIG.AI_MODEL_FALLBACK&&model!==CONFIG.AI_MODEL_FALLBACK){r=await fetch(CONFIG.AI_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:CONFIG.AI_MODEL_FALLBACK,max_tokens:1500,system:sys,messages:[{role:'user',content:usr}]})});}if(!r.ok)throw new Error('Claude API '+r.status);var d=await r.json();var txt=(d.content||[]).filter(function(c){return c.type==='text'}).map(function(c){return c.text}).join('');return _parseJSON(txt);}catch(e){console.warn('[Grader v5.2] Claude:',e.message);throw e;}}
+function _applyAdj(base,adj,w,type,p){var max=GRADING_CONFIG.maxAdjustment;var sens=1.0;if(p.capitalProtection)sens*=0.3;if(p.couponType==='garanti'||p.couponType==='fixe')sens*=0.5;if((p.maturityYears||0)>5)sens*=Math.max(0.2,1-(p.maturityYears||0)/15);if(sens<0.95)max=Math.round(max*sens);var cl=function(d){return Math.max(-max,Math.min(max,d||0))};var cp=function(v){return Math.max(0,Math.min(100,Math.round(v)))};var p1=cp(base.p1+cl(adj.p1&&adj.p1.delta));var p2=cp(base.p2+cl(adj.p2&&adj.p2.delta));var p3=cp(base.p3+cl(adj.p3&&adj.p3.delta));var p4=cp(base.p4+cl(adj.p4&&adj.p4.delta));var tot=Math.round(p1*w.adjustedReturn+p2*w.underlyingQuality+p3*w.portfolioFit+p4*w.riskPremium);return{p1:p1,p2:p2,p3:p3,p4:p4,total:tot,grade:_letterGrade(tot),deltas:{p1:cl(adj.p1&&adj.p1.delta),p2:cl(adj.p2&&adj.p2.delta),p3:cl(adj.p3&&adj.p3.delta),p4:cl(adj.p4&&adj.p4.delta)},reasons:{p1:adj.p1&&adj.p1.reason||'',p2:adj.p2&&adj.p2.reason||'',p3:adj.p3&&adj.p3.reason||'',p4:adj.p4&&adj.p4.reason||''},_miSens:sens,_miMax:max};}
 
-async function _callClaude(ctx,base,type){
-    var model=(typeof CONFIG!=='undefined'&&CONFIG.AI_MODEL)?CONFIG.AI_MODEL:'claude-opus-4-20250514';
-    var sys=_buildSystemPrompt(ctx.isInPortfolio,type);var usr=_buildUserPrompt(ctx,base,type);
-    try{var r=await fetch(CONFIG.AI_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:model,max_tokens:1500,system:sys,messages:[{role:'user',content:usr}]})});
-    if(!r.ok&&CONFIG.AI_MODEL_FALLBACK&&model!==CONFIG.AI_MODEL_FALLBACK){r=await fetch(CONFIG.AI_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:CONFIG.AI_MODEL_FALLBACK,max_tokens:1500,system:sys,messages:[{role:'user',content:usr}]})});}
-    if(!r.ok)throw new Error('Claude API '+r.status);var d=await r.json();var txt=(d.content||[]).filter(function(c){return c.type==='text'}).map(function(c){return c.text}).join('');return _parseJSON(txt);}
-    catch(e){console.warn('[Grader v5] Claude:',e.message);throw e;}
-}
-
-function _applyAdj(base,adj,w,type,p){
-    var max=GRADING_CONFIG.maxAdjustment;var sens=1.0;
-    if(p.capitalProtection)sens*=0.3;if(p.couponType==='garanti'||p.couponType==='fixe')sens*=0.5;
-    if((p.maturityYears||0)>5)sens*=Math.max(0.2,1-(p.maturityYears||0)/15);
-    if(sens<0.95)max=Math.round(max*sens);
-    var cl=function(d){return Math.max(-max,Math.min(max,d||0))};var cp=function(v){return Math.max(0,Math.min(100,Math.round(v)))};
-    var p1=cp(base.p1+cl(adj.p1&&adj.p1.delta));var p2=cp(base.p2+cl(adj.p2&&adj.p2.delta));
-    var p3=cp(base.p3+cl(adj.p3&&adj.p3.delta));var p4=cp(base.p4+cl(adj.p4&&adj.p4.delta));
-    var tot=Math.round(p1*w.adjustedReturn+p2*w.underlyingQuality+p3*w.portfolioFit+p4*w.riskPremium);
-    return{p1:p1,p2:p2,p3:p3,p4:p4,total:tot,grade:_letterGrade(tot),deltas:{p1:cl(adj.p1&&adj.p1.delta),p2:cl(adj.p2&&adj.p2.delta),p3:cl(adj.p3&&adj.p3.delta),p4:cl(adj.p4&&adj.p4.delta)},reasons:{p1:adj.p1&&adj.p1.reason||'',p2:adj.p2&&adj.p2.reason||'',p3:adj.p3&&adj.p3.reason||'',p4:adj.p4&&adj.p4.reason||''},_miSens:sens,_miMax:max};
-}
-
-// ═══ SECTION 20: MAIN ORCHESTRATOR ═══
-async function gradeProposal(product){
-    var t0=Date.now();
-    if(!product.structureType&&typeof _autoDetectStructureType==='function'){var det=_autoDetectStructureType(product);if(det)product.structureType=det;}
-    var ctx=await _collectContext(product);var p=ctx.product;
-    if(_isLiquidityProduct(p)){var lr={grade:'-',score:null,killCriteria:{triggered:false,reasons:[]},pillars:{adjustedReturn:{score:null},underlyingQuality:{score:null},portfolioFit:{score:null},riskPremium:{score:null}},verdict:'Produit de liquidité / parking cash.',keyRisks:['Rendement très faible'],scenarios:null,metadata:{gradedAt:new Date().toISOString(),durationMs:Date.now()-t0,aiUsed:false,version:'5.2',productType:'liquidity',isInPortfolio:ctx.isInPortfolio}};product.grading=lr;return lr;}
-    var type=_detectType(p,product);var w=ctx.isInPortfolio?GRADING_CONFIG.weightsPortfolio:GRADING_CONFIG.weightsProposal;
-    console.log('[Grader v5.2] Type: '+type+' | Structure: '+(p._structureType||'standard')+(p.barrierCoupon?' | barrierCoupon: '+p.barrierCoupon+'%':''));
-    var kill=_checkKillCriteria(p);if(kill.killed){var kr={grade:'F',score:0,killCriteria:{triggered:true,reasons:kill.reasons},pillars:{adjustedReturn:{score:null},underlyingQuality:{score:null},portfolioFit:{score:null},riskPremium:{score:null}},verdict:'Rejet: '+kill.reasons[0],keyRisks:kill.reasons,scenarios:null,metadata:{gradedAt:new Date().toISOString(),durationMs:Date.now()-t0,aiUsed:false,version:'5.2',productType:type}};product.grading=kr;return kr;}
-    var base={p1:_computeP1(p,type),p2:_computeP2(p,ctx.market,type),p3:_computeP3(p,ctx.portfolio,ctx.isInPortfolio),p4:_computeP4(p,ctx.cat.bestRate,type)};
-    base.total=Math.round(base.p1*w.adjustedReturn+base.p2*w.underlyingQuality+base.p3*w.portfolioFit+base.p4*w.riskPremium);base.grade=_letterGrade(base.total);
-    console.log('[Grader v5.2] Base: P1='+base.p1+' P2='+base.p2+' P3='+base.p3+' P4='+base.p4+' → '+base.total+' ('+base.grade+')');
-    var cr=null,final=base,aiUsed=false;
-    try{cr=await _callClaude(ctx,base,type);if(cr&&cr.adjustments){final=_applyAdj(base,cr.adjustments,w,type,p);aiUsed=true;}}catch(e){console.warn('[Grader v5.2] AI fallback:',e.message);}
-    var matI=p._maturityInfo||_estimateExpectedMaturity(p);var sigma=_computeBarrierSigma(p,ctx.market);var liq=_computeLiquidityScore(product);var ci=_computeCI(final.total,ctx);
-    var iss=ISSUER_RATINGS[product.bankId||''];
-    function _r(k,n){var s=n+': base '+base[k];if(aiUsed&&final.deltas&&final.deltas[k]!==0){s+=' → '+(final.deltas[k]>0?'+':'')+final.deltas[k]+' = '+final[k];if(final.reasons[k])s+=' ('+final.reasons[k]+')';}return s;}
-    var matN=matI.isEstimated?' | Mat espérée: ~'+matI.expected+'a (prob mat: '+matI.probReachMaturity+'%)':'';
-    var betaN=(ctx.market.worstMetrics&&ctx.market.worstMetrics.max_beta>1.0&&!p.capitalProtection&&p.barrier>0)?' | β'+ctx.market.worstMetrics.max_beta:'';
-    var isCbl=type==='taux_fixe'||type==='rate';
-    var result={grade:final.grade,score:final.total,killCriteria:{triggered:false,reasons:[]},
-        pillars:{adjustedReturn:{score:final.p1,base:base.p1,delta:final.deltas?final.deltas.p1:0,reasoning:_r('p1','Rendement')+' | Coupon '+p.coupon+'%'+(p.capitalProtection?', protégé':p.barrier>0?', barrière '+p.barrier+'%':'')+(p.barrierCoupon?' | Barr.coupon '+p.barrierCoupon+'%':'')+(p._couponProbability?' prob~'+p._couponProbability+'%':'')+matN},
-        underlyingQuality:{score:final.p2,base:base.p2,delta:final.deltas?final.deltas.p2:0,reasoning:_r('p2','Qualité')+(isCbl?' [crédit]':(!p.capitalProtection&&p.barrier>0?' [vol/DD 30%]':' [B/Q 35%]'))+(ctx.market.worstMetrics?' | Worst: '+ctx.market.worstMetrics.worst_name+' B:'+ctx.market.worstMetrics.worst_buffett:'')+betaN},
-        portfolioFit:{score:final.p3,base:base.p3,delta:final.deltas?final.deltas.p3:0,reasoning:ctx.isInPortfolio?'En portefeuille — neutre':_r('p3','Fit')},
-        riskPremium:{score:final.p4,base:base.p4,delta:final.deltas?final.deltas.p4:0,reasoning:_r('p4','Prime')+' | '+p.coupon+'% vs CAT '+ctx.cat.bestRate+'% (spread '+(p.coupon-ctx.cat.bestRate).toFixed(1)+'%)'}},
-        verdict:cr&&cr.verdict?cr.verdict:'Score '+final.total+'/100 (base '+base.total+').',
-        keyRisks:cr&&cr.keyRisks?cr.keyRisks:[],negotiationPoints:cr&&cr.negotiationPoints?cr.negotiationPoints:[],
-        scenarios:cr&&cr.scenarios?cr.scenarios:null,confidenceInterval:ci,
-        metadata:{gradedAt:new Date().toISOString(),durationMs:Date.now()-t0,aiUsed:aiUsed,version:'5.2',productType:type,marketDataAvailable:ctx.market.available,catBenchmark:ctx.cat.bestRate,catSource:ctx.cat.source,couponAnnualized:p.coupon,couponRaw:p.couponRaw,couponMultiplier:p.couponMultiplier,couponFrequency:p.couponFrequency,isInPortfolio:ctx.isInPortfolio,hasBarrier:!p.capitalProtection&&p.barrier>0,barrierPct:p.barrier,barrierCouponPct:p.barrierCoupon||null,couponProbability:p._couponProbability||null,expectedMaturity:matI.expected,maxMaturity:matI.max,probReachMaturity:matI.probReachMaturity,maxBeta:ctx.market.worstMetrics?ctx.market.worstMetrics.max_beta:null,baseScore:base.total,baseGrade:base.grade,adjustments:aiUsed?final.deltas:null,barrier_sigma:sigma?sigma.sigma:null,barrier_sigma_label:sigma?sigma.label:null,barrier_sigma_danger:sigma?sigma.danger:null,liquidity_level:liq.level,liquidity_score:liq.score,liquidity_label:liq.label,ci_low:ci?ci.low:null,ci_high:ci?ci.high:null,ci_label:ci?ci.label:null,issuer_rating:iss?iss.rating:(product.bankId?'NR':null),issuer_tier:iss?iss.tier:null,issuer_cds_proxy:iss?iss.cds_proxy:null,hasDecrement:p._hasDecrement||false,decrementDrag:p._decrementDrag||0,structureType:p._structureType||null}};
-    if(sigma&&sigma.danger&&result.keyRisks)result.keyRisks.push('Barrière à '+sigma.sigma+'σ ('+sigma.label+') — vol '+sigma.vol+'%');
-    product.grading=result;return result;
-}
-
+// ═══ SECTION 20: MAIN ═══
+async function gradeProposal(product){var t0=Date.now();if(!product.structureType&&typeof _autoDetectStructureType==='function'){var det=_autoDetectStructureType(product);if(det)product.structureType=det;}var ctx=await _collectContext(product);var p=ctx.product;if(_isLiquidityProduct(p)){product.grading={grade:'-',score:null,killCriteria:{triggered:false,reasons:[]},pillars:{adjustedReturn:{score:null},underlyingQuality:{score:null},portfolioFit:{score:null},riskPremium:{score:null}},verdict:'Produit de liquidité.',keyRisks:['Rendement très faible'],scenarios:null,metadata:{gradedAt:new Date().toISOString(),durationMs:Date.now()-t0,aiUsed:false,version:'5.2',productType:'liquidity',isInPortfolio:ctx.isInPortfolio}};return product.grading;}var type=_detectType(p,product);var w=ctx.isInPortfolio?GRADING_CONFIG.weightsPortfolio:GRADING_CONFIG.weightsProposal;console.log('[Grader v5.2] Type: '+type+(p.barrierCoupon?' | barrierCoupon: '+p.barrierCoupon+'%':''));var kill=_checkKillCriteria(p);if(kill.killed){product.grading={grade:'F',score:0,killCriteria:{triggered:true,reasons:kill.reasons},pillars:{adjustedReturn:{score:null},underlyingQuality:{score:null},portfolioFit:{score:null},riskPremium:{score:null}},verdict:'Rejet: '+kill.reasons[0],keyRisks:kill.reasons,scenarios:null,metadata:{gradedAt:new Date().toISOString(),durationMs:Date.now()-t0,aiUsed:false,version:'5.2',productType:type}};return product.grading;}var base={p1:_computeP1(p,type),p2:_computeP2(p,ctx.market,type),p3:_computeP3(p,ctx.portfolio,ctx.isInPortfolio),p4:_computeP4(p,ctx.cat.bestRate,type)};base.total=Math.round(base.p1*w.adjustedReturn+base.p2*w.underlyingQuality+base.p3*w.portfolioFit+base.p4*w.riskPremium);base.grade=_letterGrade(base.total);console.log('[Grader v5.2] Base: P1='+base.p1+' P2='+base.p2+' P3='+base.p3+' P4='+base.p4+' → '+base.total+' ('+base.grade+')');var cr=null,final=base,aiUsed=false;try{cr=await _callClaude(ctx,base,type);if(cr&&cr.adjustments){final=_applyAdj(base,cr.adjustments,w,type,p);aiUsed=true;}}catch(e){console.warn('[Grader v5.2] AI fallback:',e.message);}var matI=p._maturityInfo||_estimateExpectedMaturity(p);var sigma=_computeBarrierSigma(p,ctx.market);var liq=_computeLiquidityScore(product);var ci=_computeCI(final.total,ctx);var iss=ISSUER_RATINGS[product.bankId||''];function _r(k,n){var s=n+': base '+base[k];if(aiUsed&&final.deltas&&final.deltas[k]!==0){s+=' → '+(final.deltas[k]>0?'+':'')+final.deltas[k]+' = '+final[k];if(final.reasons[k])s+=' ('+final.reasons[k]+')';}return s;}var matN=matI.isEstimated?' | Mat espérée: ~'+matI.expected+'a (prob mat: '+matI.probReachMaturity+'%)':'';var isCbl=type==='taux_fixe'||type==='rate';var result={grade:final.grade,score:final.total,killCriteria:{triggered:false,reasons:[]},pillars:{adjustedReturn:{score:final.p1,base:base.p1,delta:final.deltas?final.deltas.p1:0,reasoning:_r('p1','Rendement')+' | Coupon '+p.coupon+'%'+(p.capitalProtection?', protégé':p.barrier>0?', barrière '+p.barrier+'%':'')+(p.barrierCoupon?' | Barr.coupon '+p.barrierCoupon+'%':'')+(p._couponProbability?' prob~'+p._couponProbability+'%':'')+matN},underlyingQuality:{score:final.p2,base:base.p2,delta:final.deltas?final.deltas.p2:0,reasoning:_r('p2','Qualité')+(ctx.market.worstMetrics?' | Worst: '+ctx.market.worstMetrics.worst_name+' B:'+ctx.market.worstMetrics.worst_buffett:'')},portfolioFit:{score:final.p3,base:base.p3,delta:final.deltas?final.deltas.p3:0,reasoning:ctx.isInPortfolio?'En portefeuille':_r('p3','Fit')},riskPremium:{score:final.p4,base:base.p4,delta:final.deltas?final.deltas.p4:0,reasoning:_r('p4','Prime')+' | '+p.coupon+'% vs CAT '+ctx.cat.bestRate+'% (spread '+(p.coupon-ctx.cat.bestRate).toFixed(1)+'%)'}},verdict:cr&&cr.verdict?cr.verdict:'Score '+final.total+'/100 (base '+base.total+').',keyRisks:cr&&cr.keyRisks?cr.keyRisks:[],negotiationPoints:cr&&cr.negotiationPoints?cr.negotiationPoints:[],scenarios:cr&&cr.scenarios?cr.scenarios:null,confidenceInterval:ci,metadata:{gradedAt:new Date().toISOString(),durationMs:Date.now()-t0,aiUsed:aiUsed,version:'5.2',productType:type,marketDataAvailable:ctx.market.available,catBenchmark:ctx.cat.bestRate,catSource:ctx.cat.source,couponAnnualized:p.coupon,couponRaw:p.couponRaw,couponMultiplier:p.couponMultiplier,couponFrequency:p.couponFrequency,isInPortfolio:ctx.isInPortfolio,hasBarrier:!p.capitalProtection&&p.barrier>0,barrierPct:p.barrier,barrierCouponPct:p.barrierCoupon||null,couponProbability:p._couponProbability||null,expectedMaturity:matI.expected,maxMaturity:matI.max,probReachMaturity:matI.probReachMaturity,maxBeta:ctx.market.worstMetrics?ctx.market.worstMetrics.max_beta:null,baseScore:base.total,baseGrade:base.grade,adjustments:aiUsed?final.deltas:null,barrier_sigma:sigma?sigma.sigma:null,barrier_sigma_label:sigma?sigma.label:null,barrier_sigma_danger:sigma?sigma.danger:null,liquidity_level:liq.level,liquidity_score:liq.score,liquidity_label:liq.label,ci_low:ci?ci.low:null,ci_high:ci?ci.high:null,ci_label:ci?ci.label:null,issuer_rating:iss?iss.rating:(product.bankId?'NR':null),issuer_tier:iss?iss.tier:null,hasDecrement:p._hasDecrement||false,decrementDrag:p._decrementDrag||0,structureType:p._structureType||null}};if(sigma&&sigma.danger&&result.keyRisks)result.keyRisks.push('Barrière à '+sigma.sigma+'σ ('+sigma.label+') — vol '+sigma.vol+'%');product.grading=result;return result;}
 async function gradeProposalsBatch(proposals,onProgress){var results=[],total=proposals.length;for(var i=0;i<total;i++){try{var r=await gradeProposal(proposals[i]);results.push({proposal:proposals[i],grading:r});}catch(e){results.push({proposal:proposals[i],grading:{grade:'?',score:null,verdict:'Erreur: '+e.message}});}if(onProgress)onProgress(i+1,total,results[results.length-1]);if(i<total-1)await new Promise(function(r){setTimeout(r,1500)});}results.sort(function(a,b){var o={A:0,B:1,C:2,D:3,F:4,'-':5,'?':6};return(o[a.grading.grade]||6)-(o[b.grading.grade]||6)});return results;}
 
 // ═══ SECTION 21: UI ═══
 function renderGradeBadge(g,s,size){if(g==='-')return'<span style="display:inline-flex;align-items:center;justify-content:center;width:'+(size==='large'?'80px;height:80px;border-radius:50%;font-size:24px':'28px;height:28px;border-radius:6px;font-size:12px')+';background:#94A3B822;color:#94A3B8;font-weight:700">$</span>';var cfg=GRADING_CONFIG.grades[g]||GRADING_CONFIG.grades.F,c=cfg.color;if(size==='large')return'<div style="width:80px;height:80px;border-radius:50%;background:'+c+'22;border:3px solid '+c+';display:flex;flex-direction:column;align-items:center;justify-content:center"><span style="font-size:32px;font-weight:700;color:'+c+'">'+g+'</span><span style="font-size:11px;color:'+c+';opacity:0.8">'+(s!==null?s+'/100':'—')+'</span></div>';return'<span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:'+c+'22;color:'+c+';font-weight:700;font-size:14px">'+g+'</span>';}
-
-function renderGradingSection(grading){
-    if(!grading)return'<div class="grading-section" style="padding:20px;text-align:center"><button onclick="triggerGrading(this)" class="btn primary" style="padding:12px 24px;border-radius:8px;font-size:14px;cursor:pointer">🎯 Lancer le grading</button></div>';
-    var g=grading;if(g.grade==='-')return'<div class="grading-section" style="padding:16px"><div style="display:flex;align-items:center;gap:16px"><div style="width:64px;height:64px;border-radius:50%;background:#94A3B822;display:flex;align-items:center;justify-content:center"><span style="font-size:28px;color:#94A3B8">$</span></div><div><div style="font-size:16px;font-weight:600;color:#94A3B8">Liquidité / Parking Cash</div><div style="font-size:13px;color:var(--text-muted);margin-top:4px">'+(g.verdict||'')+'</div></div></div></div>';
-    var cfg=GRADING_CONFIG.grades[g.grade]||GRADING_CONFIG.grades.F;var isP=g.metadata&&g.metadata.isInPortfolio;var isCbl=g.metadata&&(g.metadata.productType==='taux_fixe'||g.metadata.productType==='rate');
-    var h='<div class="grading-section"><div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">'+renderGradeBadge(g.grade,g.score,'large')+'<div style="flex:1"><div style="font-size:18px;font-weight:600;color:'+cfg.color+'">Grade '+g.grade+' — '+cfg.label+'</div><div style="font-size:13px;color:var(--text-muted);margin-top:4px">'+(g.verdict||'')+'</div></div></div>';
-    if(g.confidenceInterval){var ci=g.confidenceInterval;h+='<div style="font-size:11px;color:var(--text-dim);margin-bottom:8px">['+ci.low+' — '+ci.high+']';if(!ci.gradeStable)h+=' <span style="color:var(--orange);font-size:9px">⚠ '+ci.gradeRange+'</span>';h+='</div>';}
-    if(g.killCriteria&&g.killCriteria.triggered)h+='<div style="background:rgba(239,35,60,0.08);border:1px solid rgba(239,35,60,0.25);border-radius:8px;padding:12px;margin-bottom:16px"><div style="font-weight:600;color:#EF233C;margin-bottom:6px">⛔ Kill criteria</div>'+g.killCriteria.reasons.map(function(r){return'<div style="font-size:12px;color:#EF233C;padding:2px 0">• '+r+'</div>'}).join('')+'</div>';
-    if(g.metadata&&g.metadata.couponMultiplier>1)h+='<div style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:8px;padding:10px;margin-bottom:16px;font-size:12px"><strong style="color:var(--accent)">ℹ Coupon</strong> : '+g.metadata.couponRaw+'% × '+g.metadata.couponMultiplier+' ('+g.metadata.couponFrequency+') = <strong>'+g.metadata.couponAnnualized+'% annuel</strong></div>';
-    if(isCbl)h+='<div style="background:rgba(78,205,196,0.08);border:1px solid rgba(78,205,196,0.2);border-radius:8px;padding:10px;margin-bottom:16px;font-size:12px"><strong style="color:#4ECDC4">ℹ Taux Fixe Callable</strong></div>';
-    if(g.metadata&&g.metadata.expectedMaturity&&g.metadata.maxMaturity&&g.metadata.expectedMaturity<g.metadata.maxMaturity*0.8)h+='<div style="background:rgba(147,130,246,0.08);border:1px solid rgba(147,130,246,0.2);border-radius:8px;padding:10px;margin-bottom:16px;font-size:12px"><strong style="color:#9382F6">⏱ Maturité espérée</strong> : ~'+g.metadata.expectedMaturity+' ans (max '+g.metadata.maxMaturity+' ans). Prob maturité : '+(g.metadata.probReachMaturity||'?')+'%</div>';
-    if(g.metadata&&g.metadata.aiUsed&&g.metadata.baseScore!==undefined)h+='<div style="font-size:11px;color:var(--text-dim);margin-bottom:12px">Base: '+g.metadata.baseScore+'/100 ('+g.metadata.baseGrade+') → IA: <strong>'+g.score+'/100 ('+g.grade+')</strong></div>';
-    var pn={adjustedReturn:'Rendement ajusté',underlyingQuality:isCbl?'Qualité crédit':'Qualité sous-jacent',riskPremium:'Prime vs CAT'};if(!isP)pn.portfolioFit='Fit portefeuille';
-    var wts=isP?GRADING_CONFIG.weightsPortfolio:GRADING_CONFIG.weightsProposal;
-    if(g.pillars){h+='<div style="margin-bottom:16px">';['adjustedReturn','underlyingQuality','portfolioFit','riskPremium'].forEach(function(k){if(!pn[k])return;var pl=g.pillars[k]||{},sc=pl.score;if(sc===null||sc===undefined)return;var w=wts[k];var bc=sc>=70?'#06D6A0':sc>=45?'#FFB627':'#EF233C';var ds=pl.delta&&pl.delta!==0?' <span style="color:'+(pl.delta>0?'#06D6A0':'#EF233C')+';font-size:10px">('+(pl.delta>0?'+':'')+pl.delta+' IA)</span>':'';h+='<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span style="color:var(--text-muted)">'+pn[k]+' ('+Math.round(w*100)+'%)</span><span style="font-weight:600">'+sc+'/100'+ds+'</span></div><div style="height:6px;background:var(--bg-card,var(--surface));border-radius:3px;overflow:hidden"><div style="height:100%;width:'+sc+'%;background:'+bc+';border-radius:3px"></div></div>'+(pl.reasoning?'<div style="font-size:11px;color:var(--text-muted);margin-top:2px">'+pl.reasoning+'</div>':'')+'</div>';});h+='</div>';}
-    if(g.scenarios){h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px">';[['optimistic','Optimiste','#06D6A0'],['base','Base','#4ECDC4'],['stress','Stress','#FFB627'],['worst','Worst','#EF233C']].forEach(function(x){var s=g.scenarios[x[0]];if(!s)return;h+='<div style="text-align:center;padding:8px;border-radius:8px;background:'+x[2]+'15;border:1px solid '+x[2]+'30"><div style="font-size:10px;color:var(--text-muted)">'+x[1]+'</div><div style="font-size:16px;font-weight:600;color:'+x[2]+'">'+((s.return_eur||0)>=0?'+':'')+(s.return_eur||0).toLocaleString('fr-FR')+'€</div><div style="font-size:10px;color:var(--text-muted)">+'+(s.return_pct||0)+'% · '+Math.round((s.probability||0)*100)+'%</div></div>';});h+='</div>';}
-    if(g.keyRisks&&g.keyRisks.length>0)h+='<div style="font-size:12px;color:var(--text-muted);margin-bottom:8px"><strong>Risques :</strong> '+g.keyRisks.join(' · ')+'</div>';
-    if(g.grade==='C'&&g.negotiationPoints&&g.negotiationPoints.length>0)h+='<div style="font-size:12px;color:#FFB627;margin-bottom:8px"><strong>À négocier :</strong> '+g.negotiationPoints.join(' · ')+'</div>';
-    h+='<div style="font-size:10px;color:var(--text-muted);opacity:0.5;margin-top:8px">v5.2'+(g.metadata.aiUsed?' Hybride':' Local')+' · '+new Date(g.metadata.gradedAt).toLocaleDateString('fr-FR')+' · '+g.metadata.durationMs+'ms · CAT '+(g.metadata.catBenchmark||'?')+'% ('+(g.metadata.catSource||'?')+')';
-    if(isP)h+=' · Portefeuille';if(isCbl)h+=' · Callable';if(g.metadata.hasBarrier)h+=' · P2 vol/DD';if(g.metadata.maxBeta&&g.metadata.maxBeta>1.0)h+=' · β'+g.metadata.maxBeta;if(g.metadata.barrier_sigma)h+=' · σ'+g.metadata.barrier_sigma;if(g.metadata.liquidity_level)h+=' · '+g.metadata.liquidity_level;if(g.metadata.issuer_rating&&g.metadata.issuer_rating!=='NR')h+=' · Émetteur '+g.metadata.issuer_rating;if(g.metadata.hasDecrement)h+=' · Décrément '+g.metadata.decrementDrag.toFixed(1)+'%';if(g.metadata.structureType)h+=' · '+g.metadata.structureType;if(g.metadata.barrierCouponPct)h+=' · Barr.coupon '+g.metadata.barrierCouponPct+'%';
-    h+='</div></div>';return h;
-}
+function renderGradingSection(grading){if(!grading)return'<div class="grading-section" style="padding:20px;text-align:center"><button onclick="triggerGrading(this)" class="btn primary" style="padding:12px 24px;border-radius:8px;font-size:14px;cursor:pointer">🎯 Lancer le grading</button></div>';var g=grading;if(g.grade==='-')return'<div class="grading-section" style="padding:16px"><div style="display:flex;align-items:center;gap:16px"><div style="width:64px;height:64px;border-radius:50%;background:#94A3B822;display:flex;align-items:center;justify-content:center"><span style="font-size:28px;color:#94A3B8">$</span></div><div><div style="font-size:16px;font-weight:600;color:#94A3B8">Liquidité</div><div style="font-size:13px;color:var(--text-muted);margin-top:4px">'+(g.verdict||'')+'</div></div></div></div>';var cfg=GRADING_CONFIG.grades[g.grade]||GRADING_CONFIG.grades.F;var isP=g.metadata&&g.metadata.isInPortfolio;var isCbl=g.metadata&&(g.metadata.productType==='taux_fixe'||g.metadata.productType==='rate');var h='<div class="grading-section"><div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">'+renderGradeBadge(g.grade,g.score,'large')+'<div style="flex:1"><div style="font-size:18px;font-weight:600;color:'+cfg.color+'">Grade '+g.grade+' — '+cfg.label+'</div><div style="font-size:13px;color:var(--text-muted);margin-top:4px">'+(g.verdict||'')+'</div></div></div>';if(g.confidenceInterval){var ci=g.confidenceInterval;h+='<div style="font-size:11px;color:var(--text-dim);margin-bottom:8px">['+ci.low+' — '+ci.high+']';if(!ci.gradeStable)h+=' <span style="color:var(--orange);font-size:9px">⚠ '+ci.gradeRange+'</span>';h+='</div>';}if(g.metadata&&g.metadata.couponMultiplier>1)h+='<div style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:8px;padding:10px;margin-bottom:16px;font-size:12px"><strong style="color:var(--accent)">ℹ Coupon</strong> : '+g.metadata.couponRaw+'% × '+g.metadata.couponMultiplier+' ('+g.metadata.couponFrequency+') = <strong>'+g.metadata.couponAnnualized+'% annuel</strong></div>';if(g.metadata&&g.metadata.expectedMaturity&&g.metadata.maxMaturity&&g.metadata.expectedMaturity<g.metadata.maxMaturity*0.8)h+='<div style="background:rgba(147,130,246,0.08);border:1px solid rgba(147,130,246,0.2);border-radius:8px;padding:10px;margin-bottom:16px;font-size:12px"><strong style="color:#9382F6">⏱ Maturité espérée</strong> : ~'+g.metadata.expectedMaturity+' ans (max '+g.metadata.maxMaturity+' ans). Prob maturité : '+(g.metadata.probReachMaturity||'?')+'%</div>';if(g.metadata&&g.metadata.aiUsed&&g.metadata.baseScore!==undefined)h+='<div style="font-size:11px;color:var(--text-dim);margin-bottom:12px">Base: '+g.metadata.baseScore+'/100 ('+g.metadata.baseGrade+') → IA: <strong>'+g.score+'/100 ('+g.grade+')</strong></div>';var pn={adjustedReturn:'Rendement ajusté',underlyingQuality:isCbl?'Qualité crédit':'Qualité sous-jacent',riskPremium:'Prime vs CAT'};if(!isP)pn.portfolioFit='Fit portefeuille';var wts=isP?GRADING_CONFIG.weightsPortfolio:GRADING_CONFIG.weightsProposal;if(g.pillars){h+='<div style="margin-bottom:16px">';['adjustedReturn','underlyingQuality','portfolioFit','riskPremium'].forEach(function(k){if(!pn[k])return;var pl=g.pillars[k]||{},sc=pl.score;if(sc===null||sc===undefined)return;var w=wts[k];var bc=sc>=70?'#06D6A0':sc>=45?'#FFB627':'#EF233C';var ds=pl.delta&&pl.delta!==0?' <span style="color:'+(pl.delta>0?'#06D6A0':'#EF233C')+';font-size:10px">('+(pl.delta>0?'+':'')+pl.delta+' IA)</span>':'';h+='<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span style="color:var(--text-muted)">'+pn[k]+' ('+Math.round(w*100)+'%)</span><span style="font-weight:600">'+sc+'/100'+ds+'</span></div><div style="height:6px;background:var(--bg-card,var(--surface));border-radius:3px;overflow:hidden"><div style="height:100%;width:'+sc+'%;background:'+bc+';border-radius:3px"></div></div>'+(pl.reasoning?'<div style="font-size:11px;color:var(--text-muted);margin-top:2px">'+pl.reasoning+'</div>':'')+'</div>';});h+='</div>';}if(g.scenarios){h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px">';[['optimistic','Optimiste','#06D6A0'],['base','Base','#4ECDC4'],['stress','Stress','#FFB627'],['worst','Worst','#EF233C']].forEach(function(x){var s=g.scenarios[x[0]];if(!s)return;h+='<div style="text-align:center;padding:8px;border-radius:8px;background:'+x[2]+'15;border:1px solid '+x[2]+'30"><div style="font-size:10px;color:var(--text-muted)">'+x[1]+'</div><div style="font-size:16px;font-weight:600;color:'+x[2]+'">'+((s.return_eur||0)>=0?'+':'')+(s.return_eur||0).toLocaleString('fr-FR')+'€</div><div style="font-size:10px;color:var(--text-muted)">+'+(s.return_pct||0)+'% · '+Math.round((s.probability||0)*100)+'%</div></div>';});h+='</div>';}if(g.keyRisks&&g.keyRisks.length>0)h+='<div style="font-size:12px;color:var(--text-muted);margin-bottom:8px"><strong>Risques :</strong> '+g.keyRisks.join(' · ')+'</div>';h+='<div style="font-size:10px;color:var(--text-muted);opacity:0.5;margin-top:8px">v5.2'+(g.metadata.aiUsed?' Hybride':' Local')+' · '+new Date(g.metadata.gradedAt).toLocaleDateString('fr-FR')+' · '+g.metadata.durationMs+'ms · CAT '+(g.metadata.catBenchmark||'?')+'% ('+(g.metadata.catSource||'?')+')';if(g.metadata.hasBarrier)h+=' · P2 vol/DD';if(g.metadata.maxBeta&&g.metadata.maxBeta>1.0)h+=' · β'+g.metadata.maxBeta;if(g.metadata.barrier_sigma)h+=' · σ'+g.metadata.barrier_sigma;if(g.metadata.liquidity_level)h+=' · '+g.metadata.liquidity_level;if(g.metadata.issuer_rating&&g.metadata.issuer_rating!=='NR')h+=' · Émetteur '+g.metadata.issuer_rating;if(g.metadata.hasDecrement)h+=' · Décrément '+g.metadata.decrementDrag.toFixed(1)+'%';if(g.metadata.structureType)h+=' · '+g.metadata.structureType;if(g.metadata.barrierCouponPct)h+=' · Barr.coupon '+g.metadata.barrierCouponPct+'%';h+='</div></div>';return h;}
 
 // ═══ SECTION 22: EXPORTS ═══
 window.ProposalGrader={grade:gradeProposal,gradeBatch:gradeProposalsBatch,renderBadge:renderGradeBadge,renderSection:renderGradingSection,checkKillCriteria:_checkKillCriteria,normalize:_graderNormalize,config:GRADING_CONFIG,isLiquidity:_isLiquidityProduct,isFixedRateCallable:_isFixedRateProduct,estimateExpectedMaturity:_estimateExpectedMaturity,version:'5.2'};
-console.log('[StructBoard] ProposalGrader v5.2 — calibrated probs, σ-barrier, progressive CDS, worst-of corr');
+console.log('[StructBoard] ProposalGrader v5.2 — fix coupon annualization, calibrated probs, σ-barrier');
