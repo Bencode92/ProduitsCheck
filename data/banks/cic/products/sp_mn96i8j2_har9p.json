@@ -185,5 +185,106 @@
       "complementarity": 25
     }
   },
-  "envelope": ""
+  "envelope": "",
+  "grading": {
+    "grade": "C",
+    "score": 51,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 39,
+        "base": 39,
+        "delta": 0,
+        "reasoning": "Rendement: base 39 | Coupon 4.85%, barrière 40% | Barr.coupon 80% | Mat espérée: ~1.6a (prob mat: 0%)"
+      },
+      "underlyingQuality": {
+        "score": 90,
+        "base": 90,
+        "delta": 0,
+        "reasoning": "Qualité: base 90 [vol/DD 30%] | Worst: Euro Stoxx Banks B:76"
+      },
+      "portfolioFit": {
+        "score": 80,
+        "base": 80,
+        "delta": 0,
+        "reasoning": "Fit: base 80"
+      },
+      "riskPremium": {
+        "score": 4,
+        "base": 4,
+        "delta": 0,
+        "reasoning": "Prime: base 4 | 4.85% vs CAT 2.5% (spread 2.3%)"
+      }
+    },
+    "verdict": "Score 51/100 (base 51).",
+    "keyRisks": [],
+    "negotiationPoints": [],
+    "scenarios": null,
+    "confidenceInterval": {
+      "low": 43,
+      "high": 59,
+      "halfWidth": 8,
+      "gradeStable": false,
+      "gradeRange": "D-C",
+      "label": "C [43-59]"
+    },
+    "metadata": {
+      "gradedAt": "2026-03-27T17:32:51.643Z",
+      "durationMs": 14629,
+      "aiUsed": false,
+      "version": "5.2",
+      "productType": "autocall",
+      "marketDataAvailable": true,
+      "catBenchmark": 2.5,
+      "catSource": "fallback-2026",
+      "couponAnnualized": 4.85,
+      "couponRaw": 4.85,
+      "couponMultiplier": 1,
+      "couponFrequency": "semestriel",
+      "isInPortfolio": false,
+      "hasBarrier": true,
+      "barrierPct": 40,
+      "barrierCouponPct": 80,
+      "couponProbability": null,
+      "expectedMaturity": 1.6,
+      "maxMaturity": 5,
+      "probReachMaturity": 0,
+      "maxBeta": 0.96,
+      "baseScore": 51,
+      "baseGrade": "C",
+      "adjustments": null,
+      "barrier_sigma": 2.14,
+      "barrier_sigma_label": "Confortable",
+      "barrier_sigma_danger": false,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Rappelable 12M",
+      "ci_low": 43,
+      "ci_high": 59,
+      "ci_label": "C [43-59]",
+      "issuer_rating": "A+",
+      "issuer_tier": "IG",
+      "issuer_cds_proxy": 55,
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "autocall",
+      "stockData": [
+        {
+          "name": "Euro Stoxx Banks",
+          "ticker": "ENX",
+          "sector": "Finance",
+          "perf_ytd": 4.38,
+          "perf_1y": -0.07,
+          "volatility_3y": 19.14,
+          "max_drawdown_3y": 25.7,
+          "buffett_score": null,
+          "quality_score": 76,
+          "buffett_grade": null
+        }
+      ]
+    }
+  }
 }
