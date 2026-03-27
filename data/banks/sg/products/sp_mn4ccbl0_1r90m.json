@@ -12,7 +12,7 @@
   "maturityDate": null,
   "strikeDate": null,
   "coupon": {
-    "rate": 9,
+    "rate": 4.5,
     "type": "conditionnel",
     "frequency": "semestriel",
     "trigger": 60,
@@ -29,7 +29,9 @@
     "type": "autocall",
     "trigger": 95,
     "frequency": "semestriel",
-    "startYear": 2
+    "startYear": 2,
+    "hasAutocall": true,
+    "enabled": true
   },
   "scenarios": {
     "favorable": "Remboursement anticipé avec 100% capital + coupon",
@@ -246,5 +248,8 @@
         }
       ]
     }
-  }
+  },
+  "structureType": "autocall",
+  "envelope": "",
+  "maturityYears": 5
 }
