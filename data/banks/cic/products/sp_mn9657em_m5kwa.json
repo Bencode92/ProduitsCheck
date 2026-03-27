@@ -198,19 +198,19 @@
         "score": 21,
         "base": 31,
         "delta": -10,
-        "reasoning": "Rendement: base 31 → -10 = 21 (Barrière coupon à 80% peu protectrice avec vol 19% et DD historique -26%, probabilité de toucher régulièrement le coupon fortement dégradée) | Coupon 4.85%, barrière 60% | Barr.coupon 80% | Mat espérée: ~1.6a (prob mat: 0%)"
+        "reasoning": "Rendement: base 31 → -10 = 21 (VIX à 22 et volatilité sectorielle à 19.14% réduisent fortement la probabilité d'autocall rapide sur un secteur bancaire en stagflation.) | Coupon 4.85%, barrière 60% | Barr.coupon 80% | Mat espérée: ~1.6a (prob mat: 0%)"
       },
       "underlyingQuality": {
         "score": 75,
         "base": 90,
         "delta": -15,
-        "reasoning": "Qualité: base 90 → -15 = 75 (Secteur bancaire explicitement évité en stagflation, sensibilité élevée aux taux et récessions avec beta 0.96) [vol/DD 30%] | Worst: Euro Stoxx Banks B:76"
+        "reasoning": "Qualité: base 90 → -15 = 75 (Secteur financier explicitement évité en stagflation, risque de taux élevés persistants et marges bancaires sous pression.) [vol/DD 30%] | Worst: Euro Stoxx Banks B:76"
       },
       "portfolioFit": {
         "score": 75,
         "base": 80,
         "delta": -5,
-        "reasoning": "Fit: base 80 → -5 = 75 (Concentration sectorielle pure sur un secteur défavorisé limite la pertinence dans un portefeuille équilibré)"
+        "reasoning": "Fit: base 80 → -5 = 75 (Concentration sectorielle excessive sur les banques européennes, aucune diversification géographique ou sectorielle.)"
       },
       "riskPremium": {
         "score": 4,
@@ -219,36 +219,36 @@
         "reasoning": "Prime: base 4 | 4.85% vs CAT 2.5% (spread 2.3%)"
       }
     },
-    "verdict": "Produit inadapté au contexte de stagflation avec exposition 100% au secteur bancaire européen, explicitement déconseillé par le régime macro actuel. Le coupon de 4.85% est insuffisant face à une volatilité de 19% et un drawdown historique de -26%, avec une barrière coupon peu protectrice à 80%. La probabilité de toucher régulièrement les coupons est faible et le risque de perte en capital élevé dans un environnement défavorable aux financières.",
+    "verdict": "Produit hautement risqué avec un coupon de 4.85% insuffisant face aux risques sectoriels majeurs. Le secteur bancaire européen est directement pénalisé par la stagflation actuelle (taux élevés, ralentissement économique), avec une volatilité élevée de 19.14% et un drawdown historique de 25.7%. La probabilité d'autocall est quasi-nulle et le risque de franchir la barrière capitale à 60% est significatif sur 5 ans.",
     "keyRisks": [
-      "Exposition mono-sectorielle au secteur bancaire en régime stagflationniste défavorable",
-      "Barrière coupon à 80% vulnérable avec volatilité 19% et drawdown historique -26%",
-      "Risque de taux et récession amplifié sur les banques européennes (beta 0.96)"
+      "Exposition mono-sectorielle aux banques en période de stagflation défavorable",
+      "Volatilité élevée (19.14%) augmente le risque de franchir la barrière à 60%",
+      "Coupon conditionnel à 80% difficile à atteindre avec VIX à 22"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 4.85,
-        "return_eur": 4850,
-        "probability": 0.2,
-        "duration_years": 1
+        "return_pct": 6.5,
+        "return_eur": 6500,
+        "probability": 0.15,
+        "duration_years": 1.5
       },
       "base": {
         "return_pct": 2.4,
-        "return_eur": 7275,
-        "probability": 0.35,
-        "duration_years": 3
+        "return_eur": 12000,
+        "probability": 0.3,
+        "duration_years": 5
       },
       "stress": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.3,
+        "probability": 0.35,
         "duration_years": 5
       },
       "worst": {
         "return_pct": -15,
         "return_eur": -15000,
-        "probability": 0.15,
+        "probability": 0.2,
         "duration_years": 5
       }
     },
@@ -261,8 +261,8 @@
       "label": "D [33-49]"
     },
     "metadata": {
-      "gradedAt": "2026-03-27T17:22:51.323Z",
-      "durationMs": 19045,
+      "gradedAt": "2026-03-27T17:26:25.211Z",
+      "durationMs": 17047,
       "aiUsed": true,
       "version": "5.2",
       "productType": "autocall",
