@@ -195,5 +195,151 @@
       "redundancy": 59,
       "complementarity": 25
     }
+  },
+  "grading": {
+    "grade": "B",
+    "score": 65,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 67,
+        "base": 72,
+        "delta": -5,
+        "reasoning": "Rendement: base 72 → -5 = 67 (En stagflation, autocall difficile avec 2 sous-jacents secteurs évités, maturité espérée 2.1a vs 3a montre risque extension) | Coupon 6.15%, protégé | Mat espérée: ~2.1a (prob mat: 31%)"
+      },
+      "underlyingQuality": {
+        "score": 69,
+        "base": 74,
+        "delta": -5,
+        "reasoning": "Qualité: base 74 → -5 = 69 (Worst-of sur 2 secteurs à éviter (finance + conso cyclique), LVMH DD -51% montre forte vulnérabilité, VIX 22 élevé) [B/Q 35%] | Worst: Crédit Agricole S.A. B:79"
+      },
+      "portfolioFit": {
+        "score": 75,
+        "base": 80,
+        "delta": -5,
+        "reasoning": "Fit: base 80 → -5 = 75 (Protection capital limitée en stagflation quand exposé aux secteurs les plus fragiles du régime)"
+      },
+      "riskPremium": {
+        "score": 52,
+        "base": 52,
+        "delta": 0,
+        "reasoning": "Prime: base 52 | 6.15% vs CAT 2.5% (spread 3.7%)"
+      }
+    },
+    "verdict": "Produit très mal aligné avec le régime stagflationniste qui pénalise spécifiquement les deux secteurs du panier. LVMH souffre du luxe cyclique avec DD -51%, et Crédit Agricole subit la pression sur les banques. Le worst-of amplifie le risque avec une probabilité d'autocall faible (31%) et une extension probable vers 3 ans.",
+    "keyRisks": [
+      "Exposition worst-of à 2 secteurs évités en stagflation",
+      "Extension probable de la maturité au-delà de 2 ans",
+      "Dollar fort et inflation pèsent sur les marges du luxe"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 12.3,
+        "return_eur": 12300,
+        "probability": 0.2,
+        "duration_years": 2
+      },
+      "base": {
+        "return_pct": 18.45,
+        "return_eur": 18450,
+        "probability": 0.35,
+        "duration_years": 3
+      },
+      "stress": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.3,
+        "duration_years": 3
+      },
+      "worst": {
+        "return_pct": -20,
+        "return_eur": -20000,
+        "probability": 0.15,
+        "duration_years": 3
+      }
+    },
+    "confidenceInterval": {
+      "low": 58,
+      "high": 72,
+      "halfWidth": 7,
+      "gradeStable": false,
+      "gradeRange": "C-B",
+      "label": "B [58-72]"
+    },
+    "metadata": {
+      "gradedAt": "2026-03-27T14:36:08.416Z",
+      "durationMs": 16643,
+      "aiUsed": true,
+      "version": "5.0",
+      "productType": "autocall",
+      "marketDataAvailable": true,
+      "catBenchmark": 2.5,
+      "catSource": "fallback-2026",
+      "couponAnnualized": 6.15,
+      "couponRaw": 6.15,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": false,
+      "barrierPct": 0,
+      "expectedMaturity": 2.1,
+      "maxMaturity": 3,
+      "probReachMaturity": 31,
+      "maxBeta": 0.89,
+      "baseScore": 69,
+      "baseGrade": "B",
+      "adjustments": {
+        "p1": -5,
+        "p2": -5,
+        "p3": -5,
+        "p4": 0
+      },
+      "barrier_sigma": null,
+      "barrier_sigma_label": null,
+      "barrier_sigma_danger": null,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Rappelable 12M",
+      "ci_low": 58,
+      "ci_high": 72,
+      "ci_label": "B [58-72]",
+      "issuer_rating": "A+",
+      "issuer_tier": "IG",
+      "issuer_cds_proxy": 55,
+      "issuer_cap_applied": false,
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "autocall",
+      "stockData": [
+        {
+          "name": "LVMH Moët Hennessy Louis Vuitton SA",
+          "ticker": "MC",
+          "sector": "Biens de consommation cycliques",
+          "perf_ytd": -29.02,
+          "perf_1y": -19.91,
+          "volatility_3y": 29.46,
+          "max_drawdown_3y": 51.49,
+          "buffett_score": 81,
+          "quality_score": 65,
+          "buffett_grade": "A"
+        },
+        {
+          "name": "Crédit Agricole S.A.",
+          "ticker": "ACA",
+          "sector": "Finance",
+          "perf_ytd": -9.09,
+          "perf_1y": -4.89,
+          "volatility_3y": 21.27,
+          "max_drawdown_3y": 21.42,
+          "buffett_score": null,
+          "quality_score": 79,
+          "buffett_grade": null
+        }
+      ]
+    }
   }
 }
