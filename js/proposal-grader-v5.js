@@ -416,7 +416,9 @@ function _computeP4(p,catRate,type){
 function _p4Auto(p,catRate,type){
     var c=p.coupon||0;var cat=catRate||2.5;var mt=p.maturityYears||5;
     var pc=_estimateCouponProb(p);var pl=_estimateLossProb(p);var al=(p.barrier||60)/100;
-    var ec=c*pc;var el=al*100*pl/Math.max(1,mt);var er=ec-el;
+    // v5.2 fix: loss = (1-barrier)×1.3, not barrier×100
+    var lossGivenBreach=(1-al)*100*1.3;
+    var ec=c*pc;var el=lossGivenBreach*pl/Math.max(1,mt);var er=ec-el;
     var ip=0.5+0.10*Math.max(0,mt-2);var es=er-cat-ip;
     var s;if(es<=0)s=Math.max(5,30+Math.round(es*12));else if(es<=4)s=Math.min(80,Math.round(30+es*12.5));else s=Math.round(80+20*(1-Math.exp(-(es-4)/4)));
     if(!p._isCallable&&type!=='dispersion'){var spy=mt>0?(c-cat)/mt:(c-cat);if(spy<0.5&&mt>3)s-=Math.min(15,Math.round((0.5-spy)*20));}
