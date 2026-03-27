@@ -15,7 +15,7 @@
     "rate": 4.85,
     "rateIfCalled": null,
     "rateIfMaturity": null,
-    "type": "autocall",
+    "type": "conditionnel",
     "frequency": "semestriel",
     "trigger": null,
     "memory": true,
@@ -24,7 +24,7 @@
   "capitalProtection": {
     "protected": false,
     "level": null,
-    "barrier": 40,
+    "barrier": 60,
     "barrierCoupon": 80,
     "barrierType": "europeenne",
     "couponFloor": false
@@ -37,7 +37,9 @@
     "startSemester": 2,
     "startYear": null,
     "stepDown": false,
-    "stepDownPct": null
+    "stepDownPct": null,
+    "hasAutocall": true,
+    "enabled": true
   },
   "scenarios": {
     "favorable": "Remboursement anticipé avec gain de 4.85% par semestre écoulé",
@@ -75,7 +77,7 @@
       "rate": 4.85,
       "rateIfCalled": null,
       "rateIfMaturity": null,
-      "type": "autocall",
+      "type": "conditionnel",
       "frequency": "semestriel",
       "trigger": null,
       "memory": true,
@@ -85,7 +87,7 @@
     "capitalProtection": {
       "protected": false,
       "level": null,
-      "barrier": 40,
+      "barrier": 60,
       "barrierCoupon": 80,
       "barrierType": "europeenne",
       "couponFloor": false
@@ -98,7 +100,9 @@
       "startSemester": 2,
       "startYear": null,
       "stepDown": false,
-      "stepDownPct": null
+      "stepDownPct": null,
+      "hasAutocall": true,
+      "enabled": true
     },
     "decrementPct": null,
     "actualDividendYield": null,
@@ -180,5 +184,6 @@
       "redundancy": 24,
       "complementarity": 25
     }
-  }
+  },
+  "envelope": ""
 }
