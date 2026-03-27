@@ -1,204 +1,170 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Grader P1/P2 Structure Override v1.0
-// Overrides _computeP1 and _computeP2 to handle non-standard
-// structures (dispersion, taux_fixe, capital_garanti) BEFORE
-// the deterministic scoring runs.
+// STRUCTBOARD — Grader P1/P2 Structure Override v1.1
+// Strategy: Override _graderNormalize to FIX the normalized data
+// BEFORE any scoring happens. This way ALL P1/P2 patches
+// receive correct data (no worst-of for dispersion, etc.)
 //
-// Key fixes:
-//   P1: Remove worst-of penalty for dispersion products
-//       Use historical median as coupon estimate, not 7%
-//   P2: Invert vol from penalty to bonus for dispersion
-//       Remove beta penalty for capital-guaranteed products
+// Also overrides _checkKillCriteria for non-standard structures.
 // ═══════════════════════════════════════════════════════════════
 
 (function() {
     'use strict';
 
-    // Wait for both functions to exist
-    var _waitP1P2 = setInterval(function() {
-        if (typeof _computeP1 !== 'function' || typeof _computeP2 !== 'function') return;
-        clearInterval(_waitP1P2);
+    // ═══ CORE FIX: Override _graderNormalize ═══
+    // This runs BEFORE _computeP1/_computeP2 and ALL their patches
+    var _waitNorm = setInterval(function() {
+        if (typeof _graderNormalize !== 'function') return;
+        clearInterval(_waitNorm);
 
-        var _origP1 = _computeP1;
-        var _origP2 = _computeP2;
+        var _origNormalize = _graderNormalize;
 
-        // ═══ P1 OVERRIDE ═══
-        window._computeP1 = function(p) {
-            var structType = '';
-            // Try to get structureType from the original product (not normalized)
-            if (app.state.currentProduct) structType = app.state.currentProduct.structureType || '';
+        window._graderNormalize = function(product) {
+            var norm = _origNormalize(product);
+
+            // Detect structure type
+            var structType = product.structureType || '';
             if (!structType && typeof _autoDetectStructureType === 'function') {
-                structType = _autoDetectStructureType(app.state.currentProduct || p);
+                structType = _autoDetectStructureType(product);
             }
 
-            // ─── DISPERSION: completely different P1 logic ───
-            if (structType === 'dispersion') {
-                var product = app.state.currentProduct || {};
-                var histSim = product.historicalSimulations || (product.aiParsed ? product.aiParsed.historicalSimulations : null);
-                var participation = product.participationRate || p.coupon || 7;
+            if (!structType) return norm;
 
-                // Use historical median if available, else estimate
-                var expectedReturn;
+            // ─── DISPERSION: fix normalized data ───
+            if (structType === 'dispersion') {
+                // 1. NOT a worst-of — remove the flag entirely
+                norm.worstOf = false;
+
+                // 2. Capital IS protected (guaranteed 100%)
+                norm.capitalProtection = true;
+
+                // 3. NO barrier (there is none)
+                norm.barrier = 0;
+
+                // 4. Coupon type is guaranteed (always >= 0%)
+                norm.couponType = 'garanti';
+
+                // 5. Adjust coupon to expected annualized return
+                //    If historical median available, use it
+                var histSim = product.historicalSimulations ||
+                    (product.aiParsed ? product.aiParsed.historicalSimulations : null);
+                var matYears = norm.maturityYears || 3;
+
                 if (histSim && histSim.median) {
-                    expectedReturn = histSim.median; // e.g., 11.47% over 3 years
+                    // Median 11.47% over 3 years → ~3.82%/an
+                    norm.coupon = histSim.median / matYears;
+                    norm._dispersionMedian = histSim.median;
                 } else {
-                    // Tech stocks average dispersion ~120-160% over 3 years
-                    // With 7% participation → 8.4-11.2%
-                    expectedReturn = participation * 1.5; // conservative estimate
+                    // Use participation × estimated dispersion
+                    var participation = product.participationRate || norm.coupon || 7;
+                    // Conservative dispersion estimate: 130% for tech pairs over 3Y
+                    norm.coupon = (participation * 1.3) / matYears;
+                    norm._dispersionMedian = participation * 1.3;
                 }
 
-                // Annualize for comparison
-                var matYears = p.maturityYears || 3;
-                var annualReturn = expectedReturn / matYears;
+                // 6. No autocall for dispersion
+                norm.autocall = false;
 
-                // Score based on annualized expected return
-                // 3.5%/an → 55, 4%/an → 60, 5%/an → 70, 7%/an → 85
-                var s = Math.min(95, annualReturn * 15);
+                // 7. Tag it
+                norm._structureType = 'dispersion';
+                norm._originalCoupon = product.coupon?.rate || product.participationRate || 7;
 
-                // Capital guaranteed bonus
-                if (p.capitalProtection) s += 10;
-
-                // Participation rate evaluation
-                // 7% is typical, 10%+ would be generous
-                if (participation >= 10) s += 5;
-                else if (participation <= 5) s -= 5;
-
-                // NO worst-of penalty (it's NOT a worst-of)
-                // NO barrier penalty (there IS no barrier)
-
-                // Maturity adjustment (same as standard)
-                if (matYears <= 3) s += 5;
-                else if (matYears > 6) s -= 5;
-
-                // Expected maturity (no autocall for dispersion)
-                p._maturityInfo = { expected: matYears, max: matYears, isEstimated: false };
-
-                var result = Math.max(0, Math.min(100, Math.round(s)));
-                console.log('[P1 Override] Dispersion: expectedReturn=' + expectedReturn +
-                    '% annualized=' + annualReturn.toFixed(1) + '%/an → P1=' + result +
-                    ' (vs standard P1=' + _origP1(p) + ')');
-                return result;
+                console.log('[NormOverride] Dispersion: worstOf=false, barrier=0, coupon=' +
+                    norm.coupon.toFixed(2) + '%/an (median ' + (norm._dispersionMedian || '?') +
+                    '% over ' + matYears + 'Y)');
             }
 
-            // ─── CAPITAL GARANTI: boost if coupon is decent ───
-            if (structType === 'capital_garanti') {
-                var s = _origP1(p);
-                // Remove worst-of penalty if it was applied
-                if (p.worstOf && p.underlyings.length > 2) {
-                    var removedPenalty = Math.round(3 * Math.pow(p.underlyings.length - 2, 1.3));
-                    s += removedPenalty;
-                    console.log('[P1 Override] Capital garanti: removed worst-of penalty +' + removedPenalty);
-                }
-                return Math.max(0, Math.min(100, Math.round(s)));
+            // ─── CAPITAL GARANTI: remove worst-of if present ───
+            else if (structType === 'capital_garanti') {
+                norm.capitalProtection = true;
+                norm.barrier = 0;
+                if (norm.couponType !== 'fixe') norm.couponType = 'garanti';
+                norm._structureType = 'capital_garanti';
+                // Keep worstOf as-is for other capital_garanti products
+                // (some do have conditional coupons)
+                console.log('[NormOverride] Capital garanti: barrier=0, protection=true');
             }
 
-            // ─── TAUX FIXE: already handled correctly by original ───
-            // ─── ALL OTHER TYPES: use original ───
-            return _origP1(p);
+            // ─── TAUX FIXE: ensure correct treatment ───
+            else if (structType === 'taux_fixe') {
+                norm.capitalProtection = true;
+                norm.barrier = 0;
+                norm.couponType = 'fixe';
+                norm.worstOf = false;
+                norm._structureType = 'taux_fixe';
+                console.log('[NormOverride] Taux fixe: barrier=0, couponType=fixe');
+            }
+
+            return norm;
         };
 
-        // ═══ P2 OVERRIDE ═══
-        window._computeP2 = function(p, market, productType) {
-            var structType = '';
-            if (app.state.currentProduct) structType = app.state.currentProduct.structureType || '';
-            if (!structType && typeof _autoDetectStructureType === 'function') {
-                structType = _autoDetectStructureType(app.state.currentProduct || p);
-            }
+        console.log('[StructBoard] _graderNormalize overridden for structure types');
+    }, 150); // Fire early, before other patches
+    setTimeout(function() { clearInterval(_waitNorm); }, 10000);
 
-            // ─── DISPERSION: vol is a POSITIVE factor ───
-            if (structType === 'dispersion') {
-                if (!market.available || !market.worstMetrics) return 55; // neutral default
-
-                var wm = market.worstMetrics;
-
-                // For dispersion: high vol = MORE dispersion = HIGHER return
-                // We INVERT the vol component
-                var volBonus = Math.min(25, Math.max(0, (wm.max_volatility || 20) - 15) * 0.8);
-                // vol 20% → +4, vol 35% → +16, vol 57% (Tesla) → +25 (capped)
-
-                // Quality still matters (issuer default risk)
-                var qualityScore = ((wm.worst_buffett || 50) + (wm.worst_quality || 50)) / 2;
-
-                // Diversity of performance histories = good for dispersion
-                // More stocks with different trajectories = more dispersion
-                var found = market.stocks ? market.stocks.filter(function(x) { return x.found; }) : [];
-                var diversityBonus = 0;
-                if (found.length >= 6) diversityBonus = 10;
-                else if (found.length >= 4) diversityBonus = 5;
-
-                // Sector concentration: for dispersion, same sector CAN be OK
-                // (tech stocks still have very different trajectories: NVDA vs AAPL vs TSLA)
-                // Light penalty only if ALL stocks in exact same sub-sector
-                var sectorPenalty = 0;
-                if (found.length > 1) {
-                    var sectors = {};
-                    found.forEach(function(x) { sectors[(x.sector_api || '?').toLowerCase()] = 1; });
-                    if (Object.keys(sectors).length === 1) sectorPenalty = 5; // mild, not 10
-                }
-
-                // NO beta penalty (capital is guaranteed, beta doesn't matter)
-                // NO drawdown penalty (dispersion benefits from divergent movements)
-
-                var s = qualityScore * 0.4 + volBonus * 1.0 + 30 + diversityBonus - sectorPenalty;
-
-                var result = Math.max(0, Math.min(100, Math.round(s)));
-                console.log('[P2 Override] Dispersion: quality=' + qualityScore.toFixed(0) +
-                    ' volBonus=+' + volBonus.toFixed(0) +
-                    ' diversity=+' + diversityBonus +
-                    ' sectorPenalty=-' + sectorPenalty +
-                    ' → P2=' + result + ' (vs standard P2=' + _origP2(p, market, productType) + ')');
-                return result;
-            }
-
-            // ─── CAPITAL GARANTI: remove beta penalty ───
-            if (structType === 'capital_garanti') {
-                // Use original but override hasBarrier to false
-                var origBarrier = p.barrier;
-                var origProtection = p.capitalProtection;
-                p.capitalProtection = true; // force capital protected
-                var s = _origP2(p, market, productType);
-                p.barrier = origBarrier;
-                p.capitalProtection = origProtection;
-                return s;
-            }
-
-            // ─── ALL OTHER TYPES: use original ───
-            return _origP2(p, market, productType);
-        };
-
-        console.log('[StructBoard] P1/P2 Structure Override v1.0 — dispersion + capital_garanti');
-    }, 250);
-    setTimeout(function() { clearInterval(_waitP1P2); }, 12000);
-
-    // ═══ Also override kill criteria for dispersion ═══
+    // ═══ FIX KILL CRITERIA ═══
     var _waitKill = setInterval(function() {
         if (typeof _checkKillCriteria !== 'function') return;
         clearInterval(_waitKill);
 
         var _origKill = _checkKillCriteria;
         window._checkKillCriteria = function(p, cat) {
-            var structType = '';
-            if (app.state.currentProduct) structType = app.state.currentProduct.structureType || '';
-            if (!structType && typeof _autoDetectStructureType === 'function') {
-                structType = _autoDetectStructureType(app.state.currentProduct || p);
+            // If structure type is set, skip worst-of kill
+            var structType = p._structureType || '';
+            if (!structType) {
+                var product = app.state.currentProduct;
+                if (product) {
+                    structType = product.structureType || '';
+                    if (!structType && typeof _autoDetectStructureType === 'function') {
+                        structType = _autoDetectStructureType(product);
+                    }
+                }
             }
 
-            // Dispersion: do NOT apply worst-of kill criteria
-            // 16 pairs / 8 stocks is the normal structure, not a risk
-            if (structType === 'dispersion') {
-                return { killed: false, reasons: [] };
-            }
-
-            // Capital garanti: also skip worst-of kill
-            if (structType === 'capital_garanti') {
+            if (structType === 'dispersion' || structType === 'capital_garanti' || structType === 'taux_fixe') {
                 return { killed: false, reasons: [] };
             }
 
             return _origKill(p, cat);
         };
-        console.log('[StructBoard] Kill criteria override for dispersion/capital_garanti');
-    }, 300);
-    setTimeout(function() { clearInterval(_waitKill); }, 12000);
+        console.log('[StructBoard] Kill criteria overridden for non-standard structures');
+    }, 200);
+    setTimeout(function() { clearInterval(_waitKill); }, 10000);
 
-    console.log('[StructBoard] Grader P1/P2 Structure Override v1.0 loaded');
+    // ═══ FIX P2: Override AFTER all other patches ═══
+    // Use a late timeout to ensure we override LAST
+    setTimeout(function() {
+        if (typeof _computeP2 !== 'function') return;
+
+        var _lastP2 = _computeP2;
+        window._computeP2 = function(p, market, productType) {
+            // Check if this is a dispersion product (tagged by normalize)
+            if (p._structureType === 'dispersion') {
+                if (!market || !market.available || !market.worstMetrics) return 60;
+                var wm = market.worstMetrics;
+
+                // Vol is POSITIVE for dispersion
+                var volBonus = Math.min(20, Math.max(0, (wm.max_volatility || 20) - 15) * 0.7);
+
+                // Quality still matters
+                var qualityAvg = ((wm.worst_buffett || 50) + (wm.worst_quality || 50)) / 2;
+
+                // Diversity bonus
+                var found = market.stocks ? market.stocks.filter(function(x) { return x.found; }) : [];
+                var diversityBonus = found.length >= 6 ? 10 : found.length >= 4 ? 5 : 0;
+
+                var s = qualityAvg * 0.4 + volBonus + 30 + diversityBonus;
+                s = Math.max(0, Math.min(100, Math.round(s)));
+
+                console.log('[P2 Late Override] Dispersion: quality=' + qualityAvg.toFixed(0) +
+                    ' volBonus=+' + volBonus.toFixed(0) + ' diversity=+' + diversityBonus +
+                    ' → P2=' + s + ' (standard would be ' + _lastP2(p, market, productType) + ')');
+                return s;
+            }
+
+            return _lastP2(p, market, productType);
+        };
+        console.log('[StructBoard] P2 late override installed for dispersion');
+    }, 3000); // 3 seconds = after ALL setInterval patches have fired
+
+    console.log('[StructBoard] Grader P1/P2 Structure Override v1.1 — normalize strategy');
 })();
