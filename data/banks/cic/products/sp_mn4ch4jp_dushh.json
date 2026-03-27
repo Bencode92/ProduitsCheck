@@ -142,49 +142,49 @@
   "structureType": "autocall",
   "grading": {
     "grade": "B",
-    "score": 72,
+    "score": 60,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 56,
-        "base": 66,
-        "delta": -10,
-        "reasoning": "Rendement: base 66 → -10 = 56 (Distance barrière 40% correcte mais volatilité élevée (19.85%) et secteur financier évité en régime neutral réduisent la probabilité de coupons réguliers) | Coupon 19.4% (9.7×2), barrière 60%"
+        "score": 43,
+        "base": 48,
+        "delta": -5,
+        "reasoning": "Rendement: base 48 → -5 = 43 (Coupon élevé mais vol à 19.85% et DD -15.95% suggèrent une probabilité de paiement inférieure dans ce contexte volatil) | Coupon 19.4%, barrière 60%"
       },
       "underlyingQuality": {
-        "score": 65,
-        "base": 80,
+        "score": 36,
+        "base": 51,
         "delta": -15,
-        "reasoning": "Qualité: base 80 → -15 = 65 (Secteur bancaire européen explicitement évité par le régime macro, exposition systémique élevée malgré beta 0.83, YTD -10.6% confirme la fragilité) [vol/DD 30%] | Worst: EuroStoxx Banks B:50"
+        "reasoning": "Qualité: base 51 → -15 = 36 (Secteur financials explicitement évité en stagflation, beta 0.83 amplifie les baisses, banques vulnérables si récession) [vol/DD 30%] | Worst: EuroStoxx Banks B:35"
       },
       "portfolioFit": {
-        "score": 75,
+        "score": 70,
         "base": 80,
-        "delta": -5,
-        "reasoning": "Fit: base 80 → -5 = 75 (Mono-sectoriel sur un secteur évité, concentration excessive sans diversification géographique ou sectorielle)"
+        "delta": -10,
+        "reasoning": "Fit: base 80 → -10 = 70 (Exposition concentrée sur un secteur défavorisé réduit la diversification en période de stress macro)"
       },
       "riskPremium": {
-        "score": 96,
-        "base": 96,
+        "score": 97,
+        "base": 97,
         "delta": 0,
-        "reasoning": "Prime: base 96 | 19.4% vs CAT 2.5% (spread 16.9%)"
+        "reasoning": "Prime: base 97 | 19.4% vs CAT 2.5% (spread 16.9%)"
       }
     },
-    "verdict": "Produit à éviter malgré le coupon attractif de 19.4% annualisé. Le secteur bancaire européen est explicitement déconseillé dans le régime macro actuel, avec une volatilité élevée (19.85%) qui compromet la régularité des coupons. La concentration mono-sectorielle sur un segment fragilisé (YTD -10.6%) et la maturité longue (7 ans) amplifient les risques dans un contexte de taux incertains.",
+    "verdict": "Produit très risqué avec un coupon attractif de 19.4% mais exposé au secteur bancaire européen en période de stagflation. La barrière à 60% offre une protection limitée face à la volatilité de 19.85% et au drawdown actuel de -15.95%. Le contexte macro défavorable aux financials et le risque de récession rendent le profil rendement/risque déséquilibré malgré le coupon élevé.",
     "keyRisks": [
-      "Secteur bancaire européen évité en régime neutral avec risque de stress réglementaire",
-      "Volatilité élevée (19.85%) compromettant les autocalls et coupons réguliers",
-      "Exposition concentrée sans diversification face aux crises bancaires potentielles"
+      "Secteur bancaire vulnérable en stagflation avec risque de récession",
+      "Volatilité élevée (19.85%) augmente le risque de franchissement de la barrière 60%",
+      "Concentration sectorielle sans diversification dans un environnement macro hostile"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 19.4,
         "return_eur": 19400,
-        "probability": 0.15,
+        "probability": 0.2,
         "duration_years": 1
       },
       "base": {
@@ -196,22 +196,30 @@
       "stress": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.35,
-        "duration_years": 7
+        "probability": 0.3,
+        "duration_years": 6
       },
       "worst": {
         "return_pct": -25,
         "return_eur": -25000,
         "probability": 0.2,
-        "duration_years": 7
+        "duration_years": 6
       }
     },
+    "confidenceInterval": {
+      "low": 50,
+      "high": 70,
+      "halfWidth": 10,
+      "gradeStable": false,
+      "gradeRange": "C-B",
+      "label": "B [50-70]"
+    },
     "metadata": {
-      "gradedAt": "2026-03-27T12:16:10.559Z",
-      "durationMs": 18495,
+      "gradedAt": "2026-03-27T16:54:25.113Z",
+      "durationMs": 16270,
       "aiUsed": true,
-      "version": "4.3",
-      "productType": "standard",
+      "version": "5.2",
+      "productType": "autocall",
       "marketDataAvailable": true,
       "catBenchmark": 2.5,
       "catSource": "fallback-2026",
@@ -222,17 +230,34 @@
       "isInPortfolio": false,
       "hasBarrier": true,
       "barrierPct": 60,
+      "barrierCouponPct": null,
+      "couponProbability": null,
       "expectedMaturity": 0,
       "maxMaturity": 0,
       "maxBeta": 0.83,
-      "baseScore": 80,
-      "baseGrade": "A",
+      "baseScore": 67,
+      "baseGrade": "B",
       "adjustments": {
-        "p1": -10,
+        "p1": -5,
         "p2": -15,
-        "p3": -5,
+        "p3": -10,
         "p4": 0
       },
+      "barrier_sigma": 1.15,
+      "barrier_sigma_label": "Attention",
+      "barrier_sigma_danger": false,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Rappelable 12M",
+      "ci_low": 50,
+      "ci_high": 70,
+      "ci_label": "B [50-70]",
+      "issuer_rating": "A+",
+      "issuer_tier": "IG",
+      "issuer_cds_proxy": 55,
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "autocall",
       "stockData": [
         {
           "name": "EuroStoxx Banks",
