@@ -1,16 +1,8 @@
 {
   "bankId": "sg",
   "bankName": "Société Générale",
-  "lastUpdated": "2026-03-27T11:31:35.040Z",
+  "lastUpdated": "2026-03-27T11:33:00.854Z",
   "products": [
-    {
-      "id": "sp_mn4cavgv_d1rxc",
-      "name": "Solution Court Terme Boostée sur Panier d'Actions 3",
-      "type": "capital-protege",
-      "status": "analyzing",
-      "score": 75,
-      "receivedDate": "2026-03-24"
-    },
     {
       "id": "sp_mn4ccbl0_1r90m",
       "name": "ATHENA SUR INDICE SOLACTIVE GOLD MINERS À DÉCRÉMENT 2",
@@ -26,14 +18,6 @@
       "status": "analyzing",
       "score": 89,
       "receivedDate": "2026-03-24"
-    },
-    {
-      "id": "sp_mn8tmgr7_k3abl",
-      "name": "Note Taux Fixe Callable Bonus Paiement à Maturité",
-      "type": "autre",
-      "status": "analyzing",
-      "score": 61,
-      "receivedDate": "2026-03-27"
     }
   ]
 }
