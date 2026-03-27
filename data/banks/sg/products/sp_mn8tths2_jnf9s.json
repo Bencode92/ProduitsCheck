@@ -180,8 +180,8 @@
     }
   },
   "grading": {
-    "grade": "C",
-    "score": 45,
+    "grade": "D",
+    "score": 41,
     "killCriteria": {
       "triggered": false,
       "reasons": []
@@ -191,19 +191,19 @@
         "score": 43,
         "base": 44,
         "delta": -1,
-        "reasoning": "Rendement: base 44 → -1 = 43 (Taux 3.68% à peine supérieur au AAA 10Y (3.01%), peu attractif en stagflation où l'inflation érode le pouvoir d'achat) | Coupon 3.68%, protégé | Mat espérée: ~2.2a (prob mat: 0%)"
+        "reasoning": "Rendement: base 44 → -1 = 43 (En stagflation avec taux BCE à 2%, la probabilité de rappel anticipé est très faible car les taux devraient rester élevés) | Coupon 3.68%, protégé | Mat espérée: ~2.2a (prob mat: 0%)"
       },
       "underlyingQuality": {
-        "score": 59,
+        "score": 61,
         "base": 60,
-        "delta": -1,
-        "reasoning": "Qualité: base 60 → -1 = 59 (Produit taux fixe inadapté en stagflation: inflation élevée détruit le rendement réel, risque de hausse des taux dévalorise l'obligation) [crédit]"
+        "delta": 1,
+        "reasoning": "Qualité: base 60 → +1 = 61 (Produit défensif idéal en stagflation: capital garanti et rendement fixe supérieur aux taux AAA 10Y (3.68% vs 3.01%)) [crédit]"
       },
       "portfolioFit": {
-        "score": 69,
+        "score": 71,
         "base": 70,
-        "delta": -1,
-        "reasoning": "Fit: base 70 → -1 = 69 (Protection capital OK mais aucun flux pendant potentiellement 10 ans problématique pour la liquidité en période inflationniste)"
+        "delta": 1,
+        "reasoning": "Fit: base 70 → +1 = 71 (Excellent diversifiant en contexte volatil (VIX 22), protection contre l'inflation avec rendement garanti)"
       },
       "riskPremium": {
         "score": 15,
@@ -212,52 +212,51 @@
         "reasoning": "Prime: base 15 | 3.68% vs CAT 2.5% (spread 1.2%)"
       }
     },
-    "verdict": "Produit très mal adapté au contexte de stagflation avec un rendement de 3.68% qui sera probablement négatif en réel sur 10 ans. L'absence totale de flux intermédiaires est particulièrement pénalisante quand l'inflation érode le pouvoir d'achat. Avec des taux AAA 10Y à 3.01%, la prime de risque de 0.67% est insuffisante pour un engagement aussi long sans liquidité.",
+    "verdict": "Produit défensif adapté au contexte stagflationniste offrant 3.68% garanti vs 3.01% pour l'AAA 10Y. La probabilité de rappel est quasi-nulle avec des taux BCE à 2% et une inflation persistante. Principal atout: capital 100% garanti avec rendement fixe supérieur aux obligations d'État, mais attention au risque de réinvestissement si rappelé et à l'immobilisation longue du capital. ⚠ Risque émetteur élevé — grade dégradé.",
     "keyRisks": [
-      "Inflation érodant totalement le rendement réel (3.68% - inflation >5% = rendement réel négatif)",
-      "Risque de hausse des taux dégradant la valeur de marché si besoin de sortie anticipée",
-      "Absence totale de flux pendant potentiellement 10 ans"
+      "Immobilisation du capital jusqu'à 10 ans si non rappelé",
+      "Risque de réinvestissement si rappelé dans un contexte de taux plus bas"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 5,
         "return_eur": 11000,
-        "probability": 0.2,
+        "probability": 0.15,
         "duration_years": 2.2
       },
       "base": {
-        "return_pct": 4.5,
-        "return_eur": 22500,
-        "probability": 0.35,
-        "duration_years": 5
+        "return_pct": 4,
+        "return_eur": 24000,
+        "probability": 0.4,
+        "duration_years": 6
       },
       "stress": {
         "return_pct": 4,
         "return_eur": 40000,
-        "probability": 0.3,
+        "probability": 0.35,
         "duration_years": 10
       },
       "worst": {
-        "return_pct": -2,
-        "return_eur": -2000,
-        "probability": 0.15,
-        "duration_years": 10
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.1,
+        "duration_years": 1
       }
     },
     "confidenceInterval": {
-      "low": 37,
-      "high": 53,
+      "low": 38,
+      "high": 54,
       "halfWidth": 8,
       "gradeStable": false,
       "gradeRange": "D-C",
-      "label": "C [37-53]"
+      "label": "C [38-54]"
     },
     "metadata": {
-      "gradedAt": "2026-03-27T14:32:49.809Z",
-      "durationMs": 18345,
+      "gradedAt": "2026-03-27T16:43:52.125Z",
+      "durationMs": 18076,
       "aiUsed": true,
-      "version": "5.0",
+      "version": "5.2",
       "productType": "taux_fixe",
       "marketDataAvailable": false,
       "catBenchmark": 2.5,
@@ -269,6 +268,8 @@
       "isInPortfolio": false,
       "hasBarrier": false,
       "barrierPct": 0,
+      "barrierCouponPct": null,
+      "couponProbability": null,
       "expectedMaturity": 2.2,
       "maxMaturity": 10,
       "probReachMaturity": 0,
@@ -277,8 +278,8 @@
       "baseGrade": "C",
       "adjustments": {
         "p1": -1,
-        "p2": -1,
-        "p3": -1,
+        "p2": 1,
+        "p3": 1,
         "p4": 0
       },
       "barrier_sigma": null,
@@ -287,13 +288,14 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Callable long terme",
-      "ci_low": 37,
-      "ci_high": 53,
-      "ci_label": "C [37-53]",
+      "ci_low": 38,
+      "ci_high": 54,
+      "ci_label": "C [38-54]",
       "issuer_rating": "A",
       "issuer_tier": "IG",
       "issuer_cds_proxy": 70,
-      "issuer_cap_applied": false,
+      "issuer_cap_applied": true,
+      "issuer_cds_deduction": 5,
       "hasDecrement": false,
       "decrementDrag": 0,
       "structureType": "taux_fixe"
