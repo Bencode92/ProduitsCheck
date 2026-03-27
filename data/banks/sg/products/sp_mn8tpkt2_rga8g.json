@@ -178,75 +178,85 @@
   },
   "grading": {
     "grade": "B",
-    "score": 63,
+    "score": 64,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 59,
+        "score": 64,
         "base": 74,
-        "delta": -15,
-        "reasoning": "Rendement: base 74 → -15 = 59 (Décrément synthétique de 99%/an combiné à une volatilité de 38.93% rend le coupon quasi-inaccessible (barrière effective ~25% après 1 an)) | Coupon 9% (4.5×2), barrière 50% | Mat espérée: ~1.1a (max 5a, prob mat: 0%)"
+        "delta": -10,
+        "reasoning": "Rendement: base 74 → -10 = 64 (Décrément de 5%/an vs dividendes réels 0.97% crée un drag de -4%/an qui réduit drastiquement la probabilité d'autocall malgré le seuil à 95%) | Coupon 9%, barrière 50% | Mat espérée: ~2.6a (prob mat: 2%)"
       },
       "underlyingQuality": {
-        "score": 59,
-        "base": 69,
-        "delta": -10,
-        "reasoning": "Qualité: base 69 → -10 = 59 (Indice gold miners avec beta 0.55 mais décrément synthétique transforme un actif défensif en piège structurel, drawdown max -30.84%) [vol/DD 30%] | Worst: Indice Solactive GDX EUR AR 5% B:50"
+        "score": 52,
+        "base": 37,
+        "delta": 15,
+        "reasoning": "Qualité: base 37 → +15 = 52 (Régime stagflationnaire idéal pour l'or (hedge inflation + incertitudes), beta 0.55 offre décorrélation précieuse avec VIX à 22) [vol/DD 30%] | Worst: Indice Solactive GDX EUR AR 5% B:35"
       },
       "portfolioFit": {
-        "score": 75,
+        "score": 85,
         "base": 80,
-        "delta": -5,
-        "reasoning": "Fit: base 80 → -5 = 75 (L'or pourrait diversifier mais le décrément de 99%/an annule tout bénéfice de décorrélation dans un portefeuille)"
+        "delta": 5,
+        "reasoning": "Fit: base 80 → +5 = 85 (En stagflation, l'or devient allocation stratégique indispensable pour protéger le portefeuille contre l'érosion monétaire)"
       },
       "riskPremium": {
-        "score": 63,
-        "base": 73,
-        "delta": -10,
-        "reasoning": "Prime: base 73 → -10 = 63 (Coupon 9% trompeur car quasi-inatteignable avec décrément 99%/an, structure toxique malgré apparence attractive) | 9% vs CAT 2.5% (spread 6.5%)"
+        "score": 58,
+        "base": 63,
+        "delta": -5,
+        "reasoning": "Prime: base 63 → -5 = 58 (Spread vendeur probablement élevé vu la complexité du décrément et la volatilité de 38.93% sur sous-jacent niche) | 9% vs CAT 2.5% (spread 6.5%)"
       }
     },
-    "verdict": "Produit structurellement défaillant avec un décrément synthétique de 99%/an qui érode l'indice de ~0.4%/jour ouvré. Avec une volatilité de 38.93%, la barrière à 50% sera probablement franchie en 18-24 mois, rendant le coupon de 9% illusoire. Le drag de -99%/an transforme un indice gold miners potentiellement défensif en instrument de destruction de capital. Structure à éviter absolument malgré le coupon apparent attractif.",
+    "verdict": "Produit intéressant en contexte stagflationnaire où l'or performe historiquement, mais le décrément de 5%/an est un handicap majeur qui réduit fortement les chances d'autocall (prob maturité seulement 2%). Avec une volatilité de 38.93% et un drawdown max de -30.84%, la barrière à 50% offre une marge correcte. Le coupon de 9% compense partiellement le drag du décrément mais l'investisseur doit anticiper une détention longue.",
     "keyRisks": [
-      "Décrément de 99%/an garantit une érosion rapide vers la barrière",
-      "Volatilité 38.93% + drag = probabilité de perte en capital >80%"
+      "Décrément de 5%/an crée un headwind structurel de -4% qui pénalise fortement la performance",
+      "Volatilité élevée (38.93%) peut entraîner des mouvements brutaux malgré le beta faible",
+      "Risque de dollar fort (DXY 120) qui pèse traditionnellement sur le prix de l'or",
+      "Barrière à 0.8σ (Danger) — vol 38.93%"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 4.5,
-        "return_eur": 4500,
-        "probability": 0.1,
-        "duration_years": 0.5
-      },
-      "base": {
-        "return_pct": 0,
-        "return_eur": 0,
+        "return_pct": 9,
+        "return_eur": 18000,
         "probability": 0.2,
         "duration_years": 2
       },
-      "stress": {
-        "return_pct": -20,
-        "return_eur": -20000,
+      "base": {
+        "return_pct": 6,
+        "return_eur": 24000,
         "probability": 0.4,
-        "duration_years": 3
+        "duration_years": 4
+      },
+      "stress": {
+        "return_pct": 2,
+        "return_eur": 10000,
+        "probability": 0.3,
+        "duration_years": 5
       },
       "worst": {
-        "return_pct": -50,
-        "return_eur": -50000,
-        "probability": 0.3,
+        "return_pct": -25,
+        "return_eur": -25000,
+        "probability": 0.1,
         "duration_years": 5
       }
     },
+    "confidenceInterval": {
+      "low": 54,
+      "high": 74,
+      "halfWidth": 10,
+      "gradeStable": false,
+      "gradeRange": "C-B",
+      "label": "B [54-74]"
+    },
     "metadata": {
-      "gradedAt": "2026-03-27T11:34:34.308Z",
-      "durationMs": 20024,
+      "gradedAt": "2026-03-27T14:30:14.817Z",
+      "durationMs": 20610,
       "aiUsed": true,
-      "version": "4.3",
-      "productType": "standard",
+      "version": "5.0",
+      "productType": "autocall",
       "marketDataAvailable": true,
       "catBenchmark": 2.5,
       "catSource": "fallback-2026",
@@ -257,18 +267,34 @@
       "isInPortfolio": false,
       "hasBarrier": true,
       "barrierPct": 50,
-      "expectedMaturity": 1.1,
+      "expectedMaturity": 2.6,
       "maxMaturity": 5,
-      "probReachMaturity": 0,
+      "probReachMaturity": 2,
       "maxBeta": 0.55,
-      "baseScore": 74,
+      "baseScore": 63,
       "baseGrade": "B",
       "adjustments": {
-        "p1": -15,
-        "p2": -10,
-        "p3": -5,
-        "p4": -10
+        "p1": -10,
+        "p2": 15,
+        "p3": 5,
+        "p4": -5
       },
+      "barrier_sigma": 0.8,
+      "barrier_sigma_label": "Danger",
+      "barrier_sigma_danger": true,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Rappelable 12M",
+      "ci_low": 54,
+      "ci_high": 74,
+      "ci_label": "B [54-74]",
+      "issuer_rating": "A",
+      "issuer_tier": "IG",
+      "issuer_cds_proxy": 70,
+      "issuer_cap_applied": false,
+      "hasDecrement": true,
+      "decrementDrag": 4.03,
+      "structureType": "autocall",
       "stockData": [
         {
           "name": "Indice Solactive GDX EUR AR 5%",
