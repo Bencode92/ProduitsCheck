@@ -240,25 +240,26 @@
     "_timestamp": "2026-03-23T12:17:52.138Z",
     "_marketDataDate": "2026-03-22T17:18:19.741Z"
   },
+  "structureType": "phoenix_memoire",
   "grading": {
     "grade": "A",
-    "score": 83,
+    "score": 79,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 75,
-        "base": 80,
-        "delta": -5,
-        "reasoning": "Rendement: base 80 → -5 = 75 (Avec une volatilité élevée de 36.97% et un beta de 1.29, la probabilité de toucher la barrière à -60% reste significative malgré la distance) | Coupon 14% (7×2)"
+        "score": 60,
+        "base": 70,
+        "delta": -10,
+        "reasoning": "Rendement: base 70 → -10 = 60 (Vol élevée 37% + barrière éloignée -60% mais Beta 1.29 en régime neutral augmente le risque de non-paiement des coupons) | Coupon 14% (7×2)"
       },
       "underlyingQuality": {
-        "score": 79,
+        "score": 87,
         "base": 82,
-        "delta": -3,
-        "reasoning": "Qualité: base 82 → -3 = 79 (ASML reste solide (ROE 50%, marge 29%) mais le secteur tech n'est pas favorisé en régime neutral et le beta élevé amplifie le risque systémique) [B/Q 35%] | Worst: ASML Holding NV B:100"
+        "delta": 5,
+        "reasoning": "Qualité: base 82 → +5 = 87 (ASML leader mondial lithographie, ROE 50%, marges 29%, fondamentaux solides malgré Beta élevé) [B/Q 35%] | Worst: ASML Holding NV B:100"
       },
       "portfolioFit": {
         "score": 80,
@@ -267,23 +268,23 @@
         "reasoning": "Fit: base 80"
       },
       "riskPremium": {
-        "score": 97,
-        "base": 97,
-        "delta": 0,
-        "reasoning": "Prime: base 97 | 14% vs CAT 2.5% (spread 11.5%)"
+        "score": 91,
+        "base": 96,
+        "delta": -5,
+        "reasoning": "Prime: base 96 → -5 = 91 (Spread attractif mais reflète la volatilité élevée et le risque de marché inhérent) | 14% vs CAT 2.5% (spread 11.5%)"
       }
     },
-    "verdict": "Produit offrant un rendement attractif de 14% annualisé sur ASML, leader incontesté de la lithographie semiconducteur. La barrière à -60% offre une marge confortable mais la volatilité élevée (37%) et le beta de 1.29 en régime macro neutre tempèrent l'attractivité. Avec un drawdown historique de 45%, le risque de toucher la barrière existe en cas de correction tech sévère.",
+    "verdict": "Produit attractif sur ASML (leader incontesté lithographie semi-conducteurs) offrant 14% annualisé avec barrière protectrice à -60%. La qualité fondamentale exceptionnelle (ROE 50%, marges 29%) compense partiellement la volatilité élevée (37%) et le Beta systémique (1.29). En régime macro neutral, le risque principal reste la sensibilité aux cycles tech et la probabilité non négligeable de suspension des coupons en cas de correction.",
     "keyRisks": [
-      "Concentration 100% sur un seul titre tech à beta élevé (1.29)",
-      "Volatilité de 37% augmente le risque de franchissement barrière malgré les -60%"
+      "Volatilité 37% + Beta 1.29 = forte sensibilité aux corrections marché",
+      "Concentration mono sous-jacent tech sans diversification sectorielle"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 14,
         "return_eur": 14000,
-        "probability": 0.3,
+        "probability": 0.25,
         "duration_years": 1
       },
       "base": {
@@ -295,19 +296,19 @@
       "stress": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.2,
-        "duration_years": 3
+        "probability": 0.25,
+        "duration_years": 2.5
       },
       "worst": {
         "return_pct": -30,
         "return_eur": -30000,
         "probability": 0.1,
-        "duration_years": 3
+        "duration_years": 2.5
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-25T17:07:17.997Z",
-      "durationMs": 17762,
+      "gradedAt": "2026-03-27T12:17:21.812Z",
+      "durationMs": 16548,
       "aiUsed": true,
       "version": "4.3",
       "productType": "standard",
@@ -324,22 +325,22 @@
       "expectedMaturity": 0,
       "maxMaturity": 0,
       "maxBeta": 1.29,
-      "baseScore": 85,
+      "baseScore": 82,
       "baseGrade": "A",
       "adjustments": {
-        "p1": -5,
-        "p2": -3,
+        "p1": -10,
+        "p2": 5,
         "p3": 0,
-        "p4": 0
+        "p4": -5
       },
       "stockData": [
         {
           "name": "ASML Holding NV",
           "ticker": "ASML",
           "sector": "Technologie de l'information",
-          "perf_ytd": 30.41,
-          "perf_1y": 87.02,
-          "volatility_3y": 36.97,
+          "perf_ytd": 27.11,
+          "perf_1y": 93.27,
+          "volatility_3y": 37.02,
           "max_drawdown_3y": 45.12,
           "buffett_score": 100,
           "quality_score": 69,
