@@ -162,9 +162,10 @@
       "complementarity": 60
     }
   },
+  "structureType": "dispersion",
   "grading": {
     "grade": "C",
-    "score": 47,
+    "score": 53,
     "killCriteria": {
       "triggered": false,
       "reasons": []
@@ -174,63 +175,63 @@
         "score": 29,
         "base": 39,
         "delta": -10,
-        "reasoning": "Rendement: base 39 → -10 = 29 (Structure worst-of 8 sous-jacents avec Tesla ultra-volatile (57% vol) et plusieurs tech stocks en correction YTD rend le coupon très incertain) | Coupon 7%, protégé"
+        "reasoning": "Rendement: base 39 → -10 = 29 (Capital protégé mais aucune visibilité sur la barrière autocall et maturité exacte, rendant impossible l'évaluation du couple rendement/risque.) | Coupon 7%, protégé"
       },
       "underlyingQuality": {
-        "score": 35,
-        "base": 47,
+        "score": 73,
+        "base": 85,
         "delta": -12,
-        "reasoning": "Qualité: base 47 → -12 = 35 (Surexposition communication (3/8) et consumer discretionary (2/8) en régime neutral défavorable, avec Tesla faible (ROE 5%) et betas élevés) [B/Q 35%] | Worst: Tesla B:54"
+        "reasoning": "Qualité: base 85 → -12 = 73 (Surexposition au secteur communication (3/8) explicitement évité en régime neutre, avec Tesla comme maillon faible ultra-volatil (vol 57%, beta 1.62).) [B/Q 35%] | Worst: Tesla B:54"
       },
       "portfolioFit": {
-        "score": 72,
+        "score": 67,
         "base": 72,
-        "delta": 0,
-        "reasoning": "Fit: base 72"
+        "delta": -5,
+        "reasoning": "Fit: base 72 → -5 = 67 (Panier worst-of de 8 valeurs tech/comm majoritairement corrélées, inadapté pour une diversification efficace en portefeuille.)"
       },
       "riskPremium": {
-        "score": 60,
+        "score": 52,
         "base": 60,
-        "delta": 0,
-        "reasoning": "Prime: base 60 | 7% vs CAT 2.5% (spread 4.5%)"
+        "delta": -8,
+        "reasoning": "Prime: base 60 → -8 = 52 (Structure opaque sans détails critiques (maturité, mécanisme de sortie), suggérant des conditions défavorables masquées.) | 7% vs CAT 2.5% (spread 4.5%)"
       }
     },
-    "verdict": "Produit à capital protégé mais structure worst-of 8 actions très pénalisante en régime macro défavorable aux secteurs surreprésentés (5/8 en communication et consumer discretionary). Tesla constitue un talon d'Achille majeur avec 57% de volatilité et des fondamentaux faibles (ROE 5%, marge 4%). La probabilité de toucher le coupon de 7% est très faible avec 8 barrières à respecter simultanément dans un contexte de correction tech (MSFT -23% YTD).",
+    "verdict": "Produit à éviter malgré le capital protégé. L'absence d'informations cruciales (maturité, barrière autocall) combinée à un panier worst-of de 8 actions surexposé aux secteurs évités (communication 37.5%) et dominé par Tesla (vol 57.48%) rend ce produit inadapté. Le rendement de 7% annualisé semble attractif mais la structure opaque et la concentration sectorielle créent un profil risque/rendement défavorable en contexte macro neutre.",
     "keyRisks": [
-      "Structure worst-of 8 SJ multiplie drastiquement le risque de non-paiement du coupon",
-      "Surexposition aux secteurs évités (communication 37.5%, consumer discretionary 25%)",
-      "Tesla point faible évident avec volatilité extrême et fondamentaux dégradés"
+      "Tesla peut bloquer tout paiement avec sa volatilité extrême (57.48%) et faibles fondamentaux",
+      "37.5% du panier dans le secteur communication explicitement défavorisé",
+      "Structure opaque sans visibilité sur conditions de sortie et durée réelle"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 7,
-        "return_eur": 7000,
+        "return_eur": 14000,
         "probability": 0.15,
-        "duration_years": 1
+        "duration_years": 2
       },
       "base": {
-        "return_pct": 2,
-        "return_eur": 6000,
+        "return_pct": 3.5,
+        "return_eur": 17500,
         "probability": 0.35,
-        "duration_years": 3
+        "duration_years": 5
       },
       "stress": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.4,
-        "duration_years": 5
+        "probability": 0.35,
+        "duration_years": 7
       },
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.1,
-        "duration_years": 5
+        "probability": 0.15,
+        "duration_years": 10
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-26T16:32:42.811Z",
-      "durationMs": 22728,
+      "gradedAt": "2026-03-27T10:07:58.849Z",
+      "durationMs": 22277,
       "aiUsed": true,
       "version": "4.3",
       "productType": "standard",
@@ -247,13 +248,13 @@
       "expectedMaturity": 0,
       "maxMaturity": 0,
       "maxBeta": 1.92,
-      "baseScore": 53,
-      "baseGrade": "C",
+      "baseScore": 62,
+      "baseGrade": "B",
       "adjustments": {
         "p1": -10,
         "p2": -12,
-        "p3": 0,
-        "p4": 0
+        "p3": -5,
+        "p4": -8
       },
       "stockData": [
         {
