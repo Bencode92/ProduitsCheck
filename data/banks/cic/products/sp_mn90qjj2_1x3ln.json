@@ -24,8 +24,7 @@
   "capitalProtection": {
     "protected": false,
     "level": null,
-    "barrier": 40,
-    "barrierCoupon": null,
+    "barrier": 60,
     "barrierType": "europeenne",
     "couponFloor": false
   },
@@ -37,7 +36,9 @@
     "startSemester": 2,
     "startYear": 1,
     "stepDown": false,
-    "stepDownPct": null
+    "stepDownPct": null,
+    "hasAutocall": true,
+    "enabled": true
   },
   "scenarios": {
     "favorable": "Remboursement automatique anticipé dès le 2ème semestre avec gain de 9,70% par année",
@@ -316,5 +317,6 @@
         }
       ]
     }
-  }
+  },
+  "envelope": ""
 }
