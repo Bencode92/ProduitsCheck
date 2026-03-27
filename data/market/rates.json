@@ -1,23 +1,19 @@
 {
   "source": "ECB + Twelve Data",
-  "fetched_at": "2026-03-27T07:51:06.348603+00:00",
+  "fetched_at": "2026-03-27T17:52:14.518248+00:00",
   "yields": {
     "oat_fr_10y": {
-      "current": 3.012,
-      "date": "2026-03-25",
-      "high_1y": 3.076,
-      "low_1y": 2.897,
-      "avg_1y": 3.003,
+      "current": 3.094,
+      "date": "2026-03-26",
+      "high_1y": 3.094,
+      "low_1y": 2.967,
+      "avg_1y": 3.019,
       "observations": 24,
-      "vol_annualized_bps": 13.2,
-      "vol_annualized_pct": 4.4,
+      "vol_annualized_bps": 14.1,
+      "vol_annualized_pct": 4.6,
       "direction": "stable",
-      "change_3m_bps": 0.6,
+      "change_3m_bps": 1.6,
       "history": [
-        {
-          "date": "2026-03-10",
-          "value": 2.897
-        },
         {
           "date": "2026-03-11",
           "value": 2.974
@@ -61,6 +57,10 @@
         {
           "date": "2026-03-25",
           "value": 3.012
+        },
+        {
+          "date": "2026-03-26",
+          "value": 3.094
         }
       ],
       "name": "Euro Area AAA 10Y Yield",
@@ -68,21 +68,17 @@
       "tec_equivalent": "TEC 10"
     },
     "bund_de_10y": {
-      "current": 3.012,
-      "date": "2026-03-25",
-      "high_1y": 3.076,
-      "low_1y": 2.897,
-      "avg_1y": 3.003,
+      "current": 3.094,
+      "date": "2026-03-26",
+      "high_1y": 3.094,
+      "low_1y": 2.967,
+      "avg_1y": 3.019,
       "observations": 24,
-      "vol_annualized_bps": 13.2,
-      "vol_annualized_pct": 4.4,
+      "vol_annualized_bps": 14.1,
+      "vol_annualized_pct": 4.6,
       "direction": "stable",
-      "change_3m_bps": 0.6,
+      "change_3m_bps": 1.6,
       "history": [
-        {
-          "date": "2026-03-10",
-          "value": 2.897
-        },
         {
           "date": "2026-03-11",
           "value": 2.974
@@ -126,27 +122,27 @@
         {
           "date": "2026-03-25",
           "value": 3.012
+        },
+        {
+          "date": "2026-03-26",
+          "value": 3.094
         }
       ],
       "name": "Euro Area AAA 10Y Yield",
       "description": "Rendement zone euro AAA 10 ans"
     },
     "oat_fr_2y": {
-      "current": 2.557,
-      "date": "2026-03-25",
-      "high_1y": 2.589,
-      "low_1y": 2.176,
-      "avg_1y": 2.417,
+      "current": 2.624,
+      "date": "2026-03-26",
+      "high_1y": 2.624,
+      "low_1y": 2.314,
+      "avg_1y": 2.454,
       "observations": 24,
-      "vol_annualized_bps": 19.7,
-      "vol_annualized_pct": 7.7,
+      "vol_annualized_bps": 19.8,
+      "vol_annualized_pct": 7.6,
       "direction": "stable",
-      "change_3m_bps": 6.9,
+      "change_3m_bps": 6.6,
       "history": [
-        {
-          "date": "2026-03-10",
-          "value": 2.176
-        },
         {
           "date": "2026-03-11",
           "value": 2.314
@@ -190,27 +186,27 @@
         {
           "date": "2026-03-25",
           "value": 2.557
+        },
+        {
+          "date": "2026-03-26",
+          "value": 2.624
         }
       ],
       "name": "Euro Area AAA 2Y Yield",
       "description": "Rendement zone euro AAA 2 ans"
     },
     "oat_fr_5y": {
-      "current": 2.662,
-      "date": "2026-03-25",
-      "high_1y": 2.732,
-      "low_1y": 2.466,
-      "avg_1y": 2.603,
+      "current": 2.74,
+      "date": "2026-03-26",
+      "high_1y": 2.74,
+      "low_1y": 2.538,
+      "avg_1y": 2.626,
       "observations": 24,
-      "vol_annualized_bps": 18.2,
+      "vol_annualized_bps": 18.6,
       "vol_annualized_pct": 6.8,
       "direction": "stable",
-      "change_3m_bps": 2.1,
+      "change_3m_bps": 2.8,
       "history": [
-        {
-          "date": "2026-03-10",
-          "value": 2.466
-        },
         {
           "date": "2026-03-11",
           "value": 2.542
@@ -254,6 +250,10 @@
         {
           "date": "2026-03-25",
           "value": 2.662
+        },
+        {
+          "date": "2026-03-26",
+          "value": 2.74
         }
       ],
       "name": "Euro Area AAA 5Y Yield",
@@ -278,18 +278,18 @@
     "points": [
       {
         "maturity": 2,
-        "yield": 2.557
+        "yield": 2.624
       },
       {
         "maturity": 5,
-        "yield": 2.662
+        "yield": 2.74
       },
       {
         "maturity": 10,
-        "yield": 3.012
+        "yield": 3.094
       }
     ],
-    "spread_2_10": 0.455,
+    "spread_2_10": 0.47,
     "shape": "normal"
   }
 }
