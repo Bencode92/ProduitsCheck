@@ -12,7 +12,7 @@
   "maturityDate": null,
   "strikeDate": null,
   "coupon": {
-    "rate": 9.7,
+    "rate": 4.85,
     "rateIfCalled": null,
     "rateIfMaturity": null,
     "type": "conditionnel",
