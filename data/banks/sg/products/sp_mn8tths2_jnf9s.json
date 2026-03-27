@@ -181,23 +181,23 @@
   },
   "grading": {
     "grade": "D",
-    "score": 44,
+    "score": 39,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 42,
+        "score": 32,
         "base": 42,
-        "delta": 0,
-        "reasoning": "Rendement: base 42 | Coupon 3.45%, protégé | Mat espérée: ~2.2a (max 10a, prob mat: 0%)"
+        "delta": -10,
+        "reasoning": "Rendement: base 42 → -10 = 32 (Coupon 3.45% avec paiement uniquement à maturité réduit la valeur actuelle à ~2.8% effectif vs 3.01% taux sans risque 10Y) | Coupon 3.45%, protégé | Mat espérée: ~2.2a (max 10a, prob mat: 0%)"
       },
       "underlyingQuality": {
-        "score": 60,
+        "score": 55,
         "base": 60,
-        "delta": 0,
-        "reasoning": "Qualité: base 60 [crédit]"
+        "delta": -5,
+        "reasoning": "Qualité: base 60 → -5 = 55 (Environnement taux stable mais risque de réinvestissement élevé avec 45% probabilité de call précoce dans un contexte de baisse potentielle) [crédit]"
       },
       "portfolioFit": {
         "score": 70,
@@ -206,20 +206,49 @@
         "reasoning": "Fit: base 70"
       },
       "riskPremium": {
-        "score": 11,
+        "score": 6,
         "base": 11,
-        "delta": 0,
-        "reasoning": "Prime: base 11 | 3.45% vs CAT 2.5% (spread 1.0%)"
+        "delta": -5,
+        "reasoning": "Prime: base 11 → -5 = 6 (Spread effectif de 44bps insuffisant pour compenser l'illiquidité et le risque crédit sur 10 ans) | 3.45% vs CAT 2.5% (spread 1.0%)"
       }
     },
-    "verdict": "Score 44/100 (base 44).",
-    "keyRisks": [],
+    "verdict": "Ce callable offre un rendement décevant de 3.45% (paiement in fine) pour une maturité de 10 ans, soit à peine 44bps au-dessus du taux sans risque AAA 10Y (3.01%). La probabilité de call à 45% dans ~2.2 ans créerait un risque de réinvestissement majeur dans un environnement de taux potentiellement plus bas. Avec un rendement effectif inférieur au taux sans risque après actualisation, ce produit n'offre pas de compensation suffisante pour l'illiquidité et le risque crédit émetteur.",
+    "keyRisks": [
+      "Risque de réinvestissement élevé (45% call dans 2.2 ans) avec taux potentiellement inférieurs",
+      "Rendement effectif ~2.8% inférieur au taux sans risque 10Y après actualisation du paiement in fine",
+      "Risque crédit émetteur sur 10 ans pour seulement 44bps de spread"
+    ],
     "negotiationPoints": [],
-    "scenarios": null,
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 7.6,
+        "return_eur": 7590,
+        "probability": 0.2,
+        "duration_years": 2.2
+      },
+      "base": {
+        "return_pct": 5.5,
+        "return_eur": 16500,
+        "probability": 0.35,
+        "duration_years": 3
+      },
+      "stress": {
+        "return_pct": 3.45,
+        "return_eur": 34500,
+        "probability": 0.35,
+        "duration_years": 10
+      },
+      "worst": {
+        "return_pct": -20,
+        "return_eur": -20000,
+        "probability": 0.1,
+        "duration_years": 5
+      }
+    },
     "metadata": {
-      "gradedAt": "2026-03-27T11:37:12.160Z",
-      "durationMs": 1615,
-      "aiUsed": false,
+      "gradedAt": "2026-03-27T11:55:15.031Z",
+      "durationMs": 21200,
+      "aiUsed": true,
       "version": "4.3",
       "productType": "fixed-rate-callable",
       "marketDataAvailable": false,
@@ -238,7 +267,12 @@
       "maxBeta": null,
       "baseScore": 44,
       "baseGrade": "D",
-      "adjustments": null
+      "adjustments": {
+        "p1": -10,
+        "p2": -5,
+        "p3": 0,
+        "p4": -5
+      }
     }
   }
 }
