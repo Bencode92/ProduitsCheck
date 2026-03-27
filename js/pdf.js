@@ -1,12 +1,8 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — PDF Extraction & AI Parsing V7.4
+// STRUCTBOARD — PDF Extraction & AI Parsing V7.5
+// V7.5: Use CONFIG.AI_MODEL (Opus) instead of hardcoded Sonnet
 // V7.4: Fix barrier inversion — "baisse de plus de X%" = barrier at (100-X)%
-//   - Rule 19: "baisse de plus de 40%" → barrier = 60%, NOT 40%
-//   - Post-process: auto-fix inverted barriers from rawText
 // V7.3: Fix digitale/capital garanti detection
-//   - Rule 17: Digitale with capital garanti ≠ autocall
-//   - Post-process: capital 100% + no "remboursement anticipé" → not autocall
-//   - Rule 18: Barrière coupon vs barrière capital distinction
 // V7.2: 5 critical missing fields (double coupon, double barrier, décrément, etc.)
 // ═══════════════════════════════════════════════════════════════
 
@@ -91,6 +87,11 @@ function repairJSON(str) {
 }
 
 const MAX_TOKENS = 8192;
+
+// v7.5: Helper to get configured AI model (Opus by default)
+function _getAIModel() {
+  return (typeof CONFIG !== 'undefined' && CONFIG.AI_MODEL) ? CONFIG.AI_MODEL : 'claude-opus-4-20250514';
+}
 
 class AIParser {
   constructor() { this.endpoint = CONFIG.AI_ENDPOINT; }
@@ -193,15 +194,12 @@ R\u00e9ponds UNIQUEMENT avec un objet JSON. Aucun texte avant ou apr\u00e8s.
       }
 
       // ═══ V7.4 FIX: Auto-fix inverted barrier from "baisse de plus de X%" ═══
-      // If text says "baisse de plus de X%" and barrier was set to X instead of (100-X), fix it
       if (parsed.capitalProtection && parsed.capitalProtection.barrier) {
         var b = parseFloat(parsed.capitalProtection.barrier);
         if (b > 0 && b <= 50) {
-          // Barrier ≤ 50% is suspicious — check if text says "baisse de plus de X%"
           var baisseMatch = rawText.match(/(?:baisse|perte)[^.]{0,40}(?:de\s*)?(?:plus\s*de\s*)?(\d+[.,]?\d*)\s*%\s*(?:par rapport|de son)/i);
           if (baisseMatch) {
             var baisseValue = parseFloat(baisseMatch[1].replace(',', '.'));
-            // If the barrier equals the baisse percentage, it was inverted
             if (Math.abs(b - baisseValue) < 1) {
               var correctedBarrier = 100 - baisseValue;
               console.log('[parseBrochure V7.4] Barrier inversion detected: ' + b + '% → corrected to ' + correctedBarrier + '% (from "baisse de ' + baisseValue + '%")');
@@ -209,7 +207,6 @@ R\u00e9ponds UNIQUEMENT avec un objet JSON. Aucun texte avant ou apr\u00e8s.
             }
           }
         }
-        // Also check: if barrier is exactly a "baisse" value even above 50
         if (!parsed._barrierChecked) {
           var allBaisseMatches = rawText.match(/baisse\s*(?:de\s*)?(?:plus\s*de\s*)?(\d+[.,]?\d*)\s*%\s*(?:par rapport|de son)/gi);
           if (allBaisseMatches) {
@@ -229,13 +226,11 @@ R\u00e9ponds UNIQUEMENT avec un objet JSON. Aucun texte avant ou apr\u00e8s.
       }
 
       // ═══ V7.4: Also fix coupon barrier from "n'excède pas X%" patterns ═══
-      // "baisse n'excède pas 20%" → coupon paid if index ≥ 80% → this is a coupon trigger at 80%, NOT a barrier
       if (parsed.capitalProtection && !isCapitalGaranti100) {
         var excedeMatch = rawText.match(/baisse\s*(?:n['']?\s*)?exc[èe]de\s*pas\s*(\d+[.,]?\d*)\s*%/i);
         if (excedeMatch) {
           var excedeVal = parseFloat(excedeMatch[1].replace(',', '.'));
           var couponTrigger = 100 - excedeVal;
-          // This is the level at which coupon is paid at maturity (not a barrier for capital)
           if (!parsed.capitalProtection.barrierCoupon || parsed.capitalProtection.barrierCoupon === parsed.capitalProtection.barrier) {
             parsed.capitalProtection.barrierCoupon = couponTrigger;
             console.log('[parseBrochure V7.4] Coupon trigger from "n\'excède pas ' + excedeVal + '%" → barrierCoupon=' + couponTrigger + '%');
@@ -249,6 +244,13 @@ R\u00e9ponds UNIQUEMENT avec un objet JSON. Aucun texte avant ou apr\u00e8s.
         parsed.coupon.type = 'participation';
         parsed.coupon.rate = parsed.participationRate;
         parsed.coupon.paymentTiming = 'maturity';
+      }
+
+      // ═══ V7.5: Ensure coupon is always an object (never a primitive) ═══
+      if (parsed.coupon && typeof parsed.coupon !== 'object') {
+        var primitiveRate = typeof parsed.coupon === 'number' ? parsed.coupon : parseFloat(parsed.coupon);
+        parsed.coupon = { rate: primitiveRate || 0 };
+        console.log('[parseBrochure V7.5] Coupon was primitive (' + primitiveRate + ') — converted to object');
       }
 
       // ═══ Post-process décrément from rawText ═══
@@ -294,7 +296,7 @@ R\u00e9ponds UNIQUEMENT avec un objet JSON. Aucun texte avant ou apr\u00e8s.
       // ═══ V7.4: Clean up internal flags ═══
       delete parsed._barrierChecked;
 
-      console.log('[parseBrochure V7.4] type:', parsed.structureType,
+      console.log('[parseBrochure V7.5] type:', parsed.structureType,
         '| autocall:', parsed.earlyRedemption?.possible || false,
         '| capitalGaranti:', isCapitalGaranti100,
         '| decrement:', parsed.decrementPct || 'none',
@@ -302,7 +304,8 @@ R\u00e9ponds UNIQUEMENT avec un objet JSON. Aucun texte avant ou apr\u00e8s.
         '| barrierCoupon:', parsed.capitalProtection?.barrierCoupon || 'none',
         '| barrier:', parsed.capitalProtection?.barrier || 'none',
         '| startSem:', parsed.earlyRedemption?.startSemester || 'S1',
-        '| rateIfCalled:', parsed.coupon?.rateIfCalled || 'same');
+        '| rateIfCalled:', parsed.coupon?.rateIfCalled || 'same',
+        '| model:', _getAIModel());
       return parsed;
     } catch (e) {
       console.error('[parseBrochure] Error:', e);
@@ -327,24 +330,55 @@ R\u00e9ponds UNIQUEMENT avec un objet JSON. Aucun texte avant ou apr\u00e8s.
     return await this._callAI('R\u00e9sume en 3-5 points cl\u00e9s:\n' + chatText + '\nD\u00e9cision: ' + (decision || 'Non d\u00e9cid\u00e9e'), MAX_TOKENS);
   }
 
+  // v7.5: Use CONFIG.AI_MODEL (Opus) instead of hardcoded Sonnet
   async _callAI(prompt, maxTokens) {
+    var model = _getAIModel();
     const res = await fetch(this.endpoint, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: maxTokens || MAX_TOKENS, messages: [{ role: 'user', content: prompt }] }),
+      body: JSON.stringify({ model: model, max_tokens: maxTokens || MAX_TOKENS, messages: [{ role: 'user', content: prompt }] }),
     });
-    if (!res.ok) { const err = await res.text(); throw new Error('AI API ' + res.status + ': ' + err.substring(0, 200)); }
+    if (!res.ok) {
+      // Fallback to Sonnet if Opus fails
+      if (typeof CONFIG !== 'undefined' && CONFIG.AI_MODEL_FALLBACK && model !== CONFIG.AI_MODEL_FALLBACK) {
+        console.warn('[pdf.js V7.5] ' + model + ' failed, falling back to ' + CONFIG.AI_MODEL_FALLBACK);
+        const res2 = await fetch(this.endpoint, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ model: CONFIG.AI_MODEL_FALLBACK, max_tokens: maxTokens || MAX_TOKENS, messages: [{ role: 'user', content: prompt }] }),
+        });
+        if (!res2.ok) { const err = await res2.text(); throw new Error('AI API ' + res2.status + ': ' + err.substring(0, 200)); }
+        const data2 = await res2.json();
+        const text2 = data2.content?.map(b => b.text || '').join('\n') || '';
+        if (!text2) throw new Error('R\u00e9ponse IA vide');
+        return text2;
+      }
+      const err = await res.text(); throw new Error('AI API ' + res.status + ': ' + err.substring(0, 200));
+    }
     const data = await res.json();
     const text = data.content?.map(b => b.text || '').join('\n') || '';
     if (!text) throw new Error('R\u00e9ponse IA vide');
     return text;
   }
 
+  // v7.5: Use CONFIG.AI_MODEL (Opus) for chat too
   async _callAIWithHistory(systemPrompt, messages) {
+    var model = _getAIModel();
     const res = await fetch(this.endpoint, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: MAX_TOKENS, system: systemPrompt, messages }),
+      body: JSON.stringify({ model: model, max_tokens: MAX_TOKENS, system: systemPrompt, messages }),
     });
-    if (!res.ok) { const err = await res.text(); throw new Error('AI API ' + res.status + ': ' + err.substring(0, 200)); }
+    if (!res.ok) {
+      if (typeof CONFIG !== 'undefined' && CONFIG.AI_MODEL_FALLBACK && model !== CONFIG.AI_MODEL_FALLBACK) {
+        console.warn('[pdf.js V7.5] ' + model + ' chat failed, falling back to ' + CONFIG.AI_MODEL_FALLBACK);
+        const res2 = await fetch(this.endpoint, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ model: CONFIG.AI_MODEL_FALLBACK, max_tokens: MAX_TOKENS, system: systemPrompt, messages }),
+        });
+        if (!res2.ok) { const err = await res2.text(); throw new Error('AI API ' + res2.status + ': ' + err.substring(0, 200)); }
+        const data2 = await res2.json();
+        return data2.content?.map(b => b.text || '').join('\n') || '';
+      }
+      const err = await res.text(); throw new Error('AI API ' + res.status + ': ' + err.substring(0, 200));
+    }
     const data = await res.json();
     return data.content?.map(b => b.text || '').join('\n') || '';
   }
