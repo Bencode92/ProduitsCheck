@@ -1,11 +1,10 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — PDF Extraction & AI Parsing V7.2
-// V7.2: 5 critical missing fields:
-//   1. Double coupon (rappel vs maturité)
-//   2. Double barrière (coupon vs capital)
-//   3. Décrément + div yield
-//   4. Observation start period
-//   5. Coupon per-period vs annualized
+// STRUCTBOARD — PDF Extraction & AI Parsing V7.3
+// V7.3: Fix digitale/capital garanti detection
+//   - Rule 17: Digitale with capital garanti ≠ autocall
+//   - Post-process: capital 100% + no "remboursement anticipé" → not autocall
+//   - Rule 18: Barrière coupon vs barrière capital distinction
+// V7.2: 5 critical missing fields (double coupon, double barrier, décrément, etc.)
 // ═══════════════════════════════════════════════════════════════
 
 class PDFExtractor {
@@ -102,11 +101,11 @@ ${textToSend}
 
 R\u00c8GLES D'EXTRACTION CRITIQUES:
 1. "gain de X% par ann\u00e9e" ou "coupon de X%" = coupon rate X
-2. "remboursement anticip\u00e9" = autocall
+2. "remboursement anticip\u00e9 AUTOMATIQUE" = autocall. ATTENTION: "Date de Constatation Annuelle" seule N'EST PAS un autocall si elle concerne uniquement le COUPON.
 3. "performance relative" ou "paire d'actions" ou "dispersion" = structureType "dispersion"
 4. "participation de X%" = participationRate X (PAS un coupon)
 5. "taux fixe" ou "callable" = structureType "taux_fixe"
-6. "capital garanti" ou "protection 100%" sans barri\u00e8re SJ = structureType "capital_garanti"
+6. "capital garanti" ou "protection 100%" = structureType "capital_garanti" (m\u00eame s'il y a une barri\u00e8re COUPON)
 7. Si DIFFERENCES de performance entre actions = structureType "dispersion"
 8. Si paiement "\u00e0 maturit\u00e9" = paymentTiming "maturity"
 9. Extraire simulations historiques (min, max, median, mean)
@@ -117,24 +116,27 @@ R\u00c8GLES D'EXTRACTION CRITIQUES:
 14. DOUBLE COUPON: si rappel\u00e9 = Z%/an et maturit\u00e9 = W%/an (Z\u2260W), extraire coupon.rateIfCalled=Z et coupon.rateIfMaturity=W
 15. DOUBLE BARRI\u00c8RE: si barri\u00e8re coupon \u2260 barri\u00e8re capital, extraire capitalProtection.barrierCoupon ET capitalProtection.barrier (capital)
 16. OBSERVATION START: si observations commencent au semestre X ou ann\u00e9e Y (pas S1/Y1), extraire earlyRedemption.startSemester ou startYear
+17. DIGITALE / CAPITAL GARANTI: Si "garantie en capital \u00e0 l'\u00e9ch\u00e9ance" ou "remboursement de l'int\u00e9gralit\u00e9 du capital investi, peu importe l'\u00e9volution du march\u00e9" ET il n'y a PAS de "remboursement anticip\u00e9 automatique" \u2192 structureType="capital_garanti", earlyRedemption.possible=false. Les "Dates de Constatation Annuelle" sont pour le versement du COUPON, PAS pour un rappel anticip\u00e9 du produit.
+18. BARRI\u00c8RE COUPON vs CAPITAL: Si le seuil (ex: 100%) d\u00e9clenche le COUPON mais que le capital est garanti quoi qu'il arrive \u2192 c'est une barrierCoupon, PAS une barrier capital. Mettre capitalProtection.barrier=null et capitalProtection.barrierCoupon=100.
 
 R\u00e9ponds UNIQUEMENT avec un objet JSON. Aucun texte avant ou apr\u00e8s.
 
-{"name":"Nom","type":"autocall ou dispersion ou taux-fixe...","structureType":"autocall ou dispersion ou taux_fixe...","emitter":"\u00c9metteur","guarantor":"Garant","guarantorRating":{"moodys":"A1","sp":"A"},"isin":"ISIN","underlyings":["sous-jacent"],"underlyingType":"single-index ou basket ou pairs","nUnderlyings":1,"nPairs":null,"currency":"EUR","maturity":"5 ans","maturityYears":5,"coupon":{"rate":4.5,"rateIfCalled":5.0,"rateIfMaturity":4.0,"type":"conditionnel","frequency":"semestriel","trigger":60,"memory":false,"paymentTiming":"periodic"},"participationRate":null,"capitalProtection":{"protected":false,"level":null,"barrier":50,"barrierCoupon":60,"barrierType":"europeenne","couponFloor":false},"earlyRedemption":{"possible":true,"type":"autocall","trigger":95,"frequency":"semestriel","startSemester":4,"startYear":2,"stepDown":true,"stepDownPct":2.5},"decrementPct":5.0,"actualDividendYield":0.97,"historicalSimulations":null,"scenarios":{"favorable":"...","median":"...","defavorable":"..."},"risks":["risque1"],"mechanism":"Description courte","summary":"max 100 car"}`;
+{"name":"Nom","type":"autocall ou digitale ou dispersion ou taux-fixe...","structureType":"autocall ou dispersion ou taux_fixe ou capital_garanti...","emitter":"\u00c9metteur","guarantor":"Garant","guarantorRating":{"moodys":"A1","sp":"A"},"isin":"ISIN","underlyings":["sous-jacent"],"underlyingType":"single-index ou basket ou pairs","nUnderlyings":1,"nPairs":null,"currency":"EUR","maturity":"5 ans","maturityYears":5,"coupon":{"rate":4.5,"rateIfCalled":5.0,"rateIfMaturity":4.0,"type":"conditionnel","frequency":"semestriel","trigger":60,"memory":false,"paymentTiming":"periodic"},"participationRate":null,"capitalProtection":{"protected":false,"level":null,"barrier":50,"barrierCoupon":60,"barrierType":"europeenne","couponFloor":false},"earlyRedemption":{"possible":true,"type":"autocall","trigger":95,"frequency":"semestriel","startSemester":4,"startYear":2,"stepDown":true,"stepDownPct":2.5},"decrementPct":5.0,"actualDividendYield":0.97,"historicalSimulations":null,"scenarios":{"favorable":"...","median":"...","defavorable":"..."},"risks":["risque1"],"mechanism":"Description courte","summary":"max 100 car"}`;
 
     try {
       const response = await this._callAI(prompt, MAX_TOKENS);
       const parsed = repairJSON(response);
 
-      // Post-process structureType
+      // ═══ POST-PROCESS: structureType ═══
       if (!parsed.structureType && parsed.type) {
         if (parsed.type === 'dispersion') parsed.structureType = 'dispersion';
         else if (parsed.type === 'taux-fixe') parsed.structureType = 'taux_fixe';
-        else if (parsed.type === 'capital-protege' && parsed.capitalProtection?.level === 100) parsed.structureType = 'capital_garanti';
+        else if (parsed.type === 'digitale') parsed.structureType = 'capital_garanti';
+        else if (parsed.type === 'capital-protege' || parsed.type === 'capital-garanti') parsed.structureType = 'capital_garanti';
         else if (parsed.type === 'reverse') parsed.structureType = 'reverse';
       }
 
-      // Auto-detect dispersion
+      // ═══ POST-PROCESS: Auto-detect dispersion ═══
       if (!parsed.structureType) {
         var allText = JSON.stringify(parsed).toLowerCase();
         if (allText.indexOf('performance relative') >= 0 || allText.indexOf('paire') >= 0 || allText.indexOf('dispersion') >= 0) {
@@ -142,7 +144,59 @@ R\u00e9ponds UNIQUEMENT avec un objet JSON. Aucun texte avant ou apr\u00e8s.
         }
       }
 
-      // Participation adjustment
+      // ═══ V7.3 FIX: Capital garanti 100% + no autocall keyword → NOT an autocall ═══
+      // This catches digitales, capital-garanti notes, and products where the AI
+      // mistakenly set autocall=true because it saw "Date de Constatation"
+      var cpLevel = parsed.capitalProtection && (parsed.capitalProtection.level || parsed.capitalProtection.protected);
+      var isCapitalGaranti100 = false;
+      if (parsed.capitalProtection) {
+        if (parsed.capitalProtection.level === 100 || parsed.capitalProtection.level === '100' || parsed.capitalProtection.level === '100%') {
+          isCapitalGaranti100 = true;
+        }
+        if (parsed.capitalProtection.protected === true || parsed.capitalProtection.protected === 'true') {
+          // Check if level is 100 or if text says "intégralité du capital"
+          var txt = rawText.toLowerCase();
+          if (txt.indexOf('intégralité du capital') >= 0 || txt.indexOf('garantie en capital') >= 0 || txt.indexOf('capital garanti') >= 0 || txt.indexOf('capital est garanti à 100') >= 0) {
+            isCapitalGaranti100 = true;
+            if (!parsed.capitalProtection.level) parsed.capitalProtection.level = 100;
+          }
+        }
+      }
+
+      if (isCapitalGaranti100) {
+        // Check if there is a REAL autocall (remboursement anticipé automatique)
+        var txt = rawText.toLowerCase();
+        var hasRealAutocall = /remboursement\s*(?:automatique\s*)?anticip[ée]/i.test(rawText) ||
+                              /rappel\s*(?:automatique\s*)?anticip[ée]/i.test(rawText) ||
+                              /remboursement\s*anticip[ée]\s*automatique/i.test(rawText);
+
+        // "peu importe l'évolution du marché" = unconditional capital guarantee = no autocall
+        var hasUnconditionalCapital = txt.indexOf('peu importe') >= 0 && txt.indexOf('capital') >= 0;
+
+        if (!hasRealAutocall || hasUnconditionalCapital) {
+          // This is a digitale or capital garanti, NOT an autocall
+          if (parsed.earlyRedemption) {
+            parsed.earlyRedemption.possible = false;
+            parsed.earlyRedemption.type = 'none';
+          } else {
+            parsed.earlyRedemption = { possible: false, type: 'none' };
+          }
+          if (!parsed.structureType || parsed.structureType === 'autocall') {
+            parsed.structureType = 'capital_garanti';
+          }
+          if (parsed.type === 'autocall') parsed.type = 'digitale';
+          console.log('[parseBrochure V7.3] Capital garanti 100% detected — autocall overridden to false');
+        }
+
+        // Fix barrier: if capital is 100% guaranteed, any "barrier" is a COUPON barrier, not capital
+        if (parsed.capitalProtection && parsed.capitalProtection.barrier && !parsed.capitalProtection.barrierCoupon) {
+          parsed.capitalProtection.barrierCoupon = parsed.capitalProtection.barrier;
+          parsed.capitalProtection.barrier = null;
+          console.log('[parseBrochure V7.3] Barrier reclassified as barrierCoupon=' + parsed.capitalProtection.barrierCoupon + '% (capital is 100% guaranteed)');
+        }
+      }
+
+      // ═══ Participation adjustment ═══
       if (parsed.participationRate && parsed.structureType === 'dispersion') {
         if (!parsed.coupon) parsed.coupon = {};
         parsed.coupon.type = 'participation';
@@ -150,51 +204,53 @@ R\u00e9ponds UNIQUEMENT avec un objet JSON. Aucun texte avant ou apr\u00e8s.
         parsed.coupon.paymentTiming = 'maturity';
       }
 
-      // Post-process d\u00e9cr\u00e9ment from rawText
+      // ═══ Post-process décrément from rawText ═══
       if (!parsed.decrementPct) {
-        var decMatch = rawText.match(/(?:pr\u00e9l\u00e8vement forfaitaire|d\u00e9cr\u00e9ment|decrement)\s*(?:de\s*)?(?:fixe\s*(?:annuel\s*)?(?:de\s*)?)?([\d][\d.,]*)\s*%/i);
+        var decMatch = rawText.match(/(?:prélèvement forfaitaire|décrément|decrement)\s*(?:de\s*)?(?:fixe\s*(?:annuel\s*)?(?:de\s*)?)?(\d[\d.,]*)\s*%/i);
         if (!decMatch) {
-          // Also try "AR X%" in underlying name
           var arMatch = rawText.match(/AR\s*(\d+[.,]?\d*)\s*%/i);
           if (arMatch) decMatch = arMatch;
         }
         if (decMatch) {
           parsed.decrementPct = parseFloat((decMatch[1] || '').replace(',', '.'));
-          console.log('[parseBrochure] Post-process d\u00e9cr\u00e9ment: ' + parsed.decrementPct + '%');
+          console.log('[parseBrochure] Post-process décrément: ' + parsed.decrementPct + '%');
         }
       }
 
-      // Detect actual dividend
+      // ═══ Detect actual dividend ═══
       if (parsed.decrementPct && !parsed.actualDividendYield) {
         var divMatch = rawText.match(/dividendes?\s*(?:nets?\s*)?(?:distribu)?[^.]{0,80}?(\d+[.,]\d+)\s*%/i);
         if (divMatch) parsed.actualDividendYield = parseFloat(divMatch[1].replace(',', '.'));
       }
 
-      // Post-process step-down
+      // ═══ Post-process step-down ═══
       if (parsed.earlyRedemption && !parsed.earlyRedemption.stepDown) {
-        if (rawText.indexOf('d\u00e9gressive') >= 0 || rawText.indexOf('step-down') >= 0 || rawText.indexOf('step down') >= 0) {
+        if (rawText.indexOf('dégressive') >= 0 || rawText.indexOf('step-down') >= 0 || rawText.indexOf('step down') >= 0) {
           parsed.earlyRedemption.stepDown = true;
-          var sdMatch = rawText.match(/d\u00e9gressive\s*(?:de\s*)?[-\u2013]?\s*(\d+[.,]?\d*)\s*%/i);
+          var sdMatch = rawText.match(/dégressive\s*(?:de\s*)?[-\u2013]?\s*(\d+[.,]?\d*)\s*%/i);
           if (sdMatch) parsed.earlyRedemption.stepDownPct = parseFloat(sdMatch[1].replace(',', '.'));
         }
       }
 
-      // Post-process double barrier from rawText
+      // ═══ Post-process double barrier from rawText ═══
       if (parsed.capitalProtection && !parsed.capitalProtection.barrierCoupon) {
-        var bcMatch = rawText.match(/barri\u00e8re\s*(?:de\s*)?coupon[^.]{0,30}?(\d+[.,]?\d*)\s*%/i);
+        var bcMatch = rawText.match(/barrière\s*(?:de\s*)?coupon[^.]{0,30}?(\d+[.,]?\d*)\s*%/i);
         if (bcMatch) parsed.capitalProtection.barrierCoupon = parseFloat(bcMatch[1].replace(',', '.'));
       }
 
-      // Post-process observation start
+      // ═══ Post-process observation start ═══
       if (parsed.earlyRedemption && !parsed.earlyRedemption.startSemester) {
-        var startMatch = rawText.match(/(?:\u00e0 l'issue|\u00e0 partir)\s*(?:des?\s*)?(?:semestre?s?\s*)(\d+)/i);
+        var startMatch = rawText.match(/(?:à l'issue|à partir)\s*(?:des?\s*)?(?:semestres?\s*)(\d+)/i);
         if (startMatch) parsed.earlyRedemption.startSemester = parseInt(startMatch[1]);
       }
 
-      console.log('[parseBrochure V7.2] type:', parsed.structureType,
+      console.log('[parseBrochure V7.3] type:', parsed.structureType,
+        '| autocall:', parsed.earlyRedemption?.possible || false,
+        '| capitalGaranti:', isCapitalGaranti100,
         '| decrement:', parsed.decrementPct || 'none',
         '| stepDown:', parsed.earlyRedemption?.stepDown || false,
         '| barrierCoupon:', parsed.capitalProtection?.barrierCoupon || 'none',
+        '| barrier:', parsed.capitalProtection?.barrier || 'none',
         '| startSem:', parsed.earlyRedemption?.startSemester || 'S1',
         '| rateIfCalled:', parsed.coupon?.rateIfCalled || 'same');
       return parsed;
