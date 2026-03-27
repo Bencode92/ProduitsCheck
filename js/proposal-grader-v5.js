@@ -1,7 +1,8 @@
 // ═══════════════════════════════════════════════════════════════════════════════
-// STRUCTBOARD — Proposal Grader v5.1 — Consolidated Pipeline
+// STRUCTBOARD — Proposal Grader v5.2 — Consolidated Pipeline
 // ALL 13 patches merged. NO setInterval, NO override chains.
 // Pipeline: NORMALIZE → COLLECT → TYPE → SCORE → ENRICH → AI → FINALIZE
+// v5.2: calibrated probabilities, σ-based barrier, progressive CDS, worst-of correlation
 // v5.1: barrierCoupon support for capital_garanti digitales
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -80,7 +81,6 @@ function _graderNormalize(product){
         if(isAC.indexOf('autocall')>=0||isAC.indexOf('phoenix')>=0){norm._barrierUnparsed=true;norm.barrier=60;}
     }
 
-    // Structure overrides
     if(st==='dispersion'){
         norm.worstOf=false;norm.capitalProtection=true;norm.barrier=0;norm.couponType='garanti';norm.autocall=false;
         var hs=p.historicalSimulations||(ai.historicalSimulations);var my=norm.maturityYears||3;
@@ -88,18 +88,15 @@ function _graderNormalize(product){
         else{var part=p.participationRate||norm.coupon||7;norm.coupon=(part*1.3)/my;norm._dispersionMedian=part*1.3;}
         norm._originalCoupon=p.participationRate||raw;
     } else if(st==='capital_garanti'){
-        // FIX 1: Don't force couponType='garanti' if there's a barrierCoupon (digitale)
         norm.capitalProtection=true;norm.barrier=0;if(norm.couponType!=='fixe'&&!norm.barrierCoupon)norm.couponType='garanti';
     } else if(st==='taux_fixe'){
         norm.capitalProtection=true;norm.barrier=0;norm.couponType='fixe';norm.worstOf=false;
     }
 
-    // Décrément
     var decPct=parseFloat(p.decrementPct)||0;
     if(!decPct){var undStr=(und.join(' ')).toLowerCase();var am=undStr.match(/\bar\s*(\d+[.,]?\d*)\s*%/i);if(am)decPct=parseFloat(am[1].replace(',','.'));}
     if(decPct>0&&decPct<=20){norm._decrement=decPct;norm._actualDividend=parseFloat(p.actualDividendYield)||1.0;norm._decrementDrag=decPct-norm._actualDividend;norm._hasDecrement=true;}
 
-    // Payment at maturity
     var pt=(typeof co==='object'?co.paymentTiming:'')||'';var fs=(typeof co==='object'?(co.frequency||''):'').toLowerCase();
     var isCbl=norm.autocall&&(st==='taux_fixe'||name.indexOf('callable')>=0||name.indexOf('taux fixe')>=0);
     if(pt==='maturity'||fs==='maturity'||fs.indexOf('maturit')>=0||name.indexOf('paiement à maturité')>=0||name.indexOf('paiement a maturite')>=0){
@@ -109,13 +106,11 @@ function _graderNormalize(product){
         norm._isCallable=isCbl;
     }
 
-    // Step-down
     if(ar.stepDown===true||ar.stepDown==='true'||rawText.indexOf('dégressive')>=0||rawText.indexOf('step-down')>=0){
         norm._hasStepDown=true;var sdm=rawText.match(/dégressive\s*(?:de\s*)?[-–]?\s*(\d+[.,]?\d*)\s*%/i);
         if(sdm)norm._stepDownPct=parseFloat(sdm[1].replace(',','.'));
     }
 
-    // Already-annualized check
     if(norm.couponMultiplier>1&&st!=='dispersion'){
         var ap=rawText.match(/(\d+[.,]?\d*)\s*%\s*(?:p\.?a\.?|annualis|par an|annuel)/i);
         if(ap){var sa=parseFloat(ap[1].replace(',','.'));if(Math.abs(sa-norm.couponRaw)<0.5){norm.coupon=norm.couponRaw;norm.couponMultiplier=1;norm.couponFrequencySource='already-annual';}}
@@ -140,9 +135,88 @@ function _estimateExpectedMaturity(p){
 }
 
 // ═══ SECTION 6: PROBABILITY ESTIMATORS ═══
-// FIX 4: Use barrierCoupon when present instead of assuming 0.85 for all capital_garanti
-window._estimateCouponProb=function(p){if(!p)return 0.70;var ct=(p.couponType||'').toLowerCase();if(ct==='garanti'||ct==='fixe')return 0.95;if(p.capitalProtection&&!p.barrierCoupon)return 0.85;var b=p.barrierCoupon||p.barrier||60;var pr=Math.max(0.30,Math.min(0.95,1.0-(b-40)*0.015));if(p.hasMemory)pr=Math.min(0.95,pr+0.10);var n=(p.underlyings||[]).length;if(n>2)pr*=Math.max(0.5,1.0-(n-2)*0.08);return Math.round(pr*100)/100;};
-window._estimateLossProb=function(p){if(!p)return 0.05;if(p.capitalProtection)return 0.02;var ct=(p.couponType||'').toLowerCase();if(ct==='garanti'||ct==='fixe')return 0.03;var b=p.barrier||60;var pr=Math.max(0.01,Math.min(0.40,(b-35)*0.006));var n=(p.underlyings||[]).length;if(n>1)pr*=(1+(n-1)*0.15);return Math.min(0.50,Math.round(pr*100)/100);};
+
+// v5.2: Correlation-aware worst-of exponent
+function _worstOfExponent(underlyings){
+    if(!underlyings||underlyings.length<=1)return 1.0;
+    var n=underlyings.length;
+    var groups=underlyings.map(function(u){return _getUndGroup(u)});
+    var totalCorr=0,pairs=0;
+    for(var i=0;i<groups.length;i++){
+        for(var j=i+1;j<groups.length;j++){
+            totalCorr+=_getGrpCorr(groups[i],groups[j]);
+            pairs++;
+        }
+    }
+    var avgCorr=pairs>0?totalCorr/pairs:0.50;
+    var exp=1+(n-1)*(1-avgCorr);
+    return exp;
+}
+
+// v5.2: Historically calibrated P(spot >= barrier%) on EU indices
+function _calibratedBarrierProb(barrier_pct, T){
+    var grid = [
+        [50, [0.97, 0.95, 0.93, 0.90, 0.87, 0.84]],
+        [60, [0.93, 0.89, 0.85, 0.80, 0.75, 0.70]],
+        [70, [0.85, 0.78, 0.72, 0.65, 0.58, 0.52]],
+        [80, [0.72, 0.63, 0.57, 0.50, 0.43, 0.37]],
+        [90, [0.60, 0.52, 0.46, 0.40, 0.35, 0.30]],
+        [100,[0.52, 0.45, 0.40, 0.35, 0.30, 0.26]]
+    ];
+    var matBuckets = [1, 2, 3, 5, 7, 10];
+    function interpMat(row){
+        if(T<=matBuckets[0]) return row[0];
+        if(T>=matBuckets[matBuckets.length-1]) return row[matBuckets.length-1];
+        for(var i=0;i<matBuckets.length-1;i++){
+            if(T>=matBuckets[i]&&T<=matBuckets[i+1]){
+                var f=(T-matBuckets[i])/(matBuckets[i+1]-matBuckets[i]);
+                return row[i]+f*(row[i+1]-row[i]);
+            }
+        }
+        return row[0];
+    }
+    var b=Math.max(50,Math.min(100,barrier_pct));
+    for(var i=0;i<grid.length-1;i++){
+        if(b>=grid[i][0]&&b<=grid[i+1][0]){
+            var f=(b-grid[i][0])/(grid[i+1][0]-grid[i][0]);
+            var v1=interpMat(grid[i][1]);
+            var v2=interpMat(grid[i+1][1]);
+            return Math.round((v1+f*(v2-v1))*100)/100;
+        }
+    }
+    return b<=50?interpMat(grid[0][1]):interpMat(grid[grid.length-1][1]);
+}
+
+function _calibratedLossProb(barrier_pct, T){
+    return Math.max(0.005, Math.min(0.50, 1.0 - _calibratedBarrierProb(barrier_pct, T)));
+}
+
+// v5.2: Calibrated coupon probability using historical data
+window._estimateCouponProb=function(p){
+    if(!p)return 0.70;
+    var ct=(p.couponType||'').toLowerCase();
+    if(ct==='garanti'||ct==='fixe')return 0.95;
+    if(p.capitalProtection&&!p.barrierCoupon)return 0.85;
+    var b=p.barrierCoupon||p.barrier||60;
+    var T=p.maturityYears||5;
+    var pr=_calibratedBarrierProb(b, T);
+    if(p.hasMemory)pr=Math.min(0.95,pr+0.08);
+    var n=(p.underlyings||[]).length;
+    if(n>1){var woe=_worstOfExponent(p.underlyings||[]);pr=Math.max(0.10,Math.pow(pr,woe));}
+    return Math.round(pr*100)/100;
+};
+window._estimateLossProb=function(p){
+    if(!p)return 0.05;
+    if(p.capitalProtection)return 0.02;
+    var ct=(p.couponType||'').toLowerCase();
+    if(ct==='garanti'||ct==='fixe')return 0.03;
+    var b=p.barrier||60;
+    var T=p.maturityYears||5;
+    var pr=_calibratedLossProb(b, T);
+    var n=(p.underlyings||[]).length;
+    if(n>1){var woe=_worstOfExponent(p.underlyings||[]);pr=Math.min(0.50,1.0-Math.pow(1.0-pr,1.0/woe));}
+    return Math.min(0.50,Math.round(pr*100)/100);
+};
 
 // ═══ SECTION 7: MARKET DATA ═══
 var _mktCache=null,_mktCacheTs=0,_underlyingMap=null,_underlyingsExtra=null,_ratesData=null;
@@ -208,7 +282,6 @@ async function _collectContext(product){
 function _detectType(norm,product){if(norm._structureType==='dispersion')return'dispersion';if(norm._structureType==='taux_fixe')return'taux_fixe';if(norm._structureType==='capital_garanti')return'capital_garanti';if(_isFixedRateProduct(norm))return'taux_fixe';if(_isRateProduct(product||norm))return'rate';return'autocall';}
 
 // ═══ SECTION 12: P1 — RENDEMENT AJUSTÉ ═══
-// FIX 2: Add capital_garanti dispatch for digitales with barrierCoupon
 function _computeP1(p,type){
     if(type==='dispersion')return _p1Disp(p);
     if(type==='taux_fixe'||type==='rate')return _p1Rate(p);
@@ -217,7 +290,16 @@ function _computeP1(p,type){
 }
 function _p1Auto(p){
     var c=p.coupon||0;var s;if(c<=8)s=Math.min(100,c*10);else s=Math.min(100,Math.round(80+20*Math.log(c/8)/Math.log(3)));
-    if(!p.capitalProtection){if(p.barrier>0&&p.barrier<100){s=s*(1-Math.pow(Math.max(0,(p.barrier-30)/50),2.0));}else if(!p._barrierUnparsed){s-=25;}}
+    if(!p.capitalProtection){if(p.barrier>0&&p.barrier<100){
+        // v5.2: σ-based continuous barrier penalty (replaces quadratic cliff)
+        var _bVol=30;
+        var _bMat=p.maturityYears||p._maturityInfo&&p._maturityInfo.expected||5;
+        var _bSigma=-Math.log(p.barrier/100)/(_bVol/100*Math.sqrt(Math.max(0.25,_bMat)));
+        var _penaltyFactor=Math.min(1.0,0.15+0.85*(1-Math.exp(-_bSigma/1.8)));
+        s=Math.round(s*_penaltyFactor);
+        p._barrierSigmaP1=Math.round(_bSigma*100)/100;
+        p._barrierPenaltyFactor=Math.round(_penaltyFactor*100)/100;
+    }else if(!p._barrierUnparsed){s-=25;}}
     if(p.worstOf&&p.underlyings.length>2)s-=Math.round(3*Math.pow(p.underlyings.length-2,1.3));
     if(p.hasMemory)s+=5;
     if(p.couponType==='garanti'||p.couponType==='fixe')s+=Math.min(18,8+Math.round(c*1.0));
@@ -239,28 +321,20 @@ function _p1Rate(p){
     if(mt<=2)s+=8;else if(mt<=3)s+=5;else if(mt>5&&mt<=8)s-=5;else if(mt>8)s-=Math.round(5*Math.log(mt/5));
     p._maturityInfo=_estimateExpectedMaturity(p);return Math.max(0,Math.min(100,Math.round(s)));
 }
-// FIX 3: New function for capital_garanti with conditional coupon (digitale)
 function _p1CapGaranti(p){
     var c=p.coupon||0;var bc=p.barrierCoupon||100;
-    // Estimate coupon probability given barrier coupon level
-    // barrier 60%→75% | 80%→55% | 100%→40% (at-the-money = very demanding)
     var probPerDate=Math.max(0.20,Math.min(0.90,1.0-(bc-40)*0.01));
-    // Worst-of reduces probability
-    if(p.worstOf&&p.underlyings.length>1)probPerDate=Math.pow(probPerDate,Math.sqrt(p.underlyings.length));
-    // Memory: probability of getting paid AT LEAST once over maturity
+    // v5.2: correlation-aware worst-of exponent
+    if(p.worstOf&&p.underlyings.length>1){var woe=_worstOfExponent(p.underlyings);probPerDate=Math.pow(probPerDate,woe);}
     var my=p.maturityYears||3;var probTotal=probPerDate;
     if(p.hasMemory&&my>1){var probNever=Math.pow(1-probPerDate,my);probTotal=probPerDate*0.4+(1-probNever)*0.6;}
-    // Expected coupon (probability-weighted)
     var expectedCoupon=c*probTotal;
-    // Score on expected, not nominal
     var s;if(expectedCoupon<=8)s=Math.min(100,expectedCoupon*10);else s=Math.min(100,Math.round(80+20*Math.log(expectedCoupon/8)/Math.log(3)));
-    // Capital garanti bonus (always get capital back)
     s+=10;
-    // Short maturity bonus
     if(my<=3)s+=5;else if(my>6)s-=5;
     p._maturityInfo={expected:my,max:my,isEstimated:false};
     p._couponProbability=Math.round(probTotal*100);
-    console.log('[Grader v5] P1.capGaranti: coupon '+c+'% × prob '+Math.round(probTotal*100)+'% = expected '+expectedCoupon.toFixed(1)+'% → P1='+Math.round(s));
+    console.log('[Grader v5.2] P1.capGaranti: coupon '+c+'% × prob '+Math.round(probTotal*100)+'% = expected '+expectedCoupon.toFixed(1)+'% → P1='+Math.round(s));
     return Math.max(0,Math.min(100,Math.round(s)));
 }
 
@@ -409,7 +483,7 @@ function _buildUserPrompt(ctx,base,type){
     if(m.available&&m.stocks&&m.stocks.length>0){pr+='## DONNÉES MARCHÉ\n';m.stocks.forEach(function(s){if(!s.found){pr+='- '+s.name+': NON TROUVÉ\n';return;}pr+='- '+s.name+' ('+s.ticker+', '+(s.sector||'?')+'): ';if(s.buffett_score!=null)pr+='Buffett='+s.buffett_score+', ';if(s.quality_score!=null)pr+='Quality='+s.quality_score+', ';pr+='vol='+(s.volatility_3y||'?')+'%, DD='+(s.max_drawdown_3y||'?')+'%, beta='+(s.beta||'?')+'\n';});if(m.worstMetrics)pr+='Worst: '+m.worstMetrics.worst_name+' | Beta max: '+m.worstMetrics.max_beta+'\n';}
     var mii=m._mi;if(mii&&mii.regime){pr+='\n## MARKET INTELLIGENCE\nRégime: '+mii.regime.toUpperCase()+' (conf: '+mii.regime_confidence+'/5)\n';if(mii.favored_sectors)pr+='Favorisés: '+mii.favored_sectors+'\n';if(mii.avoided_sectors)pr+='Évités: '+mii.avoided_sectors+'\n';if(mii.warnings&&mii.warnings.length>0)pr+='Warnings: '+mii.warnings.join('; ')+'\n';if(mii.vix)pr+='VIX: '+mii.vix;if(mii.brent)pr+=' | Brent: $'+mii.brent;pr+='\n';}
     if((type==='taux_fixe'||type==='rate')&&_ratesData&&_ratesData.yields){pr+='\n## TAUX\n';var ecb=(_ratesData.policy_rates||{}).ecb_deposit_rate;if(ecb)pr+='BCE: '+ecb.current+'%\n';var y=_ratesData.yields;if(y.oat_fr_5y)pr+='AAA 5Y: '+y.oat_fr_5y.current+'%\n';if(y.oat_fr_10y)pr+='AAA 10Y: '+y.oat_fr_10y.current+'%\n';}
-    pr+='\n## SCORES DE BASE (v5.1)\nP1: '+base.p1+'/100 | P2: '+base.p2+'/100 | P3: '+base.p3+'/100 | P4: '+base.p4+'/100\n';
+    pr+='\n## SCORES DE BASE (v5.2)\nP1: '+base.p1+'/100 | P2: '+base.p2+'/100 | P3: '+base.p3+'/100 | P4: '+base.p4+'/100\n';
     pr+='Score: '+base.total+'/100 → '+base.grade+'\nAJUSTE ±15 pts/pilier. Nominal: '+formatNumber(nom)+'€\n';return pr;
 }
 
@@ -442,18 +516,26 @@ async function gradeProposal(product){
     var t0=Date.now();
     if(!product.structureType&&typeof _autoDetectStructureType==='function'){var det=_autoDetectStructureType(product);if(det)product.structureType=det;}
     var ctx=await _collectContext(product);var p=ctx.product;
-    if(_isLiquidityProduct(p)){var lr={grade:'-',score:null,killCriteria:{triggered:false,reasons:[]},pillars:{adjustedReturn:{score:null},underlyingQuality:{score:null},portfolioFit:{score:null},riskPremium:{score:null}},verdict:'Produit de liquidité / parking cash.',keyRisks:['Rendement très faible'],scenarios:null,metadata:{gradedAt:new Date().toISOString(),durationMs:Date.now()-t0,aiUsed:false,version:'5.1',productType:'liquidity',isInPortfolio:ctx.isInPortfolio}};product.grading=lr;return lr;}
+    if(_isLiquidityProduct(p)){var lr={grade:'-',score:null,killCriteria:{triggered:false,reasons:[]},pillars:{adjustedReturn:{score:null},underlyingQuality:{score:null},portfolioFit:{score:null},riskPremium:{score:null}},verdict:'Produit de liquidité / parking cash.',keyRisks:['Rendement très faible'],scenarios:null,metadata:{gradedAt:new Date().toISOString(),durationMs:Date.now()-t0,aiUsed:false,version:'5.2',productType:'liquidity',isInPortfolio:ctx.isInPortfolio}};product.grading=lr;return lr;}
     var type=_detectType(p,product);var w=ctx.isInPortfolio?GRADING_CONFIG.weightsPortfolio:GRADING_CONFIG.weightsProposal;
-    console.log('[Grader v5] Type: '+type+' | Structure: '+(p._structureType||'standard')+(p.barrierCoupon?' | barrierCoupon: '+p.barrierCoupon+'%':''));
-    var kill=_checkKillCriteria(p);if(kill.killed){var kr={grade:'F',score:0,killCriteria:{triggered:true,reasons:kill.reasons},pillars:{adjustedReturn:{score:null},underlyingQuality:{score:null},portfolioFit:{score:null},riskPremium:{score:null}},verdict:'Rejet: '+kill.reasons[0],keyRisks:kill.reasons,scenarios:null,metadata:{gradedAt:new Date().toISOString(),durationMs:Date.now()-t0,aiUsed:false,version:'5.1',productType:type}};product.grading=kr;return kr;}
+    console.log('[Grader v5.2] Type: '+type+' | Structure: '+(p._structureType||'standard')+(p.barrierCoupon?' | barrierCoupon: '+p.barrierCoupon+'%':''));
+    var kill=_checkKillCriteria(p);if(kill.killed){var kr={grade:'F',score:0,killCriteria:{triggered:true,reasons:kill.reasons},pillars:{adjustedReturn:{score:null},underlyingQuality:{score:null},portfolioFit:{score:null},riskPremium:{score:null}},verdict:'Rejet: '+kill.reasons[0],keyRisks:kill.reasons,scenarios:null,metadata:{gradedAt:new Date().toISOString(),durationMs:Date.now()-t0,aiUsed:false,version:'5.2',productType:type}};product.grading=kr;return kr;}
     var base={p1:_computeP1(p,type),p2:_computeP2(p,ctx.market,type),p3:_computeP3(p,ctx.portfolio,ctx.isInPortfolio),p4:_computeP4(p,ctx.cat.bestRate,type)};
     base.total=Math.round(base.p1*w.adjustedReturn+base.p2*w.underlyingQuality+base.p3*w.portfolioFit+base.p4*w.riskPremium);base.grade=_letterGrade(base.total);
-    console.log('[Grader v5] Base: P1='+base.p1+' P2='+base.p2+' P3='+base.p3+' P4='+base.p4+' → '+base.total+' ('+base.grade+')');
+    console.log('[Grader v5.2] Base: P1='+base.p1+' P2='+base.p2+' P3='+base.p3+' P4='+base.p4+' → '+base.total+' ('+base.grade+')');
     var cr=null,final=base,aiUsed=false;
-    try{cr=await _callClaude(ctx,base,type);if(cr&&cr.adjustments){final=_applyAdj(base,cr.adjustments,w,type,p);aiUsed=true;}}catch(e){console.warn('[Grader v5] AI fallback:',e.message);}
+    try{cr=await _callClaude(ctx,base,type);if(cr&&cr.adjustments){final=_applyAdj(base,cr.adjustments,w,type,p);aiUsed=true;}}catch(e){console.warn('[Grader v5.2] AI fallback:',e.message);}
     var matI=p._maturityInfo||_estimateExpectedMaturity(p);var sigma=_computeBarrierSigma(p,ctx.market);var liq=_computeLiquidityScore(product);var ci=_computeCI(final.total,ctx);
     var iss=ISSUER_RATINGS[product.bankId||''];var isCapped=false;
-    if(iss&&iss.cds_proxy>100&&final.total>55){final.total=Math.min(final.total,55);final.grade=_letterGrade(final.total);isCapped=true;}
+    // v5.2: Progressive CDS degradation (-5pts/20bps above 60bps, max -25)
+    if(iss&&iss.cds_proxy>60){
+        var cdsDeduction=Math.min(25,Math.round((iss.cds_proxy-60)/20)*5);
+        if(cdsDeduction>0&&final.total>25){
+            final.total=Math.max(25,final.total-cdsDeduction);
+            final.grade=_letterGrade(final.total);
+            isCapped=true;
+        }
+    }
     function _r(k,n){var s=n+': base '+base[k];if(aiUsed&&final.deltas&&final.deltas[k]!==0){s+=' → '+(final.deltas[k]>0?'+':'')+final.deltas[k]+' = '+final[k];if(final.reasons[k])s+=' ('+final.reasons[k]+')';}return s;}
     var matN=matI.isEstimated?' | Mat espérée: ~'+matI.expected+'a (prob mat: '+matI.probReachMaturity+'%)':'';
     var betaN=(ctx.market.worstMetrics&&ctx.market.worstMetrics.max_beta>1.0&&!p.capitalProtection&&p.barrier>0)?' | β'+ctx.market.worstMetrics.max_beta:'';
@@ -466,10 +548,10 @@ async function gradeProposal(product){
         verdict:cr&&cr.verdict?cr.verdict:'Score '+final.total+'/100 (base '+base.total+').',
         keyRisks:cr&&cr.keyRisks?cr.keyRisks:[],negotiationPoints:cr&&cr.negotiationPoints?cr.negotiationPoints:[],
         scenarios:cr&&cr.scenarios?cr.scenarios:null,confidenceInterval:ci,
-        metadata:{gradedAt:new Date().toISOString(),durationMs:Date.now()-t0,aiUsed:aiUsed,version:'5.1',productType:type,marketDataAvailable:ctx.market.available,catBenchmark:ctx.cat.bestRate,catSource:ctx.cat.source,couponAnnualized:p.coupon,couponRaw:p.couponRaw,couponMultiplier:p.couponMultiplier,couponFrequency:p.couponFrequency,isInPortfolio:ctx.isInPortfolio,hasBarrier:!p.capitalProtection&&p.barrier>0,barrierPct:p.barrier,barrierCouponPct:p.barrierCoupon||null,couponProbability:p._couponProbability||null,expectedMaturity:matI.expected,maxMaturity:matI.max,probReachMaturity:matI.probReachMaturity,maxBeta:ctx.market.worstMetrics?ctx.market.worstMetrics.max_beta:null,baseScore:base.total,baseGrade:base.grade,adjustments:aiUsed?final.deltas:null,barrier_sigma:sigma?sigma.sigma:null,barrier_sigma_label:sigma?sigma.label:null,barrier_sigma_danger:sigma?sigma.danger:null,liquidity_level:liq.level,liquidity_score:liq.score,liquidity_label:liq.label,ci_low:ci?ci.low:null,ci_high:ci?ci.high:null,ci_label:ci?ci.label:null,issuer_rating:iss?iss.rating:(product.bankId?'NR':null),issuer_tier:iss?iss.tier:null,issuer_cds_proxy:iss?iss.cds_proxy:null,issuer_cap_applied:isCapped,hasDecrement:p._hasDecrement||false,decrementDrag:p._decrementDrag||0,structureType:p._structureType||null}};
+        metadata:{gradedAt:new Date().toISOString(),durationMs:Date.now()-t0,aiUsed:aiUsed,version:'5.2',productType:type,marketDataAvailable:ctx.market.available,catBenchmark:ctx.cat.bestRate,catSource:ctx.cat.source,couponAnnualized:p.coupon,couponRaw:p.couponRaw,couponMultiplier:p.couponMultiplier,couponFrequency:p.couponFrequency,isInPortfolio:ctx.isInPortfolio,hasBarrier:!p.capitalProtection&&p.barrier>0,barrierPct:p.barrier,barrierCouponPct:p.barrierCoupon||null,couponProbability:p._couponProbability||null,expectedMaturity:matI.expected,maxMaturity:matI.max,probReachMaturity:matI.probReachMaturity,maxBeta:ctx.market.worstMetrics?ctx.market.worstMetrics.max_beta:null,baseScore:base.total,baseGrade:base.grade,adjustments:aiUsed?final.deltas:null,barrier_sigma:sigma?sigma.sigma:null,barrier_sigma_label:sigma?sigma.label:null,barrier_sigma_danger:sigma?sigma.danger:null,liquidity_level:liq.level,liquidity_score:liq.score,liquidity_label:liq.label,ci_low:ci?ci.low:null,ci_high:ci?ci.high:null,ci_label:ci?ci.label:null,issuer_rating:iss?iss.rating:(product.bankId?'NR':null),issuer_tier:iss?iss.tier:null,issuer_cds_proxy:iss?iss.cds_proxy:null,issuer_cap_applied:isCapped,issuer_cds_deduction:isCapped?(iss?Math.min(25,Math.round((iss.cds_proxy-60)/20)*5):0):0,hasDecrement:p._hasDecrement||false,decrementDrag:p._decrementDrag||0,structureType:p._structureType||null}};
     if(iss&&iss.cds_proxy>80&&result.keyRisks&&!result.keyRisks.some(function(r){return r.indexOf('émetteur')>=0}))result.keyRisks.push('Risque crédit émetteur '+iss.rating+' (CDS ~'+iss.cds_proxy+'bps)');
     if(sigma&&sigma.danger&&result.keyRisks)result.keyRisks.push('Barrière à '+sigma.sigma+'σ ('+sigma.label+') — vol '+sigma.vol+'%');
-    if(isCapped)result.verdict=(result.verdict||'')+' ⚠ Risque émetteur élevé — grade plafonné.';
+    if(isCapped)result.verdict=(result.verdict||'')+' ⚠ Risque émetteur élevé — grade dégradé.';
     product.grading=result;return result;
 }
 
@@ -495,11 +577,11 @@ function renderGradingSection(grading){
     if(g.scenarios){h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px">';[['optimistic','Optimiste','#06D6A0'],['base','Base','#4ECDC4'],['stress','Stress','#FFB627'],['worst','Worst','#EF233C']].forEach(function(x){var s=g.scenarios[x[0]];if(!s)return;h+='<div style="text-align:center;padding:8px;border-radius:8px;background:'+x[2]+'15;border:1px solid '+x[2]+'30"><div style="font-size:10px;color:var(--text-muted)">'+x[1]+'</div><div style="font-size:16px;font-weight:600;color:'+x[2]+'">'+((s.return_eur||0)>=0?'+':'')+(s.return_eur||0).toLocaleString('fr-FR')+'€</div><div style="font-size:10px;color:var(--text-muted)">+'+(s.return_pct||0)+'% · '+Math.round((s.probability||0)*100)+'%</div></div>';});h+='</div>';}
     if(g.keyRisks&&g.keyRisks.length>0)h+='<div style="font-size:12px;color:var(--text-muted);margin-bottom:8px"><strong>Risques :</strong> '+g.keyRisks.join(' · ')+'</div>';
     if(g.grade==='C'&&g.negotiationPoints&&g.negotiationPoints.length>0)h+='<div style="font-size:12px;color:#FFB627;margin-bottom:8px"><strong>À négocier :</strong> '+g.negotiationPoints.join(' · ')+'</div>';
-    h+='<div style="font-size:10px;color:var(--text-muted);opacity:0.5;margin-top:8px">v5.1'+(g.metadata.aiUsed?' Hybride':' Local')+' · '+new Date(g.metadata.gradedAt).toLocaleDateString('fr-FR')+' · '+g.metadata.durationMs+'ms · CAT '+(g.metadata.catBenchmark||'?')+'% ('+(g.metadata.catSource||'?')+')';
+    h+='<div style="font-size:10px;color:var(--text-muted);opacity:0.5;margin-top:8px">v5.2'+(g.metadata.aiUsed?' Hybride':' Local')+' · '+new Date(g.metadata.gradedAt).toLocaleDateString('fr-FR')+' · '+g.metadata.durationMs+'ms · CAT '+(g.metadata.catBenchmark||'?')+'% ('+(g.metadata.catSource||'?')+')';
     if(isP)h+=' · Portefeuille';if(isCbl)h+=' · Callable';if(g.metadata.hasBarrier)h+=' · P2 vol/DD';if(g.metadata.maxBeta&&g.metadata.maxBeta>1.0)h+=' · β'+g.metadata.maxBeta;if(g.metadata.barrier_sigma)h+=' · σ'+g.metadata.barrier_sigma;if(g.metadata.liquidity_level)h+=' · '+g.metadata.liquidity_level;if(g.metadata.issuer_rating&&g.metadata.issuer_rating!=='NR')h+=' · Émetteur '+g.metadata.issuer_rating;if(g.metadata.hasDecrement)h+=' · Décrément '+g.metadata.decrementDrag.toFixed(1)+'%';if(g.metadata.structureType)h+=' · '+g.metadata.structureType;if(g.metadata.barrierCouponPct)h+=' · Barr.coupon '+g.metadata.barrierCouponPct+'%';
     h+='</div></div>';return h;
 }
 
 // ═══ SECTION 22: EXPORTS ═══
-window.ProposalGrader={grade:gradeProposal,gradeBatch:gradeProposalsBatch,renderBadge:renderGradeBadge,renderSection:renderGradingSection,checkKillCriteria:_checkKillCriteria,normalize:_graderNormalize,config:GRADING_CONFIG,isLiquidity:_isLiquidityProduct,isFixedRateCallable:_isFixedRateProduct,estimateExpectedMaturity:_estimateExpectedMaturity,version:'5.1'};
-console.log('[StructBoard] ProposalGrader v5.1 — barrierCoupon support for capital_garanti digitales');
+window.ProposalGrader={grade:gradeProposal,gradeBatch:gradeProposalsBatch,renderBadge:renderGradeBadge,renderSection:renderGradingSection,checkKillCriteria:_checkKillCriteria,normalize:_graderNormalize,config:GRADING_CONFIG,isLiquidity:_isLiquidityProduct,isFixedRateCallable:_isFixedRateProduct,estimateExpectedMaturity:_estimateExpectedMaturity,version:'5.2'};
+console.log('[StructBoard] ProposalGrader v5.2 — calibrated probs, σ-barrier, progressive CDS, worst-of corr');
