@@ -175,5 +175,111 @@
       "redundancy": 20,
       "complementarity": 25
     }
+  },
+  "grading": {
+    "grade": "B",
+    "score": 63,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 59,
+        "base": 74,
+        "delta": -15,
+        "reasoning": "Rendement: base 74 → -15 = 59 (Décrément synthétique de 99%/an combiné à une volatilité de 38.93% rend le coupon quasi-inaccessible (barrière effective ~25% après 1 an)) | Coupon 9% (4.5×2), barrière 50% | Mat espérée: ~1.1a (max 5a, prob mat: 0%)"
+      },
+      "underlyingQuality": {
+        "score": 59,
+        "base": 69,
+        "delta": -10,
+        "reasoning": "Qualité: base 69 → -10 = 59 (Indice gold miners avec beta 0.55 mais décrément synthétique transforme un actif défensif en piège structurel, drawdown max -30.84%) [vol/DD 30%] | Worst: Indice Solactive GDX EUR AR 5% B:50"
+      },
+      "portfolioFit": {
+        "score": 75,
+        "base": 80,
+        "delta": -5,
+        "reasoning": "Fit: base 80 → -5 = 75 (L'or pourrait diversifier mais le décrément de 99%/an annule tout bénéfice de décorrélation dans un portefeuille)"
+      },
+      "riskPremium": {
+        "score": 63,
+        "base": 73,
+        "delta": -10,
+        "reasoning": "Prime: base 73 → -10 = 63 (Coupon 9% trompeur car quasi-inatteignable avec décrément 99%/an, structure toxique malgré apparence attractive) | 9% vs CAT 2.5% (spread 6.5%)"
+      }
+    },
+    "verdict": "Produit structurellement défaillant avec un décrément synthétique de 99%/an qui érode l'indice de ~0.4%/jour ouvré. Avec une volatilité de 38.93%, la barrière à 50% sera probablement franchie en 18-24 mois, rendant le coupon de 9% illusoire. Le drag de -99%/an transforme un indice gold miners potentiellement défensif en instrument de destruction de capital. Structure à éviter absolument malgré le coupon apparent attractif.",
+    "keyRisks": [
+      "Décrément de 99%/an garantit une érosion rapide vers la barrière",
+      "Volatilité 38.93% + drag = probabilité de perte en capital >80%"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 4.5,
+        "return_eur": 4500,
+        "probability": 0.1,
+        "duration_years": 0.5
+      },
+      "base": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.2,
+        "duration_years": 2
+      },
+      "stress": {
+        "return_pct": -20,
+        "return_eur": -20000,
+        "probability": 0.4,
+        "duration_years": 3
+      },
+      "worst": {
+        "return_pct": -50,
+        "return_eur": -50000,
+        "probability": 0.3,
+        "duration_years": 5
+      }
+    },
+    "metadata": {
+      "gradedAt": "2026-03-27T11:34:34.308Z",
+      "durationMs": 20024,
+      "aiUsed": true,
+      "version": "4.3",
+      "productType": "standard",
+      "marketDataAvailable": true,
+      "catBenchmark": 2.5,
+      "catSource": "fallback-2026",
+      "couponAnnualized": 9,
+      "couponRaw": 4.5,
+      "couponMultiplier": 2,
+      "couponFrequency": "semestriel",
+      "isInPortfolio": false,
+      "hasBarrier": true,
+      "barrierPct": 50,
+      "expectedMaturity": 1.1,
+      "maxMaturity": 5,
+      "probReachMaturity": 0,
+      "maxBeta": 0.55,
+      "baseScore": 74,
+      "baseGrade": "B",
+      "adjustments": {
+        "p1": -15,
+        "p2": -10,
+        "p3": -5,
+        "p4": -10
+      },
+      "stockData": [
+        {
+          "name": "Indice Solactive GDX EUR AR 5%",
+          "ticker": "GDX",
+          "sector": "Index",
+          "perf_ytd": -3.9,
+          "perf_1y": 84.44,
+          "volatility_3y": 38.93,
+          "max_drawdown_3y": -30.84
+        }
+      ]
+    }
   }
 }
