@@ -1,0 +1,182 @@
+{
+  "id": "sp_mn8tths2_jnf9s",
+  "name": "NOTE TAUX FIXE CALLABLE BONUS PAIEMENT À MATURITÉ",
+  "bankId": "sg",
+  "type": "autre",
+  "underlyingType": "autre",
+  "underlyings": [],
+  "currency": "EUR",
+  "maturity": "10 ans",
+  "maturityDate": null,
+  "strikeDate": null,
+  "coupon": {
+    "rate": 4,
+    "rateIfCalled": 5,
+    "rateIfMaturity": 4,
+    "type": "fixe",
+    "frequency": null,
+    "trigger": null,
+    "memory": false,
+    "paymentTiming": "maturity"
+  },
+  "capitalProtection": {
+    "protected": true,
+    "level": 100,
+    "barrier": null,
+    "barrierCoupon": null,
+    "barrierType": null,
+    "couponFloor": false
+  },
+  "earlyRedemption": {
+    "possible": true,
+    "type": "callable",
+    "trigger": null,
+    "frequency": "annuel",
+    "startSemester": null,
+    "startYear": 1,
+    "stepDown": false,
+    "stepDownPct": null
+  },
+  "scenarios": {
+    "favorable": null,
+    "median": null,
+    "defavorable": null
+  },
+  "risks": [
+    "Protection du capital uniquement à maturité",
+    "Risque de crédit Société Générale",
+    "Risque de réinvestissement",
+    "Durée d'investissement incertaine (1 à 10 ans)",
+    "Risque de liquidité avant échéance"
+  ],
+  "rawText": "--- PAGE 1 ---\nNOTE TAUX FIXE  CALLABLE BONUS  PAIEMENT À  MATURITÉ  1\n--- PAGE 2 ---\nPOINTS   CLÉS     À   l’issue   des   années   1   à   9 ,   le   produit   peut   être  rappelé   à   la   discrétion   de   la   Société   Générale .     En   cas   de   rappel   anticipé   au   gré   de   l’Emetteur,  l’investisseur   reçoit   un   Coupon   de   5 , 00 %   par   année  écoulée   depuis   la   date   de   lancement   du   produit .     À   l’échéance,   si   le   produit   n’a   pas   été   rappelé  précédemment,   l’investisseur   reçoit   un   Coupon   de  40 , 00 %   (soit   4 , 00 %   par   année   écoulée   depuis   la  date   de   lancement   du   produit) .     Le   capital   est   remboursé   dans   sa   totalité   à  l'échéance   ou   en   cas   de   remboursement   anticipé .  NOTE   TAUX   FIXE CALLABLE BONUS  PAIEMENT À MATURITÉ  PRÉSENTATION   CONFIDENTIELLE   │   4  *Source : Bloomberg,   1 3 /03/2026 .  (1) Hors frais et fiscalité applicable au cadre d’investissement  Sauf en cas de défaut de paiement ou faillite de Société Générale.  Format   Titre de créance de droit  français  Émetteur   Société Générale  Garant   Société Générale  (Moody’s : A1 ; S&P : A)*  Maturité   10   ans  Devise   EUR  Protection du Capital   100% à maturité  Coupons   Non Capitalisés  Période d’observation   Annuelle  Fréquence de paiement   À Maturité  Risques   Voir   page 5     MÉCANISME DE REMBOURSEMENT PAR ANTICIPATION  –   À l’issue des années 1 à 9, le produit peut être rappelé par anticipation à la discrétion de la Société Générale, et  après une période de notification, l’investisseur reçoit (1)   :     MÉCANISME DE REMBOURSEMENT À L’ÉCHÉANCE  –   À maturité, si le produit n’a pas été rappelé précédemment, l’investisseur reçoit (1)   :  MÉCANISME   DU   PRODUIT  100% du Capital Initial  Un Coupon de 40,00%,  Soit 4,00% par année écoulée depuis la date de lancement du  produit  100% du Capital Initial  Un Coupon de 5,00%  par année écoulée depuis la date de lancement du produit\n--- PAGE 3 ---\nPRÉSENTATION   CONFIDENTIELLE   │   5  ▪   Ce   produit   comporte   une   protection   totale   du   capital .   Cette   protection   ne   vaut   qu’à   la   date   d’échéance .   La   valeur  du   produit   peut,   pendant   la   durée   de   vie   de   ce   dernier,   être   inférieure   au   montant   de   la   protection   du   capital .   En  conséquence,   l’investisseur   peut   perdre   tout   ou   partie   du   montant   investi   si   le   produit   est   vendu   avant   la   date  d’échéance .  ▪   L'attention   de   l'investisseur   est   attirée   sur   le   fait   qu'à   compter   de   la   8 ème   année,   Société   Générale   n'aura   d'intérêt   à  rappeler   le   produit   qu’en   cas   de   situation   exceptionnelle   de   marché   (notamment   un   environnement   de   taux  négatifs),   le   coupon   bonus   devenant   alors   supérieur   au   coupon   final .  ▪   Dès   que   le   mécanisme   de   remboursement   anticipé   est   déclenché,   l’investisseur   ne   bénéficie   plus   des   coupons   pour  les   périodes   restantes .  ▪   L’investisseur   ne   connaît   pas   à   l’avance   la   durée   exacte   de   l’investissement   qui   peut   varier   de   1   à   10   ans .  ▪   L’investisseur   supporte   un   risque   de   crédit   Société   Générale   et   peut   donc   perdre   son   investissement   en   cas   de   défaut  de   Société   Générale .  ▪   Le   produit   comporte   un   risque   de   réinvestissement .   En   cas   de   remboursement   par   anticipation   du   produit   par  l’Émetteur,   les   conditions   de   taux   d’intérêt   proposées   pour   renouveler   l’investissement   sur   les   mêmes   termes   (en  particulier,   en   gardant   la   date   de   maturité   initiale   pourraient   être   moins   favorables .   Plus   les   taux   d’intérêts  baisseront   par   rapport   au   taux   facial   du   produit,   plus   la   probabilité   de   remboursement   anticipé   du   produit   sera  importante .   Et   plus   la   baisse   de   taux   sera   importante   plus   le   risque   de   réinvestissement   sera   élevé .  ▪   En   cas   de   revente   du   produit   par   l’investisseur   avant   la   date   d'échéance ,   il   est   impossible   de   mesurer   à   l’avance  le   gain   ou   la   perte   possible   de   son   investissement,   le   prix   appliqué   par   l’Emetteur   dépendant   alors   des   données   de  marché   du   jour   pouvant   entraîner   une   dégradation   du   prix   du   produit .  NOTE   TAUX   FIXE CALLABLE BONUS  PAIEMENT À MATURITÉ  RISQUES",
+  "aiParsed": {
+    "name": "NOTE TAUX FIXE CALLABLE BONUS PAIEMENT À MATURITÉ",
+    "type": "taux-fixe",
+    "structureType": "taux_fixe",
+    "emitter": "Société Générale",
+    "guarantor": "Société Générale",
+    "guarantorRating": {
+      "moodys": "A1",
+      "sp": "A"
+    },
+    "isin": null,
+    "underlyings": [],
+    "underlyingType": null,
+    "nUnderlyings": 0,
+    "nPairs": null,
+    "currency": "EUR",
+    "maturity": "10 ans",
+    "maturityYears": 10,
+    "coupon": {
+      "rate": 4,
+      "rateIfCalled": 5,
+      "rateIfMaturity": 4,
+      "type": "fixe",
+      "frequency": null,
+      "trigger": null,
+      "memory": false,
+      "paymentTiming": "maturity"
+    },
+    "participationRate": null,
+    "capitalProtection": {
+      "protected": true,
+      "level": 100,
+      "barrier": null,
+      "barrierCoupon": null,
+      "barrierType": null,
+      "couponFloor": false
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "callable",
+      "trigger": null,
+      "frequency": "annuel",
+      "startSemester": null,
+      "startYear": 1,
+      "stepDown": false,
+      "stepDownPct": null
+    },
+    "decrementPct": null,
+    "actualDividendYield": null,
+    "historicalSimulations": null,
+    "scenarios": {
+      "favorable": null,
+      "median": null,
+      "defavorable": null
+    },
+    "risks": [
+      "Protection du capital uniquement à maturité",
+      "Risque de crédit Société Générale",
+      "Risque de réinvestissement",
+      "Durée d'investissement incertaine (1 à 10 ans)",
+      "Risque de liquidité avant échéance"
+    ],
+    "mechanism": "Note callable avec coupon fixe de 5% par an en cas de rappel anticipé ou 4% par an à maturité",
+    "summary": "Note 10 ans avec coupon fixe callable par l'émetteur dès la 1ère année"
+  },
+  "aiSummary": "## DESCRIPTION\n**Note Taux Fixe Callable Bonus** émise par Société Générale\n- **Durée** : 10 ans maximum\n- **Type** : Produit structuré à taux fixe avec option de rappel\n- **Paiement** : Coupon versé uniquement à maturité ou au rappel\n\n## MÉCANISME\nNote callable avec coupon fixe de 5% par an en cas de rappel anticipé ou 4% par an à maturité. L'émetteur peut exercer son droit de rappel annuellement à partir de la 1ère année.\n\n## RENDEMENT\n- **Si rappel anticipé** : 5% par an\n- **Si détention jusqu'à maturité** : 4% par an\n- **Paiement** : Coupon accumulé versé en une seule fois (à maturité ou au rappel)\n\n## PROTECTION\n- **Protection du capital** : 100% à maturité uniquement\n- **Aucune protection** avant l'échéance finale\n\n## REMBOURSEMENT ANTICIPÉ\n- **Possible** : Oui, à l'initiative de l'émetteur (callable)\n- **Fréquence** : Annuelle dès la 1ère année\n- **Avantage** : Taux bonifié à 5% en cas de rappel\n\n## SCÉNARIOS\nDonnées de performance non disponibles dans la documentation fournie.\n\n## POINTS ATTENTION\n- **Risque de crédit** : Exposition à Société Générale\n- **Protection limitée** : Capital protégé uniquement à maturité (10 ans)\n- **Durée incertaine** : Investissement de 1 à 10 ans selon décision de l'émetteur\n- **Risque de réinvestissement** : En cas de rappel anticipé\n- **Liquidité réduite** : Difficultés de revente avant échéance",
+  "sourceFile": "Produit_1_Note_Taux_Fixe_Callable_Bonus.pdf",
+  "structureType": "taux_fixe",
+  "participationRate": null,
+  "historicalSimulations": null,
+  "guarantorRating": {
+    "moodys": "A1",
+    "sp": "A"
+  },
+  "mechanism": "Note callable avec coupon fixe de 5% par an en cas de rappel anticipé ou 4% par an à maturité",
+  "nPairs": null,
+  "nUnderlyings": null,
+  "decrementPct": null,
+  "actualDividendYield": null,
+  "maturityYears": 10,
+  "aiCategory": "capital-protege",
+  "aiCategoryLabel": "🛡️ Capital Protégé",
+  "aiCategoryColor": "#4CAF50",
+  "aiOpinion": "Produit défensif offrant une protection du capital à 100% avec un coupon fixe de 4% et une possibilité de remboursement anticipé, adapté aux investisseurs prudents dans un environnement de taux bas. L'absence d'informations sur le seuil d'autocall et le sous-jacent rend difficile l'évaluation complète du potentiel de performance et des conditions de sortie anticipée.",
+  "aiAnalyzedAt": "2026-03-27T11:37:03.252Z",
+  "status": "analyzing",
+  "receivedDate": "2026-03-27",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null,
+  "score": {
+    "score": 61,
+    "details": [
+      {
+        "type": "positive",
+        "icon": "✅",
+        "text": "Nouvelle contrepartie — diversification émetteur",
+        "impact": 15,
+        "category": "complementarity"
+      },
+      {
+        "type": "positive",
+        "icon": "🔀",
+        "text": "Faible corrélation moyenne (30%) — diversification",
+        "impact": 10,
+        "category": "complementarity"
+      },
+      {
+        "type": "warning",
+        "icon": "📦",
+        "text": "Même type que 1 produit(s) — 20% du book en \"Autre\"",
+        "impact": 8,
+        "category": "redundancy"
+      },
+      {
+        "type": "info",
+        "icon": "📅",
+        "text": "Maturité similaire (±6 mois) à 2 produit(s)",
+        "impact": 6,
+        "category": "redundancy"
+      }
+    ],
+    "verdict": "🟠 Modéré — apport limité, recouvrements significatifs.",
+    "breakdown": {
+      "redundancy": 14,
+      "complementarity": 25
+    }
+  }
+}
