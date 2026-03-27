@@ -201,62 +201,61 @@
   },
   "envelope": "",
   "grading": {
-    "grade": "C",
-    "score": 54,
+    "grade": "B",
+    "score": 63,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 50,
+        "score": 70,
         "base": 55,
-        "delta": -5,
-        "reasoning": "Rendement: base 55 → -5 = 50 (Malgré le capital protégé, le rendement de 3.82% est faible pour un panier incluant des valeurs très volatiles (NVDA 48%, TSLA 57%) qui limitent la prévisibilité) | Coupon 3.8233333333333337%, protégé"
+        "delta": 15,
+        "reasoning": "Rendement: base 55 → +15 = 70 (Rendement médian historique de 11.47% sur 3 ans est excellent pour un produit à capital garanti, avec participation positive à la dispersion garantissant un coupon ≥0%) | Coupon 3.8233333333333337%, protégé"
       },
       "underlyingQuality": {
-        "score": 70,
+        "score": 75,
         "base": 80,
-        "delta": -10,
-        "reasoning": "Qualité: base 80 → -10 = 70 (3 des 8 sous-jacents (META, NFLX, GOOGL) sont dans le secteur communication évité en régime neutral, et 2 autres (AMZN, TSLA) dans la conso cyclique également évitée) [B/Q 35%] | Worst: Tesla B:54"
+        "delta": -5,
+        "reasoning": "Qualité: base 80 → -5 = 75 (Secteur communication surreprésenté (3/8 SJ) en régime neutral avec évitement du secteur, mais compensé par la haute qualité des entreprises (Buffett moyen 91)) [B/Q 35%] | Worst: Tesla B:54"
       },
       "portfolioFit": {
-        "score": 72,
+        "score": 77,
         "base": 72,
-        "delta": 0,
-        "reasoning": "Fit: base 72"
+        "delta": 5,
+        "reasoning": "Fit: base 72 → +5 = 77 (Excellente diversification pour capturer la dispersion avec mix de volatilités (Tesla 57% vs Apple 25%), idéal pour ce type de structure)"
       },
       "riskPremium": {
-        "score": 27,
+        "score": 32,
         "base": 32,
-        "delta": -5,
-        "reasoning": "Prime: base 32 → -5 = 27 (Structure très simple sans autocall ni barrière visible, le rendement faible ne compense pas l'immobilisation sur 3 ans) | 3.8233333333333337% vs CAT 2.5% (spread 1.3%)"
+        "delta": 0,
+        "reasoning": "Prime: base 32 | 3.8233333333333337% vs CAT 2.5% (spread 1.3%)"
       }
     },
-    "verdict": "Produit décevant offrant seulement 3.82% annualisés sur 3 ans avec un panier surexposé aux secteurs évités (62.5% des positions). La protection du capital est le seul atout face à des volatilités extrêmes (NVDA 48%, TSLA 57%) et des betas élevés. En régime macro neutre avec 5 sous-jacents dans des secteurs défavorisés, le couple rendement/risque est peu attractif pour une immobilisation de 100k€ sur 3 ans.",
+    "verdict": "Produit dispersion attractif offrant un rendement médian de 11.47% (3.8%/an) avec capital 100% garanti à 3 ans. La structure bénéficie de la forte dispersion entre les méga-caps tech (vol Tesla 57% vs Microsoft 23%), avec une participation de 7% sur les écarts de performance. En régime macro neutre, malgré la surexposition au secteur communication évité (38% du panier), la qualité exceptionnelle des sous-jacents (Buffett moyen 91) et l'absence de risque en capital en font une opportunité solide pour diversifier avec un profil rendement/risque asymétrique favorable.",
     "keyRisks": [
-      "Rendement réel négatif si inflation >3.82%",
-      "Surexposition sectorielle avec 62.5% dans les secteurs évités",
-      "Coût d'opportunité élevé vs obligations d'État à 3.5%"
+      "Rendement limité si les 8 actions performent de manière similaire (faible dispersion)",
+      "Complexité du calcul peut rendre difficile le suivi de la performance"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 3.82,
-        "return_eur": 11460,
-        "probability": 0.3,
+        "return_pct": 21,
+        "return_eur": 21000,
+        "probability": 0.25,
         "duration_years": 3
       },
       "base": {
-        "return_pct": 3.82,
-        "return_eur": 11460,
+        "return_pct": 11,
+        "return_eur": 11000,
         "probability": 0.4,
         "duration_years": 3
       },
       "stress": {
-        "return_pct": 0,
-        "return_eur": 0,
-        "probability": 0.25,
+        "return_pct": 3,
+        "return_eur": 3000,
+        "probability": 0.3,
         "duration_years": 3
       },
       "worst": {
@@ -267,8 +266,8 @@
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-27T10:13:30.494Z",
-      "durationMs": 21990,
+      "gradedAt": "2026-03-27T10:17:31.068Z",
+      "durationMs": 23264,
       "aiUsed": true,
       "version": "4.3",
       "productType": "standard",
@@ -288,10 +287,10 @@
       "baseScore": 59,
       "baseGrade": "C",
       "adjustments": {
-        "p1": -5,
-        "p2": -10,
-        "p3": 0,
-        "p4": -5
+        "p1": 15,
+        "p2": -5,
+        "p3": 5,
+        "p4": 0
       },
       "stockData": [
         {
