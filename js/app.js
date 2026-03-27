@@ -1,7 +1,6 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Main Application (V2.1 — structureType + V7 fields)
-// V2.1: handlePDFUpload copies structureType, participationRate,
-//        historicalSimulations, guarantorRating, mechanism from parser
+// STRUCTBOARD — Main Application V2.2
+// V2.2: rawText 10K + décrément + stepDown fields from parser
 // ═══════════════════════════════════════════════════════════════
 
 class StructBoard {
@@ -19,7 +18,6 @@ class StructBoard {
     try {
       const portfolio = await github.readFile(`${CONFIG.DATA_PATH}/portfolio.json`);
       this.state.portfolio = portfolio || [];
-
       const proposals = {};
       for (const bank of BANKS) {
         const bankData = await github.readFile(`${CONFIG.DATA_PATH}/banks/${bank.id}/index.json`);
@@ -28,29 +26,20 @@ class StructBoard {
           for (const summary of bankData.products) {
             try {
               const fullProduct = await github.readFile(`${CONFIG.DATA_PATH}/banks/${bank.id}/products/${summary.id}.json`);
-              if (fullProduct && fullProduct.id) {
-                fullProducts.push(fullProduct);
-              } else {
-                console.warn(`Fiche introuvable pour ${summary.id}, utilisation du résumé`);
-                fullProducts.push({ ...summary, bankId: bank.id });
-              }
-            } catch (e) {
-              console.warn(`Erreur chargement produit ${summary.id}:`, e);
-              fullProducts.push({ ...summary, bankId: bank.id });
-            }
+              if (fullProduct && fullProduct.id) fullProducts.push(fullProduct);
+              else fullProducts.push({ ...summary, bankId: bank.id });
+            } catch (e) { fullProducts.push({ ...summary, bankId: bank.id }); }
           }
           if (fullProducts.length > 0) proposals[bank.id] = fullProducts;
         }
       }
-
       await catManager.load();
-
       this.setState({ proposals, loading: false, initialized: true });
       this.render();
     } catch (e) {
       console.error('Erreur initialisation:', e);
       this.setState({ loading: false });
-      showToast('Erreur de chargement des données', 'error');
+      showToast('Erreur de chargement des donn\u00e9es', 'error');
     }
   }
 
@@ -60,14 +49,14 @@ class StructBoard {
     await github.writeFile(`${CONFIG.DATA_PATH}/portfolio.json`, this.state.portfolio, `[StructBoard] Ajout: ${product.name || product.type}`);
     if (product.bankId) await this._saveProductFile(product.bankId, item);
     this.setState({ portfolio: [...this.state.portfolio] });
-    showToast('Produit ajouté au portefeuille', 'success');
+    showToast('Produit ajout\u00e9 au portefeuille', 'success');
   }
 
   async removeFromPortfolio(productId) {
     this.state.portfolio = this.state.portfolio.filter(p => p.id !== productId);
     await github.writeFile(`${CONFIG.DATA_PATH}/portfolio.json`, this.state.portfolio, `[StructBoard] Retrait: ${productId}`);
     this.setState({ portfolio: [...this.state.portfolio] });
-    showToast('Produit retiré', 'success');
+    showToast('Produit retir\u00e9', 'success');
   }
 
   async addProposal(bankId, product) {
@@ -78,7 +67,7 @@ class StructBoard {
     await this._saveBankIndex(bankId);
     await this._saveProductFile(bankId, proposal);
     this.setState({ proposals: { ...this.state.proposals } });
-    showToast('Proposition enregistrée', 'success');
+    showToast('Proposition enregistr\u00e9e', 'success');
     return proposal;
   }
 
@@ -99,7 +88,7 @@ class StructBoard {
     if (this.state.proposals[bankId].length === 0) delete this.state.proposals[bankId];
     await this._saveBankIndex(bankId);
     this.setState({ proposals: { ...this.state.proposals } });
-    showToast('Proposition supprimée', 'success');
+    showToast('Proposition supprim\u00e9e', 'success');
   }
 
   async handlePDFUpload(file, bankId) {
@@ -110,7 +99,7 @@ class StructBoard {
       if (!rawText || rawText.trim().length < 50) throw new Error('Le PDF semble vide ou illisible');
       showToast('Analyse IA de la brochure...', 'info');
       const parsed = await aiParser.parseBrochure(rawText);
-      showToast('Génération du résumé...', 'info');
+      showToast('G\u00e9n\u00e9ration du r\u00e9sum\u00e9...', 'info');
       const summary = await aiParser.generateSummary(parsed);
       const product = {
         id: this._uid(), name: parsed.name || file.name.replace('.pdf', ''), bankId,
@@ -119,10 +108,11 @@ class StructBoard {
         maturity: parsed.maturity || null, maturityDate: parsed.maturityDate || null, strikeDate: parsed.strikeDate || null,
         coupon: parsed.coupon || {}, capitalProtection: parsed.capitalProtection || {},
         earlyRedemption: parsed.earlyRedemption || {}, scenarios: parsed.scenarios || {},
-        risks: parsed.risks || [], rawText: rawText.substring(0, 5000),
+        risks: parsed.risks || [],
+        // V2.2: rawText increased to 10K for d\u00e9cr\u00e9ment detection
+        rawText: rawText.substring(0, 10000),
         aiParsed: parsed, aiSummary: summary, sourceFile: file.name,
-
-        // ═══ V2.1: NEW FIELDS from PDF parser V7 ═══
+        // V2.1: Structure fields
         structureType: parsed.structureType || '',
         participationRate: parsed.participationRate || null,
         historicalSimulations: parsed.historicalSimulations || null,
@@ -130,15 +120,21 @@ class StructBoard {
         mechanism: parsed.mechanism || null,
         nPairs: parsed.nPairs || null,
         nUnderlyings: parsed.nUnderlyings || null,
+        // V2.2: D\u00e9cr\u00e9ment + step-down fields
+        decrementPct: parsed.decrementPct || null,
+        actualDividendYield: parsed.actualDividendYield || null,
       };
 
-      // V2.1: If structureType detected, log it
+      // Log detections
       if (product.structureType) {
-        console.log('[handlePDFUpload] Detected structureType: ' + product.structureType);
-        showToast('Structure détectée: ' + (typeof getStructureTypeLabel === 'function' ? getStructureTypeLabel(product.structureType) : product.structureType), 'success');
+        console.log('[handlePDFUpload] structureType: ' + product.structureType);
+        showToast('Structure: ' + (typeof getStructureTypeLabel === 'function' ? getStructureTypeLabel(product.structureType) : product.structureType), 'success');
+      }
+      if (product.decrementPct) {
+        console.log('[handlePDFUpload] D\u00e9cr\u00e9ment: ' + product.decrementPct + '% (div r\u00e9el: ' + (product.actualDividendYield || '?') + '%)');
+        showToast('\u26a0 D\u00e9cr\u00e9ment d\u00e9tect\u00e9: ' + product.decrementPct + '%/an', 'info');
       }
 
-      // V2.1: If maturityYears not set, extract from maturity string
       if (parsed.maturityYears) product.maturityYears = parsed.maturityYears;
       else if (parsed.maturity) {
         const ym = parsed.maturity.match(/(\d+)/);
@@ -174,13 +170,8 @@ class StructBoard {
     const proposals = this.state.proposals[bankId] || [];
     const bankConfig = BANKS.find(b => b.id === bankId);
     const index = {
-      bankId,
-      bankName: bankConfig?.name || bankId,
-      lastUpdated: new Date().toISOString(),
-      products: proposals.map(p => ({
-        id: p.id, name: p.name, type: p.type, status: p.status,
-        score: p.score?.score || null, receivedDate: p.receivedDate,
-      })),
+      bankId, bankName: bankConfig?.name || bankId, lastUpdated: new Date().toISOString(),
+      products: proposals.map(p => ({ id: p.id, name: p.name, type: p.type, status: p.status, score: p.score?.score || null, receivedDate: p.receivedDate })),
     };
     await github.writeFile(`${CONFIG.DATA_PATH}/banks/${bankId}/index.json`, index, `[StructBoard] Update ${bankConfig?.name || bankId}`);
   }
@@ -219,8 +210,8 @@ function showToast(message, type = 'info') {
   setTimeout(() => { t.classList.remove('visible'); setTimeout(() => t.remove(), 300); }, 3000);
 }
 
-function formatNumber(n) { if (!n && n !== 0) return '—'; return Number(n).toLocaleString('fr-FR'); }
-function formatPct(n) { if (!n && n !== 0) return '—'; return Number(n).toFixed(2).replace('.', ',') + '%'; }
-function formatDate(d) { if (!d) return '—'; return new Date(d).toLocaleDateString('fr-FR'); }
+function formatNumber(n) { if (!n && n !== 0) return '\u2014'; return Number(n).toLocaleString('fr-FR'); }
+function formatPct(n) { if (!n && n !== 0) return '\u2014'; return Number(n).toFixed(2).replace('.', ',') + '%'; }
+function formatDate(d) { if (!d) return '\u2014'; return new Date(d).toLocaleDateString('fr-FR'); }
 
 const app = new StructBoard();
