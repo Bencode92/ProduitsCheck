@@ -158,32 +158,31 @@
         "score": 69,
         "base": 79,
         "delta": -10,
-        "reasoning": "Rendement: base 79 → -10 = 69 (Barrière à 50% avec vol à 38.93% implique un risque élevé de suspension des coupons en cas de correction de l'or) | Coupon 9% (4.5×2), barrière 50% | Mat espérée: ~1.1a (max 5a, prob mat: 0%)"
+        "reasoning": "Rendement: base 79 → -10 = 69 (Volatilité élevée (39%) et drawdown important (-31%) augmentent le risque de franchissement de la barrière malgré le coussin de 50%) | Coupon 9% (4.5×2), barrière 50% | Mat espérée: ~1.1a (max 5a, prob mat: 0%)"
       },
       "underlyingQuality": {
         "score": 64,
         "base": 69,
         "delta": -5,
-        "reasoning": "Qualité: base 69 → -5 = 64 (Indice sectoriel mono-thématique sur les minières aurifères avec beta faible (0.55) mais forte volatilité intrinsèque) [vol/DD 30%] | Worst: Indice Solactive GDX EUR AR 5% B:50"
+        "reasoning": "Qualité: base 69 → -5 = 64 (Secteur minier aurifère avec beta défensif (0.55) mais forte volatilité intrinsèque et performance YTD négative (-3.9%) en régime neutral) [vol/DD 30%] | Worst: Indice Solactive GDX EUR AR 5% B:50"
       },
       "portfolioFit": {
-        "score": 80,
+        "score": 85,
         "base": 80,
-        "delta": 0,
-        "reasoning": "Fit: base 80"
+        "delta": 5,
+        "reasoning": "Fit: base 80 → +5 = 85 (L'or et les minières aurifères offrent une excellente diversification et protection contre l'inflation dans un portefeuille équilibré)"
       },
       "riskPremium": {
-        "score": 87,
+        "score": 82,
         "base": 82,
-        "delta": 5,
-        "reasoning": "Prime: base 82 → +5 = 87 (Coupon de 9% attractif pour une volatilité de 38.93%, spread favorable vs risque) | 9% vs CAT 2.5% (spread 6.5%)"
+        "delta": 0,
+        "reasoning": "Prime: base 82 | 9% vs CAT 2.5% (spread 6.5%)"
       }
     },
-    "verdict": "Produit à rendement élevé (9% annualisé) sur un indice de minières aurifères très volatil (38.93%). La barrière à 50% offre une marge de sécurité correcte mais le drawdown historique de -30.84% montre la possibilité de chutes importantes. En régime macro neutre, l'or peut servir de valeur refuge mais les minières restent sensibles aux coûts opérationnels et aux fluctuations du métal.",
+    "verdict": "Produit offrant un rendement attractif de 9% annuel sur un sous-jacent défensif (beta 0.55) mais très volatil (39%). La barrière à 50% offre une protection raisonnable mais le drawdown historique de -31% et la performance YTD négative (-3.9%) appellent à la prudence. L'exposition aux minières aurifères apporte une diversification intéressante en régime neutral, avec un potentiel d'autocall à 45% sur 1.1 an.",
     "keyRisks": [
-      "Volatilité extrême de 38.93% pouvant entraîner des suspensions fréquentes de coupon",
-      "Exposition mono-sectorielle aux minières d'or sans diversification",
-      "Risque de perte en capital si l'indice chute de plus de 50%"
+      "Volatilité extrême du secteur minier aurifère pouvant entraîner des mouvements brusques",
+      "Sensibilité inverse aux taux d'intérêt et au dollar américain"
     ],
     "negotiationPoints": [],
     "scenarios": {
@@ -194,10 +193,10 @@
         "duration_years": 1.1
       },
       "base": {
-        "return_pct": 13.5,
-        "return_eur": 13500,
+        "return_pct": 6,
+        "return_eur": 12000,
         "probability": 0.35,
-        "duration_years": 3
+        "duration_years": 2
       },
       "stress": {
         "return_pct": 0,
@@ -206,15 +205,15 @@
         "duration_years": 5
       },
       "worst": {
-        "return_pct": -20,
-        "return_eur": -20000,
+        "return_pct": -25,
+        "return_eur": -25000,
         "probability": 0.1,
         "duration_years": 5
       }
     },
     "metadata": {
-      "gradedAt": "2026-03-27T10:25:29.390Z",
-      "durationMs": 16825,
+      "gradedAt": "2026-03-27T10:31:44.386Z",
+      "durationMs": 18473,
       "aiUsed": true,
       "version": "4.3",
       "productType": "standard",
@@ -237,8 +236,8 @@
       "adjustments": {
         "p1": -10,
         "p2": -5,
-        "p3": 0,
-        "p4": 5
+        "p3": 5,
+        "p4": 0
       },
       "stockData": [
         {
