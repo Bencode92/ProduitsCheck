@@ -187,30 +187,30 @@
   },
   "envelope": "",
   "grading": {
-    "grade": "C",
-    "score": 51,
+    "grade": "D",
+    "score": 43,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 39,
+        "score": 29,
         "base": 39,
-        "delta": 0,
-        "reasoning": "Rendement: base 39 | Coupon 4.85%, barrière 40% | Barr.coupon 80% | Mat espérée: ~1.6a (prob mat: 0%)"
+        "delta": -10,
+        "reasoning": "Rendement: base 39 → -10 = 29 (Barrière coupon à 80% très contraignante avec volatilité de 19.14% et DD -25.7%, réduisant drastiquement la probabilité de toucher les coupons.) | Coupon 4.85%, barrière 40% | Barr.coupon 80% | Mat espérée: ~1.6a (prob mat: 0%)"
       },
       "underlyingQuality": {
-        "score": 90,
+        "score": 75,
         "base": 90,
-        "delta": 0,
-        "reasoning": "Qualité: base 90 [vol/DD 30%] | Worst: Euro Stoxx Banks B:76"
+        "delta": -15,
+        "reasoning": "Qualité: base 90 → -15 = 75 (Secteur financier explicitement évité en stagflation, banques européennes particulièrement vulnérables aux marges d'intérêt comprimées et risques de crédit.) [vol/DD 30%] | Worst: Euro Stoxx Banks B:76"
       },
       "portfolioFit": {
-        "score": 80,
+        "score": 75,
         "base": 80,
-        "delta": 0,
-        "reasoning": "Fit: base 80"
+        "delta": -5,
+        "reasoning": "Fit: base 80 → -5 = 75 (Exposition concentrée sur un secteur défavorisé sans diversification, inadapté au régime économique actuel.)"
       },
       "riskPremium": {
         "score": 4,
@@ -219,22 +219,50 @@
         "reasoning": "Prime: base 4 | 4.85% vs CAT 2.5% (spread 2.3%)"
       }
     },
-    "verdict": "Score 51/100 (base 51).",
-    "keyRisks": [],
+    "verdict": "Produit fortement déconseillé avec score ajusté de 21/100. Le secteur bancaire européen est explicitement évité en stagflation, avec une barrière coupon restrictive à 80% qui rend improbable le versement régulier des 4.85% annuels. La volatilité de 19.14% et le drawdown de -25.7% créent un profil risque/rendement défavorable, d'autant plus que la barrière capital à 40% offre peu de protection dans ce contexte macro hostile.",
+    "keyRisks": [
+      "Exposition sectorielle bancaire inadaptée au régime stagflationniste actuel",
+      "Barrière coupon à 80% trop élevée avec forte volatilité sous-jacente"
+    ],
     "negotiationPoints": [],
-    "scenarios": null,
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 4.85,
+        "return_eur": 4850,
+        "probability": 0.15,
+        "duration_years": 1
+      },
+      "base": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.35,
+        "duration_years": 5
+      },
+      "stress": {
+        "return_pct": -2,
+        "return_eur": -2000,
+        "probability": 0.35,
+        "duration_years": 5
+      },
+      "worst": {
+        "return_pct": -25,
+        "return_eur": -25000,
+        "probability": 0.15,
+        "duration_years": 5
+      }
+    },
     "confidenceInterval": {
-      "low": 43,
-      "high": 59,
+      "low": 35,
+      "high": 51,
       "halfWidth": 8,
       "gradeStable": false,
       "gradeRange": "D-C",
-      "label": "C [43-59]"
+      "label": "D [35-51]"
     },
     "metadata": {
-      "gradedAt": "2026-03-27T17:32:51.643Z",
-      "durationMs": 14629,
-      "aiUsed": false,
+      "gradedAt": "2026-03-28T14:25:42.985Z",
+      "durationMs": 17174,
+      "aiUsed": true,
       "version": "5.2",
       "productType": "autocall",
       "marketDataAvailable": true,
@@ -255,16 +283,21 @@
       "maxBeta": 0.96,
       "baseScore": 51,
       "baseGrade": "C",
-      "adjustments": null,
+      "adjustments": {
+        "p1": -10,
+        "p2": -15,
+        "p3": -5,
+        "p4": 0
+      },
       "barrier_sigma": 2.14,
       "barrier_sigma_label": "Confortable",
       "barrier_sigma_danger": false,
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 43,
-      "ci_high": 59,
-      "ci_label": "C [43-59]",
+      "ci_low": 35,
+      "ci_high": 51,
+      "ci_label": "D [35-51]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "issuer_cds_proxy": 55,
@@ -276,8 +309,8 @@
           "name": "Euro Stoxx Banks",
           "ticker": "ENX",
           "sector": "Finance",
-          "perf_ytd": 4.38,
-          "perf_1y": -0.07,
+          "perf_ytd": 3.91,
+          "perf_1y": -2.35,
           "volatility_3y": 19.14,
           "max_drawdown_3y": 25.7,
           "buffett_score": null,
