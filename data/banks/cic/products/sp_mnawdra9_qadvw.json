@@ -183,7 +183,7 @@
   },
   "grading": {
     "grade": "D",
-    "score": 41,
+    "score": 44,
     "killCriteria": {
       "triggered": false,
       "reasons": []
@@ -193,71 +193,71 @@
         "score": 21,
         "base": 31,
         "delta": -10,
-        "reasoning": "Rendement: base 31 → -10 = 21 (VIX à 22 et régime stagflation défavorable aux autocalls, probabilité de rappel anticipé fortement réduite) | Coupon 4.85%, barrière 60% | Barr.coupon 80% | Mat espérée: ~1.6a (prob mat: 0%)"
+        "reasoning": "Rendement: base 31 → -10 = 21 (En stagflation avec VIX à 22, la probabilité de toucher le coupon à 80% baisse significativement pour un secteur bancaire cyclique) | Coupon 4.85%, barrière 60% | Barr.coupon 80% | Mat espérée: ~1.6a (prob mat: 0%)"
       },
       "underlyingQuality": {
         "score": 75,
         "base": 90,
         "delta": -15,
-        "reasoning": "Qualité: base 90 → -15 = 75 (Secteur bancaire très vulnérable en stagflation (marges comprimées, crédit douteux), beta proche de 1) | Worst: Euro Stoxx Banks B:76"
+        "reasoning": "Qualité: base 90 → -15 = 75 (Secteur bancaire très vulnérable en stagflation (marges nettes comprimées, risque crédit), beta proche de 1 amplifie la volatilité) | Worst: Euro Stoxx Banks B:76"
       },
       "portfolioFit": {
         "score": 75,
         "base": 80,
         "delta": -5,
-        "reasoning": "Fit: base 80 → -5 = 75 (Exposition sectorielle concentrée risquée dans ce contexte macro défavorable)"
+        "reasoning": "Fit: base 80 → -5 = 75 (Surexposition sectorielle risquée en période de stagflation, diversification insuffisante pour un portefeuille équilibré)"
       },
       "riskPremium": {
-        "score": 4,
+        "score": 14,
         "base": 4,
-        "delta": 0,
-        "reasoning": "Prime: base 4 | 4.85% vs CAT 2.5% (spread 2.3%)"
+        "delta": 10,
+        "reasoning": "Prime: base 4 → +10 = 14 (Spread faible justifié par le risque élevé du secteur bancaire en stagflation, valorisation plus transparente) | 4.85% vs CAT 2.5% (spread 2.3%)"
       }
     },
-    "verdict": "Ce produit est DÉCONSEILLÉ avec un score final de 14/100. Le secteur bancaire européen est particulièrement vulnérable en stagflation avec des marges nettes d'intérêts comprimées et un risque de crédit élevé. Le coupon de 4.85% ne compense pas le risque significatif de perte en capital (barrière à 60%) dans un contexte de VIX élevé à 22 et de volatilité sectorielle de 19.14%.",
+    "verdict": "Produit très risqué avec score final de 34/100 en contexte de stagflation hostile aux banques. Le coupon de 4.85% ne compense pas l'exposition à un secteur vulnérable (drawdown 25.7%, volatilité 19.14%) avec barrière capitale à seulement 60%. La probabilité de rappel anticipé est quasi-nulle et le risque de perte en capital est élevé dans un environnement de taux élevés et croissance faible.",
     "keyRisks": [
-      "Exposition concentrée au secteur bancaire européen en période de stagflation",
-      "Risque élevé de franchissement de la barrière capitale à 60% (DD actuel -25.7%)",
-      "Faible probabilité d'autocall avec VIX à 22 et contexte macro dégradé"
+      "Secteur bancaire très exposé à la stagflation (compression des marges, hausse du coût du risque)",
+      "Barrière capitale à 60% insuffisante avec volatilité de 19.14% et drawdown historique de 25.7%",
+      "Concentration sectorielle unique sans diversification en période macro défavorable"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 4.85,
         "return_eur": 4850,
-        "probability": 0.15,
+        "probability": 0.2,
         "duration_years": 1
       },
       "base": {
-        "return_pct": 2.42,
-        "return_eur": 7275,
+        "return_pct": 3.5,
+        "return_eur": 10500,
         "probability": 0.3,
         "duration_years": 3
       },
       "stress": {
-        "return_pct": -10,
-        "return_eur": -10000,
-        "probability": 0.35,
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.3,
         "duration_years": 5
       },
       "worst": {
-        "return_pct": -25,
-        "return_eur": -25000,
+        "return_pct": -15,
+        "return_eur": -15000,
         "probability": 0.2,
         "duration_years": 5
       }
     },
     "confidenceInterval": {
-      "low": 33,
-      "high": 49,
+      "low": 36,
+      "high": 52,
       "halfWidth": 8,
       "gradeStable": false,
       "gradeRange": "D-C",
-      "label": "D [33-49]"
+      "label": "D [36-52]"
     },
     "metadata": {
-      "gradedAt": "2026-03-28T22:35:33.200Z",
-      "durationMs": 16682,
+      "gradedAt": "2026-03-28T22:41:52.320Z",
+      "durationMs": 18339,
       "aiUsed": true,
       "version": "5.2",
       "productType": "autocall",
@@ -283,7 +283,7 @@
         "p1": -10,
         "p2": -15,
         "p3": -5,
-        "p4": 0
+        "p4": 10
       },
       "barrier_sigma": 1.19,
       "barrier_sigma_label": "Attention",
@@ -291,9 +291,9 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 33,
-      "ci_high": 49,
-      "ci_label": "D [33-49]",
+      "ci_low": 36,
+      "ci_high": 52,
+      "ci_label": "D [36-52]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
