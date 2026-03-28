@@ -1,8 +1,6 @@
-// ═══════════════════════════════════════════════════════════════════════════════
-// STRUCTBOARD — Grader Frequency Fix v3 (hotfix)
+// ═══ STRUCTBOARD — Grader Frequency Fix v3 ═══
 // Root cause: p.coupon=4.85 (number) shadows ai.coupon={rate:4.85, frequency:"semestriel"}
-// Fix: BEFORE grading, ensure product.coupon is an object with frequency merged from all sources
-// ═══════════════════════════════════════════════════════════════════════════════
+// This file MUST load right after proposal-grader-v5.js
 (function() {
     var _applied = false;
     var _check = setInterval(function() {
@@ -17,65 +15,61 @@
             var p = product || {};
             var ai = p.aiParsed || {};
 
-            // --- FIX 1: If p.coupon is a primitive, convert to object ---
+            // FIX 1: Convert primitive coupon to object
             if (typeof p.coupon === 'number' || typeof p.coupon === 'string') {
-                var oldRate = parseFloat(p.coupon) || 0;
-                p.coupon = { rate: oldRate };
-                console.log('[freq-fix v3] Converted primitive coupon ' + oldRate + ' to object');
+                p.coupon = { rate: parseFloat(p.coupon) || 0 };
             }
 
-            // --- FIX 2: Merge frequency from ALL possible sources ---
+            // FIX 2: Merge frequency from ALL sources into p.coupon
             var co = p.coupon;
             if (co && typeof co === 'object' && !co.frequency && !co.frequence) {
                 var freq = null;
-                // Source 1: ai.coupon (AI parsed coupon object)
-                var aiCo = ai.coupon;
-                if (aiCo && typeof aiCo === 'object') {
-                    freq = aiCo.frequency || aiCo.frequence || null;
+
+                // Source A: ai.coupon (most reliable — AI parsed with frequency)
+                if (!freq && ai.coupon && typeof ai.coupon === 'object') {
+                    freq = ai.coupon.frequency || ai.coupon.frequence || null;
                 }
-                // Source 2: p.earlyRedemption
-                if (!freq && p.earlyRedemption) {
-                    freq = p.earlyRedemption.frequency || p.earlyRedemption.frequence || null;
-                }
-                // Source 3: ai.earlyRedemption
-                if (!freq && ai.earlyRedemption) {
-                    freq = ai.earlyRedemption.frequency || ai.earlyRedemption.frequence || null;
-                }
-                // Source 4: product name regex
+                // Source B: earlyRedemption (autocall frequency = coupon frequency)
                 if (!freq) {
-                    var name = (p.name || '').toLowerCase();
-                    if (/semestriel/i.test(name)) freq = 'semestriel';
-                    else if (/trimestriel/i.test(name)) freq = 'trimestriel';
-                    else if (/mensuel/i.test(name)) freq = 'mensuel';
+                    var er = p.earlyRedemption || ai.earlyRedemption || {};
+                    freq = er.frequency || er.frequence || null;
                 }
+                // Source C: product name
+                if (!freq) {
+                    var nm = (p.name || ai.name || '').toLowerCase();
+                    if (/semestriel/i.test(nm)) freq = 'semestriel';
+                    else if (/trimestriel/i.test(nm)) freq = 'trimestriel';
+                    else if (/mensuel/i.test(nm)) freq = 'mensuel';
+                }
+                // Source D: rawText from PDF
+                if (!freq && p.rawText) {
+                    var rt = p.rawText.toLowerCase();
+                    if (/coupon[\s\S]{0,40}semestriel/i.test(rt) || /semestriel[\s\S]{0,40}coupon/i.test(rt)) freq = 'semestriel';
+                    else if (/coupon[\s\S]{0,40}trimestriel/i.test(rt)) freq = 'trimestriel';
+                }
+
                 if (freq) {
-                    var f = (typeof freq === 'string') ? freq.toLowerCase().trim() : '';
+                    var f = String(freq).toLowerCase().trim();
                     if (f && typeof FREQUENCY_MULTIPLIERS !== 'undefined' && FREQUENCY_MULTIPLIERS[f]) {
                         co.frequency = f;
                         p.coupon = co;
-                        console.log('[freq-fix v3] Coupon frequency set to: ' + f + ' (mult=' + FREQUENCY_MULTIPLIERS[f] + ')');
+                        console.log('[freq-fix v3] Frequency set: ' + f + ' (x' + FREQUENCY_MULTIPLIERS[f] + ')');
                     }
                 }
             }
 
-            // --- FIX 3: Also merge other coupon properties from ai.coupon ---
+            // FIX 3: Merge other properties from ai.coupon
             if (co && typeof co === 'object' && ai.coupon && typeof ai.coupon === 'object') {
                 if (!co.type && ai.coupon.type) co.type = ai.coupon.type;
-                if (!co.memory && !co.memoire && (ai.coupon.memory || ai.coupon.memoire)) co.memory = true;
+                if (!co.memory && (ai.coupon.memory || ai.coupon.memoire)) co.memory = true;
                 if (!co.paymentTiming && ai.coupon.paymentTiming) co.paymentTiming = ai.coupon.paymentTiming;
             }
 
-            // Call original normalize with the fixed product
             return _origNormalize(product);
         };
 
-        // Update exports
-        if (window.ProposalGrader) {
-            window.ProposalGrader.normalize = _graderNormalize;
-        }
-
-        console.log('[StructBoard] grader-freq-fix v3 applied — coupon frequency from all sources');
+        if (window.ProposalGrader) window.ProposalGrader.normalize = _graderNormalize;
+        console.log('[StructBoard] grader-freq-fix v3 loaded');
     }, 80);
-
     setTimeout(function() { clearInterval(_check); }, 10000);
 })();
