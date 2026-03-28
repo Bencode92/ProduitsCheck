@@ -193,19 +193,19 @@
         "score": 16,
         "base": 26,
         "delta": -10,
-        "reasoning": "Rendement: base 26 → -10 = 16 (Avec VIX=22 et vol=19.14%, la probabilité réelle de toucher la barrière 80% augmente significativement, réduisant l'espérance de coupon) | Coupon 4.85%, barrière 60% | Barr.coupon 80% | Mat espérée: ~1.6a (prob mat: 0%)"
+        "reasoning": "Rendement: base 26 → -10 = 16 (Barrière coupon à 80% vulnérable en régime stagflatoire avec VIX à 22 et secteur bancaire cyclique) | Coupon 4.85%, barrière 60% | Barr.coupon 80% | Mat espérée: ~1.6a (prob mat: 0%)"
       },
       "underlyingQuality": {
         "score": 75,
         "base": 90,
         "delta": -15,
-        "reasoning": "Qualité: base 90 → -15 = 75 (Secteur bancaire très sensible en stagflation (beta=0.96), avec risque de récession et hausse des défauts de crédit) | Worst: Euro Stoxx Banks B:76"
+        "reasoning": "Qualité: base 90 → -15 = 75 (Secteur bancaire très exposé à la stagflation (marge nette sous pression, risque crédit), beta proche de 1 amplifie la volatilité) | Worst: Euro Stoxx Banks B:76"
       },
       "portfolioFit": {
         "score": 75,
         "base": 80,
         "delta": -5,
-        "reasoning": "Fit: base 80 → -5 = 75 (Surexposition sectorielle risquée en contexte stagflationniste où la diversification est cruciale)"
+        "reasoning": "Fit: base 80 → -5 = 75 (Concentration sectorielle pure sur les banques inadaptée en stagflation, manque de diversification critique)"
       },
       "riskPremium": {
         "score": 4,
@@ -214,11 +214,11 @@
         "reasoning": "Prime: base 4 | 4.85% vs CAT 2.5% (spread 2.3%)"
       }
     },
-    "verdict": "Produit très risqué avec score final de 27 (D) dans un contexte de stagflation défavorable aux banques. Le coupon de 4.85% ne compense pas l'exposition à un secteur cyclique avec DD=25.7% et une barrière coupon élevée à 80%. La maturité espérée de 1.6 an semble optimiste avec VIX=22, augmentant le risque de blocage prolongé sans coupon.",
+    "verdict": "Produit inadapté au contexte de stagflation avec un coupon de 4.85% insuffisant pour compenser l'exposition au secteur bancaire européen, particulièrement vulnérable. La barrière coupon à 80% offre peu de protection avec un VIX à 22 et une volatilité sectorielle de 19.14%. L'espérance de maturité à 1.6 an semble optimiste vu le drawdown actuel de -25.7% et les perspectives macroéconomiques défavorables.",
     "keyRisks": [
-      "Secteur bancaire vulnérable en stagflation avec risque de crise du crédit",
-      "Barrière coupon à 80% facilement franchissable avec vol=19.14%",
-      "Risque de perte en capital significatif si barrière 60% touchée"
+      "Secteur bancaire très exposé à la stagflation (compression des marges, hausse du coût du risque)",
+      "Barrière coupon à 80% facilement franchissable avec volatilité de 19.14% et VIX élevé",
+      "Concentration mono-sectorielle sans diversification face aux risques systémiques"
     ],
     "negotiationPoints": [],
     "scenarios": {
@@ -229,14 +229,14 @@
         "duration_years": 1
       },
       "base": {
-        "return_pct": 2.42,
-        "return_eur": 4850,
-        "probability": 0.35,
-        "duration_years": 2
-      },
-      "stress": {
         "return_pct": 0,
         "return_eur": 0,
+        "probability": 0.35,
+        "duration_years": 3
+      },
+      "stress": {
+        "return_pct": -15,
+        "return_eur": -15000,
         "probability": 0.3,
         "duration_years": 5
       },
@@ -256,8 +256,8 @@
       "label": "D [32-48]"
     },
     "metadata": {
-      "gradedAt": "2026-03-28T23:41:12.371Z",
-      "durationMs": 18190,
+      "gradedAt": "2026-03-28T23:49:07.470Z",
+      "durationMs": 17323,
       "aiUsed": true,
       "version": "5.2",
       "productType": "autocall",
