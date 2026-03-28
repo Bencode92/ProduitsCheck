@@ -180,5 +180,139 @@
       "redundancy": 24,
       "complementarity": 25
     }
+  },
+  "grading": {
+    "grade": "D",
+    "score": 40,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 16,
+        "base": 26,
+        "delta": -10,
+        "reasoning": "Rendement: base 26 → -10 = 16 (Avec VIX=22 et vol=19.14%, la probabilité réelle de toucher la barrière 80% augmente significativement, réduisant l'espérance de coupon) | Coupon 4.85%, barrière 60% | Barr.coupon 80% | Mat espérée: ~1.6a (prob mat: 0%)"
+      },
+      "underlyingQuality": {
+        "score": 75,
+        "base": 90,
+        "delta": -15,
+        "reasoning": "Qualité: base 90 → -15 = 75 (Secteur bancaire très sensible en stagflation (beta=0.96), avec risque de récession et hausse des défauts de crédit) | Worst: Euro Stoxx Banks B:76"
+      },
+      "portfolioFit": {
+        "score": 75,
+        "base": 80,
+        "delta": -5,
+        "reasoning": "Fit: base 80 → -5 = 75 (Surexposition sectorielle risquée en contexte stagflationniste où la diversification est cruciale)"
+      },
+      "riskPremium": {
+        "score": 4,
+        "base": 4,
+        "delta": 0,
+        "reasoning": "Prime: base 4 | 4.85% vs CAT 2.5% (spread 2.3%)"
+      }
+    },
+    "verdict": "Produit très risqué avec score final de 27 (D) dans un contexte de stagflation défavorable aux banques. Le coupon de 4.85% ne compense pas l'exposition à un secteur cyclique avec DD=25.7% et une barrière coupon élevée à 80%. La maturité espérée de 1.6 an semble optimiste avec VIX=22, augmentant le risque de blocage prolongé sans coupon.",
+    "keyRisks": [
+      "Secteur bancaire vulnérable en stagflation avec risque de crise du crédit",
+      "Barrière coupon à 80% facilement franchissable avec vol=19.14%",
+      "Risque de perte en capital significatif si barrière 60% touchée"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 4.85,
+        "return_eur": 4850,
+        "probability": 0.2,
+        "duration_years": 1
+      },
+      "base": {
+        "return_pct": 2.42,
+        "return_eur": 4850,
+        "probability": 0.35,
+        "duration_years": 2
+      },
+      "stress": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.3,
+        "duration_years": 5
+      },
+      "worst": {
+        "return_pct": -25,
+        "return_eur": -25000,
+        "probability": 0.15,
+        "duration_years": 5
+      }
+    },
+    "confidenceInterval": {
+      "low": 32,
+      "high": 48,
+      "halfWidth": 8,
+      "gradeStable": false,
+      "gradeRange": "D-C",
+      "label": "D [32-48]"
+    },
+    "metadata": {
+      "gradedAt": "2026-03-28T23:41:12.371Z",
+      "durationMs": 18190,
+      "aiUsed": true,
+      "version": "5.2",
+      "productType": "autocall",
+      "marketDataAvailable": true,
+      "catBenchmark": 2.5,
+      "catSource": "fallback-2026",
+      "couponAnnualized": 4.85,
+      "couponRaw": 4.85,
+      "couponMultiplier": 1,
+      "couponFrequency": "semestriel",
+      "isInPortfolio": false,
+      "hasBarrier": true,
+      "barrierPct": 60,
+      "barrierCouponPct": 80,
+      "couponProbability": null,
+      "expectedMaturity": 1.6,
+      "maxMaturity": 5,
+      "probReachMaturity": 0,
+      "maxBeta": 0.96,
+      "baseScore": 47,
+      "baseGrade": "C",
+      "adjustments": {
+        "p1": -10,
+        "p2": -15,
+        "p3": -5,
+        "p4": 0
+      },
+      "barrier_sigma": 1.19,
+      "barrier_sigma_label": "Attention",
+      "barrier_sigma_danger": false,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Rappelable 12M",
+      "ci_low": 32,
+      "ci_high": 48,
+      "ci_label": "D [32-48]",
+      "issuer_rating": "A+",
+      "issuer_tier": "IG",
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "autocall",
+      "stockData": [
+        {
+          "name": "Euro Stoxx Banks",
+          "ticker": "ENX",
+          "sector": "Finance",
+          "perf_ytd": 3.91,
+          "perf_1y": -2.35,
+          "volatility_3y": 19.14,
+          "max_drawdown_3y": 25.7,
+          "buffett_score": null,
+          "quality_score": 76,
+          "buffett_grade": null
+        }
+      ]
+    }
   }
 }
