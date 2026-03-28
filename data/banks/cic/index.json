@@ -1,7 +1,7 @@
 {
   "bankId": "cic",
   "bankName": "CIC",
-  "lastUpdated": "2026-03-28T14:26:47.687Z",
+  "lastUpdated": "2026-03-28T22:23:28.145Z",
   "products": [
     {
       "id": "sp_mn9657em_m5kwa",
@@ -21,14 +21,6 @@
     },
     {
       "id": "sp_mnaf0wvo_f4imm",
-      "name": "Autocall Euro Stoxx Banks Avril 2031",
-      "type": "autocall",
-      "status": "analyzing",
-      "score": 51,
-      "receivedDate": "2026-03-28"
-    },
-    {
-      "id": "sp_mnafbofg_5vz3a",
       "name": "Autocall Euro Stoxx Banks Avril 2031",
       "type": "autocall",
       "status": "analyzing",
