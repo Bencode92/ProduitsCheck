@@ -180,5 +180,136 @@
       "redundancy": 24,
       "complementarity": 25
     }
+  },
+  "grading": {
+    "grade": "D",
+    "score": 31,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 21,
+        "base": 31,
+        "delta": -10,
+        "reasoning": "Rendement: base 31 → -10 = 21 (Barrière à 80% difficile en stagflation avec VIX 22, secteur bancaire vulnérable aux taux et récession) | Coupon 4.85%, barrière 60% | Barr.coupon 80% | Mat espérée: ~1.6a (prob mat: 0%)"
+      },
+      "underlyingQuality": {
+        "score": 36,
+        "base": 51,
+        "delta": -15,
+        "reasoning": "Qualité: base 51 → -15 = 36 (Secteur bancaire très exposé en stagflation (crédits douteux, marges), beta 0.83 amplifie les mouvements baissiers) | Worst: EuroStoxx Banks (SX7E) B:35"
+      },
+      "portfolioFit": {
+        "score": 75,
+        "base": 80,
+        "delta": -5,
+        "reasoning": "Fit: base 80 → -5 = 75 (Concentration sectorielle excessive sur les banques dans un contexte macro défavorable)"
+      },
+      "riskPremium": {
+        "score": 4,
+        "base": 4,
+        "delta": 0,
+        "reasoning": "Prime: base 4 | 4.85% vs CAT 2.5% (spread 2.3%)"
+      }
+    },
+    "verdict": "Produit très risqué avec un score ajusté de 19/100 en contexte stagflationniste. Le secteur bancaire souffre particulièrement avec des marges comprimées et un risque crédit accru, rendant improbable le franchissement du seuil autocall à 100%. La barrière coupon à 80% offre peu de marge avec une volatilité de 19.83% et un drawdown déjà à -15.95%. Le rendement de 4.85% ne compense pas le risque de perte en capital avec une barrière à 60% seulement.",
+    "keyRisks": [
+      "Exposition mono-sectorielle aux banques en période de crise économique",
+      "Barrière capital à 60% insuffisante avec volatilité 19.83%",
+      "Probabilité élevée de rester bloqué jusqu'à maturité sans coupon"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 4.85,
+        "return_eur": 4850,
+        "probability": 0.15,
+        "duration_years": 1
+      },
+      "base": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.35,
+        "duration_years": 5
+      },
+      "stress": {
+        "return_pct": -2,
+        "return_eur": -10000,
+        "probability": 0.35,
+        "duration_years": 5
+      },
+      "worst": {
+        "return_pct": -8,
+        "return_eur": -40000,
+        "probability": 0.15,
+        "duration_years": 5
+      }
+    },
+    "confidenceInterval": {
+      "low": 21,
+      "high": 41,
+      "halfWidth": 10,
+      "gradeStable": false,
+      "gradeRange": "F-D",
+      "label": "D [21-41]"
+    },
+    "metadata": {
+      "gradedAt": "2026-03-28T22:57:47.640Z",
+      "durationMs": 18078,
+      "aiUsed": true,
+      "version": "5.2",
+      "productType": "autocall",
+      "marketDataAvailable": true,
+      "catBenchmark": 2.5,
+      "catSource": "fallback-2026",
+      "couponAnnualized": 4.85,
+      "couponRaw": 4.85,
+      "couponMultiplier": 1,
+      "couponFrequency": "semestriel",
+      "isInPortfolio": false,
+      "hasBarrier": true,
+      "barrierPct": 60,
+      "barrierCouponPct": 80,
+      "couponProbability": null,
+      "expectedMaturity": 1.6,
+      "maxMaturity": 5,
+      "probReachMaturity": 0,
+      "maxBeta": 0.83,
+      "baseScore": 39,
+      "baseGrade": "D",
+      "adjustments": {
+        "p1": -10,
+        "p2": -15,
+        "p3": -5,
+        "p4": 0
+      },
+      "barrier_sigma": 1.15,
+      "barrier_sigma_label": "Attention",
+      "barrier_sigma_danger": false,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Rappelable 12M",
+      "ci_low": 21,
+      "ci_high": 41,
+      "ci_label": "D [21-41]",
+      "issuer_rating": "A+",
+      "issuer_tier": "IG",
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "autocall",
+      "stockData": [
+        {
+          "name": "EuroStoxx Banks (SX7E)",
+          "ticker": "EUFN",
+          "sector": "Index",
+          "perf_ytd": -11.1,
+          "perf_1y": 14.5,
+          "volatility_3y": 19.83,
+          "max_drawdown_3y": -15.95
+        }
+      ]
+    }
   }
 }
