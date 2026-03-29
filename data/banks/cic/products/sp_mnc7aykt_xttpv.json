@@ -195,5 +195,150 @@
       "redundancy": 47,
       "complementarity": 25
     }
+  },
+  "grading": {
+    "grade": "C",
+    "score": 48,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 38,
+        "base": 43,
+        "delta": -5,
+        "reasoning": "Rendement: base 43 → -5 = 38 (Probabilité de 45% surestimée en régime stagflationniste avec VIX à 22, barrière à 100% très exigeante pour un worst-of) | Coupon 6.15%, protégé | Barr.coupon 100% prob~45%"
+      },
+      "underlyingQuality": {
+        "score": 69,
+        "base": 74,
+        "delta": -5,
+        "reasoning": "Qualité: base 74 → -5 = 69 (Betas défensifs (0.83-0.89) mais secteurs luxe et bancaire vulnérables en stagflation, DD important sur LVMH (-51%)) | Worst: Crédit Agricole S.A. B:79"
+      },
+      "portfolioFit": {
+        "score": 85,
+        "base": 80,
+        "delta": 5,
+        "reasoning": "Fit: base 80 → +5 = 85 (Capital garanti offre protection totale en période incertaine, complément défensif pertinent pour un portefeuille)"
+      },
+      "riskPremium": {
+        "score": 8,
+        "base": 13,
+        "delta": -5,
+        "reasoning": "Prime: base 13 → -5 = 8 (Score de 13/100 reflète un pricing très défavorable, rendement faible pour le risque de non-perception du coupon) | 6.15% vs CAT 2.5% (spread 3.7%)"
+      }
+    },
+    "verdict": "Ce produit capital garanti offre une protection totale mais avec un coupon conditionnel très difficile à obtenir (barrière 100% sur worst-of). Avec seulement 45% de probabilité de toucher le coupon de 6.15% annuel et un pricing défavorable (P4=13), le rendement espéré est inférieur à 3% annuel. En stagflation avec VIX élevé, la probabilité réelle de coupon est probablement inférieure à 35%, rendant ce produit peu attractif malgré la garantie en capital.",
+    "keyRisks": [
+      "Risque élevé de ne percevoir aucun coupon sur 3 ans (55%+ de probabilité)",
+      "Opportunity cost important vs obligations d'État ou corporate investment grade",
+      "Exposition indirecte à la volatilité sans participation à la hausse"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 6.15,
+        "return_eur": 18450,
+        "probability": 0.2,
+        "duration_years": 3
+      },
+      "base": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.55,
+        "duration_years": 3
+      },
+      "stress": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.2,
+        "duration_years": 3
+      },
+      "worst": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.05,
+        "duration_years": 3
+      }
+    },
+    "confidenceInterval": {
+      "low": 41,
+      "high": 55,
+      "halfWidth": 7,
+      "gradeStable": false,
+      "gradeRange": "D-C",
+      "label": "C [41-55]"
+    },
+    "metadata": {
+      "gradedAt": "2026-03-29T20:18:49.917Z",
+      "durationMs": 20477,
+      "aiUsed": true,
+      "version": "5.2",
+      "productType": "capital_garanti",
+      "marketDataAvailable": true,
+      "catBenchmark": 2.5,
+      "catSource": "fallback-2026",
+      "couponAnnualized": 6.15,
+      "couponRaw": 6.15,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": false,
+      "barrierPct": 0,
+      "barrierCouponPct": 100,
+      "couponProbability": 45,
+      "expectedMaturity": 3,
+      "maxMaturity": 3,
+      "maxBeta": 0.89,
+      "baseScore": 51,
+      "baseGrade": "C",
+      "adjustments": {
+        "p1": -5,
+        "p2": -5,
+        "p3": 5,
+        "p4": -5
+      },
+      "barrier_sigma": null,
+      "barrier_sigma_label": null,
+      "barrier_sigma_danger": null,
+      "liquidity_level": "L4",
+      "liquidity_score": 10,
+      "liquidity_label": "Illiquide",
+      "ci_low": 41,
+      "ci_high": 55,
+      "ci_label": "C [41-55]",
+      "issuer_rating": "A+",
+      "issuer_tier": "IG",
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "capital_garanti",
+      "stockData": [
+        {
+          "name": "LVMH Moët Hennessy Louis Vuitton SA",
+          "ticker": "MC",
+          "sector": "Biens de consommation cycliques",
+          "perf_ytd": -28.95,
+          "perf_1y": -19.84,
+          "volatility_3y": 29.46,
+          "max_drawdown_3y": 51.49,
+          "buffett_score": 81,
+          "quality_score": 65,
+          "buffett_grade": "A"
+        },
+        {
+          "name": "Crédit Agricole S.A.",
+          "ticker": "ACA",
+          "sector": "Finance",
+          "perf_ytd": -9.15,
+          "perf_1y": -4.95,
+          "volatility_3y": 21.28,
+          "max_drawdown_3y": 21.42,
+          "buffett_score": null,
+          "quality_score": 79,
+          "buffett_grade": null
+        }
+      ]
+    }
   }
 }
