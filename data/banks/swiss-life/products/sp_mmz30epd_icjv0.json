@@ -95,12 +95,12 @@
   "aiCategoryColor": "#3B82F6",
   "aiOpinion": "Ce produit Phoenix offre un rendement attractif de 7% semestriel avec effet mémoire, mais présente un risque significatif étant exposé uniquement à ASML sans protection du capital. La barrière à -60% offre une marge de sécurité correcte, toutefois la concentration sur un seul titre technologique expose à une forte volatilité sectorielle.",
   "aiAnalyzedAt": "2026-03-20T15:56:39.280Z",
-  "status": "analyzing",
+  "status": "rejected",
   "receivedDate": "2026-03-20",
   "conversation": [],
   "conversationSummary": null,
-  "decision": null,
-  "decisionReason": null,
+  "decision": "rejected",
+  "decisionReason": "Rejeté manuellement",
   "score": {
     "score": 39,
     "details": [
