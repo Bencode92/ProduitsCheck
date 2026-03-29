@@ -12,14 +12,13 @@
   "maturityDate": null,
   "strikeDate": null,
   "coupon": {
-    "rate": 3.5,
-    "rateIfCalled": null,
-    "rateIfMaturity": null,
+    "rate": 14,
+    "frequency": "annuel",
+    "annualized": true,
     "type": "conditionnel",
-    "frequency": "semestriel",
-    "trigger": 60,
     "memory": true,
-    "paymentTiming": "periodic"
+    "paymentTiming": "periodic",
+    "trigger": 60
   },
   "capitalProtection": {
     "protected": false,
@@ -160,6 +159,140 @@
     "breakdown": {
       "redundancy": 36,
       "complementarity": 10
+    }
+  },
+  "grading": {
+    "grade": "B",
+    "score": 70,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 53,
+        "base": 62,
+        "delta": -9,
+        "reasoning": "Rendement: base 62 → -9 = 53 (Barrière coupon à 60% difficile avec volatilité 37% et drawdown historique 45%, probabilité réelle du coupon fortement surévaluée) | Coupon 7% × 2 (semestriel) = 14%, barrière 40% | Barr.coupon 60% | Mat espérée: ~1.6a (prob mat: 0%)"
+      },
+      "underlyingQuality": {
+        "score": 72,
+        "base": 77,
+        "delta": -5,
+        "reasoning": "Qualité: base 77 → -5 = 72 (ASML beta 1.29 en stagflation avec VIX 22 augmente le risque systémique, secteur tech semiconducteurs vulnérable aux tensions géopolitiques) | Worst: ASML Holding NV B:100"
+      },
+      "portfolioFit": {
+        "score": 80,
+        "base": 80,
+        "delta": 0,
+        "reasoning": "Fit: base 80"
+      },
+      "riskPremium": {
+        "score": 82,
+        "base": 91,
+        "delta": -9,
+        "reasoning": "Prime: base 91 → -9 = 82 (Spread 14% vs marché trompeur avec barrière 60% très risquée, volatilité 37% non compensée par le rendement) | 7% × 2 = 14% vs CAT 2.5% (spread 11.5%)"
+      }
+    },
+    "verdict": "Produit extrêmement risqué avec un couple rendement/risque défavorable. La barrière coupon à 60% sur un titre volatil (37%) ayant déjà chuté de 45% historiquement rend le coupon 14% illusoire. En stagflation avec VIX 22, ASML (beta 1.29) présente un risque systémique élevé. La probabilité de toucher la barrière capital 40% est significative, exposant à des pertes majeures.",
+    "keyRisks": [
+      "Barrière coupon 60% très exposée avec volatilité 37%",
+      "Risque capital élevé: drawdown historique 45% vs barrière 40%",
+      "Secteur semiconducteurs vulnérable en stagflation"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 14,
+        "return_eur": 22400,
+        "probability": 0.15,
+        "duration_years": 1.6
+      },
+      "base": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.3,
+        "duration_years": 6
+      },
+      "stress": {
+        "return_pct": -20,
+        "return_eur": -20000,
+        "probability": 0.35,
+        "duration_years": 6
+      },
+      "worst": {
+        "return_pct": -40,
+        "return_eur": -40000,
+        "probability": 0.2,
+        "duration_years": 6
+      }
+    },
+    "confidenceInterval": {
+      "low": 62,
+      "high": 78,
+      "halfWidth": 8,
+      "gradeStable": false,
+      "gradeRange": "B-A",
+      "label": "B [62-78]"
+    },
+    "metadata": {
+      "gradedAt": "2026-03-29T20:36:12.475Z",
+      "durationMs": 17482,
+      "aiUsed": true,
+      "version": "5.2",
+      "productType": "autocall",
+      "marketDataAvailable": true,
+      "catBenchmark": 2.5,
+      "catSource": "fallback-2026",
+      "couponAnnualized": 14,
+      "couponRaw": 7,
+      "couponMultiplier": 2,
+      "couponFrequency": "semestriel",
+      "isInPortfolio": false,
+      "hasBarrier": true,
+      "barrierPct": 40,
+      "barrierCouponPct": 60,
+      "couponProbability": null,
+      "expectedMaturity": 1.6,
+      "maxMaturity": 6,
+      "probReachMaturity": 0,
+      "maxBeta": 1.29,
+      "baseScore": 77,
+      "baseGrade": "A",
+      "adjustments": {
+        "p1": -9,
+        "p2": -5,
+        "p3": 0,
+        "p4": -9
+      },
+      "barrier_sigma": 1.01,
+      "barrier_sigma_label": "Attention",
+      "barrier_sigma_danger": false,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Rappelable 12M",
+      "ci_low": 62,
+      "ci_high": 78,
+      "ci_label": "B [62-78]",
+      "issuer_rating": "A+",
+      "issuer_tier": "IG",
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "autocall",
+      "stockData": [
+        {
+          "name": "ASML Holding NV",
+          "ticker": "ASML",
+          "sector": "Technologie de l'information",
+          "perf_ytd": 26.52,
+          "perf_1y": 92.38,
+          "volatility_3y": 37.03,
+          "max_drawdown_3y": 45.12,
+          "buffett_score": 100,
+          "quality_score": 70,
+          "buffett_grade": "A"
+        }
+      ]
     }
   }
 }
