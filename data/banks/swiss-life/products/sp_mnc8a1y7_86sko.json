@@ -12,14 +12,13 @@
   "maturityDate": null,
   "strikeDate": null,
   "coupon": {
-    "rate": 3.5,
-    "rateIfCalled": null,
-    "rateIfMaturity": null,
+    "rate": 7,
+    "frequency": "annuel",
+    "annualized": true,
     "type": "conditionnel",
-    "frequency": "semestriel",
-    "trigger": 60,
     "memory": true,
-    "paymentTiming": "periodic"
+    "paymentTiming": "periodic",
+    "trigger": 60
   },
   "capitalProtection": {
     "protected": false,
@@ -160,6 +159,141 @@
     "breakdown": {
       "redundancy": 36,
       "complementarity": 10
+    }
+  },
+  "_freqFixApplied": true,
+  "grading": {
+    "grade": "C",
+    "score": 54,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 41,
+        "base": 50,
+        "delta": -9,
+        "reasoning": "Rendement: base 50 → -9 = 41 (Barrière coupon à 60% avec volatilité 37% et DD 45% rend les coupons très incertains en stagflation) | Coupon 7%, barrière 40% | Barr.coupon 60% | Mat espérée: ~1.6a (prob mat: 0%)"
+      },
+      "underlyingQuality": {
+        "score": 72,
+        "base": 77,
+        "delta": -5,
+        "reasoning": "Qualité: base 77 → -5 = 72 (ASML beta 1.29 amplifie les mouvements dans un contexte stagflationniste défavorable aux valeurs tech) | Worst: ASML Holding NV B:100"
+      },
+      "portfolioFit": {
+        "score": 71,
+        "base": 80,
+        "delta": -9,
+        "reasoning": "Fit: base 80 → -9 = 71 (Concentration mono-actif sur valeur cyclique tech inadaptée en stagflation nécessitant diversification défensive)"
+      },
+      "riskPremium": {
+        "score": 36,
+        "base": 45,
+        "delta": -9,
+        "reasoning": "Prime: base 45 → -9 = 36 (Spread implicite ~4.4% (7%-2.6% taux) insuffisant pour DD 45% et vol 37% sur 6 ans) | 7% vs CAT 2.5% (spread 4.5%)"
+      }
+    },
+    "verdict": "Produit risqué avec score final de 42/100 (D). Le coupon 7% ne compense pas le risque extrême d'ASML (DD 45%, vol 37%) en stagflation. Avec une barrière capitale à 40% et aucune protection, la perte potentielle de 60% du capital est probable. La duration espérée de 1.6 an est trompeuse vu la probabilité nulle de maturité anticipée.",
+    "keyRisks": [
+      "Perte capitale jusqu'à 60% avec barrière à 40% et DD historique 45%",
+      "Coupons très incertains avec barrière 60% et volatilité 37%",
+      "Exposition mono-actif tech beta 1.29 inadaptée en stagflation"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 7,
+        "return_eur": 7000,
+        "probability": 0.15,
+        "duration_years": 1
+      },
+      "base": {
+        "return_pct": 3.5,
+        "return_eur": 10500,
+        "probability": 0.3,
+        "duration_years": 3
+      },
+      "stress": {
+        "return_pct": -20,
+        "return_eur": -20000,
+        "probability": 0.35,
+        "duration_years": 6
+      },
+      "worst": {
+        "return_pct": -45,
+        "return_eur": -45000,
+        "probability": 0.2,
+        "duration_years": 6
+      }
+    },
+    "confidenceInterval": {
+      "low": 46,
+      "high": 62,
+      "halfWidth": 8,
+      "gradeStable": false,
+      "gradeRange": "C-B",
+      "label": "C [46-62]"
+    },
+    "metadata": {
+      "gradedAt": "2026-03-29T20:45:38.139Z",
+      "durationMs": 17759,
+      "aiUsed": true,
+      "version": "5.2",
+      "productType": "autocall",
+      "marketDataAvailable": true,
+      "catBenchmark": 2.5,
+      "catSource": "fallback-2026",
+      "couponAnnualized": 7,
+      "couponRaw": 7,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": true,
+      "barrierPct": 40,
+      "barrierCouponPct": 60,
+      "couponProbability": null,
+      "expectedMaturity": 1.6,
+      "maxMaturity": 6,
+      "probReachMaturity": 0,
+      "maxBeta": 1.29,
+      "baseScore": 62,
+      "baseGrade": "B",
+      "adjustments": {
+        "p1": -9,
+        "p2": -5,
+        "p3": -9,
+        "p4": -9
+      },
+      "barrier_sigma": 1.01,
+      "barrier_sigma_label": "Attention",
+      "barrier_sigma_danger": false,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Rappelable 12M",
+      "ci_low": 46,
+      "ci_high": 62,
+      "ci_label": "C [46-62]",
+      "issuer_rating": "A+",
+      "issuer_tier": "IG",
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "autocall",
+      "stockData": [
+        {
+          "name": "ASML Holding NV",
+          "ticker": "ASML",
+          "sector": "Technologie de l'information",
+          "perf_ytd": 26.52,
+          "perf_1y": 92.38,
+          "volatility_3y": 37.03,
+          "max_drawdown_3y": 45.12,
+          "buffett_score": 100,
+          "quality_score": 70,
+          "buffett_grade": "A"
+        }
+      ]
     }
   }
 }
