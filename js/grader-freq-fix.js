@@ -1,16 +1,19 @@
 // ═══════════════════════════════════════════════════════════════════════════════
-// grader-freq-fix v5 — Fix coupon annualization for infra-annual frequencies
-// 
+// grader-freq-fix v6 — Fix coupon annualization for infra-annual frequencies
+//
 // ROOT CAUSE: In _graderNormalize(), `var co = p.coupon || ai.coupon || {}`
 // short-circuits when p.coupon is a truthy number (e.g. 4.85), losing
 // ai.coupon.frequency ("semestriel"). Result: coupon not annualized.
 //
-// WHY v4 FAILED: v4 wrapped global `gradeProposal` but UI calls
-// `ProposalGrader.grade` which holds a direct closure reference.
-// The wrapper was never invoked.
+// WHY v5 FAILED: v5 required aiParsed.coupon to be an object with frequency.
+// But when product is saved to JSON, aiParsed.coupon may also be a number.
+// So aiCoupon was null → entire fix skipped.
 //
-// FIX: Wrap ProposalGrader.grade to merge ai.coupon.frequency into
-// product.coupon BEFORE the pipeline runs.
+// FIX v6: Detect frequency from ALL sources independently:
+// 1. aiParsed.coupon.frequency (if object)
+// 2. aiParsed.earlyRedemption.frequency
+// 3. product.earlyRedemption.frequency
+// 4. product name regex (semestriel/trimestriel/mensuel)
 // ═══════════════════════════════════════════════════════════════════════════════
 (function() {
     'use strict';
@@ -22,57 +25,83 @@
         'annuel':1,'annuelle':1,'annual':1
     };
 
+    // Detect frequency from all available sources
+    function _detectFreq(product) {
+        var ai = product.aiParsed || {};
+        var freq = '';
+
+        // Source 1: aiParsed.coupon.frequency (if coupon is an object)
+        if (typeof ai.coupon === 'object' && ai.coupon !== null) {
+            freq = (ai.coupon.frequency || ai.coupon.frequence || '').toLowerCase().trim();
+            if (freq && FREQ_MULT[freq]) return { freq: freq, src: 'ai.coupon' };
+        }
+
+        // Source 2: aiParsed.earlyRedemption.frequency
+        var aiAr = ai.earlyRedemption || {};
+        freq = (aiAr.frequency || aiAr.frequence || '').toLowerCase().trim();
+        if (freq && FREQ_MULT[freq]) return { freq: freq, src: 'ai.earlyRedemption' };
+
+        // Source 3: product.earlyRedemption.frequency
+        var pAr = product.earlyRedemption || {};
+        freq = (pAr.frequency || pAr.frequence || '').toLowerCase().trim();
+        if (freq && FREQ_MULT[freq]) return { freq: freq, src: 'product.earlyRedemption' };
+
+        // Source 4: product name regex
+        var nm = (product.name || ai.name || '').toLowerCase();
+        if (/semestriel/i.test(nm)) return { freq: 'semestriel', src: 'name' };
+        if (/trimestriel/i.test(nm)) return { freq: 'trimestriel', src: 'name' };
+        if (/mensuel/i.test(nm)) return { freq: 'mensuel', src: 'name' };
+
+        // Source 5: product rawText or description
+        var raw = (product.rawText || product.description || '').toLowerCase();
+        if (/semestriel/i.test(raw)) return { freq: 'semestriel', src: 'rawText' };
+        if (/trimestriel/i.test(raw)) return { freq: 'trimestriel', src: 'rawText' };
+        if (/mensuel/i.test(raw)) return { freq: 'mensuel', src: 'rawText' };
+
+        return null; // No infra-annual frequency found
+    }
+
     function _fixCouponFrequency(product) {
         if (!product) return;
+        var pCoupon = product.coupon;
         var ai = product.aiParsed || {};
         var aiCoupon = (typeof ai.coupon === 'object' && ai.coupon !== null) ? ai.coupon : null;
-        var pCoupon = product.coupon;
 
-        // Only fix when p.coupon is a primitive AND ai.coupon has frequency info
-        if ((typeof pCoupon === 'number' || typeof pCoupon === 'string') && aiCoupon) {
+        // Case 1: p.coupon is a primitive number/string — need to convert to object with frequency
+        if (typeof pCoupon === 'number' || typeof pCoupon === 'string') {
             var rate = parseFloat(pCoupon) || 0;
-            var freq = (aiCoupon.frequency || aiCoupon.frequence || '').toLowerCase().trim();
+            if (rate <= 0) return;
 
-            // If ai.coupon doesn't have frequency, try earlyRedemption
-            if (!freq || !FREQ_MULT[freq]) {
-                var ar = product.earlyRedemption || ai.earlyRedemption || {};
-                freq = (ar.frequency || ar.frequence || '').toLowerCase().trim();
-            }
+            var detected = _detectFreq(product);
+            if (!detected) return; // No infra-annual frequency found, leave as-is
 
-            // If still no frequency, try product name
-            if (!freq || !FREQ_MULT[freq]) {
-                var nm = (product.name || ai.name || '').toLowerCase();
-                if (/semestriel/i.test(nm)) freq = 'semestriel';
-                else if (/trimestriel/i.test(nm)) freq = 'trimestriel';
-                else if (/mensuel/i.test(nm)) freq = 'mensuel';
-            }
+            var freq = detected.freq;
+            var mult = FREQ_MULT[freq];
+            if (!mult || mult <= 1) return; // Annual or unknown, no change needed
 
-            // Only convert if we found a non-annual frequency
-            if (freq && FREQ_MULT[freq] && FREQ_MULT[freq] > 1) {
-                product.coupon = {
-                    rate: rate,
-                    frequency: freq,
-                    type: aiCoupon.type || '',
-                    memory: !!(aiCoupon.memory || aiCoupon.memoire),
-                    paymentTiming: aiCoupon.paymentTiming || ''
-                };
-                // Preserve annualized/annualise flags
+            // Build coupon object
+            product.coupon = {
+                rate: rate,
+                frequency: freq
+            };
+            // Copy extra fields from aiCoupon if available
+            if (aiCoupon) {
+                if (aiCoupon.type) product.coupon.type = aiCoupon.type;
+                if (aiCoupon.memory || aiCoupon.memoire) product.coupon.memory = true;
+                if (aiCoupon.paymentTiming) product.coupon.paymentTiming = aiCoupon.paymentTiming;
                 if (aiCoupon.annualized) product.coupon.annualized = aiCoupon.annualized;
                 if (aiCoupon.annualise) product.coupon.annualise = aiCoupon.annualise;
-
-                var mult = FREQ_MULT[freq];
-                var annual = Math.round(rate * mult * 1000) / 1000;
-                console.log('[freq-fix v5] ' + rate + '% x' + mult + ' (' + freq + ') = ' + annual + '% annuel');
             }
+
+            var annual = Math.round(rate * mult * 1000) / 1000;
+            console.log('[freq-fix v6] ' + rate + '% x' + mult + ' (' + freq + ' via ' + detected.src + ') = ' + annual + '% annuel');
         }
-        // Also handle case where p.coupon is already an object but missing frequency
+        // Case 2: p.coupon is already an object but missing frequency
         else if (typeof pCoupon === 'object' && pCoupon !== null && !pCoupon.frequency && !pCoupon.frequence) {
-            if (aiCoupon) {
-                var f2 = (aiCoupon.frequency || aiCoupon.frequence || '').toLowerCase().trim();
-                if (f2 && FREQ_MULT[f2]) {
-                    pCoupon.frequency = f2;
-                    console.log('[freq-fix v5] Added missing freq to coupon obj: ' + f2);
-                }
+            var detected2 = _detectFreq(product);
+            if (detected2 && FREQ_MULT[detected2.freq] > 1) {
+                pCoupon.frequency = detected2.freq;
+                console.log('[freq-fix v6] Added freq to coupon obj: ' + detected2.freq + ' (via ' + detected2.src + ')');
             }
         }
     }
@@ -106,7 +135,7 @@
             };
         }
 
-        console.log('[freq-fix v5] Patched ProposalGrader.grade + normalize + gradeBatch');
+        console.log('[freq-fix v6] Patched ProposalGrader.grade + normalize + gradeBatch');
         return true;
     }
 
