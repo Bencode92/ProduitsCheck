@@ -1,0 +1,199 @@
+{
+  "id": "sp_mnc7aykt_xttpv",
+  "name": "Digitale WO LVMH Crédit Agricole Avril 2029",
+  "bankId": "cic",
+  "type": "autre",
+  "underlyingType": "basket",
+  "underlyings": [
+    "LVMH Moët Hennessy Louis Vuitton SA",
+    "Crédit Agricole S.A."
+  ],
+  "currency": "EUR",
+  "maturity": "3 ans",
+  "maturityDate": null,
+  "strikeDate": null,
+  "coupon": {
+    "rate": 6.15,
+    "rateIfCalled": null,
+    "rateIfMaturity": null,
+    "type": "conditionnel",
+    "frequency": "annuel",
+    "trigger": 100,
+    "memory": true,
+    "paymentTiming": "periodic"
+  },
+  "capitalProtection": {
+    "protected": true,
+    "level": 100,
+    "barrier": null,
+    "barrierCoupon": 100,
+    "barrierType": "europeenne",
+    "couponFloor": false
+  },
+  "earlyRedemption": {
+    "possible": false,
+    "type": "none",
+    "trigger": null,
+    "frequency": null,
+    "startSemester": null,
+    "startYear": null,
+    "stepDown": false,
+    "stepDownPct": null
+  },
+  "scenarios": {
+    "favorable": "Capital + coupon 6.15% annuel si worst-of ≥ 100%, gain max 18.45%",
+    "median": "Capital garanti + coupons mémorisés si worst-of ≥ 100% à une date",
+    "defavorable": "Capital garanti à échéance sans coupon si worst-of < 100%"
+  },
+  "risks": [
+    "risque de perte en cas de vente avant échéance",
+    "plafonnement des gains",
+    "pas de dividendes",
+    "risque de crédit émetteur",
+    "sensibilité autour du seuil 100%",
+    "risque d'inflation"
+  ],
+  "rawText": "--- PAGE 1 ---\n1  Digitale WO LVMH Crédit Agricole  Avril 2029  Titre de créance de droit anglais assimilable à une obligation de droit français  présentant une garantie en capital à l’échéance du produit.  Communication à caractère   promotionnel  Produit de placement risqué alternatif à un investissement dynamique de type «actions».  Émetteur   :   Crédit Industriel et Commercial (1)  Période de détention recommandée   :   3 ans  Eligibilité   :   Compte - titres ordinaire  Période de   souscription   :   du 17 mars 2026 au 3 avril 2026, dans la limite de l'enveloppe disponible   en l'absence  de clôture anticipée et sans préavis de la part de l'Emetteur.  Ce produit est un instrument de diversification, ne pouvant constituer l’intégralité d’un portefeuille  d’investissement. L’investisseur prend un risque de perte en capital non mesurable à priori s’il décide de  revendre les titres de créance avant l’échéanc e.  Les investisseurs ne sont pas protégés contre l’effet de l’inflation dans le temps. Le rendement corrigé de  l’inflation peut par conséquent être négatif.  (1)   Notations de crédit : Standard & Poor’s A+ (08/12/2025), Moody’s A1 (18/12/2025), Fitch Rati ngs AA -   (22/12/2025) . Ces notations peuvent  être révisées à tout moment et ne sont pas une garantie de solvabilité de l’Émetteur. Elles ne sauraient constituer un argume nt de  souscription au produit. Les agences de notation peuvent les modifier à tout mom ent.  Crédit Industriel et Commercial   -   CIC   -   Banque régie par les articles L.511 - 1 et suivants du Code Monétaire et Financier   -   SA au capital de 611  858 064 € .  Siège social: 6, avenue de Provence 75009 Paris   -   Adresse postale : 75452 Paris cedex 09   -   tél   01 45 96 96 96   -   Code swift: CMCIFRPP   -  www.cic.fr   -   542 016 381 RCS Paris   -   TVA intracommunautaire : FR34542016381 -\n--- PAGE 2 ---\n2  Présentation du produit  L’EMTN   Digitale WO LVMH Crédit Agricole Avril 2029   est un   produit de placement risqué alternatif à un inve stissement  dynamique de type «Actions»,   présentant un risque de perte partielle (1)   ou totale en capital en cours de vie mais une  garantie en capital à l'échéance du produit , d’une durée   de   3 ans   et offrant aux investisseurs   :  •   Une exposition aux   Actions   L VMH   Moët   Hennessy  Louis Vuitton   SA , Crédit Agricole S . A .   (les dividendes  ne sont pas réinvestis et ne bénéficient donc pas à sa  performance,   ce   qui   est   moins   favorable   à  l’investisseur) .  •   Le paiement d'un   coupon brut de 6,15% de la Valeur  Nominale chaque a nnée ainsi que la somme des  coupons mémorisés jusqu'à cette date , dès lors qu’à  l’une d es Dates de Constatation Annuelle prévue (2) , le  niveau   de   clôture   du   sous - jacent ayant le   moins  performé   est supérieur ou égal à   100% de son   Niveau  Initial (1) .  •   À l’échéance des 3 ans⁽²⁾ :  −   Un   remboursement de l'intégralité du capital investi  ainsi que le paiement d’un   gain brut   6,15 %   ( 1)   de la  Valeur   Nominale   et   la   somme   des   coupons  mémorisés   précédemment (soit un gain potentiel  maximal de   18,45%) dès lors que le niveau de clôture  du sous - jacent ayant le moins performé en Date de  Constatation Finale est supérieur ou égal à 100%   de  son Niveau Initial (1) .  −   Un   remboursement   de   l'intégralité   du   capital  investi , peu importe   l’évolution du marché.  AVANTAGES  ▪   Objectif de gain   de   6,15% (1)   brut de la Valeur Nominale par année écoulée   depuis la Date de Constatation Initiale⁽²⁾  dès lors qu’à l’une des Dates de Constatation Annuelle (2) , le niveau de clôture du sous - jacent ayant le moins performé  est supérieur ou égal à 100% de son Niveau Initial. Les coupons non versés sont mémorisés et peuvent être versés  ultérieurement selon les   conditions   ( 1) .  ▪   Un remboursement inconditionnel de l'intégralité du capital investi à   l’échéance   ( 1) .  INCONVENIENTS  ▪   Risque de perte partielle⁽¹⁾ ou totale en capital :  −   En cours de vie   :   en cas de sortie, la formule de   remboursement présentée ici ne   s’applique pas et le prix de vente  dépend des   conditions de marché en vigueur, au moment de la sortie.  ▪   Plafonnement des gains   : le gain potentiel est limité à un coupon annuel brut de 6,15% (1)   de la Valeur Nominale,  même en cas de hausse du sous - jacent aya nt le moins performé supérieure à ce montant.  ▪   Le porteur ne bénéficie pas des dividendes détachés par   les sous - jacents .  ▪   L'investisseur est exposé à une dégradation de la qualité de crédit de   l‘Émetteur (qui induit un risque sur la valeur  de marché du   produit) ou un   éventuel défaut de l'Émetteur (qui induit un risque sur le remboursement).  •   Le   rendement du produit à l’échéance   est très sensible autour du seuil   100 % du Niveau Initial du sous - jacent ayant  le moins performé.  ▪   Une inflation élevée   dans la dur ée aura un impact négatif sur le rendement réel du produit. Les investisseurs ne sont  pas protégés contre l’érosion du capital initial liée à l’inflation. L’inflation aura également un impact sur les conditions  de réinvestissement en cas de remboursement a nticipé du produit.  (1)   Hors prélèvements sociaux et fiscaux applicables et/ou frais liés au cadre d’investissement et sous réserve d’absence de fail lite et/ou défaut de paiement et/ou  mise en résolution de l’Émetteur et de conservation du   produit jusqu’à échéance ou   remboursement anticipé .   En cas de rachat, d’arbitrage en sortie du support,  de transfert vers un autre contrat ou de décès avant l’échéance finale, en dehors du cas de remboursement anticipé, le montan t remboursé dépendra des  pa ramètres de marché en vigueur et engendrera un gain ou une perte non mesurable a priori. La perte en capital, notamment, pour ra être partielle ou totale.  (2)   Veuillez - vous   référer au tableau récapitulant les principales caractéristiques en page   7   pour connaître le détail des dates.\n--- PAGE 3 ---\n3  NB : La Valeur Nominale de l‘EMTN   Digitale WO LVMH Crédit Agricole Avril 2029   est de   100   000 €.  Tous les remboursements présentés dans cette brochure (gains ou pertes) sont calculés sur la base de cette  V aleur   N omina le, hors frais liés au cadre d’investissement (frais d’entrée, de rachat, de réorientation de  l’épargne ou de gestion), prélèvements fiscaux et sociaux applicables et sous réserve d’absence de faillite,  défaut de paiement et/ou mise en résolution de l’Émet teur.\n--- PAGE 4 ---\n4  -  b  Mécanisme des coupons  À partir du 31 mars 2027 et à chaque Date de Constatation Annuelle⁽²⁾, on observe le niveau de clôture du sous - jacent ayant  le moins performé et on le compare à son Niveau Initial du 7 avril 2026.  ▪   Si à l’une de ces dates, le niveau de clôture du sous - jacent ayant le moins performé est supérieur ou égal à 100% de  son Niveau Initial, l’investisseur récupère à la Date de Paiement Annuel   correspondante   ( 2)   :  Un coupon brut égal à 6,15% (1)   de la Valeur  N ominale   + la somme des coupons mémorisés à  cette date.  A noter que dans tous les cas l'investisseur ne bénéficiera pas d'une éventuelle hausse du sous - jacent ayant le moins  performé au - delà de 6,15% brut par an (mécanisme de plafonnement des   gains).  Mécanisme de remboursement à l’échéance  On observe une dernière fois, le niveau de clôture du sous - jacent ayant le moins performé à la Date de Constatation Finale,  le 29 mars 2029 et on le compare à son Niveau Initial.  ▪   Si, à cette date, le   niveau de clôture du sous - jacent ayant le moins performé est supérieur à 100% de son Niveau Initial,  l’investisseur récupère à la Date d'Échéance :  L'intégralité du capital investi (1)   +   Un coupon brut de 6,15% (1)   de la Valeur  Nominale + la somme des   coupons  mémorisés pendant la durée de vie du  produit  Soit un taux de rendement actuariel annuel brut   maximum   de   6,13   %   ( 1)  ▪   Sinon, l’investisseur récupère l’intégralité du capital investi   (1) .  (1)   Hors prélèvements   sociaux et fiscaux applicables et/ou frais liés au cadre d’investissement et sous réserve d’absence de faillite et/ou défaut   de paiement et/ou  mise en résolution de l’Émetteur et de conservation du produit jusqu’à échéance ou   remboursement anticipé .   En cas   de rachat, d’arbitrage en sortie du support,  de transfert vers un autre contrat ou de décès avant l’échéance finale, en dehors du cas de remboursement anticipé, le montan t remboursé dépendra des  paramètres de marché en vigueur et engendrera un gain ou une   perte non mesurable a priori. La perte en capital, notamment, pourra être partielle ou totale.  (2)   Veuillez - vous   référer au tableau récapitulant les principales caractéristiques en page   7   pour connaître le détail des dates.\n--- PAGE 5 ---\n5  Entité de référence  NIVEAUX HISTORIQUES ENTRE   MARS 2021   ET   MARS   2026  Les performances passées ne sont pas un indicateur fiable des performances futures.  LVMH Moët Hennessy Louis Vuitton S A   est un groupe diversifié d'articles de luxe. La société produit et vend du vin et du  cognac ainsi que des parfums, des cosmétiques, des bagages, des montres et des bijoux. Ses clients sont en France.  Site   web :   https://www.lvmh.fr  Crédit Agricole S.A.   est une holding Via ses filiales, elle offre des services bancaires et d'assurance et conçoit et gère des  produits financiers spécialisés. Elle offre aussi des services tels que gestion et titres, assurance, crédit à la consommatio n,  banque privée, crédit - bail et affacturage.  Site   web :   https://www.credit - agricole.com  Source   :   Bloomberg au   10/03/2026 .  -  0  100  200  300  400  500  600  700  800  900  1000  mars-21   mars-22   mars-23   mars-24   mars-25   mars-26  LVMH Moët Hennessy Louis Vuitton SA  0  2  4  6  8  10  12  14  16  18  20  mars-21   mars-22   mars-23   mars-24   mars-25   mars-26  Crédit Agricole S.A.\n--- PAGE 6 ---\n6  Principaux facteurs de r",
+  "aiParsed": {
+    "name": "Digitale WO LVMH Crédit Agricole Avril 2029",
+    "type": "digitale",
+    "structureType": "capital_garanti",
+    "emitter": "Crédit Industriel et Commercial",
+    "guarantor": null,
+    "guarantorRating": {
+      "moodys": "A1",
+      "sp": "A+",
+      "fitch": "AA-"
+    },
+    "isin": null,
+    "underlyings": [
+      "LVMH Moët Hennessy Louis Vuitton SA",
+      "Crédit Agricole S.A."
+    ],
+    "underlyingType": "basket",
+    "nUnderlyings": 2,
+    "nPairs": null,
+    "currency": "EUR",
+    "maturity": "3 ans",
+    "maturityYears": 3,
+    "coupon": {
+      "rate": 6.15,
+      "rateIfCalled": null,
+      "rateIfMaturity": null,
+      "type": "conditionnel",
+      "frequency": "annuel",
+      "trigger": 100,
+      "memory": true,
+      "paymentTiming": "periodic"
+    },
+    "participationRate": null,
+    "capitalProtection": {
+      "protected": true,
+      "level": 100,
+      "barrier": null,
+      "barrierCoupon": 100,
+      "barrierType": "europeenne",
+      "couponFloor": false
+    },
+    "earlyRedemption": {
+      "possible": false,
+      "type": "none",
+      "trigger": null,
+      "frequency": null,
+      "startSemester": null,
+      "startYear": null,
+      "stepDown": false,
+      "stepDownPct": null
+    },
+    "decrementPct": null,
+    "actualDividendYield": null,
+    "historicalSimulations": null,
+    "scenarios": {
+      "favorable": "Capital + coupon 6.15% annuel si worst-of ≥ 100%, gain max 18.45%",
+      "median": "Capital garanti + coupons mémorisés si worst-of ≥ 100% à une date",
+      "defavorable": "Capital garanti à échéance sans coupon si worst-of < 100%"
+    },
+    "risks": [
+      "risque de perte en cas de vente avant échéance",
+      "plafonnement des gains",
+      "pas de dividendes",
+      "risque de crédit émetteur",
+      "sensibilité autour du seuil 100%",
+      "risque d'inflation"
+    ],
+    "mechanism": "Coupon annuel 6.15% avec mémoire si worst-of ≥ 100% Niveau Initial, capital garanti à échéance",
+    "summary": "Digitale 3 ans sur LVMH/Crédit Agricole, capital garanti, coupon 6.15%/an si worst-of ≥ 100%"
+  },
+  "aiSummary": "## DESCRIPTION\nProduit structuré \"Digitale WO LVMH Crédit Agricole Avril 2029\" émis par Crédit Industriel et Commercial. Maturité 3 ans. Sous-jacents : LVMH et Crédit Agricole (worst-of). Structure à capital garanti.\n\n## MÉCANISME\nCoupon conditionnel annuel de 6,15% avec effet mémoire. Versement si le worst-of des deux sous-jacents ≥ 100% du niveau initial à la date d'observation. Les coupons non versés sont mémorisés et payés dès que la condition est remplie.\n\n## RENDEMENT\n- Coupon : 6,15% annuel conditionnel\n- Gain maximum : 18,45% (3 × 6,15%)\n- Fréquence : annuelle\n- Condition : worst-of ≥ 100% niveau initial\n\n## PROTECTION\n- Capital garanti à 100% à l'échéance\n- Barrière coupon : 100% (européenne)\n- Protection valable uniquement à maturité\n\n## REMBOURSEMENT ANTICIPÉ\nAucun remboursement anticipé automatique prévu.\n\n## SCÉNARIOS\n- **Favorable** : Capital + 6,15% annuel si worst-of ≥ 100%, gain max 18,45%\n- **Médian** : Capital garanti + coupons mémorisés si worst-of ≥ 100% à une date\n- **Défavorable** : Capital garanti sans coupon si worst-of toujours < 100%\n\n## POINTS ATTENTION\n- Risque de perte si vente avant échéance\n- Gains plafonnés à 18,45%\n- Pas de dividendes perçus\n- Risque de crédit émetteur\n- Sensibilité forte autour du seuil 100%\n- Risque d'inflation sur capital garanti",
+  "sourceFile": "Digitale WO LVMH Crédit Agricole.pdf",
+  "structureType": "capital_garanti",
+  "participationRate": null,
+  "historicalSimulations": null,
+  "guarantorRating": {
+    "moodys": "A1",
+    "sp": "A+",
+    "fitch": "AA-"
+  },
+  "mechanism": "Coupon annuel 6.15% avec mémoire si worst-of ≥ 100% Niveau Initial, capital garanti à échéance",
+  "nPairs": null,
+  "nUnderlyings": 2,
+  "decrementPct": null,
+  "actualDividendYield": null,
+  "maturityYears": 3,
+  "aiCategory": "capital-protege",
+  "aiCategoryLabel": "🛡️ Capital Protégé",
+  "aiCategoryColor": "#4CAF50",
+  "aiOpinion": "Produit défensif offrant un coupon attractif de 6,15% avec protection totale du capital, idéal pour les investisseurs prudents cherchant du rendement sans risque de perte. Le mécanisme à mémoire sur deux valeurs (LVMH et Crédit Agricole) augmente les chances de versement du coupon, mais la performance reste conditionnée à l'évolution de ces sous-jacents.",
+  "aiAnalyzedAt": "2026-03-29T20:17:50.949Z",
+  "status": "analyzing",
+  "receivedDate": "2026-03-29",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null,
+  "score": {
+    "score": 28,
+    "details": [
+      {
+        "type": "warning",
+        "icon": "⚠️",
+        "text": "Même sous-jacent que 1 produit(s) — 20% du book",
+        "impact": 35,
+        "category": "redundancy"
+      },
+      {
+        "type": "positive",
+        "icon": "📈",
+        "text": "Coupon (6.15%) > moyenne du book (4.1%)",
+        "impact": 15,
+        "category": "complementarity"
+      },
+      {
+        "type": "positive",
+        "icon": "🔀",
+        "text": "Faible corrélation moyenne (30%) — diversification",
+        "impact": 10,
+        "category": "complementarity"
+      },
+      {
+        "type": "warning",
+        "icon": "📦",
+        "text": "Même type que 1 produit(s) — 20% du book en \"Autre\"",
+        "impact": 8,
+        "category": "redundancy"
+      },
+      {
+        "type": "info",
+        "icon": "🏦",
+        "text": "Même émetteur que 1 produit(s) — concentration CIC",
+        "impact": 4,
+        "category": "redundancy"
+      }
+    ],
+    "verdict": "🔴 Redondant — forte concentration, peu de valeur ajoutée.",
+    "breakdown": {
+      "redundancy": 47,
+      "complementarity": 25
+    }
+  }
+}
