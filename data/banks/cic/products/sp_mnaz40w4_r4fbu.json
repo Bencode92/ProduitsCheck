@@ -191,19 +191,19 @@
         "score": 38,
         "base": 48,
         "delta": -10,
-        "reasoning": "Rendement: base 48 → -10 = 38 (Volatilité élevée (19.14%) et DD important (-25.7%) réduisent significativement la probabilité de toucher le coupon dans ce contexte de stagflation) | Coupon 19.4%, barrière 60% | Barr.coupon 80% | Mat espérée: ~1.6a (prob mat: 0%)"
+        "reasoning": "Rendement: base 48 → -10 = 38 (Vol 19.14% et DD 25.7% sur secteur bancaire cyclique rendent le franchissement barrière 80% plus risqué en stagflation) | Coupon 19.4%, barrière 60% | Barr.coupon 80% | Mat espérée: ~1.6a (prob mat: 0%)"
       },
       "underlyingQuality": {
         "score": 75,
         "base": 90,
         "delta": -15,
-        "reasoning": "Qualité: base 90 → -15 = 75 (Secteur bancaire très vulnérable en stagflation (marges comprimées, risque crédit), beta proche de 1 amplifie la baisse) | Worst: Euro Stoxx Banks B:76"
+        "reasoning": "Qualité: base 90 → -15 = 75 (Secteur bancaire très vulnérable en stagflation: marges nettes comprimées et risque crédit accru) | Worst: Euro Stoxx Banks B:76"
       },
       "portfolioFit": {
         "score": 75,
         "base": 80,
         "delta": -5,
-        "reasoning": "Fit: base 80 → -5 = 75 (Concentration sectorielle excessive sur les banques européennes dans un portefeuille déjà exposé aux actions)"
+        "reasoning": "Fit: base 80 → -5 = 75 (Concentration sectorielle pure sur banques inadaptée en environnement macro défavorable)"
       },
       "riskPremium": {
         "score": 82,
@@ -212,11 +212,11 @@
         "reasoning": "Prime: base 82 | 19.4% vs CAT 2.5% (spread 16.9%)"
       }
     },
-    "verdict": "Produit très risqué avec un score ajusté de 53 (D). Le secteur bancaire européen est particulièrement vulnérable en stagflation avec des marges d'intérêt comprimées et un risque de crédit accru. La barrière coupon à 80% sera difficile à maintenir avec une volatilité de 19.14% et un drawdown déjà à -25.7%. Le coupon de 19.4% ne compense pas le risque de perte en capital sur ce secteur cyclique.",
+    "verdict": "Produit très risqué avec score final 43/100 en raison de l'exposition pure au secteur bancaire européen en stagflation. Le coupon élevé de 19.4% ne compense pas le risque de perte en capital significative avec une barrière à 60% sur un indice volatile (DD 25.7%). La probabilité de maturité à 0% et l'espérance à 1.6 ans suggèrent un risque élevé de non-remboursement anticipé, exposant l'investisseur à la pleine maturité dans un contexte macro défavorable.",
     "keyRisks": [
-      "Exposition concentrée au secteur bancaire européen en période de stagflation",
-      "Probabilité élevée de toucher la barrière capitale à 60% (DD actuel -25.7%)",
-      "Duration effective longue (1.6a) avec faible probabilité d'autocall"
+      "Exposition concentrée secteur bancaire en stagflation avec compression des marges",
+      "Volatilité élevée 19.14% et drawdown 25.7% augmentent risque de toucher barrière capitale 60%",
+      "Risque de blocage prolongé sans autocall avec détérioration progressive des fondamentaux bancaires"
     ],
     "negotiationPoints": [],
     "scenarios": {
@@ -227,9 +227,9 @@
         "duration_years": 1
       },
       "base": {
-        "return_pct": 0,
-        "return_eur": 0,
-        "probability": 0.35,
+        "return_pct": 6.5,
+        "return_eur": 19500,
+        "probability": 0.3,
         "duration_years": 3
       },
       "stress": {
@@ -239,9 +239,9 @@
         "duration_years": 5
       },
       "worst": {
-        "return_pct": -40,
-        "return_eur": -40000,
-        "probability": 0.15,
+        "return_pct": -30,
+        "return_eur": -30000,
+        "probability": 0.2,
         "duration_years": 5
       }
     },
@@ -254,8 +254,8 @@
       "label": "B [58-74]"
     },
     "metadata": {
-      "gradedAt": "2026-03-29T12:01:02.854Z",
-      "durationMs": 15958,
+      "gradedAt": "2026-03-29T20:51:30.096Z",
+      "durationMs": 17853,
       "aiUsed": true,
       "version": "5.2",
       "productType": "autocall",
