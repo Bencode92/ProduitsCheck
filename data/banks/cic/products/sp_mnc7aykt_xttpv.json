@@ -208,57 +208,56 @@
         "score": 38,
         "base": 43,
         "delta": -5,
-        "reasoning": "Rendement: base 43 → -5 = 38 (Probabilité de 45% surestimée en régime stagflationniste avec VIX à 22, barrière à 100% très exigeante pour un worst-of) | Coupon 6.15%, protégé | Barr.coupon 100% prob~45%"
+        "reasoning": "Rendement: base 43 → -5 = 38 (Probabilité de 45% surévaluée en régime stagflation avec VIX à 22, barrière à 100% très exigeante sur 3 ans) | Coupon 6.15%, protégé | Barr.coupon 100% prob~45%"
       },
       "underlyingQuality": {
         "score": 69,
         "base": 74,
         "delta": -5,
-        "reasoning": "Qualité: base 74 → -5 = 69 (Betas défensifs (0.83-0.89) mais secteurs luxe et bancaire vulnérables en stagflation, DD important sur LVMH (-51%)) | Worst: Crédit Agricole S.A. B:79"
+        "reasoning": "Qualité: base 74 → -5 = 69 (Worst-of sur banque (ACA) et luxe (LVMH) avec betas élevés vulnérables en stagflation, mais capital garanti limite le risque) | Worst: Crédit Agricole S.A. B:79"
       },
       "portfolioFit": {
         "score": 85,
         "base": 80,
         "delta": 5,
-        "reasoning": "Fit: base 80 → +5 = 85 (Capital garanti offre protection totale en période incertaine, complément défensif pertinent pour un portefeuille)"
+        "reasoning": "Fit: base 80 → +5 = 85 (Capital garanti très pertinent en stagflation, diversification sectorielle banque/luxe adaptée au contexte incertain)"
       },
       "riskPremium": {
         "score": 8,
         "base": 13,
         "delta": -5,
-        "reasoning": "Prime: base 13 → -5 = 8 (Score de 13/100 reflète un pricing très défavorable, rendement faible pour le risque de non-perception du coupon) | 6.15% vs CAT 2.5% (spread 3.7%)"
+        "reasoning": "Prime: base 13 → -5 = 8 (Spread implicite de 615bp sur capital garanti suggère forte surévaluation, coût réel probablement 300-400bp) | 6.15% vs CAT 2.5% (spread 3.7%)"
       }
     },
-    "verdict": "Ce produit capital garanti offre une protection totale mais avec un coupon conditionnel très difficile à obtenir (barrière 100% sur worst-of). Avec seulement 45% de probabilité de toucher le coupon de 6.15% annuel et un pricing défavorable (P4=13), le rendement espéré est inférieur à 3% annuel. En stagflation avec VIX élevé, la probabilité réelle de coupon est probablement inférieure à 35%, rendant ce produit peu attractif malgré la garantie en capital.",
+    "verdict": "Produit capital garanti offrant 6.15% annualisé avec seulement 45% de probabilité de toucher les coupons en régime stagflation défavorable. Le worst-of ACA/LVMH avec barrière à 100% rend les coupons très incertains malgré la protection du capital. Avec un spread implicite excessif et un VIX à 22, le couple rendement/risque est déséquilibré pour un horizon 3 ans.",
     "keyRisks": [
-      "Risque élevé de ne percevoir aucun coupon sur 3 ans (55%+ de probabilité)",
-      "Opportunity cost important vs obligations d'État ou corporate investment grade",
-      "Exposition indirecte à la volatilité sans participation à la hausse"
+      "Forte probabilité (55%) de ne toucher aucun coupon sur 3 ans",
+      "Coût d'opportunité élevé vs obligations investment grade à 4-5%"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 6.15,
+        "return_pct": 18.45,
         "return_eur": 18450,
         "probability": 0.2,
         "duration_years": 3
       },
       "base": {
-        "return_pct": 0,
-        "return_eur": 0,
-        "probability": 0.55,
+        "return_pct": 6.15,
+        "return_eur": 6150,
+        "probability": 0.25,
         "duration_years": 3
       },
       "stress": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.2,
+        "probability": 0.4,
         "duration_years": 3
       },
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.05,
+        "probability": 0.15,
         "duration_years": 3
       }
     },
@@ -271,8 +270,8 @@
       "label": "C [41-55]"
     },
     "metadata": {
-      "gradedAt": "2026-03-29T20:18:49.917Z",
-      "durationMs": 20477,
+      "gradedAt": "2026-03-29T20:51:02.262Z",
+      "durationMs": 16904,
       "aiUsed": true,
       "version": "5.2",
       "productType": "capital_garanti",
