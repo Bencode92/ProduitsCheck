@@ -209,19 +209,19 @@
         "score": 74,
         "base": 72,
         "delta": 2,
-        "reasoning": "Rendement: base 72 → +2 = 74 (Participation 7% avec historique médian à 11.47% offre une probabilité élevée de surperformance dans un produit à capital garanti) | Coupon 3.8233333333333337%, protégé"
+        "reasoning": "Rendement: base 72 → +2 = 74 (Capital garanti élimine le risque de perte, coupon de 3.82% assuré dans un contexte stagflationniste) | Coupon 3.8233333333333337%, protégé"
       },
       "underlyingQuality": {
         "score": 78,
         "base": 80,
         "delta": -2,
-        "reasoning": "Qualité: base 80 → -2 = 78 (Surexposition tech (62.5%) et communication (37.5%) en stagflation avec 3 titres évités, betas élevés amplifient la vulnérabilité) [B/Q 35%] | Worst: Tesla B:54"
+        "reasoning": "Qualité: base 80 → -2 = 78 (Panier tech très volatil (vol 25-57%) avec betas élevés (1.07-1.92) inadapté en stagflation) | Worst: Tesla B:54"
       },
       "portfolioFit": {
         "score": 74,
         "base": 72,
         "delta": 2,
-        "reasoning": "Fit: base 72 → +2 = 74 (Dispersion élevée entre NVDA (vol 48%) et MSFT (vol 23%) favorise la capture de performance relative sur 3 ans)"
+        "reasoning": "Fit: base 72 → +2 = 74 (Produit défensif avec capital garanti apporte stabilité dans un portefeuille en période incertaine)"
       },
       "riskPremium": {
         "score": 32,
@@ -230,49 +230,49 @@
         "reasoning": "Prime: base 32 | 3.8233333333333337% vs CAT 2.5% (spread 1.3%)"
       }
     },
-    "verdict": "Produit dispersion offrant un potentiel intéressant (médian historique 11.47%) avec capital 100% garanti, mais fortement exposé aux secteurs défavorisés en stagflation. La volatilité élevée du panier (moy 35.6%) est un atout pour la dispersion, compensant partiellement le risque sectoriel. Sur 3 ans, la probabilité d'obtenir au moins 3.82% annualisé est élevée malgré le contexte macro adverse.",
+    "verdict": "Produit défensif intéressant offrant 3.82%/an garanti sur 3 ans, soit 11.47% au total sans risque de perte. Dans un contexte stagflationniste (VIX 22), la garantie du capital compense largement la volatilité élevée du panier tech (NVDA 48%, TSLA 57%). Le rendement dépasse l'inflation attendue tout en protégeant le capital.",
     "keyRisks": [
-      "Concentration tech/comm (100%) vulnérable en stagflation avec VIX à 22",
-      "Corrélation élevée du panier peut réduire la dispersion en cas de choc systémique"
+      "Rendement limité à 3.82%/an même si les actions surperforment",
+      "Coût d'opportunité si sortie de la stagflation et rally tech"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 21,
-        "return_eur": 21000,
-        "probability": 0.25,
+        "return_pct": 11.47,
+        "return_eur": 11470,
+        "probability": 1,
         "duration_years": 3
       },
       "base": {
-        "return_pct": 11,
-        "return_eur": 11000,
-        "probability": 0.4,
+        "return_pct": 11.47,
+        "return_eur": 11470,
+        "probability": 1,
         "duration_years": 3
       },
       "stress": {
-        "return_pct": 3,
-        "return_eur": 3000,
-        "probability": 0.3,
+        "return_pct": 11.47,
+        "return_eur": 11470,
+        "probability": 1,
         "duration_years": 3
       },
       "worst": {
-        "return_pct": 0,
-        "return_eur": 0,
-        "probability": 0.05,
+        "return_pct": 11.47,
+        "return_eur": 11470,
+        "probability": 1,
         "duration_years": 3
       }
     },
     "confidenceInterval": {
-      "low": 59,
-      "high": 71,
-      "halfWidth": 6,
+      "low": 58,
+      "high": 72,
+      "halfWidth": 7,
       "gradeStable": false,
       "gradeRange": "C-B",
-      "label": "B [59-71]"
+      "label": "B [58-72]"
     },
     "metadata": {
-      "gradedAt": "2026-03-27T16:51:47.918Z",
-      "durationMs": 18373,
+      "gradedAt": "2026-03-29T20:20:29.150Z",
+      "durationMs": 14979,
       "aiUsed": true,
       "version": "5.2",
       "productType": "dispersion",
@@ -304,13 +304,12 @@
       "barrier_sigma_danger": null,
       "liquidity_level": "L4",
       "liquidity_score": 10,
-      "liquidity_label": "Illiquide (999M)",
-      "ci_low": 59,
-      "ci_high": 71,
-      "ci_label": "B [59-71]",
+      "liquidity_label": "Illiquide",
+      "ci_low": 58,
+      "ci_high": 72,
+      "ci_label": "B [58-72]",
       "issuer_rating": "A",
       "issuer_tier": "IG",
-      "issuer_cds_proxy": 70,
       "hasDecrement": false,
       "decrementDrag": 0,
       "structureType": "dispersion",
