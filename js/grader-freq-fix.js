@@ -1,18 +1,8 @@
 // ═══════════════════════════════════════════════════════════════════════════════
-// grader-freq-fix v7 — Fix coupon annualization for infra-annual frequencies
+// grader-freq-fix v7.1 — Fix coupon annualization for infra-annual frequencies
 //
-// BUG CHAIN (3 issues compound):
-// 1. `var co = p.coupon || ai.coupon` short-circuits when p.coupon is truthy
-// 2. Even when coupon object has frequency, _annualizeCoupon correctly returns
-//    mult=2, BUT then a "safeguard" at the END of _graderNormalize reverts it:
-//    if rawText contains "4.85%...annuel" (regex match), it sets mult back to 1
-// 3. This safeguard was intended for rates already stated as annual, but
-//    falsely triggers when per-period rate appears near "annuel" in PDF text
-//
-// FIX v7 STRATEGY: Pre-annualize the coupon to its yearly equivalent and
-// mark annualized=true so _annualizeCoupon returns mult=1 (no further mult).
-// The rawText safeguard then never triggers (it only runs when mult>1).
-// After grading, patch the result metadata for the UI blue banner.
+// v7.1: Add guard against double-application (normalize + grade both call fix)
+// v7: Pre-annualize strategy to bypass rawText safeguard
 // ═══════════════════════════════════════════════════════════════════════════════
 (function() {
     'use strict';
@@ -24,33 +14,27 @@
         'annuel':1,'annuelle':1,'annual':1
     };
 
-    // Detect frequency from all available sources
     function _detectFreq(product) {
         var ai = product.aiParsed || {};
 
-        // Source 1: product.coupon.frequency (if coupon is an object)
         if (typeof product.coupon === 'object' && product.coupon !== null) {
             var pcf = (product.coupon.frequency || product.coupon.frequence || '').toLowerCase().trim();
             if (pcf && FREQ_MULT[pcf] && FREQ_MULT[pcf] > 1) return { freq: pcf, src: 'product.coupon' };
         }
 
-        // Source 2: aiParsed.coupon.frequency
         if (typeof ai.coupon === 'object' && ai.coupon !== null) {
             var acf = (ai.coupon.frequency || ai.coupon.frequence || '').toLowerCase().trim();
             if (acf && FREQ_MULT[acf] && FREQ_MULT[acf] > 1) return { freq: acf, src: 'ai.coupon' };
         }
 
-        // Source 3: aiParsed.earlyRedemption.frequency
         var aiAr = ai.earlyRedemption || {};
         var aef = (aiAr.frequency || aiAr.frequence || '').toLowerCase().trim();
         if (aef && FREQ_MULT[aef] && FREQ_MULT[aef] > 1) return { freq: aef, src: 'ai.earlyRedemption' };
 
-        // Source 4: product.earlyRedemption.frequency
         var pAr = product.earlyRedemption || {};
         var pef = (pAr.frequency || pAr.frequence || '').toLowerCase().trim();
         if (pef && FREQ_MULT[pef] && FREQ_MULT[pef] > 1) return { freq: pef, src: 'product.earlyRedemption' };
 
-        // Source 5: product name regex
         var nm = (product.name || ai.name || '').toLowerCase();
         if (/semestriel/i.test(nm)) return { freq: 'semestriel', src: 'name' };
         if (/trimestriel/i.test(nm)) return { freq: 'trimestriel', src: 'name' };
@@ -59,7 +43,6 @@
         return null;
     }
 
-    // Get per-period rate from coupon (number or object)
     function _getRate(coupon) {
         if (typeof coupon === 'number') return coupon;
         if (typeof coupon === 'string') return parseFloat(coupon) || 0;
@@ -67,10 +50,17 @@
         return 0;
     }
 
-    // Pre-fix: convert coupon to pre-annualized value
-    // Returns fix info object if applied, null otherwise
     function _fixCouponFrequency(product) {
         if (!product) return null;
+
+        // v7.1 GUARD: Skip if already pre-annualized (prevents double-application)
+        if (typeof product.coupon === 'object' && product.coupon !== null && product.coupon.annualized === true) {
+            return null;
+        }
+        // v7.1 GUARD: Also check _freqFixApplied flag
+        if (product._freqFixApplied) {
+            return null;
+        }
 
         var detected = _detectFreq(product);
         if (!detected) return null;
@@ -86,15 +76,12 @@
         // Sanity: if annualized > 25%, probably already annual
         if (annual > 25) return null;
 
-        // SET coupon to pre-annualized value with annualized=true
-        // This makes _annualizeCoupon return mult=1, bypassing the rawText safeguard
         var oldCoupon = product.coupon;
         product.coupon = {
             rate: annual,
             frequency: 'annuel',
             annualized: true
         };
-        // Copy metadata from original coupon object
         if (typeof oldCoupon === 'object' && oldCoupon !== null) {
             if (oldCoupon.type) product.coupon.type = oldCoupon.type;
             if (oldCoupon.memory || oldCoupon.memoire) product.coupon.memory = oldCoupon.memory || oldCoupon.memoire;
@@ -102,7 +89,10 @@
             if (oldCoupon.trigger) product.coupon.trigger = oldCoupon.trigger;
         }
 
-        console.log('[freq-fix v7] PRE-ANNUALIZED: ' + rawRate + '% x' + mult + ' (' + detected.freq + ' via ' + detected.src + ') = ' + annual + '%');
+        // v7.1: Mark product so we don't apply again
+        product._freqFixApplied = true;
+
+        console.log('[freq-fix v7.1] PRE-ANNUALIZED: ' + rawRate + '% x' + mult + ' (' + detected.freq + ' via ' + detected.src + ') = ' + annual + '%');
 
         return {
             applied: true,
@@ -114,11 +104,9 @@
         };
     }
 
-    // Post-fix: patch grading result metadata for UI display (blue banner)
     function _patchResult(result, fixInfo) {
         if (!result || !fixInfo || !fixInfo.applied) return;
 
-        // Patch metadata
         if (result.metadata) {
             result.metadata.couponRaw = fixInfo.rawRate;
             result.metadata.couponMultiplier = fixInfo.mult;
@@ -126,7 +114,6 @@
             result.metadata.couponAnnualized = fixInfo.annual;
         }
 
-        // Patch pillar reasoning to show correct info
         if (result.pillars) {
             var p1 = result.pillars.adjustedReturn;
             if (p1 && p1.reasoning) {
@@ -150,32 +137,27 @@
             return false;
         }
 
-        // Wrap ProposalGrader.grade
         var _origGrade = ProposalGrader.grade;
         ProposalGrader.grade = function(product) {
             var fixInfo = _fixCouponFrequency(product);
             var resultPromise = _origGrade.call(this, product);
 
-            // gradeProposal returns a Promise (async function)
             if (resultPromise && typeof resultPromise.then === 'function') {
                 return resultPromise.then(function(result) {
                     _patchResult(result, fixInfo);
                     return result;
                 });
             }
-            // Fallback for sync
             _patchResult(resultPromise, fixInfo);
             return resultPromise;
         };
 
-        // Wrap normalize for console testing
         var _origNorm = ProposalGrader.normalize;
         ProposalGrader.normalize = function(product) {
             _fixCouponFrequency(product);
             return _origNorm.call(this, product);
         };
 
-        // Wrap gradeBatch
         if (ProposalGrader.gradeBatch) {
             var _origBatch = ProposalGrader.gradeBatch;
             ProposalGrader.gradeBatch = function(proposals, onProgress) {
@@ -189,7 +171,7 @@
             };
         }
 
-        console.log('[freq-fix v7] Patched ProposalGrader.grade + normalize + gradeBatch (pre-annualize strategy)');
+        console.log('[freq-fix v7.1] Patched ProposalGrader.grade + normalize + gradeBatch (anti-doublon guard)');
         return true;
     }
 
