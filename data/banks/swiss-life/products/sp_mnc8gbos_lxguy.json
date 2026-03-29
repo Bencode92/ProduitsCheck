@@ -1,0 +1,182 @@
+{
+  "id": "sp_mnc8gbos_lxguy",
+  "name": "Income Euro Selection",
+  "bankId": "swiss-life",
+  "type": "autre",
+  "underlyingType": "basket",
+  "underlyings": [
+    "80% FTSE EuroBig",
+    "20% FTSE Euro High Yield Bond Index"
+  ],
+  "currency": "EUR",
+  "maturity": "3 ans recommandé",
+  "maturityDate": null,
+  "strikeDate": null,
+  "coupon": {
+    "rate": 4.17,
+    "rateIfCalled": null,
+    "rateIfMaturity": null,
+    "type": "rendement_moyen",
+    "frequency": "na",
+    "trigger": null,
+    "memory": false,
+    "paymentTiming": "capitalisation"
+  },
+  "capitalProtection": {
+    "protected": false,
+    "level": null,
+    "barrier": null,
+    "barrierCoupon": null,
+    "barrierType": null,
+    "couponFloor": false
+  },
+  "earlyRedemption": {
+    "possible": false,
+    "type": null,
+    "trigger": null,
+    "frequency": null,
+    "startSemester": null,
+    "startYear": null,
+    "stepDown": false,
+    "stepDownPct": null
+  },
+  "scenarios": {
+    "favorable": null,
+    "median": null,
+    "defavorable": null
+  },
+  "risks": [
+    "risque de perte en capital",
+    "risque de taux",
+    "risque de crédit",
+    "risque high yield",
+    "risque marchés émergents"
+  ],
+  "rawText": "--- PAGE 1 ---\nIncome Euro Selection  Février 2026   |   Données au   27 février 2026  SwissLife  Gestion Privée  Performances  Caractéristiques  Code ISIN (Part P / Part R)   FR0010363648 / FR00140063X1  Date de création   22/12/2006  Forme juridique   FCP  Classification   Obligations et/ou titres de créances libellés en euros  Indice de référence   80% FTSE EuroBig + 20%FTSE Euro High Yield Bond Index*  Affectation du résultat   Capitalisation  Durée de placement recommandée   3 ans  Décimalisation   Millièmes de part  Souscription/Rachat   Quotidien avant 10h30  Commission de souscription/rachat   2 % max / Néant  Frais de gestion   0,70% TTC max (Part P) / 1,2% TTC max (Part R)  Commission de surperformance   20% TTC au-delà de l'indice de référence (Part P) / Néant  (Part R)  Evolution de l'OPC et de son indice* (base 100)  Performance du 27/02/2012 au 27/02/2026  Le fonds SLGP Income Convertible a fait l ’ objet d ’ une scission en date du 23 mai 2019, afin d ’ isoler les TCN Rallye  dans un fonds de cantonnement. La performance présentée est retraitée de l’ incidence de cette sortie de titres.  Répartition par maturité  L'équipe de gestion  Nicolas SAULNIER  Etienne VIVET  L'objectif de gestion du fonds Income Euro Selection est de se positionner sur des obligations  internationales émises en euro afin d’ exploiter le couple rendement / risque particulier des obligations  et ainsi faire bénéficier l'investisseur du rendement courant sur la durée de placement recommandée de 36  mois. Il s ’ agit d ’un fonds de sélection d’ obligations internationales qui suit une approche non contrainte  afin de bénéficier de l’ensemble des opportunités des marchés obligataires.  Valeur liquidative (Part P)   177,17   €  Valeur liquidative (Part R)   109,92   €  Actif net (Part P)   112 102 050,00   €  Actif net (Part R)   108 127 365,45   €  Risque plus faible   Indicateur de Risque   Risque plus élevé  1   2   3   4   5   6   7  Cet indicateur représente le profil de risque affiché dans le DIC. L'indicateur de risque part de l'hypothèse que vous conservez les parts pendant 3 années. Avertissement: le risque réel peut être très différent si vous optez pour une sortie avant cette échéance, et vous pourriez obtenir moins en retour.  *Le 21/12/2023, l ’indice de référence est passé de Bloomberg Euro Aggregates Corporates, à l'indice composite 80% FTSE EuroBig + 20% FTSE Euro High Yield Bond Ind.  COMMUNICATION PUBLICITAIRE. Veuillez vous référer au prospectus et au document d'informations clés de l'OPC avant de prendre toute décision d'investissement.   Les  chiffres cités ont trait aux années écoulées. Les performances passées ne préjugent pas des performances futures et ne sont pas constantes dans le temps. L'OPC est investi sur les marchés financiers et comporte des risques dont le risque de perte en capital. Ce document, à caractère commercial, a pour but de vous informer de manière simplifiée sur les caractéristiques de l'OPC et n'est donc pas suffisant pour prendre une décision d'investissement. Sources de données: SIX Telekurs, Bloomberg, SLGP.  SwissLife Gestion Privée – Société de gestion de portefeuille -   7   place Vendôme -   75001 Paris SA au capital de 277 171 € - 378 782 163 RCS Paris   – Agrément AMF n°GP 00-038   – banqueprivée.swisslife.fr  Les performances passées ne préjugent pas des performances futures.  Indicateurs de risques  Volatilité calculée sur 1 an   2,09%   Rendement au pire   3,04%  Sensibilité Taux   1,14   Spread moyen vs Etat   140bps  Duration   1,18   Ratio de Sharpe sur 1 an   1,00  Rendement à maturité   4,17%   Nombre de titres détenus   54  Cumulées   Fonds (Part P)   Indice*  Février 2026   0,15%   1,02%  2026 Ytd   0,60%   1,74%  3 mois   0,85%   1,41%  1 an   4,07%   2,93%  3 ans   24,69%   15,50%  5 ans   13,91%   2,27%  10 ans   36,35%   6,45%  Calendaires   Fonds (Part P)   Indice*  2025   5,22%   2,04%  2024   8,85%   3,85%  2023   13,14%   7,93%  2022   -15,77%   -13,65%  2021   3,32%   1,78%  2020   -1,82%   0,12%  2019   7,91%   2,87%  2018   -6,04%   -1,32%  2017   8,93%   0,67%  2016   6,40%   0,93%  Annualisées   Fonds (Part P)   Indice*  3 ans   7,63%   4,92%  5 ans   2,64%   0,45%  10 ans   3,15%   0,63%\n--- PAGE 2 ---\nIncome Euro Selection  Février 2026   |   Données au   27 février 2026  SwissLife  Gestion Privée  Répartition géographique des produits de taux  Répartition sectorielle des produits de taux  Poids des 10 principales positions (titres vifs)  Principaux mouvements sur le mois  Principaux portages  Achats / Renforcements  UNITED GROUP BV 4.625% 15/08/2028  BANIJAY ENTERTAINMENT 7% 01/05/2029  ARENA LUX FIN SARL FRN 01/05/2030  BNP PARIBAS 5.625% PERP  Ventes / Positions échues  UNITED GROUP BV FRN 15/02/2031  BNP PARIBAS 5.625% PERP  APCOA GMBH FRN 15/04/2031  ZF EUROPE FINANCE BV 5.5% 17/02/2032  Taux de rendement actuariel  AVIS BUDGET FINANCE PLC 7% 28/02/2029   7,38%  INTRALOT CAPITAL LUX FRN 15/10/2031   6,91%  VERISURE HOLDING AB 7.125% 01/02/2028   5,92%  MOBILUX FINANCE SAS 7% 15/05/2030   5,91%  NEXTURE SPA FRN 30/07/2032   5,87%  BANIJAY ENTERTAINMENT 7% 01/05/2029   5,85%  SECHE ENVIRONNEMENT SACA 5.87% PERP   5,82%  ESSENDI SA FRN 15/05/2032   5,64%  APCOA GMBH FRN 15/04/2031   5,44%  PLT VII FINANCE SARL FRN 15/06/2031   5,41%  Libellés   Poids  FRANCE (GOVT OF) 0% 25/02/2027   3,56%  ILIAD HOLDING SAS 5.625% 15/10/2028   3,29%  ADECCO INT FINANCIAL SVS 1% 21/03/2082   3,28%  ELECTRICITE DE FRANCE SA 2.875% PERP   3,26%  UNITED GROUP BV 4.625% 15/08/2028   3,20%  ENI SPA 2% PERP   3,19%  BAYER AG 3.125% 12/11/2079   3,18%  RCI BANQUE SA 4.625% 13/07/2026   2,81%  BIRKENSTOCK FINANC SARL 5.25% 30/04/2029   2,79%  ABERTIS FINANCE BV 2.625% PERP   2,77%  Total   31,31%  Répartition par notations*  COMMUNICATION PUBLICITAIRE. Veuillez vous référer au prospectus et au document d'informations clés de l'OPC avant de prendre toute décision d'investissement.  Les chiffres cités ont trait aux années écoulées. Les performances passées ne préjugent pas des performances futures et ne sont pas constantes dans le temps. L'OPC est investi sur les marchés financiers et comporte des risques dont le risque de perte en capital. Ce document, à caractère commercial, a pour but de vous informer de manière simplifiée sur les caractéristiques de l'OPC et n'est donc pas suffisant pour prendre une décision d'investissement. Sources de données: SIX Telekurs, Bloomberg, SLGP.  SwissLife Gestion Privée – Société de gestion de portefeuille -   7   place Vendôme -   75001 Paris SA au capital de 277 171 € - 378 782 163 RCS Paris   – Agrément AMF n°GP 00-038   – banqueprivée.swisslife.fr  *les notations des émetteurs ne correspondent pas systématiquement aux notations des émissions, ces dernières ayant leur propre caractéristique.\n--- PAGE 3 ---\nIncome Euro Selection  Février 2026   |   Données au   27 février 2026  SwissLife  Gestion Privée  COMMUNICATION PUBLICITAIRE. Veuillez vous référer au prospectus et au document d'informations clés de l'OPC avant de prendre toute décision d'investissement.   Les  chiffres cités ont trait aux années écoulées. Les performances passées ne préjugent pas des performances futures et ne sont pas constantes dans le temps. L'OPC est investi sur les marchés financiers et comporte des risques dont le risque de perte en capital. Ce document, à caractère commercial, a pour but de vous informer de manière simplifiée sur les caractéristiques de l'OPC et n'est donc pas suffisant pour prendre une décision d'investissement. Sources de données: SIX Telekurs, Bloomberg, SLGP.  SwissLife Gestion Privée – Société de gestion de portefeuille -   7   place Vendôme -   75001 Paris SA au capital de 277 171 € - 378 782 163 RCS Paris   – Agrément AMF n°GP 00-038   – banqueprivée.swisslife.fr  Commentaire de gestion  Le mois de février a vu les taux longs baisser de manière franche, en raison de la faiblesse de l’ inflation en Europe et aux Etats- Unis, mais aussi de la faiblesse persistante de l ’emploi aux US. Les taux américains ont ainsi reculé de 30 points de base (pb)  contre un recul d ’environ 20 pb des taux allemands et français à 10 ans. Les spreads, eux, ont connu une remontée limitée mais bien méritée de 13 pb. Dans ce contexte, Income Euro Sélection progresse de 0.15% (1.02% pour son indice de référence). Selon nous, la légère remontée de l’ aversion au risque en fin de mois pourrait bien se poursuivre. Il faut dire que les points de tension sont nombreux. D ’une part, on ne peut plus ignorer la présence militaire américaine massive au Moyen-Orient. Le contingent est le plus gros envoyé dans la région depuis l’ invasion de l ’ Irak en 2003. D ’autre part, les difficultés du marché du crédit privé se poursuivent et inquiètent les investisseurs : plus un jour ne passe sans que des articles à ce sujet ne fassent la une. Après la faillite de Tricolor et First brands aux Etats-Unis fin 2025, la saga des défaillances se poursuit. Cette fois, c’ est MFS, un  prêteur hypothécaire au Royaume-Uni affichant un bilan de 2.5 milliards GBP, qui est en faillite. Appollo, Jefferies, Banco Santander ou Barclays sont notamment touchés par ce défaut. Comme avec First Brands, des actifs ont été comptabilisés plusieurs fois en garantie de différents prêts privés, laissant peu de chance de retour à meilleure fortune pour les créanciers. Ces  abus sont le signe d ’un secteur trop peu contrôlé malgré son développement rapide depuis 2022. Ces risques sont, selon nous, peu pris en compte par le marché, et ne sont pas les seuls. Nous parlons notamment d’ un risque haussier structurel sur les taux longs depuis plusieurs mois.  En conséquence, nous conservons notre positionnement prudent avec une sensibilité de 1.14, et un rendement très confortable pour le risque embarqué, de 4.17%. Le portefeuille est bien positionné pour résister à un choc et profiter de points d’entrée  attractifs.\n--- PAGE 4 ---\nIncome Euro Selection  Février 2026   |   Données au   27 février 2026  Swiss",
+  "aiParsed": {
+    "name": "Income Euro Selection",
+    "type": "fonds",
+    "structureType": "fonds_obligataire",
+    "emitter": "SwissLife Gestion Privée",
+    "guarantor": null,
+    "guarantorRating": null,
+    "isin": "FR0010363648",
+    "underlyings": [
+      "80% FTSE EuroBig",
+      "20% FTSE Euro High Yield Bond Index"
+    ],
+    "underlyingType": "basket",
+    "nUnderlyings": 2,
+    "nPairs": null,
+    "currency": "EUR",
+    "maturity": "3 ans recommandé",
+    "maturityYears": 3,
+    "coupon": {
+      "rate": 4.17,
+      "rateIfCalled": null,
+      "rateIfMaturity": null,
+      "type": "rendement_moyen",
+      "frequency": "na",
+      "trigger": null,
+      "memory": false,
+      "paymentTiming": "capitalisation"
+    },
+    "participationRate": null,
+    "capitalProtection": {
+      "protected": false,
+      "level": null,
+      "barrier": null,
+      "barrierCoupon": null,
+      "barrierType": null,
+      "couponFloor": false
+    },
+    "earlyRedemption": {
+      "possible": false,
+      "type": null,
+      "trigger": null,
+      "frequency": null,
+      "startSemester": null,
+      "startYear": null,
+      "stepDown": false,
+      "stepDownPct": null
+    },
+    "decrementPct": null,
+    "actualDividendYield": null,
+    "historicalSimulations": null,
+    "scenarios": {
+      "favorable": null,
+      "median": null,
+      "defavorable": null
+    },
+    "risks": [
+      "risque de perte en capital",
+      "risque de taux",
+      "risque de crédit",
+      "risque high yield",
+      "risque marchés émergents"
+    ],
+    "mechanism": "FCP obligataire euro investissant dans des obligations internationales avec approche non contrainte",
+    "summary": "Fonds obligataire euro avec rendement 4.17%, sensibilité 1.14, duration 1.18, spread 140bps"
+  },
+  "aiSummary": "## DESCRIPTION\n**Income Euro Selection** - Fonds obligataire émis par SwissLife Gestion Privée. Durée recommandée de 3 ans. Investissement sur indices obligataires européens : 80% FTSE EuroBig et 20% FTSE Euro High Yield Bond Index.\n\n## MÉCANISME\nFCP obligataire euro avec approche non contrainte, investissant dans des obligations internationales. Allocation fixe entre obligations investment grade (80%) et high yield (20%).\n\n## RENDEMENT\n- **Taux moyen** : 4,17% par an\n- **Mode** : Capitalisation (pas de distribution)\n- **Pas de coupon conditionnel** ni de mécanisme à mémoire\n\n## PROTECTION\n**Aucune protection du capital**. Exposition totale aux fluctuations des marchés obligataires sans barrière ni garantie.\n\n## REMBOURSEMENT ANTICIPÉ\nNon applicable. Fonds sans mécanisme de rappel automatique.\n\n## SCÉNARIOS\nDonnées non communiquées. Pas de simulations historiques disponibles.\n\n## POINTS ATTENTION\n- **Risque de perte en capital** non protégé\n- **Risque de taux** : sensibilité aux variations des taux d'intérêt\n- **Risque de crédit** sur les émetteurs obligataires\n- **Risque high yield** : 20% d'exposition aux obligations spéculatives\n- **Risque marchés émergents** potentiel selon allocation",
+  "sourceFile": "Income Euro Selection.pdf",
+  "structureType": "fonds_obligataire",
+  "participationRate": null,
+  "historicalSimulations": null,
+  "guarantorRating": null,
+  "mechanism": "FCP obligataire euro investissant dans des obligations internationales avec approche non contrainte",
+  "nPairs": null,
+  "nUnderlyings": 2,
+  "decrementPct": null,
+  "actualDividendYield": null,
+  "maturityYears": 3,
+  "aiCategory": "track-bond",
+  "aiCategoryLabel": "📊 Tracker Obligataire",
+  "aiCategoryColor": "#FF7043",
+  "aiOpinion": "Ce produit offre une exposition diversifiée aux obligations européennes avec un coupon attractif de 4.17%, mais sans protection du capital ce qui expose à un risque de perte significatif. La combinaison investment grade/high yield (80/20) permet un bon équilibre rendement/risque, toutefois l'absence de barrière de protection constitue le principal point faible.",
+  "aiAnalyzedAt": "2026-03-29T20:49:59.900Z",
+  "status": "analyzing",
+  "receivedDate": "2026-03-29",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null,
+  "score": {
+    "score": 1,
+    "details": [
+      {
+        "type": "warning",
+        "icon": "⚠️",
+        "text": "Même sous-jacent que 1 produit(s) — 20% du book",
+        "impact": 35,
+        "category": "redundancy"
+      },
+      {
+        "type": "info",
+        "icon": "🏦",
+        "text": "Même émetteur que 4 produit(s) — concentration Swiss Life",
+        "impact": 16,
+        "category": "redundancy"
+      },
+      {
+        "type": "positive",
+        "icon": "🔀",
+        "text": "Faible corrélation moyenne (30%) — diversification",
+        "impact": 10,
+        "category": "complementarity"
+      },
+      {
+        "type": "warning",
+        "icon": "📦",
+        "text": "Même type que 1 produit(s) — 20% du book en \"Autre\"",
+        "impact": 8,
+        "category": "redundancy"
+      }
+    ],
+    "verdict": "⛔ Fortement déconseillé — duplication quasi-totale.",
+    "breakdown": {
+      "redundancy": 59,
+      "complementarity": 10
+    }
+  }
+}
