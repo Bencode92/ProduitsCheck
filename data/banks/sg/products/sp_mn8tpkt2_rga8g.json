@@ -12,14 +12,12 @@
   "maturityDate": null,
   "strikeDate": null,
   "coupon": {
-    "rate": 4.5,
-    "rateIfCalled": null,
-    "rateIfMaturity": null,
+    "rate": 18,
+    "frequency": "annuel",
+    "annualized": true,
     "type": "conditionnel",
-    "frequency": "semestriel",
-    "trigger": 60,
-    "memory": false,
-    "paymentTiming": "periodic"
+    "paymentTiming": "periodic",
+    "trigger": 60
   },
   "capitalProtection": {
     "protected": false,
@@ -178,7 +176,7 @@
   },
   "grading": {
     "grade": "C",
-    "score": 51,
+    "score": 46,
     "killCriteria": {
       "triggered": false,
       "reasons": []
@@ -188,72 +186,72 @@
         "score": 38,
         "base": 48,
         "delta": -10,
-        "reasoning": "Rendement: base 48 → -10 = 38 (Autocall à 95% difficile avec vol 39% et drag 4%/an, probabilité réelle du coupon fortement dégradée par le décrément) | Coupon 9%, barrière 50% | Barr.coupon 60% | Mat espérée: ~2.6a (prob mat: 2%)"
+        "reasoning": "Rendement: base 48 → -10 = 38 (Volatilité élevée (38.94%) et barrière coupon à 60% avec autocall à 95% rendent le profil de paiement très incertain en stagflation) | Coupon 4.5% × 2 (semestriel) = 9%, barrière 50% | Barr.coupon 60% | Mat espérée: ~2.6a (prob mat: 2%)"
       },
       "underlyingQuality": {
-        "score": 52,
+        "score": 22,
         "base": 37,
-        "delta": 15,
-        "reasoning": "Qualité: base 37 → +15 = 52 (Or = hedge stagflation optimal, beta 0.55 protecteur, secteur minier bénéficiaire direct inflation/USD faible) [vol/DD 30%] | Worst: Indice Solactive GDX EUR AR 5% B:35"
+        "delta": -15,
+        "reasoning": "Qualité: base 37 → -15 = 22 (Secteur minier aurifère très sensible aux taux réels et dollar fort en stagflation, beta faible (0.54) n'offre pas de protection suffisante) | Worst: Indice Solactive GDX EUR AR 5% B:35"
       },
       "portfolioFit": {
         "score": 85,
         "base": 80,
         "delta": 5,
-        "reasoning": "Fit: base 80 → +5 = 85 (Exposition or particulièrement pertinente en régime stagflationniste, diversification excellente vs actions traditionnelles)"
+        "reasoning": "Fit: base 80 → +5 = 85 (L'or peut offrir une couverture partielle contre l'inflation, mais l'indice décrément 5% érode significativement la performance)"
       },
       "riskPremium": {
-        "score": 38,
+        "score": 48,
         "base": 53,
-        "delta": -15,
-        "reasoning": "Prime: base 53 → -15 = 38 (Décrément 5% vs dividende 0.97% = drag annuel 4%, structure très défavorable qui érode massivement la performance) | 9% vs CAT 2.5% (spread 6.5%)"
+        "delta": -5,
+        "reasoning": "Prime: base 53 → -5 = 48 (Spread de 9% attractif mais le décrément de 5% représente un coût caché important sur 5 ans) | 4.5% × 2 = 9% vs CAT 2.5% (spread 6.5%)"
       }
     },
-    "verdict": "Produit paradoxal avec un sous-jacent parfaitement adapté au contexte stagflationniste (or/miniers) mais une structure toxique. Le décrément de 5% crée un drag annuel de 4% qui rend l'autocall à 95% quasi-impossible avec une volatilité de 39%. Malgré le coupon attractif de 9%, la probabilité de le toucher régulièrement est faible. Le beta défensif de 0.55 et l'exposition or sont des atouts majeurs dans le régime actuel, mais insuffisants pour compenser le handicap structurel du décrément excessif.",
+    "verdict": "Produit très risqué avec un score final de 38/100 (D). La volatilité extrême de 38.94% et le drawdown historique de -30.84% sur un indice minier avec décrément de 5% créent un profil asymétrique défavorable. Le coupon de 9% ne compense pas le risque de perte en capital avec une barrière à 50% dans un contexte stagflationniste défavorable aux minières aurifères. La probabilité de maturité anticipée est quasi-nulle (2%) avec un seuil autocall à 95%.",
     "keyRisks": [
-      "Drag annuel de 4% rend l'autocall très improbable",
-      "Volatilité élevée (39%) augmente le risque de franchissement barrière capitale 50%",
-      "Dollar fort (warnings DXY 120) peut peser sur les minières aurifères",
-      "Barrière à 0.8σ (Danger) — vol 38.93%"
+      "Décrément de 5% annuel érode 22% de performance sur 5 ans",
+      "Volatilité de 38.94% rend probable le franchissement de la barrière capital à 50%",
+      "Sensibilité extrême aux taux réels et au dollar en stagflation",
+      "Barrière à 0.8σ (Danger) — vol 38.94%"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 18,
-        "return_eur": 18000,
+        "return_pct": 9,
+        "return_eur": 9000,
         "probability": 0.15,
-        "duration_years": 2
+        "duration_years": 1
       },
       "base": {
-        "return_pct": 13.5,
-        "return_eur": 13500,
+        "return_pct": 4.5,
+        "return_eur": 11700,
         "probability": 0.3,
-        "duration_years": 3
+        "duration_years": 2.6
       },
       "stress": {
-        "return_pct": 0,
-        "return_eur": 0,
+        "return_pct": -20,
+        "return_eur": -20000,
         "probability": 0.35,
         "duration_years": 5
       },
       "worst": {
-        "return_pct": -25,
-        "return_eur": -25000,
+        "return_pct": -40,
+        "return_eur": -40000,
         "probability": 0.2,
         "duration_years": 5
       }
     },
     "confidenceInterval": {
-      "low": 41,
-      "high": 61,
+      "low": 36,
+      "high": 56,
       "halfWidth": 10,
       "gradeStable": false,
-      "gradeRange": "D-B",
-      "label": "C [41-61]"
+      "gradeRange": "D-C",
+      "label": "C [36-56]"
     },
     "metadata": {
-      "gradedAt": "2026-03-27T16:52:24.117Z",
-      "durationMs": 19522,
+      "gradedAt": "2026-03-29T20:21:16.144Z",
+      "durationMs": 19139,
       "aiUsed": true,
       "version": "5.2",
       "productType": "autocall",
@@ -272,14 +270,14 @@
       "expectedMaturity": 2.6,
       "maxMaturity": 5,
       "probReachMaturity": 2,
-      "maxBeta": 0.55,
+      "maxBeta": 0.54,
       "baseScore": 53,
       "baseGrade": "C",
       "adjustments": {
         "p1": -10,
-        "p2": 15,
+        "p2": -15,
         "p3": 5,
-        "p4": -15
+        "p4": -5
       },
       "barrier_sigma": 0.8,
       "barrier_sigma_label": "Danger",
@@ -287,12 +285,11 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 41,
-      "ci_high": 61,
-      "ci_label": "C [41-61]",
+      "ci_low": 36,
+      "ci_high": 56,
+      "ci_label": "C [36-56]",
       "issuer_rating": "A",
       "issuer_tier": "IG",
-      "issuer_cds_proxy": 70,
       "hasDecrement": true,
       "decrementDrag": 4.03,
       "structureType": "autocall",
@@ -301,9 +298,9 @@
           "name": "Indice Solactive GDX EUR AR 5%",
           "ticker": "GDX",
           "sector": "Index",
-          "perf_ytd": -3.9,
-          "perf_1y": 84.44,
-          "volatility_3y": 38.93,
+          "perf_ytd": -0.85,
+          "perf_1y": 85.75,
+          "volatility_3y": 38.94,
           "max_drawdown_3y": -30.84
         }
       ]
