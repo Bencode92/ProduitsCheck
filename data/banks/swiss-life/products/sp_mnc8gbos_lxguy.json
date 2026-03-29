@@ -178,5 +178,124 @@
       "redundancy": 59,
       "complementarity": 10
     }
+  },
+  "grading": {
+    "grade": "D",
+    "score": 26,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 12,
+        "base": 22,
+        "delta": -10,
+        "reasoning": "Rendement: base 22 → -10 = 12 (Coupon 4.17% faible en stagflation où l'inflation érode le rendement réel, obligations sensibles à la hausse des taux) | Coupon 4.17%"
+      },
+      "underlyingQuality": {
+        "score": 20,
+        "base": 35,
+        "delta": -15,
+        "reasoning": "Qualité: base 35 → -15 = 20 (Produit obligataire très vulnérable en stagflation avec risque de hausse des taux et spreads de crédit, VIX 22 défavorable)"
+      },
+      "portfolioFit": {
+        "score": 75,
+        "base": 80,
+        "delta": -5,
+        "reasoning": "Fit: base 80 → -5 = 75 (Diversification obligataire moins pertinente en période de corrélation élevée taux/crédit en stagflation)"
+      },
+      "riskPremium": {
+        "score": 11,
+        "base": 11,
+        "delta": 0,
+        "reasoning": "Prime: base 11 | 4.17% vs CAT 2.5% (spread 1.7%)"
+      }
+    },
+    "verdict": "Produit obligataire inadapté à l'environnement stagflationniste actuel avec un rendement réel négatif (4.17% - inflation). L'exposition 80/20 investment grade/high yield offre peu de protection contre la hausse des taux avec un duration risk élevé. Score final de 19/100 reflète un rapport risque/rendement très défavorable avec capital non protégé et sensibilité maximale au risque de taux.",
+    "keyRisks": [
+      "Perte en capital significative si hausse des taux de 100-200bps",
+      "Rendement réel négatif avec inflation >4%",
+      "Élargissement des spreads de crédit sur le segment high yield"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 4.17,
+        "return_eur": 12510,
+        "probability": 0.15,
+        "duration_years": 3
+      },
+      "base": {
+        "return_pct": -2,
+        "return_eur": -2000,
+        "probability": 0.4,
+        "duration_years": 3
+      },
+      "stress": {
+        "return_pct": -8,
+        "return_eur": -8000,
+        "probability": 0.3,
+        "duration_years": 2
+      },
+      "worst": {
+        "return_pct": -15,
+        "return_eur": -15000,
+        "probability": 0.15,
+        "duration_years": 1
+      }
+    },
+    "confidenceInterval": {
+      "low": 13,
+      "high": 39,
+      "halfWidth": 13,
+      "gradeStable": false,
+      "gradeRange": "F-D",
+      "label": "D [13-39]"
+    },
+    "metadata": {
+      "gradedAt": "2026-03-29T20:50:26.938Z",
+      "durationMs": 17930,
+      "aiUsed": true,
+      "version": "5.2",
+      "productType": "autocall",
+      "marketDataAvailable": false,
+      "catBenchmark": 2.5,
+      "catSource": "fallback-2026",
+      "couponAnnualized": 4.17,
+      "couponRaw": 4.17,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": false,
+      "barrierPct": 0,
+      "barrierCouponPct": null,
+      "couponProbability": null,
+      "expectedMaturity": 3,
+      "maxMaturity": 3,
+      "maxBeta": null,
+      "baseScore": 34,
+      "baseGrade": "D",
+      "adjustments": {
+        "p1": -10,
+        "p2": -15,
+        "p3": -5,
+        "p4": 0
+      },
+      "barrier_sigma": null,
+      "barrier_sigma_label": null,
+      "barrier_sigma_danger": null,
+      "liquidity_level": "L4",
+      "liquidity_score": 10,
+      "liquidity_label": "Illiquide",
+      "ci_low": 13,
+      "ci_high": 39,
+      "ci_label": "D [13-39]",
+      "issuer_rating": "A+",
+      "issuer_tier": "IG",
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "fonds_obligataire"
+    }
   }
 }
