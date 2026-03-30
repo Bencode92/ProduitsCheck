@@ -146,77 +146,88 @@
     "date": "2026-03-24",
     "note": ""
   },
+  "envelope": "cameleons",
+  "maturityYears": 10,
+  "structureType": "capital_garanti",
   "grading": {
-    "grade": "C",
-    "score": 51,
+    "grade": "B",
+    "score": 62,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 50,
-        "base": 60,
-        "delta": -10,
-        "reasoning": "Rendement: base 60 → -10 = 50 (Coupon 6% attractif mais structure TARN complexifie la réalisation du rendement avec risque d'extinction prématurée) | Coupon 6%, protégé"
+        "score": 80,
+        "base": 79,
+        "delta": 1,
+        "reasoning": "Rendement: base 79 → +1 = 80 (TEC 10 à 6% très réaliste en stagflation avec hausse des taux longs, probabilité de coupon élevée) | Coupon 6%, protégé | Mat espérée: ~1.2a (prob mat: 0%)"
       },
       "underlyingQuality": {
-        "score": 40,
+        "score": 36,
         "base": 35,
-        "delta": 5,
-        "reasoning": "Qualité: base 35 → +5 = 40 (TEC 10 bénéficie du contexte macro neutral-energy favorable, exposition diversifiée européenne moins risquée que secteurs évités) [B/Q 35%]"
+        "delta": 1,
+        "reasoning": "Qualité: base 35 → +1 = 36 (Indice obligataire parfait en stagflation, pentification de la courbe booste le TEC 10, zéro risque sectoriel)"
       },
       "portfolioFit": {
-        "score": 70,
+        "score": 71,
         "base": 70,
-        "delta": 0,
-        "reasoning": "En portefeuille — neutre"
+        "delta": 1,
+        "reasoning": "En portefeuille"
       },
       "riskPremium": {
-        "score": 65,
-        "base": 70,
-        "delta": -5,
-        "reasoning": "Prime: base 70 → -5 = 65 (Structure TARN génère une complexité tarifaire supplémentaire qui peut masquer des frais implicites) | 6% vs CAT 2.5% (spread 3.5%)"
+        "score": 72,
+        "base": 49,
+        "delta": -1,
+        "reasoning": "Capital garanti: spread 6.0% - CAT 2.5% - illiq 0.7% = 2.8%"
       }
     },
-    "verdict": "Ce TARN sur TEC 10 offre un coupon attractif de 6% avec protection du capital, bénéficiant d'une exposition diversifiée européenne alignée avec le contexte macro favorable à l'énergie. Cependant, la structure TARN complexifie significativement la réalisation du rendement avec un risque d'extinction anticipée qui peut frustrer les attentes. Le seuil d'autocall élevé à 24% rend le déclenchement difficile dans un contexte de volatilité. L'investissement reste défendable pour la protection capital mais la complexité structurelle justifie une approche prudente.",
+    "verdict": "Produit idéalement positionné pour la stagflation actuelle avec le TEC 10 qui devrait surperformer grâce à la pentification de la courbe (spread 2Y10Y à 46bps). Le capital garanti offre une protection totale dans un contexte de VIX à 22 et de rotation sectorielle violente. Avec un coupon de 6% sur un indice de taux longs en hausse et une maturité courte espérée de 1.2 ans, le couple rendement/risque est excellent pour naviguer la stagflation.",
     "keyRisks": [
-      "Extinction TARN prématurée limitant le rendement total réalisé",
-      "Seuil autocall 24% élevé rendant le déclenchement improbable en cas de volatilité"
+      "Risque de duration si la Fed pivote et les taux baissent brutalement",
+      "Opportunité manquée si l'inflation persiste et les taux montent au-delà de 6%"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 8,
-        "return_eur": 8000,
-        "probability": 0.2,
-        "duration_years": 2
+        "return_pct": 7.2,
+        "return_eur": 7200,
+        "probability": 0.35,
+        "duration_years": 1
       },
       "base": {
-        "return_pct": 4,
-        "return_eur": 16000,
+        "return_pct": 12,
+        "return_eur": 12000,
         "probability": 0.4,
-        "duration_years": 4
+        "duration_years": 2
       },
       "stress": {
-        "return_pct": 1,
+        "return_pct": 6,
         "return_eur": 6000,
-        "probability": 0.3,
-        "duration_years": 6
+        "probability": 0.2,
+        "duration_years": 1
       },
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.1,
-        "duration_years": 6
+        "probability": 0.05,
+        "duration_years": 10
       }
     },
+    "confidenceInterval": {
+      "low": 46,
+      "high": 64,
+      "halfWidth": 9,
+      "gradeStable": false,
+      "gradeRange": "C-B",
+      "label": "C [46-64]"
+    },
     "metadata": {
-      "gradedAt": "2026-03-25T08:20:00.763Z",
-      "durationMs": 11840,
+      "gradedAt": "2026-03-30T08:55:53.486Z",
+      "durationMs": 17801,
       "aiUsed": true,
-      "version": "4.3",
-      "productType": "standard",
+      "version": "5.2",
+      "productType": "capital_garanti",
       "marketDataAvailable": false,
       "catBenchmark": 2.5,
       "catSource": "fallback-2026",
@@ -227,19 +238,34 @@
       "isInPortfolio": true,
       "hasBarrier": false,
       "barrierPct": 0,
-      "expectedMaturity": 0,
-      "maxMaturity": 0,
+      "barrierCouponPct": null,
+      "couponProbability": null,
+      "expectedMaturity": 1.2,
+      "maxMaturity": 10,
+      "probReachMaturity": 0,
       "maxBeta": null,
-      "baseScore": 54,
+      "baseScore": 55,
       "baseGrade": "C",
       "adjustments": {
-        "p1": -10,
-        "p2": 5,
-        "p3": 0,
-        "p4": -5
-      }
+        "p1": 1,
+        "p2": 1,
+        "p3": 1,
+        "p4": -1
+      },
+      "barrier_sigma": null,
+      "barrier_sigma_label": null,
+      "barrier_sigma_danger": null,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Rappelable 8M",
+      "ci_low": 46,
+      "ci_high": 64,
+      "ci_label": "C [46-64]",
+      "issuer_rating": "A+",
+      "issuer_tier": "IG",
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "capital_garanti"
     }
-  },
-  "envelope": "cameleons",
-  "maturityYears": 10
+  }
 }
