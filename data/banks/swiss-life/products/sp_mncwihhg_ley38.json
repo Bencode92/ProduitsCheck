@@ -18,7 +18,7 @@
     "rate": 9.7,
     "rateIfCalled": null,
     "rateIfMaturity": null,
-    "type": "autocall",
+    "type": "conditionnel",
     "frequency": "annuel",
     "trigger": 95,
     "memory": false,
@@ -28,7 +28,6 @@
     "protected": false,
     "level": null,
     "barrier": 60,
-    "barrierCoupon": null,
     "barrierType": "europeenne",
     "couponFloor": false
   },
@@ -40,7 +39,9 @@
     "startSemester": null,
     "startYear": 1,
     "stepDown": false,
-    "stepDownPct": null
+    "stepDownPct": null,
+    "hasAutocall": true,
+    "enabled": true
   },
   "scenarios": {
     "favorable": null,
@@ -81,7 +82,7 @@
       "rate": 9.7,
       "rateIfCalled": null,
       "rateIfMaturity": null,
-      "type": "autocall",
+      "type": "conditionnel",
       "frequency": "annuel",
       "trigger": 95,
       "memory": false,
@@ -92,7 +93,6 @@
       "protected": false,
       "level": null,
       "barrier": 60,
-      "barrierCoupon": null,
       "barrierType": "europeenne",
       "couponFloor": false
     },
@@ -104,7 +104,9 @@
       "startSemester": null,
       "startYear": 1,
       "stepDown": false,
-      "stepDownPct": null
+      "stepDownPct": null,
+      "hasAutocall": true,
+      "enabled": true
     },
     "decrementPct": null,
     "actualDividendYield": null,
@@ -124,7 +126,7 @@
   },
   "aiSummary": "## DESCRIPTION\nProduit structuré \"OBJECTIF MAI 2026\" émis par Goldman Sachs Finance Corp International Ltd. Type autocall sur 6 ans avec exposition à un panier de 4 actions : ASML Holding N.V., Intesa Sanpaolo S.p.A., Siemens Energy AG et Banco Santander S.A.\n\n## MÉCANISME\n- Observation annuelle du niveau du panier par rapport à son niveau initial\n- Si panier ≥ 95% : remboursement automatique avec gain\n- À échéance (6 ans) : gain si panier ≥ 95%, perte en capital si panier < 60%\n- Entre 60% et 95% à échéance : remboursement du capital sans gain\n\n## RENDEMENT\n- Coupon : 9,70% par an\n- Fréquence : annuelle\n- Condition : panier ≥ 95% (trigger)\n- Paiement : à l'échéance ou au remboursement anticipé\n- Pas d'effet mémoire\n\n## PROTECTION\n- Capital non protégé\n- Barrière de protection à 60% (européenne, observée uniquement à échéance)\n- Perte en capital si panier < 60% à échéance\n\n## REMBOURSEMENT ANTICIPÉ\n- Autocall possible dès la fin de l'année 1\n- Déclenchement si panier ≥ 95%\n- Observation annuelle\n- Remboursement du capital + coupons de 9,70% par année écoulée\n\n## SCÉNARIOS\nDonnées non fournies pour les scénarios favorable, médian et défavorable.\n\n## POINTS ATTENTION\n- Risque de perte totale ou partielle du capital investi\n- Risque de défaut de l'émetteur Goldman Sachs\n- Risque d'inflation sur la période de 6 ans\n- Performance dépendante de l'évolution des 4 actions du panier",
   "sourceFile": "Brochure OBJECTIF MAI 2026.pdf",
-  "structureType": "autocall",
+  "structureType": "basket",
   "participationRate": null,
   "historicalSimulations": null,
   "guarantorRating": {
@@ -193,5 +195,6 @@
       "redundancy": 71,
       "complementarity": 25
     }
-  }
+  },
+  "envelope": ""
 }
