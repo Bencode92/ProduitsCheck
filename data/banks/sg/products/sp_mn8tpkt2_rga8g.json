@@ -176,91 +176,93 @@
       "complementarity": 25
     }
   },
+  "envelope": "",
   "grading": {
     "grade": "B",
-    "score": 69,
+    "score": 63,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 65,
-        "base": 55,
-        "delta": 10,
-        "reasoning": "Rendement: base 55 → +10 = 65 (Coupon élevé de 18% bien positionné en stagflation où l'or surperforme historiquement, barrière 60% offre marge de sécurité suffisante) | Coupon 18%, barrière 50% | Barr.coupon 60% | Mat espérée: ~2.5a (prob mat: 1%)"
+        "score": 38,
+        "base": 48,
+        "delta": -10,
+        "reasoning": "Rendement: base 48 → -10 = 38 (En stagflation avec VIX à 22, la probabilité d'autocall rapide chute drastiquement pour un indice volatil (38.92%) nécessitant +95% de performance) | Coupon 9%, barrière 50% | Barr.coupon 60% | Mat espérée: ~2.5a (prob mat: 1%)"
       },
       "underlyingQuality": {
         "score": 54,
         "base": 39,
         "delta": 15,
-        "reasoning": "Qualité: base 39 → +15 = 54 (Secteur aurifère idéalement positionné en stagflation (hedge inflation + safe haven), beta défensif 0.53 et momentum materials neutre favorables) | Worst: Indice Solactive GDX EUR AR 5% B:35"
+        "reasoning": "Qualité: base 39 → +15 = 54 (L'or est l'actif refuge par excellence en stagflation (Brent >$100, PCE élevé), les minières aurifères surperforment historiquement dans ce régime) | Worst: Indice Solactive GDX EUR AR 5% B:35"
       },
       "portfolioFit": {
-        "score": 75,
+        "score": 85,
         "base": 80,
-        "delta": -5,
-        "reasoning": "Fit: base 80 → -5 = 75 (Excellente diversification en stagflation mais volatilité 38.92% nécessite allocation prudente, maximum 5-10% du portefeuille)"
+        "delta": 5,
+        "reasoning": "Fit: base 80 → +5 = 85 (Excellent diversifiant en portefeuille avec beta 0.53, corrélation négative aux actions en période stagflationniste)"
       },
       "riskPremium": {
         "score": 83,
-        "base": 36,
-        "delta": -10,
-        "reasoning": "Capital garanti: spread 18.0% - CAT 2.5% - illiq 0.5% = 15.1% | Illiq. premium +1.3% (-7pts)"
+        "base": 0,
+        "delta": 0,
+        "reasoning": "Capital garanti: spread 9.0% - CAT 2.5% - illiq 0.5% = 6.0% | Illiq. premium +1.3% (-7pts)"
       }
     },
-    "verdict": "Produit très bien adapté au régime stagflationniste actuel avec l'or bénéficiant du double catalyseur inflation (Brent >$100) et aversion au risque (VIX 22). Le coupon de 18% offre un rendement réel positif malgré l'inflation élevée, avec une probabilité de maturation anticipée élevée grâce au seuil autocall 95%. Le beta défensif 0.53 et la corrélation négative historique de l'or aux actions en font un excellent hedge de portefeuille dans ce contexte de rotation sectorielle violente.",
+    "verdict": "Produit exceptionnellement bien positionné pour le régime stagflationniste actuel. L'indice GDX bénéficie directement du statut refuge de l'or (Brent >$100, stress énergétique) avec un coupon attractif de 9% annualisé et des barrières prudentes (60%/50%). Le beta faible (0.53) offre une décorrélation précieuse alors que tech/growth subissent la rotation sectorielle. Attention toutefois à la volatilité élevée (38.92%) qui réduit la probabilité d'autocall rapide.",
     "keyRisks": [
-      "Risque de correction brutale si dollar s'apprécie fortement face aux politiques Fed hawkish",
-      "Décrément 5% érode performance dans scénario de stagnation prolongée des minières aurifères",
+      "Volatilité extrême de 38.92% peut retarder significativement l'autocall",
+      "Drawdown historique de -30.84% montre le potentiel de baisse brutal du secteur",
+      "Décrément 5% érode progressivement la performance en cas de stagnation prolongée",
       "Barrière à 0.8σ (Danger) — vol 38.92%"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 36,
-        "return_eur": 36000,
+        "return_pct": 13.5,
+        "return_eur": 13500,
         "probability": 0.3,
-        "duration_years": 2
+        "duration_years": 1.5
       },
       "base": {
-        "return_pct": 45,
-        "return_eur": 45000,
+        "return_pct": 22.5,
+        "return_eur": 22500,
         "probability": 0.4,
         "duration_years": 2.5
       },
       "stress": {
-        "return_pct": 18,
-        "return_eur": 18000,
+        "return_pct": 45,
+        "return_eur": 45000,
         "probability": 0.2,
-        "duration_years": 1
+        "duration_years": 5
       },
       "worst": {
-        "return_pct": -20,
-        "return_eur": -20000,
+        "return_pct": -25,
+        "return_eur": -25000,
         "probability": 0.1,
         "duration_years": 5
       }
     },
     "confidenceInterval": {
-      "low": 45,
-      "high": 65,
+      "low": 32,
+      "high": 52,
       "halfWidth": 10,
       "gradeStable": false,
-      "gradeRange": "C-B",
-      "label": "C [45-65]"
+      "gradeRange": "D-C",
+      "label": "D [32-52]"
     },
     "metadata": {
-      "gradedAt": "2026-03-30T09:05:14.085Z",
-      "durationMs": 20471,
+      "gradedAt": "2026-03-30T09:11:23.062Z",
+      "durationMs": 19959,
       "aiUsed": true,
       "version": "5.2",
       "productType": "autocall",
       "marketDataAvailable": true,
       "catBenchmark": 2.5,
       "catSource": "fallback-2026",
-      "couponAnnualized": 18,
-      "couponRaw": 18,
+      "couponAnnualized": 9,
+      "couponRaw": 9,
       "couponMultiplier": 1,
       "couponFrequency": "annuel",
       "isInPortfolio": false,
@@ -272,13 +274,13 @@
       "maxMaturity": 5,
       "probReachMaturity": 1,
       "maxBeta": 0.53,
-      "baseScore": 51,
-      "baseGrade": "C",
+      "baseScore": 40,
+      "baseGrade": "D",
       "adjustments": {
-        "p1": 10,
+        "p1": -10,
         "p2": 15,
-        "p3": -5,
-        "p4": -10
+        "p3": 5,
+        "p4": 0
       },
       "barrier_sigma": 0.8,
       "barrier_sigma_label": "Danger",
@@ -286,9 +288,9 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 45,
-      "ci_high": 65,
-      "ci_label": "C [45-65]",
+      "ci_low": 32,
+      "ci_high": 52,
+      "ci_label": "D [32-52]",
       "issuer_rating": "A",
       "issuer_tier": "IG",
       "hasDecrement": true,
@@ -306,6 +308,5 @@
         }
       ]
     }
-  },
-  "envelope": ""
+  }
 }
