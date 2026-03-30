@@ -245,32 +245,32 @@
         "score": 84,
         "base": 86,
         "delta": -2,
-        "reasoning": "Rendement: base 86 → -2 = 84 (Barrière 100% en stagflation avec VIX 22 et volatilités élevées (29% LVMH, 21% ACA) réduit fortement la probabilité de toucher le coupon) | Coupon 6.15%, protégé | Barr.coupon 100%"
+        "reasoning": "Rendement: base 86 → -2 = 84 (Barrière à 100% en stagflation avec VIX élevé et volatilités >20% rend le coupon très incertain) | Coupon 6.15%, protégé | Barr.coupon 100%"
       },
       "underlyingQuality": {
         "score": 72,
         "base": 74,
         "delta": -2,
-        "reasoning": "Qualité: base 74 → -2 = 72 (Crédit Agricole dans les financials évités (-1.63%) en stagflation avec choc pétrolier, LVMH exposé au ralentissement consumer discretionary) | Worst: Crédit Agricole S.A. B:79"
+        "reasoning": "Qualité: base 74 → -2 = 72 (Crédit Agricole dans secteur financier évité (-1.63% momentum) et LVMH vulnérable au ralentissement chinois en stagflation) | Worst: Crédit Agricole S.A. B:79"
       },
       "portfolioFit": {
         "score": 82,
         "base": 80,
         "delta": 2,
-        "reasoning": "Fit: base 80 → +2 = 82 (Capital garanti offre protection précieuse en stagflation avec rotation sectorielle violente et risque de bear steepening)"
+        "reasoning": "Fit: base 80 → +2 = 82 (Capital garanti offre une protection bienvenue en régime stagflationniste avec choc pétrolier)"
       },
       "riskPremium": {
         "score": 77,
         "base": 15,
-        "delta": 0,
+        "delta": -2,
         "reasoning": "Capital garanti: spread 6.2% - CAT 2.5% - illiq 0.3% = 3.3%"
       }
     },
-    "verdict": "Produit médiocre (score 44/100) en stagflation avec Brent >$100 et VIX 22. La barrière coupon à 100% sur un worst-of incluant Crédit Agricole (secteur financier évité, -1.63%) rend le coupon 6.15% quasi-inatteignable. Seul avantage : capital garanti en environnement de rotation sectorielle violente et risque de bear steepening.",
+    "verdict": "Produit capital garanti peu attractif en stagflation avec seulement 49/100 après ajustements. La barrière digitale à 100% sur un worst-of incluant Crédit Agricole (secteur évité, -1.63%) rend le coupon de 6.15% très hypothétique avec des volatilités >20%. Le régime stagflationniste avec Brent >$100 et rotation sectorielle défavorise fortement les deux sous-jacents, limitant le produit à une simple protection du capital sur 3 ans.",
     "keyRisks": [
-      "Probabilité très faible de toucher le coupon avec barrière 100% en stagflation",
-      "Crédit Agricole dans secteur financier évité avec momentum négatif -1.63%",
-      "Worst-of amplifie le risque avec deux secteurs sous pression en stagflation"
+      "Probabilité très élevée de 0% de coupon avec barrière 100% en stagflation",
+      "Crédit Agricole dans secteur financier évité avec momentum négatif",
+      "LVMH exposé au ralentissement chinois et rotation anti-growth"
     ],
     "negotiationPoints": [],
     "scenarios": {
@@ -308,8 +308,8 @@
       "label": "B [56-70]"
     },
     "metadata": {
-      "gradedAt": "2026-03-30T13:14:34.639Z",
-      "durationMs": 19389,
+      "gradedAt": "2026-03-30T13:14:35.463Z",
+      "durationMs": 19315,
       "aiUsed": true,
       "version": "5.2",
       "productType": "capital_garanti",
@@ -334,7 +334,7 @@
         "p1": -2,
         "p2": -2,
         "p3": 2,
-        "p4": 0
+        "p4": -2
       },
       "barrier_sigma": null,
       "barrier_sigma_label": null,
