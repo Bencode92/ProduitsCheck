@@ -18,20 +18,17 @@
   "maturityYears": 10,
   "coupon": {
     "rate": 3,
-    "rateIfCalled": null,
-    "rateIfMaturity": null,
-    "type": "conditionnel",
     "frequency": "semestriel",
+    "annualized": true,
+    "type": "conditionnel",
+    "paymentTiming": "maturity",
     "trigger": 91,
-    "memory": false,
-    "paymentTiming": "maturity"
+    "memory": false
   },
   "participationRate": null,
   "capitalProtection": {
     "protected": true,
     "level": 100,
-    "barrier": null,
-    "barrierCoupon": null,
     "barrierType": "europeenne"
   },
   "earlyRedemption": {
@@ -41,10 +38,10 @@
     "frequency": "semestriel",
     "startSemester": 2,
     "stepDown": false,
-    "stepDownPct": null
+    "stepDownPct": null,
+    "hasAutocall": true,
+    "enabled": true
   },
-  "decrementPct": null,
-  "actualDividendYield": null,
   "mechanism": "Remboursement automatique anticipé à partir du semestre 2 si l'action Intesa Sanpaolo clôture ≥ 91% de son niveau initial. Gain de 3% par semestre écoulé plafonné à 5,85% semestriel. Protection du capital à l'échéance.",
   "risks": [
     "Risque de perte en capital en cours de vie",
@@ -224,5 +221,12 @@
       "redundancy": 42,
       "complementarity": 35
     }
-  }
+  },
+  "_freqFixApplied": true,
+  "aiCategory": "autocall-mono",
+  "aiCategoryLabel": "⚡ Autocall Mono-actif",
+  "aiCategoryColor": "#06D6A0",
+  "aiOpinion": "Produit autocall sur un seul sous-jacent bancaire italien avec protection du capital et coupon attractif de 6%, mais exposé au risque spécifique d'Intesa Sanpaolo. La durée longue de 10 ans et la concentration sur une seule action augmentent significativement le risque malgré la protection du capital.",
+  "aiAnalyzedAt": "2026-03-30T13:27:31.014Z",
+  "envelope": ""
 }
