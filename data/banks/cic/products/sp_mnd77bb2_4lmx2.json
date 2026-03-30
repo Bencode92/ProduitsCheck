@@ -1,0 +1,225 @@
+{
+  "id": "sp_mnd77bb2_4lmx2",
+  "name": "Digitale WO LVMH Crédit Agricole Avril 2029",
+  "type": "autocall",
+  "structureType": "autocall",
+  "emitter": "Crédit Industriel et Commercial",
+  "guarantor": "Crédit Industriel et Commercial",
+  "guarantorRating": {
+    "moodys": "A1",
+    "sp": "A+"
+  },
+  "underlyings": [
+    "LVMH Moët Hennessy Louis Vuitton SA",
+    "Crédit Agricole S.A."
+  ],
+  "underlyingType": "worst-of",
+  "currency": "EUR",
+  "maturity": "3 ans",
+  "maturityYears": 3,
+  "coupon": {
+    "rate": 6.15,
+    "rateIfCalled": null,
+    "rateIfMaturity": null,
+    "type": "fixe",
+    "frequency": "annuel",
+    "trigger": 100,
+    "memory": true,
+    "paymentTiming": "periodic"
+  },
+  "participationRate": null,
+  "capitalProtection": {
+    "protected": true,
+    "level": 100,
+    "barrier": null,
+    "barrierCoupon": 100,
+    "barrierType": "europeenne"
+  },
+  "earlyRedemption": {
+    "possible": false,
+    "type": "none",
+    "trigger": null,
+    "frequency": "annuel",
+    "startSemester": null,
+    "stepDown": false,
+    "stepDownPct": null
+  },
+  "decrementPct": null,
+  "actualDividendYield": null,
+  "mechanism": "Coupon de 6,15% par an si le sous-jacent ayant le moins performé ≥ 100% de son niveau initial. Coupons mémorisés. Capital garanti à l'échéance.",
+  "risks": [
+    "Risque de marché",
+    "Risque de crédit",
+    "Risque de liquidité",
+    "Plafonnement des gains",
+    "Pas de dividendes"
+  ],
+  "summary": "Produit worst-of sur LVMH et Crédit Agricole offrant un coupon annuel de 6,15% avec mémoire si le moins performant des sous-jacents est au-dessus de son niveau initial. Capital garanti à l'échéance de 3 ans.",
+  "aiParsed": {
+    "name": "Digitale WO LVMH Crédit Agricole Avril 2029",
+    "type": "autocall",
+    "structureType": "autocall",
+    "emitter": "Crédit Industriel et Commercial",
+    "guarantor": "Crédit Industriel et Commercial",
+    "guarantorRating": {
+      "moodys": "A1",
+      "sp": "A+"
+    },
+    "underlyings": [
+      "LVMH Moët Hennessy Louis Vuitton SA",
+      "Crédit Agricole S.A."
+    ],
+    "underlyingType": "worst-of",
+    "currency": "EUR",
+    "maturity": "3 ans",
+    "maturityYears": 3,
+    "coupon": {
+      "rate": 6.15,
+      "rateIfCalled": null,
+      "rateIfMaturity": null,
+      "type": "fixe",
+      "frequency": "annuel",
+      "trigger": 100,
+      "memory": true,
+      "paymentTiming": "periodic"
+    },
+    "participationRate": null,
+    "capitalProtection": {
+      "protected": true,
+      "level": 100,
+      "barrier": null,
+      "barrierCoupon": 100,
+      "barrierType": "europeenne"
+    },
+    "earlyRedemption": {
+      "possible": false,
+      "type": "none",
+      "trigger": null,
+      "frequency": "annuel",
+      "startSemester": null,
+      "stepDown": false,
+      "stepDownPct": null
+    },
+    "decrementPct": null,
+    "actualDividendYield": null,
+    "mechanism": "Coupon de 6,15% par an si le sous-jacent ayant le moins performé ≥ 100% de son niveau initial. Coupons mémorisés. Capital garanti à l'échéance.",
+    "risks": [
+      "Risque de marché",
+      "Risque de crédit",
+      "Risque de liquidité",
+      "Plafonnement des gains",
+      "Pas de dividendes"
+    ],
+    "summary": "Produit worst-of sur LVMH et Crédit Agricole offrant un coupon annuel de 6,15% avec mémoire si le moins performant des sous-jacents est au-dessus de son niveau initial. Capital garanti à l'échéance de 3 ans.",
+    "aiParsed": {
+      "name": "Digitale WO LVMH Crédit Agricole Avril 2029",
+      "structureType": "worst_of",
+      "emitter": "Crédit Industriel et Commercial",
+      "guarantor": "Crédit Industriel et Commercial",
+      "guarantorRating": {
+        "moodys": "A1",
+        "sp": "A+"
+      },
+      "underlyings": [
+        "LVMH Moët Hennessy Louis Vuitton SA",
+        "Crédit Agricole S.A."
+      ],
+      "underlyingType": "worst-of",
+      "currency": "EUR",
+      "maturity": "09/04/2029",
+      "maturityYears": 3,
+      "coupon": {
+        "rate": 6.15,
+        "rateIfCalled": null,
+        "rateIfMaturity": null,
+        "type": "fixe",
+        "frequency": "annuel",
+        "trigger": 100,
+        "memory": true,
+        "paymentTiming": "periodic"
+      },
+      "participationRate": null,
+      "capitalProtection": {
+        "protected": true,
+        "level": 100,
+        "barrier": null,
+        "barrierCoupon": 100,
+        "barrierType": "europeenne"
+      },
+      "earlyRedemption": {
+        "possible": false,
+        "type": "",
+        "trigger": null,
+        "frequency": "",
+        "startSemester": null,
+        "stepDown": false,
+        "stepDownPct": null
+      },
+      "decrementPct": null,
+      "actualDividendYield": null,
+      "mechanism": "Coupon de 6,15% par an si le sous-jacent ayant le moins performé ≥ 100% de son niveau initial. Coupons mémorisés. Capital garanti à l'échéance.",
+      "risks": [
+        "Risque de marché",
+        "Risque de crédit",
+        "Risque de liquidité",
+        "Plafonnement des gains",
+        "Pas de dividendes"
+      ],
+      "summary": "Produit worst-of sur LVMH et Crédit Agricole offrant un coupon annuel de 6,15% avec mémoire si le moins performant des sous-jacents est au-dessus de son niveau initial. Capital garanti à l'échéance de 3 ans."
+    },
+    "sourceFile": "Digitale WO LVMH Crédit Agricole.pdf"
+  },
+  "sourceFile": "JSON import",
+  "bankId": "cic",
+  "status": "analyzing",
+  "receivedDate": "2026-03-30",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null,
+  "score": {
+    "score": 76,
+    "details": [
+      {
+        "type": "positive",
+        "icon": "✅",
+        "text": "Nouveau sous-jacent absent du book — diversification",
+        "impact": 25,
+        "category": "complementarity"
+      },
+      {
+        "type": "warning",
+        "icon": "📦",
+        "text": "Même type que 4 produit(s) — 80% du book en \"Autocall / Phoenix\"",
+        "impact": 20,
+        "category": "redundancy"
+      },
+      {
+        "type": "positive",
+        "icon": "📈",
+        "text": "Coupon (6.15%) > moyenne du book (5.2%)",
+        "impact": 15,
+        "category": "complementarity"
+      },
+      {
+        "type": "positive",
+        "icon": "🔀",
+        "text": "Faible corrélation moyenne (30%) — diversification",
+        "impact": 10,
+        "category": "complementarity"
+      },
+      {
+        "type": "info",
+        "icon": "🏦",
+        "text": "Même émetteur que 1 produit(s) — concentration CIC",
+        "impact": 4,
+        "category": "redundancy"
+      }
+    ],
+    "verdict": "🟡 Intéressant — bonne diversification avec quelques recouvrements.",
+    "breakdown": {
+      "redundancy": 24,
+      "complementarity": 50
+    }
+  }
+}
