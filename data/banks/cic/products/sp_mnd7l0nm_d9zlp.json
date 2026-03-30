@@ -31,7 +31,6 @@
   "capitalProtection": {
     "protected": true,
     "level": 100,
-    "barrier": null,
     "barrierCoupon": 100,
     "barrierType": "europeenne"
   },
@@ -42,10 +41,10 @@
     "frequency": "annuel",
     "startSemester": null,
     "stepDown": false,
-    "stepDownPct": null
+    "stepDownPct": null,
+    "hasAutocall": false,
+    "enabled": false
   },
-  "decrementPct": null,
-  "actualDividendYield": null,
   "mechanism": "Le produit verse un coupon annuel de 6,15% si le sous-jacent ayant le moins performé est supérieur ou égal à 100% de son niveau initial. Les coupons non versés sont mémorisés. Capital garanti à 100% à l'échéance.",
   "risks": [
     "Risque lié au sous-jacent",
@@ -227,5 +226,11 @@
       "redundancy": 4,
       "complementarity": 70
     }
-  }
+  },
+  "aiCategory": "capital-protege",
+  "aiCategoryLabel": "🛡️ Capital Protégé",
+  "aiCategoryColor": "#4CAF50",
+  "aiOpinion": "Ce produit offre un bon équilibre avec un coupon attractif de 6,15% annuel et une protection totale du capital, mais dépend de la performance de deux valeurs dont une bancaire (Crédit Agricole) potentiellement volatile. Le mécanisme à mémoire est un plus, permettant de rattraper les coupons non versés, mais la durée de 3 ans expose aux fluctuations sectorielles du luxe et de la banque.",
+  "aiAnalyzedAt": "2026-03-30T13:13:28.329Z",
+  "envelope": ""
 }
