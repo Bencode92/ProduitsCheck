@@ -1,0 +1,231 @@
+{
+  "id": "sp_mnd8qz4j_67jax",
+  "name": "OBJECTIF MAI 2026",
+  "type": "autocall",
+  "structureType": "autocall",
+  "emitter": "Goldman Sachs Finance Corp International Ltd",
+  "guarantor": "The Goldman Sachs Group, Inc.",
+  "guarantorRating": {
+    "moodys": "A2",
+    "sp": "BBB+"
+  },
+  "underlyings": [
+    "ASML Holding N.V.",
+    "Intesa Sanpaolo S.p.A.",
+    "Siemens Energy AG",
+    "Banco Santander S.A."
+  ],
+  "underlyingType": "basket",
+  "currency": "EUR",
+  "maturity": "6 ans",
+  "maturityYears": 6,
+  "coupon": {
+    "rate": 9.7,
+    "rateIfCalled": null,
+    "rateIfMaturity": null,
+    "type": "fixe",
+    "frequency": "annuel",
+    "trigger": 95,
+    "memory": false,
+    "paymentTiming": "periodic"
+  },
+  "participationRate": null,
+  "capitalProtection": {
+    "protected": false,
+    "level": null,
+    "barrier": 60,
+    "barrierCoupon": 95,
+    "barrierType": "europeenne"
+  },
+  "earlyRedemption": {
+    "possible": true,
+    "type": "autocall",
+    "trigger": 95,
+    "frequency": "annuel",
+    "startSemester": 2,
+    "stepDown": false,
+    "stepDownPct": null
+  },
+  "decrementPct": null,
+  "actualDividendYield": null,
+  "mechanism": "Remboursement automatique anticipé à partir de l'année 1 si le panier équi-pondéré clôture à un niveau supérieur ou égal à 95% de son niveau initial. Gain de 9,70% par année écoulée. Protection du capital si le panier reste au-dessus de 60% à l'échéance.",
+  "risks": [
+    "Risque de perte en capital",
+    "Risque de crédit",
+    "Risque de marché",
+    "Risque de liquidité",
+    "Risques liés aux titres indexés sur un panier de sous-jacents"
+  ],
+  "summary": "Titre de créance de 6 ans sur un panier équi-pondéré de 4 actions européennes avec remboursement anticipé automatique possible dès la 1ère année si le panier atteint 95% de son niveau initial, offrant un gain de 9,70% par année écoulée. Barrière de perte en capital à 60%.",
+  "aiParsed": {
+    "name": "OBJECTIF MAI 2026",
+    "type": "autocall",
+    "structureType": "autocall",
+    "emitter": "Goldman Sachs Finance Corp International Ltd",
+    "guarantor": "The Goldman Sachs Group, Inc.",
+    "guarantorRating": {
+      "moodys": "A2",
+      "sp": "BBB+"
+    },
+    "underlyings": [
+      "ASML Holding N.V.",
+      "Intesa Sanpaolo S.p.A.",
+      "Siemens Energy AG",
+      "Banco Santander S.A."
+    ],
+    "underlyingType": "basket",
+    "currency": "EUR",
+    "maturity": "6 ans",
+    "maturityYears": 6,
+    "coupon": {
+      "rate": 9.7,
+      "rateIfCalled": null,
+      "rateIfMaturity": null,
+      "type": "fixe",
+      "frequency": "annuel",
+      "trigger": 95,
+      "memory": false,
+      "paymentTiming": "periodic"
+    },
+    "participationRate": null,
+    "capitalProtection": {
+      "protected": false,
+      "level": null,
+      "barrier": 60,
+      "barrierCoupon": 95,
+      "barrierType": "europeenne"
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "autocall",
+      "trigger": 95,
+      "frequency": "annuel",
+      "startSemester": 2,
+      "stepDown": false,
+      "stepDownPct": null
+    },
+    "decrementPct": null,
+    "actualDividendYield": null,
+    "mechanism": "Remboursement automatique anticipé à partir de l'année 1 si le panier équi-pondéré clôture à un niveau supérieur ou égal à 95% de son niveau initial. Gain de 9,70% par année écoulée. Protection du capital si le panier reste au-dessus de 60% à l'échéance.",
+    "risks": [
+      "Risque de perte en capital",
+      "Risque de crédit",
+      "Risque de marché",
+      "Risque de liquidité",
+      "Risques liés aux titres indexés sur un panier de sous-jacents"
+    ],
+    "summary": "Titre de créance de 6 ans sur un panier équi-pondéré de 4 actions européennes avec remboursement anticipé automatique possible dès la 1ère année si le panier atteint 95% de son niveau initial, offrant un gain de 9,70% par année écoulée. Barrière de perte en capital à 60%.",
+    "aiParsed": {
+      "name": "OBJECTIF MAI 2026",
+      "structureType": "autocall",
+      "emitter": "Goldman Sachs Finance Corp International Ltd",
+      "guarantor": "The Goldman Sachs Group, Inc.",
+      "guarantorRating": {
+        "moodys": "A2",
+        "sp": "BBB+"
+      },
+      "underlyings": [
+        "ASML Holding N.V.",
+        "Intesa Sanpaolo S.p.A.",
+        "Siemens Energy AG",
+        "Banco Santander S.A."
+      ],
+      "underlyingType": "basket",
+      "currency": "EUR",
+      "maturity": "07/06/2032",
+      "maturityYears": 6,
+      "coupon": {
+        "rate": 9.7,
+        "rateIfCalled": null,
+        "rateIfMaturity": null,
+        "type": "fixe",
+        "frequency": "annuel",
+        "trigger": null,
+        "memory": false,
+        "paymentTiming": "periodic"
+      },
+      "participationRate": null,
+      "capitalProtection": {
+        "protected": false,
+        "level": null,
+        "barrier": 60,
+        "barrierCoupon": 95,
+        "barrierType": "europeenne"
+      },
+      "earlyRedemption": {
+        "possible": true,
+        "type": "autocall",
+        "trigger": 95,
+        "frequency": "annuel",
+        "startSemester": 2,
+        "stepDown": false,
+        "stepDownPct": null
+      },
+      "decrementPct": null,
+      "actualDividendYield": null,
+      "mechanism": "Remboursement automatique anticipé à partir de l'année 1 si le panier équi-pondéré clôture à un niveau supérieur ou égal à 95% de son niveau initial. Gain de 9,70% par année écoulée. Protection du capital si le panier reste au-dessus de 60% à l'échéance.",
+      "risks": [
+        "Risque de perte en capital",
+        "Risque de crédit",
+        "Risque de marché",
+        "Risque de liquidité",
+        "Risques liés aux titres indexés sur un panier de sous-jacents"
+      ],
+      "summary": "Titre de créance de 6 ans sur un panier équi-pondéré de 4 actions européennes avec remboursement anticipé automatique possible dès la 1ère année si le panier atteint 95% de son niveau initial, offrant un gain de 9,70% par année écoulée. Barrière de perte en capital à 60%."
+    },
+    "sourceFile": "Brochure OBJECTIF MAI 2026.pdf"
+  },
+  "sourceFile": "JSON import",
+  "bankId": "swiss-life",
+  "status": "analyzing",
+  "receivedDate": "2026-03-30",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null,
+  "score": {
+    "score": 4,
+    "details": [
+      {
+        "type": "warning",
+        "icon": "⚠️",
+        "text": "Même sous-jacent que 1 produit(s) — 20% du book",
+        "impact": 35,
+        "category": "redundancy"
+      },
+      {
+        "type": "warning",
+        "icon": "📦",
+        "text": "Même type que 4 produit(s) — 80% du book en \"Autocall / Phoenix\"",
+        "impact": 20,
+        "category": "redundancy"
+      },
+      {
+        "type": "info",
+        "icon": "🏦",
+        "text": "Même émetteur que 4 produit(s) — concentration Swiss Life",
+        "impact": 16,
+        "category": "redundancy"
+      },
+      {
+        "type": "positive",
+        "icon": "📈",
+        "text": "Coupon (9.7%) > moyenne du book (5.2%)",
+        "impact": 15,
+        "category": "complementarity"
+      },
+      {
+        "type": "positive",
+        "icon": "🔀",
+        "text": "Faible corrélation moyenne (30%) — diversification",
+        "impact": 10,
+        "category": "complementarity"
+      }
+    ],
+    "verdict": "⛔ Fortement déconseillé — duplication quasi-totale.",
+    "breakdown": {
+      "redundancy": 71,
+      "complementarity": 25
+    }
+  }
+}
