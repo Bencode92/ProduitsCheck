@@ -1,5 +1,6 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Brochure Parser v1.0
+// STRUCTBOARD — Brochure Parser v1.1
+// v1.1: underlyingType normalization + prompt fix
 // Intégré dans StructBoard (onglet Analyseur)
 // Upload PDF → Claude analyse via proxy → Formulaire → Ajout direct
 // ═══════════════════════════════════════════════════════════════
@@ -44,6 +45,14 @@
     'DÉCRÉMENT:',
     '- "prélèvement forfaitaire X%" / "décrément X%" → decrementPct=X',
     '- "dividendes nets moyens Y%" → actualDividendYield=Y',
+    '',
+    'UNDERLYING TYPE (valeurs exactes):',
+    '- Un seul indice → underlyingType="single-index"',
+    '- Une seule action → underlyingType="single-stock"',
+    '- Worst-of sur plusieurs sous-jacents → underlyingType="worst-of"',
+    '- Panier équipondéré → underlyingType="basket"',
+    '- Paires / dispersion → underlyingType="pairs"',
+    '- Pas de sous-jacent → underlyingType="none"',
     '',
     'Réponds UNIQUEMENT avec le JSON. AUCUN texte avant/après. AUCUN markdown.',
     '',
@@ -118,7 +127,7 @@
   var _investedAmount = '';
 
   // ─── Helpers ───
-  function esc(s) { return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+  function esc(s) { return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;').replace(/'/g, '&#39;'); }
 
   function _sel(id, val, opts) {
     var html = '<select id="' + id + '" class="bp-select">';
@@ -180,15 +189,43 @@
     if (!data) return data;
     var c = data.coupon || {};
 
+    // ── underlyingType normalization ──
+    // Claude sometimes returns "indice", "index", "multi-index" etc.
+    var ut = (data.underlyingType || '').toLowerCase().trim();
+    var UND_MAP = {
+      'indice': 'single-index', 'index': 'single-index', 'single index': 'single-index',
+      'action': 'single-stock', 'stock': 'single-stock', 'single stock': 'single-stock', 'equity': 'single-stock',
+      'worst of': 'worst-of', 'worstof': 'worst-of', 'multi': 'worst-of',
+      'panier': 'basket', 'equiweight': 'basket', 'equal-weight': 'basket',
+      'pair': 'pairs', 'paire': 'pairs', 'dispersion': 'pairs',
+      'aucun': 'none', 'n/a': 'none', '': 'none'
+    };
+    if (UND_MAP[ut]) {
+      console.log('[BrochureParser] underlyingType normalized: "' + data.underlyingType + '" → "' + UND_MAP[ut] + '"');
+      data.underlyingType = UND_MAP[ut];
+    } else if (UND_TYPES.indexOf(ut) === -1) {
+      // Not a known value — try to infer
+      var undCount = (data.underlyings || []).length;
+      if (undCount === 0) data.underlyingType = 'none';
+      else if (undCount === 1) {
+        // Single underlying — guess index vs stock
+        var name = (data.underlyings[0] || '').toLowerCase();
+        data.underlyingType = (name.indexOf('indice') >= 0 || name.indexOf('index') >= 0 || name.indexOf('euro') >= 0 ||
+          name.indexOf('cac') >= 0 || name.indexOf('s&p') >= 0 || name.indexOf('solactive') >= 0 || name.indexOf('stoxx') >= 0)
+          ? 'single-index' : 'single-stock';
+      } else {
+        data.underlyingType = 'worst-of';
+      }
+      console.log('[BrochureParser] underlyingType inferred: "' + ut + '" → "' + data.underlyingType + '"');
+    }
+
     // Cumulative coupon fix: rate > 12% is likely cumulative error
     if (c.rate && c.rate > 12) {
       console.log('[BrochureParser] Cumulative coupon suspect: ' + c.rate + '% — checking...');
-      // Try to detect real per-period rate
       if (c.frequency === 'semestriel' && c.rate > 15) {
         var possible = c.rate / 2;
         if (possible >= 2 && possible <= 12) { c.rate = possible; console.log('[BrochureParser] Fixed cumulative → ' + possible + '%/sem'); }
       } else if (c.frequency === 'annuel' && c.rate > 15) {
-        // Might be total over maturity
         var yrs = data.maturityYears || 5;
         var possibleAnn = c.rate / yrs;
         if (possibleAnn >= 2 && possibleAnn <= 12) { c.rate = possibleAnn; console.log('[BrochureParser] Fixed cumulative → ' + possibleAnn + '%/an'); }
@@ -203,7 +240,6 @@
     // Capital garanti false positive fix
     var cp = data.capitalProtection || {};
     if (cp.protected && cp.barrier && cp.barrier < 100) {
-      // Has a barrier below 100% → NOT truly capital guaranteed
       cp.protected = false;
       cp.level = null;
       console.log('[BrochureParser] False positive cap garanti: barrier=' + cp.barrier + '%');
@@ -279,7 +315,6 @@
     _render();
 
     try {
-      // Read file as base64
       var base64 = await new Promise(function(res, rej) {
         var r = new FileReader();
         r.onload = function() { res(r.result.split(',')[1]); };
@@ -287,7 +322,6 @@
         r.readAsDataURL(file);
       });
 
-      // Call Claude via proxy
       var resp = await fetch(CONFIG.AI_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -343,19 +377,15 @@
     product.investedAmount = amount;
 
     try {
-      // Add as proposal
       var saved = await app.addProposal(_selectedBank, product);
       showToast('✅ ' + (product.name || 'Produit') + ' ajouté !', 'success');
 
-      // Auto-analyze with AI categorization
       if (typeof analyzeProposal === 'function') {
         analyzeProposal(saved).catch(function() {});
       }
 
-      // Open the product sheet
       app.openProduct(saved);
 
-      // Reset parser
       _phase = 'upload';
       _data = null;
       _fileName = '';
@@ -453,7 +483,6 @@
     var cp = d.capitalProtection || {};
     var er = d.earlyRedemption || {};
 
-    // Badges
     var badges = '';
     var sOpt = STRUCT_OPTS.find(function(o) { return o.v === d.structureType; });
     if (sOpt) badges += _badge(sOpt.l, 'var(--accent)');
@@ -465,7 +494,6 @@
 
     var html = '<div class="bp-review">';
 
-    // Header
     html += '<div class="bp-review-header">' +
       '<div style="flex:1;min-width:0">' +
         '<div style="font-size:10px;color:var(--text-dim);margin-bottom:4px">' + esc(_fileName) + '</div>' +
@@ -479,14 +507,12 @@
       '</div>' +
     '</div>';
 
-    // ─ Identité ─
     html += _section('IDENTITÉ', '🏷️', 'var(--accent)',
       _field('Type structure', _sel('bp-struct', d.structureType, STRUCT_OPTS)) +
       _field('Émetteur', _inp('bp-emitter', d.emitter)) +
       _field('Garant', _inp('bp-guarantor', d.guarantor || ''))
     );
 
-    // ─ Sous-jacents ─
     html += _section('SOUS-JACENTS', '📊', 'var(--purple)',
       '<div class="bp-field bp-span2">' +
         '<div class="bp-label">Sous-jacents</div>' +
@@ -499,7 +525,6 @@
       _field('Décrément (%)', _inp('bp-decrement', d.decrementPct, 'number', '—'), 'Prélèvement forfaitaire')
     );
 
-    // ─ Coupon ─
     html += _section('COUPON', '💰', 'var(--green)',
       _field('Taux (%)', _inp('bp-rate', c.rate, 'number'), 'PAR PÉRIODE — ne pas multiplier') +
       _field('Type', _sel('bp-coupontype', c.type || 'conditionnel', COUPON_TYPES)) +
@@ -512,7 +537,6 @@
       '<div class="bp-field">' + _tog('bp-memory', c.memory, 'Coupon à mémoire') + '</div>'
     );
 
-    // ─ Protection ─
     html += _section('PROTECTION CAPITAL', '🛡️', 'var(--orange)',
       '<div class="bp-field">' + _tog('bp-capprotected', cp.protected, cp.protected ? 'Capital garanti ✓' : 'Pas de protection ✗') + '</div>' +
       _field('Niveau protection (%)', _inp('bp-caplevel', cp.level, 'number', '100')) +
@@ -520,7 +544,6 @@
       _field('Barrière coupon (%)', _inp('bp-barriercoupon', cp.barrierCoupon, 'number', '60'), 'Seuil versement coupon')
     );
 
-    // ─ Early redemption ─
     html += _section('REMBOURSEMENT ANTICIPÉ', '⏰', 'var(--red)',
       '<div class="bp-field">' + _tog('bp-erpossible', er.possible, 'Rappel possible') + '</div>' +
       _field('Type', _sel('bp-ertype', er.type || 'none', ER_TYPES)) +
@@ -532,7 +555,6 @@
       _field('Div réel (%)', _inp('bp-divyield', d.actualDividendYield, 'number', '—'), 'Yield réel vs décrément')
     );
 
-    // ─ Mechanism ─
     html += _section('MÉCANISME & RISQUES', '⚙️', 'var(--text-dim)',
       '<div class="bp-field bp-span-full">' +
         '<div class="bp-label">Description du mécanisme</div>' +
@@ -567,7 +589,6 @@
     var productName = _data ? _data.name || _fileName : _fileName;
     var emitter = _data ? _data.emitter || '' : '';
 
-    // Try to auto-detect bank from emitter
     var autoBank = '';
     if (emitter) {
       var emLower = emitter.toLowerCase();
@@ -583,7 +604,6 @@
       '<div style="font-size:12px;color:var(--text-muted)">' + esc(productName) + '</div>' +
     '</div>';
 
-    // Bank grid
     html += '<div style="margin-bottom:20px">' +
       '<div class="bp-label" style="margin-bottom:8px">Banque source</div>' +
       '<div class="bank-select-grid">';
@@ -599,13 +619,11 @@
 
     html += '</div></div>';
 
-    // Amount
     html += '<div class="bp-field" style="margin-bottom:24px">' +
       '<div class="bp-label">Montant investi (€) — optionnel</div>' +
       '<input type="number" id="bp-amount" class="bp-input" value="' + esc(_investedAmount) + '" placeholder="Ex: 10000">' +
     '</div>';
 
-    // Actions
     html += '<div style="display:flex;gap:8px;justify-content:flex-end">' +
       '<button class="btn" id="bp-bank-back">← Retour</button>' +
       '<button class="btn primary" id="bp-bank-confirm"' + (!_selectedBank ? ' disabled' : '') + '>✅ Confirmer et ajouter</button>' +
@@ -616,7 +634,6 @@
   }
 
   function _bindBankSelectEvents() {
-    // Bank buttons
     document.querySelectorAll('.bank-select-btn').forEach(function(btn) {
       btn.addEventListener('click', function() {
         _selectedBank = btn.dataset.bank;
@@ -700,5 +717,5 @@
   ].join('\n');
   document.head.appendChild(style);
 
-  console.log('[StructBoard] Brochure Parser v1.0 loaded');
+  console.log('[StructBoard] Brochure Parser v1.1 loaded');
 })();
