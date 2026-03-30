@@ -238,43 +238,60 @@
   "aiAnalyzedAt": "2026-03-30T13:49:08.070Z",
   "envelope": "",
   "grading": {
-    "grade": "B",
-    "score": 65,
+    "grade": "C",
+    "score": 52,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 58,
-        "base": 38,
-        "delta": -5,
-        "reasoning": "Rendement: base 38 → -5 = 33 (Siemens Energy (DD 71.9%, vol 60%) en régime stagflationniste avec choc énergétique réduit drastiquement la probabilité du coupon) | Coupon 7%, barrière 60% | Barr.coupon 62% | Mat espérée: ~3.3a (prob mat: 24%) | Basket +25pts (vol÷0.79)"
+        "score": 15,
+        "base": 58,
+        "delta": -43,
+        "reasoning": "BS: P(SJ>62% | vol=37% T=3.3a) = 69.0% | Breach 60%: P=52.2% -> perte esperee 8.2%/an | Rdt net: 4.8% - 8.2% = -3.4%/an | Spread vs CAT: -5.9%",
+        "_bs": {
+          "score": 15,
+          "probCoupon": 69,
+          "couponEffectif": 7,
+          "rendementEspere": 4.83,
+          "perteEsperee": 8.22,
+          "rendementNet": -3.39,
+          "drag": 0,
+          "vols": [
+            24.79,
+            28.14,
+            37.05,
+            28.49
+          ],
+          "matEsperee": 3.3,
+          "reasoning": "P(SJ>62% | vol=37% T=3.3a) = 69.0% | Breach 60%: P=52.2% -> perte esperee 8.2%/an | Rdt net: 4.8% - 8.2% = -3.4%/an",
+          "method": "BS-simplifie-v1"
+        }
       },
       "underlyingQuality": {
         "score": 56,
         "base": 35,
         "delta": -5,
-        "reasoning": "Qualité: base 35 → -5 = 30 (3 SJ sur 4 dans secteurs évités (ASML tech, ISP/SAN financials) + ENR beta 1.56 en stagflation = cocktail toxique) | Worst: Siemens Energy AG B:24 | Basket équipondéré 4 actifs: P2 +26pts (diversification)"
+        "reasoning": "Qualité: base 35 → -5 = 30 (3 SJ sur 4 dans secteurs évités (ASML tech, ISP/SAN financials), seul ENR energy favorisé mais trop volatil (60%)) | Worst: Siemens Energy AG B:24 | Basket équipondéré 4 actifs: P2 +26pts (diversification)"
       },
       "portfolioFit": {
         "score": 75,
         "base": 80,
         "delta": -5,
-        "reasoning": "Fit: base 80 → -5 = 75 (Surexposition sectorielle dangereuse en rotation violente, mais coupon 7% reste attractif si tolérance risque élevée)"
+        "reasoning": "Fit: base 80 → -5 = 75 (En stagflation, les produits autocall sur secteurs cycliques sous-performent vs obligations indexées inflation)"
       },
       "riskPremium": {
         "score": 73,
         "base": 67,
-        "delta": -5,
+        "delta": 0,
         "reasoning": "Capital garanti: spread 7.0% - CAT 2.5% - illiq 0.5% = 4.0% | Illiq. premium +1.4% (-7pts)"
       }
     },
-    "verdict": "Produit TRÈS RISQUÉ en stagflation avec worst-of sur Siemens Energy (DD 71.9%) qui pourrait souffrir paradoxalement du choc énergétique via marges comprimées. Le panier expose à 75% de secteurs évités par le marché (tech ASML, financials ISP/SAN) avec des betas élevés. Malgré un coupon attractif de 7%, la probabilité de toucher les coupons est faible (28% après ajustement) et le capital est exposé à une perte potentielle sévère.",
+    "verdict": "Produit à ÉVITER en contexte de stagflation avec VIX à 22. Le worst-of combine 3 secteurs sous pression (tech -1.22%, financials -1.63%) avec Siemens Energy hyper-volatil (60.46%, DD 71.9%). La barrière coupon à 62% paraît insuffisante avec une probabilité de maturité de seulement 24% et le risque réel de perte en capital sur 6 ans.",
     "keyRisks": [
-      "Siemens Energy en DD extrême (-71.9%) peut casser la barrière capital 60% rapidement",
-      "75% du panier dans secteurs évités en stagflation = sous-performance systémique probable",
-      "Choc énergétique peut paradoxalement pénaliser ENR via coûts inputs et marges",
+      "Siemens Energy (DD -71.9%) peut entraîner une perte totale des coupons et du capital",
+      "75% des sous-jacents dans des secteurs évités par le marché en stagflation",
       "Barrière à 0.34σ (Critique) — vol 60.46%"
     ],
     "negotiationPoints": [],
@@ -292,8 +309,8 @@
         "duration_years": 3
       },
       "stress": {
-        "return_pct": -15,
-        "return_eur": -15000,
+        "return_pct": 0,
+        "return_eur": 0,
         "probability": 0.35,
         "duration_years": 6
       },
@@ -305,16 +322,16 @@
       }
     },
     "confidenceInterval": {
-      "low": 37,
-      "high": 59,
+      "low": 38,
+      "high": 60,
       "halfWidth": 11,
       "gradeStable": false,
-      "gradeRange": "D-C",
-      "label": "C [37-59]"
+      "gradeRange": "D-B",
+      "label": "C [38-60]"
     },
     "metadata": {
-      "gradedAt": "2026-03-30T13:49:36.571Z",
-      "durationMs": 21419,
+      "gradedAt": "2026-03-30T15:11:15.572Z",
+      "durationMs": 18966,
       "aiUsed": true,
       "version": "5.2",
       "productType": "autocall",
@@ -329,7 +346,7 @@
       "hasBarrier": true,
       "barrierPct": 60,
       "barrierCouponPct": 62,
-      "couponProbability": null,
+      "couponProbability": 69,
       "expectedMaturity": 3.3,
       "maxMaturity": 6,
       "probReachMaturity": 24,
@@ -340,7 +357,7 @@
         "p1": -5,
         "p2": -5,
         "p3": -5,
-        "p4": -5
+        "p4": 0
       },
       "barrier_sigma": 0.34,
       "barrier_sigma_label": "Critique",
@@ -348,14 +365,26 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 37,
-      "ci_high": 59,
-      "ci_label": "C [37-59]",
+      "ci_low": 38,
+      "ci_high": 60,
+      "ci_label": "C [38-60]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
       "decrementDrag": 0,
       "structureType": "autocall",
+      "bsMethod": "BS-simplifie-v1",
+      "bsProbCoupon": 69,
+      "bsRendementNet": -3.39,
+      "bsPerteEsperee": 8.22,
+      "bsCouponEffectif": 7,
+      "bsVols": [
+        24.79,
+        28.14,
+        37.05,
+        28.49
+      ],
+      "bsMatEsperee": 3.3,
       "stockData": [
         {
           "name": "Intesa Sanpaolo",
@@ -407,5 +436,7 @@
         }
       ]
     }
-  }
+  },
+  "_couponProbability": 69,
+  "_bsRendementNet": -3.39
 }
