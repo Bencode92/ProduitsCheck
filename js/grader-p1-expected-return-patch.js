@@ -1,13 +1,13 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Grader P1 Expected Return Patch v1.0
+// STRUCTBOARD — Grader P1 Expected Return Patch v1.1
 //
 // Remplace le P1 heuristique par un calcul Black-Scholes:
 //   rendement_net = prob_coupon × coupon - perte_espérée - drag
 //   score = f(rendement_net)
 //
+// v1.1: Fix vol resolution (keyword extraction) + autocall trigger priority
 // Utilise les vol 3Y réelles du market data StructBoard.
 // Chargé en DERNIER (outermost) → écrase les P1 des autres patches.
-// Les ajustements P2/P3/P4 des autres patches sont conservés.
 // ═══════════════════════════════════════════════════════════════
 
 (function() {
@@ -24,7 +24,6 @@
     return 0.5 * (1.0 + sign * y);
   }
 
-  // P(S_T > K) = N(d2)
   function _probAbove(trigger, volPct, T, rPct) {
     var sigma = volPct / 100;
     var r = rPct / 100;
@@ -33,7 +32,6 @@
     return _normcdf(d2);
   }
 
-  // P(min S_t < B sur [0,T]) — barrière continue
   function _probBreach(barrierPct, volPct, T, rPct) {
     if (!barrierPct || barrierPct <= 0 || barrierPct >= 100) return 0;
     var sigma = volPct / 100;
@@ -48,12 +46,10 @@
     return Math.min(0.95, _normcdf(-d1) + ratio * _normcdf(d2));
   }
 
-  // ─── Vol Data Cache ───
   var _volData = null;
 
   function _loadVolData() {
     if (_volData) return Promise.resolve(_volData);
-
     _volData = { stocks: {}, indices: {}, proxies: {} };
 
     var p1 = fetch('data/market/stocks_europe.json').then(function(r) { return r.json(); })
@@ -92,7 +88,6 @@
       }).catch(function() {});
 
     return Promise.all([p1, p2, p3]).then(function() {
-      // Link index names to proxy ETF vols
       Object.keys(_volData.indices).forEach(function(name) {
         var info = _volData.indices[name];
         if (info.proxy && _volData.proxies[info.proxy]) {
@@ -106,29 +101,37 @@
     });
   }
 
-  // ─── Resolve vol for a given underlying name ───
+  // ─── Resolve vol for a given underlying name (v1.1: keyword extraction) ───
   function _resolveVol(name) {
     if (!_volData || !name) return null;
     var n = name.toUpperCase().trim();
 
-    // 1. Direct stock match (ticker or name)
+    // 1. Direct stock match
     if (_volData.stocks[n]) return _volData.stocks[n];
 
-    // 2. Index match
+    // 2. Direct proxy match (ETFs from underlyings_extra)
+    if (_volData.proxies[n]) return _volData.proxies[n];
+
+    // 3. Index match
     if (_volData.indices[n]) {
       return _volData.indices[n].realVol || _volData.indices[n].defaultVol;
     }
 
-    // 3. Partial match on stock names
-    var keys = Object.keys(_volData.stocks);
-    for (var i = 0; i < keys.length; i++) {
-      if (keys[i].indexOf(n) >= 0 || n.indexOf(keys[i]) >= 0) {
-        return _volData.stocks[keys[i]];
+    // 4. Keyword extraction: split long names into tokens, try each
+    // "Indice Solactive GDX EUR AR 5%" -> try "GDX", "SOLACTIVE", etc.
+    var tokens = n.split(/[\s,.:;()%\-\/]+/).filter(function(t) { return t.length >= 2; });
+    for (var t = 0; t < tokens.length; t++) {
+      var tok = tokens[t];
+      if (_volData.stocks[tok]) return _volData.stocks[tok];
+      if (_volData.proxies[tok]) return _volData.proxies[tok];
+      if (_volData.indices[tok]) {
+        var info = _volData.indices[tok];
+        return info.realVol || info.defaultVol;
       }
     }
 
-    // 4. Partial match on index names
-    keys = Object.keys(_volData.indices);
+    // 5. Partial match on index names (bidirectional)
+    var keys = Object.keys(_volData.indices);
     for (var i = 0; i < keys.length; i++) {
       if (keys[i].indexOf(n) >= 0 || n.indexOf(keys[i]) >= 0) {
         var info = _volData.indices[keys[i]];
@@ -136,10 +139,17 @@
       }
     }
 
+    // 6. Partial match on stock names (min 3 chars to avoid false positives)
+    keys = Object.keys(_volData.stocks);
+    for (var i = 0; i < keys.length; i++) {
+      if (keys[i].length >= 3 && (keys[i].indexOf(n) >= 0 || n.indexOf(keys[i]) >= 0)) {
+        return _volData.stocks[keys[i]];
+      }
+    }
+
     return null;
   }
 
-  // ─── Default vol by underlying type ───
   var DEFAULT_VOLS = {
     'single-index': 20, 'single_index': 20, 'index': 20,
     'single-stock': 28, 'single_stock': 28, 'stock': 28,
@@ -149,7 +159,7 @@
     'rates': 8, 'credit': 10
   };
 
-  // ─── Extract product info for BS calc ───
+  // ─── Extract product info for BS calc (v1.1: autocall trigger priority) ───
   function _extractBSInputs(product) {
     var coupon = product.coupon || {};
     var cp = product.capitalProtection || {};
@@ -157,34 +167,31 @@
     var undType = (product.underlyingType || '').toLowerCase();
     var st = (product.structureType || '').toLowerCase();
 
-    // Annualized rate
     var annRate = (typeof window.getAnnualizedRate === 'function')
       ? window.getAnnualizedRate(product)
       : (parseFloat(coupon.rate || coupon) || 0);
 
-    // Trigger coupon
-    var triggerCoupon = parseFloat(cp.barrierCoupon) || 0;
-    if (!triggerCoupon && coupon.trigger) triggerCoupon = parseFloat(coupon.trigger);
-    // If no explicit coupon trigger, use autocall trigger as proxy
-    if (!triggerCoupon && er.trigger) triggerCoupon = parseFloat(er.trigger);
-    if (!triggerCoupon) triggerCoupon = 100; // default ATM
+    // v1.1: Trigger coupon — for autocalls, use autocall trigger (most probable scenario)
+    var triggerCoupon = 0;
+    var isAutocall = er.type === 'autocall' || (er.possible && er.trigger > 0);
+    if (isAutocall) {
+      triggerCoupon = parseFloat(er.trigger) || parseFloat(cp.barrierCoupon) || parseFloat(coupon.trigger) || 100;
+    } else {
+      triggerCoupon = parseFloat(cp.barrierCoupon) || parseFloat(coupon.trigger) || 0;
+    }
+    if (!triggerCoupon) triggerCoupon = 100;
 
-    // Barrier capital
     var barrierCapital = parseFloat(cp.barrier) || 0;
     var isProtected = cp.protected || false;
 
-    // Maturité espérée (from grader metadata if available)
     var matMax = parseFloat(product.maturityYears) || 5;
     var matEsperee = matMax;
-    // Use grader's estimation if available
     if (product.grading && product.grading.metadata && product.grading.metadata.expectedMaturity) {
       matEsperee = product.grading.metadata.expectedMaturity;
     } else if (er.type === 'autocall' || product.autocall) {
-      // Simple heuristic for expected maturity with autocall
       matEsperee = Math.min(matMax, Math.max(1, matMax * 0.35));
     }
 
-    // Drag décrément
     var dec = parseFloat(product.decrementPct) || 0;
     var div = parseFloat(product.actualDividendYield) || 0;
     if (!dec && product.aiParsed) {
@@ -193,7 +200,6 @@
     }
     var drag = Math.max(0, dec - div);
 
-    // Underlyings
     var unds = product.underlyings || [];
     if ((!unds || unds.length === 0) && product.aiParsed) {
       unds = product.aiParsed.underlyings || [];
@@ -202,38 +208,25 @@
       return typeof u === 'string' ? u : (u.name || u.ticker || '');
     }).filter(Boolean);
 
-    // Is dispersion?
     var isDispersion = st === 'dispersion' || undType === 'pairs';
     var isRate = st === 'taux_fixe' || undType === 'rates' || undType === 'credit';
     var isWorstOf = undType === 'worst-of' || undType === 'worst_of';
     var hasMemory = (coupon.memory === true) || st === 'phoenix_memoire';
-
-    // Dispersion historical return
-    var dispMedianReturn = 11; // conservative median for 3Y dispersion
+    var dispMedianReturn = 11;
 
     return {
-      annRate: annRate,
-      triggerCoupon: triggerCoupon,
-      barrierCapital: barrierCapital,
-      isProtected: isProtected,
-      matMax: matMax,
-      matEsperee: matEsperee,
-      drag: drag,
-      underlyings: unds,
-      undType: undType,
-      isDispersion: isDispersion,
-      isRate: isRate,
-      isWorstOf: isWorstOf,
-      hasMemory: hasMemory,
-      dispMedianReturn: dispMedianReturn
+      annRate: annRate, triggerCoupon: triggerCoupon,
+      barrierCapital: barrierCapital, isProtected: isProtected,
+      matMax: matMax, matEsperee: matEsperee, drag: drag,
+      underlyings: unds, undType: undType,
+      isDispersion: isDispersion, isRate: isRate, isWorstOf: isWorstOf,
+      hasMemory: hasMemory, dispMedianReturn: dispMedianReturn
     };
   }
 
-  // ─── Resolve vols for all underlyings ───
   function _resolveVols(inputs) {
     var vols = [];
     var defaultVol = DEFAULT_VOLS[inputs.undType] || 25;
-
     if (inputs.underlyings.length > 0) {
       inputs.underlyings.forEach(function(u) {
         var v = _resolveVol(u);
@@ -242,18 +235,15 @@
     } else {
       vols.push(defaultVol);
     }
-
     return vols;
   }
 
-  // ─── Compute BS-based P1 ───
   function _computeBSP1(inputs, riskFreeRate) {
     var r = riskFreeRate || 2.5;
     var vols = _resolveVols(inputs);
     var log = [];
     var probCoupon, couponEffectif, perteEsperee;
 
-    // ─── Probabilité coupon ───
     if (inputs.isDispersion) {
       probCoupon = 0.95;
       couponEffectif = inputs.dispMedianReturn;
@@ -267,11 +257,9 @@
         return _probAbove(inputs.triggerCoupon, v, inputs.matEsperee, r);
       });
       probCoupon = probs.reduce(function(a, b) { return a * b; }, 1);
-
       var corrAdj = 1 + 0.15 * (vols.length - 1);
       var maxProb = Math.min.apply(null, probs);
       probCoupon = Math.min(probCoupon * corrAdj, maxProb);
-
       couponEffectif = inputs.annRate;
       log.push('WO probs: ' + probs.map(function(p) { return (p * 100).toFixed(0) + '%'; }).join(' x ') +
         ' = ' + (probCoupon * 100).toFixed(1) + '% (corr adj)');
@@ -283,18 +271,14 @@
         inputs.matEsperee.toFixed(1) + 'a) = ' + (probCoupon * 100).toFixed(1) + '%');
     }
 
-    // Ajustement mémoire (phoenix)
     if (inputs.hasMemory && !inputs.isDispersion) {
       probCoupon = Math.min(0.99, probCoupon * 1.08);
       log.push('Memoire: prob x 1.08 = ' + (probCoupon * 100).toFixed(1) + '%');
     }
 
     probCoupon = Math.max(0.01, Math.min(0.99, probCoupon));
-
-    // ─── Rendement espéré ───
     var rendementEspere = couponEffectif * probCoupon;
 
-    // ─── Perte espérée ───
     perteEsperee = 0;
     if (!inputs.isProtected && inputs.barrierCapital > 0 && inputs.barrierCapital < 100) {
       var vol = vols.length > 0 ? Math.max.apply(null, vols) : 25;
@@ -307,7 +291,6 @@
       }
     }
 
-    // ─── Rendement net ───
     var rendementNet = rendementEspere - perteEsperee - inputs.drag;
     if (inputs.drag > 0) {
       log.push('Drag decrement: -' + inputs.drag.toFixed(2) + '%/an');
@@ -317,8 +300,6 @@
       (inputs.drag > 0 ? ' - ' + inputs.drag.toFixed(1) + '%' : '') +
       ' = ' + rendementNet.toFixed(1) + '%/an');
 
-    // ─── Score mapping ───
-    // score = 35 + rendementNet × 6, clamp [5, 95]
     var score = Math.round(35 + rendementNet * 6);
     score = Math.max(5, Math.min(95, score));
 
@@ -329,58 +310,41 @@
       rendementEspere: Math.round(rendementEspere * 100) / 100,
       perteEsperee: Math.round(perteEsperee * 100) / 100,
       rendementNet: Math.round(rendementNet * 100) / 100,
-      drag: inputs.drag,
-      vols: vols,
-      matEsperee: inputs.matEsperee,
+      drag: inputs.drag, vols: vols, matEsperee: inputs.matEsperee,
       reasoning: log.join(' | '),
-      method: 'BS-simplifie-v1'
+      method: 'BS-simplifie-v1.1'
     };
   }
 
-  // ─── Main patch ───
   function _patchGrade() {
     if (typeof ProposalGrader === 'undefined' || !ProposalGrader.grade) return false;
-
     var _prevGrade = ProposalGrader.grade;
 
     ProposalGrader.grade = function(product) {
-      // Load vol data (cached after first call)
       return _loadVolData().then(function() {
         return _prevGrade.call(ProposalGrader, product);
       }).then(function(result) {
         if (!result || !result.pillars || !product) return result;
-
-        // Skip liquidity and rate products (P1 rate calc is fine as-is)
         var st = (product.structureType || '').toLowerCase();
         var ut = (product.underlyingType || '').toLowerCase();
         if (st === 'taux_fixe' || ut === 'rates' || ut === 'credit') return result;
         if (result.grade === '-') return result;
 
-        // Extract inputs
         var inputs = _extractBSInputs(product);
-
-        // Get risk-free rate from result metadata
         var rfRate = (result.metadata && result.metadata.catBenchmark) || 2.5;
-
-        // Compute BS P1
         var bs = _computeBSP1(inputs, rfRate);
 
-        // Replace P1
         var oldP1 = result.pillars.adjustedReturn.score;
         result.pillars.adjustedReturn.score = bs.score;
         result.pillars.adjustedReturn.reasoning =
-          'BS: ' + bs.reasoning +
-          ' | Spread vs CAT: ' + (bs.rendementNet - rfRate).toFixed(1) + '%';
+          'BS: ' + bs.reasoning + ' | Spread vs CAT: ' + (bs.rendementNet - rfRate).toFixed(1) + '%';
         result.pillars.adjustedReturn.base = oldP1;
         result.pillars.adjustedReturn.delta = bs.score - oldP1;
-
-        // Store BS data
         result.pillars.adjustedReturn._bs = bs;
 
         console.log('[p1-bs] P1: ' + oldP1 + ' -> ' + bs.score +
           ' | prob=' + bs.probCoupon + '% | rdtNet=' + bs.rendementNet + '%/an');
 
-        // Enrich metadata
         if (result.metadata) {
           result.metadata.bsMethod = bs.method;
           result.metadata.bsProbCoupon = bs.probCoupon;
@@ -392,11 +356,9 @@
           result.metadata.couponProbability = bs.probCoupon;
         }
 
-        // Also store on product for display
         product._couponProbability = bs.probCoupon;
         product._bsRendementNet = bs.rendementNet;
 
-        // ─── Recalculate total ───
         var p1s = result.pillars.adjustedReturn.score;
         var p2s = result.pillars.underlyingQuality ? result.pillars.underlyingQuality.score : 0;
         var p3s = result.pillars.portfolioFit ? result.pillars.portfolioFit.score : 0;
@@ -418,7 +380,7 @@
       });
     };
 
-    console.log('[p1-bs v1.0] Black-Scholes P1 (expected return) active — outermost');
+    console.log('[p1-bs v1.1] Black-Scholes P1 (expected return) active — outermost');
     return true;
   }
 
