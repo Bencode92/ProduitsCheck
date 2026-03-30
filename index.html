@@ -20,6 +20,7 @@
     <div class="topbar-nav" id="main-nav">
       <button class="nav-tab active" data-view="dashboard" onclick="switchMainView('dashboard')">Produits Structurés</button>
       <button class="nav-tab" data-view="cat" onclick="switchMainView('cat')">Comptes à Terme</button>
+      <button class="nav-tab" data-view="parser" onclick="switchMainView('parser')">📄 Analyseur</button>
       <button class="nav-tab" data-view="analytics" onclick="switchMainView('analytics')">📊 Analytique</button>
     </div>
     <div class="topbar-actions">
@@ -78,12 +79,15 @@
   <script src="js/dashboard-buttons.js"></script>
   <script src="js/liquidites-fix.js"></script>
   <script src="js/analytics.js"></script>
+  <!-- Brochure parser (integrated analyzer tab) -->
+  <script src="js/brochure-parser.js?v=1"></script>
   <script>
     function switchMainView(view) {
       document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
       document.querySelector(`.nav-tab[data-view="${view}"]`).classList.add('active');
       if (view === 'cat') { app.setState({ view: 'cat' }); renderCAT(document.getElementById('main-content')); }
       else if (view === 'analytics') { app.setState({ view: 'analytics' }); renderAnalytics(document.getElementById('main-content')); }
+      else if (view === 'parser') { app.setState({ view: 'parser' }); renderBrochureParser(document.getElementById('main-content')); }
       else { app.goToDashboard(); }
     }
     document.addEventListener('DOMContentLoaded', async () => {
