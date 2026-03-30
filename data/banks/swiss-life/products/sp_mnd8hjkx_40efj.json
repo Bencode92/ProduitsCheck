@@ -1,0 +1,225 @@
+{
+  "id": "sp_mnd8hjkx_40efj",
+  "name": "SL - ATHENA PRIVILEGE INTESA SANPAOLO MAI 2026",
+  "type": "autocall",
+  "structureType": "autocall",
+  "emitter": "Goldman Sachs Finance Corp International Ltd",
+  "guarantor": "The Goldman Sachs Group, Inc.",
+  "guarantorRating": {
+    "moodys": "A2",
+    "sp": "BBB+"
+  },
+  "underlyings": [
+    "Intesa Sanpaolo S.p.A."
+  ],
+  "underlyingType": "single-stock",
+  "currency": "EUR",
+  "maturity": "10 ans",
+  "maturityYears": 10,
+  "coupon": {
+    "rate": 3,
+    "rateIfCalled": null,
+    "rateIfMaturity": null,
+    "type": "fixe",
+    "frequency": "semestriel",
+    "trigger": 91,
+    "memory": false,
+    "paymentTiming": "periodic"
+  },
+  "participationRate": null,
+  "capitalProtection": {
+    "protected": true,
+    "level": 100,
+    "barrier": null,
+    "barrierCoupon": 91,
+    "barrierType": "europeenne"
+  },
+  "earlyRedemption": {
+    "possible": true,
+    "type": "autocall",
+    "trigger": 91,
+    "frequency": "semestriel",
+    "startSemester": 2,
+    "stepDown": false,
+    "stepDownPct": null
+  },
+  "decrementPct": null,
+  "actualDividendYield": null,
+  "mechanism": "Remboursement automatique anticipé dès le semestre 2 si l'action Intesa Sanpaolo clôture à un niveau supérieur ou égal à 91% de son niveau initial. Gain de 3% par semestre écoulé, plafonné à 5,85% de rendement semestriel brut maximum. Garantie du capital à l'échéance.",
+  "risks": [
+    "Risque de perte en capital en cours de vie",
+    "Risque de crédit sur l'émetteur et le garant",
+    "Risque de marché",
+    "Risque de liquidité",
+    "Plafonnement des gains",
+    "Pas de réinvestissement des dividendes"
+  ],
+  "summary": "Titre de créance à capital garanti à l'échéance sur l'action Intesa Sanpaolo, avec mécanisme de remboursement automatique anticipé dès le semestre 2 si l'action atteint 91% de son niveau initial, offrant un gain de 3% par semestre écoulé avec plafonnement des gains.",
+  "aiParsed": {
+    "name": "SL - ATHENA PRIVILEGE INTESA SANPAOLO MAI 2026",
+    "type": "autocall",
+    "structureType": "autocall",
+    "emitter": "Goldman Sachs Finance Corp International Ltd",
+    "guarantor": "The Goldman Sachs Group, Inc.",
+    "guarantorRating": {
+      "moodys": "A2",
+      "sp": "BBB+"
+    },
+    "underlyings": [
+      "Intesa Sanpaolo S.p.A."
+    ],
+    "underlyingType": "single-stock",
+    "currency": "EUR",
+    "maturity": "10 ans",
+    "maturityYears": 10,
+    "coupon": {
+      "rate": 3,
+      "rateIfCalled": null,
+      "rateIfMaturity": null,
+      "type": "fixe",
+      "frequency": "semestriel",
+      "trigger": 91,
+      "memory": false,
+      "paymentTiming": "periodic"
+    },
+    "participationRate": null,
+    "capitalProtection": {
+      "protected": true,
+      "level": 100,
+      "barrier": null,
+      "barrierCoupon": 91,
+      "barrierType": "europeenne"
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "autocall",
+      "trigger": 91,
+      "frequency": "semestriel",
+      "startSemester": 2,
+      "stepDown": false,
+      "stepDownPct": null
+    },
+    "decrementPct": null,
+    "actualDividendYield": null,
+    "mechanism": "Remboursement automatique anticipé dès le semestre 2 si l'action Intesa Sanpaolo clôture à un niveau supérieur ou égal à 91% de son niveau initial. Gain de 3% par semestre écoulé, plafonné à 5,85% de rendement semestriel brut maximum. Garantie du capital à l'échéance.",
+    "risks": [
+      "Risque de perte en capital en cours de vie",
+      "Risque de crédit sur l'émetteur et le garant",
+      "Risque de marché",
+      "Risque de liquidité",
+      "Plafonnement des gains",
+      "Pas de réinvestissement des dividendes"
+    ],
+    "summary": "Titre de créance à capital garanti à l'échéance sur l'action Intesa Sanpaolo, avec mécanisme de remboursement automatique anticipé dès le semestre 2 si l'action atteint 91% de son niveau initial, offrant un gain de 3% par semestre écoulé avec plafonnement des gains.",
+    "aiParsed": {
+      "name": "SL - ATHENA PRIVILEGE INTESA SANPAOLO MAI 2026",
+      "structureType": "autocall",
+      "emitter": "Goldman Sachs Finance Corp International Ltd",
+      "guarantor": "The Goldman Sachs Group, Inc.",
+      "guarantorRating": {
+        "moodys": "A2",
+        "sp": "BBB+"
+      },
+      "underlyings": [
+        "Intesa Sanpaolo S.p.A."
+      ],
+      "underlyingType": "single-stock",
+      "currency": "EUR",
+      "maturity": "22/05/2036",
+      "maturityYears": 10,
+      "coupon": {
+        "rate": 3,
+        "rateIfCalled": null,
+        "rateIfMaturity": null,
+        "type": "fixe",
+        "frequency": "semestriel",
+        "trigger": null,
+        "memory": false,
+        "paymentTiming": "periodic"
+      },
+      "participationRate": null,
+      "capitalProtection": {
+        "protected": true,
+        "level": 100,
+        "barrier": null,
+        "barrierCoupon": 91,
+        "barrierType": "europeenne"
+      },
+      "earlyRedemption": {
+        "possible": true,
+        "type": "autocall",
+        "trigger": 91,
+        "frequency": "semestriel",
+        "startSemester": 2,
+        "stepDown": false,
+        "stepDownPct": null
+      },
+      "decrementPct": null,
+      "actualDividendYield": null,
+      "mechanism": "Remboursement automatique anticipé dès le semestre 2 si l'action Intesa Sanpaolo clôture à un niveau supérieur ou égal à 91% de son niveau initial. Gain de 3% par semestre écoulé, plafonné à 5,85% de rendement semestriel brut maximum. Garantie du capital à l'échéance.",
+      "risks": [
+        "Risque de perte en capital en cours de vie",
+        "Risque de crédit sur l'émetteur et le garant",
+        "Risque de marché",
+        "Risque de liquidité",
+        "Plafonnement des gains",
+        "Pas de réinvestissement des dividendes"
+      ],
+      "summary": "Titre de créance à capital garanti à l'échéance sur l'action Intesa Sanpaolo, avec mécanisme de remboursement automatique anticipé dès le semestre 2 si l'action atteint 91% de son niveau initial, offrant un gain de 3% par semestre écoulé avec plafonnement des gains."
+    },
+    "sourceFile": "Brochure ATHENA PRIVILEGE INTENSA SANPAOLO MAI 2026.pdf"
+  },
+  "sourceFile": "JSON import",
+  "bankId": "swiss-life",
+  "status": "analyzing",
+  "receivedDate": "2026-03-30",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null,
+  "score": {
+    "score": 43,
+    "details": [
+      {
+        "type": "positive",
+        "icon": "✅",
+        "text": "Nouveau sous-jacent absent du book — diversification",
+        "impact": 25,
+        "category": "complementarity"
+      },
+      {
+        "type": "warning",
+        "icon": "📦",
+        "text": "Même type que 4 produit(s) — 80% du book en \"Autocall / Phoenix\"",
+        "impact": 20,
+        "category": "redundancy"
+      },
+      {
+        "type": "info",
+        "icon": "🏦",
+        "text": "Même émetteur que 4 produit(s) — concentration Swiss Life",
+        "impact": 16,
+        "category": "redundancy"
+      },
+      {
+        "type": "positive",
+        "icon": "🔀",
+        "text": "Faible corrélation moyenne (30%) — diversification",
+        "impact": 10,
+        "category": "complementarity"
+      },
+      {
+        "type": "info",
+        "icon": "📅",
+        "text": "Maturité similaire (±6 mois) à 2 produit(s)",
+        "impact": 6,
+        "category": "redundancy"
+      }
+    ],
+    "verdict": "🔴 Redondant — forte concentration, peu de valeur ajoutée.",
+    "breakdown": {
+      "redundancy": 42,
+      "complementarity": 35
+    }
+  }
+}
