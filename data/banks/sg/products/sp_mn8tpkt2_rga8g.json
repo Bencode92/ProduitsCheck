@@ -12,7 +12,7 @@
   "maturityDate": null,
   "strikeDate": null,
   "coupon": {
-    "rate": 18,
+    "rate": 9,
     "frequency": "annuel",
     "annualized": true,
     "type": "conditionnel",
@@ -35,7 +35,9 @@
     "startSemester": 4,
     "startYear": null,
     "stepDown": true,
-    "stepDownPct": 2.5
+    "stepDownPct": 2.5,
+    "hasAutocall": true,
+    "enabled": true
   },
   "scenarios": {
     "favorable": "Remboursement anticipé avec coupon de 4,50% par semestre écoulé",
@@ -304,5 +306,6 @@
         }
       ]
     }
-  }
+  },
+  "envelope": ""
 }
