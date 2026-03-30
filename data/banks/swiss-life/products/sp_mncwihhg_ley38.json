@@ -1,0 +1,197 @@
+{
+  "id": "sp_mncwihhg_ley38",
+  "name": "OBJECTIF MAI 2026",
+  "bankId": "swiss-life",
+  "type": "autocall",
+  "underlyingType": "basket",
+  "underlyings": [
+    "ASML Holding N.V.",
+    "Intesa Sanpaolo S.p.A.",
+    "Siemens Energy AG",
+    "Banco Santander S.A."
+  ],
+  "currency": "EUR",
+  "maturity": "6 ans",
+  "maturityDate": null,
+  "strikeDate": null,
+  "coupon": {
+    "rate": 9.7,
+    "rateIfCalled": null,
+    "rateIfMaturity": null,
+    "type": "autocall",
+    "frequency": "annuel",
+    "trigger": 95,
+    "memory": false,
+    "paymentTiming": "maturity"
+  },
+  "capitalProtection": {
+    "protected": false,
+    "level": null,
+    "barrier": 60,
+    "barrierCoupon": null,
+    "barrierType": "europeenne",
+    "couponFloor": false
+  },
+  "earlyRedemption": {
+    "possible": true,
+    "type": "autocall",
+    "trigger": 95,
+    "frequency": "annuel",
+    "startSemester": null,
+    "startYear": 1,
+    "stepDown": false,
+    "stepDownPct": null
+  },
+  "scenarios": {
+    "favorable": null,
+    "median": null,
+    "defavorable": null
+  },
+  "risks": [
+    "risque de perte en capital",
+    "risque de défaut émetteur/garant",
+    "risque inflation"
+  ],
+  "rawText": "--- PAGE 1 ---\ni  –   Durée   d ’ investissement   conseillée   :   6   ans   (hors   cas   de   remboursement  automatique   anticipé ( 3 ) ) .   En   cas   de   revente   avant   la   date   d ’ échéance ( 2 )   ou   de  remboursement   automatique   anticipé ( 2 ) ,   l ’ investisseur   prend   un   risque   de   perte  en   capital   non   mesurable   a   priori .  –   É ligibilité   :   compte - titres,   unité   de   compte   d ’ un   contrat   d ’ assurance - vie   ou   de  capitalisation .  –   Période   de   commercialisation   :   du   16   mars   2026   au   29   mai   2026 ( 4 ) .  –   Code   ISIN   :   FR 1459 ABE 278 .  –   Produit   émis   par   Goldman   Sachs   Finance   Corp   International   Ltd ( 5 )  (l ’   «   émetteur   »),   bénéficiant   d ’ une   garantie   des   sommes   dues   fournie   par  The   Goldman   Sachs   Group,   Inc . ( 5 )   (le   «   garant   ») .   L ’ investisseur   est   par  conséquent   exposé   au   risque   de   défaut   de   paiement   et   de   faillite   de  l ’ émetteur,   ainsi   que   de   défaut   de   paiement,   faillite   et   de   mise   en  résolution   du   garant .  –   Dans   le   cadre   d ’ un   contrat   d ’ assurance - vie   ou   de   capitalisation,   l ’ assureur   s ’ engage  exclusivement   sur   le   nombre   d ’ unités   de   compte   mais   non   sur   leur   valeur,   qu ’ il   ne  garantit   pas .   Il   est   précisé   que   l ’ assureur   d ’ une   part   et   l ’ émetteur   et   le   garant   d ’ autre  part,   sont   des   entités   juridiques   distinctes .   Ce   document   n ’ a   pas   été   rédigé   par  l ’ assureur .  –   Les   investisseurs   ne   sont   pas   protégés   contre   l ’ effet   de   l ’ inflation   dans   le   temps .   Le  rendement   réel   du   produit   corrigé   de   l ’ inflation   peut   par   conséquent   être   négatif .  ( 1 )   L ’ investisseur   prend   un   risque   de   perte   en   capital   non   mesurable   a   priori   si   les   titres   de  créance   sont   revendus   avant   la   date   d ’ échéance ( 2 )   ou   de   remboursement   automatique  anticipé ( 2 ) .   L ’ investisseur   supporte   le   risque   de   défaut   de   paiement   ou   de   faillite   de  l ’ émetteur   et   du   garant   et   de   mise   en   résolution   du   garant .   Pour   les   autres   risques   de   perte  en   capital,   voir   pages   suivantes .  ( 2 )   Veuillez   vous   référer   au   tableau   récapitulant   les   principales   caractéristiques   financières  en   page   10   pour   le   détail   des   dates   et   des   barrières .  ( 3 )   Le   remboursement   automatique   anticipé   ne   pourra   se   faire,   en   tout   état   de   cause,  avant   la   fin   de   la   première   année   suivant   la   date   de   constatation   initiale   ( 29   mai   2026 ) .  ( 4 )   Une   fois   le   montant   de   l ’ enveloppe   atteint,   la   commercialisation   du   titre   «   OBJECTIF  MAI   2026   »   peut   cesser   à   tout   moment   sans   préavis,   avant   le  29   mai   2026   ce   dont   vous   serez   informé(e),   le   cas   échéant,   par   le   distributeur .  ( 5 )   Goldman   Sachs   Finance   Corp   International   Ltd .   :   l   ’ émetteur   n ’ a   sollicité   ou   obtenu  aucune   notation   des   principales   agences   de   notation .   The   Goldman   Sachs   Group,   Inc .   :  Standard   &   Poor ’ s   BBB+,   Moody ’ s   A 2 ,   Fitch   A .   Notations   en   vigueur   au   moment  de   la   rédaction   de   la   présente   brochure   le   6   mars   2026 .   Ces   notations   peuvent  être   révisées   à   tout   moment   par   les   agences   de   notation   et   ne   sont   pas   une  garantie   de   solvabilité   de   l ’ émetteur   et   du   garant .   Elles   ne   sauraient   constituer   un  argument   de   souscription   au   titre   de   créance .  Communication   à   caractère   promotionnel  Titre   de   créance   de   droit   français   présentant   un   risque   de   perte   en   capital   partielle   ou   totale   en   cours   de   vie ( 1 )   et   à   la   date  d ’ échéance ( 2 )   (ci - après   désigné   le   «   titre   »,   le   «   titre   de   créance   »   ou   le   «   produit   ») .   Produit   de   placement   risqué   alternatif  à   un   investissement   dynamique   risqué   de   type   «   actions   » .  OBJECTIF MAI 2026  Vous   êtes   sur   le   point   d ’ acheter   un   produit   qui   n ’ est   pas   simple   et   qui   peut   être   difficile   à   comprendre .\n--- PAGE 2 ---\n2  OBJECTIF   MAI   2026   est   un   titre   de   créance   complexe   présentant   un   risque   de   perte   en   capital   partiel   ou  total   proposant   aux   investisseurs   de   s ’ exposer   pour   une   durée   de   1   à   6   années   à   l ’ évolution  du   niveau   d ’ un   panier   équi - pondéré   (ci - après   le   «   panier   équi - pondéré   »)   composé   des   actions   suivantes   :  ASML   Holding   N . V . ,   Intesa   Sanpaolo   S . p . A . ,   Siemens   Energy   AG   et   Banco   Santander   S . A ..   Le  remboursement   est   donc   conditionné   à   l ’ évolution   de   ce   panier   d ’ actions   équi - pondéré .  Les   dividendes   ne   sont   pas   réinvestis,   ce   qui   est   moins   favorable   à   l ’ investisseur   que   lorsque   les   dividendes  sont   réinvestis .  Points   clés  (1)   Veuillez vous référer au tableau récapitulant les principales caractéristiques financières en page 10 pour le détail des date s e t des barrières.  (2)   La baisse du panier   équi - pondéré est l ’ écart entre son niveau initial (3)   et son niveau (3)   à la date de constatation finale (31 mai 2032) exprimée en pourcentage de son niveau  initial (3) .  (3)   Voir en page 3 pour le détail de la détermination du “niveau” et du “niveau initial” du panier   équi - pondéré.  (4)   Les montants remboursés s ’ entendent hors frais de gestion (pour les contrats d ’ assurance - vie ou de capitalisation) ou de droits de garde (en compte - titres) et hors autres frais,  prélèvements sociaux et fiscaux applicables. Le taux de rendement annuel Brut est calculé entre la date de constatation initi ale   (29 mai 2026) et la date de remboursement  automatique anticipé (1)   concernée, ou d ’ échéance (1)   selon les cas. Pour plus d ’ informations sur le calcul des taux de rendement annuel de ce titre de créance et sur les différents  frais applicables à votre contrat d ’ assurance, merci de vous rapprocher de votre conseiller Swiss   Life.  Un   risque   de   perte   en   capital   à   hauteur   de   l ’ intégralité   de   la   baisse ( 2 )   enregistrée   par   le   panier   équi - pondéré   si   celui - ci   clôture  à   un   niveau ( 3 )   strictement   inférieur   à   60 %   de   son   niveau   initial ( 3 )   à   la   date   de   constatation   finale ( 1 )   et   que   le   produit   n ’ a   pas   été  remboursé   par   anticipation .   La   perte   en   capital   peut   être   totale   si   le   panier   équi - pondéré   a   une   valeur   nulle   à   la   date  de   constatation   finale ( 1 ) .  Un   mécanisme   de   remboursement   automatique   anticipé   du   capital   activable   automatiquement   à   partir   de   l ’ année   1   à   compter  du   29   mai   2026   (date   de   constatation   initiale)   et   jusqu ’ à   l ’ année   5 ,   si   le   panier   équi - pondéré   clôture   à   un   niveau ( 3 )   supérieur  ou   égal   à   95   %   de   son   niveau   initial ( 3 )   à   une   date   de   constatation   annuelle ( 1 ) ,   la   première   étant   le   31   mai   2027 .  Un   objectif   de   gain   de   9 , 70   % ( 4 )   par   année   écoulée   depuis   le   29   mai   2026   en   cas   de   remboursement   automatique   anticipé  ou   si,   en   date   de   constatation   finale ( 1 ) ,   le   panier   équi - pondéré   clôture   à   un   niveau ( 3 )   supérieur   ou   égal   à   95   %   de   son   niveau   initial ( 3 ) .  L ’ investisseur   accepte   de   limiter   ses   gains   en   cas   de   forte   hausse   du   panier   équi - pondéré   (soit   un   taux   de   rendement   annuel   brut  maximum   de   9 , 46   % ( 4 ) ) .  OBJECTIF MAI 2026  La   présente   brochure   décrit   les   caractéristiques   du   titre   de   créance   «   OBJECTIF   MAI   2026   »   et   ne   prend   pas  en   compte   les   spécificités   des   contrats   d ’ assurance   vie   ou   de   capitalisation   dans   le   cadre   desquels   ce   produit   peut   être   proposé .  Les   termes   «   capital   »   et   «   capital   initial   »   utilisés   dans   cette   brochure   désignent   la   valeur   nominale   des   titres   de   créance  «   OBJECTIF   MAI   2026   »,   soit   1   000   euros .   Tous   les   remboursements   présentés   dans   cette   brochure   (dont   les   gains   éventuels)  sont   calculés   sur   la   base   de   cette   valeur   nominale,   hors   frais,   commissions,   prélèvements   sociaux   et   fiscaux   applicables   et   sauf  faillite   ou   défaut   de   paiement   de   l ’ émetteur   et   /   ou   du   garant   et   /   ou   mise   en   résolution   du   garant .   L ’ attention   des  investisseurs   est   donc   attirée   sur   le   fait   que   la   valeur   de   remboursement   du   produit   ne   constitue   donc  pas   nécessairement   le   montant   qui   leur   est   effectivement   restitué .  Le   taux   de   rendement   annuel   utilisé   dans   cette   brochure   est   brut,   sans   prise   en   compte   des   frais   de   gestion   pour   les   contrats  d ’ assurance - vie   ou   de   capitalisation   ou   d ’ éventuels   droits   de   garde   en   compte - titres,   des   autres   frais   et   des   prélèvements  sociaux   et   fiscaux   applicables .   Il   est   calculé   pour   un   investissement   de   1   000   euros   entre   la   date   de   constatation   initiale,  le   29   mai   2026 ,   et   la   date   de   remboursement   automatique   anticipé ( 1 )   concernée,   ou   d ’ échéan",
+  "aiParsed": {
+    "name": "OBJECTIF MAI 2026",
+    "type": "autocall",
+    "structureType": "autocall",
+    "emitter": "Goldman Sachs Finance Corp International Ltd",
+    "guarantor": "The Goldman Sachs Group, Inc.",
+    "guarantorRating": {
+      "moodys": "A2",
+      "sp": "BBB+",
+      "fitch": "A"
+    },
+    "isin": "FR1459ABE278",
+    "underlyings": [
+      "ASML Holding N.V.",
+      "Intesa Sanpaolo S.p.A.",
+      "Siemens Energy AG",
+      "Banco Santander S.A."
+    ],
+    "underlyingType": "basket",
+    "nUnderlyings": 4,
+    "nPairs": null,
+    "currency": "EUR",
+    "maturity": "6 ans",
+    "maturityYears": 6,
+    "coupon": {
+      "rate": 9.7,
+      "rateIfCalled": null,
+      "rateIfMaturity": null,
+      "type": "autocall",
+      "frequency": "annuel",
+      "trigger": 95,
+      "memory": false,
+      "paymentTiming": "maturity"
+    },
+    "participationRate": null,
+    "capitalProtection": {
+      "protected": false,
+      "level": null,
+      "barrier": 60,
+      "barrierCoupon": null,
+      "barrierType": "europeenne",
+      "couponFloor": false
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "autocall",
+      "trigger": 95,
+      "frequency": "annuel",
+      "startSemester": null,
+      "startYear": 1,
+      "stepDown": false,
+      "stepDownPct": null
+    },
+    "decrementPct": null,
+    "actualDividendYield": null,
+    "historicalSimulations": null,
+    "scenarios": {
+      "favorable": null,
+      "median": null,
+      "defavorable": null
+    },
+    "risks": [
+      "risque de perte en capital",
+      "risque de défaut émetteur/garant",
+      "risque inflation"
+    ],
+    "mechanism": "Autocall annuel si panier ≥95%, gain 9,70%/an. À échéance: gain si ≥95%, perte si <60%",
+    "summary": "Autocall 6 ans sur panier 4 actions, barrière 95%, coupon 9,70%/an, protection 60%"
+  },
+  "aiSummary": "## DESCRIPTION\nProduit structuré \"OBJECTIF MAI 2026\" émis par Goldman Sachs Finance Corp International Ltd. Type autocall sur 6 ans avec exposition à un panier de 4 actions : ASML Holding N.V., Intesa Sanpaolo S.p.A., Siemens Energy AG et Banco Santander S.A.\n\n## MÉCANISME\n- Observation annuelle du niveau du panier par rapport à son niveau initial\n- Si panier ≥ 95% : remboursement automatique avec gain\n- À échéance (6 ans) : gain si panier ≥ 95%, perte en capital si panier < 60%\n- Entre 60% et 95% à échéance : remboursement du capital sans gain\n\n## RENDEMENT\n- Coupon : 9,70% par an\n- Fréquence : annuelle\n- Condition : panier ≥ 95% (trigger)\n- Paiement : à l'échéance ou au remboursement anticipé\n- Pas d'effet mémoire\n\n## PROTECTION\n- Capital non protégé\n- Barrière de protection à 60% (européenne, observée uniquement à échéance)\n- Perte en capital si panier < 60% à échéance\n\n## REMBOURSEMENT ANTICIPÉ\n- Autocall possible dès la fin de l'année 1\n- Déclenchement si panier ≥ 95%\n- Observation annuelle\n- Remboursement du capital + coupons de 9,70% par année écoulée\n\n## SCÉNARIOS\nDonnées non fournies pour les scénarios favorable, médian et défavorable.\n\n## POINTS ATTENTION\n- Risque de perte totale ou partielle du capital investi\n- Risque de défaut de l'émetteur Goldman Sachs\n- Risque d'inflation sur la période de 6 ans\n- Performance dépendante de l'évolution des 4 actions du panier",
+  "sourceFile": "Brochure OBJECTIF MAI 2026.pdf",
+  "structureType": "autocall",
+  "participationRate": null,
+  "historicalSimulations": null,
+  "guarantorRating": {
+    "moodys": "A2",
+    "sp": "BBB+",
+    "fitch": "A"
+  },
+  "mechanism": "Autocall annuel si panier ≥95%, gain 9,70%/an. À échéance: gain si ≥95%, perte si <60%",
+  "nPairs": null,
+  "nUnderlyings": 4,
+  "decrementPct": null,
+  "actualDividendYield": null,
+  "maturityYears": 6,
+  "aiCategory": "autocall-multi",
+  "aiCategoryLabel": "⚡ Autocall Multi-actifs",
+  "aiCategoryColor": "#2EC4B6",
+  "aiOpinion": "Produit offrant un rendement attractif de 9,7% annuel avec possibilité de remboursement anticipé, mais exposé au risque de quatre sous-jacents européens sans protection du capital. Le seuil d'autocall élevé à 95% réduit les chances de sortie anticipée, tandis que la barrière à 60% offre une marge de sécurité correcte mais reste risquée sur 6 ans.",
+  "aiAnalyzedAt": "2026-03-30T08:03:31.970Z",
+  "status": "analyzing",
+  "receivedDate": "2026-03-30",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null,
+  "score": {
+    "score": 4,
+    "details": [
+      {
+        "type": "warning",
+        "icon": "⚠️",
+        "text": "Même sous-jacent que 1 produit(s) — 20% du book",
+        "impact": 35,
+        "category": "redundancy"
+      },
+      {
+        "type": "warning",
+        "icon": "📦",
+        "text": "Même type que 4 produit(s) — 80% du book en \"Autocall / Phoenix\"",
+        "impact": 20,
+        "category": "redundancy"
+      },
+      {
+        "type": "info",
+        "icon": "🏦",
+        "text": "Même émetteur que 4 produit(s) — concentration Swiss Life",
+        "impact": 16,
+        "category": "redundancy"
+      },
+      {
+        "type": "positive",
+        "icon": "📈",
+        "text": "Coupon (9.7%) > moyenne du book (4.1%)",
+        "impact": 15,
+        "category": "complementarity"
+      },
+      {
+        "type": "positive",
+        "icon": "🔀",
+        "text": "Faible corrélation moyenne (30%) — diversification",
+        "impact": 10,
+        "category": "complementarity"
+      }
+    ],
+    "verdict": "⛔ Fortement déconseillé — duplication quasi-totale.",
+    "breakdown": {
+      "redundancy": 71,
+      "complementarity": 25
+    }
+  }
+}
