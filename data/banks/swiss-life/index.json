@@ -1,7 +1,7 @@
 {
   "bankId": "swiss-life",
   "bankName": "Swiss Life",
-  "lastUpdated": "2026-03-30T13:57:18.220Z",
+  "lastUpdated": "2026-03-30T19:45:23.116Z",
   "products": [
     {
       "id": "sp_mnd8hjkx_40efj",
@@ -41,6 +41,14 @@
       "type": "autocall",
       "status": "analyzing",
       "score": 49,
+      "receivedDate": "2026-03-30"
+    },
+    {
+      "id": "sp_mndll5m3_oaqed",
+      "name": "OBJECTIF MAI 2026",
+      "type": "autocall",
+      "status": "analyzing",
+      "score": 4,
       "receivedDate": "2026-03-30"
     }
   ]
