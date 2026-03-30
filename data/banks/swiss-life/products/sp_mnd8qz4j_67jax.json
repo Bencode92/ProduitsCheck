@@ -234,6 +234,8 @@
   "aiOpinion": "Produit attractif avec un coupon fixe de 9,7% et une barrière relativement basse à 60% sur 4 sous-jacents diversifiés. Cependant, l'absence de protection du capital et le seuil d'autocall élevé à 95% augmentent significativement le risque de perte en capital en cas de forte baisse des marchés.",
   "aiAnalyzedAt": "2026-03-30T13:46:05.501Z",
   "envelope": "",
+  "_couponProbability": 44.5,
+  "_bsRendementNet": -3.91,
   "grading": {
     "grade": "C",
     "score": 53,
@@ -252,31 +254,31 @@
           "probCoupon": 44.5,
           "couponEffectif": 9.7,
           "rendementEspere": 4.32,
-          "perteEsperee": 8.22,
-          "rendementNet": -3.9,
+          "perteEsperee": 8.23,
+          "rendementNet": -3.91,
           "drag": 0,
           "vols": [
-            37.05,
+            37.09,
             24.51,
-            28.14,
+            28.12,
             24.51
           ],
           "matEsperee": 3.3,
           "reasoning": "P(SJ>95% | vol=37% T=3.3a) = 44.5% | Breach 60%: P=52.2% -> perte esperee 8.2%/an | Rdt net: 4.3% - 8.2% = -3.9%/an",
-          "method": "BS-simplifie-v1"
+          "method": "BS-simplifie-v1.1"
         }
       },
       "underlyingQuality": {
-        "score": 56,
-        "base": 35,
+        "score": 55,
+        "base": 33,
         "delta": -5,
-        "reasoning": "Qualité: base 35 → -5 = 30 (3 des 4 sous-jacents dans des secteurs évités (ASML/tech -1.22%, ISP+SAN/financials -1.63%) et ENR ultra-cyclique souffre en stagflation malgré le secteur energy favorisé) | Worst: Siemens Energy AG B:24 | Basket équipondéré 4 actifs: P2 +26pts (diversification)"
+        "reasoning": "Qualité: base 33 → -5 = 28 (3/4 SJ dans secteurs évités (ASML tech -1.22%, ISP/SAN financials -1.63%), seul ENR energy favorisé mais DD 71.9% excessif) | Worst: Intesa Sanpaolo S.p.A. B:25 | Basket équipondéré 4 actifs: P2 +27pts (diversification)"
       },
       "portfolioFit": {
         "score": 75,
         "base": 80,
         "delta": -5,
-        "reasoning": "Fit: base 80 → -5 = 75 (En régime stagflationnaire, la surexposition aux secteurs évités (tech/financials) et la volatilité élevée réduisent la pertinence du produit dans un portefeuille défensif)"
+        "reasoning": "Fit: base 80 → -5 = 75 (Diversification sectorielle positive mais surexposition aux secteurs pénalisés en stagflation diminue la pertinence portefeuille)"
       },
       "riskPremium": {
         "score": 83,
@@ -285,36 +287,35 @@
         "reasoning": "Capital garanti: spread 9.7% - CAT 2.5% - illiq 0.5% = 6.7% | Illiq. premium +1.4% (-7pts)"
       }
     },
-    "verdict": "Produit inadapté au régime stagflationnaire actuel avec 3 sous-jacents sur 4 dans des secteurs en rotation négative. Le worst-of ENR (-71.9% DD, vol 60.46%) compromet fortement les chances de toucher les coupons 9.7% avec des barrières à 95%. La probabilité de maturation anticipée chute à seulement 24% dans ce contexte de stress, exposant l'investisseur à un risque de perte en capital significatif sur 6 ans.",
+    "verdict": "Produit TRÈS RISQUÉ (score ajusté: 19/100) inadapté au régime stagflationniste actuel. Avec 3/4 sous-jacents dans des secteurs évités par le marché (tech/financials sous-performent de -1.2% à -1.6%) et une barrière coupon à 95% irréaliste, la probabilité de toucher le coupon 9.7% est infime. Le worst-of ISP (financials) avec beta 0.85 offre peu de protection dans un contexte de stress énergétique et VIX à 22.",
     "keyRisks": [
-      "Exposition fatale aux secteurs évités (tech/financials) en stagflation avec momentum négatif confirmé",
-      "ENR ultra-volatil (60.46%) peut facilement franchir la barrière 95% et compromettre tous les coupons",
-      "Choc énergétique >$100 paradoxalement négatif pour ENR (surcapacité/transition) malgré secteur energy favorisé",
-      "Barrière à 0.34σ (Critique) — vol 60.46%"
+      "Exposition fatale aux secteurs évités: 75% du panier dans tech/financials en pleine rotation sectorielle",
+      "Barrière 95% inatteignable avec Siemens Energy volatilité 60.5% et DD -71.9%",
+      "Barrière à 0.34σ (Critique) — vol 60.47%"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 9.7,
         "return_eur": 9700,
-        "probability": 0.15,
+        "probability": 0.1,
         "duration_years": 1
       },
       "base": {
-        "return_pct": 3.2,
-        "return_eur": 9600,
+        "return_pct": 0,
+        "return_eur": 0,
         "probability": 0.3,
-        "duration_years": 3
+        "duration_years": 6
       },
       "stress": {
-        "return_pct": -2,
-        "return_eur": -12000,
-        "probability": 0.35,
+        "return_pct": -15,
+        "return_eur": -15000,
+        "probability": 0.4,
         "duration_years": 6
       },
       "worst": {
-        "return_pct": -10,
-        "return_eur": -60000,
+        "return_pct": -40,
+        "return_eur": -40000,
         "probability": 0.2,
         "duration_years": 6
       }
@@ -328,8 +329,8 @@
       "label": "D [25-47]"
     },
     "metadata": {
-      "gradedAt": "2026-03-30T15:10:47.147Z",
-      "durationMs": 22891,
+      "gradedAt": "2026-03-30T18:52:13.094Z",
+      "durationMs": 21493,
       "aiUsed": true,
       "version": "5.2",
       "productType": "autocall",
@@ -349,7 +350,7 @@
       "maxMaturity": 6,
       "probReachMaturity": 24,
       "maxBeta": 1.56,
-      "baseScore": 40,
+      "baseScore": 39,
       "baseGrade": "D",
       "adjustments": {
         "p1": -5,
@@ -371,15 +372,15 @@
       "hasDecrement": false,
       "decrementDrag": 0,
       "structureType": "autocall",
-      "bsMethod": "BS-simplifie-v1",
+      "bsMethod": "BS-simplifie-v1.1",
       "bsProbCoupon": 44.5,
-      "bsRendementNet": -3.9,
-      "bsPerteEsperee": 8.22,
+      "bsRendementNet": -3.91,
+      "bsPerteEsperee": 8.23,
       "bsCouponEffectif": 9.7,
       "bsVols": [
-        37.05,
+        37.09,
         24.51,
-        28.14,
+        28.12,
         24.51
       ],
       "bsMatEsperee": 3.3,
@@ -388,53 +389,51 @@
           "name": "ASML Holding N.V.",
           "ticker": "ASML",
           "sector": "Technologie de l'information",
-          "perf_ytd": 24.42,
-          "perf_1y": 84.99,
-          "volatility_3y": 37.05,
+          "perf_ytd": 20.69,
+          "perf_1y": 80.43,
+          "volatility_3y": 37.09,
           "max_drawdown_3y": 45.12,
-          "buffett_score": 100,
-          "quality_score": 68,
-          "buffett_grade": "A"
+          "buffett_score": 50,
+          "quality_score": 71,
+          "buffett_grade": "C"
         },
         {
           "name": "Intesa Sanpaolo S.p.A.",
           "ticker": "ISP",
           "sector": "Finance",
-          "perf_ytd": -14.08,
-          "perf_1y": 5.75,
-          "volatility_3y": 24.79,
+          "perf_ytd": -13.93,
+          "perf_1y": 7.89,
+          "volatility_3y": 24.76,
           "max_drawdown_3y": 21.19,
-          "buffett_score": null,
-          "quality_score": 70,
-          "buffett_grade": null
+          "buffett_score": 25,
+          "quality_score": 61,
+          "buffett_grade": "D"
         },
         {
           "name": "Siemens Energy AG",
           "ticker": "ENR",
           "sector": "Industries",
-          "perf_ytd": 19.93,
-          "perf_1y": 161.12,
-          "volatility_3y": 60.46,
+          "perf_ytd": 17.94,
+          "perf_1y": 163.74,
+          "volatility_3y": 60.47,
           "max_drawdown_3y": 71.9,
-          "buffett_score": 24,
-          "quality_score": 49,
-          "buffett_grade": "D"
+          "buffett_score": 40,
+          "quality_score": 41,
+          "buffett_grade": "C"
         },
         {
           "name": "Banco Santander S.A.",
           "ticker": "SAN",
           "sector": "Finance",
-          "perf_ytd": -6.63,
-          "perf_1y": 48.7,
-          "volatility_3y": 28.49,
+          "perf_ytd": -5.76,
+          "perf_1y": 49.4,
+          "volatility_3y": 28.42,
           "max_drawdown_3y": 20.79,
-          "buffett_score": null,
-          "quality_score": 75,
-          "buffett_grade": null
+          "buffett_score": 40,
+          "quality_score": 71,
+          "buffett_grade": "C"
         }
       ]
     }
-  },
-  "_couponProbability": 44.5,
-  "_bsRendementNet": -3.9
+  }
 }
