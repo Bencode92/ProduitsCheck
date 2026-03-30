@@ -1,16 +1,8 @@
 {
   "bankId": "sg",
   "bankName": "Société Générale",
-  "lastUpdated": "2026-03-30T16:01:02.269Z",
+  "lastUpdated": "2026-03-30T16:01:26.533Z",
   "products": [
-    {
-      "id": "sp_mnd5ye82_bbfix",
-      "name": "ATHENA SUR INDICE SOLACTIVE GOLD MINERS À DÉCRÉMENT",
-      "type": "autocall",
-      "status": "analyzing",
-      "score": 80,
-      "receivedDate": "2026-03-30"
-    },
     {
       "id": "sp_mnd6yq2v_as1r1",
       "name": "Solution Court Terme Boostée sur Panier d'Actions",
