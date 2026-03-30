@@ -23,7 +23,7 @@
   "capitalProtection": {
     "protected": false,
     "level": null,
-    "barrier": 40,
+    "barrier": 60,
     "barrierCoupon": 60,
     "barrierType": "europeenne",
     "couponFloor": false
@@ -36,7 +36,9 @@
     "startSemester": 2,
     "startYear": null,
     "stepDown": true,
-    "stepDownPct": 5
+    "stepDownPct": 5,
+    "hasAutocall": true,
+    "enabled": true
   },
   "scenarios": {
     "favorable": "Remboursement au S2 à 103.5% avec TRA 6.98%",
@@ -294,5 +296,6 @@
         }
       ]
     }
-  }
+  },
+  "envelope": ""
 }
