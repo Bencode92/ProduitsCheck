@@ -1,7 +1,7 @@
 {
   "bankId": "cic",
   "bankName": "CIC",
-  "lastUpdated": "2026-03-30T11:53:23.794Z",
+  "lastUpdated": "2026-03-30T11:53:34.344Z",
   "products": [
     {
       "id": "sp_mnaz40w4_r4fbu",
@@ -18,14 +18,6 @@
       "status": "analyzing",
       "score": 28,
       "receivedDate": "2026-03-29"
-    },
-    {
-      "id": "sp_mnd4ptu4_m0csp",
-      "name": "Digitale WO LVMH Crédit Agricole Avril 2029",
-      "type": null,
-      "status": "analyzing",
-      "score": 100,
-      "receivedDate": "2026-03-30"
     }
   ]
 }
