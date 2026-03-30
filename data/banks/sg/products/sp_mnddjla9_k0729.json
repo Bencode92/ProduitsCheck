@@ -28,8 +28,6 @@
   "capitalProtection": {
     "protected": true,
     "level": 100,
-    "barrier": null,
-    "barrierCoupon": null,
     "barrierType": "europeenne"
   },
   "earlyRedemption": {
@@ -39,10 +37,10 @@
     "frequency": "annuel",
     "startSemester": 2,
     "stepDown": false,
-    "stepDownPct": null
+    "stepDownPct": null,
+    "hasAutocall": true,
+    "enabled": true
   },
-  "decrementPct": null,
-  "actualDividendYield": null,
   "mechanism": "Note à taux fixe callable avec coupon bonus. Rappel possible à la discrétion de l'émetteur dès la 1ère année. Coupon de 5% par année si rappel anticipé, 4% par année (soit 40% total) si détention jusqu'à maturité. Paiement des coupons à maturité uniquement.",
   "risks": [
     "Protection du capital uniquement à l'échéance",
@@ -212,5 +210,11 @@
       "redundancy": 6,
       "complementarity": 70
     }
-  }
+  },
+  "aiCategory": "capital-protege",
+  "aiCategoryLabel": "🛡️ Capital Protégé",
+  "aiCategoryColor": "#4CAF50",
+  "aiOpinion": "Produit défensif avec protection intégrale du capital et coupon fixe attractif de 5% annuel, idéal pour investisseurs prudents en période d'incertitude. La clause d'autocall permet un remboursement anticipé potentiel mais le seuil non précisé et l'absence d'information sur le sous-jacent limitent l'évaluation complète du profil risque/rendement.",
+  "aiAnalyzedAt": "2026-03-30T16:00:21.448Z",
+  "envelope": ""
 }
