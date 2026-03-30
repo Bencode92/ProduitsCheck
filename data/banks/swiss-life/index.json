@@ -1,6 +1,15 @@
 {
   "bankId": "swiss-life",
   "bankName": "Swiss Life",
-  "lastUpdated": "2026-03-30T13:25:02.360Z",
-  "products": []
+  "lastUpdated": "2026-03-30T13:27:23.592Z",
+  "products": [
+    {
+      "id": "sp_mnd831zb_vjl80",
+      "name": "SL - ATHENA PRIVILEGE INTESA SANPAOLO MAI 2026",
+      "type": "autocall",
+      "status": "analyzing",
+      "score": 43,
+      "receivedDate": "2026-03-30"
+    }
+  ]
 }
