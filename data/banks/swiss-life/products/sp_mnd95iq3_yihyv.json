@@ -1,0 +1,221 @@
+{
+  "id": "sp_mnd95iq3_yihyv",
+  "name": "SL - PHOENIX MEMOIRE FAST SEMESTRIEL ASML AVRIL 2026",
+  "type": "autocall",
+  "structureType": "autocall",
+  "emitter": "HSBC Continental Europe",
+  "guarantor": "",
+  "guarantorRating": {
+    "moodys": "",
+    "sp": ""
+  },
+  "underlyings": [
+    "ASML Holding NV"
+  ],
+  "underlyingType": "single-stock",
+  "currency": "EUR",
+  "maturity": "6 ans",
+  "maturityYears": 6,
+  "coupon": {
+    "rate": 3.5,
+    "rateIfCalled": null,
+    "rateIfMaturity": null,
+    "type": "conditionnel",
+    "frequency": "semestriel",
+    "trigger": 60,
+    "memory": true,
+    "paymentTiming": "periodic"
+  },
+  "participationRate": null,
+  "capitalProtection": {
+    "protected": false,
+    "level": null,
+    "barrier": 60,
+    "barrierCoupon": 60,
+    "barrierType": "europeenne"
+  },
+  "earlyRedemption": {
+    "possible": true,
+    "type": "autocall",
+    "trigger": 100,
+    "frequency": "semestriel",
+    "startSemester": 2,
+    "stepDown": true,
+    "stepDownPct": 5
+  },
+  "decrementPct": null,
+  "actualDividendYield": null,
+  "mechanism": "Mécanisme de remboursement automatique anticipé dès le semestre 2 avec barrières dégressives (100%, 95%, 90%, 85%, 80%). Coupon conditionnel de 3.50% par semestre avec effet mémoire si l'action est ≥ -40%. Protection du capital si baisse ≤ 40%, perte en capital si baisse > 60%.",
+  "risks": [
+    "Risque de crédit",
+    "Risque de marché",
+    "Risque de liquidité",
+    "Risque de perte en capital",
+    "Risque lié au sous-jacent",
+    "Risque lié à l'inflation",
+    "Risque lié à l'éventuelle défaillance de l'Emetteur"
+  ],
+  "summary": "Produit structuré autocall sur ASML avec remboursement anticipé possible dès le semestre 2 (barrières dégressives de 100% à 80%). Coupon conditionnel de 3.50% par semestre avec mémoire si action ≥ -40%. Capital protégé si baisse ≤ 40%, perte en capital si baisse > 60%.",
+  "aiParsed": {
+    "name": "SL - PHOENIX MEMOIRE FAST SEMESTRIEL ASML AVRIL 2026",
+    "type": "autocall",
+    "structureType": "autocall",
+    "emitter": "HSBC Continental Europe",
+    "guarantor": "",
+    "guarantorRating": {
+      "moodys": "",
+      "sp": ""
+    },
+    "underlyings": [
+      "ASML Holding NV"
+    ],
+    "underlyingType": "single-stock",
+    "currency": "EUR",
+    "maturity": "6 ans",
+    "maturityYears": 6,
+    "coupon": {
+      "rate": 3.5,
+      "rateIfCalled": null,
+      "rateIfMaturity": null,
+      "type": "conditionnel",
+      "frequency": "semestriel",
+      "trigger": 60,
+      "memory": true,
+      "paymentTiming": "periodic"
+    },
+    "participationRate": null,
+    "capitalProtection": {
+      "protected": false,
+      "level": null,
+      "barrier": 60,
+      "barrierCoupon": 60,
+      "barrierType": "europeenne"
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "autocall",
+      "trigger": 100,
+      "frequency": "semestriel",
+      "startSemester": 2,
+      "stepDown": true,
+      "stepDownPct": 5
+    },
+    "decrementPct": null,
+    "actualDividendYield": null,
+    "mechanism": "Mécanisme de remboursement automatique anticipé dès le semestre 2 avec barrières dégressives (100%, 95%, 90%, 85%, 80%). Coupon conditionnel de 3.50% par semestre avec effet mémoire si l'action est ≥ -40%. Protection du capital si baisse ≤ 40%, perte en capital si baisse > 60%.",
+    "risks": [
+      "Risque de crédit",
+      "Risque de marché",
+      "Risque de liquidité",
+      "Risque de perte en capital",
+      "Risque lié au sous-jacent",
+      "Risque lié à l'inflation",
+      "Risque lié à l'éventuelle défaillance de l'Emetteur"
+    ],
+    "summary": "Produit structuré autocall sur ASML avec remboursement anticipé possible dès le semestre 2 (barrières dégressives de 100% à 80%). Coupon conditionnel de 3.50% par semestre avec mémoire si action ≥ -40%. Capital protégé si baisse ≤ 40%, perte en capital si baisse > 60%.",
+    "aiParsed": {
+      "name": "SL - PHOENIX MEMOIRE FAST SEMESTRIEL ASML AVRIL 2026",
+      "structureType": "autocall",
+      "emitter": "HSBC Continental Europe",
+      "guarantor": "",
+      "guarantorRating": {
+        "moodys": "",
+        "sp": ""
+      },
+      "underlyings": [
+        "ASML Holding NV"
+      ],
+      "underlyingType": "single-stock",
+      "currency": "EUR",
+      "maturity": "07/05/2032",
+      "maturityYears": 6,
+      "coupon": {
+        "rate": 3.5,
+        "rateIfCalled": null,
+        "rateIfMaturity": null,
+        "type": "conditionnel",
+        "frequency": "semestriel",
+        "trigger": 60,
+        "memory": true,
+        "paymentTiming": "periodic"
+      },
+      "participationRate": null,
+      "capitalProtection": {
+        "protected": false,
+        "level": null,
+        "barrier": 60,
+        "barrierCoupon": 60,
+        "barrierType": "europeenne"
+      },
+      "earlyRedemption": {
+        "possible": true,
+        "type": "autocall",
+        "trigger": 100,
+        "frequency": "semestriel",
+        "startSemester": 2,
+        "stepDown": true,
+        "stepDownPct": 5
+      },
+      "decrementPct": null,
+      "actualDividendYield": null,
+      "mechanism": "Mécanisme de remboursement automatique anticipé dès le semestre 2 avec barrières dégressives (100%, 95%, 90%, 85%, 80%). Coupon conditionnel de 3.50% par semestre avec effet mémoire si l'action est ≥ -40%. Protection du capital si baisse ≤ 40%, perte en capital si baisse > 60%.",
+      "risks": [
+        "Risque de crédit",
+        "Risque de marché",
+        "Risque de liquidité",
+        "Risque de perte en capital",
+        "Risque lié au sous-jacent",
+        "Risque lié à l'inflation",
+        "Risque lié à l'éventuelle défaillance de l'Emetteur"
+      ],
+      "summary": "Produit structuré autocall sur ASML avec remboursement anticipé possible dès le semestre 2 (barrières dégressives de 100% à 80%). Coupon conditionnel de 3.50% par semestre avec mémoire si action ≥ -40%. Capital protégé si baisse ≤ 40%, perte en capital si baisse > 60%."
+    },
+    "sourceFile": "Brochure PHOENIX FAST SEMESTRIEL ASML AVRIL 2026.pdf"
+  },
+  "sourceFile": "JSON import",
+  "bankId": "swiss-life",
+  "status": "analyzing",
+  "receivedDate": "2026-03-30",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null,
+  "score": {
+    "score": 49,
+    "details": [
+      {
+        "type": "positive",
+        "icon": "✅",
+        "text": "Nouveau sous-jacent absent du book — diversification",
+        "impact": 25,
+        "category": "complementarity"
+      },
+      {
+        "type": "warning",
+        "icon": "📦",
+        "text": "Même type que 4 produit(s) — 80% du book en \"Autocall / Phoenix\"",
+        "impact": 20,
+        "category": "redundancy"
+      },
+      {
+        "type": "info",
+        "icon": "🏦",
+        "text": "Même émetteur que 4 produit(s) — concentration Swiss Life",
+        "impact": 16,
+        "category": "redundancy"
+      },
+      {
+        "type": "positive",
+        "icon": "🔀",
+        "text": "Faible corrélation moyenne (30%) — diversification",
+        "impact": 10,
+        "category": "complementarity"
+      }
+    ],
+    "verdict": "🟠 Modéré — apport limité, recouvrements significatifs.",
+    "breakdown": {
+      "redundancy": 36,
+      "complementarity": 35
+    }
+  }
+}
