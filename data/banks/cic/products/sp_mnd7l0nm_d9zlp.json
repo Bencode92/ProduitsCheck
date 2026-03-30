@@ -234,30 +234,46 @@
   "aiAnalyzedAt": "2026-03-30T13:13:28.329Z",
   "envelope": "",
   "grading": {
-    "grade": "A",
-    "score": 79,
+    "grade": "B",
+    "score": 67,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 84,
-        "base": 86,
-        "delta": -2,
-        "reasoning": "Rendement: base 86 → -2 = 84 (Barrière à 100% en stagflation avec VIX élevé et volatilités >20% rend le coupon très incertain) | Coupon 6.15%, protégé | Barr.coupon 100%"
+        "score": 44,
+        "base": 61,
+        "delta": -17,
+        "reasoning": "BS: WO probs: 46% x 45% = 23.8% (corr adj) | Memoire: prob x 1.08 = 25.7% | Rdt net: 1.6% - 0.0% = 1.6%/an | Spread vs CAT: -0.9%",
+        "_bs": {
+          "score": 44,
+          "probCoupon": 25.7,
+          "couponEffectif": 6.15,
+          "rendementEspere": 1.58,
+          "perteEsperee": 0,
+          "rendementNet": 1.58,
+          "drag": 0,
+          "vols": [
+            29.28,
+            30.33
+          ],
+          "matEsperee": 3,
+          "reasoning": "WO probs: 46% x 45% = 23.8% (corr adj) | Memoire: prob x 1.08 = 25.7% | Rdt net: 1.6% - 0.0% = 1.6%/an",
+          "method": "BS-simplifie-v1"
+        }
       },
       "underlyingQuality": {
         "score": 72,
         "base": 74,
         "delta": -2,
-        "reasoning": "Qualité: base 74 → -2 = 72 (Crédit Agricole dans secteur financier évité (-1.63% momentum) et LVMH vulnérable au ralentissement chinois en stagflation) | Worst: Crédit Agricole S.A. B:79"
+        "reasoning": "Qualité: base 74 → -2 = 72 (Crédit Agricole dans secteur financials évité (-1.63% momentum) et LVMH luxury vulnérable en stagflation avec beta 0.89) | Worst: Crédit Agricole S.A. B:79"
       },
       "portfolioFit": {
         "score": 82,
         "base": 80,
         "delta": 2,
-        "reasoning": "Fit: base 80 → +2 = 82 (Capital garanti offre une protection bienvenue en régime stagflationniste avec choc pétrolier)"
+        "reasoning": "Fit: base 80 → +2 = 82 (Capital garanti offre protection précieuse en régime stagflationnaire avec VIX à 22 et choc pétrolier)"
       },
       "riskPremium": {
         "score": 77,
@@ -266,36 +282,36 @@
         "reasoning": "Capital garanti: spread 6.2% - CAT 2.5% - illiq 0.3% = 3.3%"
       }
     },
-    "verdict": "Produit capital garanti peu attractif en stagflation avec seulement 49/100 après ajustements. La barrière digitale à 100% sur un worst-of incluant Crédit Agricole (secteur évité, -1.63%) rend le coupon de 6.15% très hypothétique avec des volatilités >20%. Le régime stagflationniste avec Brent >$100 et rotation sectorielle défavorise fortement les deux sous-jacents, limitant le produit à une simple protection du capital sur 3 ans.",
+    "verdict": "Produit défensif avec capital garanti mais structure coupon trop exigeante pour le contexte stagflationnaire actuel. La barrière à 100% sur worst-of bancaire/luxe rend improbable le versement régulier des 6.15% annuels avec Crédit Agricole dans un secteur évité (-1.63% momentum) et LVMH vulnérable au ralentissement. Le capital garanti reste l'atout majeur avec VIX à 22 et Brent >$100, mais les 615bps de spread reflètent justement la faible probabilité de toucher les coupons.",
     "keyRisks": [
-      "Probabilité très élevée de 0% de coupon avec barrière 100% en stagflation",
-      "Crédit Agricole dans secteur financier évité avec momentum négatif",
-      "LVMH exposé au ralentissement chinois et rotation anti-growth"
+      "Forte probabilité de 0% coupon avec barrière 100% en stagflation et volatilité LVMH 29%",
+      "Crédit Agricole dans secteur financials évité avec momentum négatif -1.63%",
+      "Duration 3 ans sans sortie anticipée en régime macro défavorable"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 6.15,
-        "return_eur": 18450,
+        "return_eur": 6150,
         "probability": 0.15,
-        "duration_years": 3
+        "duration_years": 1
       },
       "base": {
-        "return_pct": 0,
-        "return_eur": 0,
-        "probability": 0.6,
+        "return_pct": 3,
+        "return_eur": 9000,
+        "probability": 0.35,
         "duration_years": 3
       },
       "stress": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.2,
+        "probability": 0.4,
         "duration_years": 3
       },
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.05,
+        "probability": 0.1,
         "duration_years": 3
       }
     },
@@ -308,8 +324,8 @@
       "label": "B [56-70]"
     },
     "metadata": {
-      "gradedAt": "2026-03-30T13:14:35.463Z",
-      "durationMs": 19315,
+      "gradedAt": "2026-03-30T15:08:39.149Z",
+      "durationMs": 20759,
       "aiUsed": true,
       "version": "5.2",
       "productType": "capital_garanti",
@@ -324,7 +340,7 @@
       "hasBarrier": false,
       "barrierPct": 0,
       "barrierCouponPct": 100,
-      "couponProbability": null,
+      "couponProbability": 25.7,
       "expectedMaturity": 3,
       "maxMaturity": 3,
       "maxBeta": 0.89,
@@ -350,6 +366,16 @@
       "hasDecrement": false,
       "decrementDrag": 0,
       "structureType": "capital_garanti",
+      "bsMethod": "BS-simplifie-v1",
+      "bsProbCoupon": 25.7,
+      "bsRendementNet": 1.58,
+      "bsPerteEsperee": 0,
+      "bsCouponEffectif": 6.15,
+      "bsVols": [
+        29.28,
+        30.33
+      ],
+      "bsMatEsperee": 3,
       "stockData": [
         {
           "name": "LVMH Moët Hennessy Louis Vuitton SA",
@@ -377,5 +403,7 @@
         }
       ]
     }
-  }
+  },
+  "_couponProbability": 25.7,
+  "_bsRendementNet": 1.58
 }
