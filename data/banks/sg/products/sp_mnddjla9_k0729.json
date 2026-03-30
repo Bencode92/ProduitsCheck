@@ -216,5 +216,124 @@
   "aiCategoryColor": "#4CAF50",
   "aiOpinion": "Produit défensif avec protection intégrale du capital et coupon fixe attractif de 5% annuel, idéal pour investisseurs prudents en période d'incertitude. La clause d'autocall permet un remboursement anticipé potentiel mais le seuil non précisé et l'absence d'information sur le sous-jacent limitent l'évaluation complète du profil risque/rendement.",
   "aiAnalyzedAt": "2026-03-30T16:00:21.448Z",
-  "envelope": ""
+  "envelope": "",
+  "grading": {
+    "grade": "B",
+    "score": 60,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 60,
+        "base": 64,
+        "delta": -1,
+        "reasoning": "Rendement: base 64 → -1 = 63 (En stagflation, les taux courts restent élevés plus longtemps, réduisant la probabilité de call anticipé (prob mat 1% très faible)) | Coupon 4.6%, protégé | Mat espérée: ~2.3a (prob mat: 1%) | ⚠ Maturité 10a = incertitude accrue (-3pts)"
+      },
+      "underlyingQuality": {
+        "score": 61,
+        "base": 60,
+        "delta": 1,
+        "reasoning": "Qualité: base 60 → +1 = 61 (Produit sans sous-jacent avec capital garanti, parfait en stagflation où les actions souffrent et l'inflation érode les liquidités)"
+      },
+      "portfolioFit": {
+        "score": 71,
+        "base": 70,
+        "delta": 1,
+        "reasoning": "Fit: base 70 → +1 = 71 (Excellent diversifiant en régime stagflationnaire avec 4.6% garanti vs TIPS et obligations classiques sous pression)"
+      },
+      "riskPremium": {
+        "score": 51,
+        "base": 27,
+        "delta": -1,
+        "reasoning": "Capital garanti: spread 4.6% - CAT 2.5% - illiq 0.7% = 1.4%"
+      }
+    },
+    "verdict": "Produit défensif adapté au régime stagflationnaire actuel avec 4.6% annuel garanti et capital protégé. La probabilité de maturité à 1% suggère un call probable vers 2.3 ans, offrant un rendement supérieur aux TIPS dans un contexte où le Brent >$100 et l'inflation reste élevée. Principal risque: si non rappelé, exposition 10 ans à taux fixes alors que la courbe se pentifie (+46bps) avec risque de bear steepening.",
+    "keyRisks": [
+      "Duration longue si produit non rappelé dans environnement de taux volatils",
+      "Risque émetteur sur 10 ans en cas de stress financier prolongé"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 10.58,
+        "return_eur": 10580,
+        "probability": 0.6,
+        "duration_years": 2.3
+      },
+      "base": {
+        "return_pct": 23,
+        "return_eur": 23000,
+        "probability": 0.25,
+        "duration_years": 5
+      },
+      "stress": {
+        "return_pct": 46,
+        "return_eur": 46000,
+        "probability": 0.14,
+        "duration_years": 10
+      },
+      "worst": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.01,
+        "duration_years": 0
+      }
+    },
+    "confidenceInterval": {
+      "low": 46,
+      "high": 64,
+      "halfWidth": 9,
+      "gradeStable": false,
+      "gradeRange": "C-B",
+      "label": "C [46-64]"
+    },
+    "metadata": {
+      "gradedAt": "2026-03-30T16:00:43.158Z",
+      "durationMs": 19640,
+      "aiUsed": true,
+      "version": "5.2",
+      "productType": "taux_fixe",
+      "marketDataAvailable": false,
+      "catBenchmark": 2.5,
+      "catSource": "fallback-2026",
+      "couponAnnualized": 4.6,
+      "couponRaw": 5,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": false,
+      "barrierPct": 0,
+      "barrierCouponPct": null,
+      "couponProbability": null,
+      "expectedMaturity": 2.3,
+      "maxMaturity": 10,
+      "probReachMaturity": 1,
+      "maxBeta": null,
+      "baseScore": 55,
+      "baseGrade": "C",
+      "adjustments": {
+        "p1": -1,
+        "p2": 1,
+        "p3": 1,
+        "p4": -1
+      },
+      "barrier_sigma": null,
+      "barrier_sigma_label": null,
+      "barrier_sigma_danger": null,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Callable LT",
+      "ci_low": 46,
+      "ci_high": 64,
+      "ci_label": "C [46-64]",
+      "issuer_rating": "A",
+      "issuer_tier": "IG",
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "taux_fixe"
+    }
+  }
 }
