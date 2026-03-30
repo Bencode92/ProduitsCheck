@@ -199,5 +199,178 @@
       "redundancy": 71,
       "complementarity": 25
     }
+  },
+  "grading": {
+    "grade": "C",
+    "score": 55,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 29,
+        "base": 34,
+        "delta": -5,
+        "reasoning": "Rendement: base 34 → -5 = 29 (Siemens Energy avec DD de 72% et vol de 60% rend la barrière coupon à 62% très vulnérable en régime stagflationniste) | Coupon 6.41%, barrière 60% | Barr.coupon 62% | Mat espérée: ~3.3a (prob mat: 24%)"
+      },
+      "underlyingQuality": {
+        "score": 56,
+        "base": 35,
+        "delta": -5,
+        "reasoning": "Qualité: base 35 → -5 = 30 (Worst-of sur 4 sous-jacents dont ENR (beta 1.56, vol 60%) et ASML (beta 1.29, vol 37%) très exposés au ralentissement économique) | Worst: Siemens Energy AG B:24 | Basket équipondéré 4 actifs: P2 +26pts (diversification)"
+      },
+      "portfolioFit": {
+        "score": 75,
+        "base": 80,
+        "delta": -5,
+        "reasoning": "Fit: base 80 → -5 = 75 (VIX à 22 et stagflation défavorables pour un produit complexe avec barrière agressive sur actions volatiles)"
+      },
+      "riskPremium": {
+        "score": 70,
+        "base": 60,
+        "delta": -5,
+        "reasoning": "Capital garanti: spread 6.4% - CAT 2.5% - illiq 0.5% = 3.4% | Illiq. premium +1.4% (-7pts)"
+      }
+    },
+    "verdict": "Produit très risqué avec un worst-of sur 4 sous-jacents dont Siemens Energy déjà en DD de 72%. La barrière coupon à 62% sera probablement franchie rapidement, annulant le coupon attractif de 6.41%. Avec une probabilité de maturité de seulement 24% et un contexte de stagflation, le capital est fortement menacé sur 6 ans.",
+    "keyRisks": [
+      "Siemens Energy à 28% de la barrière avec volatilité extrême de 60%",
+      "Worst-of sur 4 actions augmente drastiquement la probabilité de perte en capital",
+      "Durée attendue de 3.3 ans sous-estime le risque de blocage sur 6 ans sans coupons",
+      "Barrière à 0.34σ (Critique) — vol 60.46%"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 6.41,
+        "return_eur": 6410,
+        "probability": 0.15,
+        "duration_years": 1
+      },
+      "base": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.35,
+        "duration_years": 6
+      },
+      "stress": {
+        "return_pct": -15,
+        "return_eur": -15000,
+        "probability": 0.35,
+        "duration_years": 6
+      },
+      "worst": {
+        "return_pct": -40,
+        "return_eur": -40000,
+        "probability": 0.15,
+        "duration_years": 6
+      }
+    },
+    "confidenceInterval": {
+      "low": 34,
+      "high": 56,
+      "halfWidth": 11,
+      "gradeStable": false,
+      "gradeRange": "D-C",
+      "label": "C [34-56]"
+    },
+    "metadata": {
+      "gradedAt": "2026-03-30T08:31:18.148Z",
+      "durationMs": 18689,
+      "aiUsed": true,
+      "version": "5.2",
+      "productType": "autocall",
+      "marketDataAvailable": true,
+      "catBenchmark": 2.5,
+      "catSource": "fallback-2026",
+      "couponAnnualized": 6.41,
+      "couponRaw": 7,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": true,
+      "barrierPct": 60,
+      "barrierCouponPct": 62,
+      "couponProbability": null,
+      "expectedMaturity": 3.3,
+      "maxMaturity": 6,
+      "probReachMaturity": 24,
+      "maxBeta": 1.56,
+      "baseScore": 50,
+      "baseGrade": "C",
+      "adjustments": {
+        "p1": -5,
+        "p2": -5,
+        "p3": -5,
+        "p4": -5
+      },
+      "barrier_sigma": 0.34,
+      "barrier_sigma_label": "Critique",
+      "barrier_sigma_danger": true,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Rappelable 12M",
+      "ci_low": 34,
+      "ci_high": 56,
+      "ci_label": "C [34-56]",
+      "issuer_rating": "A+",
+      "issuer_tier": "IG",
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "basket",
+      "stockData": [
+        {
+          "name": "Intesa Sanpaolo",
+          "ticker": "ISP",
+          "sector": "Finance",
+          "perf_ytd": -14.08,
+          "perf_1y": 5.75,
+          "volatility_3y": 24.79,
+          "max_drawdown_3y": 21.19,
+          "buffett_score": null,
+          "quality_score": 70,
+          "buffett_grade": null
+        },
+        {
+          "name": "Siemens Energy AG",
+          "ticker": "ENR",
+          "sector": "Industries",
+          "perf_ytd": 19.93,
+          "perf_1y": 161.12,
+          "volatility_3y": 60.46,
+          "max_drawdown_3y": 71.9,
+          "buffett_score": 24,
+          "quality_score": 49,
+          "buffett_grade": "D"
+        },
+        {
+          "name": "ASML Holding NV",
+          "ticker": "ASML",
+          "sector": "Technologie de l'information",
+          "perf_ytd": 24.42,
+          "perf_1y": 84.99,
+          "volatility_3y": 37.05,
+          "max_drawdown_3y": 45.12,
+          "buffett_score": 100,
+          "quality_score": 68,
+          "buffett_grade": "A"
+        },
+        {
+          "name": "Banco Santander SA",
+          "ticker": "SAN",
+          "sector": "Finance",
+          "perf_ytd": -6.63,
+          "perf_1y": 48.7,
+          "volatility_3y": 28.49,
+          "max_drawdown_3y": 20.79,
+          "buffett_score": null,
+          "quality_score": 75,
+          "buffett_grade": null
+        }
+      ]
+    },
+    "_isBasket": true,
+    "_basketInfo": "Panier équipondéré 4 actions"
   }
 }
