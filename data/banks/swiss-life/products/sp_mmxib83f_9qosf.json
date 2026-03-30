@@ -12,14 +12,12 @@
   "maturityDate": "2034-01-09",
   "strikeDate": "2026-01-09",
   "coupon": {
-    "rate": 1.875,
+    "rate": 7.5,
+    "frequency": "annuel",
+    "annualized": true,
     "type": "conditionnel",
-    "frequency": "trimestriel",
-    "trigger": 77,
-    "triggerDetail": "Cours BNP Paribas >= 77% du niveau initial",
     "memory": true,
-    "maxReturn": "7.68% brut annuel (6.88% net)",
-    "totalReturn": "1.875% par trimestre écoulé"
+    "trigger": 77
   },
   "capitalProtection": {
     "protected": true,
@@ -147,100 +145,6 @@
     "date": "2026-03-24",
     "note": ""
   },
-  "grading": {
-    "grade": "B",
-    "score": 65,
-    "killCriteria": {
-      "triggered": false,
-      "reasons": []
-    },
-    "pillars": {
-      "adjustedReturn": {
-        "score": 49,
-        "base": 59,
-        "delta": -10,
-        "reasoning": "Rendement: base 59 → -10 = 49 (Volatilité élevée 26% + action unique sans diversification augmente le risque de non-paiement du coupon) | Coupon 7.5% (1.875×4), barrière 60%"
-      },
-      "underlyingQuality": {
-        "score": 70,
-        "base": 85,
-        "delta": -15,
-        "reasoning": "Qualité: base 85 → -15 = 70 (Secteur financier explicitement évité en macro + performance catastrophique -33% sur 1Y expose à prolongation) [vol/DD 30%] | Worst: Action BNP Paribas (FR0000131104) B:100"
-      },
-      "portfolioFit": {
-        "score": 70,
-        "base": 70,
-        "delta": 0,
-        "reasoning": "En portefeuille — neutre"
-      },
-      "riskPremium": {
-        "score": 79,
-        "base": 84,
-        "delta": -5,
-        "reasoning": "Prime: base 84 → -5 = 79 (Spread attractif mais compensé par risque concentration sur valeur financière malmenée) | 7.5% vs CAT 2.5% (spread 5.0%)"
-      }
-    },
-    "verdict": "Produit présentant un profil risque-rendement déséquilibré malgré un coupon attractif à 7,5%. L'exposition unique à BNP Paribas, secteur évité en contexte macro et performance désastreuse -33% sur 1 an, crée un risque majeur de prolongation au-delà de la maturité initiale. La barrière à 60% offre une marge correcte mais insuffisante face à la volatilité de 26% du sous-jacent. Le timing d'investissement apparaît défavorable sur une valeur financière en difficulté structurelle.",
-    "keyRisks": [
-      "Concentration sur secteur financier évité + performance -33% augmente probabilité de prolongation",
-      "Volatilité élevée 26% menace régularité des coupons trimestriels sur action unique"
-    ],
-    "negotiationPoints": [],
-    "scenarios": {
-      "optimistic": {
-        "return_pct": 7.5,
-        "return_eur": 2250,
-        "probability": 0.2,
-        "duration_years": 1
-      },
-      "base": {
-        "return_pct": 4.5,
-        "return_eur": 4050,
-        "probability": 0.3,
-        "duration_years": 3
-      },
-      "stress": {
-        "return_pct": 1.5,
-        "return_eur": 675,
-        "probability": 0.35,
-        "duration_years": 6
-      },
-      "worst": {
-        "return_pct": -25,
-        "return_eur": -7500,
-        "probability": 0.15,
-        "duration_years": 6
-      }
-    },
-    "metadata": {
-      "gradedAt": "2026-03-25T08:19:47.422Z",
-      "durationMs": 11564,
-      "aiUsed": true,
-      "version": "4.3",
-      "productType": "standard",
-      "marketDataAvailable": true,
-      "catBenchmark": 2.5,
-      "catSource": "fallback-2026",
-      "couponAnnualized": 7.5,
-      "couponRaw": 1.875,
-      "couponMultiplier": 4,
-      "couponFrequency": "trimestriel",
-      "isInPortfolio": true,
-      "hasBarrier": true,
-      "barrierPct": 60,
-      "expectedMaturity": 0,
-      "maxMaturity": 0,
-      "maxBeta": 0.96,
-      "baseScore": 76,
-      "baseGrade": "A",
-      "adjustments": {
-        "p1": -10,
-        "p2": -15,
-        "p3": 0,
-        "p4": -5
-      }
-    }
-  },
   "envelope": "cameleons",
   "maturityYears": 8,
   "strikePrice": 75.39,
@@ -250,5 +154,140 @@
     "Action BNP Paribas (FR0000131104)": 75.39
   },
   "_strikePriceSource": "confirmed",
-  "_strikePriceDate": "2026-03-26"
+  "_strikePriceDate": "2026-03-26",
+  "structureType": "phoenix_memoire",
+  "_freqFixApplied": true,
+  "grading": {
+    "grade": "A",
+    "score": 80,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 83,
+        "base": 85,
+        "delta": -2,
+        "reasoning": "Rendement: base 85 → -2 = 83 (En stagflation avec choc énergétique, la probabilité d'atteindre le coupon trimestriel est réduite malgré le capital garanti) | Coupon 1.875% × 4 (trimestriel) = 7.5%, protégé | Mat espérée: ~1.3a (prob mat: 0%)"
+      },
+      "underlyingQuality": {
+        "score": 83,
+        "base": 85,
+        "delta": -2,
+        "reasoning": "Qualité: base 85 → -2 = 83 (BNP dans le secteur financier explicitement évité (-1.63% momentum), beta 0.96 amplifie la baisse en contexte stagflationniste) | Worst: Action BNP Paribas (FR0000131104) B:100"
+      },
+      "portfolioFit": {
+        "score": 68,
+        "base": 70,
+        "delta": -2,
+        "reasoning": "En portefeuille"
+      },
+      "riskPremium": {
+        "score": 74,
+        "base": 63,
+        "delta": 0,
+        "reasoning": "Capital garanti: spread 7.5% - CAT 2.5% - illiq 0.6% = 4.4% | Illiq. premium +1.6% (-8pts)"
+      }
+    },
+    "verdict": "Produit défavorable en stagflation malgré le capital garanti. BNP subit une double peine : secteur financier évité (-1.63% momentum) et sensibilité aux taux élevés persistants. Le coupon de 7.5% est attractif mais la probabilité de rappel anticipé est compromise avec un DD de 42.88% et une volatilité de 25.89%. L'espérance de maturité de 1.3 an semble optimiste dans ce contexte macro hostile aux financières.",
+    "keyRisks": [
+      "Secteur financier fortement pénalisé en stagflation avec momentum négatif",
+      "Risque de blocage prolongé sous la barrière autocall avec taux élevés persistants"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 7.5,
+        "return_eur": 2250,
+        "probability": 0.15,
+        "duration_years": 1
+      },
+      "base": {
+        "return_pct": 15,
+        "return_eur": 4500,
+        "probability": 0.3,
+        "duration_years": 2
+      },
+      "stress": {
+        "return_pct": 30,
+        "return_eur": 9000,
+        "probability": 0.35,
+        "duration_years": 4
+      },
+      "worst": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.2,
+        "duration_years": 8
+      }
+    },
+    "confidenceInterval": {
+      "low": 70,
+      "high": 84,
+      "halfWidth": 7,
+      "gradeStable": false,
+      "gradeRange": "B-A",
+      "label": "A [70-84]"
+    },
+    "metadata": {
+      "gradedAt": "2026-03-30T08:55:08.166Z",
+      "durationMs": 17897,
+      "aiUsed": true,
+      "version": "5.2",
+      "productType": "autocall",
+      "marketDataAvailable": true,
+      "catBenchmark": 2.5,
+      "catSource": "fallback-2026",
+      "couponAnnualized": 7.5,
+      "couponRaw": 1.875,
+      "couponMultiplier": 4,
+      "couponFrequency": "trimestriel",
+      "isInPortfolio": true,
+      "hasBarrier": false,
+      "barrierPct": 60,
+      "barrierCouponPct": null,
+      "couponProbability": null,
+      "expectedMaturity": 1.3,
+      "maxMaturity": 8,
+      "probReachMaturity": 0,
+      "maxBeta": 0.96,
+      "baseScore": 78,
+      "baseGrade": "A",
+      "adjustments": {
+        "p1": -2,
+        "p2": -2,
+        "p3": -2,
+        "p4": 0
+      },
+      "barrier_sigma": null,
+      "barrier_sigma_label": null,
+      "barrier_sigma_danger": null,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Rappelable 8M",
+      "ci_low": 70,
+      "ci_high": 84,
+      "ci_label": "A [70-84]",
+      "issuer_rating": "A+",
+      "issuer_tier": "IG",
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "phoenix_memoire",
+      "stockData": [
+        {
+          "name": "Action BNP Paribas (FR0000131104)",
+          "ticker": "RMS",
+          "sector": "Biens de consommation cycliques",
+          "perf_ytd": -23.59,
+          "perf_1y": -33.13,
+          "volatility_3y": 25.89,
+          "max_drawdown_3y": 42.88,
+          "buffett_score": 100,
+          "quality_score": 70,
+          "buffett_grade": "A"
+        }
+      ]
+    }
+  }
 }
