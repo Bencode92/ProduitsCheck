@@ -44,10 +44,10 @@
     "frequency": "annuel",
     "startSemester": 2,
     "stepDown": false,
-    "stepDownPct": null
+    "stepDownPct": null,
+    "hasAutocall": true,
+    "enabled": true
   },
-  "decrementPct": null,
-  "actualDividendYield": null,
   "mechanism": "Remboursement automatique anticipé possible de l'année 1 à 5 si le niveau du panier équipondéré ≥ 95% du niveau initial, avec gain de 7% par année écoulée. À l'échéance: gain de 7% par année si niveau ≥ 62%, remboursement intégral si niveau ≥ 60%, perte en capital proportionnelle si niveau < 60%.",
   "risks": [
     "Risque de perte en capital partielle ou totale",
@@ -230,5 +230,11 @@
       "redundancy": 71,
       "complementarity": 25
     }
-  }
+  },
+  "aiCategory": "autocall-multi",
+  "aiCategoryLabel": "⚡ Autocall Multi-actifs",
+  "aiCategoryColor": "#2EC4B6",
+  "aiOpinion": "Produit offrant un rendement attractif de 7% annuel avec possibilité de sortie anticipée dès 95% du niveau initial, mais exposé au risque de perte en capital sans protection. Le panier de 4 actions européennes diversifie les secteurs (banque, technologie, énergie) mais reste concentré géographiquement, avec une barrière à 60% qui laisse une marge de sécurité correcte.",
+  "aiAnalyzedAt": "2026-03-30T13:49:08.070Z",
+  "envelope": ""
 }
