@@ -1,0 +1,234 @@
+{
+  "id": "sp_mndlo0s6_gs35x",
+  "name": "Oxygene Objectif Mai 2026",
+  "type": "autocall",
+  "structureType": "autocall",
+  "emitter": "Barclays Bank PLC",
+  "guarantor": "Barclays Bank PLC",
+  "guarantorRating": {
+    "moodys": "A1",
+    "sp": "A+"
+  },
+  "underlyings": [
+    "Intesa Sanpaolo",
+    "Siemens Energy AG",
+    "ASML Holding NV",
+    "Banco Santander SA"
+  ],
+  "underlyingType": "basket",
+  "currency": "EUR",
+  "maturity": "6 ans",
+  "maturityYears": 6,
+  "coupon": {
+    "rate": 7,
+    "rateIfCalled": null,
+    "rateIfMaturity": null,
+    "type": "fixe",
+    "frequency": "annuel",
+    "trigger": 62,
+    "memory": false,
+    "paymentTiming": "periodic"
+  },
+  "participationRate": null,
+  "capitalProtection": {
+    "protected": false,
+    "level": null,
+    "barrier": 60,
+    "barrierCoupon": 62,
+    "barrierType": "europeenne"
+  },
+  "earlyRedemption": {
+    "possible": true,
+    "type": "autocall",
+    "trigger": 95,
+    "frequency": "annuel",
+    "startSemester": 2,
+    "stepDown": false,
+    "stepDownPct": null
+  },
+  "decrementPct": null,
+  "actualDividendYield": null,
+  "mechanism": "Remboursement automatique anticipé possible de l'année 1 à 5 si le niveau du panier équipondéré ≥ 95% de son niveau initial, avec gain de 7% par année écoulée. À l'échéance: si niveau ≥ 62%, gain de 7% par année écoulée (soit 42% total). Si niveau entre 60% et 62%, remboursement du capital initial. Si niveau < 60%, perte proportionnelle à la baisse du panier.",
+  "risks": [
+    "Risque de perte en capital",
+    "Risque de crédit",
+    "Risque de liquidité",
+    "Risque de mise en résolution",
+    "Risque de fluctuation du prix",
+    "Risque lié à l'inflation"
+  ],
+  "summary": "Produit autocall sur panier équipondéré de 4 actions avec remboursement anticipé automatique possible dès l'année 1 si le panier ≥ 95% du niveau initial. Gain plafonné à 7% par année écoulée. Protection partielle du capital à l'échéance si le panier reste ≥ 60% du niveau initial.",
+  "aiParsed": {
+    "name": "Oxygene Objectif Mai 2026",
+    "type": "autocall",
+    "structureType": "autocall",
+    "emitter": "Barclays Bank PLC",
+    "guarantor": "Barclays Bank PLC",
+    "guarantorRating": {
+      "moodys": "A1",
+      "sp": "A+"
+    },
+    "underlyings": [
+      "Intesa Sanpaolo",
+      "Siemens Energy AG",
+      "ASML Holding NV",
+      "Banco Santander SA"
+    ],
+    "underlyingType": "basket",
+    "currency": "EUR",
+    "maturity": "6 ans",
+    "maturityYears": 6,
+    "coupon": {
+      "rate": 7,
+      "rateIfCalled": null,
+      "rateIfMaturity": null,
+      "type": "fixe",
+      "frequency": "annuel",
+      "trigger": 62,
+      "memory": false,
+      "paymentTiming": "periodic"
+    },
+    "participationRate": null,
+    "capitalProtection": {
+      "protected": false,
+      "level": null,
+      "barrier": 60,
+      "barrierCoupon": 62,
+      "barrierType": "europeenne"
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "autocall",
+      "trigger": 95,
+      "frequency": "annuel",
+      "startSemester": 2,
+      "stepDown": false,
+      "stepDownPct": null
+    },
+    "decrementPct": null,
+    "actualDividendYield": null,
+    "mechanism": "Remboursement automatique anticipé possible de l'année 1 à 5 si le niveau du panier équipondéré ≥ 95% de son niveau initial, avec gain de 7% par année écoulée. À l'échéance: si niveau ≥ 62%, gain de 7% par année écoulée (soit 42% total). Si niveau entre 60% et 62%, remboursement du capital initial. Si niveau < 60%, perte proportionnelle à la baisse du panier.",
+    "risks": [
+      "Risque de perte en capital",
+      "Risque de crédit",
+      "Risque de liquidité",
+      "Risque de mise en résolution",
+      "Risque de fluctuation du prix",
+      "Risque lié à l'inflation"
+    ],
+    "summary": "Produit autocall sur panier équipondéré de 4 actions avec remboursement anticipé automatique possible dès l'année 1 si le panier ≥ 95% du niveau initial. Gain plafonné à 7% par année écoulée. Protection partielle du capital à l'échéance si le panier reste ≥ 60% du niveau initial.",
+    "aiParsed": {
+      "name": "Oxygene Objectif Mai 2026",
+      "structureType": "autocall",
+      "emitter": "Barclays Bank PLC",
+      "guarantor": "Barclays Bank PLC",
+      "guarantorRating": {
+        "moodys": "A1",
+        "sp": "A+"
+      },
+      "underlyings": [
+        "Intesa Sanpaolo",
+        "Siemens Energy AG",
+        "ASML Holding NV",
+        "Banco Santander SA"
+      ],
+      "underlyingType": "basket",
+      "currency": "EUR",
+      "maturity": "07/06/2032",
+      "maturityYears": 6,
+      "coupon": {
+        "rate": 7,
+        "rateIfCalled": null,
+        "rateIfMaturity": null,
+        "type": "fixe",
+        "frequency": "annuel",
+        "trigger": null,
+        "memory": false,
+        "paymentTiming": "periodic"
+      },
+      "participationRate": null,
+      "capitalProtection": {
+        "protected": false,
+        "level": null,
+        "barrier": 60,
+        "barrierCoupon": 62,
+        "barrierType": "europeenne"
+      },
+      "earlyRedemption": {
+        "possible": true,
+        "type": "autocall",
+        "trigger": 95,
+        "frequency": "annuel",
+        "startSemester": 2,
+        "stepDown": false,
+        "stepDownPct": null
+      },
+      "decrementPct": null,
+      "actualDividendYield": null,
+      "mechanism": "Remboursement automatique anticipé possible de l'année 1 à 5 si le niveau du panier équipondéré ≥ 95% de son niveau initial, avec gain de 7% par année écoulée. À l'échéance: si niveau ≥ 62%, gain de 7% par année écoulée (soit 42% total). Si niveau entre 60% et 62%, remboursement du capital initial. Si niveau < 60%, perte proportionnelle à la baisse du panier.",
+      "risks": [
+        "Risque de perte en capital",
+        "Risque de crédit",
+        "Risque de liquidité",
+        "Risque de mise en résolution",
+        "Risque de fluctuation du prix",
+        "Risque lié à l'inflation"
+      ],
+      "summary": "Produit autocall sur panier équipondéré de 4 actions avec remboursement anticipé automatique possible dès l'année 1 si le panier ≥ 95% du niveau initial. Gain plafonné à 7% par année écoulée. Protection partielle du capital à l'échéance si le panier reste ≥ 60% du niveau initial."
+    },
+    "sourceFile": "Brochure OXYGENE OBJECTIF MAI 2026.pdf"
+  },
+  "sourceFile": "JSON import",
+  "bankId": "swiss-life",
+  "status": "analyzing",
+  "receivedDate": "2026-03-30",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null,
+  "score": {
+    "score": 4,
+    "details": [
+      {
+        "type": "warning",
+        "icon": "⚠️",
+        "text": "Même sous-jacent que 1 produit(s) — 20% du book",
+        "impact": 35,
+        "category": "redundancy"
+      },
+      {
+        "type": "warning",
+        "icon": "📦",
+        "text": "Même type que 4 produit(s) — 80% du book en \"Autocall / Phoenix\"",
+        "impact": 20,
+        "category": "redundancy"
+      },
+      {
+        "type": "info",
+        "icon": "🏦",
+        "text": "Même émetteur que 4 produit(s) — concentration Swiss Life",
+        "impact": 16,
+        "category": "redundancy"
+      },
+      {
+        "type": "positive",
+        "icon": "📈",
+        "text": "Coupon (7%) > moyenne du book (5.2%)",
+        "impact": 15,
+        "category": "complementarity"
+      },
+      {
+        "type": "positive",
+        "icon": "🔀",
+        "text": "Faible corrélation moyenne (30%) — diversification",
+        "impact": 10,
+        "category": "complementarity"
+      }
+    ],
+    "verdict": "⛔ Fortement déconseillé — duplication quasi-totale.",
+    "breakdown": {
+      "redundancy": 71,
+      "complementarity": 25
+    }
+  }
+}
