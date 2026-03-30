@@ -1,16 +1,8 @@
 {
   "bankId": "sg",
   "bankName": "Société Générale",
-  "lastUpdated": "2026-03-30T12:56:01.927Z",
+  "lastUpdated": "2026-03-30T12:59:31.470Z",
   "products": [
-    {
-      "id": "sp_mn8tra0s_xx6xs",
-      "name": "Solution Court Terme Boostée sur Panier d'Actions 3",
-      "type": "autre",
-      "status": "analyzing",
-      "score": 82,
-      "receivedDate": "2026-03-27"
-    },
     {
       "id": "sp_mn8tths2_jnf9s",
       "name": "NOTE TAUX FIXE CALLABLE BONUS PAIEMENT À MATURITÉ",
