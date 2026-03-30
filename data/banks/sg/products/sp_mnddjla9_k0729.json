@@ -1,0 +1,216 @@
+{
+  "id": "sp_mnddjla9_k0729",
+  "name": "NOTE TAUX FIXE CALLABLE BONUS PAIEMENT À MATURITÉ",
+  "type": "taux-fixe",
+  "structureType": "taux_fixe",
+  "emitter": "Société Générale",
+  "guarantor": "Société Générale",
+  "guarantorRating": {
+    "moodys": "A1",
+    "sp": "A"
+  },
+  "underlyings": [],
+  "underlyingType": "none",
+  "currency": "EUR",
+  "maturity": "10 ans",
+  "maturityYears": 10,
+  "coupon": {
+    "rate": 5,
+    "rateIfCalled": 5,
+    "rateIfMaturity": 4,
+    "type": "fixe",
+    "frequency": "annuel",
+    "trigger": null,
+    "memory": false,
+    "paymentTiming": "maturity"
+  },
+  "participationRate": null,
+  "capitalProtection": {
+    "protected": true,
+    "level": 100,
+    "barrier": null,
+    "barrierCoupon": null,
+    "barrierType": "europeenne"
+  },
+  "earlyRedemption": {
+    "possible": true,
+    "type": "callable",
+    "trigger": null,
+    "frequency": "annuel",
+    "startSemester": 2,
+    "stepDown": false,
+    "stepDownPct": null
+  },
+  "decrementPct": null,
+  "actualDividendYield": null,
+  "mechanism": "Note à taux fixe callable avec coupon bonus. Rappel possible à la discrétion de l'émetteur dès la 1ère année. Coupon de 5% par année si rappel anticipé, 4% par année (soit 40% total) si détention jusqu'à maturité. Paiement des coupons à maturité uniquement.",
+  "risks": [
+    "Protection du capital uniquement à l'échéance",
+    "Risque de crédit Société Générale",
+    "Durée d'investissement incertaine (1 à 10 ans)",
+    "Risque de réinvestissement en cas de rappel anticipé",
+    "Risque de liquidité avant échéance"
+  ],
+  "summary": "Note callable 10 ans avec protection du capital à 100% à maturité. Rappel possible au gré de l'émetteur dès l'année 1. Coupon de 5%/an si rappel anticipé, 4%/an si détention complète, versé à maturité.",
+  "aiParsed": {
+    "name": "NOTE TAUX FIXE CALLABLE BONUS PAIEMENT À MATURITÉ",
+    "type": "taux-fixe",
+    "structureType": "taux_fixe",
+    "emitter": "Société Générale",
+    "guarantor": "Société Générale",
+    "guarantorRating": {
+      "moodys": "A1",
+      "sp": "A"
+    },
+    "underlyings": [],
+    "underlyingType": "none",
+    "currency": "EUR",
+    "maturity": "10 ans",
+    "maturityYears": 10,
+    "coupon": {
+      "rate": 5,
+      "rateIfCalled": 5,
+      "rateIfMaturity": 4,
+      "type": "fixe",
+      "frequency": "annuel",
+      "trigger": null,
+      "memory": false,
+      "paymentTiming": "maturity"
+    },
+    "participationRate": null,
+    "capitalProtection": {
+      "protected": true,
+      "level": 100,
+      "barrier": null,
+      "barrierCoupon": null,
+      "barrierType": "europeenne"
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "callable",
+      "trigger": null,
+      "frequency": "annuel",
+      "startSemester": 2,
+      "stepDown": false,
+      "stepDownPct": null
+    },
+    "decrementPct": null,
+    "actualDividendYield": null,
+    "mechanism": "Note à taux fixe callable avec coupon bonus. Rappel possible à la discrétion de l'émetteur dès la 1ère année. Coupon de 5% par année si rappel anticipé, 4% par année (soit 40% total) si détention jusqu'à maturité. Paiement des coupons à maturité uniquement.",
+    "risks": [
+      "Protection du capital uniquement à l'échéance",
+      "Risque de crédit Société Générale",
+      "Durée d'investissement incertaine (1 à 10 ans)",
+      "Risque de réinvestissement en cas de rappel anticipé",
+      "Risque de liquidité avant échéance"
+    ],
+    "summary": "Note callable 10 ans avec protection du capital à 100% à maturité. Rappel possible au gré de l'émetteur dès l'année 1. Coupon de 5%/an si rappel anticipé, 4%/an si détention complète, versé à maturité.",
+    "aiParsed": {
+      "name": "NOTE TAUX FIXE CALLABLE BONUS PAIEMENT À MATURITÉ",
+      "structureType": "taux_fixe",
+      "emitter": "Société Générale",
+      "guarantor": "Société Générale",
+      "guarantorRating": {
+        "moodys": "A1",
+        "sp": "A"
+      },
+      "underlyings": [],
+      "underlyingType": "none",
+      "currency": "EUR",
+      "maturity": "10 ans",
+      "maturityYears": 10,
+      "coupon": {
+        "rate": 5,
+        "rateIfCalled": 5,
+        "rateIfMaturity": 4,
+        "type": "fixe",
+        "frequency": "annuel",
+        "trigger": null,
+        "memory": false,
+        "paymentTiming": "maturity"
+      },
+      "participationRate": null,
+      "capitalProtection": {
+        "protected": true,
+        "level": 100,
+        "barrier": null,
+        "barrierCoupon": null,
+        "barrierType": "europeenne"
+      },
+      "earlyRedemption": {
+        "possible": true,
+        "type": "callable",
+        "trigger": null,
+        "frequency": "annuel",
+        "startSemester": 2,
+        "stepDown": false,
+        "stepDownPct": null
+      },
+      "decrementPct": null,
+      "actualDividendYield": null,
+      "mechanism": "Note à taux fixe callable avec coupon bonus. Rappel possible à la discrétion de l'émetteur dès la 1ère année. Coupon de 5% par année si rappel anticipé, 4% par année (soit 40% total) si détention jusqu'à maturité. Paiement des coupons à maturité uniquement.",
+      "risks": [
+        "Protection du capital uniquement à l'échéance",
+        "Risque de crédit Société Générale",
+        "Durée d'investissement incertaine (1 à 10 ans)",
+        "Risque de réinvestissement en cas de rappel anticipé",
+        "Risque de liquidité avant échéance"
+      ],
+      "summary": "Note callable 10 ans avec protection du capital à 100% à maturité. Rappel possible au gré de l'émetteur dès l'année 1. Coupon de 5%/an si rappel anticipé, 4%/an si détention complète, versé à maturité."
+    },
+    "sourceFile": "Produit_1_Note_Taux_Fixe_Callable_Bonus.pdf"
+  },
+  "sourceFile": "JSON import",
+  "bankId": "sg",
+  "status": "analyzing",
+  "receivedDate": "2026-03-30",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null,
+  "score": {
+    "score": 100,
+    "details": [
+      {
+        "type": "positive",
+        "icon": "✅",
+        "text": "Nouveau sous-jacent absent du book — diversification",
+        "impact": 25,
+        "category": "complementarity"
+      },
+      {
+        "type": "positive",
+        "icon": "✅",
+        "text": "Nouveau type \"taux-fixe\" absent du book",
+        "impact": 20,
+        "category": "complementarity"
+      },
+      {
+        "type": "positive",
+        "icon": "✅",
+        "text": "Nouvelle contrepartie — diversification émetteur",
+        "impact": 15,
+        "category": "complementarity"
+      },
+      {
+        "type": "positive",
+        "icon": "🔀",
+        "text": "Faible corrélation moyenne (30%) — diversification",
+        "impact": 10,
+        "category": "complementarity"
+      },
+      {
+        "type": "info",
+        "icon": "📅",
+        "text": "Maturité similaire (±6 mois) à 2 produit(s)",
+        "impact": 6,
+        "category": "redundancy"
+      }
+    ],
+    "verdict": "🟢 Excellent candidat — forte complémentarité avec le book.",
+    "breakdown": {
+      "redundancy": 6,
+      "complementarity": 70
+    }
+  }
+}
