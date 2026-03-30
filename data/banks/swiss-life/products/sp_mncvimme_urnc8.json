@@ -12,14 +12,13 @@
   "maturityDate": null,
   "strikeDate": null,
   "coupon": {
-    "rate": 3,
-    "rateIfCalled": null,
-    "rateIfMaturity": null,
+    "rate": 6,
+    "frequency": "annuel",
+    "annualized": true,
     "type": "conditionnel",
-    "frequency": "semestriel",
-    "trigger": 91,
     "memory": true,
-    "paymentTiming": "maturity"
+    "paymentTiming": "maturity",
+    "trigger": 91
   },
   "capitalProtection": {
     "protected": true,
@@ -179,6 +178,140 @@
     "breakdown": {
       "redundancy": 42,
       "complementarity": 10
+    }
+  },
+  "_freqFixApplied": true,
+  "grading": {
+    "grade": "C",
+    "score": 54,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 60,
+        "base": 62,
+        "delta": -2,
+        "reasoning": "Rendement: base 62 → -2 = 60 (Avec 21.19% de DD et vol 24.79%, la probabilité de toucher 91% est élevée mais le régime stagflationniste augmente le risque de correction) | Coupon 5.18%, protégé | Barr.coupon 91% | Mat espérée: ~1.4a (prob mat: 0%)"
+      },
+      "underlyingQuality": {
+        "score": 80,
+        "base": 78,
+        "delta": 2,
+        "reasoning": "Qualité: base 78 → +2 = 80 (ISP beta 0.85 offre une protection relative en cas de baisse mais reste exposée aux risques bancaires européens en stagflation) | Worst: Intesa Sanpaolo S.p.A. B:70"
+      },
+      "portfolioFit": {
+        "score": 78,
+        "base": 80,
+        "delta": -2,
+        "reasoning": "Fit: base 80 → -2 = 78 (Capital garanti pertinent en stagflation mais exposition concentrée sur une seule banque italienne limite la diversification)"
+      },
+      "riskPremium": {
+        "score": 0,
+        "base": 1,
+        "delta": 2,
+        "reasoning": "Prime: base 1 → +2 = 3 (Score initial de 1 très pénalisant corrigé car capital garanti et coupon 5.18% attractif vs taux sans risque actuels) | 5.18% vs CAT 2.5% (spread 2.7%) | Illiq. premium +1.8% (-9pts)"
+      }
+    },
+    "verdict": "Produit défensif avec capital garanti offrant 5.18% annualisé, adapté au contexte stagflationniste mais concentré sur ISP qui a déjà chuté de 21%. La barrière à 91% reste atteignable (9% de marge) mais la volatilité élevée (24.79%) et l'exposition mono-titre limitent l'attrait. Le capital garanti compense partiellement ces risques mais la durée potentielle de 10 ans pèse sur le rendement réel en inflation élevée.",
+    "keyRisks": [
+      "Concentration totale sur le secteur bancaire italien vulnérable en stagflation",
+      "Durée potentielle de 10 ans avec rendement fixe érodé par l'inflation"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 7.25,
+        "return_eur": 7250,
+        "probability": 0.3,
+        "duration_years": 1.4
+      },
+      "base": {
+        "return_pct": 15.54,
+        "return_eur": 15540,
+        "probability": 0.35,
+        "duration_years": 3
+      },
+      "stress": {
+        "return_pct": 25.9,
+        "return_eur": 25900,
+        "probability": 0.25,
+        "duration_years": 5
+      },
+      "worst": {
+        "return_pct": 51.8,
+        "return_eur": 51800,
+        "probability": 0.1,
+        "duration_years": 10
+      }
+    },
+    "confidenceInterval": {
+      "low": 47,
+      "high": 61,
+      "halfWidth": 7,
+      "gradeStable": false,
+      "gradeRange": "C-B",
+      "label": "C [47-61]"
+    },
+    "metadata": {
+      "gradedAt": "2026-03-30T07:36:03.792Z",
+      "durationMs": 18991,
+      "aiUsed": true,
+      "version": "5.2",
+      "productType": "autocall",
+      "marketDataAvailable": true,
+      "catBenchmark": 2.5,
+      "catSource": "fallback-2026",
+      "couponAnnualized": 5.18,
+      "couponRaw": 6,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": false,
+      "barrierPct": 0,
+      "barrierCouponPct": 91,
+      "couponProbability": null,
+      "expectedMaturity": 1.4,
+      "maxMaturity": 10,
+      "probReachMaturity": 0,
+      "maxBeta": 0.85,
+      "baseScore": 54,
+      "baseGrade": "C",
+      "adjustments": {
+        "p1": -2,
+        "p2": 2,
+        "p3": -2,
+        "p4": 2
+      },
+      "barrier_sigma": null,
+      "barrier_sigma_label": null,
+      "barrier_sigma_danger": null,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Rappelable 12M",
+      "ci_low": 47,
+      "ci_high": 61,
+      "ci_label": "C [47-61]",
+      "issuer_rating": "A+",
+      "issuer_tier": "IG",
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "autocall",
+      "stockData": [
+        {
+          "name": "Intesa Sanpaolo S.p.A.",
+          "ticker": "ISP",
+          "sector": "Finance",
+          "perf_ytd": -14.54,
+          "perf_1y": 3.09,
+          "volatility_3y": 24.79,
+          "max_drawdown_3y": 21.19,
+          "buffett_score": null,
+          "quality_score": 70,
+          "buffett_grade": null
+        }
+      ]
     }
   }
 }
