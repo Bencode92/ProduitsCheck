@@ -79,14 +79,16 @@
   <script src="js/dashboard-buttons.js"></script>
   <script src="js/liquidites-fix.js"></script>
   <script src="js/analytics.js"></script>
-  <!-- Brochure parser + grader fixes (OUTERMOST - load last) -->
+  <!-- Brochure parser + grader fixes -->
   <script src="js/brochure-parser.js?v=15"></script>
   <script src="js/grader-annualize-patch.js?v=2"></script>
   <script src="js/grader-decrement-patch.js?v=1"></script>
   <script src="js/grader-trigger-penalty-patch.js?v=1"></script>
   <script src="js/grader-dispersion-boost-patch.js?v=1"></script>
-  <!-- P1 BS expected return v1.2 basket vol (OUTERMOST - must be last grader patch) -->
+  <!-- P1 BS expected return v1.2 basket vol -->
   <script src="js/grader-p1-expected-return-patch.js?v=12"></script>
+  <!-- v6 CALIBRATION (OUTERMOST — must be absolute last grader patch) -->
+  <script src="js/grader-v6-calibration-patch.js?v=1"></script>
   <script>
     function switchMainView(view) {
       document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
