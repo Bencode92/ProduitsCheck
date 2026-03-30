@@ -1,0 +1,203 @@
+{
+  "id": "sp_mncx6vva_n7pc2",
+  "name": "Oxygene Objectif Mai 2026",
+  "bankId": "swiss-life",
+  "type": "autocall",
+  "underlyingType": "basket",
+  "underlyings": [
+    "Intesa Sanpaolo",
+    "Siemens Energy AG",
+    "ASML Holding NV",
+    "Banco Santander SA"
+  ],
+  "currency": "EUR",
+  "maturity": "6 ans",
+  "maturityDate": null,
+  "strikeDate": null,
+  "coupon": {
+    "rate": 7,
+    "rateIfCalled": null,
+    "rateIfMaturity": null,
+    "type": "gain",
+    "frequency": "annuel",
+    "trigger": null,
+    "memory": false,
+    "paymentTiming": "maturity"
+  },
+  "capitalProtection": {
+    "protected": false,
+    "level": null,
+    "barrier": 60,
+    "barrierCoupon": 62,
+    "barrierType": "europeenne",
+    "couponFloor": false
+  },
+  "earlyRedemption": {
+    "possible": true,
+    "type": "autocall",
+    "trigger": 95,
+    "frequency": "annuel",
+    "startSemester": null,
+    "startYear": 1,
+    "stepDown": false,
+    "stepDownPct": null
+  },
+  "scenarios": {
+    "favorable": "Remboursement anticipé ou à échéance avec gain de 7% par année écoulée si panier ≥ 95% (années 1-5) ou ≥ 62% (année 6)",
+    "median": "Remboursement du capital initial si panier entre 60% et 62% à l'échéance",
+    "defavorable": "Perte en capital égale à la baisse du panier si < 60% à l'échéance"
+  },
+  "risks": [
+    "Risque de perte en capital partielle ou totale",
+    "Risque de crédit émetteur Barclays Bank PLC",
+    "Gain plafonné à 7% par année écoulée",
+    "Pas de dividendes versés",
+    "Durée d'investissement inconnue (1 à 6 ans)"
+  ],
+  "rawText": "--- PAGE 1 ---\n1  Communication à caractère promotionnel  Oxygene Objectif Mai 2026  –   Durée d’investissement conseillée :   6   ans (hors cas de remboursement automatique anticipé). L’investisseur prend un risque de perte en ca- pital non mesurable   a priori   si les titres de créance sont revendus avant la date de remboursement final ou la date de remboursement antici- pé, selon les cas.  –   Période de commercialisation :   du 20 mars 2026 au 29 mai 2026. La commercialisation du titre de créance peut cesser à tout moment sans préavis avant la fin de la période de commercialisation.  –   Cadre   d’investissement   :   contrat d’assurance vie ou contrat de capitalisation en unités de compte et compte titres.  – Code ISIN : FRBCP1260660 –   Émetteur :   Barclays Bank PLC (Moody’s A1, Standard & Poor’s A+, Fitch Ratings A+). L’investisseur supporte le risque de crédit lié au non-remboursement en cas de faillite, de défaut de paiement ou de mise en résolution de Barclays Bank PLC en tant qu’émetteur.  Ce document n’a pas été rédigé par l’assureur.  Titre de créance complexe de droit français présentant un   risque de perte en capital partielle ou totale en cours de vie et à l’échéance , alternatif à un placement risqué de type actions.  VOUS ÊTES SUR LE POINT D’ACHETER UN PRODUIT QUI N’EST PAS SIMPLE ET QUI PEUT ÊTRE DIFFICILE À COMPRENDRE. Document à caractère promotionnel à destination de clients non professionnels au sens de la directive MIF II (directive 2014/65/CE).\n--- PAGE 2 ---\n2 Oxygene Objectif Mai 2026 Oxygene Objectif Mai 2026 est un titre de créance complexe présentant un risque de perte en capital en cours de vie et à l’échéance, qui propose aux investisseurs de s’adosser à la performance d’un panier équipondéré calculé hors dividendes (nommé ci-après le « panier équipondéré » ou « sous-jacent ») composé des actions suivantes : Intesa Sanpaolo, Siemens Energy AG, ASML Holding NV, Banco Santander SA. Le remboursement est conditionné à l’évolution de ce panier d’actions équipondéré (dividendes non réinvestis).  De l’année 1 à 5, en date de constatation annuelle, si le niveau (1)   du panier équipondéré est supérieur ou égal à 95% de son niveau de référence initial (1) , le capital initial (2)   sera remboursé par anticipation de manière automatique avec un gain de 7,00 % (2)   par année écoulée. À l’échéance des 6 ans, si le niveau du panier équipondéré est strictement inférieur à 60 % de son niveau de référence initial, et en l’absence d’activation préalable du mécanisme de remboursement automatique anticipé, l’investisseur subira une perte en capital à hauteur de la baisse enregistrée par le panier équipondéré. En acceptant de limiter leurs gains à 7,00 % (2)   par année écoulée, les investisseurs recevront en contrepartie l’intégralité de leur capital initial   (2) , si le niveau du panier équipondéré est supérieur ou égal à 60 % de son niveau de référence initial à l’échéance.  (1) Pour le détail de la détermination du « niveau » et du « niveau de référence initial » du panier équipondéré, voir en page 4.  (2) Hors frais de gestion, commission de souscription ou frais d’entrée, de rachat, et / ou fiscalité et prélèvements sociaux applicables au cadre d’investissement, et sauf faillite, défaut de paiement ou de mise en résolution de Barclays Bank PLC. (3) L’investisseur notera que ces taux de rendement annuel ne correspondent pas nécessairement aux rendements effectifs obtenus par les investisseurs sur leur placement. Pour plus d’informations sur le calcul des taux de rendement annuel de ce titre de créance et sur les différents frais applicables à votre contrat d’assurance, vous pouvez vous rapprocher de votre conseiller Swiss Life. Points clés  –   Un mécanisme de remboursement automatique anticipé du capital initial activable de l’année 1 à 5, si le niveau du panier équipondéré est supérieur ou égal à 95% de son niveau de référence initial. –   Un gain de 7,00 %   (2)   par année écoulée en cas de remboursement automatique anticipé ou si, en date de constatation finale, le niveau du panier équipondéré est supérieur ou égal à 62% de son niveau de référence initial. –   Une perte en capital à l’échéance dans le cas où le niveau du panier équipondéré est strictement inférieur à 60 % de son niveau de référence initial et que le produit n’a pas été remboursé par anticipation.  Les termes « capital » et « capital initial » utilisés dans cette brochure désignent la valeur nominale d’« Oxygene Objectif Mai 2026 », soit 1   000 euros. Les montants de remboursement et les taux de rendement annuel annoncés sont calculés sur la base de cette valeur nominale. Ils s’entendent hors frais, commissions et fiscalité applicables   au cadre d’investissement, et sont conditionnés par l’absence de défaut, d’ouverture d’une procédure de résolution et de faillite de l’émetteur.   Les rendements indiqués dans ce document sont des taux nominaux qui ne tiennent pas compte du niveau de l’inflation. Le rendement réel du produit peut être significativement inférieur dans un contexte de forte inflation.   Les calculs sont effectués entre la date de constatation initiale (29 mai 2026) et jusqu’à la date d’échéance (7 juin 2032) ou, selon le cas, de remboursement automatique anticipé. En cas de vente du titre avant ces dates (ou en cas d’arbitrage, de rachat, de dénouement par décès du contrat d’assurance vie), le taux de rendement annuel (2)(3)   effectif peut être supérieur, inférieur voire négatif. L’assureur s’engage exclusivement sur le nombre d’unités de compte, mais non sur leur valeur, qu’il ne garantit pas.\n--- PAGE 3 ---\n3 Avantages  –   L’investisseur peut bénéficier d’un retour sur investissement dès la fin de la première année  grâce au mécanisme de remboursement automatique anticipé : il récupère   l’intégralité de son capital initial (4) , majoré d’un gain de 7,00 % (4)   par année écoulée depuis l’origine , dès lors qu’à l’une des dates de constatation annuelle, le niveau du panier équipondéré est supérieur ou égal à 95% de son niveau de référence initial. –   Si   Oxygene Objectif Mai 2026   n’est pas remboursé par anticipation, l’investisseur récupère à l’échéance   l’intégralité de son capital initial (4) , majoré d’un gain de 7,00 % (4) par année écoulée depuis l’origine , soit une valeur de remboursement totale de 142 % (4)   du capital initial à l’échéance, si le niveau du panier équipondéré est supérieur ou égal à 62% de son niveau de référence initial à la date de constatation finale. –   Le titre de créance permet un remboursement de l’intégralité du capital initial (4)   à l’échéance , si le niveau du panier équipondéré est supérieur ou égal à 60 % de son niveau de référence initial à la date de constatation finale.  Inconvénients  –   Risque de perte en capital en cours de vie  (en cas de revente du titre de créance avant l’échéance),  ou à l’échéance   (dès lors qu’à la date de constatation finale, le niveau du panier équipondéré est strictement inférieur à 60 % de son niveau de référence initial).   Cette perte pourra être partielle ou totale.  –   Une faible variation du niveau du panier équipondéré autour des seuils de 60 % et de 62 % de son niveau de référence initial à la date de constatation finale peut faire fortement varier la valeur de remboursement d’ Oxygene Objectif Mai 2026.  –   Le gain est plafonné à 7,00 % (4)   par année écoulée , même en cas de hausse du niveau du panier équipondéré supérieure à ce niveau. –   L’investisseur ne bénéficie pas des dividendes éventuellement versés par les actions composant le panier équipondéré.  –   L’investisseur ne connaît pas à l’avance la durée effective de son investissement   qui peut durer de 1 an à 6 ans. –   L’investisseur est exposé à un éventuel défaut de paiement, une faillite, une mise en résolution   (qui induit un risque de non-remboursement)   ou à une dégradation de la qualité de crédit   (qui induit un risque sur la valeur de marché du titre de créance) de l’émetteur. Avantages et inconvénients  (4) Hors frais de gestion, commission de souscription ou frais d’entrée, de rachat, et / ou fiscalité et prélèvements sociaux applicables au cadre d’investissement, et sauf faillite, défaut de paiement ou de mise en résolution de Barclays Bank PLC.\n--- PAGE 4 ---\n4 (5) Dates de constatation annuelle : veuillez vous référer à la rubrique « Principales caractéristiques financières » pour le détail des dates. (6) Hors frais de gestion, commission de souscription ou frais d’entrée, de rachat, et / ou fiscalité et prélèvements sociaux applicables au cadre d’investissement, et sauf faillite, défaut de paiement ou de mise en résolution de Barclays Bank PLC. (7) Dates de remboursement automatique anticipé : veuillez vous référer à la rubrique « Principales caractéristiques financières » pour le détail des dates. (8) L’investisseur notera que ces taux de rendement annuel ne correspondent pas nécessairement aux rendements effectifs obtenus par les investisseurs sur leur placement. Pour plus d’informations sur le calcul des taux de rendement annuel de ce titre de créance et sur les différents frais applicables à votre contrat d’assurance, vous pouvez vous rapprocher de votre conseiller Swiss Life.  Mécanisme d’ « Oxygene Objectif Mai 2026 »  Détermination du niveau du panier équipondéré  Le panier équipondéré est composé des actions Intesa Sanpaolo, Siemens Energy AG, ASML Holding NV, Banco Santander SA (dividendes non réinvestis). Chaque action représente un poids identique (25 %) dans le calcul du niveau du panier équipondéré. Le niveau du panier équipondéré à une date déterminée correspond à la somme pondérée du cours de chacune des actions. Le cours d’une action correspond à son cours de clôture observé à la date de constatation annuelle (5)   concernée, divisé par son cours de clôture observé à la date de constatation initiale (le 29 mai 2026), et est exprimé en pourcentage. Le niveau de référence initial du panier équipondéré est donc égal à ",
+  "aiParsed": {
+    "name": "Oxygene Objectif Mai 2026",
+    "type": "autocall",
+    "structureType": "basket",
+    "emitter": "Barclays Bank PLC",
+    "guarantor": null,
+    "guarantorRating": {
+      "moodys": "A1",
+      "sp": "A+",
+      "fitch": "A+"
+    },
+    "isin": "FRBCP1260660",
+    "underlyings": [
+      "Intesa Sanpaolo",
+      "Siemens Energy AG",
+      "ASML Holding NV",
+      "Banco Santander SA"
+    ],
+    "underlyingType": "basket",
+    "nUnderlyings": 4,
+    "nPairs": null,
+    "currency": "EUR",
+    "maturity": "6 ans",
+    "maturityYears": 6,
+    "coupon": {
+      "rate": 7,
+      "rateIfCalled": null,
+      "rateIfMaturity": null,
+      "type": "gain",
+      "frequency": "annuel",
+      "trigger": null,
+      "memory": false,
+      "paymentTiming": "maturity"
+    },
+    "participationRate": null,
+    "capitalProtection": {
+      "protected": false,
+      "level": null,
+      "barrier": 60,
+      "barrierCoupon": 62,
+      "barrierType": "europeenne",
+      "couponFloor": false
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "autocall",
+      "trigger": 95,
+      "frequency": "annuel",
+      "startSemester": null,
+      "startYear": 1,
+      "stepDown": false,
+      "stepDownPct": null
+    },
+    "decrementPct": null,
+    "actualDividendYield": null,
+    "historicalSimulations": null,
+    "scenarios": {
+      "favorable": "Remboursement anticipé ou à échéance avec gain de 7% par année écoulée si panier ≥ 95% (années 1-5) ou ≥ 62% (année 6)",
+      "median": "Remboursement du capital initial si panier entre 60% et 62% à l'échéance",
+      "defavorable": "Perte en capital égale à la baisse du panier si < 60% à l'échéance"
+    },
+    "risks": [
+      "Risque de perte en capital partielle ou totale",
+      "Risque de crédit émetteur Barclays Bank PLC",
+      "Gain plafonné à 7% par année écoulée",
+      "Pas de dividendes versés",
+      "Durée d'investissement inconnue (1 à 6 ans)"
+    ],
+    "mechanism": "Autocall annuel si panier équipondéré ≥ 95% avec gain 7%/an. À échéance: gain si ≥ 62%, capital si ≥ 60%, perte si < 60%",
+    "summary": "Autocall 6 ans sur panier équipondéré 4 actions, gain 7%/an si ≥95% (Y1-5) ou ≥62% (Y6), barrière capital 60%",
+    "_isBasket": true,
+    "_rawTextSnippet": "--- PAGE 1 ---\n1  Communication à caractère promotionnel  Oxygene Objectif Mai 2026  –   Durée d’investissement conseillée :   6   ans (hors cas de remboursement automatique anticipé). L’investisseur prend un risque de perte en ca- pital non mesurable   a priori   si les titres de créance sont revendus avant la date de remboursement final ou la date de remboursement antici- pé, selon les cas.  –   Période de commercialisation :   du 20 mars 2026 au 29 mai 2026. La commercialisation du titre de créance peut cesser à tout moment sans préavis avant la fin de la période de commercialisation.  –   Cadre   d’investissement   :   contrat d’assurance vie ou contrat de capitalisation en unités de compte et compte titres.  – Code ISIN : FRBCP1260660 –   Émetteur :   Barclays Bank PLC (Moody’s A1, Standard & Poor’s A+, Fitch Ratings A+). L’investisseur supporte le risque de crédit lié au non-remboursement en cas de faillite, de défaut de paiement ou de mise en résolution de Barclays Bank PLC en tant qu’émetteur.  Ce document n’a pas été rédigé par l’assureur.  Titre de créance complexe de droit français présentant un   risque de perte en capital partielle ou totale en cours de vie et à l’échéance , alternatif à un placement risqué de type actions.  VOUS ÊTES SUR LE POINT D’ACHETER UN PRODUIT QUI N’EST PAS SIMPLE ET QUI PEUT ÊTRE DIFFICILE À COMPRENDRE. Document à caractère promotionnel à destination de clients non professionnels au sens de la directive MIF II (directive 2014/65/CE).\n--- PAGE 2 ---\n2 Oxygene Objectif Mai 2026 Oxygene Objectif Mai 2026 est un titre de créance complexe présentant un risque de perte en capital en cours de vie et à l’échéance, qui propose aux investisseurs de s’adosser à la performance d’un panier équipondéré calculé hors dividendes (nommé ci-après le « panier équipondéré » ou « sous-jacent ») composé des actions suivantes : Intesa Sanpaolo, Siemens Energy AG, ASML Holding NV, Banco Santander SA. Le remboursement est conditionné à l’évolution de ce panier d’actions équipondéré (dividendes non réinvestis).  De l’année 1 à 5, en date de constatation annuelle, si le niveau (1)   du panier équipondéré est supérieur ou égal à 95% de son niveau de référence initial (1) , le capital initial (2)   sera remboursé par anticipation de manière automatique avec un gain de 7,00 % (2)   par année écoulée. À l’échéance des 6 ans, si le niveau du panier équipondéré est strictement inférieur à 60 % de son niveau de référence initial, et en l’absence d’activation préalable du mécanisme de remboursement automatique anticipé, l’investisseur subira une perte en capital à hauteur de la baisse enregistrée par le panier équipondéré. En acceptant de limiter leurs gains à 7,00 % (2)   par année écoulée, les investisseurs recevront en contrepartie l’intégralité de leur capital initial   (2) , si le niveau du panier équipondéré est supérieur ou égal à 60 % de son niveau de référence initial à l’échéance.  (1) Pour le détail de la détermination du « niveau »"
+  },
+  "aiSummary": "## DESCRIPTION\n\nProduit structuré **Oxygène Objectif Mai 2026** émis par Barclays Bank PLC, de type autocall sur panier de 4 actions européennes (durée maximale 6 ans).\n\n**Sous-jacents** : Intesa Sanpaolo, Siemens Energy AG, ASML Holding NV, Banco Santander SA (panier équipondéré)\n\n## MÉCANISME\n\n- Autocall annuel si performance du panier ≥ 95% du niveau initial (années 1 à 5)\n- À échéance (année 6) : 3 cas selon la performance du panier\n- Capital non protégé avec barrière européenne à 60%\n\n## RENDEMENT\n\n- **Gain fixe** : 7% par année écoulée\n- Versement uniquement en cas de remboursement (anticipé ou à échéance)\n- Pas de coupons périodiques\n- Gain plafonné (pas de participation à la hausse au-delà)\n\n## PROTECTION\n\n- **Barrière de protection** : 60% (européenne, observée uniquement à échéance)\n- **Barrière de gain** : 62% à échéance\n- Capital à risque si panier < 60% à l'échéance\n\n## REMBOURSEMENT ANTICIPÉ\n\n- **Trigger autocall** : 95% du niveau initial\n- **Fréquence** : annuelle (années 1 à 5)\n- **Versement** : capital + gain de 7% × nombre d'années écoulées\n\n## SCÉNARIOS\n\n**Favorable** : Remboursement anticipé (années 1-5) si panier ≥ 95% ou à échéance (année 6) si panier ≥ 62%\n→ Capital + 7% par année écoulée\n\n**Médian** : À échéance, panier entre 60% et 62%\n→ Remboursement du capital initial sans gain\n\n**Défavorable** : À échéance, panier < 60%\n→ Perte en capital = baisse du panier\n\n## POINTS ATTENTION\n\n- Risque de perte totale ou partielle du capital investi\n- Risque émetteur Barclays Bank PLC\n- Durée d'investissement incertaine (1 à 6 ans)\n- Absence de dividendes des actions sous-jacentes\n- Performance limitée au gain fixe de 7%/an",
+  "sourceFile": "Brochure OXYGENE OBJECTIF MAI 2026.pdf",
+  "structureType": "basket",
+  "participationRate": null,
+  "historicalSimulations": null,
+  "guarantorRating": {
+    "moodys": "A1",
+    "sp": "A+",
+    "fitch": "A+"
+  },
+  "mechanism": "Autocall annuel si panier équipondéré ≥ 95% avec gain 7%/an. À échéance: gain si ≥ 62%, capital si ≥ 60%, perte si < 60%",
+  "nPairs": null,
+  "nUnderlyings": 4,
+  "decrementPct": null,
+  "actualDividendYield": null,
+  "maturityYears": 6,
+  "aiCategory": "autocall-multi",
+  "aiCategoryLabel": "⚡ Autocall Multi-actifs",
+  "aiCategoryColor": "#2EC4B6",
+  "aiOpinion": "Ce produit offre un rendement attractif de 7% annuel avec une possibilité de sortie anticipée dès 95% du niveau initial, ce qui est favorable. Cependant, l'absence de protection du capital et la barrière relativement basse à 60% exposent à des pertes significatives en cas de forte baisse d'un des quatre sous-jacents européens.",
+  "aiAnalyzedAt": "2026-03-30T08:22:30.671Z",
+  "status": "analyzing",
+  "receivedDate": "2026-03-30",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null,
+  "score": {
+    "score": 4,
+    "details": [
+      {
+        "type": "warning",
+        "icon": "⚠️",
+        "text": "Même sous-jacent que 1 produit(s) — 20% du book",
+        "impact": 35,
+        "category": "redundancy"
+      },
+      {
+        "type": "warning",
+        "icon": "📦",
+        "text": "Même type que 4 produit(s) — 80% du book en \"Autocall / Phoenix\"",
+        "impact": 20,
+        "category": "redundancy"
+      },
+      {
+        "type": "info",
+        "icon": "🏦",
+        "text": "Même émetteur que 4 produit(s) — concentration Swiss Life",
+        "impact": 16,
+        "category": "redundancy"
+      },
+      {
+        "type": "positive",
+        "icon": "📈",
+        "text": "Coupon (7%) > moyenne du book (4.1%)",
+        "impact": 15,
+        "category": "complementarity"
+      },
+      {
+        "type": "positive",
+        "icon": "🔀",
+        "text": "Faible corrélation moyenne (30%) — diversification",
+        "impact": 10,
+        "category": "complementarity"
+      }
+    ],
+    "verdict": "⛔ Fortement déconseillé — duplication quasi-totale.",
+    "breakdown": {
+      "redundancy": 71,
+      "complementarity": 25
+    }
+  }
+}
