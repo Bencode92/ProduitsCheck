@@ -1,30 +1,25 @@
 // ═══════════════════════════════════════════════════════════════════════════════
-// BASKET DETECTION PATCH v2 — Fix worst-of misclassification
+// BASKET DETECTION PATCH v2.1 — Fix worst-of misclassification + P2 fix
 //
-// Problem: Products like "OBJECTIF MAI 2026" are panier équipondéré but graded
-// as worst-of because:
-//   1. No "Panier équipondéré" option in UI dropdown (fixed by edit-modal v1.8)
-//   2. basket-fix.js only checks rawText keywords — if rawText isn't stored, detection fails
-//   3. No check on structureType === 'basket' from manual selection
-//   4. PDF parser doesn't flag basket products
+// v2.1: Enhanced P2 scoring for baskets (use average metrics, not worst)
+//       + P1 barrier penalty reduction for basket diversification
+//       + Better integration with AI grading prompt context
 //
-// This patch adds 3 layers of detection:
-//   Layer 1: structureType === 'basket' (manual selection from UI)
+// 3 layers of detection:
+//   Layer 1: structureType === 'basket' (manual selection from UI or pdf.js V7.8)
 //   Layer 2: Enhanced keyword detection (name, aiParsed, rawText, description)
-//   Layer 3: Auto-detection from AI parsed data (basketType field, mechanism description)
+//   Layer 3: Auto-detection from AI parsed data
 //
-// Must load AFTER grader-basket-fix.js (which loads after sprint1)
+// Must load AFTER grader-basket-fix.js
 // ═══════════════════════════════════════════════════════════════════════════════
 (function() {
     'use strict';
 
-    // Extended basket keywords (beyond basket-fix.js)
     var BASKET_KEYWORDS_EXTENDED = [
         'panier equi', 'panier \u00e9qui', 'equiponder', '\u00e9quipond\u00e9r',
         'equally weighted', 'equal weight', 'basket average',
         'average basket', 'panier moyen', 'moyenne pond',
         'somme pond\u00e9r\u00e9e', 'somme ponderee',
-        // New patterns
         'panier d\'actions \u00e9qui', 'panier d\'actions equi',
         'poids identique', 'poids \u00e9gal',
         'performance moyenne du panier', 'niveau du panier',
@@ -37,59 +32,57 @@
     // ENHANCED BASKET DETECTION
     // ========================================
     function _isBasketProductEnhanced(product) {
-        // Layer 1: Manual structureType from UI
         if (product.structureType === 'basket') {
-            console.log('[BasketV2] Detected via structureType=basket');
             return true;
         }
-
-        // Layer 2: Keywords in all text sources
         var name = (product.name || '').toLowerCase();
         var rawText = (product.rawText || product._rawText || '').toLowerCase();
+        // V7.8: also check _rawTextSnippet from pdf.js
+        var rawSnippet = (product.aiParsed && product.aiParsed._rawTextSnippet || '').toLowerCase();
         var aiDesc = '';
         var mechanism = '';
 
         if (product.aiParsed) {
             try { aiDesc = JSON.stringify(product.aiParsed).toLowerCase(); } catch(e) {}
-            // Check specific aiParsed fields
             mechanism = (product.aiParsed.mechanism || product.aiParsed.mecanisme || '').toLowerCase();
             var desc = (product.aiParsed.description || product.aiParsed.description_courte || '').toLowerCase();
             aiDesc += ' ' + mechanism + ' ' + desc;
 
-            // Layer 3: basketType field from AI
             if (product.aiParsed.basketType || product.aiParsed.basket_type || product.aiParsed.typeBasket) {
                 var bt = (product.aiParsed.basketType || product.aiParsed.basket_type || product.aiParsed.typeBasket || '').toLowerCase();
                 if (bt.indexOf('equi') >= 0 || bt.indexOf('average') >= 0 || bt.indexOf('moyen') >= 0 || bt.indexOf('equal') >= 0) {
-                    console.log('[BasketV2] Detected via aiParsed.basketType=' + bt);
                     return true;
                 }
             }
 
-            // Layer 3b: Check if AI says "panier" in underlyingType or productType
             var pType = (product.aiParsed.productType || product.aiParsed.type_produit || product.aiParsed.type || '').toLowerCase();
             if (pType.indexOf('panier') >= 0 && pType.indexOf('worst') < 0) {
-                console.log('[BasketV2] Detected via aiParsed.productType=' + pType);
+                return true;
+            }
+
+            // V7.8: check underlyingType from pdf parser
+            var uType = (product.aiParsed.underlyingType || '').toLowerCase();
+            if (uType === 'basket') {
+                return true;
+            }
+
+            // V7.8: check _isBasket flag from pdf.js
+            if (product.aiParsed._isBasket === true) {
                 return true;
             }
         }
 
-        // Also check product-level description
         var productDesc = (product.description || '').toLowerCase();
-        
-        var allText = name + ' ' + rawText + ' ' + aiDesc + ' ' + productDesc;
+        var allText = name + ' ' + rawText + ' ' + rawSnippet + ' ' + aiDesc + ' ' + productDesc;
 
-        // Check all keywords
         for (var i = 0; i < BASKET_KEYWORDS_EXTENDED.length; i++) {
             if (allText.indexOf(BASKET_KEYWORDS_EXTENDED[i]) >= 0) {
-                console.log('[BasketV2] Detected via keyword: "' + BASKET_KEYWORDS_EXTENDED[i] + '"');
                 return true;
             }
         }
 
-        // Layer 3c: Heuristic — if mechanism mentions "panier" but NOT "worst" or "pire des"
         if (mechanism && mechanism.indexOf('panier') >= 0 && 
             mechanism.indexOf('worst') < 0 && mechanism.indexOf('pire') < 0) {
-            console.log('[BasketV2] Detected via mechanism heuristic (panier without worst)');
             return true;
         }
 
@@ -97,7 +90,53 @@
     }
 
     // ========================================
-    // PATCH: Override basket detection in grader-basket-fix
+    // BASKET METRICS HELPER — compute average metrics for basket
+    // ========================================
+    function _computeBasketAverageMetrics(product, market) {
+        if (!market || !market.stocks) return null;
+        
+        var found = (market.stocks || []).filter(function(s) { return s.found; });
+        if (found.length < 2) return null;
+        
+        var n = found.length;
+        var avgVol = 0, avgDD = 0, avgBeta = 0, avgBuffett = 0, avgQuality = 0;
+        var countBuffett = 0, countQuality = 0;
+        
+        found.forEach(function(s) {
+            avgVol += (s.volatility_3y || 25) / n;
+            avgDD += Math.abs(s.drawdown_3y || -20) / n;
+            avgBeta += (s.beta || 1.0) / n;
+            if (s.buffett_score !== undefined && s.buffett_score !== null) {
+                avgBuffett += s.buffett_score; countBuffett++;
+            }
+            if (s.quality_score !== undefined && s.quality_score !== null) {
+                avgQuality += s.quality_score; countQuality++;
+            }
+        });
+        
+        if (countBuffett > 0) avgBuffett /= countBuffett;
+        if (countQuality > 0) avgQuality /= countQuality;
+        
+        // Basket vol is lower than average vol due to diversification
+        // vol_basket ≈ vol_avg × sqrt((1 + (n-1) × rho) / n)
+        var rho = 0.50; // conservative cross-correlation
+        var diversificationFactor = Math.sqrt((1 + (n - 1) * rho) / n);
+        var basketVol = avgVol * diversificationFactor;
+        var basketDD = avgDD * diversificationFactor; // drawdown also diversified
+        
+        return {
+            vol: Math.round(basketVol * 10) / 10,
+            dd: -Math.round(basketDD * 10) / 10,
+            beta: Math.round(avgBeta * 100) / 100,
+            buffett: Math.round(avgBuffett),
+            quality: Math.round(avgQuality),
+            nStocks: n,
+            diversificationFactor: Math.round(diversificationFactor * 100) / 100
+        };
+    }
+
+    // ========================================
+    // PATCH: Normalize + probabilities
     // ========================================
     function _patchBasketDetection() {
         if (typeof ProposalGrader === 'undefined') return false;
@@ -109,10 +148,8 @@
         ProposalGrader.normalize = function(product) {
             var n = _currentNormalize.call(this, product);
 
-            // If basket-fix already detected it, great
             if (n._isBasket) return n;
 
-            // Try enhanced detection
             if (n.underlyings && n.underlyings.length > 1) {
                 var isBasket = _isBasketProductEnhanced(product);
                 if (isBasket) {
@@ -133,7 +170,7 @@
         };
         ProposalGrader.normalize._basketV2Patched = true;
 
-        // Patch _estimateCouponProb for basket products
+        // Patch _estimateCouponProb
         var _currentCouponProb = window._estimateCouponProb;
         if (_currentCouponProb && !_currentCouponProb._basketV2Patched) {
             window._estimateCouponProb = function(p) {
@@ -147,19 +184,17 @@
                     var adjustedProb = Math.min(0.95, prob + adjustment);
                     
                     if (adjustedProb > prob) {
-                        console.log('[BasketV2] Coupon prob adjusted: ' + 
-                            (prob * 100).toFixed(1) + '% \u2192 ' + (adjustedProb * 100).toFixed(1) + 
-                            '% (basket ' + n + ' stocks, volReduction=' + volReduction.toFixed(2) + ')');
+                        console.log('[BasketV2] Coupon prob: ' + 
+                            (prob * 100).toFixed(1) + '% \u2192 ' + (adjustedProb * 100).toFixed(1) + '%');
                         return adjustedProb;
                     }
                 }
-
                 return prob;
             };
             window._estimateCouponProb._basketV2Patched = true;
         }
 
-        // Patch _estimateLossProb for basket
+        // Patch _estimateLossProb
         var _currentLossProb = window._estimateLossProb;
         if (_currentLossProb && !_currentLossProb._basketV2Patched) {
             window._estimateLossProb = function(p) {
@@ -172,13 +207,11 @@
                     var adjustedProb = prob * volReduction;
                     
                     if (adjustedProb < prob) {
-                        console.log('[BasketV2] Loss prob adjusted: ' + 
-                            (prob * 100).toFixed(1) + '% \u2192 ' + (adjustedProb * 100).toFixed(1) + 
-                            '% (basket diversification)');
+                        console.log('[BasketV2] Loss prob: ' + 
+                            (prob * 100).toFixed(1) + '% \u2192 ' + (adjustedProb * 100).toFixed(1) + '%');
                         return Math.max(0.005, adjustedProb);
                     }
                 }
-
                 return prob;
             };
             window._estimateLossProb._basketV2Patched = true;
@@ -188,7 +221,48 @@
     }
 
     // ========================================
-    // PATCH: Override grade() post-processing for basket P2
+    // PATCH: P2 — Use average metrics for basket, not worst
+    // ========================================
+    function _patchBasketP2() {
+        if (typeof _computeP2 !== 'function') return false;
+        
+        var _currentP2 = _computeP2;
+        if (_currentP2._basketV2Patched) return true;
+
+        window._computeP2 = function(p, market, productType) {
+            // For baskets: override market metrics with averages before computing P2
+            if (p._isBasket && market && market.stocks) {
+                var avgMetrics = _computeBasketAverageMetrics(null, market);
+                if (avgMetrics) {
+                    // Create modified market with basket-averaged worst metrics
+                    var basketMarket = JSON.parse(JSON.stringify(market));
+                    if (basketMarket.worstMetrics) {
+                        basketMarket.worstMetrics.volatility_3y = avgMetrics.vol;
+                        basketMarket.worstMetrics.drawdown_3y = avgMetrics.dd;
+                        basketMarket.worstMetrics.beta = avgMetrics.beta;
+                        if (avgMetrics.buffett) basketMarket.worstMetrics.buffett_score = avgMetrics.buffett;
+                        if (avgMetrics.quality) basketMarket.worstMetrics.quality_score = avgMetrics.quality;
+                        
+                        console.log('[BasketV2] P2: using basket average metrics — vol ' + 
+                            avgMetrics.vol + '% (×' + avgMetrics.diversificationFactor + '), DD ' + 
+                            avgMetrics.dd + '%, beta ' + avgMetrics.beta);
+                    }
+                    return _currentP2(p, basketMarket, productType);
+                }
+            }
+            
+            return _currentP2(p, market, productType);
+        };
+        window._computeP2._basketV2Patched = true;
+        // Also update if ProposalGrader references it
+        if (typeof ProposalGrader !== 'undefined') {
+            ProposalGrader._computeP2 = window._computeP2;
+        }
+        return true;
+    }
+
+    // ========================================
+    // PATCH: grade() post-processing for P1 + recalc
     // ========================================
     function _patchBasketGrading() {
         if (typeof ProposalGrader === 'undefined' || !ProposalGrader.grade) return false;
@@ -203,45 +277,60 @@
             var isBasket = (norm && norm._isBasket) || product.structureType === 'basket';
 
             if (isBasket && result && result.pillars) {
-                var p2 = result.pillars.underlyingQuality;
-                if (p2 && p2.score < 50) {
-                    var boost = Math.min(15, Math.round((50 - p2.score) * 0.4));
-                    p2.score = Math.min(80, p2.score + boost);
-                    p2.reasoning = (p2.reasoning || '') + 
-                        ' | Basket \u00e9quipond\u00e9r\u00e9 +' + boost + 'pts (risque dilu\u00e9 par moyenne)';
-                    console.log('[BasketV2] P2 boosted by ' + boost + ' for basket product');
-                }
+                var changed = false;
 
+                // P1: Remove worst-of penalty if still in reasoning
                 var p1 = result.pillars.couponAndCapital;
                 if (p1 && p1.reasoning && p1.reasoning.indexOf('Worst') >= 0) {
-                    var p1boost = Math.min(10, Math.round(((norm && norm.underlyings) ? norm.underlyings.length : 4) * 2));
+                    var nUnd = (norm && norm.underlyings) ? norm.underlyings.length : 4;
+                    var p1boost = Math.min(10, Math.round(nUnd * 2));
                     p1.score = Math.min(100, p1.score + p1boost);
                     p1.reasoning = p1.reasoning.replace(/Worst[^|]*\|?/, '') + 
                         ' | Basket \u00e9quipond\u00e9r\u00e9 +' + p1boost + 'pts';
-                    console.log('[BasketV2] P1 boosted by ' + p1boost + ' (removed worst-of penalty)');
+                    changed = true;
+                    console.log('[BasketV2] P1 +' + p1boost + ' (worst-of penalty removed)');
                 }
 
-                // Recalculate total score
-                var weights = { couponAndCapital: 0.30, underlyingQuality: 0.25, 
-                                portfolioFit: 0.20, primeVsCat: 0.25 };
-                var newScore = 0;
-                for (var key in weights) {
-                    if (result.pillars[key]) {
-                        newScore += result.pillars[key].score * weights[key];
+                // P2: Additional boost if P2 was still computed with worst metrics
+                // (safety net in case _computeP2 override didn't fire)
+                var p2 = result.pillars.underlyingQuality;
+                if (p2 && p2.score < 45) {
+                    var boost = Math.min(20, Math.round((50 - p2.score) * 0.5));
+                    p2.score = Math.min(75, p2.score + boost);
+                    p2.reasoning = (p2.reasoning || '') + 
+                        ' | Basket \u00e9quipond\u00e9r\u00e9 +' + boost + 'pts (m\u00e9triques moyenn\u00e9es)';
+                    changed = true;
+                    console.log('[BasketV2] P2 +' + boost + ' (basket averaging safety net)');
+                }
+
+                // Recalculate total score if anything changed
+                if (changed) {
+                    var weights = { couponAndCapital: 0.30, underlyingQuality: 0.25, 
+                                    portfolioFit: 0.20, primeVsCat: 0.25 };
+                    var newScore = 0;
+                    for (var key in weights) {
+                        if (result.pillars[key]) {
+                            newScore += result.pillars[key].score * weights[key];
+                        }
+                    }
+                    newScore = Math.round(newScore);
+
+                    if (newScore !== result.score) {
+                        console.log('[BasketV2] Score: ' + result.score + ' \u2192 ' + newScore);
+                        result.score = newScore;
+                        
+                        if (newScore >= 75) result.grade = 'A';
+                        else if (newScore >= 55) result.grade = 'B';
+                        else if (newScore >= 40) result.grade = 'C';
+                        else if (newScore >= 25) result.grade = 'D';
+                        else result.grade = 'F';
                     }
                 }
-                newScore = Math.round(newScore);
 
-                if (newScore > result.score) {
-                    console.log('[BasketV2] Score recalculated: ' + result.score + ' \u2192 ' + newScore);
-                    result.score = newScore;
-                    
-                    if (newScore >= 75) result.grade = 'A';
-                    else if (newScore >= 55) result.grade = 'B';
-                    else if (newScore >= 40) result.grade = 'C';
-                    else if (newScore >= 25) result.grade = 'D';
-                    else result.grade = 'F';
-                }
+                // Add basket info to result for display
+                result._isBasket = true;
+                result._basketInfo = 'Panier \u00e9quipond\u00e9r\u00e9 ' + 
+                    ((norm && norm.underlyings) ? norm.underlyings.length : '?') + ' actions';
             }
 
             return result;
@@ -251,7 +340,7 @@
     }
 
     // ========================================
-    // PATCH: Auto-detect structure type for basket products
+    // PATCH: Auto-detect structure type
     // ========================================
     function _patchAutoDetect() {
         if (typeof _autoDetectStructureType !== 'function') return false;
@@ -264,7 +353,6 @@
             
             if ((!result || result === 'autocall') && product.underlyings && product.underlyings.length > 1) {
                 if (_isBasketProductEnhanced(product)) {
-                    console.log('[BasketV2] Auto-detected structure type: basket');
                     return 'basket';
                 }
             }
@@ -282,10 +370,11 @@
         var ok1 = _patchBasketDetection();
         var ok2 = _patchBasketGrading();
         var ok3 = _patchAutoDetect();
+        var ok4 = _patchBasketP2();
 
-        if (ok1 && ok2) {
+        if (ok1 && ok2 && ok4) {
             clearInterval(_basketV2Interval);
-            console.log('[StructBoard] Basket Detection V2 active \u2014 3 layers: structureType + keywords + AI');
+            console.log('[StructBoard] Basket V2.1 active \u2014 detection + P2 average metrics + prob adjustment');
         }
     }, 300);
 
@@ -293,4 +382,4 @@
 
 })();
 
-console.log('[StructBoard] Basket Detection V2 patch loaded');
+console.log('[StructBoard] Basket Detection V2.1 loaded');
