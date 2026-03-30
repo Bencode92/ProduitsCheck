@@ -1,7 +1,7 @@
 {
   "bankId": "swiss-life",
   "bankName": "Swiss Life",
-  "lastUpdated": "2026-03-30T06:45:58.758Z",
+  "lastUpdated": "2026-03-30T07:28:44.917Z",
   "products": [
     {
       "id": "sp_mn5u82do_cx6ya",
@@ -18,6 +18,14 @@
       "status": "analyzing",
       "score": 24,
       "receivedDate": "2026-03-29"
+    },
+    {
+      "id": "sp_mncv9pgv_lyeiw",
+      "name": "SL - PHOENIX MEMOIRE SEMESTRIEL RICHEMONT AVRIL 2026",
+      "type": "autocall",
+      "status": "analyzing",
+      "score": 24,
+      "receivedDate": "2026-03-30"
     }
   ]
 }
