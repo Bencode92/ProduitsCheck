@@ -181,7 +181,7 @@
   },
   "grading": {
     "grade": "B",
-    "score": 61,
+    "score": 68,
     "killCriteria": {
       "triggered": false,
       "reasons": []
@@ -191,46 +191,46 @@
         "score": 38,
         "base": 48,
         "delta": -10,
-        "reasoning": "Rendement: base 48 → -10 = 38 (Probabilité de toucher le coupon réduite en stagflation avec VIX élevé et DD actuel de 25.7%) | Coupon 19.4%, barrière 60% | Barr.coupon 80% | Mat espérée: ~1.6a (prob mat: 0%)"
+        "reasoning": "Rendement: base 48 → -10 = 38 (Avec seulement 1% de probabilité de maturité et VIX à 22, le coupon de 19.4% sera difficile à toucher régulièrement) | Coupon 19.4%, barrière 60% | Barr.coupon 80% | Mat espérée: ~1.6a (prob mat: 1%)"
       },
       "underlyingQuality": {
-        "score": 75,
-        "base": 90,
+        "score": 79,
+        "base": 94,
         "delta": -15,
-        "reasoning": "Qualité: base 90 → -15 = 75 (Secteur bancaire très sensible en stagflation (hausse taux + récession), beta proche de 1 amplifie les mouvements) | Worst: Euro Stoxx Banks B:76"
+        "reasoning": "Qualité: base 94 → -15 = 79 (Secteur bancaire très sensible en stagflation avec beta 0.96, risque de récession et compression des marges) | Worst: Euro Stoxx Banks B:85"
       },
       "portfolioFit": {
-        "score": 75,
+        "score": 80,
         "base": 80,
-        "delta": -5,
-        "reasoning": "Fit: base 80 → -5 = 75 (Surexposition sectorielle risquée dans ce contexte macro défavorable aux banques)"
+        "delta": 0,
+        "reasoning": "Fit: base 80"
       },
       "riskPremium": {
-        "score": 62,
+        "score": 83,
         "base": 62,
-        "delta": 0,
-        "reasoning": "Prime: base 62 | 19.4% vs CAT 2.5% (spread 16.9%)"
+        "delta": 5,
+        "reasoning": "Capital garanti: spread 19.4% - CAT 2.5% - illiq 0.5% = 16.4% | Illiq. premium +1.3% (-7pts)"
       }
     },
-    "verdict": "Produit très risqué avec 19.4% annualisé sur le secteur bancaire européen en pleine stagflation. Le drawdown actuel de 25.7% et la volatilité de 19.14% indiquent un stress déjà significatif. La barrière capital à 60% offre une protection limitée face à un secteur qui pourrait subir -40% en cas de crise bancaire. Score final de 48/100 reflète un rapport risque/rendement défavorable.",
+    "verdict": "Produit à éviter malgré le coupon élevé de 19.4%. Le secteur bancaire européen est particulièrement vulnérable en stagflation avec un beta proche de 1 et un drawdown historique de 25.7%. La probabilité de toucher régulièrement les coupons est faible avec un VIX à 22 et seulement 1% de chance d'atteindre la maturité, suggérant des autocalls difficiles.",
     "keyRisks": [
-      "Concentration 100% sur secteur bancaire vulnérable en stagflation",
-      "Risque de perte en capital significative si barrière 60% touchée",
-      "Probabilité élevée de rester bloqué 5 ans sans coupon"
+      "Secteur bancaire très exposé à la récession en stagflation",
+      "Volatilité élevée (19.15%) compromet les coupons réguliers",
+      "Barrière capitale à 60% insuffisante vu le DD historique de 25.7%"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 19.4,
         "return_eur": 19400,
-        "probability": 0.2,
+        "probability": 0.15,
         "duration_years": 1
       },
       "base": {
         "return_pct": 9.7,
-        "return_eur": 19400,
+        "return_eur": 15520,
         "probability": 0.3,
-        "duration_years": 2
+        "duration_years": 1.6
       },
       "stress": {
         "return_pct": 0,
@@ -239,23 +239,23 @@
         "duration_years": 5
       },
       "worst": {
-        "return_pct": -25,
-        "return_eur": -25000,
-        "probability": 0.15,
+        "return_pct": -15,
+        "return_eur": -15000,
+        "probability": 0.2,
         "duration_years": 5
       }
     },
     "confidenceInterval": {
-      "low": 53,
-      "high": 69,
+      "low": 56,
+      "high": 72,
       "halfWidth": 8,
       "gradeStable": false,
       "gradeRange": "C-B",
-      "label": "B [53-69]"
+      "label": "B [56-72]"
     },
     "metadata": {
-      "gradedAt": "2026-03-30T06:47:40.677Z",
-      "durationMs": 14753,
+      "gradedAt": "2026-03-30T08:17:29.146Z",
+      "durationMs": 14423,
       "aiUsed": true,
       "version": "5.2",
       "productType": "autocall",
@@ -273,15 +273,15 @@
       "couponProbability": null,
       "expectedMaturity": 1.6,
       "maxMaturity": 5,
-      "probReachMaturity": 0,
+      "probReachMaturity": 1,
       "maxBeta": 0.96,
-      "baseScore": 68,
+      "baseScore": 69,
       "baseGrade": "B",
       "adjustments": {
         "p1": -10,
         "p2": -15,
-        "p3": -5,
-        "p4": 0
+        "p3": 0,
+        "p4": 5
       },
       "barrier_sigma": 1.19,
       "barrier_sigma_label": "Attention",
@@ -289,9 +289,9 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 53,
-      "ci_high": 69,
-      "ci_label": "B [53-69]",
+      "ci_low": 56,
+      "ci_high": 72,
+      "ci_label": "B [56-72]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
@@ -302,12 +302,12 @@
           "name": "Euro Stoxx Banks",
           "ticker": "ENX",
           "sector": "Finance",
-          "perf_ytd": 3.91,
-          "perf_1y": -2.35,
-          "volatility_3y": 19.14,
+          "perf_ytd": 3.44,
+          "perf_1y": -2.79,
+          "volatility_3y": 19.15,
           "max_drawdown_3y": 25.7,
           "buffett_score": null,
-          "quality_score": 76,
+          "quality_score": 85,
           "buffett_grade": null
         }
       ]
