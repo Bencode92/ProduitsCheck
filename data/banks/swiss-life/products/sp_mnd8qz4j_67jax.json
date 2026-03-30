@@ -177,12 +177,12 @@
   },
   "sourceFile": "JSON import",
   "bankId": "swiss-life",
-  "status": "analyzing",
+  "status": "rejected",
   "receivedDate": "2026-03-30",
   "conversation": [],
   "conversationSummary": null,
-  "decision": null,
-  "decisionReason": null,
+  "decision": "rejected",
+  "decisionReason": "Rejeté manuellement",
   "score": {
     "score": 4,
     "details": [
