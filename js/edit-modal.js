@@ -1,5 +1,6 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Edit Modal v1.7 — fix coupon-as-number bug
+// STRUCTBOARD — Edit Modal v1.8 — add Panier équipondéré
+// v1.8: Added "Panier équipondéré" structure type + info banner
 // v1.7: Fix coupon saved as primitive number → frequency not persisted
 // v1.6: Added "Barrière Coupon (%)" field for digitale products
 // v1.5: Added "À maturité" freq + "Participation" coupon type
@@ -15,6 +16,7 @@ var STRUCTURE_TYPES = [
     { id: '', label: '— Auto-détection —' },
     { id: 'autocall', label: 'Autocall / Phoenix' },
     { id: 'phoenix_memoire', label: 'Phoenix à mémoire' },
+    { id: 'basket', label: 'Panier équipondéré' },
     { id: 'dispersion', label: 'Dispersion / Perf. relative' },
     { id: 'taux_fixe', label: 'Taux fixe / Callable' },
     { id: 'capital_garanti', label: 'Capital garanti structuré' },
@@ -107,6 +109,7 @@ window.showEditModal = function() {
         '<div class="form-field full"><label>Sous-jacents (séparés par virgule)</label><input id="fe-underlyings" value="' + escapeAttr(underlyings) + '"></div>' +
         '</div>' +
         (structureType === 'dispersion' ? '<div style="background:rgba(6,214,160,0.08);border:1px solid rgba(6,214,160,0.2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:12px;font-size:10px;color:var(--green)">✅ <strong>Dispersion</strong> : le grading valorisera la volatilité (moteur de rendement) et considèrera le capital comme garanti.</div>' : '') +
+        (structureType === 'basket' ? '<div style="background:rgba(78,205,196,0.08);border:1px solid rgba(78,205,196,0.2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:12px;font-size:10px;color:#4ECDC4">🧺 <strong>Panier équipondéré</strong> : le grading utilisera la performance moyenne du panier (pas le worst-of). Risque réduit par la diversification.</div>' : '') +
         (structureType === 'taux_fixe' ? '<div style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:12px;font-size:10px;color:var(--accent)">🏛 <strong>Taux fixe</strong> : le grading comparera le coupon au taux sans risque BCE et évaluera le spread.</div>' : '') +
         (strikePrice ? '' : '<div style="background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.15);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:12px;font-size:10px;color:var(--text-muted)">💡 <strong>Strike</strong> : renseignez la valeur du SJ à la souscription pour améliorer le calcul barrière (σ).</div>') +
         (barrierCoupon ? '<div style="background:rgba(255,182,39,0.08);border:1px solid rgba(255,182,39,0.2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:12px;font-size:10px;color:var(--orange)">🎯 <strong>Digitale</strong> : barrière coupon à ' + barrierCoupon + '%. Le grading estimera la probabilité de toucher le coupon.</div>' : '') +
@@ -127,7 +130,6 @@ window.handleEditSave = async function() {
     var newCoupon = document.getElementById('fe-coupon')?.value;
 
     // v1.7 FIX: Force coupon to be an object (not a primitive number)
-    // If coupon was stored as a number (e.g. 4.85), convert to {rate: 4.85}
     if (!p.coupon || typeof p.coupon !== 'object') {
         var oldRate = typeof p.coupon === 'number' ? p.coupon : null;
         p.coupon = {};
@@ -209,4 +211,4 @@ function escapeAttr(str) {
     return (str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;');
 }
 
-console.log('[StructBoard] Edit Modal v1.7 — fix coupon-as-number bug');
+console.log('[StructBoard] Edit Modal v1.8 — Panier équipondéré support');
