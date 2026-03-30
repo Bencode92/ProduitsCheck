@@ -159,51 +159,59 @@
     "envelope": "cameleons",
     "maturityYears": 12,
     "strikePrice": 16,
+    "_strikePriceAll": null,
+    "_strikePriceNotFound": null,
+    "strikePrices": {
+      "ENI S.p.A.": 16
+    },
+    "_strikePriceSource": "confirmed",
+    "_strikePriceDate": "2026-03-26",
+    "structureType": "capital_garanti",
     "grading": {
-      "grade": "C",
-      "score": 53,
+      "grade": "B",
+      "score": 64,
       "killCriteria": {
         "triggered": false,
         "reasons": []
       },
       "pillars": {
         "adjustedReturn": {
-          "score": 57,
-          "base": 62,
-          "delta": -5,
-          "reasoning": "Rendement: base 62 → -5 = 57 (Malgré le Buffett de 44%, la volatilité de 20.37% et l'autocall à 100% réduisent la probabilité de percevoir les coupons régulièrement.) | Coupon 5.7%, protégé | Mat espérée: ~2.2a (max 12a, prob mat: 0%)"
+          "score": 76,
+          "base": 76,
+          "delta": 0,
+          "reasoning": "Rendement: base 76 | Coupon 5.7%, protégé | Mat espérée: ~2.3a (prob mat: 0%)"
         },
         "underlyingQuality": {
-          "score": 58,
+          "score": 50,
           "base": 50,
-          "delta": 8,
-          "reasoning": "Qualité: base 50 → +8 = 58 (ENI bénéficie du régime neutral avec le secteur energy favorisé, compensant largement les fondamentaux moyens (ROE 5%, marge 3%).) [B/Q 35%] | Worst: ENI S.p.A. B:44"
+          "delta": 0,
+          "reasoning": "Qualité: base 50 | Worst: ENI S.p.A. B:44"
         },
         "portfolioFit": {
           "score": 70,
           "base": 70,
           "delta": 0,
-          "reasoning": "En portefeuille — neutre"
+          "reasoning": "En portefeuille"
         },
         "riskPremium": {
-          "score": 44,
-          "base": 39,
-          "delta": 5,
-          "reasoning": "Prime: base 39 → +5 = 44 (Le spread de 5.7% reste attractif dans le contexte actuel pour un produit à capital protégé sur 12 ans.) | 5.7% vs CAT 2.5% (spread 3.2%)"
+          "score": 66,
+          "base": 42,
+          "delta": 0,
+          "reasoning": "Capital garanti: spread 5.7% - CAT 2.5% - illiq 0.8% = 2.4%"
         }
       },
-      "verdict": "Produit défensif adapté au contexte macro favorable à l'énergie, avec un rendement de 5.7% sur capital protégé. La probabilité d'autocall de 45% suggère une durée effective de 2.2 ans, limitant l'exposition longue. Cependant, les fondamentaux moyens d'ENI (ROE 5%, marge 3%) et la volatilité élevée (20%) tempèrent l'attrait malgré le secteur porteur.",
+      "verdict": "Produit défensif très bien positionné en stagflation avec ENI bénéficiant du choc pétrolier (Brent $103.79) et du momentum sectoriel energy (+1.76%). Le capital garanti élimine le risque de perte tandis que le coupon de 5.7% reste attractif malgré la barrière autocall élevée. La maturité longue (12 ans) offre de multiples opportunités de sortie dans un secteur structurellement favorisé.",
       "keyRisks": [
-        "Volatilité du pétrole impactant directement ENI et retardant l'autocall",
-        "Transition énergétique pesant sur les valorisations pétrolières à moyen terme"
+        "Blocage prolongé sous la barrière 100% limitant les coupons pendant plusieurs années",
+        "Retournement brutal du prix du pétrole impactant négativement ENI"
       ],
       "negotiationPoints": [],
       "scenarios": {
         "optimistic": {
-          "return_pct": 12.5,
-          "return_eur": 3750,
-          "probability": 0.25,
-          "duration_years": 2.2
+          "return_pct": 11.4,
+          "return_eur": 3420,
+          "probability": 0.3,
+          "duration_years": 2
         },
         "base": {
           "return_pct": 17.1,
@@ -214,8 +222,8 @@
         "stress": {
           "return_pct": 0,
           "return_eur": 0,
-          "probability": 0.25,
-          "duration_years": 12
+          "probability": 0.2,
+          "duration_years": 8
         },
         "worst": {
           "return_pct": 0,
@@ -224,12 +232,20 @@
           "duration_years": 12
         }
       },
+      "confidenceInterval": {
+        "low": 50,
+        "high": 64,
+        "halfWidth": 7,
+        "gradeStable": false,
+        "gradeRange": "C-B",
+        "label": "C [50-64]"
+      },
       "metadata": {
-        "gradedAt": "2026-03-26T08:44:41.968Z",
-        "durationMs": 16844,
+        "gradedAt": "2026-03-30T08:54:12.950Z",
+        "durationMs": 18481,
         "aiUsed": true,
-        "version": "4.3",
-        "productType": "standard",
+        "version": "5.2",
+        "productType": "capital_garanti",
         "marketDataAvailable": true,
         "catBenchmark": 2.5,
         "catSource": "fallback-2026",
@@ -240,26 +256,42 @@
         "isInPortfolio": true,
         "hasBarrier": false,
         "barrierPct": 0,
-        "expectedMaturity": 2.2,
+        "barrierCouponPct": null,
+        "couponProbability": null,
+        "expectedMaturity": 2.3,
         "maxMaturity": 12,
         "probReachMaturity": 0,
         "maxBeta": 0.71,
-        "baseScore": 51,
+        "baseScore": 57,
         "baseGrade": "C",
         "adjustments": {
-          "p1": -5,
-          "p2": 8,
+          "p1": 0,
+          "p2": 0,
           "p3": 0,
-          "p4": 5
+          "p4": 0
         },
+        "barrier_sigma": null,
+        "barrier_sigma_label": null,
+        "barrier_sigma_danger": null,
+        "liquidity_level": "L3",
+        "liquidity_score": 40,
+        "liquidity_label": "Rappelable 8M",
+        "ci_low": 50,
+        "ci_high": 64,
+        "ci_label": "C [50-64]",
+        "issuer_rating": "A+",
+        "issuer_tier": "IG",
+        "hasDecrement": false,
+        "decrementDrag": 0,
+        "structureType": "capital_garanti",
         "stockData": [
           {
             "name": "ENI S.p.A.",
             "ticker": "ENI",
             "sector": "Energie",
-            "perf_ytd": 44.26,
-            "perf_1y": 62.11,
-            "volatility_3y": 20.37,
+            "perf_ytd": 48.11,
+            "perf_1y": 65.99,
+            "volatility_3y": 20.4,
             "max_drawdown_3y": 26.78,
             "buffett_score": 44,
             "quality_score": 14,
@@ -267,14 +299,7 @@
           }
         ]
       }
-    },
-    "_strikePriceAll": null,
-    "_strikePriceNotFound": null,
-    "strikePrices": {
-      "ENI S.p.A.": 16
-    },
-    "_strikePriceSource": "confirmed",
-    "_strikePriceDate": "2026-03-26"
+    }
   },
   {
     "id": "sp_mmxh3jcm_zxdaa",
