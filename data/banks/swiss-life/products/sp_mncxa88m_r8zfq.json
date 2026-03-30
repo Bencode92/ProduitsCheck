@@ -12,14 +12,13 @@
   "maturityDate": null,
   "strikeDate": null,
   "coupon": {
-    "rate": 3,
-    "rateIfCalled": null,
-    "rateIfMaturity": null,
+    "rate": 6,
+    "frequency": "annuel",
+    "annualized": true,
     "type": "conditionnel",
-    "frequency": "semestriel",
-    "trigger": 91,
     "memory": true,
-    "paymentTiming": "maturity"
+    "paymentTiming": "maturity",
+    "trigger": 91
   },
   "capitalProtection": {
     "protected": true,
@@ -180,6 +179,140 @@
     "breakdown": {
       "redundancy": 42,
       "complementarity": 10
+    }
+  },
+  "_freqFixApplied": true,
+  "grading": {
+    "grade": "B",
+    "score": 66,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 60,
+        "base": 62,
+        "delta": -2,
+        "reasoning": "Rendement: base 62 → -2 = 60 (Avec barrière coupon à 91% et volatilité 24.79%, la probabilité de toucher régulièrement le coupon est fortement réduite en environnement stagflationnaire) | Coupon 5.18%, protégé | Barr.coupon 91% | Mat espérée: ~1.4a (prob mat: 0%)"
+      },
+      "underlyingQuality": {
+        "score": 76,
+        "base": 78,
+        "delta": -2,
+        "reasoning": "Qualité: base 78 → -2 = 76 (Beta 0.85 offre une protection relative mais le drawdown de 21% et le VIX à 22 indiquent un stress sectoriel bancaire important) | Worst: Intesa Sanpaolo S.p.A. B:70"
+      },
+      "portfolioFit": {
+        "score": 82,
+        "base": 80,
+        "delta": 2,
+        "reasoning": "Fit: base 80 → +2 = 82 (Capital garanti très pertinent en stagflation, offre une protection totale du nominal avec potentiel de rendement)"
+      },
+      "riskPremium": {
+        "score": 51,
+        "base": 1,
+        "delta": 2,
+        "reasoning": "Capital garanti: spread 5.2% - CAT 2.5% - illiq 0.7% = 2.0% | Illiq. premium +1.8% (-9pts)"
+      }
+    },
+    "verdict": "Produit défensif adapté au contexte stagflationnaire grâce au capital garanti, mais la barrière coupon à 91% limite fortement les chances de percevoir les 5.18% annuels avec une volatilité de 24.79%. Le drawdown actuel de 21% place déjà ISP proche du seuil critique. Espérance de sortie à 1.4 an très optimiste vu le contexte.",
+    "keyRisks": [
+      "Coupon rarement atteint avec barrière haute et volatilité élevée",
+      "Durée réelle probablement proche des 10 ans sans coupons"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 5.18,
+        "return_eur": 5180,
+        "probability": 0.15,
+        "duration_years": 1
+      },
+      "base": {
+        "return_pct": 2,
+        "return_eur": 20000,
+        "probability": 0.35,
+        "duration_years": 10
+      },
+      "stress": {
+        "return_pct": 0.5,
+        "return_eur": 5000,
+        "probability": 0.35,
+        "duration_years": 10
+      },
+      "worst": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.15,
+        "duration_years": 10
+      }
+    },
+    "confidenceInterval": {
+      "low": 47,
+      "high": 61,
+      "halfWidth": 7,
+      "gradeStable": false,
+      "gradeRange": "C-B",
+      "label": "C [47-61]"
+    },
+    "metadata": {
+      "gradedAt": "2026-03-30T08:25:26.906Z",
+      "durationMs": 14508,
+      "aiUsed": true,
+      "version": "5.2",
+      "productType": "autocall",
+      "marketDataAvailable": true,
+      "catBenchmark": 2.5,
+      "catSource": "fallback-2026",
+      "couponAnnualized": 5.18,
+      "couponRaw": 6,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": false,
+      "barrierPct": 0,
+      "barrierCouponPct": 91,
+      "couponProbability": null,
+      "expectedMaturity": 1.4,
+      "maxMaturity": 10,
+      "probReachMaturity": 0,
+      "maxBeta": 0.85,
+      "baseScore": 54,
+      "baseGrade": "C",
+      "adjustments": {
+        "p1": -2,
+        "p2": -2,
+        "p3": 2,
+        "p4": 2
+      },
+      "barrier_sigma": null,
+      "barrier_sigma_label": null,
+      "barrier_sigma_danger": null,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Rappelable 12M",
+      "ci_low": 47,
+      "ci_high": 61,
+      "ci_label": "C [47-61]",
+      "issuer_rating": "A+",
+      "issuer_tier": "IG",
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "autocall",
+      "stockData": [
+        {
+          "name": "Intesa Sanpaolo S.p.A.",
+          "ticker": "ISP",
+          "sector": "Finance",
+          "perf_ytd": -14.08,
+          "perf_1y": 5.75,
+          "volatility_3y": 24.79,
+          "max_drawdown_3y": 21.19,
+          "buffett_score": null,
+          "quality_score": 70,
+          "buffett_grade": null
+        }
+      ]
     }
   }
 }
