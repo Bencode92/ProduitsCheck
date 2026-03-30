@@ -174,16 +174,16 @@
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 31,
+        "score": 40,
         "base": 40,
-        "delta": -9,
-        "reasoning": "Rendement: base 40 → -9 = 31 (Volatilité élevée (37%) et drawdown de 45% réduisent la probabilité de toucher le coupon régulièrement) | Coupon 7%, barrière 60% | Barr.coupon 60% | Mat espérée: ~1.6a (prob mat: 0%)"
+        "delta": 0,
+        "reasoning": "Rendement: base 40 | Coupon 7%, barrière 60% | Barr.coupon 60% | Mat espérée: ~1.6a (prob mat: 0%)"
       },
       "underlyingQuality": {
-        "score": 72,
+        "score": 77,
         "base": 77,
-        "delta": -5,
-        "reasoning": "Qualité: base 77 → -5 = 72 (Beta élevé (1.29) en régime stagflationniste avec VIX à 22 amplifie le risque de correction) | Worst: ASML Holding NV B:100"
+        "delta": 0,
+        "reasoning": "Qualité: base 77 | Worst: ASML Holding NV B:100"
       },
       "portfolioFit": {
         "score": 80,
@@ -192,58 +192,30 @@
         "reasoning": "Fit: base 80"
       },
       "riskPremium": {
-        "score": 18,
+        "score": 2,
         "base": 9,
-        "delta": 9,
-        "reasoning": "Prime: base 9 → +9 = 18 (Spread de 9 points très faible ne reflète pas le risque réel du produit) | 7% vs CAT 2.5% (spread 4.5%)"
+        "delta": 0,
+        "reasoning": "Prime: base 9 | 7% vs CAT 2.5% (spread 4.5%) | Illiq. premium +1.4% (-7pts)"
       }
     },
-    "verdict": "Produit risqué avec un rendement de 7% annualisé insuffisant face à la volatilité d'ASML (37%) et son drawdown de 45%. La barrière à 60% offre une protection limitée dans un contexte de stagflation où le beta de 1.29 amplifie les mouvements. La maturité espérée de 1.6 an semble optimiste vu la distance actuelle au strike.",
+    "verdict": "Score 50/100 (base 50).",
     "keyRisks": [
-      "Correction sectorielle des semiconducteurs en stagflation",
-      "Volatilité extrême rendant l'autocall improbable",
-      "Protection capitale insuffisante à 60% vu le drawdown historique",
       "Barrière à 0.56σ (Danger) — vol 37.03%"
     ],
     "negotiationPoints": [],
-    "scenarios": {
-      "optimistic": {
-        "return_pct": 7,
-        "return_eur": 7000,
-        "probability": 0.2,
-        "duration_years": 1.5
-      },
-      "base": {
-        "return_pct": 3.5,
-        "return_eur": 10500,
-        "probability": 0.35,
-        "duration_years": 3
-      },
-      "stress": {
-        "return_pct": 0,
-        "return_eur": 0,
-        "probability": 0.3,
-        "duration_years": 6
-      },
-      "worst": {
-        "return_pct": -40,
-        "return_eur": -40000,
-        "probability": 0.15,
-        "duration_years": 6
-      }
-    },
+    "scenarios": null,
     "confidenceInterval": {
-      "low": 40,
-      "high": 56,
+      "low": 42,
+      "high": 58,
       "halfWidth": 8,
       "gradeStable": false,
       "gradeRange": "D-C",
-      "label": "C [40-56]"
+      "label": "C [42-58]"
     },
     "metadata": {
-      "gradedAt": "2026-03-30T06:50:13.407Z",
-      "durationMs": 13201,
-      "aiUsed": true,
+      "gradedAt": "2026-03-30T06:55:21.287Z",
+      "durationMs": 1196,
+      "aiUsed": false,
       "version": "5.2",
       "productType": "autocall",
       "marketDataAvailable": true,
@@ -264,21 +236,16 @@
       "maxBeta": 1.29,
       "baseScore": 50,
       "baseGrade": "C",
-      "adjustments": {
-        "p1": -9,
-        "p2": -5,
-        "p3": 0,
-        "p4": 9
-      },
+      "adjustments": null,
       "barrier_sigma": 0.56,
       "barrier_sigma_label": "Danger",
       "barrier_sigma_danger": true,
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 40,
-      "ci_high": 56,
-      "ci_label": "C [40-56]",
+      "ci_low": 42,
+      "ci_high": 58,
+      "ci_label": "C [42-58]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
