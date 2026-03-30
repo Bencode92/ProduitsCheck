@@ -1,7 +1,7 @@
 {
   "bankId": "swiss-life",
   "bankName": "Swiss Life",
-  "lastUpdated": "2026-03-30T08:16:23.991Z",
+  "lastUpdated": "2026-03-30T08:16:26.957Z",
   "products": [
     {
       "id": "sp_mn5u82do_cx6ya",
@@ -30,14 +30,6 @@
     {
       "id": "sp_mncvbzzp_z2cbo",
       "name": "Oxygene Objectif Mai 2026",
-      "type": "autocall",
-      "status": "analyzing",
-      "score": 4,
-      "receivedDate": "2026-03-30"
-    },
-    {
-      "id": "sp_mncvdyvp_k2d9o",
-      "name": "OBJECTIF MAI 2026",
       "type": "autocall",
       "status": "analyzing",
       "score": 4,
