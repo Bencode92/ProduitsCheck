@@ -1,5 +1,6 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — UI Rendering (V3 — Fixed reject/delete)
+// STRUCTBOARD — UI Rendering (V3.1 — JSON paste in upload modal)
+// V3.1: Added "📋 Coller JSON" option in upload modal
 // ═══════════════════════════════════════════════════════════════
 
 function renderApp(state) { const main = document.getElementById('main-content'); if (!main) return; switch(state.view) { case 'dashboard': renderDashboard(main,state); break; case 'product-sheet': renderProductSheet(main,state); break; case 'chat': renderChat(main,state); break; } }
@@ -34,7 +35,6 @@ function renderProductCard(product, context) {
   const typeName = PRODUCT_TYPES.find(t => t.id === product.type)?.name || product.type || '—';
   const scoreHTML = product.score ? `<div class="card-score ${product.score.score >= 65 ? 'good' : product.score.score >= 40 ? 'medium' : 'low'}">${product.score.score}</div>` : '';
   const statusBadge = product.status && PROPOSAL_STATUS[product.status] ? `<span class="status-badge" style="--badge-color:${PROPOSAL_STATUS[product.status].color}">${PROPOSAL_STATUS[product.status].icon} ${PROPOSAL_STATUS[product.status].label}</span>` : '';
-  // Use safe bankId (never 'undefined' or 'null' string)
   const safeBankId = product.bankId || '';
   return `<div class="product-card" onclick="app.openProduct(app._findProduct('${product.id}','${safeBankId}'))">
     <div class="product-card-header"><div class="product-card-name">${product.name||typeName}</div><div class="product-card-bank" style="color:${bankColor};border-color:${bankColor}33;background:${bankColor}12">${bankName}</div></div>
@@ -76,7 +76,6 @@ function renderProductSheet(container, state) {
   const isProtected = p.capitalProtection?.protected === true || p.capitalProtection?.protected === 'true';
   const hasAutocall = p.earlyRedemption?.possible === true || p.earlyRedemption?.possible === 'true';
   const hasMem = p.coupon?.memory === true || p.coupon?.memory === 'true';
-  // Safe bankId for onclick handlers
   const safeBankId = p.bankId || '';
 
   container.innerHTML = `
@@ -218,11 +217,100 @@ function showUploadModal(context, bankId) {
       <input type="file" accept=".pdf" id="file-input" style="display:none" onchange="handleFileSelect(event,'${context}','${bankId||''}')"></div>
     <button class="btn" style="width:100%;margin-top:12px" onclick="document.getElementById('file-input').click()">Choisir un fichier PDF</button>
     <div class="upload-divider"><span>ou</span></div>
-    <button class="btn ghost" style="width:100%" onclick="showManualEntryModal('${context}','${bankId||''}')">✏️ Saisie manuelle</button>
+    <button class="btn" style="width:100%;background:rgba(59,130,246,0.08);border-color:rgba(59,130,246,0.25);color:var(--accent)" onclick="toggleJSONPasteZone('${context}','${bankId||''}')">📋 Coller JSON (depuis l'analyseur)</button>
+    <div id="json-paste-zone" style="display:none;margin-top:12px">
+      <textarea id="json-paste-input" placeholder="Colle ici le JSON généré par l'analyseur de brochure..." style="width:100%;height:120px;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--mono);font-size:11px;padding:10px;resize:vertical;box-sizing:border-box;outline:none"></textarea>
+      <button class="btn primary" style="width:100%;margin-top:8px" onclick="handleJSONPasteImport('${context}','${bankId||''}')">✅ Importer le produit</button>
+    </div>
+    <div style="margin-top:8px">
+      <button class="btn ghost" style="width:100%" onclick="showManualEntryModal('${context}','${bankId||''}')">✏️ Saisie manuelle</button>
+    </div>
     <div id="upload-progress" class="upload-progress hidden"><div class="spinner"></div><span id="upload-status">Extraction...</span></div>
     <div class="modal-actions"><button class="btn" onclick="closeModal()">Annuler</button></div></div></div>`;
   modal.classList.add('visible');
 }
+
+// V3.1: Toggle JSON paste zone
+window.toggleJSONPasteZone = function(context, bankId) {
+  var zone = document.getElementById('json-paste-zone');
+  if (zone) {
+    zone.style.display = zone.style.display === 'none' ? 'block' : 'none';
+    if (zone.style.display !== 'none') {
+      var input = document.getElementById('json-paste-input');
+      if (input) input.focus();
+    }
+  }
+};
+
+// V3.1: Import product from pasted JSON
+window.handleJSONPasteImport = async function(context, bankId) {
+  var input = document.getElementById('json-paste-input');
+  if (!input || !input.value.trim()) {
+    showToast('Colle un JSON valide', 'error');
+    return;
+  }
+
+  try {
+    var json = JSON.parse(input.value.trim());
+    console.log('[UI V3.1] JSON paste import:', json.name || 'unnamed');
+
+    // Build product from JSON
+    var product = {
+      id: app._uid(),
+      name: json.name || 'Produit importé',
+      type: json.type || json.structureType || 'autre',
+      structureType: json.structureType || '',
+      emitter: json.emitter || '',
+      guarantor: json.guarantor || '',
+      guarantorRating: json.guarantorRating || null,
+      underlyings: json.underlyings || [],
+      underlyingType: json.underlyingType || 'autre',
+      currency: json.currency || 'EUR',
+      maturity: json.maturity || '',
+      maturityYears: json.maturityYears || null,
+      coupon: json.coupon || {},
+      participationRate: json.participationRate || null,
+      capitalProtection: json.capitalProtection || {},
+      earlyRedemption: json.earlyRedemption || {},
+      decrementPct: json.decrementPct || null,
+      actualDividendYield: json.actualDividendYield || null,
+      mechanism: json.mechanism || '',
+      risks: json.risks || [],
+      summary: json.summary || '',
+      aiParsed: json,
+      sourceFile: 'JSON import'
+    };
+
+    // Coupon normalization
+    if (typeof product.coupon === 'number') {
+      product.coupon = { rate: product.coupon };
+    }
+
+    closeModal();
+
+    if (context === 'portfolio') {
+      var amount = prompt('Montant investi (€) :');
+      if (amount) {
+        product.bankId = bankId || '';
+        await app.addToPortfolio(product, amount);
+      }
+    } else {
+      var saved = await app.addProposal(bankId, product);
+      // Auto-analyze
+      if (typeof analyzeProposal === 'function') {
+        analyzeProposal(saved).catch(function() {});
+      }
+      showToast('✅ ' + product.name + ' importé !', 'success');
+      app.openProduct(saved);
+      return;
+    }
+    app.render();
+  } catch(e) {
+    console.error('[UI V3.1] JSON parse error:', e);
+    showToast('JSON invalide: ' + e.message, 'error');
+  }
+};
+
 function showManualEntryModal(context, bankId) {
   const modal = document.getElementById('modal');
   modal.innerHTML = `<div class="modal-overlay" onclick="closeModal()"><div class="modal-content modal-large" onclick="event.stopPropagation()">
@@ -292,7 +380,6 @@ async function handleIntegrate(productId, bankId) {
 async function handleReject(productId, bankId) {
   if (!confirm('Rejeter cette proposition ?')) return;
   try {
-    // Trouver le vrai bankId si pas fourni
     const resolvedBankId = _resolveBankId(productId, bankId);
     if (!resolvedBankId) { showToast('Erreur: banque introuvable pour ce produit', 'error'); return; }
 
@@ -315,7 +402,6 @@ async function handleDelete(productId, bankId) {
     if (resolvedBankId) {
       await app.removeProposal(resolvedBankId, productId);
     }
-    // Aussi retirer du portfolio si présent
     const inPortfolio = app.state.portfolio.find(p => p.id === productId);
     if (inPortfolio) {
       await app.removeFromPortfolio(productId);
@@ -327,12 +413,10 @@ async function handleDelete(productId, bankId) {
 
 // ─── Résoudre le bankId même s'il est vide/undefined ────────
 function _resolveBankId(productId, bankId) {
-  // Si bankId est valide et le produit existe dans cette banque
   if (bankId && bankId !== 'undefined' && bankId !== 'null' && app.state.proposals[bankId]) {
     const found = app.state.proposals[bankId].find(p => p.id === productId);
     if (found) return bankId;
   }
-  // Sinon chercher dans toutes les banques
   for (const [bId, proposals] of Object.entries(app.state.proposals)) {
     if (proposals.find(p => p.id === productId)) return bId;
   }
