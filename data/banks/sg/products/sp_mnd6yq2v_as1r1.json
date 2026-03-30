@@ -239,81 +239,81 @@
   "envelope": "",
   "grading": {
     "grade": "B",
-    "score": 61,
+    "score": 71,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 68,
+        "score": 78,
         "base": 70,
         "delta": -2,
-        "reasoning": "Rendement: base 70 → -2 = 68 (Stagflation + 6 SJ tech/communication dans secteurs évités = forte probabilité de sous-performance vs barrières en régime défensif) | Coupon 1.3144444444444445%, protégé"
+        "reasoning": "Rendement: base 70 → -2 = 68 (En stagflation avec 6/8 sous-jacents tech/communication évités, la dispersion augmente le risque de non-paiement du coupon) | Coupon 1.3144444444444445%, protégé | ✅ Dispersion cap garanti: rendement quasi-certain (+10pts)"
       },
       "underlyingQuality": {
         "score": 78,
         "base": 80,
         "delta": -2,
-        "reasoning": "Qualité: base 80 → -2 = 78 (75% du panier en tech/communication évités, beta moyen 1.35, Tesla à 54% de barrière = vulnérabilité extrême en stagflation) | Worst: Tesla B:54"
+        "reasoning": "Qualité: base 80 → -2 = 78 (Portefeuille ultra-concentré sur tech (beta moyen 1.33) en pleine rotation sectorielle défavorable, Tesla à 54% de son ATH) | Worst: Tesla B:54"
       },
       "portfolioFit": {
         "score": 74,
         "base": 72,
         "delta": 2,
-        "reasoning": "Fit: base 72 → +2 = 74 (Capital garanti + faible corrélation intra-panier (dispersion) = protection idéale contre rotation sectorielle violente actuelle)"
+        "reasoning": "Fit: base 72 → +2 = 74 (Capital garanti offre protection bienvenue en stagflation, mais exposition tech inadaptée au régime actuel)"
       },
       "riskPremium": {
-        "score": 27,
+        "score": 52,
         "base": 5,
-        "delta": -2,
-        "reasoning": "Capital garanti: spread 3.0% - CAT 2.5% - illiq 0.3% = 0.2% | Illiq. premium +1.1% (-6pts)"
+        "delta": 0,
+        "reasoning": "Capital garanti: spread 3.0% - CAT 2.5% - illiq 0.3% = 0.2% | ✅ Dispersion: vol = moteur de rendement (+25pts) + capital garanti | Illiq. premium +1.1% (-6pts)"
       }
     },
-    "verdict": "Produit paradoxal en stagflation : la garantie du capital protège contre le crash tech anticipé (6/8 SJ dans secteurs évités, Tesla déjà -46% de sa barrière), mais le rendement réel est NÉGATIF (-1.5% vs inflation). La dispersion devient un atout majeur car la divergence sectorielle s'accentue (tech -1.22% vs energy +1.76%), augmentant mécaniquement le potentiel de coupon. Structure défensive appropriée mais économiquement perdante sur 3 ans.",
+    "verdict": "Produit inadapté au régime stagflationniste actuel avec 75% du panier en secteurs évités (tech/communication). Le capital garanti protège mais le rendement de 1.31% annuel sera probablement érodé par l'inflation à 2.83%. La dispersion sur des valeurs tech volatiles (NVDA vol 48%, TSLA vol 58%) en rotation défavorable réduit fortement la probabilité des coupons.",
     "keyRisks": [
-      "Rendement réel négatif de -1.5%/an avec inflation à 2.8%",
-      "75% du panier exposé aux secteurs en rotation négative (tech/communication)",
-      "Tesla à 54% de barrière pourrait déclencher des pertes sur coupons conditionnels"
+      "Rotation sectorielle violente défavorable à 6/8 sous-jacents",
+      "Coupon réel négatif avec inflation >2.8%",
+      "Tesla à -46% de son ATH peut bloquer tous les coupons"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 3.94,
-        "return_eur": 3940,
-        "probability": 0.15,
+        "return_pct": 1.31,
+        "return_eur": 3943,
+        "probability": 0.2,
         "duration_years": 3
       },
       "base": {
-        "return_pct": 1.31,
-        "return_eur": 1310,
-        "probability": 0.4,
+        "return_pct": 0.5,
+        "return_eur": 1500,
+        "probability": 0.35,
         "duration_years": 3
       },
       "stress": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.35,
+        "probability": 0.3,
         "duration_years": 3
       },
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.1,
+        "probability": 0.15,
         "duration_years": 3
       }
     },
     "confidenceInterval": {
-      "low": 48,
-      "high": 62,
+      "low": 49,
+      "high": 63,
       "halfWidth": 7,
       "gradeStable": false,
       "gradeRange": "C-B",
-      "label": "C [48-62]"
+      "label": "C [49-63]"
     },
     "metadata": {
-      "gradedAt": "2026-03-30T12:56:36.550Z",
-      "durationMs": 23214,
+      "gradedAt": "2026-03-30T14:07:13.515Z",
+      "durationMs": 20678,
       "aiUsed": true,
       "version": "5.2",
       "productType": "dispersion",
@@ -338,7 +338,7 @@
         "p1": -2,
         "p2": -2,
         "p3": 2,
-        "p4": -2
+        "p4": 0
       },
       "barrier_sigma": null,
       "barrier_sigma_label": null,
@@ -346,9 +346,9 @@
       "liquidity_level": "L4",
       "liquidity_score": 10,
       "liquidity_label": "Illiquide",
-      "ci_low": 48,
-      "ci_high": 62,
-      "ci_label": "C [48-62]",
+      "ci_low": 49,
+      "ci_high": 63,
+      "ci_label": "C [49-63]",
       "issuer_rating": "A",
       "issuer_tier": "IG",
       "hasDecrement": false,
