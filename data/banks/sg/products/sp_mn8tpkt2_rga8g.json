@@ -176,82 +176,81 @@
   },
   "grading": {
     "grade": "B",
-    "score": 60,
+    "score": 69,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 45,
+        "score": 65,
         "base": 55,
-        "delta": -10,
-        "reasoning": "Rendement: base 55 → -10 = 45 (Volatilité de 39% et barrière coupon à 60% en régime stagflation augmentent fortement le risque de non-paiement) | Coupon 18%, barrière 50% | Barr.coupon 60% | Mat espérée: ~2.5a (prob mat: 1%)"
+        "delta": 10,
+        "reasoning": "Rendement: base 55 → +10 = 65 (Coupon élevé de 18% bien positionné en stagflation où l'or surperforme historiquement, barrière 60% offre marge de sécurité suffisante) | Coupon 18%, barrière 50% | Barr.coupon 60% | Mat espérée: ~2.5a (prob mat: 1%)"
       },
       "underlyingQuality": {
-        "score": 34,
+        "score": 54,
         "base": 39,
-        "delta": -5,
-        "reasoning": "Qualité: base 39 → -5 = 34 (Beta 0.53 offre une protection partielle mais le secteur minier aurifère reste très cyclique avec DD de -31%) | Worst: Indice Solactive GDX EUR AR 5% B:35"
+        "delta": 15,
+        "reasoning": "Qualité: base 39 → +15 = 54 (Secteur aurifère idéalement positionné en stagflation (hedge inflation + safe haven), beta défensif 0.53 et momentum materials neutre favorables) | Worst: Indice Solactive GDX EUR AR 5% B:35"
       },
       "portfolioFit": {
-        "score": 85,
+        "score": 75,
         "base": 80,
-        "delta": 5,
-        "reasoning": "Fit: base 80 → +5 = 85 (L'or physique surperforme en stagflation mais les minières restent sensibles aux coûts opérationnels croissants)"
+        "delta": -5,
+        "reasoning": "Fit: base 80 → -5 = 75 (Excellente diversification en stagflation mais volatilité 38.92% nécessite allocation prudente, maximum 5-10% du portefeuille)"
       },
       "riskPremium": {
         "score": 83,
         "base": 36,
-        "delta": -15,
+        "delta": -10,
         "reasoning": "Capital garanti: spread 18.0% - CAT 2.5% - illiq 0.5% = 15.1% | Illiq. premium +1.3% (-7pts)"
       }
     },
-    "verdict": "Produit très risqué avec un profil rendement/risque défavorable malgré le coupon attractif. La volatilité de 39% combinée à une barrière coupon à 60% en stagflation présente un risque élevé de non-paiement. Le secteur des minières aurifères, bien que potentiellement intéressant en stagflation, reste exposé à l'inflation des coûts et à la volatilité des marchés actions. Score final ajusté: 36/100.",
+    "verdict": "Produit très bien adapté au régime stagflationniste actuel avec l'or bénéficiant du double catalyseur inflation (Brent >$100) et aversion au risque (VIX 22). Le coupon de 18% offre un rendement réel positif malgré l'inflation élevée, avec une probabilité de maturation anticipée élevée grâce au seuil autocall 95%. Le beta défensif 0.53 et la corrélation négative historique de l'or aux actions en font un excellent hedge de portefeuille dans ce contexte de rotation sectorielle violente.",
     "keyRisks": [
-      "Volatilité extrême de 39% vs barrière coupon 60%",
-      "Décorrélation possible entre or physique et minières en stagflation",
-      "Risque de perte en capital jusqu'à -50% si barrière franchie",
+      "Risque de correction brutale si dollar s'apprécie fortement face aux politiques Fed hawkish",
+      "Décrément 5% érode performance dans scénario de stagnation prolongée des minières aurifères",
       "Barrière à 0.8σ (Danger) — vol 38.92%"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
+        "return_pct": 36,
+        "return_eur": 36000,
+        "probability": 0.3,
+        "duration_years": 2
+      },
+      "base": {
+        "return_pct": 45,
+        "return_eur": 45000,
+        "probability": 0.4,
+        "duration_years": 2.5
+      },
+      "stress": {
         "return_pct": 18,
         "return_eur": 18000,
         "probability": 0.2,
         "duration_years": 1
       },
-      "base": {
-        "return_pct": 9,
-        "return_eur": 22500,
-        "probability": 0.3,
-        "duration_years": 2.5
-      },
-      "stress": {
-        "return_pct": 0,
-        "return_eur": 0,
-        "probability": 0.35,
-        "duration_years": 5
-      },
       "worst": {
-        "return_pct": -30,
-        "return_eur": -30000,
-        "probability": 0.15,
+        "return_pct": -20,
+        "return_eur": -20000,
+        "probability": 0.1,
         "duration_years": 5
       }
     },
     "confidenceInterval": {
-      "low": 34,
-      "high": 54,
+      "low": 45,
+      "high": 65,
       "halfWidth": 10,
       "gradeStable": false,
-      "gradeRange": "D-C",
-      "label": "D [34-54]"
+      "gradeRange": "C-B",
+      "label": "C [45-65]"
     },
     "metadata": {
-      "gradedAt": "2026-03-30T08:18:58.704Z",
-      "durationMs": 17616,
+      "gradedAt": "2026-03-30T09:05:14.085Z",
+      "durationMs": 20471,
       "aiUsed": true,
       "version": "5.2",
       "productType": "autocall",
@@ -274,10 +273,10 @@
       "baseScore": 51,
       "baseGrade": "C",
       "adjustments": {
-        "p1": -10,
-        "p2": -5,
-        "p3": 5,
-        "p4": -15
+        "p1": 10,
+        "p2": 15,
+        "p3": -5,
+        "p4": -10
       },
       "barrier_sigma": 0.8,
       "barrier_sigma_label": "Danger",
@@ -285,9 +284,9 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 34,
-      "ci_high": 54,
-      "ci_label": "D [34-54]",
+      "ci_low": 45,
+      "ci_high": 65,
+      "ci_label": "C [45-65]",
       "issuer_rating": "A",
       "issuer_tier": "IG",
       "hasDecrement": true,
