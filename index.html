@@ -54,7 +54,7 @@
   <script src="js/grader-freq-fix.js?v=71"></script>
   <script src="js/grader-sprint1-patch.js?v=1"></script>
   <script src="js/grader-sprint2-patch.js?v=1"></script>
-  <!-- Structure-specific grading (dispersion, taux fixe, capital garanti) -->
+  <!-- Structure-specific grading -->
   <script src="js/grader-mi-patch.js?v=1"></script>
   <script src="js/grader-p1p2-structure-override.js?v=1"></script>
   <script src="js/grader-dispersion-patch.js?v=1"></script>
@@ -79,9 +79,10 @@
   <script src="js/dashboard-buttons.js"></script>
   <script src="js/liquidites-fix.js"></script>
   <script src="js/analytics.js"></script>
-  <!-- Brochure parser + annualize fix -->
+  <!-- Brochure parser + grader fixes (OUTERMOST - load last) -->
   <script src="js/brochure-parser.js?v=12"></script>
-  <script src="js/grader-annualize-patch.js?v=1"></script>
+  <script src="js/grader-annualize-patch.js?v=2"></script>
+  <script src="js/grader-decrement-patch.js?v=1"></script>
   <script>
     function switchMainView(view) {
       document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
