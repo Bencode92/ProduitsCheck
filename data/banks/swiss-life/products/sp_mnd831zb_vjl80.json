@@ -23,7 +23,10 @@
     "type": "conditionnel",
     "paymentTiming": "maturity",
     "trigger": 91,
-    "memory": false
+    "memory": false,
+    "_origRate": 3,
+    "_origFreq": "semestriel",
+    "_mult": 2
   },
   "participationRate": null,
   "capitalProtection": {
@@ -228,5 +231,139 @@
   "aiCategoryColor": "#06D6A0",
   "aiOpinion": "Produit autocall sur un seul sous-jacent bancaire italien avec protection du capital et coupon attractif de 6%, mais exposé au risque spécifique d'Intesa Sanpaolo. La durée longue de 10 ans et la concentration sur une seule action augmentent significativement le risque malgré la protection du capital.",
   "aiAnalyzedAt": "2026-03-30T13:27:31.014Z",
-  "envelope": ""
+  "envelope": "",
+  "grading": {
+    "grade": "B",
+    "score": 64,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 55,
+        "base": 57,
+        "delta": -2,
+        "reasoning": "Rendement: base 57 → -2 = 55 (En stagflation avec VIX à 22, la probabilité de trigger autocall à 91% diminue, mais le capital garanti limite fortement le risque) | Coupon 5.18%, protégé | Mat espérée: ~1.4a (prob mat: 0%)"
+      },
+      "underlyingQuality": {
+        "score": 76,
+        "base": 78,
+        "delta": -2,
+        "reasoning": "Qualité: base 78 → -2 = 76 (ISP dans le secteur financier explicitement évité (-1.63% perf), beta 0.85 sensible au contexte macro défavorable) | Worst: Intesa Sanpaolo S.p.A. B:70"
+      },
+      "portfolioFit": {
+        "score": 80,
+        "base": 80,
+        "delta": 0,
+        "reasoning": "Fit: base 80"
+      },
+      "riskPremium": {
+        "score": 51,
+        "base": 31,
+        "delta": 2,
+        "reasoning": "Capital garanti: spread 5.2% - CAT 2.5% - illiq 0.7% = 2.0% | Illiq. premium +1.8% (-9pts)"
+      }
+    },
+    "verdict": "En régime stagflationnaire avec financials évités (-1.63%), ce produit sur ISP présente des défis mais le capital GARANTI offre une protection cruciale. Le coupon de 5.18% est attractif mais la probabilité d'autocall à 91% est réduite avec VIX à 22 et le contexte macro défavorable. Score ajusté à 50/100 (D) reflète la protection du capital mais aussi les vents contraires sectoriels et la faible probabilité de sortie anticipée.",
+    "keyRisks": [
+      "Secteur financier explicitement évité en stagflation, ISP sous pression",
+      "Durée potentielle longue (10 ans) avec faible probabilité d'autocall en contexte volatil"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 5.18,
+        "return_eur": 5180,
+        "probability": 0.2,
+        "duration_years": 1
+      },
+      "base": {
+        "return_pct": 5.18,
+        "return_eur": 25900,
+        "probability": 0.35,
+        "duration_years": 5
+      },
+      "stress": {
+        "return_pct": 5.18,
+        "return_eur": 51800,
+        "probability": 0.3,
+        "duration_years": 10
+      },
+      "worst": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.15,
+        "duration_years": 10
+      }
+    },
+    "confidenceInterval": {
+      "low": 53,
+      "high": 67,
+      "halfWidth": 7,
+      "gradeStable": false,
+      "gradeRange": "C-B",
+      "label": "B [53-67]"
+    },
+    "metadata": {
+      "gradedAt": "2026-03-30T13:27:53.743Z",
+      "durationMs": 18782,
+      "aiUsed": true,
+      "version": "5.2",
+      "productType": "autocall",
+      "marketDataAvailable": true,
+      "catBenchmark": 2.5,
+      "catSource": "fallback-2026",
+      "couponAnnualized": 6,
+      "couponRaw": 6,
+      "couponMultiplier": 2,
+      "couponFrequency": "semestriel",
+      "isInPortfolio": false,
+      "hasBarrier": false,
+      "barrierPct": 0,
+      "barrierCouponPct": null,
+      "couponProbability": null,
+      "expectedMaturity": 1.4,
+      "maxMaturity": 10,
+      "probReachMaturity": 0,
+      "maxBeta": 0.85,
+      "baseScore": 60,
+      "baseGrade": "B",
+      "adjustments": {
+        "p1": -2,
+        "p2": -2,
+        "p3": 0,
+        "p4": 2
+      },
+      "barrier_sigma": null,
+      "barrier_sigma_label": null,
+      "barrier_sigma_danger": null,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Rappelable 12M",
+      "ci_low": 53,
+      "ci_high": 67,
+      "ci_label": "B [53-67]",
+      "issuer_rating": "A+",
+      "issuer_tier": "IG",
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "autocall",
+      "couponPerPeriod": 3,
+      "stockData": [
+        {
+          "name": "Intesa Sanpaolo S.p.A.",
+          "ticker": "ISP",
+          "sector": "Finance",
+          "perf_ytd": -14.08,
+          "perf_1y": 5.75,
+          "volatility_3y": 24.79,
+          "max_drawdown_3y": 21.19,
+          "buffett_score": null,
+          "quality_score": 70,
+          "buffett_grade": null
+        }
+      ]
+    }
+  }
 }
