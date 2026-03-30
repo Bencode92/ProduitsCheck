@@ -1,0 +1,231 @@
+{
+  "id": "sp_mnd7l0nm_d9zlp",
+  "name": "Digitale WO LVMH Crédit Agricole Avril 2029",
+  "type": "capital_garanti",
+  "structureType": "capital_garanti",
+  "emitter": "Crédit Industriel et Commercial",
+  "guarantor": "Crédit Industriel et Commercial",
+  "guarantorRating": {
+    "moodys": "A1",
+    "sp": "A+"
+  },
+  "underlyings": [
+    "LVMH Moët Hennessy Louis Vuitton SA",
+    "Crédit Agricole S.A."
+  ],
+  "underlyingType": "worst-of",
+  "currency": "EUR",
+  "maturity": "3 ans",
+  "maturityYears": 3,
+  "coupon": {
+    "rate": 6.15,
+    "rateIfCalled": null,
+    "rateIfMaturity": null,
+    "type": "conditionnel",
+    "frequency": "annuel",
+    "trigger": 100,
+    "memory": true,
+    "paymentTiming": "periodic"
+  },
+  "participationRate": null,
+  "capitalProtection": {
+    "protected": true,
+    "level": 100,
+    "barrier": null,
+    "barrierCoupon": 100,
+    "barrierType": "europeenne"
+  },
+  "earlyRedemption": {
+    "possible": false,
+    "type": "none",
+    "trigger": null,
+    "frequency": "annuel",
+    "startSemester": null,
+    "stepDown": false,
+    "stepDownPct": null
+  },
+  "decrementPct": null,
+  "actualDividendYield": null,
+  "mechanism": "Le produit verse un coupon annuel de 6,15% si le sous-jacent ayant le moins performé est supérieur ou égal à 100% de son niveau initial. Les coupons non versés sont mémorisés. Capital garanti à 100% à l'échéance.",
+  "risks": [
+    "Risque lié au sous-jacent",
+    "Risques de marché",
+    "Risque découlant de la nature du produit",
+    "Risque de liquidité",
+    "Risque de crédit",
+    "Risque lié à l'éventuelle défaillance de l'Émetteur",
+    "Risque de conflits d'intérêts potentiels"
+  ],
+  "summary": "Produit à capital garanti offrant un coupon conditionnel de 6,15% par an basé sur la performance du moins performant entre LVMH et Crédit Agricole, avec mécanisme de mémoire des coupons non versés.",
+  "aiParsed": {
+    "name": "Digitale WO LVMH Crédit Agricole Avril 2029",
+    "type": "capital_garanti",
+    "structureType": "capital_garanti",
+    "emitter": "Crédit Industriel et Commercial",
+    "guarantor": "Crédit Industriel et Commercial",
+    "guarantorRating": {
+      "moodys": "A1",
+      "sp": "A+"
+    },
+    "underlyings": [
+      "LVMH Moët Hennessy Louis Vuitton SA",
+      "Crédit Agricole S.A."
+    ],
+    "underlyingType": "worst-of",
+    "currency": "EUR",
+    "maturity": "3 ans",
+    "maturityYears": 3,
+    "coupon": {
+      "rate": 6.15,
+      "rateIfCalled": null,
+      "rateIfMaturity": null,
+      "type": "conditionnel",
+      "frequency": "annuel",
+      "trigger": 100,
+      "memory": true,
+      "paymentTiming": "periodic"
+    },
+    "participationRate": null,
+    "capitalProtection": {
+      "protected": true,
+      "level": 100,
+      "barrier": null,
+      "barrierCoupon": 100,
+      "barrierType": "europeenne"
+    },
+    "earlyRedemption": {
+      "possible": false,
+      "type": "none",
+      "trigger": null,
+      "frequency": "annuel",
+      "startSemester": null,
+      "stepDown": false,
+      "stepDownPct": null
+    },
+    "decrementPct": null,
+    "actualDividendYield": null,
+    "mechanism": "Le produit verse un coupon annuel de 6,15% si le sous-jacent ayant le moins performé est supérieur ou égal à 100% de son niveau initial. Les coupons non versés sont mémorisés. Capital garanti à 100% à l'échéance.",
+    "risks": [
+      "Risque lié au sous-jacent",
+      "Risques de marché",
+      "Risque découlant de la nature du produit",
+      "Risque de liquidité",
+      "Risque de crédit",
+      "Risque lié à l'éventuelle défaillance de l'Émetteur",
+      "Risque de conflits d'intérêts potentiels"
+    ],
+    "summary": "Produit à capital garanti offrant un coupon conditionnel de 6,15% par an basé sur la performance du moins performant entre LVMH et Crédit Agricole, avec mécanisme de mémoire des coupons non versés.",
+    "aiParsed": {
+      "name": "Digitale WO LVMH Crédit Agricole Avril 2029",
+      "structureType": "capital_garanti",
+      "emitter": "Crédit Industriel et Commercial",
+      "guarantor": "Crédit Industriel et Commercial",
+      "guarantorRating": {
+        "moodys": "A1",
+        "sp": "A+"
+      },
+      "underlyings": [
+        "LVMH Moët Hennessy Louis Vuitton SA",
+        "Crédit Agricole S.A."
+      ],
+      "underlyingType": "worst-of",
+      "currency": "EUR",
+      "maturity": "9 avril 2029",
+      "maturityYears": 3,
+      "coupon": {
+        "rate": 6.15,
+        "rateIfCalled": null,
+        "rateIfMaturity": null,
+        "type": "conditionnel",
+        "frequency": "annuel",
+        "trigger": 100,
+        "memory": true,
+        "paymentTiming": "scheduled"
+      },
+      "participationRate": null,
+      "capitalProtection": {
+        "protected": true,
+        "level": 100,
+        "barrier": null,
+        "barrierCoupon": 100,
+        "barrierType": "europeenne"
+      },
+      "earlyRedemption": {
+        "possible": false,
+        "type": "",
+        "trigger": null,
+        "frequency": "",
+        "startSemester": null,
+        "stepDown": false,
+        "stepDownPct": null
+      },
+      "decrementPct": null,
+      "actualDividendYield": null,
+      "mechanism": "Le produit verse un coupon annuel de 6,15% si le sous-jacent ayant le moins performé est supérieur ou égal à 100% de son niveau initial. Les coupons non versés sont mémorisés. Capital garanti à 100% à l'échéance.",
+      "risks": [
+        "Risque lié au sous-jacent",
+        "Risques de marché",
+        "Risque découlant de la nature du produit",
+        "Risque de liquidité",
+        "Risque de crédit",
+        "Risque lié à l'éventuelle défaillance de l'Émetteur",
+        "Risque de conflits d'intérêts potentiels"
+      ],
+      "summary": "Produit à capital garanti offrant un coupon conditionnel de 6,15% par an basé sur la performance du moins performant entre LVMH et Crédit Agricole, avec mécanisme de mémoire des coupons non versés."
+    },
+    "sourceFile": "Digitale WO LVMH Crédit Agricole.pdf"
+  },
+  "sourceFile": "JSON import",
+  "bankId": "cic",
+  "status": "analyzing",
+  "receivedDate": "2026-03-30",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null,
+  "score": {
+    "score": 100,
+    "details": [
+      {
+        "type": "positive",
+        "icon": "✅",
+        "text": "Nouveau sous-jacent absent du book — diversification",
+        "impact": 25,
+        "category": "complementarity"
+      },
+      {
+        "type": "positive",
+        "icon": "✅",
+        "text": "Nouveau type \"capital_garanti\" absent du book",
+        "impact": 20,
+        "category": "complementarity"
+      },
+      {
+        "type": "positive",
+        "icon": "📈",
+        "text": "Coupon (6.15%) > moyenne du book (5.2%)",
+        "impact": 15,
+        "category": "complementarity"
+      },
+      {
+        "type": "positive",
+        "icon": "🔀",
+        "text": "Faible corrélation moyenne (30%) — diversification",
+        "impact": 10,
+        "category": "complementarity"
+      },
+      {
+        "type": "info",
+        "icon": "🏦",
+        "text": "Même émetteur que 1 produit(s) — concentration CIC",
+        "impact": 4,
+        "category": "redundancy"
+      }
+    ],
+    "verdict": "🟢 Excellent candidat — forte complémentarité avec le book.",
+    "breakdown": {
+      "redundancy": 4,
+      "complementarity": 70
+    }
+  }
+}
