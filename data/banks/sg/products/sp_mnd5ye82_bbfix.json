@@ -18,13 +18,12 @@
   "maturityYears": 5,
   "coupon": {
     "rate": 4.5,
-    "rateIfCalled": null,
-    "rateIfMaturity": null,
-    "type": "conditionnel",
     "frequency": "semestriel",
+    "annualized": true,
+    "type": "conditionnel",
+    "paymentTiming": "periodic",
     "trigger": 60,
-    "memory": false,
-    "paymentTiming": "periodic"
+    "memory": false
   },
   "participationRate": null,
   "capitalProtection": {
@@ -41,7 +40,9 @@
     "frequency": "semestriel",
     "startSemester": 4,
     "stepDown": true,
-    "stepDownPct": 2.5
+    "stepDownPct": 2.5,
+    "hasAutocall": true,
+    "enabled": true
   },
   "decrementPct": 5,
   "actualDividendYield": 0.97,
@@ -217,5 +218,12 @@
       "redundancy": 20,
       "complementarity": 50
     }
-  }
+  },
+  "_freqFixApplied": true,
+  "aiCategory": "autocall-mono",
+  "aiCategoryLabel": "⚡ Autocall Mono-actif",
+  "aiCategoryColor": "#06D6A0",
+  "aiOpinion": "Produit offrant un rendement attractif de 9% avec possibilité de sortie anticipée dès 95%, mais exposé à un secteur volatile (mines d'or) sans protection du capital. Le risque de perte est significatif si l'indice chute sous 50%, particulièrement élevé sur un secteur cyclique comme les matières premières.",
+  "aiAnalyzedAt": "2026-03-30T12:27:51.988Z",
+  "envelope": ""
 }
