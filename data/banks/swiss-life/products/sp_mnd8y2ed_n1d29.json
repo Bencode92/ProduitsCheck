@@ -236,46 +236,48 @@
   "summary": "Autocall Phoenix à mémoire sur action Richemont. Remboursement anticipé automatique à 100% dès S2. Coupon conditionnel 3,75%/semestre si performance ≥ -25% avec mémoire. Capital non protégé, barrière de perte à 60%.",
   "emitter": "HSBC Continental Europe",
   "envelope": "",
+  "_couponProbability": 51.2,
+  "_bsRendementNet": -1.47,
   "grading": {
     "grade": "B",
-    "score": 66,
+    "score": 60,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 50,
+        "score": 26,
         "base": 33,
-        "delta": 17,
-        "reasoning": "BS: P(SJ>75% | vol=26% T=1.6a) = 80.2% | Memoire: prob x 1.08 = 86.7% | Breach 60%: P=12.2% -> perte esperee 4.0%/an | Rdt net: 6.5% - 4.0% = 2.5%/an | Spread vs CAT: 0.0%",
+        "delta": -7,
+        "reasoning": "BS: P(SJ>100% | vol=28% T=1.6a) = 47.4% | Memoire: prob x 1.08 = 51.2% | Breach 60%: P=16.3% -> perte esperee 5.3%/an | Rdt net: 3.8% - 5.3% = -1.5%/an | Spread vs CAT: -4.0%",
         "_bs": {
-          "score": 50,
-          "probCoupon": 86.7,
+          "score": 26,
+          "probCoupon": 51.2,
           "couponEffectif": 7.5,
-          "rendementEspere": 6.5,
-          "perteEsperee": 3.95,
-          "rendementNet": 2.55,
+          "rendementEspere": 3.84,
+          "perteEsperee": 5.31,
+          "rendementNet": -1.47,
           "drag": 0,
           "vols": [
-            25.59
+            28
           ],
           "matEsperee": 1.6,
-          "reasoning": "P(SJ>75% | vol=26% T=1.6a) = 80.2% | Memoire: prob x 1.08 = 86.7% | Breach 60%: P=12.2% -> perte esperee 4.0%/an | Rdt net: 6.5% - 4.0% = 2.5%/an",
-          "method": "BS-simplifie-v1"
+          "reasoning": "P(SJ>100% | vol=28% T=1.6a) = 47.4% | Memoire: prob x 1.08 = 51.2% | Breach 60%: P=16.3% -> perte esperee 5.3%/an | Rdt net: 3.8% - 5.3% = -1.5%/an",
+          "method": "BS-simplifie-v1.1"
         }
       },
       "underlyingQuality": {
-        "score": 66,
-        "base": 75,
-        "delta": -9,
-        "reasoning": "Qualité: base 75 → -9 = 66 (Richemont exposé à la consommation discrétionnaire en stagflation, beta 1.04 amplifie le risque, luxe sensible au ralentissement) | Worst: RICHEMONT (CIE FIN.) B:55"
+        "score": 72,
+        "base": 77,
+        "delta": -5,
+        "reasoning": "Qualité: base 77 → -5 = 72 (Secteur financials explicitement évité en stagflation, et le luxe est très sensible au ralentissement économique avec pétrole >$100) | Worst: RICHEMONT (CIE FIN.) B:67"
       },
       "portfolioFit": {
         "score": 75,
         "base": 80,
         "delta": -5,
-        "reasoning": "Fit: base 80 → -5 = 75 (Duration 6 ans inadaptée en stagflation avec risque de hausse des taux, diversification luxe discutable)"
+        "reasoning": "Fit: base 80 → -5 = 75 (Produit mono sous-jacent sur secteur cyclique défavorisé, peu adapté au contexte stagflationniste actuel)"
       },
       "riskPremium": {
         "score": 76,
@@ -284,12 +286,11 @@
         "reasoning": "Capital garanti: spread 3.75×2=7.5% - CAT 2.5% - illiq 0.5% = 4.5% | Illiq. premium +1.4% (-7pts)"
       }
     },
-    "verdict": "Phoenix à éviter en stagflation. Richemont (luxe cyclique) particulièrement vulnérable avec -33% YTD et volatilité 30.6%. Coupon 7.5% insuffisant face au risque de toucher la barrière 75% dans ce régime macro hostile au luxe. Duration 6 ans expose à la hausse des taux et probabilité autocall quasi-nulle (0%) confirme le piège potentiel.",
+    "verdict": "Produit très risqué en contexte de stagflation avec VIX à 22 et pétrole >$100. Richemont (B=67, DD=-33%) dans le secteur financials évité pourrait voir son cours fortement impacté par la baisse du pouvoir d'achat des consommateurs de luxe. Le coupon de 7.5% semble attractif mais la probabilité de le toucher est faible (score P1 ajusté à 32/100). Avec une maturité espérée de seulement 1.6 an mais 0% de probabilité d'autocall, le capital est fortement exposé.",
     "keyRisks": [
-      "Luxe cyclique en stagflation = double peine (inflation + ralentissement)",
-      "Barrière coupon 75% fragile avec vol 30.6% et momentum négatif",
-      "Duration 6 ans = risque taux maximal si Fed reste hawkish",
-      "Barrière à 0.68σ (Danger) — vol 30.6%"
+      "Secteur luxe très vulnérable en stagflation avec inflation >2.8% et pétrole >$100",
+      "Barrière capitale à 60% insuffisante vu le DD actuel de -33% et la volatilité à 30.56%",
+      "Barrière à 0.68σ (Danger) — vol 30.56%"
     ],
     "negotiationPoints": [],
     "scenarios": {
@@ -312,23 +313,23 @@
         "duration_years": 6
       },
       "worst": {
-        "return_pct": -40,
-        "return_eur": -40000,
+        "return_pct": -15,
+        "return_eur": -15000,
         "probability": 0.2,
         "duration_years": 6
       }
     },
     "confidenceInterval": {
-      "low": 35,
-      "high": 51,
+      "low": 36,
+      "high": 52,
       "halfWidth": 8,
       "gradeStable": false,
       "gradeRange": "D-C",
-      "label": "D [35-51]"
+      "label": "D [36-52]"
     },
     "metadata": {
-      "gradedAt": "2026-03-30T15:11:46.106Z",
-      "durationMs": 18099,
+      "gradedAt": "2026-03-30T19:00:15.120Z",
+      "durationMs": 21922,
       "aiUsed": true,
       "version": "5.2",
       "productType": "autocall",
@@ -343,7 +344,7 @@
       "hasBarrier": true,
       "barrierPct": 60,
       "barrierCouponPct": 75,
-      "couponProbability": 86.7,
+      "couponProbability": 51.2,
       "expectedMaturity": 1.6,
       "maxMaturity": 6,
       "probReachMaturity": 0,
@@ -352,7 +353,7 @@
       "baseGrade": "C",
       "adjustments": {
         "p1": -9,
-        "p2": -9,
+        "p2": -5,
         "p3": -5,
         "p4": 0
       },
@@ -362,22 +363,22 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 35,
-      "ci_high": 51,
-      "ci_label": "D [35-51]",
+      "ci_low": 36,
+      "ci_high": 52,
+      "ci_label": "D [36-52]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
       "decrementDrag": 0,
       "structureType": "autocall",
       "couponPerPeriod": 3.75,
-      "bsMethod": "BS-simplifie-v1",
-      "bsProbCoupon": 86.7,
-      "bsRendementNet": 2.55,
-      "bsPerteEsperee": 3.95,
+      "bsMethod": "BS-simplifie-v1.1",
+      "bsProbCoupon": 51.2,
+      "bsRendementNet": -1.47,
+      "bsPerteEsperee": 5.31,
       "bsCouponEffectif": 7.5,
       "bsVols": [
-        25.59
+        28
       ],
       "bsMatEsperee": 1.6,
       "stockData": [
@@ -385,17 +386,15 @@
           "name": "RICHEMONT (CIE FIN.)",
           "ticker": "CFR",
           "sector": "Biens de consommation cycliques",
-          "perf_ytd": -19.76,
-          "perf_1y": -14.84,
-          "volatility_3y": 30.6,
+          "perf_ytd": -20.26,
+          "perf_1y": -15.36,
+          "volatility_3y": 30.56,
           "max_drawdown_3y": 32.93,
-          "buffett_score": 55,
-          "quality_score": 57,
-          "buffett_grade": "C"
+          "buffett_score": 67,
+          "quality_score": 56,
+          "buffett_grade": "B"
         }
       ]
     }
-  },
-  "_couponProbability": 86.7,
-  "_bsRendementNet": 2.55
+  }
 }
