@@ -1,0 +1,221 @@
+{
+  "id": "sp_mnddfnwg_dmer1",
+  "name": "ATHENA SUR INDICE SOLACTIVE GOLD MINERS À DÉCRÉMENT",
+  "type": "autocall",
+  "structureType": "autocall",
+  "emitter": "SG Issuer",
+  "guarantor": "Société Générale",
+  "guarantorRating": {
+    "moodys": "A1",
+    "sp": "A"
+  },
+  "underlyings": [
+    "Indice Solactive GDX EUR AR 5%"
+  ],
+  "underlyingType": "single-index",
+  "currency": "EUR",
+  "maturity": "5 ans",
+  "maturityYears": 5,
+  "coupon": {
+    "rate": 4.5,
+    "rateIfCalled": null,
+    "rateIfMaturity": null,
+    "type": "conditionnel",
+    "frequency": "semestriel",
+    "trigger": 60,
+    "memory": false,
+    "paymentTiming": "periodic"
+  },
+  "participationRate": null,
+  "capitalProtection": {
+    "protected": false,
+    "level": null,
+    "barrier": 50,
+    "barrierCoupon": 60,
+    "barrierType": "europeenne"
+  },
+  "earlyRedemption": {
+    "possible": true,
+    "type": "autocall",
+    "trigger": 95,
+    "frequency": "semestriel",
+    "startSemester": 4,
+    "stepDown": true,
+    "stepDownPct": 2.5
+  },
+  "decrementPct": 5,
+  "actualDividendYield": 0.97,
+  "mechanism": "À l'issue des semestres 4 à 9, si le Niveau du Sous-Jacent est supérieur ou égal à la barrière de rappel (95% dès le semestre 4 puis dégressive de -2,50% par semestre), remboursement anticipé automatique avec 100% du capital + coupon de 4,50% par semestre écoulé. À maturité, coupon versé si niveau final ≥ 60% du niveau initial, remboursement du capital si niveau final ≥ 50%.",
+  "risks": [
+    "Risque de perte en capital partielle ou totale",
+    "Arrêt des coupons dès remboursement anticipé",
+    "Plafonnement des gains",
+    "Durée d'investissement variable (4 à 10 semestres)",
+    "Impact du décrément de 5% supérieur aux dividendes historiques (0,97%)",
+    "Risque de crédit Société Générale",
+    "Sensibilité autour du seuil de 50%"
+  ],
+  "summary": "Produit autocall sur indice Solactive Gold Miners avec décrément de 5%, remboursement anticipé possible dès le semestre 4 à 95% puis dégression de -2,50%, coupon conditionnel de 4,50% par semestre, protection du capital à 50%, barrière de coupon à 60%.",
+  "aiParsed": {
+    "name": "ATHENA SUR INDICE SOLACTIVE GOLD MINERS À DÉCRÉMENT",
+    "type": "autocall",
+    "structureType": "autocall",
+    "emitter": "SG Issuer",
+    "guarantor": "Société Générale",
+    "guarantorRating": {
+      "moodys": "A1",
+      "sp": "A"
+    },
+    "underlyings": [
+      "Indice Solactive GDX EUR AR 5%"
+    ],
+    "underlyingType": "single-index",
+    "currency": "EUR",
+    "maturity": "5 ans",
+    "maturityYears": 5,
+    "coupon": {
+      "rate": 4.5,
+      "rateIfCalled": null,
+      "rateIfMaturity": null,
+      "type": "conditionnel",
+      "frequency": "semestriel",
+      "trigger": 60,
+      "memory": false,
+      "paymentTiming": "periodic"
+    },
+    "participationRate": null,
+    "capitalProtection": {
+      "protected": false,
+      "level": null,
+      "barrier": 50,
+      "barrierCoupon": 60,
+      "barrierType": "europeenne"
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "autocall",
+      "trigger": 95,
+      "frequency": "semestriel",
+      "startSemester": 4,
+      "stepDown": true,
+      "stepDownPct": 2.5
+    },
+    "decrementPct": 5,
+    "actualDividendYield": 0.97,
+    "mechanism": "À l'issue des semestres 4 à 9, si le Niveau du Sous-Jacent est supérieur ou égal à la barrière de rappel (95% dès le semestre 4 puis dégressive de -2,50% par semestre), remboursement anticipé automatique avec 100% du capital + coupon de 4,50% par semestre écoulé. À maturité, coupon versé si niveau final ≥ 60% du niveau initial, remboursement du capital si niveau final ≥ 50%.",
+    "risks": [
+      "Risque de perte en capital partielle ou totale",
+      "Arrêt des coupons dès remboursement anticipé",
+      "Plafonnement des gains",
+      "Durée d'investissement variable (4 à 10 semestres)",
+      "Impact du décrément de 5% supérieur aux dividendes historiques (0,97%)",
+      "Risque de crédit Société Générale",
+      "Sensibilité autour du seuil de 50%"
+    ],
+    "summary": "Produit autocall sur indice Solactive Gold Miners avec décrément de 5%, remboursement anticipé possible dès le semestre 4 à 95% puis dégression de -2,50%, coupon conditionnel de 4,50% par semestre, protection du capital à 50%, barrière de coupon à 60%.",
+    "aiParsed": {
+      "name": "ATHENA SUR INDICE SOLACTIVE GOLD MINERS À DÉCRÉMENT",
+      "structureType": "autocall",
+      "emitter": "SG Issuer",
+      "guarantor": "Société Générale",
+      "guarantorRating": {
+        "moodys": "A1",
+        "sp": "A"
+      },
+      "underlyings": [
+        "Indice Solactive GDX EUR AR 5%"
+      ],
+      "underlyingType": "single-index",
+      "currency": "EUR",
+      "maturity": "5 ans",
+      "maturityYears": 5,
+      "coupon": {
+        "rate": 4.5,
+        "rateIfCalled": null,
+        "rateIfMaturity": null,
+        "type": "conditionnel",
+        "frequency": "semestriel",
+        "trigger": null,
+        "memory": false,
+        "paymentTiming": "periodic"
+      },
+      "participationRate": null,
+      "capitalProtection": {
+        "protected": false,
+        "level": null,
+        "barrier": 50,
+        "barrierCoupon": 60,
+        "barrierType": "europeenne"
+      },
+      "earlyRedemption": {
+        "possible": true,
+        "type": "autocall",
+        "trigger": 95,
+        "frequency": "semestriel",
+        "startSemester": 4,
+        "stepDown": true,
+        "stepDownPct": 2.5
+      },
+      "decrementPct": 5,
+      "actualDividendYield": 0.97,
+      "mechanism": "À l'issue des semestres 4 à 9, si le Niveau du Sous-Jacent est supérieur ou égal à la barrière de rappel (95% dès le semestre 4 puis dégressive de -2,50% par semestre), remboursement anticipé automatique avec 100% du capital + coupon de 4,50% par semestre écoulé. À maturité, coupon versé si niveau final ≥ 60% du niveau initial, remboursement du capital si niveau final ≥ 50%.",
+      "risks": [
+        "Risque de perte en capital partielle ou totale",
+        "Arrêt des coupons dès remboursement anticipé",
+        "Plafonnement des gains",
+        "Durée d'investissement variable (4 à 10 semestres)",
+        "Impact du décrément de 5% supérieur aux dividendes historiques (0,97%)",
+        "Risque de crédit Société Générale",
+        "Sensibilité autour du seuil de 50%"
+      ],
+      "summary": "Produit autocall sur indice Solactive Gold Miners avec décrément de 5%, remboursement anticipé possible dès le semestre 4 à 95% puis dégression de -2,50%, coupon conditionnel de 4,50% par semestre, protection du capital à 50%, barrière de coupon à 60%."
+    },
+    "sourceFile": "Produit_2_Athena_Solactive_Gold_Miners.pdf"
+  },
+  "sourceFile": "JSON import",
+  "bankId": "sg",
+  "status": "analyzing",
+  "receivedDate": "2026-03-30",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null,
+  "score": {
+    "score": 80,
+    "details": [
+      {
+        "type": "positive",
+        "icon": "✅",
+        "text": "Nouveau sous-jacent absent du book — diversification",
+        "impact": 25,
+        "category": "complementarity"
+      },
+      {
+        "type": "warning",
+        "icon": "📦",
+        "text": "Même type que 4 produit(s) — 80% du book en \"Autocall / Phoenix\"",
+        "impact": 20,
+        "category": "redundancy"
+      },
+      {
+        "type": "positive",
+        "icon": "✅",
+        "text": "Nouvelle contrepartie — diversification émetteur",
+        "impact": 15,
+        "category": "complementarity"
+      },
+      {
+        "type": "positive",
+        "icon": "🔀",
+        "text": "Faible corrélation moyenne (30%) — diversification",
+        "impact": 10,
+        "category": "complementarity"
+      }
+    ],
+    "verdict": "🟢 Excellent candidat — forte complémentarité avec le book.",
+    "breakdown": {
+      "redundancy": 20,
+      "complementarity": 50
+    }
+  }
+}
