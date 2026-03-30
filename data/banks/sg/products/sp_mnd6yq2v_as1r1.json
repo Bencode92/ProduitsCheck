@@ -33,12 +33,10 @@
     "memory": false,
     "paymentTiming": "maturity"
   },
-  "participationRate": 7,
+  "participationRate": 0,
   "capitalProtection": {
     "protected": true,
     "level": 100,
-    "barrier": null,
-    "barrierCoupon": null,
     "barrierType": "europeenne"
   },
   "earlyRedemption": {
@@ -48,10 +46,10 @@
     "frequency": "annuel",
     "startSemester": null,
     "stepDown": false,
-    "stepDownPct": null
+    "stepDownPct": null,
+    "hasAutocall": false,
+    "enabled": false
   },
-  "decrementPct": null,
-  "actualDividendYield": null,
   "mechanism": "Produit basé sur la performance relative moyenne de 16 paires d'actions technologiques américaines. À maturité, l'investisseur reçoit 100% du capital initial plus une participation de 7% basée sur la moyenne arithmétique des performances relatives des paires.",
   "risks": [
     "Protection du capital valable uniquement à maturité",
@@ -232,5 +230,11 @@
       "redundancy": 0,
       "complementarity": 70
     }
-  }
+  },
+  "aiCategory": "capital-protege",
+  "aiCategoryLabel": "🛡️ Capital Protégé",
+  "aiCategoryColor": "#4CAF50",
+  "aiOpinion": "Produit offrant une protection du capital à 100% avec participation aux performances d'un panier technologique de qualité sur 3 ans, idéal pour investisseurs prudents cherchant une exposition aux tech leaders. Le risque principal reste le risque émetteur et la performance limitée par le taux de participation non spécifié, mais la diversification sur 8 valeurs de référence réduit la volatilité.",
+  "aiAnalyzedAt": "2026-03-30T12:56:08.434Z",
+  "envelope": ""
 }
