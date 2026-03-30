@@ -181,81 +181,81 @@
   },
   "grading": {
     "grade": "C",
-    "score": 51,
+    "score": 54,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 43,
-        "base": 44,
+        "score": 53,
+        "base": 54,
         "delta": -1,
-        "reasoning": "Rendement: base 44 → -1 = 43 (En stagflation avec VIX 22, les taux courts resteront élevés rendant le call peu probable avant 3-4 ans minimum) | Coupon 3.68%, protégé | Mat espérée: ~2.3a (prob mat: 1%)"
+        "reasoning": "Rendement: base 54 → -1 = 53 (En stagflation avec taux élevés, probabilité de rappel anticipé très faible - émetteur préfère conserver financement à 3.68%) | Coupon 3.68%, protégé | Mat espérée: ~2.3a (prob mat: 1%)"
       },
       "underlyingQuality": {
         "score": 59,
         "base": 60,
         "delta": -1,
-        "reasoning": "Qualité: base 60 → -1 = 59 (Capital garanti mais rendement 3.68% insuffisant face à l'inflation en stagflation et aux alternatives sans risque)"
+        "reasoning": "Qualité: base 60 → -1 = 59 (Produit sans sous-jacent actions mais sensible au risque émetteur en environnement stagflationnaire avec stress financier croissant)"
       },
       "portfolioFit": {
         "score": 69,
         "base": 70,
         "delta": -1,
-        "reasoning": "Fit: base 70 → -1 = 69 (Produit inadapté en stagflation: rendement réel négatif et risque de blocage 10 ans avec 3.68% annuel)"
+        "reasoning": "Fit: base 70 → -1 = 69 (Rendement 3.68% insuffisant en stagflation avec inflation >2.8% - destruction de valeur réelle du capital)"
       },
       "riskPremium": {
         "score": 37,
         "base": 13,
-        "delta": 0,
+        "delta": -1,
         "reasoning": "Capital garanti: spread 3.7% - CAT 2.5% - illiq 0.7% = 0.5%"
       }
     },
-    "verdict": "Produit défavorable en stagflation avec un rendement de 3.68% largement insuffisant face à l'inflation. Le risque principal est d'être bloqué 10 ans avec ce taux médiocre si l'émetteur ne rappelle pas. Avec seulement 1% de probabilité d'aller à maturité selon les données, l'émetteur anticipe un rappel rapide mais la stagflation actuelle rend ce scénario peu crédible.",
+    "verdict": "Produit totalement inadapté au contexte stagflationnaire actuel. Le coupon de 3.68% ne couvre pas l'inflation à 2.83%, garantissant une perte réelle de -0.85%/an sur le capital garanti. La durée espérée de 2.3 ans est irréaliste avec des taux élevés incitant l'émetteur à conserver ce financement bon marché. Le spread de crédit ridicule de 13 points pour un engagement 10 ans en période de stress financier expose dangereusement au risque émetteur.",
     "keyRisks": [
-      "Rendement réel négatif en période inflationniste",
-      "Risque de blocage 10 ans à 3.68% si non rappelé",
-      "Coût d'opportunité élevé vs obligations d'État ou fonds monétaires"
+      "Rendement réel négatif de -0.85%/an avec inflation à 2.83%",
+      "Risque émetteur sous-compensé (spread 13pts vs 10 ans)",
+      "Duration longue de 10 ans en phase de bear steepening"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 7.36,
-        "return_eur": 7360,
-        "probability": 0.15,
-        "duration_years": 2
+        "return_pct": 3.68,
+        "return_eur": 8464,
+        "probability": 0.05,
+        "duration_years": 2.3
       },
       "base": {
-        "return_pct": 12.88,
-        "return_eur": 12880,
-        "probability": 0.4,
-        "duration_years": 3.5
+        "return_pct": 3.68,
+        "return_eur": 36800,
+        "probability": 0.6,
+        "duration_years": 10
       },
       "stress": {
-        "return_pct": 22.08,
-        "return_eur": 22080,
-        "probability": 0.35,
-        "duration_years": 6
+        "return_pct": 2.5,
+        "return_eur": 25000,
+        "probability": 0.25,
+        "duration_years": 10
       },
       "worst": {
-        "return_pct": 36.8,
-        "return_eur": 36800,
+        "return_pct": -10,
+        "return_eur": -10000,
         "probability": 0.1,
         "duration_years": 10
       }
     },
     "confidenceInterval": {
-      "low": 36,
-      "high": 54,
+      "low": 38,
+      "high": 56,
       "halfWidth": 9,
       "gradeStable": false,
       "gradeRange": "D-C",
-      "label": "C [36-54]"
+      "label": "C [38-56]"
     },
     "metadata": {
-      "gradedAt": "2026-03-30T08:18:10.032Z",
-      "durationMs": 18108,
+      "gradedAt": "2026-03-30T09:10:09.355Z",
+      "durationMs": 19587,
       "aiUsed": true,
       "version": "5.2",
       "productType": "taux_fixe",
@@ -275,13 +275,13 @@
       "maxMaturity": 10,
       "probReachMaturity": 1,
       "maxBeta": null,
-      "baseScore": 45,
+      "baseScore": 48,
       "baseGrade": "C",
       "adjustments": {
         "p1": -1,
         "p2": -1,
         "p3": -1,
-        "p4": 0
+        "p4": -1
       },
       "barrier_sigma": null,
       "barrier_sigma_label": null,
@@ -289,9 +289,9 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Callable LT",
-      "ci_low": 36,
-      "ci_high": 54,
-      "ci_label": "C [36-54]",
+      "ci_low": 38,
+      "ci_high": 56,
+      "ci_label": "C [38-56]",
       "issuer_rating": "A",
       "issuer_tier": "IG",
       "hasDecrement": false,
