@@ -1,16 +1,8 @@
 {
   "bankId": "sg",
   "bankName": "Société Générale",
-  "lastUpdated": "2026-03-30T16:00:13.185Z",
+  "lastUpdated": "2026-03-30T16:01:02.269Z",
   "products": [
-    {
-      "id": "sp_mn8tths2_jnf9s",
-      "name": "NOTE TAUX FIXE CALLABLE BONUS PAIEMENT À MATURITÉ",
-      "type": "autre",
-      "status": "analyzing",
-      "score": 61,
-      "receivedDate": "2026-03-27"
-    },
     {
       "id": "sp_mnd5ye82_bbfix",
       "name": "ATHENA SUR INDICE SOLACTIVE GOLD MINERS À DÉCRÉMENT",
