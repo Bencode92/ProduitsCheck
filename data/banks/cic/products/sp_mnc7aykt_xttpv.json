@@ -197,30 +197,30 @@
     }
   },
   "grading": {
-    "grade": "B",
-    "score": 67,
+    "grade": "A",
+    "score": 78,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 38,
-        "base": 43,
-        "delta": -5,
-        "reasoning": "Rendement: base 43 → -5 = 38 (Barrière à 100% trop restrictive en stagflation avec VIX à 22, probabilité réelle plus proche de 35% que 45%) | Coupon 6.15%, protégé | Barr.coupon 100% prob~45%"
+        "score": 75,
+        "base": 86,
+        "delta": -2,
+        "reasoning": "Rendement: base 86 → -2 = 84 (Barrière coupon à 100% très exigeante en stagflation, probabilité réelle de toucher 6.15% p.a. fortement réduite) | Coupon 6.15%, protégé | Barr.coupon 100% | Basket +5pts (vol÷0.87)"
       },
       "underlyingQuality": {
-        "score": 77,
+        "score": 79,
         "base": 74,
-        "delta": -5,
-        "reasoning": "Qualité: base 74 → -5 = 69 (Crédit Agricole (DD -21%) vulnérable en stagflation malgré beta défensif, LVMH souffre du luxe cyclique) | Worst: Crédit Agricole S.A. B:79 | Basket équipondéré 2 actifs: P2 +8pts (diversification)"
+        "delta": -2,
+        "reasoning": "Qualité: base 74 → -2 = 72 (ACA dans financials (secteur évité, -1.63% momentum) + LVMH luxury sensible à la stagflation = double exposition négative) | Worst: Crédit Agricole S.A. B:79 | Basket équipondéré 2 actifs: P2 +7pts (diversification)"
       },
       "portfolioFit": {
-        "score": 85,
+        "score": 82,
         "base": 80,
-        "delta": 5,
-        "reasoning": "Fit: base 80 → +5 = 85 (Capital garanti précieux en stagflation volatile, diversification sectorielle banque/luxe pertinente)"
+        "delta": 2,
+        "reasoning": "Fit: base 80 → +2 = 82 (Capital garanti offre protection cruciale en régime stagflationniste avec VIX à 22)"
       },
       "riskPremium": {
         "score": 77,
@@ -229,49 +229,50 @@
         "reasoning": "Capital garanti: spread 6.2% - CAT 2.5% - illiq 0.3% = 3.3%"
       }
     },
-    "verdict": "Structure défensive adaptée au contexte stagflationniste mais le coupon de 6.15% nécessite que les deux sous-jacents restent au-dessus de leur niveau initial, ce qui représente un défi avec Crédit Agricole déjà en baisse de 21%. Le capital garanti offre une protection bienvenue avec VIX à 22, mais la probabilité réelle de toucher le coupon est probablement inférieure à 35% sur 3 ans. Le ratio rendement/risque reste correct grâce à l'absence de risque en capital.",
+    "verdict": "Produit capital garanti peu attractif malgré la protection du capital. Le coupon de 6.15% annualisé nécessite que les DEUX sous-jacents restent ≥100% de leur niveau initial, condition irréaliste en stagflation avec ACA (financials -1.63%) et LVMH exposé au ralentissement. Avec Brent >$100 et VIX à 22, la probabilité de toucher ne serait-ce qu'un seul coupon est <25%. Le capital garanti ne compense pas l'opportunité manquée face à l'inflation >2.8%.",
     "keyRisks": [
-      "Probabilité élevée de ne toucher aucun coupon si l'un des deux sous-jacents reste sous 100%",
-      "Opportunité manquée si rebond fort des marchés, plafonnement à 6.15% annuel"
+      "Coupon conditionnel très difficile à atteindre (barrière 100% worst-of)",
+      "Rendement réel négatif si aucun coupon versé vs inflation 2.8%+",
+      "ACA dans secteur financials évité (-1.63%) en stagflation"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 6.15,
-        "return_eur": 18450,
-        "probability": 0.35,
-        "duration_years": 3
+        "return_eur": 6150,
+        "probability": 0.15,
+        "duration_years": 1
       },
       "base": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.45,
+        "probability": 0.5,
         "duration_years": 3
       },
       "stress": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.15,
+        "probability": 0.25,
         "duration_years": 3
       },
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.05,
+        "probability": 0.1,
         "duration_years": 3
       }
     },
     "confidenceInterval": {
-      "low": 42,
-      "high": 56,
+      "low": 56,
+      "high": 70,
       "halfWidth": 7,
       "gradeStable": false,
-      "gradeRange": "D-C",
-      "label": "C [42-56]"
+      "gradeRange": "C-B",
+      "label": "B [56-70]"
     },
     "metadata": {
-      "gradedAt": "2026-03-30T08:17:00.056Z",
-      "durationMs": 18416,
+      "gradedAt": "2026-03-30T09:01:43.385Z",
+      "durationMs": 20820,
       "aiUsed": true,
       "version": "5.2",
       "productType": "capital_garanti",
@@ -286,16 +287,16 @@
       "hasBarrier": false,
       "barrierPct": 0,
       "barrierCouponPct": 100,
-      "couponProbability": 45,
+      "couponProbability": null,
       "expectedMaturity": 3,
       "maxMaturity": 3,
       "maxBeta": 0.89,
-      "baseScore": 51,
-      "baseGrade": "C",
+      "baseScore": 64,
+      "baseGrade": "B",
       "adjustments": {
-        "p1": -5,
-        "p2": -5,
-        "p3": 5,
+        "p1": -2,
+        "p2": -2,
+        "p3": 2,
         "p4": 0
       },
       "barrier_sigma": null,
@@ -304,9 +305,9 @@
       "liquidity_level": "L4",
       "liquidity_score": 10,
       "liquidity_label": "Illiquide",
-      "ci_low": 42,
-      "ci_high": 56,
-      "ci_label": "C [42-56]",
+      "ci_low": 56,
+      "ci_high": 70,
+      "ci_label": "B [56-70]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
