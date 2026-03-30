@@ -18,7 +18,10 @@
     "type": "conditionnel",
     "memory": true,
     "paymentTiming": "periodic",
-    "trigger": 75
+    "trigger": 75,
+    "_origRate": 3.75,
+    "_origFreq": "semestriel",
+    "_mult": 2
   },
   "capitalProtection": {
     "protected": false,
@@ -232,5 +235,141 @@
   "_freqFixApplied": true,
   "summary": "Autocall Phoenix à mémoire sur action Richemont. Remboursement anticipé automatique à 100% dès S2. Coupon conditionnel 3,75%/semestre si performance ≥ -25% avec mémoire. Capital non protégé, barrière de perte à 60%.",
   "emitter": "HSBC Continental Europe",
-  "envelope": ""
+  "envelope": "",
+  "grading": {
+    "grade": "B",
+    "score": 60,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 33,
+        "base": 42,
+        "delta": -9,
+        "reasoning": "Rendement: base 42 → -9 = 33 (En stagflation avec VIX à 22 et DD de 33%, la probabilité d'autocall rapide chute drastiquement, rendant le coupon de 7.5% moins accessible) | Coupon 3.75% × 2 (semestriel) = 7.5%/an, barrière 60% | Barr.coupon 75% | Mat espérée: ~1.6a (prob mat: 0%)"
+      },
+      "underlyingQuality": {
+        "score": 66,
+        "base": 75,
+        "delta": -9,
+        "reasoning": "Qualité: base 75 → -9 = 66 (Richemont (luxe) très vulnérable en stagflation avec beta 1.04, vol 30.6% et secteur financials évité (-1.63% momentum)) | Worst: RICHEMONT (CIE FIN.) B:55"
+      },
+      "portfolioFit": {
+        "score": 75,
+        "base": 80,
+        "delta": -5,
+        "reasoning": "Fit: base 80 → -5 = 75 (En régime stagflationniste, un phoenix sur action cyclique luxe offre peu de diversification défensive)"
+      },
+      "riskPremium": {
+        "score": 76,
+        "base": 5,
+        "delta": 0,
+        "reasoning": "Capital garanti: spread 3.75×2=7.5% - CAT 2.5% - illiq 0.5% = 4.5% | Illiq. premium +1.4% (-7pts)"
+      }
+    },
+    "verdict": "Produit déconseillé (score ajusté: 29/100). En stagflation avec Brent >$100 et VIX à 22, Richemont (luxe/financials) cumule tous les risques: secteur évité (-1.63% momentum), DD de 33%, volatilité élevée de 30.6%. La barrière capital à 60% offre peu de protection avec une espérance de maturité de seulement 1.6 ans, exposant à un risque de perte en capital significatif dans ce contexte macro défavorable.",
+    "keyRisks": [
+      "Risque sectoriel majeur: luxe très exposé au ralentissement économique en stagflation",
+      "Volatilité extrême (30.6%) avec DD actuel de 33% proche de la barrière capital 60%",
+      "Choc pétrolier >$100 peut accentuer la rotation défensive au détriment du luxe",
+      "Barrière à 0.68σ (Danger) — vol 30.6%"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 7.5,
+        "return_eur": 7500,
+        "probability": 0.15,
+        "duration_years": 1
+      },
+      "base": {
+        "return_pct": 3.75,
+        "return_eur": 11250,
+        "probability": 0.3,
+        "duration_years": 3
+      },
+      "stress": {
+        "return_pct": -10,
+        "return_eur": -10000,
+        "probability": 0.35,
+        "duration_years": 4
+      },
+      "worst": {
+        "return_pct": -25,
+        "return_eur": -25000,
+        "probability": 0.2,
+        "duration_years": 6
+      }
+    },
+    "confidenceInterval": {
+      "low": 35,
+      "high": 51,
+      "halfWidth": 8,
+      "gradeStable": false,
+      "gradeRange": "D-C",
+      "label": "D [35-51]"
+    },
+    "metadata": {
+      "gradedAt": "2026-03-30T13:52:58.602Z",
+      "durationMs": 20732,
+      "aiUsed": true,
+      "version": "5.2",
+      "productType": "autocall",
+      "marketDataAvailable": true,
+      "catBenchmark": 2.5,
+      "catSource": "fallback-2026",
+      "couponAnnualized": 7.5,
+      "couponRaw": 7.5,
+      "couponMultiplier": 2,
+      "couponFrequency": "semestriel",
+      "isInPortfolio": false,
+      "hasBarrier": true,
+      "barrierPct": 60,
+      "barrierCouponPct": 75,
+      "couponProbability": null,
+      "expectedMaturity": 1.6,
+      "maxMaturity": 6,
+      "probReachMaturity": 0,
+      "maxBeta": 1.04,
+      "baseScore": 49,
+      "baseGrade": "C",
+      "adjustments": {
+        "p1": -9,
+        "p2": -9,
+        "p3": -5,
+        "p4": 0
+      },
+      "barrier_sigma": 0.68,
+      "barrier_sigma_label": "Danger",
+      "barrier_sigma_danger": true,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Rappelable 12M",
+      "ci_low": 35,
+      "ci_high": 51,
+      "ci_label": "D [35-51]",
+      "issuer_rating": "A+",
+      "issuer_tier": "IG",
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "autocall",
+      "couponPerPeriod": 3.75,
+      "stockData": [
+        {
+          "name": "RICHEMONT (CIE FIN.)",
+          "ticker": "CFR",
+          "sector": "Biens de consommation cycliques",
+          "perf_ytd": -19.76,
+          "perf_1y": -14.84,
+          "volatility_3y": 30.6,
+          "max_drawdown_3y": 32.93,
+          "buffett_score": 55,
+          "quality_score": 57,
+          "buffett_grade": "C"
+        }
+      ]
+    }
+  }
 }
