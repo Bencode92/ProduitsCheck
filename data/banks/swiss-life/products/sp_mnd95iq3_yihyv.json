@@ -23,7 +23,10 @@
     "type": "conditionnel",
     "memory": true,
     "paymentTiming": "periodic",
-    "trigger": 60
+    "trigger": 60,
+    "_origRate": 3.5,
+    "_origFreq": "semestriel",
+    "_mult": 2
   },
   "participationRate": null,
   "capitalProtection": {
@@ -223,5 +226,141 @@
   "aiCategoryColor": "#3B82F6",
   "aiOpinion": "Produit offrant un rendement attractif de 7% annuel avec effet mémoire, mais exposé au risque important d'ASML sans protection du capital. La barrière à 60% et la possibilité d'autocall offrent une certaine sécurité, mais la concentration sur un seul titre technologique augmente significativement le risque de perte en capital.",
   "aiAnalyzedAt": "2026-03-30T13:57:23.990Z",
-  "envelope": ""
+  "envelope": "",
+  "grading": {
+    "grade": "B",
+    "score": 60,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 31,
+        "base": 40,
+        "delta": -9,
+        "reasoning": "Rendement: base 40 → -9 = 31 (En stagflation avec ASML (tech) dans un secteur évité et beta élevé 1.29, la probabilité d'atteindre le coupon 60% diminue significativement) | Coupon 3.5% × 2 (semestriel) = 7%/an, barrière 60% | Barr.coupon 60% | Mat espérée: ~1.6a (prob mat: 0%)"
+      },
+      "underlyingQuality": {
+        "score": 68,
+        "base": 77,
+        "delta": -9,
+        "reasoning": "Qualité: base 77 → -9 = 68 (ASML dans le secteur information-technology évité (-1.22% momentum), rotation violente hors tech et choc pétrolier défavorable aux valeurs growth) | Worst: ASML Holding NV B:100"
+      },
+      "portfolioFit": {
+        "score": 75,
+        "base": 80,
+        "delta": -5,
+        "reasoning": "Fit: base 80 → -5 = 75 (Phoenix sur tech single-stock peu adapté en stagflation, manque de diversification face au risque sectoriel concentré)"
+      },
+      "riskPremium": {
+        "score": 73,
+        "base": 9,
+        "delta": 0,
+        "reasoning": "Capital garanti: spread 3.5×2=7.0% - CAT 2.5% - illiq 0.5% = 4.0% | Illiq. premium +1.4% (-7pts)"
+      }
+    },
+    "verdict": "Produit INADAPTÉ au régime stagflationniste actuel. ASML (DD -45%, vol 37%) subit la rotation violente hors tech avec un momentum sectoriel négatif de -1.22%. La barrière coupon à 60% paraît vulnérable avec un beta de 1.29 en période de stress macro. Score ajusté de 30/100 reflète un risque/rendement défavorable malgré le coupon attractif de 7%.",
+    "keyRisks": [
+      "Rotation sectorielle défavorable à la tech en stagflation avec ASML particulièrement exposé",
+      "Volatilité élevée (37%) et beta 1.29 amplifient le risque de franchissement des barrières 60%",
+      "Choc pétrolier >$100 maintient pression sur valorisations tech et prolonge le bear market",
+      "Barrière à 0.56σ (Danger) — vol 37.05%"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 7,
+        "return_eur": 7000,
+        "probability": 0.15,
+        "duration_years": 1
+      },
+      "base": {
+        "return_pct": 3.5,
+        "return_eur": 10500,
+        "probability": 0.3,
+        "duration_years": 3
+      },
+      "stress": {
+        "return_pct": -20,
+        "return_eur": -20000,
+        "probability": 0.35,
+        "duration_years": 4
+      },
+      "worst": {
+        "return_pct": -45,
+        "return_eur": -45000,
+        "probability": 0.2,
+        "duration_years": 6
+      }
+    },
+    "confidenceInterval": {
+      "low": 36,
+      "high": 52,
+      "halfWidth": 8,
+      "gradeStable": false,
+      "gradeRange": "D-C",
+      "label": "D [36-52]"
+    },
+    "metadata": {
+      "gradedAt": "2026-03-30T13:57:49.683Z",
+      "durationMs": 20330,
+      "aiUsed": true,
+      "version": "5.2",
+      "productType": "autocall",
+      "marketDataAvailable": true,
+      "catBenchmark": 2.5,
+      "catSource": "fallback-2026",
+      "couponAnnualized": 7,
+      "couponRaw": 7,
+      "couponMultiplier": 2,
+      "couponFrequency": "semestriel",
+      "isInPortfolio": false,
+      "hasBarrier": true,
+      "barrierPct": 60,
+      "barrierCouponPct": 60,
+      "couponProbability": null,
+      "expectedMaturity": 1.6,
+      "maxMaturity": 6,
+      "probReachMaturity": 0,
+      "maxBeta": 1.29,
+      "baseScore": 50,
+      "baseGrade": "C",
+      "adjustments": {
+        "p1": -9,
+        "p2": -9,
+        "p3": -5,
+        "p4": 0
+      },
+      "barrier_sigma": 0.56,
+      "barrier_sigma_label": "Danger",
+      "barrier_sigma_danger": true,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Rappelable 12M",
+      "ci_low": 36,
+      "ci_high": 52,
+      "ci_label": "D [36-52]",
+      "issuer_rating": "A+",
+      "issuer_tier": "IG",
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "autocall",
+      "couponPerPeriod": 3.5,
+      "stockData": [
+        {
+          "name": "ASML Holding NV",
+          "ticker": "ASML",
+          "sector": "Technologie de l'information",
+          "perf_ytd": 24.42,
+          "perf_1y": 84.99,
+          "volatility_3y": 37.05,
+          "max_drawdown_3y": 45.12,
+          "buffett_score": 100,
+          "quality_score": 68,
+          "buffett_grade": "A"
+        }
+      ]
+    }
+  }
 }
