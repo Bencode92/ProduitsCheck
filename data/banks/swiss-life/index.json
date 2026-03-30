@@ -1,15 +1,6 @@
 {
   "bankId": "swiss-life",
   "bankName": "Swiss Life",
-  "lastUpdated": "2026-03-30T13:24:59.044Z",
-  "products": [
-    {
-      "id": "sp_mn5u82do_cx6ya",
-      "name": "Income Euro Selection",
-      "type": "autre",
-      "status": "analyzing",
-      "score": 36,
-      "receivedDate": "2026-03-25"
-    }
-  ]
+  "lastUpdated": "2026-03-30T13:25:02.360Z",
+  "products": []
 }
