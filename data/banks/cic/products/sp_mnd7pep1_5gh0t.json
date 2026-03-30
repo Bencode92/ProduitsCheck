@@ -237,8 +237,8 @@
   "_couponProbability": 51.3,
   "_bsRendementNet": 3.71,
   "grading": {
-    "grade": "A",
-    "score": 77,
+    "grade": "B",
+    "score": 73,
     "killCriteria": {
       "triggered": false,
       "reasons": []
@@ -246,8 +246,8 @@
     "pillars": {
       "adjustedReturn": {
         "score": 57,
-        "base": 42,
-        "delta": 15,
+        "base": 32,
+        "delta": 25,
         "reasoning": "BS: P(SJ>100% | vol=20% T=1.6a) = 51.3% | Breach 60%: P=3.9% -> perte esperee 1.3%/an | Rdt net: 5.0% - 1.3% = 3.7%/an | Spread vs CAT: 1.2%",
         "_bs": {
           "score": 57,
@@ -266,16 +266,16 @@
         }
       },
       "underlyingQuality": {
-        "score": 94,
+        "score": 79,
         "base": 94,
-        "delta": 0,
-        "reasoning": "Qualité: base 94 | Worst: Euro Stoxx Banks B:85"
+        "delta": -15,
+        "reasoning": "Qualité: base 94 → -15 = 79 (Secteur financials explicitement évité par le marché, beta proche de 1 amplifie le risque en contexte stagflationniste défavorable aux banques) | Worst: Euro Stoxx Banks B:85"
       },
       "portfolioFit": {
-        "score": 80,
+        "score": 75,
         "base": 80,
-        "delta": 0,
-        "reasoning": "Fit: base 80"
+        "delta": -5,
+        "reasoning": "Fit: base 80 → -5 = 75 (Surpondération sectorielle dangereuse en régime stagflationniste, diversification insuffisante face au risque systémique bancaire)"
       },
       "riskPremium": {
         "score": 83,
@@ -284,22 +284,51 @@
         "reasoning": "Capital garanti: spread 4.85×2=9.7% - CAT 2.5% - illiq 0.5% = 6.7% | Illiq. premium +1.3% (-7pts)"
       }
     },
-    "verdict": "Score 53/100 (base 53).",
-    "keyRisks": [],
+    "verdict": "Produit à ÉVITER en contexte de stagflation avec le secteur bancaire sous pression (-1.63% momentum). Le coupon de 9.7% ne compense pas le risque de perte en capital avec une barrière à 60% vulnérable dans un environnement de taux élevés et croissance faible. La probabilité de maturation à 1% et l'espérance à 1.6 ans masquent mal le risque de rester bloqué 5 ans avec des banques en difficulté.",
+    "keyRisks": [
+      "Secteur bancaire évité par les investisseurs en stagflation - risque de sous-performance structurelle",
+      "Choc pétrolier >$100 peut déclencher une crise bancaire via défauts sur crédits",
+      "VIX à 22 avec volatilité 19.15% augmente fortement le risque de toucher la barrière capitale"
+    ],
     "negotiationPoints": [],
-    "scenarios": null,
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 9.7,
+        "return_eur": 9700,
+        "probability": 0.15,
+        "duration_years": 1
+      },
+      "base": {
+        "return_pct": 4.85,
+        "return_eur": 9700,
+        "probability": 0.3,
+        "duration_years": 2
+      },
+      "stress": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.35,
+        "duration_years": 5
+      },
+      "worst": {
+        "return_pct": -25,
+        "return_eur": -25000,
+        "probability": 0.2,
+        "duration_years": 5
+      }
+    },
     "confidenceInterval": {
-      "low": 45,
-      "high": 61,
+      "low": 38,
+      "high": 54,
       "halfWidth": 8,
       "gradeStable": false,
-      "gradeRange": "C-B",
-      "label": "C [45-61]"
+      "gradeRange": "D-C",
+      "label": "C [38-54]"
     },
     "metadata": {
-      "gradedAt": "2026-03-30T16:02:48.173Z",
-      "durationMs": 19507,
-      "aiUsed": false,
+      "gradedAt": "2026-03-30T16:03:57.401Z",
+      "durationMs": 19652,
+      "aiUsed": true,
       "version": "5.2",
       "productType": "autocall",
       "marketDataAvailable": true,
@@ -320,16 +349,21 @@
       "maxBeta": 0.96,
       "baseScore": 53,
       "baseGrade": "C",
-      "adjustments": null,
+      "adjustments": {
+        "p1": -10,
+        "p2": -15,
+        "p3": -5,
+        "p4": 0
+      },
       "barrier_sigma": 1.19,
       "barrier_sigma_label": "Attention",
       "barrier_sigma_danger": false,
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 45,
-      "ci_high": 61,
-      "ci_label": "C [45-61]",
+      "ci_low": 38,
+      "ci_high": 54,
+      "ci_label": "C [38-54]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
