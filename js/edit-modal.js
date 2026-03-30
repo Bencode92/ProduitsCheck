@@ -1,8 +1,8 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Edit Modal v1.9 — JSON paste import
-// v1.9: Added "📋 Coller JSON" button to import from artifact analyzer
-// v1.8: Added "Panier équipondéré" structure type + info banner
-// v1.7: Fix coupon saved as primitive number → frequency not persisted
+// STRUCTBOARD — Edit Modal v2.0 — Complete fields
+// v2.0: Added décrément, div réel, step-down, start semester,
+//       type remboursement, fréquence remboursement, coupon mémoire
+// v1.9: JSON paste import
 // ═══════════════════════════════════════════════════════════════
 
 var ENVELOPES = [
@@ -44,17 +44,25 @@ window.showEditModal = function() {
     var couponRate = couponObj.rate || p.participationRate || '';
     var couponType = couponObj.type || 'conditionnel';
     var couponFreq = couponObj.frequency || couponObj.paymentTiming || 'annuel';
+    var couponMemory = couponObj.memory === true;
     var barrier = p.capitalProtection?.barrier || '';
     if (barrier === 100 && p.capitalProtection?.level === 100) barrier = '';
     var barrierCoupon = p.capitalProtection?.barrierCoupon || '';
     var protection = p.capitalProtection?.level || (p.capitalProtection?.protected ? '100' : '');
     var autocall = (p.earlyRedemption?.possible === true || p.earlyRedemption?.possible === 'true') ? 'true' : 'false';
     var autocallTrigger = p.earlyRedemption?.trigger || '';
+    var erType = p.earlyRedemption?.type || 'autocall';
+    var erFreq = p.earlyRedemption?.frequency || 'annuel';
+    var erStart = p.earlyRedemption?.startSemester || '';
+    var erStepDown = p.earlyRedemption?.stepDown === true;
+    var erStepDownPct = p.earlyRedemption?.stepDownPct || '';
     var amount = p.investedAmount || '';
     var underlyings = (p.underlyings || []).join(', ');
     var currentEnvelope = p.envelope || '';
     var strikePrice = p.strikePrice || '';
     var structureType = p.structureType || '';
+    var decrementPct = p.decrementPct || '';
+    var divYield = p.actualDividendYield || '';
 
     var envelopeOptions = ENVELOPES.map(function(e) {
         return '<option value="' + e.id + '"' + (currentEnvelope === e.id ? ' selected' : '') + '>' + (e.icon ? e.icon + ' ' : '') + e.label + '</option>';
@@ -84,12 +92,28 @@ window.showEditModal = function() {
         return '<option value="' + f.id + '"' + (sel ? ' selected' : '') + '>' + f.label + '</option>';
     }).join('');
 
+    var erTypeOptions = [
+        { id: 'autocall', label: 'Autocall (marché)' },
+        { id: 'callable', label: 'Callable (émetteur)' },
+        { id: 'none', label: 'Aucun' }
+    ].map(function(t) {
+        return '<option value="' + t.id + '"' + (erType === t.id ? ' selected' : '') + '>' + t.label + '</option>';
+    }).join('');
+
+    var erFreqOptions = [
+        { id: 'annuel', label: 'Annuel' },
+        { id: 'semestriel', label: 'Semestriel' },
+        { id: 'trimestriel', label: 'Trimestriel' }
+    ].map(function(f) {
+        return '<option value="' + f.id + '"' + (erFreq === f.id ? ' selected' : '') + '>' + f.label + '</option>';
+    }).join('');
+
     var modal = document.getElementById('modal');
-    modal.innerHTML = '<div class="modal-overlay" onclick="closeModal()"><div class="modal-content modal-large" onclick="event.stopPropagation()">' +
+    modal.innerHTML = '<div class="modal-overlay" onclick="closeModal()"><div class="modal-content modal-large" onclick="event.stopPropagation()" style="max-width:780px">' +
         '<h2 class="modal-title">✎ Modifier les informations</h2>' +
         '<div style="color:var(--text-muted);font-size:12px;margin-bottom:16px">' + (p.name || 'Produit') + '</div>' +
 
-        // V1.9: JSON paste zone (hidden by default)
+        // JSON paste zone
         '<div id="json-paste-zone" style="display:none;margin-bottom:16px">' +
         '<textarea id="fe-json-input" placeholder="Colle ici le JSON de l\'analyseur de brochure..." style="width:100%;height:120px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:monospace;font-size:11px;padding:8px;resize:vertical;box-sizing:border-box"></textarea>' +
         '<div style="display:flex;gap:8px;margin-top:8px">' +
@@ -97,35 +121,65 @@ window.showEditModal = function() {
         '<button class="btn" onclick="document.getElementById(\'json-paste-zone\').style.display=\'none\'" style="font-size:11px;padding:6px 14px">Annuler</button>' +
         '</div></div>' +
 
-        // V1.9: Toggle button for JSON paste
         '<div style="margin-bottom:12px">' +
         '<button class="btn" onclick="toggleJSONPaste()" style="font-size:11px;padding:5px 12px;background:rgba(88,166,255,0.1);border-color:rgba(88,166,255,0.3);color:var(--accent)">📋 Coller JSON (depuis l\'analyseur)</button>' +
         '</div>' +
 
+        // ─── Section 1: Identité ───
+        '<div style="font-size:10px;font-weight:700;color:var(--text-muted);margin:16px 0 8px;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border);padding-bottom:4px">🏷️ Identité</div>' +
         '<div class="form-grid">' +
         '<div class="form-field full"><label>Nom du produit</label><input id="fe-name" value="' + escapeAttr(p.name || '') + '"></div>' +
         '<div class="form-field"><label>Type de structure</label><select id="fe-structure-type">' + structTypeOptions + '</select></div>' +
         '<div class="form-field"><label>Enveloppe</label><select id="fe-envelope">' + envelopeOptions + '</select></div>' +
         '<div class="form-field"><label>Montant investi (€)</label><input id="fe-invested" type="number" value="' + amount + '"></div>' +
+        '<div class="form-field"><label>Maturité</label><input id="fe-maturity" value="' + escapeAttr(p.maturity || '') + '"></div>' +
+        '<div class="form-field"><label>Niveau initial (strike)</label><input id="fe-strike-price" type="number" step="0.01" value="' + strikePrice + '" placeholder="Ex: 4950"></div>' +
+        '<div class="form-field full"><label>Sous-jacents (séparés par virgule)</label><input id="fe-underlyings" value="' + escapeAttr(underlyings) + '"></div>' +
+        '</div>' +
+
+        // ─── Section 2: Coupon ───
+        '<div style="font-size:10px;font-weight:700;color:var(--green);margin:20px 0 8px;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border);padding-bottom:4px">💰 Coupon</div>' +
+        '<div class="form-grid">' +
         '<div class="form-field"><label>Coupon / Participation (%)</label><input id="fe-coupon" type="number" step="0.01" value="' + couponRate + '"></div>' +
         '<div class="form-field"><label>Type coupon</label><select id="fe-coupon-type">' + couponTypeOptions + '</select></div>' +
         '<div class="form-field"><label>Fréquence paiement</label><select id="fe-coupon-freq">' + freqOptions + '</select></div>' +
-        '<div class="form-field"><label>Barrière capital (%)</label><input id="fe-barrier" type="number" step="0.1" value="' + barrier + '" placeholder="Ex: 60 (vide si aucune)"></div>' +
-        '<div class="form-field"><label>Barrière coupon (%) <span style="font-size:9px;color:var(--text-dim)">digitale</span></label><input id="fe-barrier-coupon" type="number" step="0.1" value="' + barrierCoupon + '" placeholder="Ex: 100 (vide si aucune)"></div>' +
-        '<div class="form-field"><label>Protection capital (%)</label><input id="fe-protection" type="number" step="0.1" value="' + protection + '"></div>' +
-        '<div class="form-field"><label>Maturité</label><input id="fe-maturity" value="' + escapeAttr(p.maturity || '') + '"></div>' +
-        '<div class="form-field"><label>Autocall</label><select id="fe-autocall"><option value="true"' + (autocall === 'true' ? ' selected' : '') + '>Oui</option><option value="false"' + (autocall === 'false' ? ' selected' : '') + '>Non</option></select></div>' +
-        '<div class="form-field"><label>Seuil autocall (%)</label><input id="fe-autocall-trigger" type="number" step="1" value="' + autocallTrigger + '"></div>' +
-        '<div class="form-field"><label>Niveau initial (strike) <span style="font-size:9px;color:var(--text-dim)">📊 pts ou €</span></label><input id="fe-strike-price" type="number" step="0.01" value="' + strikePrice + '" placeholder="Ex: 4950"></div>' +
-        '<div class="form-field full"><label>Sous-jacents (séparés par virgule)</label><input id="fe-underlyings" value="' + escapeAttr(underlyings) + '"></div>' +
+        '<div class="form-field"><label>Coupon mémoire</label><select id="fe-coupon-memory"><option value="false"' + (!couponMemory ? ' selected' : '') + '>Non</option><option value="true"' + (couponMemory ? ' selected' : '') + '>Oui — rattrapage</option></select></div>' +
         '</div>' +
-        _getInfoBanners(structureType, barrierCoupon, strikePrice) +
+
+        // ─── Section 3: Protection Capital ───
+        '<div style="font-size:10px;font-weight:700;color:var(--orange);margin:20px 0 8px;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border);padding-bottom:4px">🛡️ Protection Capital</div>' +
+        '<div class="form-grid">' +
+        '<div class="form-field"><label>Barrière capital (%)</label><input id="fe-barrier" type="number" step="0.1" value="' + barrier + '" placeholder="Ex: 60"></div>' +
+        '<div class="form-field"><label>Barrière coupon (%) <span style="font-size:9px;color:var(--text-dim)">digitale</span></label><input id="fe-barrier-coupon" type="number" step="0.1" value="' + barrierCoupon + '" placeholder="Ex: 100"></div>' +
+        '<div class="form-field"><label>Protection capital (%)</label><input id="fe-protection" type="number" step="0.1" value="' + protection + '"></div>' +
+        '</div>' +
+
+        // ─── Section 4: Remboursement anticipé ───
+        '<div style="font-size:10px;font-weight:700;color:var(--red);margin:20px 0 8px;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border);padding-bottom:4px">⏰ Remboursement Anticipé</div>' +
+        '<div class="form-grid">' +
+        '<div class="form-field"><label>Rappel possible</label><select id="fe-autocall"><option value="true"' + (autocall === 'true' ? ' selected' : '') + '>Oui</option><option value="false"' + (autocall === 'false' ? ' selected' : '') + '>Non</option></select></div>' +
+        '<div class="form-field"><label>Type</label><select id="fe-er-type">' + erTypeOptions + '</select></div>' +
+        '<div class="form-field"><label>Seuil autocall (%)</label><input id="fe-autocall-trigger" type="number" step="1" value="' + autocallTrigger + '"></div>' +
+        '<div class="form-field"><label>Fréquence observation</label><select id="fe-er-freq">' + erFreqOptions + '</select></div>' +
+        '<div class="form-field"><label>Début (semestre n°)</label><input id="fe-er-start" type="number" step="1" value="' + erStart + '" placeholder="Ex: 4"></div>' +
+        '<div class="form-field"><label>Step-down</label><select id="fe-stepdown"><option value="false"' + (!erStepDown ? ' selected' : '') + '>Non</option><option value="true"' + (erStepDown ? ' selected' : '') + '>Oui — dégressif</option></select></div>' +
+        '<div class="form-field"><label>Step-down (%/période)</label><input id="fe-stepdown-pct" type="number" step="0.1" value="' + erStepDownPct + '" placeholder="Ex: 2.5"></div>' +
+        '</div>' +
+
+        // ─── Section 5: Décrément ───
+        '<div style="font-size:10px;font-weight:700;color:var(--purple);margin:20px 0 8px;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border);padding-bottom:4px">📉 Décrément</div>' +
+        '<div class="form-grid">' +
+        '<div class="form-field"><label>Décrément (%/an)</label><input id="fe-decrement" type="number" step="0.01" value="' + decrementPct + '" placeholder="Ex: 5"></div>' +
+        '<div class="form-field"><label>Dividende réel (%/an)</label><input id="fe-divyield" type="number" step="0.01" value="' + divYield + '" placeholder="Ex: 0.97"></div>' +
+        (decrementPct && divYield ? '<div class="form-field"><label>Drag annuel</label><div style="padding:8px;background:var(--red-dim);border-radius:var(--radius-sm);color:var(--red);font-size:12px;font-weight:600">' + (decrementPct - divYield).toFixed(2) + '%/an invisible</div></div>' : '') +
+        '</div>' +
+
+        _getInfoBanners(structureType, barrierCoupon, strikePrice, decrementPct, divYield) +
         '<div class="modal-actions"><button class="btn" onclick="closeModal()">Annuler</button><button class="btn primary" onclick="handleEditSave()">💾 Enregistrer</button></div>' +
         '</div></div>';
     modal.classList.add('visible');
 };
 
-// V1.9: Toggle JSON paste zone visibility
 window.toggleJSONPaste = function() {
     var zone = document.getElementById('json-paste-zone');
     if (zone) {
@@ -137,7 +191,6 @@ window.toggleJSONPaste = function() {
     }
 };
 
-// V1.9: Import JSON from artifact analyzer
 window.handleJSONImport = function() {
     var input = document.getElementById('fe-json-input');
     if (!input || !input.value.trim()) {
@@ -147,9 +200,9 @@ window.handleJSONImport = function() {
 
     try {
         var json = JSON.parse(input.value.trim());
-        console.log('[EditModal V1.9] JSON import:', json);
+        console.log('[EditModal V2.0] JSON import:', json);
 
-        // Fill form fields from JSON
+        // Fill ALL form fields from JSON
         _setFieldValue('fe-name', json.name);
         _setFieldValue('fe-structure-type', json.structureType);
         _setFieldValue('fe-maturity', json.maturity);
@@ -159,6 +212,7 @@ window.handleJSONImport = function() {
             _setFieldValue('fe-coupon', json.coupon.rate);
             _setFieldValue('fe-coupon-type', json.coupon.type);
             _setFieldValue('fe-coupon-freq', json.coupon.frequency);
+            _setFieldValue('fe-coupon-memory', json.coupon.memory ? 'true' : 'false');
         } else if (json.participationRate) {
             _setFieldValue('fe-coupon', json.participationRate);
             _setFieldValue('fe-coupon-type', 'participation');
@@ -172,87 +226,84 @@ window.handleJSONImport = function() {
             _setFieldValue('fe-protection', cp.protected ? (cp.level || 100) : '');
         }
 
-        // Early redemption
+        // Early redemption — ALL fields now visible
         if (json.earlyRedemption) {
             var er = json.earlyRedemption;
             _setFieldValue('fe-autocall', er.possible ? 'true' : 'false');
             _setFieldValue('fe-autocall-trigger', er.trigger);
+            _setFieldValue('fe-er-type', er.type);
+            _setFieldValue('fe-er-freq', er.frequency);
+            _setFieldValue('fe-er-start', er.startSemester);
+            _setFieldValue('fe-stepdown', er.stepDown ? 'true' : 'false');
+            _setFieldValue('fe-stepdown-pct', er.stepDownPct);
         }
+
+        // Décrément
+        _setFieldValue('fe-decrement', json.decrementPct);
+        _setFieldValue('fe-divyield', json.actualDividendYield);
 
         // Underlyings
         if (json.underlyings && Array.isArray(json.underlyings)) {
-            _setFieldValue('fe-underlyings', json.underlyings.join(', '));
+            // Normalize: handle objects like {name: "..."} 
+            var strs = json.underlyings.map(function(u) {
+                return typeof u === 'string' ? u : (u && u.name) || String(u);
+            });
+            _setFieldValue('fe-underlyings', strs.join(', '));
         }
 
-        // Also inject parsed data directly into the product object for grading
+        // Inject hidden fields into product
         var p = app.state.currentProduct;
         if (p) {
-            // Deep merge important fields that aren't in the form
-            if (json.decrementPct) p.decrementPct = json.decrementPct;
-            if (json.actualDividendYield) p.actualDividendYield = json.actualDividendYield;
-            if (json.earlyRedemption) {
-                if (!p.earlyRedemption) p.earlyRedemption = {};
-                if (json.earlyRedemption.startSemester) p.earlyRedemption.startSemester = json.earlyRedemption.startSemester;
-                if (json.earlyRedemption.stepDown !== undefined) p.earlyRedemption.stepDown = json.earlyRedemption.stepDown;
-                if (json.earlyRedemption.stepDownPct) p.earlyRedemption.stepDownPct = json.earlyRedemption.stepDownPct;
-                if (json.earlyRedemption.type) p.earlyRedemption.type = json.earlyRedemption.type;
-                if (json.earlyRedemption.frequency) p.earlyRedemption.frequency = json.earlyRedemption.frequency;
-            }
-            if (json.coupon && typeof json.coupon === 'object') {
-                if (!p.coupon || typeof p.coupon !== 'object') p.coupon = {};
-                if (json.coupon.rateIfCalled) p.coupon.rateIfCalled = json.coupon.rateIfCalled;
-                if (json.coupon.rateIfMaturity) p.coupon.rateIfMaturity = json.coupon.rateIfMaturity;
-                if (json.coupon.memory !== undefined) p.coupon.memory = json.coupon.memory;
-                if (json.coupon.paymentTiming) p.coupon.paymentTiming = json.coupon.paymentTiming;
-                if (json.coupon.trigger) p.coupon.trigger = json.coupon.trigger;
-            }
             if (json.guarantorRating) p.guarantorRating = json.guarantorRating;
             if (json.mechanism) p.mechanism = json.mechanism;
-            if (json.risks) p.risks = json.risks;
-            if (json._rawTextSnippet) p._rawTextSnippet = json._rawTextSnippet;
+            if (json.risks) p.risks = Array.isArray(json.risks) ? json.risks.map(function(r) { return typeof r === 'string' ? r : r.name || String(r); }) : json.risks;
             if (json.underlyingType) p.underlyingType = json.underlyingType;
             if (json.summary) p.summary = json.summary;
-
-            // Store the full AI parsed data for grading context
+            if (json.guarantor) p.guarantor = json.guarantor;
+            if (json.emitter) p.emitter = json.emitter;
+            if (json.coupon && json.coupon.rateIfCalled) { if (!p.coupon) p.coupon = {}; p.coupon.rateIfCalled = json.coupon.rateIfCalled; }
+            if (json.coupon && json.coupon.rateIfMaturity) { if (!p.coupon) p.coupon = {}; p.coupon.rateIfMaturity = json.coupon.rateIfMaturity; }
+            if (json.coupon && json.coupon.paymentTiming) { if (!p.coupon) p.coupon = {}; p.coupon.paymentTiming = json.coupon.paymentTiming; }
+            if (json.coupon && json.coupon.trigger) { if (!p.coupon) p.coupon = {}; p.coupon.trigger = json.coupon.trigger; }
             p.aiParsed = json;
-
-            console.log('[EditModal V1.9] Product enriched with JSON data');
+            console.log('[EditModal V2.0] Product enriched with ALL JSON data');
         }
 
-        // Hide paste zone and show success
         document.getElementById('json-paste-zone').style.display = 'none';
-        showToast('✅ JSON importé — vérifiez les champs puis Enregistrez', 'success');
+        showToast('✅ JSON importé — vérifiez tous les champs puis Enregistrez', 'success');
 
     } catch(e) {
-        console.error('[EditModal V1.9] JSON parse error:', e);
+        console.error('[EditModal V2.0] JSON parse error:', e);
         showToast('JSON invalide: ' + e.message, 'error');
     }
 };
 
-// Helper: set form field value safely
 function _setFieldValue(id, value) {
     var el = document.getElementById(id);
     if (!el || value === null || value === undefined || value === '') return;
     el.value = value;
 }
 
-// Helper: generate info banners
-function _getInfoBanners(structureType, barrierCoupon, strikePrice) {
+function _getInfoBanners(structureType, barrierCoupon, strikePrice, decrementPct, divYield) {
     var html = '';
     if (structureType === 'dispersion') {
-        html += '<div style="background:rgba(6,214,160,0.08);border:1px solid rgba(6,214,160,0.2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:12px;font-size:10px;color:var(--green)">✅ <strong>Dispersion</strong> : le grading valorisera la volatilité (moteur de rendement) et considèrera le capital comme garanti.</div>';
+        html += '<div style="background:rgba(6,214,160,0.08);border:1px solid rgba(6,214,160,0.2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:12px;font-size:10px;color:var(--green)">✅ <strong>Dispersion</strong> : le grading valorisera la volatilité et considèrera le capital comme garanti.</div>';
     }
     if (structureType === 'basket') {
-        html += '<div style="background:rgba(78,205,196,0.08);border:1px solid rgba(78,205,196,0.2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:12px;font-size:10px;color:#4ECDC4">🧺 <strong>Panier équipondéré</strong> : le grading utilisera la performance moyenne du panier (pas le worst-of). Risque réduit par la diversification.</div>';
+        html += '<div style="background:rgba(78,205,196,0.08);border:1px solid rgba(78,205,196,0.2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:12px;font-size:10px;color:#4ECDC4">🧺 <strong>Panier</strong> : performance moyenne du panier (pas worst-of). Risque réduit.</div>';
     }
     if (structureType === 'taux_fixe') {
-        html += '<div style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:12px;font-size:10px;color:var(--accent)">🏛 <strong>Taux fixe</strong> : le grading comparera le coupon au taux sans risque BCE et évaluera le spread.</div>';
+        html += '<div style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:12px;font-size:10px;color:var(--accent)">🏛 <strong>Taux fixe</strong> : comparaison au taux sans risque BCE.</div>';
     }
     if (!strikePrice) {
-        html += '<div style="background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.15);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:12px;font-size:10px;color:var(--text-muted)">💡 <strong>Strike</strong> : renseignez la valeur du SJ à la souscription pour améliorer le calcul barrière (σ).</div>';
+        html += '<div style="background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.15);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:12px;font-size:10px;color:var(--text-muted)">💡 <strong>Strike</strong> : renseignez la valeur du SJ à la souscription.</div>';
     }
     if (barrierCoupon) {
-        html += '<div style="background:rgba(255,182,39,0.08);border:1px solid rgba(255,182,39,0.2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:12px;font-size:10px;color:var(--orange)">🎯 <strong>Digitale</strong> : barrière coupon à ' + barrierCoupon + '%. Le grading estimera la probabilité de toucher le coupon.</div>';
+        html += '<div style="background:rgba(255,182,39,0.08);border:1px solid rgba(255,182,39,0.2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:12px;font-size:10px;color:var(--orange)">🎯 <strong>Digitale</strong> : barrière coupon à ' + barrierCoupon + '%.</div>';
+    }
+    if (decrementPct && decrementPct > 0) {
+        var drag = decrementPct - (divYield || 0);
+        html += '<div style="background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:12px;font-size:10px;color:var(--red)">⚠️ <strong>Décrément</strong> : ' + decrementPct + '%/an prélevé vs ' + (divYield || '?') + '% div réel → drag de ' + drag.toFixed(2) + '%/an.</div>';
     }
     return html;
 }
@@ -261,27 +312,29 @@ window.handleEditSave = async function() {
     var p = app.state.currentProduct;
     if (!p) return;
 
+    // ─── Identité ───
     var newName = document.getElementById('fe-name')?.value;
     if (newName) p.name = newName;
     p.envelope = document.getElementById('fe-envelope')?.value || '';
     p.structureType = document.getElementById('fe-structure-type')?.value || '';
 
+    // ─── Coupon ───
     var newCoupon = document.getElementById('fe-coupon')?.value;
-
     if (!p.coupon || typeof p.coupon !== 'object') {
         var oldRate = typeof p.coupon === 'number' ? p.coupon : null;
         p.coupon = {};
         if (oldRate !== null) p.coupon.rate = oldRate;
     }
-
     if (newCoupon !== '') p.coupon.rate = parseFloat(newCoupon);
     p.coupon.type = document.getElementById('fe-coupon-type')?.value || p.coupon.type;
     p.coupon.frequency = document.getElementById('fe-coupon-freq')?.value || p.coupon.frequency;
+    p.coupon.memory = document.getElementById('fe-coupon-memory')?.value === 'true';
 
     if (p.coupon.type === 'participation' && newCoupon !== '') {
         p.participationRate = parseFloat(newCoupon);
     }
 
+    // ─── Capital Protection ───
     var newBarrier = document.getElementById('fe-barrier')?.value;
     if (!p.capitalProtection) p.capitalProtection = {};
     if (newBarrier !== '' && newBarrier !== null) {
@@ -303,13 +356,15 @@ window.handleEditSave = async function() {
         p.capitalProtection.protected = parseFloat(newProtection) > 0;
     }
 
+    // ─── Maturité ───
     var newMaturity = document.getElementById('fe-maturity')?.value;
     if (newMaturity) p.maturity = newMaturity;
     var yearsMatch = newMaturity?.match(/(\d+)/);
     if (yearsMatch) p.maturityYears = parseInt(yearsMatch[1]);
 
-    var newAutocall = document.getElementById('fe-autocall')?.value;
+    // ─── Early Redemption (COMPLETE) ───
     if (!p.earlyRedemption) p.earlyRedemption = {};
+    var newAutocall = document.getElementById('fe-autocall')?.value;
     p.earlyRedemption.possible = newAutocall === 'true';
     p.earlyRedemption.hasAutocall = newAutocall === 'true';
     p.earlyRedemption.enabled = newAutocall === 'true';
@@ -317,6 +372,30 @@ window.handleEditSave = async function() {
     var newTrigger = document.getElementById('fe-autocall-trigger')?.value;
     if (newTrigger !== '') p.earlyRedemption.trigger = parseFloat(newTrigger);
 
+    var newErType = document.getElementById('fe-er-type')?.value;
+    if (newErType) p.earlyRedemption.type = newErType;
+
+    var newErFreq = document.getElementById('fe-er-freq')?.value;
+    if (newErFreq) p.earlyRedemption.frequency = newErFreq;
+
+    var newErStart = document.getElementById('fe-er-start')?.value;
+    if (newErStart !== '') p.earlyRedemption.startSemester = parseInt(newErStart);
+
+    p.earlyRedemption.stepDown = document.getElementById('fe-stepdown')?.value === 'true';
+
+    var newStepDownPct = document.getElementById('fe-stepdown-pct')?.value;
+    if (newStepDownPct !== '') p.earlyRedemption.stepDownPct = parseFloat(newStepDownPct);
+
+    // ─── Décrément ───
+    var newDecrement = document.getElementById('fe-decrement')?.value;
+    if (newDecrement !== '') p.decrementPct = parseFloat(newDecrement);
+    else delete p.decrementPct;
+
+    var newDivYield = document.getElementById('fe-divyield')?.value;
+    if (newDivYield !== '') p.actualDividendYield = parseFloat(newDivYield);
+    else delete p.actualDividendYield;
+
+    // ─── Other fields ───
     var newAmount = document.getElementById('fe-invested')?.value;
     if (newAmount !== '') p.investedAmount = parseFloat(newAmount);
 
@@ -347,4 +426,4 @@ function escapeAttr(str) {
     return (str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;');
 }
 
-console.log('[StructBoard] Edit Modal v1.9 — JSON paste import');
+console.log('[StructBoard] Edit Modal v2.0 — complete fields');
