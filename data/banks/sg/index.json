@@ -1,7 +1,7 @@
 {
   "bankId": "sg",
   "bankName": "Société Générale",
-  "lastUpdated": "2026-03-30T12:21:23.205Z",
+  "lastUpdated": "2026-03-30T12:27:46.947Z",
   "products": [
     {
       "id": "sp_mn8tpkt2_rga8g",
@@ -37,6 +37,14 @@
     },
     {
       "id": "sp_mnd5q64j_sti3p",
+      "name": "ATHENA SUR INDICE SOLACTIVE GOLD MINERS À DÉCRÉMENT",
+      "type": "autocall",
+      "status": "analyzing",
+      "score": 80,
+      "receivedDate": "2026-03-30"
+    },
+    {
+      "id": "sp_mnd5ye82_bbfix",
       "name": "ATHENA SUR INDICE SOLACTIVE GOLD MINERS À DÉCRÉMENT",
       "type": "autocall",
       "status": "analyzing",
