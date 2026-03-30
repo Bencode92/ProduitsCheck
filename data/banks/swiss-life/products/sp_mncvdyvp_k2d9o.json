@@ -194,8 +194,8 @@
     }
   },
   "grading": {
-    "grade": "D",
-    "score": 29,
+    "grade": "C",
+    "score": 55,
     "killCriteria": {
       "triggered": false,
       "reasons": []
@@ -205,32 +205,32 @@
         "score": 19,
         "base": 28,
         "delta": -9,
-        "reasoning": "Rendement: base 28 → -9 = 19 (Worst-of sur 4 sous-jacents avec ENR en DD de 71.9% et volatilité extrême de 60.41%, probabilité de toucher la barrière très élevée) | Coupon 8.88%, barrière 60% | Mat espérée: ~3.3a (prob mat: 24%)"
+        "reasoning": "Rendement: base 28 → -9 = 19 (Worst-of sur ENR (vol 60%, DD 72%, beta 1.56) en stagflation avec autocall 95% réduit drastiquement la probabilité de coupons) | Coupon 8.88%, barrière 60% | Mat espérée: ~3.3a (prob mat: 24%)"
       },
       "underlyingQuality": {
-        "score": 26,
+        "score": 54,
         "base": 35,
         "delta": -9,
-        "reasoning": "Qualité: base 35 → -9 = 26 (Siemens Energy ultra-volatil (beta 1.56) en chute libre dans un contexte stagflationniste défavorable aux valeurs cycliques) | Worst: Siemens Energy AG B:24"
+        "reasoning": "Qualité: base 35 → -9 = 26 (ENR ultra-volatile (60%) et cyclique (beta 1.56) très exposé en stagflation, risque sectoriel énergie maximal) | Worst: Siemens Energy AG B:24 | Basket équipondéré 4 actifs: P2 +28pts (diversification)"
       },
       "portfolioFit": {
         "score": 75,
         "base": 80,
         "delta": -5,
-        "reasoning": "Fit: base 80 → -5 = 75 (Concentration sectorielle élevée (2 banques) et exposition excessive au risque idiosyncratique de ENR mal adaptée en stagflation)"
+        "reasoning": "Fit: base 80 → -5 = 75 (Corrélations sectorielles (banques IT/ES + tech/énergie) limitent la diversification en stress macro)"
       },
       "riskPremium": {
-        "score": 7,
+        "score": 82,
         "base": 5,
-        "delta": 9,
-        "reasoning": "Prime: base 5 → +9 = 14 (Coupon de 8.88% justifié par le risque extrême du worst-of, spread cohérent avec la volatilité de 60%) | 8.88% vs CAT 2.5% (spread 6.4%) | Illiq. premium +1.4% (-7pts)"
+        "delta": 0,
+        "reasoning": "Capital garanti: spread 8.9% - CAT 2.5% - illiq 0.5% = 5.9% | Illiq. premium +1.4% (-7pts)"
       }
     },
-    "verdict": "Produit extrêmement risqué avec un score final de 24/100. Le worst-of sur 4 sous-jacents incluant Siemens Energy (DD -71.9%, vol 60.41%) dans un contexte de stagflation crée un risque de perte en capital quasi-certain. La barrière à 60% sera très probablement touchée et le coupon de 8.88% ne compense pas le risque de perte de 40% minimum.",
+    "verdict": "Produit extrêmement risqué avec ENR comme point de rupture (vol 60%, DD -72%, beta 1.56) dans un contexte stagflationniste défavorable. La structure worst-of avec autocall élevé (95%) transforme le coupon attractif de 8.88% en piège, avec seulement 24% de probabilité d'atteindre maturité. La barrière à 60% offre peu de protection face à la volatilité extrême d'ENR qui peut facilement perdre 40% en cas de stress énergétique.",
     "keyRisks": [
-      "Risque de perte en capital >40% avec ENR en DD extrême de 71.9%",
-      "Worst-of sur 4 actifs multiplie la probabilité d'activation de la barrière",
-      "Stagflation pénalise les valeurs cycliques et financières du panier",
+      "ENR peut chuter de 40%+ rapidement (déjà -72% de son pic)",
+      "Autocall 95% très difficile à atteindre avec ENR volatil",
+      "Corrélation banques IT/ES amplifie le risque systémique",
       "Barrière à 0.35σ (Critique) — vol 60.41%"
     ],
     "negotiationPoints": [],
@@ -242,35 +242,35 @@
         "duration_years": 1
       },
       "base": {
-        "return_pct": 0,
-        "return_eur": 0,
+        "return_pct": 4.44,
+        "return_eur": 13320,
         "probability": 0.25,
         "duration_years": 3
       },
       "stress": {
-        "return_pct": -30,
-        "return_eur": -30000,
-        "probability": 0.4,
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.35,
         "duration_years": 6
       },
       "worst": {
-        "return_pct": -50,
-        "return_eur": -50000,
-        "probability": 0.2,
+        "return_pct": -40,
+        "return_eur": -40000,
+        "probability": 0.25,
         "duration_years": 6
       }
     },
     "confidenceInterval": {
-      "low": 20,
-      "high": 42,
+      "low": 17,
+      "high": 39,
       "halfWidth": 11,
       "gradeStable": false,
       "gradeRange": "F-D",
-      "label": "D [20-42]"
+      "label": "D [17-39]"
     },
     "metadata": {
-      "gradedAt": "2026-03-30T07:32:43.437Z",
-      "durationMs": 17099,
+      "gradedAt": "2026-03-30T07:50:52.634Z",
+      "durationMs": 18902,
       "aiUsed": true,
       "version": "5.2",
       "productType": "autocall",
@@ -296,7 +296,7 @@
         "p1": -9,
         "p2": -9,
         "p3": -5,
-        "p4": 9
+        "p4": 0
       },
       "barrier_sigma": 0.35,
       "barrier_sigma_label": "Critique",
@@ -304,9 +304,9 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 20,
-      "ci_high": 42,
-      "ci_label": "D [20-42]",
+      "ci_low": 17,
+      "ci_high": 39,
+      "ci_label": "D [17-39]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
