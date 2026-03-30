@@ -18,13 +18,12 @@
   "maturityYears": 6,
   "coupon": {
     "rate": 3.5,
-    "rateIfCalled": null,
-    "rateIfMaturity": null,
-    "type": "conditionnel",
     "frequency": "semestriel",
-    "trigger": 60,
+    "annualized": true,
+    "type": "conditionnel",
     "memory": true,
-    "paymentTiming": "periodic"
+    "paymentTiming": "periodic",
+    "trigger": 60
   },
   "participationRate": null,
   "capitalProtection": {
@@ -41,10 +40,10 @@
     "frequency": "semestriel",
     "startSemester": 2,
     "stepDown": true,
-    "stepDownPct": 5
+    "stepDownPct": 5,
+    "hasAutocall": true,
+    "enabled": true
   },
-  "decrementPct": null,
-  "actualDividendYield": null,
   "mechanism": "Mécanisme de remboursement automatique anticipé dès le semestre 2 avec barrières dégressives (100%, 95%, 90%, 85%, 80%). Coupon conditionnel de 3.50% par semestre avec effet mémoire si l'action est ≥ -40%. Protection du capital si baisse ≤ 40%, perte en capital si baisse > 60%.",
   "risks": [
     "Risque de crédit",
@@ -217,5 +216,12 @@
       "redundancy": 36,
       "complementarity": 35
     }
-  }
+  },
+  "_freqFixApplied": true,
+  "aiCategory": "phoenix-mono",
+  "aiCategoryLabel": "🎯 Phoenix Mono-actif",
+  "aiCategoryColor": "#3B82F6",
+  "aiOpinion": "Produit offrant un rendement attractif de 7% annuel avec effet mémoire, mais exposé au risque important d'ASML sans protection du capital. La barrière à 60% et la possibilité d'autocall offrent une certaine sécurité, mais la concentration sur un seul titre technologique augmente significativement le risque de perte en capital.",
+  "aiAnalyzedAt": "2026-03-30T13:57:23.990Z",
+  "envelope": ""
 }
