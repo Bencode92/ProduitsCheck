@@ -238,30 +238,52 @@
   "aiAnalyzedAt": "2026-03-30T12:56:08.434Z",
   "envelope": "",
   "grading": {
-    "grade": "B",
-    "score": 71,
+    "grade": "A",
+    "score": 76,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 78,
-        "base": 70,
-        "delta": -2,
-        "reasoning": "Rendement: base 70 → -2 = 68 (En stagflation avec 6/8 sous-jacents tech/communication évités, la dispersion augmente le risque de non-paiement du coupon) | Coupon 1.3144444444444445%, protégé | ✅ Dispersion cap garanti: rendement quasi-certain (+10pts)"
+        "score": 95,
+        "base": 78,
+        "delta": 17,
+        "reasoning": "BS: Dispersion: prob=95% (mecanique), rdt median hist=11% | Rdt net: 10.4% - 0.0% = 10.4%/an | Spread vs CAT: 7.9%",
+        "_bs": {
+          "score": 95,
+          "probCoupon": 95,
+          "couponEffectif": 11,
+          "rendementEspere": 10.45,
+          "perteEsperee": 0,
+          "rendementNet": 10.45,
+          "drag": 0,
+          "vols": [
+            25,
+            22.74,
+            18.03,
+            29.2,
+            31.25,
+            22.33,
+            25,
+            25
+          ],
+          "matEsperee": 3,
+          "reasoning": "Dispersion: prob=95% (mecanique), rdt median hist=11% | Rdt net: 10.4% - 0.0% = 10.4%/an",
+          "method": "BS-simplifie-v1"
+        }
       },
       "underlyingQuality": {
         "score": 78,
         "base": 80,
         "delta": -2,
-        "reasoning": "Qualité: base 80 → -2 = 78 (Portefeuille ultra-concentré sur tech (beta moyen 1.33) en pleine rotation sectorielle défavorable, Tesla à 54% de son ATH) | Worst: Tesla B:54"
+        "reasoning": "Qualité: base 80 → -2 = 78 (75% du panier en tech/communication-services sous pression sectorielle, betas élevés >1.2 en moyenne) | Worst: Tesla B:54"
       },
       "portfolioFit": {
         "score": 74,
         "base": 72,
         "delta": 2,
-        "reasoning": "Fit: base 72 → +2 = 74 (Capital garanti offre protection bienvenue en stagflation, mais exposition tech inadaptée au régime actuel)"
+        "reasoning": "Fit: base 72 → +2 = 74 (Produit DISPERSION capital garanti offre protection idéale en stagflation, volatilité devient atout)"
       },
       "riskPremium": {
         "score": 52,
@@ -270,24 +292,23 @@
         "reasoning": "Capital garanti: spread 3.0% - CAT 2.5% - illiq 0.3% = 0.2% | ✅ Dispersion: vol = moteur de rendement (+25pts) + capital garanti | Illiq. premium +1.1% (-6pts)"
       }
     },
-    "verdict": "Produit inadapté au régime stagflationniste actuel avec 75% du panier en secteurs évités (tech/communication). Le capital garanti protège mais le rendement de 1.31% annuel sera probablement érodé par l'inflation à 2.83%. La dispersion sur des valeurs tech volatiles (NVDA vol 48%, TSLA vol 58%) en rotation défavorable réduit fortement la probabilité des coupons.",
+    "verdict": "En régime STAGFLATION avec VIX à 22 et rotation violente hors tech, ce produit DISPERSION offre une protection capitale cruciale. Le coupon de 1.31% annualisé reste modeste mais le capital garanti compense largement avec 75% du panier en secteurs évités (tech/comm). La volatilité élevée (NVDA 48%, TSLA 57%) devient un atout pour la dispersion, offrant un potentiel de surperformance si les écarts se creusent.",
     "keyRisks": [
-      "Rotation sectorielle violente défavorable à 6/8 sous-jacents",
-      "Coupon réel négatif avec inflation >2.8%",
-      "Tesla à -46% de son ATH peut bloquer tous les coupons"
+      "Coupon faible vs inflation en stagflation",
+      "Concentration excessive tech/GAFAM sous pression sectorielle"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 1.31,
-        "return_eur": 3943,
+        "return_pct": 4,
+        "return_eur": 4000,
         "probability": 0.2,
-        "duration_years": 3
+        "duration_years": 1
       },
       "base": {
-        "return_pct": 0.5,
-        "return_eur": 1500,
-        "probability": 0.35,
+        "return_pct": 3.94,
+        "return_eur": 3940,
+        "probability": 0.4,
         "duration_years": 3
       },
       "stress": {
@@ -299,7 +320,7 @@
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.15,
+        "probability": 0.1,
         "duration_years": 3
       }
     },
@@ -312,8 +333,8 @@
       "label": "C [49-63]"
     },
     "metadata": {
-      "gradedAt": "2026-03-30T14:07:13.515Z",
-      "durationMs": 20678,
+      "gradedAt": "2026-03-30T15:09:41.632Z",
+      "durationMs": 19424,
       "aiUsed": true,
       "version": "5.2",
       "productType": "dispersion",
@@ -328,7 +349,7 @@
       "hasBarrier": false,
       "barrierPct": 0,
       "barrierCouponPct": null,
-      "couponProbability": null,
+      "couponProbability": 95,
       "expectedMaturity": 3,
       "maxMaturity": 3,
       "maxBeta": 1.92,
@@ -354,6 +375,22 @@
       "hasDecrement": false,
       "decrementDrag": 0,
       "structureType": "dispersion",
+      "bsMethod": "BS-simplifie-v1",
+      "bsProbCoupon": 95,
+      "bsRendementNet": 10.45,
+      "bsPerteEsperee": 0,
+      "bsCouponEffectif": 11,
+      "bsVols": [
+        25,
+        22.74,
+        18.03,
+        29.2,
+        31.25,
+        22.33,
+        25,
+        25
+      ],
+      "bsMatEsperee": 3,
       "stockData": [
         {
           "name": "NVIDIA",
@@ -453,5 +490,7 @@
         }
       ]
     }
-  }
+  },
+  "_couponProbability": 95,
+  "_bsRendementNet": 10.45
 }
