@@ -235,43 +235,61 @@
   "aiAnalyzedAt": "2026-03-30T13:46:05.501Z",
   "envelope": "",
   "grading": {
-    "grade": "B",
-    "score": 72,
+    "grade": "C",
+    "score": 53,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 66,
-        "base": 46,
-        "delta": -5,
-        "reasoning": "Rendement: base 46 → -5 = 41 (En stagflation avec ENR basket éq. à 71.9% DD et vol 60%, probabilité coupon fortement dégradée malgré barrière 95%) | Coupon 9.7%, barrière 60% | Barr.coupon 95% | Mat espérée: ~3.3a (prob mat: 24%) | Basket +25pts (vol÷0.79)"
+        "score": 12,
+        "base": 62,
+        "delta": -50,
+        "reasoning": "BS: P(SJ>95% | vol=37% T=3.3a) = 44.5% | Breach 60%: P=52.2% -> perte esperee 8.2%/an | Rdt net: 4.3% - 8.2% = -3.9%/an | Spread vs CAT: -6.4%",
+        "_bs": {
+          "score": 12,
+          "probCoupon": 44.5,
+          "couponEffectif": 9.7,
+          "rendementEspere": 4.32,
+          "perteEsperee": 8.22,
+          "rendementNet": -3.9,
+          "drag": 0,
+          "vols": [
+            37.05,
+            24.51,
+            28.14,
+            24.51
+          ],
+          "matEsperee": 3.3,
+          "reasoning": "P(SJ>95% | vol=37% T=3.3a) = 44.5% | Breach 60%: P=52.2% -> perte esperee 8.2%/an | Rdt net: 4.3% - 8.2% = -3.9%/an",
+          "method": "BS-simplifie-v1"
+        }
       },
       "underlyingQuality": {
         "score": 56,
         "base": 35,
         "delta": -5,
-        "reasoning": "Qualité: base 35 → -5 = 30 (3 SJ sur 4 dans secteurs évités (ASML tech, ISP/SAN financials) avec betas élevés en contexte stagflationniste défavorable) | Worst: Siemens Energy AG B:24 | Basket équipondéré 4 actifs: P2 +26pts (diversification)"
+        "reasoning": "Qualité: base 35 → -5 = 30 (3 des 4 sous-jacents dans des secteurs évités (ASML/tech -1.22%, ISP+SAN/financials -1.63%) et ENR ultra-cyclique souffre en stagflation malgré le secteur energy favorisé) | Worst: Siemens Energy AG B:24 | Basket équipondéré 4 actifs: P2 +26pts (diversification)"
       },
       "portfolioFit": {
-        "score": 85,
+        "score": 75,
         "base": 80,
-        "delta": 5,
-        "reasoning": "Fit: base 80 → +5 = 85 (Coupon 9.7% attractif en stagflation où rendements réels négatifs, mais exposition sectorielle problématique)"
+        "delta": -5,
+        "reasoning": "Fit: base 80 → -5 = 75 (En régime stagflationnaire, la surexposition aux secteurs évités (tech/financials) et la volatilité élevée réduisent la pertinence du produit dans un portefeuille défensif)"
       },
       "riskPremium": {
         "score": 83,
         "base": 5,
-        "delta": -5,
+        "delta": 0,
         "reasoning": "Capital garanti: spread 9.7% - CAT 2.5% - illiq 0.5% = 6.7% | Illiq. premium +1.4% (-7pts)"
       }
     },
-    "verdict": "Produit à éviter en stagflation: 75% des sous-jacents dans secteurs sous pression (tech -1.22%, financials -1.63%) avec ENR déjà à -71.9% du plus haut. La barrière coupon à 95% est trop proche avec une volatilité moyenne de 37.7% et VIX à 22. Malgré le coupon attractif de 9.7%, le risque de non-perception durant plusieurs années est élevé avec seulement 24% de probabilité d'autocall anticipé.",
+    "verdict": "Produit inadapté au régime stagflationnaire actuel avec 3 sous-jacents sur 4 dans des secteurs en rotation négative. Le worst-of ENR (-71.9% DD, vol 60.46%) compromet fortement les chances de toucher les coupons 9.7% avec des barrières à 95%. La probabilité de maturation anticipée chute à seulement 24% dans ce contexte de stress, exposant l'investisseur à un risque de perte en capital significatif sur 6 ans.",
     "keyRisks": [
-      "ENR (worst-of) déjà à -71.9% avec vol 60% en contexte energy shock",
-      "75% exposition aux secteurs évités (tech/financials) en stagflation",
-      "Barrière coupon 95% vulnérable avec VIX 22 et rotation sectorielle violente",
+      "Exposition fatale aux secteurs évités (tech/financials) en stagflation avec momentum négatif confirmé",
+      "ENR ultra-volatil (60.46%) peut facilement franchir la barrière 95% et compromettre tous les coupons",
+      "Choc énergétique >$100 paradoxalement négatif pour ENR (surcapacité/transition) malgré secteur energy favorisé",
       "Barrière à 0.34σ (Critique) — vol 60.46%"
     ],
     "negotiationPoints": [],
@@ -279,39 +297,39 @@
       "optimistic": {
         "return_pct": 9.7,
         "return_eur": 9700,
-        "probability": 0.2,
+        "probability": 0.15,
         "duration_years": 1
       },
       "base": {
         "return_pct": 3.2,
         "return_eur": 9600,
-        "probability": 0.35,
+        "probability": 0.3,
         "duration_years": 3
       },
       "stress": {
-        "return_pct": 0,
-        "return_eur": 0,
-        "probability": 0.3,
+        "return_pct": -2,
+        "return_eur": -12000,
+        "probability": 0.35,
         "duration_years": 6
       },
       "worst": {
-        "return_pct": -7.2,
-        "return_eur": -43200,
-        "probability": 0.15,
+        "return_pct": -10,
+        "return_eur": -60000,
+        "probability": 0.2,
         "duration_years": 6
       }
     },
     "confidenceInterval": {
-      "low": 26,
-      "high": 48,
+      "low": 25,
+      "high": 47,
       "halfWidth": 11,
       "gradeStable": false,
       "gradeRange": "D-C",
-      "label": "D [26-48]"
+      "label": "D [25-47]"
     },
     "metadata": {
-      "gradedAt": "2026-03-30T13:46:36.230Z",
-      "durationMs": 22358,
+      "gradedAt": "2026-03-30T15:10:47.147Z",
+      "durationMs": 22891,
       "aiUsed": true,
       "version": "5.2",
       "productType": "autocall",
@@ -326,7 +344,7 @@
       "hasBarrier": true,
       "barrierPct": 60,
       "barrierCouponPct": 95,
-      "couponProbability": null,
+      "couponProbability": 44.5,
       "expectedMaturity": 3.3,
       "maxMaturity": 6,
       "probReachMaturity": 24,
@@ -336,8 +354,8 @@
       "adjustments": {
         "p1": -5,
         "p2": -5,
-        "p3": 5,
-        "p4": -5
+        "p3": -5,
+        "p4": 0
       },
       "barrier_sigma": 0.34,
       "barrier_sigma_label": "Critique",
@@ -345,14 +363,26 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 26,
-      "ci_high": 48,
-      "ci_label": "D [26-48]",
+      "ci_low": 25,
+      "ci_high": 47,
+      "ci_label": "D [25-47]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
       "decrementDrag": 0,
       "structureType": "autocall",
+      "bsMethod": "BS-simplifie-v1",
+      "bsProbCoupon": 44.5,
+      "bsRendementNet": -3.9,
+      "bsPerteEsperee": 8.22,
+      "bsCouponEffectif": 9.7,
+      "bsVols": [
+        37.05,
+        24.51,
+        28.14,
+        24.51
+      ],
+      "bsMatEsperee": 3.3,
       "stockData": [
         {
           "name": "ASML Holding N.V.",
@@ -404,5 +434,7 @@
         }
       ]
     }
-  }
+  },
+  "_couponProbability": 44.5,
+  "_bsRendementNet": -3.9
 }
