@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Grader Annualize Patch v1.0
-// Fix: 4.5% semestriel = 9% annuel dans le grading P1/P4
-// Runs AFTER all grader patches (post-grade adjustment)
+// STRUCTBOARD — Grader Annualize Patch v2.0
+// FORCE annualize coupon BEFORE grading, no flags, no guards
+// 4.5% semestriel → grade with 9%, then restore original after
 // ═══════════════════════════════════════════════════════════════
 
 (function() {
@@ -15,180 +15,174 @@
     'à maturité': 1, 'maturity': 1
   };
 
-  // ─── Global helper: get annualized rate from any product ───
+  // ─── Global helpers ───
   window.getAnnualizedRate = function(product) {
     if (!product) return 0;
     var coupon = product.coupon;
     var rate = 0;
+    var freq = 'annuel';
 
     if (typeof coupon === 'number') {
       rate = coupon;
     } else if (typeof coupon === 'object' && coupon !== null) {
-      rate = parseFloat(coupon.rate || coupon.taux || 0) || 0;
-
-      // If already annualized by freq-fix, return directly
-      if (coupon.annualized === true) return rate;
-
-      // Get frequency
-      var freq = (coupon.frequency || coupon.frequence || '').toLowerCase().trim();
-      var mult = FREQ_MULT[freq] || 1;
-
-      if (mult > 1 && rate > 0 && rate * mult <= 25) {
-        return Math.round(rate * mult * 1000) / 1000;
-      }
+      rate = parseFloat(coupon.rate || 0) || 0;
+      freq = (coupon.frequency || coupon.frequence || 'annuel').toLowerCase().trim();
     }
 
-    // Fallback: check aiParsed
-    if (rate > 0 && product.aiParsed && product.aiParsed.coupon) {
+    // Also check aiParsed for frequency
+    if (product.aiParsed && product.aiParsed.coupon) {
       var aiFreq = (product.aiParsed.coupon.frequency || '').toLowerCase().trim();
-      var aiMult = FREQ_MULT[aiFreq] || 1;
-      if (aiMult > 1 && rate * aiMult <= 25) {
-        return Math.round(rate * aiMult * 1000) / 1000;
-      }
+      if (aiFreq && FREQ_MULT[aiFreq] && FREQ_MULT[aiFreq] > 1) freq = aiFreq;
     }
 
+    var mult = FREQ_MULT[freq] || 1;
+    if (mult > 1 && rate > 0 && rate * mult <= 25) {
+      return Math.round(rate * mult * 1000) / 1000;
+    }
     return rate;
   };
 
-  // ─── Get frequency multiplier ───
   window.getFrequencyMultiplier = function(product) {
     if (!product) return 1;
     var coupon = (typeof product.coupon === 'object') ? product.coupon : {};
     var freq = (coupon.frequency || coupon.frequence || '').toLowerCase().trim();
+    if (!freq && product.aiParsed && product.aiParsed.coupon) {
+      freq = (product.aiParsed.coupon.frequency || '').toLowerCase().trim();
+    }
     return FREQ_MULT[freq] || 1;
   };
 
-  // ─── Post-grade P1 adjustment ───
-  // The freq-fix v7.1 tries to pre-annualize but sometimes fails due to wrapping chain.
-  // This patch runs AFTER grading and fixes P1 if the coupon was infra-annual.
-  function _patchGradeForAnnualization() {
-    if (typeof ProposalGrader === 'undefined' || !ProposalGrader.grade) {
-      return false;
+  // ─── Detect infra-annual frequency ───
+  function _getFreqInfo(product) {
+    if (!product) return null;
+    var coupon = (typeof product.coupon === 'object') ? product.coupon : {};
+    var rate = parseFloat(coupon.rate || 0) || 0;
+    if (rate <= 0) return null;
+
+    // Check frequency from multiple sources
+    var freq = (coupon.frequency || '').toLowerCase().trim();
+    
+    // Fallback to aiParsed
+    if ((!freq || !FREQ_MULT[freq] || FREQ_MULT[freq] <= 1) && product.aiParsed) {
+      var ai = product.aiParsed;
+      if (ai.coupon && ai.coupon.frequency) {
+        freq = ai.coupon.frequency.toLowerCase().trim();
+      }
+      if ((!freq || FREQ_MULT[freq] <= 1) && ai.earlyRedemption && ai.earlyRedemption.frequency) {
+        freq = ai.earlyRedemption.frequency.toLowerCase().trim();
+      }
     }
+
+    // Fallback to product name
+    if (!freq || !FREQ_MULT[freq] || FREQ_MULT[freq] <= 1) {
+      var name = (product.name || '').toLowerCase();
+      if (/semestriel/.test(name)) freq = 'semestriel';
+      else if (/trimestriel/.test(name)) freq = 'trimestriel';
+    }
+
+    var mult = FREQ_MULT[freq];
+    if (!mult || mult <= 1) return null;
+
+    var annual = Math.round(rate * mult * 1000) / 1000;
+    if (annual > 25) return null; // Already annual
+
+    return { rate: rate, freq: freq, mult: mult, annual: annual };
+  }
+
+  // ─── Main patch: FORCE annualize before grade, restore after ───
+  function _patchGrade() {
+    if (typeof ProposalGrader === 'undefined' || !ProposalGrader.grade) return false;
 
     var _prevGrade = ProposalGrader.grade;
 
     ProposalGrader.grade = function(product) {
-      var resultPromise = _prevGrade.call(this, product);
+      var freqInfo = _getFreqInfo(product);
 
-      function _adjustResult(result) {
-        if (!result || !result.pillars || !product) return result;
+      if (freqInfo) {
+        // SAVE original values
+        var origRate = product.coupon.rate;
+        var origFreq = product.coupon.frequency;
+        var origFlag = product._freqFixApplied;
+        var origAnn = product.coupon.annualized;
 
-        // Check if coupon is infra-annual and P1 used the per-period rate
-        var coupon = product.coupon || {};
-        var rawRate = parseFloat(coupon.rate || coupon.taux || 0) || 0;
-        var annualRate = window.getAnnualizedRate(product);
-        var mult = window.getFrequencyMultiplier(product);
+        // FORCE annualize BEFORE grading
+        product.coupon.rate = freqInfo.annual;
+        product.coupon.frequency = 'annuel';
+        product.coupon.annualized = true;
+        product.coupon._origRate = freqInfo.rate;
+        product.coupon._origFreq = freqInfo.freq;
+        product.coupon._mult = freqInfo.mult;
+        product._freqFixApplied = true;
 
-        if (mult <= 1 || rawRate <= 0 || annualRate <= rawRate) return result;
+        console.log('[annualize-v2] PRE-GRADE: ' + freqInfo.rate + '% ' + freqInfo.freq + ' → ' + freqInfo.annual + '%/an');
 
-        // The grader used rawRate but should have used annualRate
-        var p1 = result.pillars.adjustedReturn;
-        if (!p1) return result;
+        var resultPromise = _prevGrade.call(this, product);
 
-        // Check if P1 reasoning mentions the per-period rate (not annualized)
-        var reasoning = p1.reasoning || '';
-        var usedPerPeriod = reasoning.indexOf('Coupon ' + rawRate + '%') >= 0 ||
-                           reasoning.indexOf(rawRate + '%') >= 0;
+        function _postProcess(result) {
+          // RESTORE original values so the form still shows per-period
+          product.coupon.rate = origRate;
+          product.coupon.frequency = origFreq;
+          product.coupon.annualized = origAnn;
+          product._freqFixApplied = origFlag;
 
-        if (usedPerPeriod || !coupon.annualized) {
-          // Calculate P1 boost from annualization
-          // The coupon appears X times lower than it should
-          // Boost proportional to the missed return
-          var missedReturn = annualRate - rawRate;
-          var boost = Math.min(Math.round(missedReturn * 3), 20); // ~3pts per % missed, cap 20
-
-          if (boost > 0) {
-            var oldScore = p1.score;
-            p1.score = Math.min(p1.score + boost, 85);
-
-            // Fix reasoning
-            var freqLabel = (coupon.frequency || '?');
-            p1.reasoning = (p1.reasoning || '').replace(
-              'Coupon ' + rawRate + '%',
-              'Coupon ' + rawRate + '% × ' + mult + ' (' + freqLabel + ') = ' + annualRate + '%/an'
-            );
-
-            // Also add note if not already present
-            if (p1.reasoning.indexOf('annualis') < 0 && p1.reasoning.indexOf('× ' + mult) < 0) {
-              p1.reasoning += ' | ⚠ Coupon annualisé: ' + rawRate + '% × ' + mult + ' = ' + annualRate + '%/an';
-            }
-
-            console.log('[annualize-patch] P1 boost: ' + oldScore + ' → ' + p1.score +
-              ' (coupon ' + rawRate + '% ' + freqLabel + ' = ' + annualRate + '%/an, +' + boost + 'pts)');
+          // Enrich result metadata
+          if (result && result.metadata) {
+            result.metadata.couponPerPeriod = freqInfo.rate;
+            result.metadata.couponAnnualized = freqInfo.annual;
+            result.metadata.couponFrequency = freqInfo.freq;
+            result.metadata.couponMultiplier = freqInfo.mult;
           }
-        }
 
-        // Also fix P4 (Prime vs CAT) — annualized spread matters
-        var p4 = result.pillars.riskPremium;
-        if (p4 && mult > 1) {
-          var p4reasoning = p4.reasoning || '';
-          if (p4reasoning.indexOf(rawRate + '%') >= 0 && p4reasoning.indexOf(annualRate + '%') < 0) {
-            // P4 used per-period rate for spread calculation
-            var spreadBoost = Math.min(Math.round(missedReturn * 2), 12);
-            if (spreadBoost > 0) {
-              var oldP4 = p4.score;
-              p4.score = Math.min(p4.score + spreadBoost, 80);
-              p4.reasoning = p4reasoning.replace(
-                rawRate + '% vs CAT',
-                annualRate + '% (' + rawRate + '% × ' + mult + ') vs CAT'
-              ).replace(
-                'spread ' + rawRate,
-                'spread ' + annualRate
-              );
-              console.log('[annualize-patch] P4 boost: ' + oldP4 + ' → ' + p4.score + ' (+' + spreadBoost + 'pts)');
+          // Fix reasoning to show the calculation
+          if (result && result.pillars) {
+            var p1 = result.pillars.adjustedReturn;
+            if (p1 && p1.reasoning) {
+              // Replace any mention of the annual rate without context
+              if (p1.reasoning.indexOf('Coupon ' + freqInfo.annual + '%') >= 0 && 
+                  p1.reasoning.indexOf('×') < 0) {
+                p1.reasoning = p1.reasoning.replace(
+                  'Coupon ' + freqInfo.annual + '%',
+                  'Coupon ' + freqInfo.rate + '% × ' + freqInfo.mult + ' (' + freqInfo.freq + ') = ' + freqInfo.annual + '%/an'
+                );
+              }
+            }
+            var p4 = result.pillars.riskPremium;
+            if (p4 && p4.reasoning) {
+              if (p4.reasoning.indexOf('spread ' + freqInfo.annual) >= 0 &&
+                  p4.reasoning.indexOf('×') < 0) {
+                p4.reasoning = p4.reasoning.replace(
+                  'spread ' + freqInfo.annual,
+                  'spread ' + freqInfo.rate + '×' + freqInfo.mult + '=' + freqInfo.annual
+                );
+              }
             }
           }
+
+          console.log('[annualize-v2] POST-GRADE: restored rate=' + origRate + '% ' + origFreq + 
+            ' | grade=' + (result ? result.grade + ' ' + result.score : '?'));
+
+          return result;
         }
 
-        // Recalculate total score
-        if (result.pillars.adjustedReturn && result.pillars.underlyingQuality &&
-            result.pillars.portfolioFit && result.pillars.riskPremium) {
-          var newTotal = Math.round(
-            result.pillars.adjustedReturn.score * 0.30 +
-            result.pillars.underlyingQuality.score * 0.25 +
-            result.pillars.portfolioFit.score * 0.20 +
-            result.pillars.riskPremium.score * 0.25
-          );
-          if (newTotal !== result.score) {
-            console.log('[annualize-patch] Total: ' + result.score + ' → ' + newTotal);
-            result.score = newTotal;
-            // Update grade letter
-            if (newTotal >= 75) result.grade = 'A';
-            else if (newTotal >= 60) result.grade = 'B';
-            else if (newTotal >= 45) result.grade = 'C';
-            else if (newTotal >= 25) result.grade = 'D';
-            else result.grade = 'F';
-          }
+        if (resultPromise && typeof resultPromise.then === 'function') {
+          return resultPromise.then(_postProcess);
         }
-
-        // Store annualized info in metadata
-        if (result.metadata) {
-          result.metadata.couponAnnualized = annualRate;
-          result.metadata.couponPerPeriod = rawRate;
-          result.metadata.couponFrequency = coupon.frequency;
-          result.metadata.couponMultiplier = mult;
-        }
-
-        return result;
+        return _postProcess(resultPromise);
       }
 
-      if (resultPromise && typeof resultPromise.then === 'function') {
-        return resultPromise.then(_adjustResult);
-      }
-      return _adjustResult(resultPromise);
+      // No frequency fix needed
+      return _prevGrade.call(this, product);
     };
 
-    console.log('[annualize-patch v1.0] Post-grade P1/P4 annualization fix active');
+    console.log('[annualize-v2.0] FORCE pre-grade annualization active — wraps outermost grade()');
     return true;
   }
 
-  // Retry patching until ProposalGrader is available
-  if (!_patchGradeForAnnualization()) {
+  if (!_patchGrade()) {
     var attempts = 0;
     var iv = setInterval(function() {
       attempts++;
-      if (_patchGradeForAnnualization() || attempts > 60) clearInterval(iv);
+      if (_patchGrade() || attempts > 60) clearInterval(iv);
     }, 100);
   }
 })();
