@@ -238,29 +238,44 @@
   "envelope": "",
   "grading": {
     "grade": "B",
-    "score": 60,
+    "score": 66,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 33,
-        "base": 42,
-        "delta": -9,
-        "reasoning": "Rendement: base 42 → -9 = 33 (En stagflation avec VIX à 22 et DD de 33%, la probabilité d'autocall rapide chute drastiquement, rendant le coupon de 7.5% moins accessible) | Coupon 3.75% × 2 (semestriel) = 7.5%/an, barrière 60% | Barr.coupon 75% | Mat espérée: ~1.6a (prob mat: 0%)"
+        "score": 50,
+        "base": 33,
+        "delta": 17,
+        "reasoning": "BS: P(SJ>75% | vol=26% T=1.6a) = 80.2% | Memoire: prob x 1.08 = 86.7% | Breach 60%: P=12.2% -> perte esperee 4.0%/an | Rdt net: 6.5% - 4.0% = 2.5%/an | Spread vs CAT: 0.0%",
+        "_bs": {
+          "score": 50,
+          "probCoupon": 86.7,
+          "couponEffectif": 7.5,
+          "rendementEspere": 6.5,
+          "perteEsperee": 3.95,
+          "rendementNet": 2.55,
+          "drag": 0,
+          "vols": [
+            25.59
+          ],
+          "matEsperee": 1.6,
+          "reasoning": "P(SJ>75% | vol=26% T=1.6a) = 80.2% | Memoire: prob x 1.08 = 86.7% | Breach 60%: P=12.2% -> perte esperee 4.0%/an | Rdt net: 6.5% - 4.0% = 2.5%/an",
+          "method": "BS-simplifie-v1"
+        }
       },
       "underlyingQuality": {
         "score": 66,
         "base": 75,
         "delta": -9,
-        "reasoning": "Qualité: base 75 → -9 = 66 (Richemont (luxe) très vulnérable en stagflation avec beta 1.04, vol 30.6% et secteur financials évité (-1.63% momentum)) | Worst: RICHEMONT (CIE FIN.) B:55"
+        "reasoning": "Qualité: base 75 → -9 = 66 (Richemont exposé à la consommation discrétionnaire en stagflation, beta 1.04 amplifie le risque, luxe sensible au ralentissement) | Worst: RICHEMONT (CIE FIN.) B:55"
       },
       "portfolioFit": {
         "score": 75,
         "base": 80,
         "delta": -5,
-        "reasoning": "Fit: base 80 → -5 = 75 (En régime stagflationniste, un phoenix sur action cyclique luxe offre peu de diversification défensive)"
+        "reasoning": "Fit: base 80 → -5 = 75 (Duration 6 ans inadaptée en stagflation avec risque de hausse des taux, diversification luxe discutable)"
       },
       "riskPremium": {
         "score": 76,
@@ -269,11 +284,11 @@
         "reasoning": "Capital garanti: spread 3.75×2=7.5% - CAT 2.5% - illiq 0.5% = 4.5% | Illiq. premium +1.4% (-7pts)"
       }
     },
-    "verdict": "Produit déconseillé (score ajusté: 29/100). En stagflation avec Brent >$100 et VIX à 22, Richemont (luxe/financials) cumule tous les risques: secteur évité (-1.63% momentum), DD de 33%, volatilité élevée de 30.6%. La barrière capital à 60% offre peu de protection avec une espérance de maturité de seulement 1.6 ans, exposant à un risque de perte en capital significatif dans ce contexte macro défavorable.",
+    "verdict": "Phoenix à éviter en stagflation. Richemont (luxe cyclique) particulièrement vulnérable avec -33% YTD et volatilité 30.6%. Coupon 7.5% insuffisant face au risque de toucher la barrière 75% dans ce régime macro hostile au luxe. Duration 6 ans expose à la hausse des taux et probabilité autocall quasi-nulle (0%) confirme le piège potentiel.",
     "keyRisks": [
-      "Risque sectoriel majeur: luxe très exposé au ralentissement économique en stagflation",
-      "Volatilité extrême (30.6%) avec DD actuel de 33% proche de la barrière capital 60%",
-      "Choc pétrolier >$100 peut accentuer la rotation défensive au détriment du luxe",
+      "Luxe cyclique en stagflation = double peine (inflation + ralentissement)",
+      "Barrière coupon 75% fragile avec vol 30.6% et momentum négatif",
+      "Duration 6 ans = risque taux maximal si Fed reste hawkish",
       "Barrière à 0.68σ (Danger) — vol 30.6%"
     ],
     "negotiationPoints": [],
@@ -291,14 +306,14 @@
         "duration_years": 3
       },
       "stress": {
-        "return_pct": -10,
-        "return_eur": -10000,
+        "return_pct": 0,
+        "return_eur": 0,
         "probability": 0.35,
-        "duration_years": 4
+        "duration_years": 6
       },
       "worst": {
-        "return_pct": -25,
-        "return_eur": -25000,
+        "return_pct": -40,
+        "return_eur": -40000,
         "probability": 0.2,
         "duration_years": 6
       }
@@ -312,8 +327,8 @@
       "label": "D [35-51]"
     },
     "metadata": {
-      "gradedAt": "2026-03-30T13:52:58.602Z",
-      "durationMs": 20732,
+      "gradedAt": "2026-03-30T15:11:46.106Z",
+      "durationMs": 18099,
       "aiUsed": true,
       "version": "5.2",
       "productType": "autocall",
@@ -328,7 +343,7 @@
       "hasBarrier": true,
       "barrierPct": 60,
       "barrierCouponPct": 75,
-      "couponProbability": null,
+      "couponProbability": 86.7,
       "expectedMaturity": 1.6,
       "maxMaturity": 6,
       "probReachMaturity": 0,
@@ -356,6 +371,15 @@
       "decrementDrag": 0,
       "structureType": "autocall",
       "couponPerPeriod": 3.75,
+      "bsMethod": "BS-simplifie-v1",
+      "bsProbCoupon": 86.7,
+      "bsRendementNet": 2.55,
+      "bsPerteEsperee": 3.95,
+      "bsCouponEffectif": 7.5,
+      "bsVols": [
+        25.59
+      ],
+      "bsMatEsperee": 1.6,
       "stockData": [
         {
           "name": "RICHEMONT (CIE FIN.)",
@@ -371,5 +395,7 @@
         }
       ]
     }
-  }
+  },
+  "_couponProbability": 86.7,
+  "_bsRendementNet": 2.55
 }
