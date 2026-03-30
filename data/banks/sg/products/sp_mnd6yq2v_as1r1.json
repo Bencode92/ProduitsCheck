@@ -1,0 +1,236 @@
+{
+  "id": "sp_mnd6yq2v_as1r1",
+  "name": "Solution Court Terme Boostée sur Panier d'Actions",
+  "type": "dispersion",
+  "structureType": "dispersion",
+  "emitter": "SG Issuer",
+  "guarantor": "Société Générale",
+  "guarantorRating": {
+    "moodys": "A1",
+    "sp": "A"
+  },
+  "underlyings": [
+    "NVIDIA",
+    "Meta Platforms",
+    "Netflix",
+    "Amazon.com",
+    "Alphabet (Ex Google)",
+    "Microsoft",
+    "Apple",
+    "Tesla"
+  ],
+  "underlyingType": "pairs",
+  "currency": "EUR",
+  "maturity": "3 ans",
+  "maturityYears": 3,
+  "coupon": {
+    "rate": 0,
+    "rateIfCalled": null,
+    "rateIfMaturity": null,
+    "type": "participation",
+    "frequency": "annuel",
+    "trigger": null,
+    "memory": false,
+    "paymentTiming": "maturity"
+  },
+  "participationRate": 7,
+  "capitalProtection": {
+    "protected": true,
+    "level": 100,
+    "barrier": null,
+    "barrierCoupon": null,
+    "barrierType": "europeenne"
+  },
+  "earlyRedemption": {
+    "possible": false,
+    "type": "none",
+    "trigger": null,
+    "frequency": "annuel",
+    "startSemester": null,
+    "stepDown": false,
+    "stepDownPct": null
+  },
+  "decrementPct": null,
+  "actualDividendYield": null,
+  "mechanism": "Produit basé sur la performance relative moyenne de 16 paires d'actions technologiques américaines. À maturité, l'investisseur reçoit 100% du capital initial plus une participation de 7% basée sur la moyenne arithmétique des performances relatives des paires.",
+  "risks": [
+    "Protection du capital valable uniquement à maturité",
+    "Risque de crédit Société Générale",
+    "Pas de dividendes",
+    "Risque de liquidité avant échéance",
+    "Rendement dépendant de la dispersion des performances"
+  ],
+  "summary": "Solution 3 ans avec protection totale du capital à maturité et participation de 7% sur la performance relative moyenne d'un panier de 16 paires d'actions technologiques américaines",
+  "aiParsed": {
+    "name": "Solution Court Terme Boostée sur Panier d'Actions",
+    "type": "dispersion",
+    "structureType": "dispersion",
+    "emitter": "SG Issuer",
+    "guarantor": "Société Générale",
+    "guarantorRating": {
+      "moodys": "A1",
+      "sp": "A"
+    },
+    "underlyings": [
+      "NVIDIA",
+      "Meta Platforms",
+      "Netflix",
+      "Amazon.com",
+      "Alphabet (Ex Google)",
+      "Microsoft",
+      "Apple",
+      "Tesla"
+    ],
+    "underlyingType": "pairs",
+    "currency": "EUR",
+    "maturity": "3 ans",
+    "maturityYears": 3,
+    "coupon": {
+      "rate": 0,
+      "rateIfCalled": null,
+      "rateIfMaturity": null,
+      "type": "participation",
+      "frequency": "annuel",
+      "trigger": null,
+      "memory": false,
+      "paymentTiming": "maturity"
+    },
+    "participationRate": 7,
+    "capitalProtection": {
+      "protected": true,
+      "level": 100,
+      "barrier": null,
+      "barrierCoupon": null,
+      "barrierType": "europeenne"
+    },
+    "earlyRedemption": {
+      "possible": false,
+      "type": "none",
+      "trigger": null,
+      "frequency": "annuel",
+      "startSemester": null,
+      "stepDown": false,
+      "stepDownPct": null
+    },
+    "decrementPct": null,
+    "actualDividendYield": null,
+    "mechanism": "Produit basé sur la performance relative moyenne de 16 paires d'actions technologiques américaines. À maturité, l'investisseur reçoit 100% du capital initial plus une participation de 7% basée sur la moyenne arithmétique des performances relatives des paires.",
+    "risks": [
+      "Protection du capital valable uniquement à maturité",
+      "Risque de crédit Société Générale",
+      "Pas de dividendes",
+      "Risque de liquidité avant échéance",
+      "Rendement dépendant de la dispersion des performances"
+    ],
+    "summary": "Solution 3 ans avec protection totale du capital à maturité et participation de 7% sur la performance relative moyenne d'un panier de 16 paires d'actions technologiques américaines",
+    "aiParsed": {
+      "name": "Solution Court Terme Boostée sur Panier d'Actions",
+      "structureType": "dispersion",
+      "emitter": "SG Issuer",
+      "guarantor": "Société Générale",
+      "guarantorRating": {
+        "moodys": "A1",
+        "sp": "A"
+      },
+      "underlyings": [
+        "NVIDIA",
+        "Meta Platforms",
+        "Netflix",
+        "Amazon.com",
+        "Alphabet (Ex Google)",
+        "Microsoft",
+        "Apple",
+        "Tesla"
+      ],
+      "underlyingType": "pairs",
+      "currency": "EUR",
+      "maturity": "3 ans",
+      "maturityYears": 3,
+      "coupon": {
+        "rate": 0,
+        "rateIfCalled": null,
+        "rateIfMaturity": null,
+        "type": "participation",
+        "frequency": "",
+        "trigger": null,
+        "memory": false,
+        "paymentTiming": "maturity"
+      },
+      "participationRate": 7,
+      "capitalProtection": {
+        "protected": true,
+        "level": 100,
+        "barrier": null,
+        "barrierCoupon": null,
+        "barrierType": "europeenne"
+      },
+      "earlyRedemption": {
+        "possible": false,
+        "type": "",
+        "trigger": null,
+        "frequency": "",
+        "startSemester": null,
+        "stepDown": false,
+        "stepDownPct": null
+      },
+      "decrementPct": null,
+      "actualDividendYield": null,
+      "mechanism": "Produit basé sur la performance relative moyenne de 16 paires d'actions technologiques américaines. À maturité, l'investisseur reçoit 100% du capital initial plus une participation de 7% basée sur la moyenne arithmétique des performances relatives des paires.",
+      "risks": [
+        "Protection du capital valable uniquement à maturité",
+        "Risque de crédit Société Générale",
+        "Pas de dividendes",
+        "Risque de liquidité avant échéance",
+        "Rendement dépendant de la dispersion des performances"
+      ],
+      "summary": "Solution 3 ans avec protection totale du capital à maturité et participation de 7% sur la performance relative moyenne d'un panier de 16 paires d'actions technologiques américaines"
+    },
+    "sourceFile": "Produit_3_Solution_Court_Terme_Boostee.pdf"
+  },
+  "sourceFile": "JSON import",
+  "bankId": "sg",
+  "status": "analyzing",
+  "receivedDate": "2026-03-30",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null,
+  "score": {
+    "score": 100,
+    "details": [
+      {
+        "type": "positive",
+        "icon": "✅",
+        "text": "Nouveau sous-jacent absent du book — diversification",
+        "impact": 25,
+        "category": "complementarity"
+      },
+      {
+        "type": "positive",
+        "icon": "✅",
+        "text": "Nouveau type \"dispersion\" absent du book",
+        "impact": 20,
+        "category": "complementarity"
+      },
+      {
+        "type": "positive",
+        "icon": "✅",
+        "text": "Nouvelle contrepartie — diversification émetteur",
+        "impact": 15,
+        "category": "complementarity"
+      },
+      {
+        "type": "positive",
+        "icon": "🔀",
+        "text": "Faible corrélation moyenne (30%) — diversification",
+        "impact": 10,
+        "category": "complementarity"
+      }
+    ],
+    "verdict": "🟢 Excellent candidat — forte complémentarité avec le book.",
+    "breakdown": {
+      "redundancy": 0,
+      "complementarity": 70
+    }
+  }
+}
