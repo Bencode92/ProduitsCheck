@@ -31,7 +31,6 @@
   "capitalProtection": {
     "protected": true,
     "level": 100,
-    "barrier": null,
     "barrierCoupon": 100,
     "barrierType": "europeenne"
   },
@@ -42,10 +41,10 @@
     "frequency": "annuel",
     "startSemester": null,
     "stepDown": false,
-    "stepDownPct": null
+    "stepDownPct": null,
+    "hasAutocall": false,
+    "enabled": false
   },
-  "decrementPct": null,
-  "actualDividendYield": null,
   "mechanism": "Coupon de 6,15% par an si le sous-jacent ayant le moins performé ≥ 100% de son niveau initial. Coupons mémorisés. Capital garanti à l'échéance.",
   "risks": [
     "Risque de marché",
@@ -221,5 +220,11 @@
       "redundancy": 24,
       "complementarity": 50
     }
-  }
+  },
+  "aiCategory": "capital-protege",
+  "aiCategoryLabel": "🛡️ Capital Protégé",
+  "aiCategoryColor": "#4CAF50",
+  "aiOpinion": "Produit offrant un rendement fixe attractif de 6.15% avec protection totale du capital, idéal pour les investisseurs prudents cherchant du rendement sans risque de perte. Le rendement semble élevé pour un produit protégé, mais dépend de la solidité des émetteurs et des frais cachés potentiels.",
+  "aiAnalyzedAt": "2026-03-30T13:02:49.092Z",
+  "envelope": ""
 }
