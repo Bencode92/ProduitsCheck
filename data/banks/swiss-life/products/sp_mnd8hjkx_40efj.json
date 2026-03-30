@@ -18,19 +18,17 @@
   "maturityYears": 10,
   "coupon": {
     "rate": 3,
-    "rateIfCalled": null,
-    "rateIfMaturity": null,
-    "type": "fixe",
     "frequency": "semestriel",
+    "annualized": true,
+    "type": "fixe",
+    "paymentTiming": "periodic",
     "trigger": 91,
-    "memory": false,
-    "paymentTiming": "periodic"
+    "memory": false
   },
   "participationRate": null,
   "capitalProtection": {
     "protected": true,
     "level": 100,
-    "barrier": null,
     "barrierCoupon": 91,
     "barrierType": "europeenne"
   },
@@ -41,10 +39,10 @@
     "frequency": "semestriel",
     "startSemester": 2,
     "stepDown": false,
-    "stepDownPct": null
+    "stepDownPct": null,
+    "hasAutocall": true,
+    "enabled": true
   },
-  "decrementPct": null,
-  "actualDividendYield": null,
   "mechanism": "Remboursement automatique anticipé dès le semestre 2 si l'action Intesa Sanpaolo clôture à un niveau supérieur ou égal à 91% de son niveau initial. Gain de 3% par semestre écoulé, plafonné à 5,85% de rendement semestriel brut maximum. Garantie du capital à l'échéance.",
   "risks": [
     "Risque de perte en capital en cours de vie",
@@ -221,5 +219,12 @@
       "redundancy": 42,
       "complementarity": 35
     }
-  }
+  },
+  "_freqFixApplied": true,
+  "aiCategory": "autocall-mono",
+  "aiCategoryLabel": "⚡ Autocall Mono-actif",
+  "aiCategoryColor": "#06D6A0",
+  "aiOpinion": "Produit attractif avec un coupon fixe de 6% annuel et protection totale du capital, offrant un bon équilibre rendement/sécurité. Le risque principal reste la concentration sur un seul titre bancaire italien et la possibilité de remboursement anticipé dès que le sous-jacent dépasse 91%.",
+  "aiAnalyzedAt": "2026-03-30T13:38:45.016Z",
+  "envelope": ""
 }
