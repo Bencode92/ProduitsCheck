@@ -166,56 +166,84 @@
   "_freqFixApplied": true,
   "envelope": "",
   "grading": {
-    "grade": "C",
-    "score": 48,
+    "grade": "B",
+    "score": 60,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 40,
+        "score": 31,
         "base": 40,
-        "delta": 0,
-        "reasoning": "Rendement: base 40 | Coupon 7%, barrière 60% | Barr.coupon 60% | Mat espérée: ~1.6a (prob mat: 0%)"
+        "delta": -9,
+        "reasoning": "Rendement: base 40 → -9 = 31 (Volatilité élevée (37%) et drawdown important (45%) réduisent fortement la probabilité de toucher les coupons régulièrement) | Coupon 7%, barrière 60% | Barr.coupon 60% | Mat espérée: ~1.6a (prob mat: 0%)"
       },
       "underlyingQuality": {
-        "score": 77,
+        "score": 68,
         "base": 77,
-        "delta": 0,
-        "reasoning": "Qualité: base 77 | Worst: ASML Holding NV B:100"
+        "delta": -9,
+        "reasoning": "Qualité: base 77 → -9 = 68 (ASML très exposé aux cycles technologiques avec beta élevé (1.29), particulièrement vulnérable en stagflation où les valorisations tech souffrent) | Worst: ASML Holding NV B:100"
       },
       "portfolioFit": {
-        "score": 80,
+        "score": 75,
         "base": 80,
-        "delta": 0,
-        "reasoning": "Fit: base 80"
+        "delta": -5,
+        "reasoning": "Fit: base 80 → -5 = 75 (Concentration sur un seul titre tech volatil augmente le risque du portefeuille global)"
       },
       "riskPremium": {
-        "score": 2,
+        "score": 73,
         "base": 9,
-        "delta": 0,
-        "reasoning": "Prime: base 9 | 7% vs CAT 2.5% (spread 4.5%) | Illiq. premium +1.4% (-7pts)"
+        "delta": 5,
+        "reasoning": "Capital garanti: spread 7.0% - CAT 2.5% - illiq 0.5% = 4.0% | Illiq. premium +1.4% (-7pts)"
       }
     },
-    "verdict": "Score 50/100 (base 50).",
+    "verdict": "Produit très risqué avec ASML en drawdown de 45% et volatilité de 37% dans un contexte de stagflation défavorable aux valeurs technologiques. La barrière à 60% offre une protection limitée face à un titre qui a déjà perdu près de la moitié de sa valeur. Le coupon de 7% ne compense pas le risque de perte en capital sur un titre à beta élevé (1.29) dans ce contexte macro hostile.",
     "keyRisks": [
-      "Barrière à 0.56σ (Danger) — vol 37.03%"
+      "Poursuite de la correction tech avec ASML déjà en baisse de 45%",
+      "Titre à beta élevé (1.29) amplifiant les mouvements baissiers",
+      "Concentration totale sur un seul secteur cyclique",
+      "Barrière à 0.56σ (Danger) — vol 37.05%"
     ],
     "negotiationPoints": [],
-    "scenarios": null,
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 14,
+        "return_eur": 14000,
+        "probability": 0.15,
+        "duration_years": 1
+      },
+      "base": {
+        "return_pct": 7,
+        "return_eur": 7000,
+        "probability": 0.25,
+        "duration_years": 1
+      },
+      "stress": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.35,
+        "duration_years": 6
+      },
+      "worst": {
+        "return_pct": -40,
+        "return_eur": -40000,
+        "probability": 0.25,
+        "duration_years": 6
+      }
+    },
     "confidenceInterval": {
-      "low": 42,
-      "high": 58,
+      "low": 37,
+      "high": 53,
       "halfWidth": 8,
       "gradeStable": false,
       "gradeRange": "D-C",
-      "label": "C [42-58]"
+      "label": "C [37-53]"
     },
     "metadata": {
-      "gradedAt": "2026-03-30T06:55:28.136Z",
-      "durationMs": 441,
-      "aiUsed": false,
+      "gradedAt": "2026-03-30T08:19:29.541Z",
+      "durationMs": 13503,
+      "aiUsed": true,
       "version": "5.2",
       "productType": "autocall",
       "marketDataAvailable": true,
@@ -236,16 +264,21 @@
       "maxBeta": 1.29,
       "baseScore": 50,
       "baseGrade": "C",
-      "adjustments": null,
+      "adjustments": {
+        "p1": -9,
+        "p2": -9,
+        "p3": -5,
+        "p4": 5
+      },
       "barrier_sigma": 0.56,
       "barrier_sigma_label": "Danger",
       "barrier_sigma_danger": true,
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 42,
-      "ci_high": 58,
-      "ci_label": "C [42-58]",
+      "ci_low": 37,
+      "ci_high": 53,
+      "ci_label": "C [37-53]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
@@ -256,12 +289,12 @@
           "name": "ASML Holding NV",
           "ticker": "ASML",
           "sector": "Technologie de l'information",
-          "perf_ytd": 26.52,
-          "perf_1y": 92.38,
-          "volatility_3y": 37.03,
+          "perf_ytd": 24.42,
+          "perf_1y": 84.99,
+          "volatility_3y": 37.05,
           "max_drawdown_3y": 45.12,
           "buffett_score": 100,
-          "quality_score": 70,
+          "quality_score": 68,
           "buffett_grade": "A"
         }
       ]
