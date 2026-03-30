@@ -176,118 +176,85 @@
   },
   "grading": {
     "grade": "C",
-    "score": 46,
+    "score": 49,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 38,
-        "base": 48,
-        "delta": -10,
-        "reasoning": "Rendement: base 48 → -10 = 38 (Volatilité élevée (38.94%) et barrière coupon à 60% avec autocall à 95% rendent le profil de paiement très incertain en stagflation) | Coupon 4.5% × 2 (semestriel) = 9%, barrière 50% | Barr.coupon 60% | Mat espérée: ~2.6a (prob mat: 2%)"
+        "score": 55,
+        "base": 55,
+        "delta": 0,
+        "reasoning": "Rendement: base 55 | Coupon 18%, barrière 50% | Barr.coupon 60% | Mat espérée: ~2.5a (prob mat: 1%)"
       },
       "underlyingQuality": {
-        "score": 22,
+        "score": 37,
         "base": 37,
-        "delta": -15,
-        "reasoning": "Qualité: base 37 → -15 = 22 (Secteur minier aurifère très sensible aux taux réels et dollar fort en stagflation, beta faible (0.54) n'offre pas de protection suffisante) | Worst: Indice Solactive GDX EUR AR 5% B:35"
+        "delta": 0,
+        "reasoning": "Qualité: base 37 | Worst: Indice Solactive GDX EUR AR 5% B:35"
       },
       "portfolioFit": {
-        "score": 85,
+        "score": 80,
         "base": 80,
-        "delta": 5,
-        "reasoning": "Fit: base 80 → +5 = 85 (L'or peut offrir une couverture partielle contre l'inflation, mais l'indice décrément 5% érode significativement la performance)"
+        "delta": 0,
+        "reasoning": "Fit: base 80"
       },
       "riskPremium": {
-        "score": 48,
-        "base": 53,
-        "delta": -5,
-        "reasoning": "Prime: base 53 → -5 = 48 (Spread de 9% attractif mais le décrément de 5% représente un coût caché important sur 5 ans) | 4.5% × 2 = 9% vs CAT 2.5% (spread 6.5%)"
+        "score": 29,
+        "base": 36,
+        "delta": 0,
+        "reasoning": "Prime: base 36 | 18% vs CAT 2.5% (spread 15.5%) | Illiq. premium +1.3% (-7pts)"
       }
     },
-    "verdict": "Produit très risqué avec un score final de 38/100 (D). La volatilité extrême de 38.94% et le drawdown historique de -30.84% sur un indice minier avec décrément de 5% créent un profil asymétrique défavorable. Le coupon de 9% ne compense pas le risque de perte en capital avec une barrière à 50% dans un contexte stagflationniste défavorable aux minières aurifères. La probabilité de maturité anticipée est quasi-nulle (2%) avec un seuil autocall à 95%.",
+    "verdict": "Score 51/100 (base 51).",
     "keyRisks": [
-      "Décrément de 5% annuel érode 22% de performance sur 5 ans",
-      "Volatilité de 38.94% rend probable le franchissement de la barrière capital à 50%",
-      "Sensibilité extrême aux taux réels et au dollar en stagflation",
       "Barrière à 0.8σ (Danger) — vol 38.94%"
     ],
     "negotiationPoints": [],
-    "scenarios": {
-      "optimistic": {
-        "return_pct": 9,
-        "return_eur": 9000,
-        "probability": 0.15,
-        "duration_years": 1
-      },
-      "base": {
-        "return_pct": 4.5,
-        "return_eur": 11700,
-        "probability": 0.3,
-        "duration_years": 2.6
-      },
-      "stress": {
-        "return_pct": -20,
-        "return_eur": -20000,
-        "probability": 0.35,
-        "duration_years": 5
-      },
-      "worst": {
-        "return_pct": -40,
-        "return_eur": -40000,
-        "probability": 0.2,
-        "duration_years": 5
-      }
-    },
+    "scenarios": null,
     "confidenceInterval": {
-      "low": 36,
-      "high": 56,
+      "low": 41,
+      "high": 61,
       "halfWidth": 10,
       "gradeStable": false,
-      "gradeRange": "D-C",
-      "label": "C [36-56]"
+      "gradeRange": "D-B",
+      "label": "C [41-61]"
     },
     "metadata": {
-      "gradedAt": "2026-03-29T20:21:16.144Z",
-      "durationMs": 19139,
-      "aiUsed": true,
+      "gradedAt": "2026-03-30T06:55:48.938Z",
+      "durationMs": 261,
+      "aiUsed": false,
       "version": "5.2",
       "productType": "autocall",
       "marketDataAvailable": true,
       "catBenchmark": 2.5,
       "catSource": "fallback-2026",
-      "couponAnnualized": 9,
-      "couponRaw": 4.5,
-      "couponMultiplier": 2,
-      "couponFrequency": "semestriel",
+      "couponAnnualized": 18,
+      "couponRaw": 18,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
       "isInPortfolio": false,
       "hasBarrier": true,
       "barrierPct": 50,
       "barrierCouponPct": 60,
       "couponProbability": null,
-      "expectedMaturity": 2.6,
+      "expectedMaturity": 2.5,
       "maxMaturity": 5,
-      "probReachMaturity": 2,
+      "probReachMaturity": 1,
       "maxBeta": 0.54,
-      "baseScore": 53,
+      "baseScore": 51,
       "baseGrade": "C",
-      "adjustments": {
-        "p1": -10,
-        "p2": -15,
-        "p3": 5,
-        "p4": -5
-      },
+      "adjustments": null,
       "barrier_sigma": 0.8,
       "barrier_sigma_label": "Danger",
       "barrier_sigma_danger": true,
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 36,
-      "ci_high": 56,
-      "ci_label": "C [36-56]",
+      "ci_low": 41,
+      "ci_high": 61,
+      "ci_label": "C [41-61]",
       "issuer_rating": "A",
       "issuer_tier": "IG",
       "hasDecrement": true,
