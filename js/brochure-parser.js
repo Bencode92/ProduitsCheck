@@ -1,5 +1,6 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Brochure Parser v1.4
+// STRUCTBOARD — Brochure Parser v1.5
+// v1.5: Callable rate priority (rateIfCalled) + force fixe + underlyingType none
 // v1.4: Infer barrierCoupon from trigger + fix paymentTiming for autocalls
 // v1.3: Fix capital_garanti detection + conditionnel coupon type
 // v1.2: fix underlyings [object Object]
@@ -125,18 +126,16 @@
       return String(item); }).filter(Boolean);
   }
 
-  // ─── Post-processing (V7.9.4 — 29 rules) ───
+  // ─── Post-processing (v1.5 — 32 rules) ───
   function _postProcess(data) {
     if (!data) return data;
     var c = data.coupon || {};
     var cp = data.capitalProtection || {};
     var er = data.earlyRedemption || {};
 
-    // ── Normalize underlyings/risks to strings ──
     data.underlyings = _normalizeStringArray(data.underlyings);
     data.risks = _normalizeStringArray(data.risks);
 
-    // ── underlyingType normalization ──
     var ut = (data.underlyingType || '').toLowerCase().trim();
     var UND_MAP = {
       'indice': 'single-index', 'index': 'single-index', 'single index': 'single-index',
@@ -155,23 +154,17 @@
       } else data.underlyingType = 'worst-of';
     }
 
-    // ── Capital garanti + no autocall → structureType "capital_garanti" ──
     if (cp.protected && cp.level >= 100 && !er.possible) {
       if (data.structureType === 'autocall' || !data.structureType) {
         data.structureType = 'capital_garanti';
       }
     }
 
-    // ── Coupon with trigger = conditionnel, NOT fixe ──
     if (c.trigger && c.trigger > 0 && c.type === 'fixe') {
       c.type = 'conditionnel';
     }
 
-    // ── V1.4 FIX: Infer barrierCoupon from coupon.trigger or earlyRedemption.trigger ──
-    // If autocall has a trigger and barrierCoupon is null, the coupon at maturity
-    // typically uses the same threshold (or a related one)
     if (!cp.barrierCoupon && er.possible && er.type === 'autocall') {
-      // Priority: coupon.trigger > earlyRedemption.trigger
       var inferredBarrier = c.trigger || er.trigger;
       if (inferredBarrier && inferredBarrier > 0) {
         cp.barrierCoupon = inferredBarrier;
@@ -180,14 +173,11 @@
       }
     }
 
-    // ── V1.4 FIX: Autocall with earlyRedemption → paymentTiming should be "periodic" ──
-    // For autocalls, coupons are paid at each recall, not just at maturity
     if (er.possible && er.type === 'autocall' && c.paymentTiming === 'maturity') {
       c.paymentTiming = 'periodic';
-      console.log('[BrochureParser] Autocall → paymentTiming forced to "periodic" (was "maturity")');
+      console.log('[BrochureParser] Autocall -> paymentTiming forced to "periodic"');
     }
 
-    // ── Cumulative coupon fix ──
     if (c.rate && c.rate > 12) {
       if (c.frequency === 'semestriel' && c.rate > 15) {
         var p = c.rate / 2; if (p >= 2 && p <= 12) c.rate = p;
@@ -196,13 +186,23 @@
       }
     }
 
-    // Rate fallback
-    if (!c.rate && (c.rateIfCalled || c.rateIfMaturity)) c.rate = c.rateIfMaturity || c.rateIfCalled;
+    // v1.5: Rate fallback — callable: prefer rateIfCalled (probable scenario)
+    if (!c.rate && (c.rateIfCalled || c.rateIfMaturity)) {
+      c.rate = (er.type === 'callable') ? (c.rateIfCalled || c.rateIfMaturity) : (c.rateIfMaturity || c.rateIfCalled);
+    }
 
-    // Capital garanti false positive (barrier < 100 but protected=true)
+    // v1.5: Callable: coupon type should be "fixe" (no market condition)
+    if (er.type === 'callable' && (!c.type || c.type === 'conditionnel')) {
+      c.type = 'fixe';
+    }
+
+    // v1.5: Callable with no underlyings -> underlyingType = "none"
+    if (er.type === 'callable' && (!data.underlyings || data.underlyings.length === 0)) {
+      data.underlyingType = 'none';
+    }
+
     if (cp.protected && cp.barrier && cp.barrier < 100) { cp.protected = false; cp.level = null; }
 
-    // Callable → taux_fixe
     if (er.type === 'callable' && data.structureType === 'autocall') data.structureType = 'taux_fixe';
 
     return data;
@@ -404,5 +404,5 @@
   var style = document.createElement('style');
   style.textContent = '.bp-center{max-width:640px;margin:0 auto}.bp-upload-header{text-align:center;margin-bottom:32px}.bp-upload-title{font-size:24px;font-weight:800;color:var(--text-bright);line-height:1.3}.bp-upload-sub{font-size:12px;color:var(--text-muted);margin-top:8px}.bp-dropzone{border:2px dashed var(--border);border-radius:var(--radius-lg);padding:48px 24px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg-card)}.bp-dropzone:hover,.bp-dropzone.dragover{border-color:var(--accent);background:var(--accent-glow)}.bp-error{margin-top:12px;padding:10px 14px;background:var(--red-dim);border:1px solid rgba(248,113,113,.25);border-radius:var(--radius-sm);color:var(--red);font-size:12px}.bp-steps-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:32px}.bp-step{padding:14px;background:var(--bg-card);border-radius:var(--radius);border:1px solid var(--border)}.bp-step-icon{font-size:20px;margin-bottom:6px}.bp-step-title{font-size:11px;font-weight:700;color:var(--text-bright);margin-bottom:4px}.bp-step-desc{font-size:10px;color:var(--text-muted);line-height:1.4}.bp-review-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--border);gap:12px;flex-wrap:wrap}.bp-review-name input{font-size:15px;font-weight:700;width:100%;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text-bright);padding:2px 0;font-family:var(--font);outline:none}.bp-review-name input:focus{border-color:var(--accent)}.bp-review-actions{display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap}.bp-section{margin-bottom:18px}.bp-section-header{display:flex;align-items:center;gap:6px;margin-bottom:10px;border-bottom:2px solid;padding-bottom:5px;font-size:12px;font-weight:800;letter-spacing:.3px;text-transform:uppercase}.bp-section-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px 14px}.bp-span2{grid-column:span 2}.bp-span-full{grid-column:1/-1}.bp-label{font-size:10px;font-weight:700;color:var(--text-muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px}.bp-hint{font-size:9px;color:var(--text-dim);margin-top:2px}.bp-input,.bp-select{width:100%;padding:7px 10px;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:12px;font-family:var(--font);outline:none;box-sizing:border-box;transition:border-color .2s}.bp-input:focus,.bp-select:focus{border-color:var(--border-focus)}.bp-select{cursor:pointer}.bp-select option{background:var(--bg-card);color:var(--text)}.bp-textarea{width:100%;min-height:50px;padding:8px;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:11px;font-family:var(--font);resize:vertical;outline:none;box-sizing:border-box}.bp-textarea:focus{border-color:var(--border-focus)}.bp-toggle{display:flex;align-items:center;gap:7px;cursor:pointer;font-size:12px;color:var(--text)}.bp-toggle input{display:none}.bp-toggle-track{width:32px;height:18px;border-radius:9px;background:var(--border);position:relative;transition:.2s;flex-shrink:0}.bp-toggle input:checked+.bp-toggle-track{background:var(--green)}.bp-toggle-thumb{width:14px;height:14px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:.2s}.bp-toggle input:checked+.bp-toggle-track .bp-toggle-thumb{left:16px}.bp-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;border:1px solid;margin-right:4px}.bank-select-btn.selected{font-weight:700}@media(max-width:768px){.bp-section-grid{grid-template-columns:1fr 1fr}.bp-steps-row{grid-template-columns:1fr}.bp-review-header{flex-direction:column}}';
   document.head.appendChild(style);
-  console.log('[StructBoard] Brochure Parser v1.4 loaded');
+  console.log('[StructBoard] Brochure Parser v1.5 loaded');
 })();
