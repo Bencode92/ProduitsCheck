@@ -44,10 +44,10 @@
     "frequency": "annuel",
     "startSemester": 2,
     "stepDown": false,
-    "stepDownPct": null
+    "stepDownPct": null,
+    "hasAutocall": true,
+    "enabled": true
   },
-  "decrementPct": null,
-  "actualDividendYield": null,
   "mechanism": "Remboursement automatique anticipé à partir de l'année 1 si le panier équi-pondéré clôture à un niveau supérieur ou égal à 95% de son niveau initial. Gain de 9,70% par année écoulée. Protection du capital si le panier reste au-dessus de 60% à l'échéance.",
   "risks": [
     "Risque de perte en capital",
@@ -227,5 +227,11 @@
       "redundancy": 71,
       "complementarity": 25
     }
-  }
+  },
+  "aiCategory": "autocall-multi",
+  "aiCategoryLabel": "⚡ Autocall Multi-actifs",
+  "aiCategoryColor": "#2EC4B6",
+  "aiOpinion": "Produit attractif avec un coupon fixe de 9,7% et une barrière relativement basse à 60% sur 4 sous-jacents diversifiés. Cependant, l'absence de protection du capital et le seuil d'autocall élevé à 95% augmentent significativement le risque de perte en capital en cas de forte baisse des marchés.",
+  "aiAnalyzedAt": "2026-03-30T13:46:05.501Z",
+  "envelope": ""
 }
