@@ -1,0 +1,184 @@
+{
+  "id": "sp_mncvh71o_qx3yh",
+  "name": "SL - ATHENA PRIVILEGE INTESA SANPAOLO MAI 2026",
+  "bankId": "swiss-life",
+  "type": "autocall",
+  "underlyingType": "autre",
+  "underlyings": [
+    "Intesa Sanpaolo S.p.A."
+  ],
+  "currency": "EUR",
+  "maturity": "10 ans",
+  "maturityDate": null,
+  "strikeDate": null,
+  "coupon": {
+    "rate": 3,
+    "rateIfCalled": null,
+    "rateIfMaturity": null,
+    "type": "conditionnel",
+    "frequency": "semestriel",
+    "trigger": 91,
+    "memory": true,
+    "paymentTiming": "maturity"
+  },
+  "capitalProtection": {
+    "protected": true,
+    "level": 100,
+    "barrier": null,
+    "barrierCoupon": 91,
+    "barrierType": "europeenne",
+    "couponFloor": false
+  },
+  "earlyRedemption": {
+    "possible": true,
+    "type": "autocall",
+    "trigger": 91,
+    "frequency": "semestriel",
+    "startSemester": 2,
+    "startYear": null,
+    "stepDown": false,
+    "stepDownPct": null
+  },
+  "scenarios": {
+    "favorable": null,
+    "median": null,
+    "defavorable": null
+  },
+  "risks": [
+    "risque de perte en capital en cours de vie",
+    "risque de défaut de l'émetteur et du garant",
+    "dividendes non réinvestis"
+  ],
+  "rawText": "--- PAGE 1 ---\ni  –   Durée   d’investissement   conseillée   :   10   ans   (hors   cas   de   remboursement  automatique   anticipé ( 3 ) ) .   En   cas   de   revente   avant   la   date   d’échéance ( 2 )   ou   de  remboursement   automatique   anticipé ( 2 ) ,   l’investisseur   prend   un   risque   de   perte  en   capital   non   mesurable   a   priori .  –   Eligibilité   :   Compte - titres,   unité   de   compte   d’un   contrat   d’assurance - vie   ou   de  capitalisation .  –   Période   de   commercialisation   :   jusqu’au   15   mai   2026 ( 4 ) .  –   Code   ISIN   :   XS 3284499780  –   Produit   émis   par   Goldman   Sachs   Finance   Corp   International   Ltd ( 5 )   (l’«  Émetteur   »),   bénéficiant   d’une   garantie   des   sommes   dues   fournie   par   The  Goldman   Sachs   Group,   Inc . ( 5 )   (le   «   Garant   ») .   L’investisseur   est   par  conséquent   exposé   au   risque   de   défaut   de   paiement   et   de   faillite   de  l’Émetteur,   ainsi   que   de   défaut   de   paiement,   faillite   et   de   mise   en  résolution   du   Garant .  –   Dans   le   cadre   d’un   contrat   d’assurance - vie   ou   de   capitalisation,   l’assureur   s’engage  exclusivement   sur   le   nombre   d’unités   de   compte   mais   non   sur   leur   valeur,   qu’il   ne  garantit   pas .   Il   est   précisé   que   l’assureur   d’une   part   et   l’Émetteur   et   le   Garant  d’autre   part,   sont   des   entités   juridiques   distinctes .   Ce   document   n’a   pas   été   rédigé  par   l’assureur .  –   Les   investisseurs   ne   sont   pas   protégés   contre   l'effet   de   l'inflation   dans   le   temps .   Le  rendement   réel   du   produit   corrigé   de   l'inflation   peut   par   conséquent   être   négatif .  ( 1 )   L’investisseur   prend   un   risque   de   perte   en   capital   non   mesurable   a   priori   si   les  titres   de   créance   sont   revendus   avant   la   date   d’échéance ( 2 )   ou   de   remboursement  automatique   anticipé ( 2 ) .   L’investisseur   supporte   le   risque   de   défaut   de   paiement  ou   de   faillite   de   l’Émetteur   et   du   Garant   et   de   mise   en   résolution   du   Garant .  Pour   les   autres   risques   de   perte   en   capital,   voir   pages   suivantes .  ( 2 )   Veuillez   vous   référer   au   tableau   récapitulant   les   principales   caractéristiques  financières   en   page   9   pour   le   détail   des   dates   et   des   barrières .  ( 3 )   Le   remboursement   automatique   anticipé   ne   pourra   se   faire,   en   tout   état   de  cause,   avant   la   fin   de   la   première   année   suivant   la   date   de   constatation   initiale  ( 15   mai   2026 ) .  ( 4 )   Une   fois   le   montant   de   l’enveloppe   atteint,   la   commercialisation   du   titre   «   SL  -   ATHENA   PRIVILEGE   INTESA   SANPAOLO   MAI   2026   »   peut   cesser   à   tout  moment   sans   préavis,   avant   le   15   mai   2026   ce   dont   vous   serez   informé(e),   le   cas  échéant,   par   le   distributeur .  ( 5 )   Goldman   Sachs   Finance   Corp   International   Ltd .   :   l’Émetteur   n’a   sollicité   ou  obtenu   aucune   notation   des   principales   agences   de   notation .   The   Goldman  Sachs   Group,   Inc .   :   Standard   &   Poor’s   BBB+,   Moody’s   A 2 ,   Fitch   A .   Notations   en  vigueur   au   moment   de   la   rédaction   de   la   présente   brochure   le   18   mars   2026 .   Ces  notations   peuvent   être   révisées   à   tout   moment   par   les   agences   de   notation   et   ne  sont   pas   une   garantie   de   solvabilité   de   l’Émetteur   et   du   Garant .   Elles   ne  sauraient   constituer   un   argument   de   souscription   au   titre   de   créance .  Communication   à   caractère   promotionnel  Titre   de   créance   de   droit   anglais   présentant   u n   risque   de   perte   e n   capital   partielle   o u   totale   e n   cours   de   vie (   1 )   et   une   protection   du  capital   à   la   date   d'échéance (   2   )   (ci - après   désigné   le   «   titre   »,   le   «   titre   de   c réan c e   »   ou   le   «   produit   ») .   Produit   de   placement   risqué  alternatif   à   u n   investissement   dynamique   risqué   de   type   «   actions   » .   Il   s’inscrit   dans   le   cadre   de   la   diversification   des   actifs  financiers   d’un   investisseur   et   n’est   pas   destiné   à   e n   constituer   la   totalité .  SL   -   ATHENA PRIVILEGE  INTESA SANPAOLO MAI 2026  Vous   êtes   sur   le   point   d’acheter   un   produit   qui   n’est   pas   simple   et   qui   peut   être   difficile   à   comprendre .\n--- PAGE 2 ---\n2  SL   -   ATHENA   PRIVILEGE   INTESA   SANPAOLO   MAI   2026   est   un   titre   de   créance  présentant   un   risque   de   perte   en   capital   partielle   ou   totale   en   cours   de   vie   et   une   garantie   du  capital   à   la   date   d’échéance,   proposant   aux   investisseurs   de   s’exposer   pour   une   durée   de   1   à  10   années   à   l’évolution   de   l’action   Intesa   Sanpaolo   S . p . A .   (code   Bloomberg   :   ISP   IM   Equity   ;  ISIN   :   IT 0000072618 )   (l’   «   Action   ») .   Le   remboursement   est   donc   conditionné   à   l’évolution  de   l’Action,   calculée   dividendes   non   réinvestis .   Le   cours   initial   de   l’Action   correspond   à   son  cours   de   clôture   constaté   le   15   mai   2026 .  Les   dividendes   ne   sont   pas   réinvestis,   ce   qui   est   moins   favorable   à   l’investisseur   que   lorsque  les   dividendes   sont   réinvestis .  Points   clés  (1)   Veuillez   vous   référer   au   tableau   récapitulant   les   principales   caractéristiques   financières   en   page   9   pour   le   détail   des   dates   et   des   barrières .  (2)   Voir   en   page   3   pour   le   détail   de   la   détermination   du   “Niveau”   et   du   “Niveau   Initial”   de   l'Action .  (3)   Les   montants   remboursés   s'entendent   hors   frais   de   gestion   (pour   les   contrats   d'assurance - vie   ou   de   capitalisation)   ou   de   droits   de   garde   (en   compte -  titres)   et   hors   autres   frais,   prélèvements   sociaux   et   fiscaux   applicables .   Le   Taux   de   Rendement   semestriel   Brut   est   calculé   entre   la   date   d'émission   ( 15   mai  2026 )   et   la   date   de   remboursement   automatique   anticipé ( 1 )   concernée,   ou   d'échéance ( 1 )   selon   les   cas .   Pour   plus   d’informations   sur   le   calcul   des   Taux   de  Rendement   semestriel   de   ce   titre   de   créance   et   sur   les   différents   frais   applicables   à   votre   contrat   d’assurance,   merci   de   vous   rapprocher   de   votre   conseiller  SwissLife .  –   Un remboursement du capital à la date d'échéance (le 22 mai 2036) dès lors que l’investisseur a conservé son placement  pendant 10 ans (hors défaut de paiement ou de faillite de l’Émetteur et/ou du Garant ou de mise en résolution de ce dernier).  –   Un   mécanisme   de   remboursement   automatique   anticipé   du   capital   activable   automatiquement   à   partir   du   semestre   2   à   compter  du   15   mai   2026   (date   de   constatation   initiale)   et   jusqu’au   semestre   19 ,   si   l'Action   clôture   à   un   Niveau ( 2 )   supérieur   ou   égal   à   91 %  de   son   Niveau   Initial ( 2 )   à   une   date   de   constatation   semestrielle ( 1 ) ,   la   première   étant   le   17   mai   2027 .  –   Un objectif de gain de 3% (3)   par semestre écoulé depuis le 15 mai 2026 en cas de remboursement automatique anticipé ou si, en  date de constatation finale (1) , l'Action clôture à un Niveau (2)   supérieur ou égal à 91% de son Niveau Initial (2) . L’investisseur  accepte de limiter ses gains en cas de forte hausse de l'Action (soit un Taux de Rendement semestriel Brut maximum de 5,85% (3) ).  SL   -   ATHENA PRIVILEGE INTESA SANPAOLO MAI 2026  La   présente   brochure   décrit   les   caractéristiques   du   titre   de   créance   «   SL   -   ATHENA   PRIVILEGE   INTESA   SANPAOLO   MAI  2026   »   et   ne   prend   pas   en   compte   les   spécificités   des   contrats   d’assurance   vie   ou   de   capitalisation   dans   le   cadre   desquels   ce  produit   peut   être   proposé .  Les   termes   «   capital   »   et   «   capital   initial   »   utilisés   dans   cette   brochure   désignent   la   valeur   nominale   des   titres   de   créance  «   SL   -   ATHENA   PRIVILEGE   INTESA   SANPAOLO   MAI   2026   »,   soit   1   000   EUR .   Tous   les   remboursements   présentés   dans  cette   brochure   (dont   les   gains   éventuels)   sont   calculés   sur   la   base   de   cette   valeur   nominale,   hors   frais,   commissions,  prélèvements   sociaux   et   fiscaux   applicables   et   sauf   faillite   ou   défaut   de   paiement   de   l’Émetteur   et/ou   du   Garant   et/ou   mise   en  résolution   du   Garant .   L’attention   des   investisseurs   est   donc   attirée   sur   le   fait   que   la   valeur   de   remboursement   du   produit   ne  constitue   donc   pas   nécessairement   le   montant   qui   leur   est   effectivement   restitué .  Le   Taux   de   Rendement   semestriel   utilisé   dans   cette   brochure   est   brut,   sans   prise   en   compte   des   frais   de   gestion   pour   les  contrats   d’assurance - vie   ou   de   capitalisation   ou   d’éventuels   droits   de   garde   en   compte - titres,   des   autres   frais   et   des  prélèvements   sociaux   et   fiscaux   applicables .   Il   est   calculé   pour   un   investissement   de   1   000   EUR   entre   la   date   d’émission,   le  15   mai   2026 ,   et   la   date   de   remboursement   automatique   anticipé ( 1 )   concernée,   ou   d’échéance ( 1 )   selon   les   cas .   En   cas   d’achat  après   le   15   mai   2026   (date   de   consta",
+  "aiParsed": {
+    "name": "SL - ATHENA PRIVILEGE INTESA SANPAOLO MAI 2026",
+    "type": "autocall",
+    "structureType": "autocall",
+    "emitter": "Goldman Sachs Finance Corp International Ltd",
+    "guarantor": "The Goldman Sachs Group, Inc.",
+    "guarantorRating": {
+      "moodys": "A2",
+      "sp": "BBB+",
+      "fitch": "A"
+    },
+    "isin": "XS3284499780",
+    "underlyings": [
+      "Intesa Sanpaolo S.p.A."
+    ],
+    "underlyingType": "single-stock",
+    "nUnderlyings": 1,
+    "nPairs": null,
+    "currency": "EUR",
+    "maturity": "10 ans",
+    "maturityYears": 10,
+    "coupon": {
+      "rate": 3,
+      "rateIfCalled": null,
+      "rateIfMaturity": null,
+      "type": "conditionnel",
+      "frequency": "semestriel",
+      "trigger": 91,
+      "memory": true,
+      "paymentTiming": "maturity"
+    },
+    "participationRate": null,
+    "capitalProtection": {
+      "protected": true,
+      "level": 100,
+      "barrier": null,
+      "barrierCoupon": 91,
+      "barrierType": "europeenne",
+      "couponFloor": false
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "autocall",
+      "trigger": 91,
+      "frequency": "semestriel",
+      "startSemester": 2,
+      "startYear": null,
+      "stepDown": false,
+      "stepDownPct": null
+    },
+    "decrementPct": null,
+    "actualDividendYield": null,
+    "historicalSimulations": null,
+    "scenarios": {
+      "favorable": null,
+      "median": null,
+      "defavorable": null
+    },
+    "risks": [
+      "risque de perte en capital en cours de vie",
+      "risque de défaut de l'émetteur et du garant",
+      "dividendes non réinvestis"
+    ],
+    "mechanism": "Autocall avec coupon mémoire 3%/semestre si action ≥91%, capital garanti à échéance",
+    "summary": "Autocall 10Y sur Intesa Sanpaolo, coupon 3%/sem si ≥91%, capital garanti à échéance"
+  },
+  "aiSummary": "## DESCRIPTION\n**Produit** : SL - ATHENA PRIVILEGE INTESA SANPAOLO MAI 2026  \n**Type** : Autocall  \n**Émetteur** : Goldman Sachs Finance Corp International Ltd  \n**Sous-jacent** : Intesa Sanpaolo S.p.A.  \n**Maturité** : 10 ans  \n\n## MÉCANISME\nAutocall avec coupon mémoire de 3% par semestre si l'action Intesa Sanpaolo ≥ 91% de son niveau initial. Les coupons non versés sont mémorisés et payés ultérieurement si la condition est remplie.\n\n## RENDEMENT\n- **Coupon** : 3% semestriel conditionnel\n- **Fréquence** : Semestrielle  \n- **Condition** : Action ≥ 91% du niveau initial\n- **Mécanisme mémoire** : Oui\n- **Paiement** : À maturité\n\n## PROTECTION\n- **Capital garanti à échéance** : 100%\n- **Barrière coupon** : 91% (européenne)\n- **Protection en cours de vie** : Non\n\n## REMBOURSEMENT ANTICIPÉ\n- **Autocall actif** : Oui\n- **Déclencheur** : 91% du niveau initial\n- **Fréquence** : Semestrielle\n- **Début** : 2ème semestre\n- **Step-down** : Non\n\n## SCÉNARIOS\nNon communiqués\n\n## POINTS ATTENTION\n- Risque de perte en capital en cours de vie\n- Risque de défaut de l'émetteur et du garant\n- Dividendes non réinvestis",
+  "sourceFile": "Brochure ATHENA PRIVILEGE INTENSA SANPAOLO MAI 2026.pdf",
+  "structureType": "autocall",
+  "participationRate": null,
+  "historicalSimulations": null,
+  "guarantorRating": {
+    "moodys": "A2",
+    "sp": "BBB+",
+    "fitch": "A"
+  },
+  "mechanism": "Autocall avec coupon mémoire 3%/semestre si action ≥91%, capital garanti à échéance",
+  "nPairs": null,
+  "nUnderlyings": 1,
+  "decrementPct": null,
+  "actualDividendYield": null,
+  "maturityYears": 10,
+  "aiCategory": "autocall-mono",
+  "aiCategoryLabel": "⚡ Autocall Mono-actif",
+  "aiCategoryColor": "#06D6A0",
+  "aiOpinion": "Produit autocall mono sous-jacent avec un rendement attractif de 6% annuel (3% semestriel) et protection totale du capital, mais concentré sur un seul titre bancaire italien présentant une volatilité élevée. Le seuil d'autocall à 91% est relativement exigeant et la maturité longue de 10 ans expose à un risque de liquidité important.",
+  "aiAnalyzedAt": "2026-03-30T07:34:32.525Z",
+  "status": "analyzing",
+  "receivedDate": "2026-03-30",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null,
+  "score": {
+    "score": 18,
+    "details": [
+      {
+        "type": "warning",
+        "icon": "📦",
+        "text": "Même type que 4 produit(s) — 80% du book en \"Autocall / Phoenix\"",
+        "impact": 20,
+        "category": "redundancy"
+      },
+      {
+        "type": "info",
+        "icon": "🏦",
+        "text": "Même émetteur que 4 produit(s) — concentration Swiss Life",
+        "impact": 16,
+        "category": "redundancy"
+      },
+      {
+        "type": "positive",
+        "icon": "🔀",
+        "text": "Faible corrélation moyenne (30%) — diversification",
+        "impact": 10,
+        "category": "complementarity"
+      },
+      {
+        "type": "info",
+        "icon": "📅",
+        "text": "Maturité similaire (±6 mois) à 2 produit(s)",
+        "impact": 6,
+        "category": "redundancy"
+      }
+    ],
+    "verdict": "⛔ Fortement déconseillé — duplication quasi-totale.",
+    "breakdown": {
+      "redundancy": 42,
+      "complementarity": 10
+    }
+  }
+}
