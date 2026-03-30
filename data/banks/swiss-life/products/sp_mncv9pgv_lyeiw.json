@@ -1,0 +1,167 @@
+{
+  "id": "sp_mncv9pgv_lyeiw",
+  "name": "SL - PHOENIX MEMOIRE SEMESTRIEL RICHEMONT AVRIL 2026",
+  "bankId": "swiss-life",
+  "type": "autocall",
+  "underlyingType": "autre",
+  "underlyings": [
+    "RICHEMONT (CIE FIN.)"
+  ],
+  "currency": "EUR",
+  "maturity": "6 ans",
+  "maturityDate": null,
+  "strikeDate": null,
+  "coupon": {
+    "rate": 3.75,
+    "rateIfCalled": null,
+    "rateIfMaturity": null,
+    "type": "conditionnel",
+    "frequency": "semestriel",
+    "trigger": 75,
+    "memory": true,
+    "paymentTiming": "periodic"
+  },
+  "capitalProtection": {
+    "protected": false,
+    "level": null,
+    "barrier": 60,
+    "barrierCoupon": 75,
+    "barrierType": "europeenne",
+    "couponFloor": false
+  },
+  "earlyRedemption": {
+    "possible": true,
+    "type": "autocall",
+    "trigger": 100,
+    "frequency": "semestriel",
+    "startSemester": 2,
+    "startYear": null,
+    "stepDown": false,
+    "stepDownPct": null
+  },
+  "scenarios": {
+    "favorable": "Remboursement anticipé S2 avec coupon total 7.5% (TRA 7.42%)",
+    "median": "Remboursement à maturité avec capital protégé si action ≥60% (TRA 1.95%)",
+    "defavorable": "Perte en capital si action <60% à maturité (TRA -10.85% dans exemple)"
+  },
+  "risks": [
+    "Perte en capital partielle ou totale",
+    "Plafonnement des gains"
+  ],
+  "rawText": "--- PAGE 1 ---\nPUBLIC  •  •  •  •  •  •  •  •  )\n--- PAGE 2 ---\nPUBLIC  Un   mécanisme   de   remboursement   automatique   anticipé   dès   le   semestre   2   :  Du   semestre   2   au   semestre   11 ,   à   la   date   de   constatation   semestrielle   correspondante,   on   observe   le   cours   de   l’action   depuis   l’origine .  Si   l’action   RICHEMONT   (CIE   FIN . )   enregistre   une   performance   supérieure   ou   égale   à   la   Barrière   de   Remboursement   Anticipé,   le  mécanisme   de   remboursement   automatique   anticipé   est   automatiquement   activé,   et   l’investisseur   reçoit ( 1 )   à   la   date   de   remboursement  anticipé   :  L’intégralité du capital initial (2)  +  Un coupon de 3,75% par semestre écoulé depuis la date de constatation initiale défini ci -  dessus dans le mécanisme de versement du coupon conditionnel  (Taux de Rendement Annuel Brut compris entre au maximum 7.58% et minimum 6.45% dans ce cas, selon l’année de remboursement)  Un   mécanisme   de   remboursement   à   l’échéance   des   12   semestres   :  À   l'issue   des   12   semestres,   à   la   date   de   constatation   finale,   si   le   mécanisme   de   remboursement   automatique   anticipé   n’a   pas   été   activé  précédemment,   on   observe   le   cours   de   l’action,  ▪   Si   le   cours   de   l’action   enregistre   une   performance   supérieure   ou   égale   à   - 25 %   depuis   l’origine,   l’investisseur   reçoit ( 1 )   :  L’intégralité du capital initial (2)  +  Un coupon de 3,75% par semestre écoulé depuis la date de constatation initiale défini ci -  dessus dans le mécanisme de versement du coupon conditionnel  (Taux de Rendement Annuel Brut compris entre au maximum 7.59% et minimum 6.35% dans ce cas)  ▪   Si   le   cours   de   l’action   enregistre   une   performance   strictement   inférieure   à   - 40 %   depuis   l’origine ,   l’investisseur   reçoit   ( 1 )   :  L’intégralité du capital initial (2)   diminué de la baisse de l'action  Dans ce scénario, l’investisseur subit une perte en capital à l’échéance. Cette perte en capital  peut être partielle ou totale.  (Taux de Rendement Annuel Brut inférieur à   - 8.12% dans ce cas)  ▪   Si   le   cours   de   l’action   enregistre   une   performance   inférieure   à   - 25 %   mais   supérieure   ou   égale   à   - 40 %   depuis   l’origine ,  l’investisseur   reçoit   ( 1 )   :  L’intégralité du capital initial (2)  (Taux de Rendement Annuel Brut minimum de 0%)  Barrières de Remboursement Anticipé activant le mécanisme automatique de remboursement anticipé:  Un   mécanisme   de   versement   du   coupon   conditionnel :  Du   semestre   1   au   semestre   12 ,   à   chaque   date   de   constatation   semestrielle   correspondante,   on   observe   le   cours   de   l’action   depuis  l’origine .  Si   le   cours   de   l’action   RICHEMONT   (CIE   FIN . )   enregistre   une   performance   supérieure   ou   égale   à   - 25 % ,   l’investisseur   reçoit ( 1 )   à   la   date  de   versement   du   coupon   correspondante   :  Un coupon de 3,75%  +  Un coupon de 3,75% par semestre écoulé au titre duquel aucun coupon n’aurait été versé  précédemment  Semestres   2 - 11  Niveau de la Barrière de Remboursement Anticipé   100%  ( 1 )   Hors   commission   de   souscription   ou   frais   d’entrée,   de   rachat,   d’arbitrage   et   de   gestion   liés   aux   contrats   d’assurance - vie   ou   de   capitalisation,   et/ou   fiscalité   et   prélèvements   sociaux  applicables .  ( 2 )   Les   termes   «   capital   initial   »   ou   «   capital   »   utilisés   dans   cette   brochure   désignent   la   valeur   nominale   des   titres   «   SL   –   PHOENIX   MEMOIRE   SEMESTRIEL   RICHEMONT   AVRIL   2026   »   soit   1   000  euros .   Le   montant   remboursé   est   calculé   sur   la   base   de   la   valeur   nominale   des   titres   «   SL   –   PHOENIX   MEMOIRE   SEMESTRIEL   RICHEMONT   AVRIL   2026   »,   hors   frais   et   fiscalité   applicables   au  cadre   d’investissement .\n--- PAGE 3 ---\nPUBLIC  ILLUSTRATIONS  Les   données   chiffrées   utilisées   dans   ces   illustrations   n’ont   qu’une   valeur   indicative   et   informative,   l’objectif   étant   de   décrire   le  mécanisme   du   produit .   Elles   ne   préjugent   en   rien   de   résultats   futurs   et   ne   sauraient   constituer   en   aucune   manière   une   offre  commerciale .   Ces   données   sont   présentées   hors   frais   et   fiscalité   applicables   au   cadre   de   l’investissement .  ▪   À   l’issue   des   semestres   2   à   11 ,   le   cours   de   l’action   enregistre   une  performance   inférieure   à   la   Barrière   de   Remboursement   Anticipé  correspondante   depuis   l’origine .   Le   produit   n’est   donc   pas   rappelé   par  anticipation .  ▪   À   l’échéance   des   12   semestres,   le   cours   de   l’action   enregistre   une  performance   inférieure   à   - 40 %   depuis   l’origine   (soit   50 %   de   son   niveau  initial ( 3 )   dans   ce   cas) .   L’investisseur   reçoit   alors   la   valeur   finale   de  l'action   enregistrée   à   cette   date,   soit   50 %   de   son   capital   initial ( 2 ) .  Dans   ce   scénario,   le   TRA ( 1 )   brut   est   - 10 , 85 % .  ▪   Dans   ce   scénario,   l’investisseur   subit   une   perte   en   capital   à  l’échéance .   Dans   le   cas   le   plus   défavorable,   la   perte   en   capital   peut  être   totale   et   le   montant   remboursé   nul .  ▪   Remboursement   à   maturité   :   50 %   du   capital   initial ( 2 ) .  ▪   À   l’issue   du   semestre   2 ,   le   cours   de   l’action   enregistre   une   performance  supérieure   à   la   barrière   de   versement   de   coupon .   L’investisseur   reçoit   à   la  date   de   versement   du   coupon   correspondante,   le   coupon   de   3 , 75 %   majoré  du   coupon   non   précédemment   perçu   au   semestre   1 ,   soit   un   coupon   total   de  7 , 5 % .  ▪   À   l’issue   du   semestre   3 ,   le   cours   de   l’action   enregistre   une   performance  supérieure   à   la   barrière   de   versement   de   coupon .   L’investisseur   reçoit   à   la  date   de   versement   du   coupon   correspondante,   le   coupon   de   3 , 75 % .  ▪   À   l’échéance   des   12   semestres,   le   cours   de   l’action   enregistre   une  performance   supérieure   ou   égale   à   - 40 %   et   inférieure   à   - 25 %   depuis   l’origine  (soit   65 %   de   son   niveau   initial   ( 3 )   dans   ce   cas) .   L’investisseur   reçoit   alors  l’intégralité   de   son   capital   initial ( 2 ) .  ▪   Dans   ce   scénario,   le   TRA ( 1 )   brut   est   égal   à   1 , 95 %   (contre   un   TRA ( 1 )   brut   de  - 6 , 89 %   dans   le   cas   d’un   investissement   direct   dans   l'action) .  ▪   Remboursement à maturité : 100% du capital initial (2) .  ▪   À   l’issue   du   semestre   1 ,   le   cours   de   l’action   enregistre   une   performance  supérieure   à   la   barrière   de   versement   de   coupon .   L’investisseur   reçoit   à   la  date   de   versement   du   coupon   correspondante,   le   coupon   de   3 , 75 % .  ▪   À   l’issue   du   semestre   2 ,   le   cours   de   l’action   enregistre   une   performance  supérieure   à   la   Barrière   de   Remboursement   Anticipé   correspondante   (de  + 20 %   dans   cet   exemple) .   Par   conséquent,   le   mécanisme   de  remboursement   anticipé   est   automatiquement   activé .  ▪   L’investisseur   reçoit   alors   l’intégralité   du   capital   initial ( 2 )   ainsi   que   le  coupon   de   3 , 75 % ,   soit   103 , 75 %   du   capital   initial ( 2 ) .  ▪   Dans   ce   scénario,   le   TRA ( 1 )   brut   est   alors   égal   à   7 , 42 %   (contre   un   TRA ( 1 )  brut   de   19 , 42 %   dans   le   cas   d’ un   investissement   direct   dans   l'action),   du   fait  du   mécanisme   de   plafonnement   des   gains .  ▪   Remboursement à l’issue du semestre 2: 103,75% du capital initial (2) .  Le rendement du support «   SL   –   PHOENIX MEMOIRE SEMESTRIEL RICHEMONT AVRIL 2026   » est très sensible à  l’échéance à une faible variation du cours de l'action autour des seuils de 60% et 75%.  ▪   SCÉNARIO DÉFAVORABLE  Marché fortement baissier à long terme  ▪   SCÉNARIO MÉDIAN  Marché baissier à long terme  ▪   SCÉNARIO FAVORABLE  Marché fortement haussier à court terme  Évolution du cours de l'action   Seuil de perte en capital à l’échéance (60%)   Versement de coupons  Fin de vie du produit   Seuil d’activation du mécanisme de remboursement  automatique anticipé (100%)   Plafonnement des gains  Valeur de remboursement du support SL   –  PHOENIX MEMOIRE SEMESTRIEL  RICHEMONT AVRIL 2026  Seuil d’activation du mécanisme de versement de coupon  (75%)  (1)   Dans   l’ensemble   des   scénarii   présentés   ci - dessus,   TRA   désigne   le   Taux   de   Rendement   Annuel   (hors   commission   de   souscription   ou   frais   d’entrée,   de   rachat,   d’arbitrage   et   de   gestion   liés,   le  cas   échéant,   au   contrat   d’assurance   vie,   de   capitalisation   ou   au   compte - titres,   et   /   ou   fiscalité   et   prélèvements   sociaux   applicables) .  (2)   Les   termes   «   capital   initial   »   ou   «   capital   »   utilisés   dans   cette   brochure   désignent   la   valeur   nominale   des   titres   «   SL   –   PHOENIX   MEMOIRE   SEMESTRIEL   RICHEMONT   AVRIL   2026 »   soit   1   000  euros .   Le   montant   remboursé   est   calculé   sur   la   base   de   la   valeur   nominale   des   titres   «   SL   –   PHOENIX   MEMOIRE   SEMESTRIEL   RICHEMONT   AVRIL   2026 »,   hors   frais   et   fiscalité   applicables   au  cadre   d’investissement .  (3)   Veuillez   vous   référer   à   la   définition   en   page   5 .  0%  20%  40%  60%  80%  100%  120%  0   2   4   6   8   10   12  50%  0%  20%  40%  60%  80%  100%  120%  0   2   4   6   8   10   12",
+  "aiParsed": {
+    "name": "SL - PHOENIX MEMOIRE SEMESTRIEL RICHEMONT AVRIL 2026",
+    "type": "autocall",
+    "structureType": "autocall",
+    "emitter": "HSBC Continental Europe",
+    "guarantor": null,
+    "guarantorRating": null,
+    "isin": "FR0014016TT0",
+    "underlyings": [
+      "RICHEMONT (CIE FIN.)"
+    ],
+    "underlyingType": "single-stock",
+    "nUnderlyings": 1,
+    "nPairs": null,
+    "currency": "EUR",
+    "maturity": "6 ans",
+    "maturityYears": 6,
+    "coupon": {
+      "rate": 3.75,
+      "rateIfCalled": null,
+      "rateIfMaturity": null,
+      "type": "conditionnel",
+      "frequency": "semestriel",
+      "trigger": 75,
+      "memory": true,
+      "paymentTiming": "periodic"
+    },
+    "participationRate": null,
+    "capitalProtection": {
+      "protected": false,
+      "level": null,
+      "barrier": 60,
+      "barrierCoupon": 75,
+      "barrierType": "europeenne",
+      "couponFloor": false
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "autocall",
+      "trigger": 100,
+      "frequency": "semestriel",
+      "startSemester": 2,
+      "startYear": null,
+      "stepDown": false,
+      "stepDownPct": null
+    },
+    "decrementPct": null,
+    "actualDividendYield": null,
+    "historicalSimulations": null,
+    "scenarios": {
+      "favorable": "Remboursement anticipé S2 avec coupon total 7.5% (TRA 7.42%)",
+      "median": "Remboursement à maturité avec capital protégé si action ≥60% (TRA 1.95%)",
+      "defavorable": "Perte en capital si action <60% à maturité (TRA -10.85% dans exemple)"
+    },
+    "risks": [
+      "Perte en capital partielle ou totale",
+      "Plafonnement des gains"
+    ],
+    "mechanism": "Phoenix mémoire avec autocall 100% dès S2, coupon 3.75%/sem si ≥75%, protection capital si ≥60% à maturité",
+    "summary": "Phoenix mémoire 6 ans sur Richemont, coupon 3.75%/sem si ≥75%, autocall 100% dès S2, protection 60%"
+  },
+  "aiSummary": "## DESCRIPTION\nProduit structuré autocall Phoenix mémoire sur action Richemont émis par HSBC Continental Europe. Durée maximale 6 ans avec coupons semestriels conditionnels de 3.75% et effet mémoire.\n\n## MÉCANISME\nPhoenix mémoire avec observation semestrielle du cours Richemont. Si action ≥75% du niveau initial : versement coupon 3.75% + coupons non versés précédemment (effet mémoire). Si action <75% : pas de coupon mais mémorisation pour versement ultérieur.\n\n## RENDEMENT\n- Coupon conditionnel : 3.75% semestriel si Richemont ≥75%\n- Effet mémoire : récupération des coupons non versés\n- TRA favorable : 7.42% (remboursement S2)\n- TRA médian : 1.95% (remboursement à maturité)\n\n## PROTECTION\n- Capital NON garanti\n- Barrière protection 60% à maturité uniquement (barrière européenne)\n- Si Richemont <60% à échéance : perte en capital proportionnelle\n- Pas de protection sur les coupons\n\n## REMBOURSEMENT ANTICIPÉ\n- Autocall actif dès semestre 2\n- Déclenchement si Richemont ≥100% du niveau initial\n- Fréquence : chaque semestre\n- Remboursement : 100% capital + coupons dus\n\n## SCÉNARIOS\n**Favorable** : Richemont ≥100% au S2, remboursement 107.5% (capital + 2 coupons)\n**Médian** : Richemont entre 60-100% à maturité, remboursement 100% + coupons perçus\n**Défavorable** : Richemont <60% à maturité, perte capitale (ex: -10.85% TRA)\n\n## POINTS ATTENTION\n- Risque perte totale si Richemont <60% à maturité\n- Gains plafonnés aux coupons (pas de participation hausse)\n- Dépendance performance unique action Richemont\n- Risque émetteur HSBC Continental Europe",
+  "sourceFile": "Brochure PHOENIX MEMOIRE SEMESTRIEL RICHEMONT AVRIL 2026.pdf",
+  "structureType": "autocall",
+  "participationRate": null,
+  "historicalSimulations": null,
+  "guarantorRating": null,
+  "mechanism": "Phoenix mémoire avec autocall 100% dès S2, coupon 3.75%/sem si ≥75%, protection capital si ≥60% à maturité",
+  "nPairs": null,
+  "nUnderlyings": 1,
+  "decrementPct": null,
+  "actualDividendYield": null,
+  "maturityYears": 6,
+  "aiCategory": "phoenix-mono",
+  "aiCategoryLabel": "🎯 Phoenix Mono-actif",
+  "aiCategoryColor": "#3B82F6",
+  "aiOpinion": "Produit offrant un rendement attractif de 7,5% annuel avec effet mémoire, mais exposé au risque action sur un seul titre (Richemont) sans protection du capital. La barrière à 60% et l'autocall à 100% offrent un bon équilibre risque/rendement, mais la concentration sectorielle (luxe) et l'absence de protection restent des points de vigilance.",
+  "aiAnalyzedAt": "2026-03-30T07:28:44.915Z",
+  "status": "analyzing",
+  "receivedDate": "2026-03-30",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null,
+  "score": {
+    "score": 24,
+    "details": [
+      {
+        "type": "warning",
+        "icon": "📦",
+        "text": "Même type que 4 produit(s) — 80% du book en \"Autocall / Phoenix\"",
+        "impact": 20,
+        "category": "redundancy"
+      },
+      {
+        "type": "info",
+        "icon": "🏦",
+        "text": "Même émetteur que 4 produit(s) — concentration Swiss Life",
+        "impact": 16,
+        "category": "redundancy"
+      },
+      {
+        "type": "positive",
+        "icon": "🔀",
+        "text": "Faible corrélation moyenne (30%) — diversification",
+        "impact": 10,
+        "category": "complementarity"
+      }
+    ],
+    "verdict": "⛔ Fortement déconseillé — duplication quasi-totale.",
+    "breakdown": {
+      "redundancy": 36,
+      "complementarity": 10
+    }
+  }
+}
