@@ -231,81 +231,81 @@
   "envelope": "",
   "grading": {
     "grade": "B",
-    "score": 64,
+    "score": 60,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 38,
+        "score": 44,
         "base": 48,
-        "delta": -10,
-        "reasoning": "Rendement: base 48 → -10 = 38 (En stagflation avec VIX à 22, la probabilité de toucher les coupons diminue malgré la barrière à 60%, surtout avec une volatilité de 38.92%) | Coupon 4.5% × 2 (semestriel) = 9%/an, barrière 50% | Barr.coupon 60% | Mat espérée: ~2.5a (prob mat: 1%)"
+        "delta": 12,
+        "reasoning": "Rendement: base 48 → +12 = 60 (En stagflation, l'or bénéficie historiquement d'une surperformance comme hedge inflation, augmentant fortement la probabilité du coupon à 60%) | Coupon 4.5% × 2 (semestriel) = 9%/an, barrière 50% | Barr.coupon 60% | Mat espérée: ~2.5a (prob mat: 1%) | ⚠ Décrément 5% vs div réel 0.97% = drag 4.03%/an (-16pts)"
       },
       "underlyingQuality": {
         "score": 54,
         "base": 39,
         "delta": 15,
-        "reasoning": "Qualité: base 39 → +15 = 54 (L'or est un actif refuge parfait en stagflation (inflation + ralentissement), le beta faible de 0.53 offre une décorrélation précieuse) | Worst: Indice Solactive GDX EUR AR 5% B:35"
+        "reasoning": "Qualité: base 39 → +15 = 54 (Beta défensif 0.53 idéal en stagflation + materials secteur neutre mais l'or surperforme en régime inflationniste avec Brent >$100) | Worst: Indice Solactive GDX EUR AR 5% B:35"
       },
       "portfolioFit": {
         "score": 90,
         "base": 80,
         "delta": 10,
-        "reasoning": "Fit: base 80 → +10 = 90 (En régime stagflationniste, une exposition aux minières aurifères via un produit structuré diversifie idéalement un portefeuille)"
+        "reasoning": "Fit: base 80 → +10 = 90 (Allocation or/minières cruciale en stagflation pour protéger le pouvoir d'achat, diversification parfaite vs tech sous pression)"
       },
       "riskPremium": {
-        "score": 83,
+        "score": 63,
         "base": 0,
         "delta": 0,
-        "reasoning": "Capital garanti: spread 4.5×2=9.0% - CAT 2.5% - illiq 0.5% = 6.0% | Illiq. premium +1.3% (-7pts)"
+        "reasoning": "Capital garanti: spread 4.5×2=9.0% - CAT 2.5% - illiq 0.5% = 6.0% | ⚠ Spread réel après drag: 9% - 4.03% drag - 2.5% CAT = 2.47% (-20pts) | Illiq. premium +1.3% (-7pts)"
       }
     },
-    "verdict": "Produit très pertinent en contexte stagflationniste avec un coupon attractif de 9% sur un sous-jacent défensif (beta 0.53). L'indice des minières aurifères bénéficie directement du régime actuel où l'or joue son rôle de valeur refuge face à l'inflation élevée (PCE 2.83% au-dessus cible) et aux tensions géopolitiques (Brent >$100). La barrière coupon à 60% offre une marge de sécurité raisonnable malgré la volatilité élevée (38.92%), compensée par la qualité défensive du sous-jacent en période de stress.",
+    "verdict": "Produit exceptionnellement bien positionné pour le régime stagflationniste actuel. L'indice GDX bénéficie directement du Brent >$100 et de l'inflation PCE à 2.83%, avec un beta défensif de 0.53 idéal quand le VIX monte à 22. Le coupon 9% avec barrière à 60% seulement offre un excellent couple rendement/risque, la probabilité de toucher les coupons étant maximisée par le contexte macro favorable à l'or. Décrément de 5% avec div réel de seulement 0.97% crée un drag invisible de 4.03%/an sur la performance.",
     "keyRisks": [
-      "Volatilité élevée de 38.92% peut compromettre les coupons malgré la barrière à 60%",
-      "Risque de correction brutale si désinflation rapide ou résolution du choc énergétique",
+      "Risque de correction brutale si la Fed pivote dovish et fait chuter les taux réels",
+      "Volatilité élevée à 38.92% peut générer des mouvements erratiques court terme",
       "Barrière à 0.8σ (Danger) — vol 38.92%"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 9,
-        "return_eur": 22500,
-        "probability": 0.3,
-        "duration_years": 2.5
+        "return_eur": 18000,
+        "probability": 0.35,
+        "duration_years": 2
       },
       "base": {
         "return_pct": 9,
-        "return_eur": 36000,
+        "return_eur": 27000,
         "probability": 0.4,
-        "duration_years": 4
+        "duration_years": 3
       },
       "stress": {
-        "return_pct": 0,
-        "return_eur": 0,
+        "return_pct": 4.5,
+        "return_eur": 22500,
         "probability": 0.2,
         "duration_years": 5
       },
       "worst": {
         "return_pct": -15,
         "return_eur": -15000,
-        "probability": 0.1,
+        "probability": 0.05,
         "duration_years": 5
       }
     },
     "confidenceInterval": {
-      "low": 33,
-      "high": 53,
+      "low": 40,
+      "high": 60,
       "halfWidth": 10,
       "gradeStable": false,
-      "gradeRange": "D-C",
-      "label": "D [33-53]"
+      "gradeRange": "D-B",
+      "label": "C [40-60]"
     },
     "metadata": {
-      "gradedAt": "2026-03-30T12:51:19.031Z",
-      "durationMs": 19601,
+      "gradedAt": "2026-03-30T12:52:42.765Z",
+      "durationMs": 20088,
       "aiUsed": true,
       "version": "5.2",
       "productType": "autocall",
@@ -328,7 +328,7 @@
       "baseScore": 40,
       "baseGrade": "D",
       "adjustments": {
-        "p1": -10,
+        "p1": 12,
         "p2": 15,
         "p3": 10,
         "p4": 0
@@ -339,15 +339,17 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 33,
-      "ci_high": 53,
-      "ci_label": "D [33-53]",
+      "ci_low": 40,
+      "ci_high": 60,
+      "ci_label": "C [40-60]",
       "issuer_rating": "A",
       "issuer_tier": "IG",
       "hasDecrement": true,
       "decrementDrag": 4.03,
       "structureType": "autocall",
       "couponPerPeriod": 4.5,
+      "decrementPct": 5,
+      "dividendYield": 0.97,
       "stockData": [
         {
           "name": "Indice Solactive GDX EUR AR 5%",
