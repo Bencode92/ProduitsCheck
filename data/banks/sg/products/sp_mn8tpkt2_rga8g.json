@@ -13,7 +13,7 @@
   "strikeDate": null,
   "coupon": {
     "rate": 9,
-    "frequency": "annuel",
+    "frequency": "maturity",
     "annualized": true,
     "type": "conditionnel",
     "paymentTiming": "periodic",
