@@ -199,29 +199,29 @@
   },
   "grading": {
     "grade": "B",
-    "score": 62,
+    "score": 63,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 72,
+        "score": 74,
         "base": 72,
-        "delta": 0,
-        "reasoning": "Rendement: base 72 | Coupon 3.8233333333333337%, protégé"
+        "delta": 2,
+        "reasoning": "Rendement: base 72 → +2 = 74 (Capital garanti + forte dispersion (vol NVDA 48%, TSLA 57%) = quasi-certitude du coupon en stagflation) | Coupon 3.8233333333333337%, protégé"
       },
       "underlyingQuality": {
-        "score": 80,
+        "score": 78,
         "base": 80,
-        "delta": 0,
-        "reasoning": "Qualité: base 80 | Worst: Tesla B:54"
+        "delta": -2,
+        "reasoning": "Qualité: base 80 → -2 = 78 (Tesla à 54% de barrière avec beta 1.62 et DD -54% reste préoccupant malgré la protection capitale) | Worst: Tesla B:54"
       },
       "portfolioFit": {
-        "score": 72,
+        "score": 74,
         "base": 72,
-        "delta": 0,
-        "reasoning": "Fit: base 72"
+        "delta": 2,
+        "reasoning": "Fit: base 72 → +2 = 74 (Produit défensif idéal en stagflation: capital garanti + exposition tech diversifiée sans risque de perte)"
       },
       "riskPremium": {
         "score": 26,
@@ -230,22 +230,50 @@
         "reasoning": "Prime: base 32 | 3.8233333333333337% vs CAT 2.5% (spread 1.3%) | Illiq. premium +1.1% (-6pts)"
       }
     },
-    "verdict": "Score 64/100 (base 64).",
-    "keyRisks": [],
+    "verdict": "Excellente opportunité en stagflation avec capital 100% garanti et coupon de 3.82% sur 3 ans. La forte volatilité (NVDA 48%, TSLA 57%) devient un atout majeur pour générer du rendement sans risque de perte. Avec 8 méga-caps tech diversifiées et Tesla à seulement 54% de barrière, la probabilité de toucher les coupons est maximale.",
+    "keyRisks": [
+      "Rendement limité à 11.47% total si marchés montent fortement",
+      "Immobilisation 3 ans sans sortie anticipée"
+    ],
     "negotiationPoints": [],
-    "scenarios": null,
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 3.82,
+        "return_eur": 11470,
+        "probability": 0.85,
+        "duration_years": 3
+      },
+      "base": {
+        "return_pct": 3.82,
+        "return_eur": 11470,
+        "probability": 0.1,
+        "duration_years": 3
+      },
+      "stress": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.04,
+        "duration_years": 3
+      },
+      "worst": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.01,
+        "duration_years": 3
+      }
+    },
     "confidenceInterval": {
-      "low": 57,
-      "high": 71,
+      "low": 58,
+      "high": 72,
       "halfWidth": 7,
       "gradeStable": false,
       "gradeRange": "C-B",
-      "label": "B [57-71]"
+      "label": "B [58-72]"
     },
     "metadata": {
-      "gradedAt": "2026-03-30T06:56:13.752Z",
-      "durationMs": 259,
-      "aiUsed": false,
+      "gradedAt": "2026-03-30T07:03:37.536Z",
+      "durationMs": 15441,
+      "aiUsed": true,
       "version": "5.2",
       "productType": "dispersion",
       "marketDataAvailable": true,
@@ -265,16 +293,21 @@
       "maxBeta": 1.92,
       "baseScore": 64,
       "baseGrade": "B",
-      "adjustments": null,
+      "adjustments": {
+        "p1": 2,
+        "p2": -2,
+        "p3": 2,
+        "p4": 0
+      },
       "barrier_sigma": null,
       "barrier_sigma_label": null,
       "barrier_sigma_danger": null,
       "liquidity_level": "L4",
       "liquidity_score": 10,
       "liquidity_label": "Illiquide",
-      "ci_low": 57,
-      "ci_high": 71,
-      "ci_label": "B [57-71]",
+      "ci_low": 58,
+      "ci_high": 72,
+      "ci_label": "B [58-72]",
       "issuer_rating": "A",
       "issuer_tier": "IG",
       "hasDecrement": false,
