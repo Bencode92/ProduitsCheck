@@ -1,25 +1,6 @@
 {
-  "lastUpdated": "2026-03-31T10:40:13.405Z",
+  "lastUpdated": "2026-03-31T12:28:27.310Z",
   "rates": [
-    {
-      "bankId": "cic",
-      "bankName": "CIC",
-      "durationMonths": 2,
-      "rate": 2.2,
-      "productType": "cat",
-      "date": "2026-03-31",
-      "rateType": "fixe",
-      "rateSchedule": [
-        {
-          "period": "Mois 1-2",
-          "rate": 2.2
-        }
-      ],
-      "withdrawalConditions": "Pas de rémunération si sortie 1er mois",
-      "notice": "32 jours",
-      "productName": "CAT Fixe 2 mois",
-      "calculationBase": null
-    },
     {
       "bankId": "cic",
       "bankName": "CIC",
