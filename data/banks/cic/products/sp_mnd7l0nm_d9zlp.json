@@ -247,19 +247,19 @@
         "score": 84,
         "base": 86,
         "delta": -2,
-        "reasoning": "Rendement: base 86 → -2 = 84 (Barrière à 100% en stagflation avec volatilité élevée (VIX 22) réduit fortement la probabilité du coupon, surtout avec ACA (financials évité).) | Coupon 6.15%, protégé | Barr.coupon 100%"
+        "reasoning": "Rendement: base 86 → -2 = 84 (Barrière 100% exige performance positive des 2 SJ en stagflation, probabilité réduite avec financials évité) | Coupon 6.15%, protégé | Barr.coupon 100%"
       },
       "underlyingQuality": {
         "score": 58,
         "base": 60,
         "delta": -2,
-        "reasoning": "Qualité: base 60 → -2 = 58 (Worst-of sur ACA (secteur financials évité avec -1.63% momentum) en stagflation + choc énergétique = contexte très défavorable.) | Worst: Crédit Agricole S.A. B:40"
+        "reasoning": "Qualité: base 60 → -2 = 58 (ACA dans financials (-1.63% momentum) secteur évité en stagflation, beta élevés vulnérables si VIX monte) | Worst: Crédit Agricole S.A. B:40"
       },
       "portfolioFit": {
         "score": 82,
         "base": 80,
         "delta": 2,
-        "reasoning": "Fit: base 80 → +2 = 82 (Capital garanti offre une protection précieuse en régime stagflationnaire avec stress volatilité et énergie.)"
+        "reasoning": "Fit: base 80 → +2 = 82 (Capital garanti attrayant en stagflation avec VIX 22, protection totale contre choc pétrolier)"
       },
       "riskPremium": {
         "score": 15,
@@ -268,24 +268,23 @@
         "reasoning": "Prime: base 15 | 6.15% vs CAT 2.5% (spread 3.7%)"
       }
     },
-    "verdict": "Produit inadapté au régime stagflationnaire actuel. La barrière à 100% sur un worst-of incluant Crédit Agricole (secteur financials évité, momentum -1.63%) rend le coupon de 6.15% quasi-inatteignable avec VIX à 22. Le capital garanti limite les pertes mais le rendement espéré est proche de 0% sur 3 ans dans ce contexte de choc énergétique (Brent $103.79) et stress volatilité.",
+    "verdict": "Produit défensif adapté au régime stagflationniste grâce au capital garanti, mais la barrière 100% limite fortement l'espérance de coupon (6.15% annualisé) avec ACA dans le secteur financier évité (-1.63% momentum). La protection totale du capital compense le risque de non-paiement des coupons dans un contexte de Brent >$100 et VIX 22. Score ajusté à 49/100 reflète le compromis entre sécurité absolue et faible probabilité de performance.",
     "keyRisks": [
-      "Probabilité de coupon <20% avec barrière 100% en stagflation",
-      "Exposition à ACA (financials) secteur évité avec beta 0.83",
-      "Opportunity cost élevé vs TIPS en environnement inflationniste"
+      "Coupon digitale exige les 2 SJ ≥100%, difficile avec ACA en secteur évité",
+      "Stagflation + choc pétrolier pénalisent LVMH (luxe) et ACA (financials)"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 6.15,
         "return_eur": 18450,
-        "probability": 0.15,
+        "probability": 0.2,
         "duration_years": 3
       },
       "base": {
-        "return_pct": 0,
-        "return_eur": 0,
-        "probability": 0.5,
+        "return_pct": 2.05,
+        "return_eur": 6150,
+        "probability": 0.35,
         "duration_years": 3
       },
       "stress": {
@@ -297,7 +296,7 @@
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.05,
+        "probability": 0.15,
         "duration_years": 3
       }
     },
@@ -310,8 +309,8 @@
       "label": "C [47-61]"
     },
     "metadata": {
-      "gradedAt": "2026-03-31T13:12:48.413Z",
-      "durationMs": 17160,
+      "gradedAt": "2026-03-31T13:24:30.948Z",
+      "durationMs": 19788,
       "aiUsed": true,
       "version": "5.2",
       "productType": "capital_garanti",
