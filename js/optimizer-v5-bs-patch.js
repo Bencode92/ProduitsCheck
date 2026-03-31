@@ -34,6 +34,8 @@
     var meta = (proposal.grading && proposal.grading.metadata) || {};
     var rdtNet = proposal._bsRendementNet;
     if (rdtNet === undefined || rdtNet === null) rdtNet = meta.bsRendementNet;
+    // Fallback for guaranteed-rate products (rates-patch sets _ratesRendementNet)
+    if (rdtNet === undefined || rdtNet === null) rdtNet = proposal._ratesRendementNet;
     if (rdtNet === undefined || rdtNet === null) return null;
     return {
       rendementNet: rdtNet,
@@ -89,6 +91,18 @@
 
   function _cashRes(regime) {
     return { crisis: 0.25, recession: 0.20, stagflation: 0.15 }[regime] || 0.10;
+  }
+
+  function _detectSector(unds) {
+    if (!unds || unds.length === 0) return 'autre';
+    var joined = unds.join(' ').toLowerCase();
+    if (/bank|bnp|sg |credit|intesa|santander|unicredit|hsbc|barclays|goldman|jpmorgan/i.test(joined)) return 'finance';
+    if (/tech|asml|apple|nvidia|microsoft|meta|alphabet|tesla|amazon|netflix|sap|siemens energy/i.test(joined)) return 'tech';
+    if (/lvmh|hermes|kering|richemont/i.test(joined)) return 'luxe';
+    if (/total|eni|shell|bp |brent/i.test(joined)) return 'energie';
+    if (/gold|gdx|silver|xau/i.test(joined)) return 'commodities';
+    if (/euro stoxx|cac|eurostoxx|sx5e|dax|stoxx 600/i.test(joined)) return 'indice-eu';
+    return 'autre';
   }
 
   function _mc(label, value, color, sub) {
@@ -175,14 +189,67 @@
           a.allocatedAmount = t;
         });
 
-        // ═══ Phase 4: Correlation limits ═══
+        // ═══ Phase 4: Hard concentration limits ═══
+        // 4a. Overlap > 50% → block (not just reduce)
+        var freed = 0;
         for (var i = 0; i < actionable.length; i++) {
           for (var j = i + 1; j < actionable.length; j++) {
             var ol = _overlap(actionable[i]._unds, actionable[j]._unds);
             if (ol > 0.5 && actionable[j].allocatedAmount > 0) {
-              actionable[j].allocatedAmount = Math.round(actionable[j].allocatedAmount * 0.75 / 1000) * 1000;
+              freed += actionable[j].allocatedAmount;
+              actionable[j].allocatedAmount = 0;
+              actionable[j].recommendation = 'ATTENDRE';
+              actionable[j].reason = '\u26d4 Overlap SJ >' + Math.round(ol * 100) + '% avec ' +
+                (actionable[i].name || actionable[i].id) + '. Concentration bloqu\u00e9e.';
               actionable[j]._olap = true;
             }
+          }
+        }
+
+        // 4b. Sector > 40% of allocated positions → block excess
+        var sectorCount = {};
+        var liveCount = 0;
+        actionable.forEach(function(a) {
+          if (a.allocatedAmount <= 0) return;
+          liveCount++;
+          var sec = _detectSector(a._unds);
+          a._sector = sec;
+          sectorCount[sec] = (sectorCount[sec] || 0) + 1;
+        });
+        if (liveCount >= 3) {
+          Object.keys(sectorCount).forEach(function(sec) {
+            if (sec === 'autre') return;
+            while (sectorCount[sec] / liveCount > 0.40) {
+              // Find lowest-scored product in this sector and block it
+              var worst = null;
+              actionable.forEach(function(a) {
+                if (a._sector === sec && a.allocatedAmount > 0) {
+                  if (!worst || a.score < worst.score) worst = a;
+                }
+              });
+              if (!worst) break;
+              freed += worst.allocatedAmount;
+              worst.allocatedAmount = 0;
+              worst.recommendation = 'ATTENDRE';
+              worst.reason = '\u26d4 Secteur ' + sec + ' d\u00e9j\u00e0 >' + Math.round(sectorCount[sec] / liveCount * 100) + '% du portefeuille.';
+              worst._olap = true;
+              sectorCount[sec]--;
+              liveCount--;
+              if (liveCount < 3) break;
+            }
+          });
+        }
+
+        // 4c. Redistribute freed cash to surviving positions pro-rata
+        if (freed > 0) {
+          var survivors = actionable.filter(function(a) { return !a._olap && a.allocatedAmount > 0; });
+          var survW = survivors.reduce(function(s, a) { return s + (a._w || 0); }, 0);
+          if (survW > 0) {
+            survivors.forEach(function(a) {
+              var extra = Math.round((a._w / survW) * freed / 1000) * 1000;
+              extra = Math.min(extra, maxPer - a.allocatedAmount);
+              if (extra > 0) a.allocatedAmount += extra;
+            });
           }
         }
 

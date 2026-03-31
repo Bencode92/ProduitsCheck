@@ -60,15 +60,12 @@
         return { ratio: Math.min(0.35, base + regimeAdd + tacticalCash + vixAdd), reason: reasons.join(' | ') };
     };
 
-    // ═══ MI: REGIME DAMPENER (exported) ═══
+    // ═══ MI: REGIME DAMPENER — DISABLED ═══
+    // v4's dynamic threshold (seuil) already handles regime adjustment.
+    // Applying both was a double-penalty (e.g., stagflation: seuil 65 AND ×0.85).
+    // Now always returns 1.0; regime filtering is handled by v4 threshold alone.
     window._miRegimeDampener = function(mi) {
-        if (!mi) return 1.0;
-        var regime = (mi.regime || '').toLowerCase(), conf = mi.regime_confidence || 3;
-        var d = 1.0;
-        if (regime === 'stagflation') d = 0.85;
-        else if (regime === 'recession') d = 0.75;
-        else if (regime === 'expansion') d = 1.10;
-        return 1.0 + (d - 1.0) * Math.min(1, conf / 4);
+        return 1.0;
     };
 
     // ═══ MI: SECTOR PENALTY (exported) ═══
