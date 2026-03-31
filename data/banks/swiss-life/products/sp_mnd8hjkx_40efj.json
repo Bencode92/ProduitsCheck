@@ -234,7 +234,7 @@
   "_bsRendementNet": 3.71,
   "grading": {
     "grade": "D",
-    "score": 40,
+    "score": 39,
     "killCriteria": {
       "triggered": false,
       "reasons": []
@@ -244,19 +244,19 @@
         "score": 45,
         "base": 46,
         "delta": -1,
-        "reasoning": "Rendement: base 46 → -1 = 45 (En stagflation avec ISP dans le secteur financier évité (-1.63% momentum), la probabilité d'atteindre le coupon à 91% est fortement réduite) | Coupon 3%, protégé | Barr.coupon 91% | Mat espérée: ~1.4a (prob mat: 0%)"
+        "reasoning": "Rendement: base 46 → -1 = 45 (Barrière à 91% trop proche du spot en stagflation avec ISP dans le secteur financier évité (DD 21%, vol 25%)) | Coupon 3%, protégé | Barr.coupon 91% | Mat espérée: ~1.4a (prob mat: 0%)"
       },
       "underlyingQuality": {
         "score": 58,
         "base": 59,
         "delta": -1,
-        "reasoning": "Qualité: base 59 → -1 = 58 (ISP est une banque italienne dans un secteur évité en stagflation, avec beta 0.85 qui amplifiera la baisse dans ce contexte macro défavorable) | Worst: Intesa Sanpaolo S.p.A. B:25"
+        "reasoning": "Qualité: base 59 → -1 = 58 (ISP dans secteur financier ÉVITÉ par MI (-1.63% momentum) + beta 0.85 en régime stagflation défavorable aux banques) | Worst: Intesa Sanpaolo S.p.A. B:25"
       },
       "portfolioFit": {
-        "score": 81,
+        "score": 79,
         "base": 80,
-        "delta": 1,
-        "reasoning": "Fit: base 80 → +1 = 81 (Le capital garanti offre une protection cruciale en stagflation, compensant partiellement le faible rendement de 3%)"
+        "delta": -1,
+        "reasoning": "Fit: base 80 → -1 = 79 (Capital garanti mais coupon 3% insuffisant vs inflation PCE 2.83% en stagflation = rendement réel négatif)"
       },
       "riskPremium": {
         "score": 8,
@@ -265,10 +265,11 @@
         "reasoning": "Prime: base 8 | 3% vs CAT 2.5% (spread 0.5%)"
       }
     },
-    "verdict": "Ce produit à capital garanti sur ISP est mal positionné en stagflation : le secteur bancaire est évité (-1.63% de momentum), la barrière à 91% sera difficile à maintenir avec une volatilité à 24.76%. Le rendement de 3% annualisé est insuffisant face à l'inflation élevée (PCE >2.8%), créant une perte réelle de pouvoir d'achat. La garantie en capital reste le seul point positif dans ce contexte de stress macro avec VIX à 22.",
+    "verdict": "Produit INADAPTÉ au contexte stagflationniste actuel. ISP (secteur financier évité, -1.63% momentum) avec barrière coupon à 91% trop risquée vu la volatilité 25% et le drawdown 21%. Le capital garanti est positif mais le rendement réel est NÉGATIF (3% coupon - 2.83% inflation). Avec VIX à 22 et stress énergétique, la probabilité de toucher les coupons est faible sur 10 ans.",
     "keyRisks": [
-      "Risque de perte réelle avec inflation >3% vs coupon 3%",
-      "Secteur bancaire sous pression en stagflation avec hausse des taux et risque crédit"
+      "ISP dans secteur financier ÉVITÉ en stagflation avec momentum négatif -1.63%",
+      "Rendement réel négatif: coupon 3% < inflation PCE 2.83%",
+      "Barrière 91% vulnérable avec volatilité 25% et choc pétrolier potentiel"
     ],
     "negotiationPoints": [],
     "scenarios": {
@@ -298,16 +299,16 @@
       }
     },
     "confidenceInterval": {
-      "low": 33,
-      "high": 47,
+      "low": 32,
+      "high": 46,
       "halfWidth": 7,
       "gradeStable": false,
       "gradeRange": "D-C",
-      "label": "D [33-47]"
+      "label": "D [32-46]"
     },
     "metadata": {
-      "gradedAt": "2026-03-31T12:14:39.433Z",
-      "durationMs": 18894,
+      "gradedAt": "2026-03-31T13:09:25.910Z",
+      "durationMs": 19171,
       "aiUsed": true,
       "version": "5.2",
       "productType": "autocall",
@@ -332,7 +333,7 @@
       "adjustments": {
         "p1": -1,
         "p2": -1,
-        "p3": 1,
+        "p3": -1,
         "p4": 0
       },
       "barrier_sigma": null,
@@ -341,9 +342,9 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 33,
-      "ci_high": 47,
-      "ci_label": "D [33-47]",
+      "ci_low": 32,
+      "ci_high": 46,
+      "ci_label": "D [32-46]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
