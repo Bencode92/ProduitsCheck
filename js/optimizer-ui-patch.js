@@ -83,19 +83,24 @@
         return true;
     }
 
-    // ═══ SHARED TABLE ═══
+    // ═══ SHARED TABLE v2 — Card-based UI ═══
+    function _cpn(v) { return typeof v === 'number' ? v.toFixed(1) : (parseFloat(v) || 0).toFixed(1); }
+    function _gc(g) { return { A:'#06D6A0', B:'#4ECDC4', C:'#FFB627', D:'#E85D04', F:'#EF233C' }[g] || '#888'; }
+    function _badge(g, s) { var c = _gc(g); return '<span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:' + c + '22;color:' + c + ';font-weight:700;font-size:13px">' + g + '</span>' + (s != null ? '<span style="font-size:10px;color:var(--text-dim);margin-left:4px">' + s + '</span>' : ''); }
+
     function _buildTableHTML(a) {
         var pfInvested = a.totalPortfolioInvested || 0, pfReturn = a.totalPortfolioReturn || 0;
         var liqTotal = a.totalLiquidity || 0, catRate = a.catBenchmark || 2.5;
         var liqReturn = Math.round(liqTotal * catRate / 100);
         var deployedAmount = a.deployedAmount || 0, deployedReturn = a.deployedReturn || 0;
-        var remainCash = a.remainingCash || 0, remainCashReturn = Math.round(remainCash * catRate / 100);
+        var remainCash = a.remainingCash || (liqTotal - deployedAmount);
+        var remainCashReturn = Math.round(remainCash * catRate / 100);
         var afterInvested = pfInvested + deployedAmount;
-        var structRetBefore = pfReturn, structRetAfter = pfReturn + deployedReturn;
-        var totalRetBefore = pfReturn + liqReturn, totalRetAfter = pfReturn + deployedReturn + remainCashReturn;
-        var totalBefore = pfInvested + liqTotal, totalAfter = pfInvested + deployedAmount + remainCash;
+        var totalRetBefore = pfReturn + liqReturn;
+        var totalRetAfter = pfReturn + deployedReturn + remainCashReturn;
+        var totalBefore = pfInvested + liqTotal;
         var yBefore = totalBefore > 0 ? (totalRetBefore / totalBefore * 100) : 0;
-        var yAfter = totalAfter > 0 ? (totalRetAfter / totalAfter * 100) : 0;
+        var yAfter = totalBefore > 0 ? (totalRetAfter / totalBefore * 100) : 0;
         var liqStruct = a._structuredLiquidity || a._savedStructLiq || 0;
         var liqExt = a._externalLiquidity || a._savedExtLiq || 0;
         var extBC = a._extByCam || a._savedExtByCam || 0, extCM = a._extCameleons || a._savedExtCameleons || 0;
@@ -106,78 +111,86 @@
         var eLbl = a._entityLabel || a._savedEntityLabel || _entityLabel(eStr);
         var html = '';
 
-        // Header
+        // ── Header: entity + liquidity sources ──
         html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding:10px 14px;background:var(--bg-elevated);border-radius:var(--radius-sm);border:1px solid var(--border)">';
         html += '<span style="font-size:13px;font-weight:700;color:var(--text-bright)">' + eLbl + '</span><div style="display:flex;gap:12px;font-size:11px">';
         if (liqStruct > 0) html += '<span style="color:#A855F7;font-weight:600">\ud83e\udd8e Struct. ' + fmt(liqStruct) + '\u20ac</span>';
         if (extBC > 0) html += '<span style="color:#3B82F6;font-weight:600">\ud83c\udfe2 ByCam ' + fmt(extBC) + '\u20ac</span>';
         if (extCM > 0) html += '<span style="color:#A855F7;font-weight:600">\ud83e\udd8e Ext. ' + fmt(extCM) + '\u20ac</span>';
-        if (liqExt > 0 && extBC === 0 && extCM === 0) html += '<span style="color:var(--green);font-weight:600">\ud83d\udcb5 Ext. ' + fmt(liqExt) + '\u20ac</span>';
         html += '</div></div>';
 
-        // Table
-        html += '<div style="border:2px solid var(--accent);border-radius:var(--radius);overflow:hidden;margin-bottom:16px">';
-        html += '<div style="padding:12px 16px;background:linear-gradient(135deg,rgba(59,130,246,0.12),rgba(139,92,246,0.12));border-bottom:1px solid var(--border)">';
-        html += '<span style="font-size:14px;font-weight:700;color:var(--accent)">\ud83d\udcca Avant / Apr\u00e8s optimisation</span></div>';
-        html += '<table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="background:var(--bg-elevated);border-bottom:2px solid var(--border)">';
-        html += '<th style="padding:12px 16px;text-align:left;width:38%"></th>';
-        html += '<th style="padding:12px 8px;text-align:center;color:var(--text-muted);font-weight:600;width:22%;font-size:11px;text-transform:uppercase">Avant</th>';
-        html += '<th style="padding:12px 8px;text-align:center;color:var(--accent);font-weight:700;width:22%;font-size:11px;text-transform:uppercase">\u2192 Apr\u00e8s</th>';
-        html += '<th style="padding:12px 8px;text-align:center;width:18%;font-size:11px;text-transform:uppercase;font-weight:600;color:var(--text-muted)">Diff.</th>';
-        html += '</tr></thead><tbody>';
-        html += _row('\ud83c\udfe6 Investi structur\u00e9s', fmt(pfInvested) + '\u20ac', fmt(afterInvested) + '\u20ac', '+' + fmt(deployedAmount) + '\u20ac', deployedAmount > 0 ? 'green' : 'dim');
-        html += _row('\ud83d\udcb0 Liquidit\u00e9 restante', fmt(liqTotal) + '\u20ac', fmt(remainCash) + '\u20ac', '-' + fmt(liqTotal - remainCash) + '\u20ac', 'orange');
-        html += _bigRow('\ud83d\udce6 Rdt structur\u00e9s /an', '+' + fmt(structRetBefore) + '\u20ac', '+' + fmt(structRetAfter) + '\u20ac', '+' + fmt(deployedReturn) + '\u20ac', 'green');
-        html += _row('\ud83d\udcc8 Rdt total /an (+ cash)', '+' + fmt(totalRetBefore) + '\u20ac', '+' + fmt(totalRetAfter) + '\u20ac', (totalRetAfter - totalRetBefore >= 0 ? '+' : '') + fmt(totalRetAfter - totalRetBefore) + '\u20ac', totalRetAfter - totalRetBefore >= 0 ? 'green' : 'red');
-        html += _row('\ud83d\udcca Rendement %', yBefore.toFixed(2) + '%', yAfter.toFixed(2) + '%', (yAfter - yBefore >= 0 ? '+' : '') + (yAfter - yBefore).toFixed(2) + '%', yAfter - yBefore >= 0 ? 'green' : 'red', true);
+        // ── BLOC 1: AVANT → APRES ──
+        html += '<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:0;margin-bottom:14px;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden">';
+        html += '<div style="padding:14px;background:var(--bg-card)">';
+        html += '<div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);font-weight:600;margin-bottom:8px">Avant</div>';
+        html += '<div style="font-size:11px;color:var(--text-muted);margin-bottom:3px">Investi <span style="float:right;font-family:var(--mono);color:var(--text-bright)">' + fmt(pfInvested) + '\u20ac</span></div>';
+        html += '<div style="font-size:11px;color:var(--text-muted);margin-bottom:3px">Cash <span style="float:right;font-family:var(--mono);color:var(--text-bright)">' + fmt(liqTotal) + '\u20ac</span></div>';
+        html += '<div style="font-size:11px;color:var(--text-muted);margin-bottom:3px">Rdt/an <span style="float:right;font-family:var(--mono);color:var(--green);font-weight:700">+' + fmt(totalRetBefore) + '\u20ac</span></div>';
+        html += '<div style="font-size:11px;color:var(--text-muted)">Yield <span style="float:right;font-family:var(--mono)">' + yBefore.toFixed(1) + '%</span></div>';
+        html += '</div>';
+        html += '<div style="display:flex;align-items:center;padding:0 10px;background:var(--bg-card);font-size:22px;color:var(--accent)">\u2192</div>';
+        html += '<div style="padding:14px;background:var(--bg-card)">';
+        html += '<div style="font-size:10px;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:8px">Apr\u00e8s</div>';
+        var diffInv = deployedAmount;
+        html += '<div style="font-size:11px;color:var(--text-muted);margin-bottom:3px">Investi <span style="float:right;font-family:var(--mono);color:var(--text-bright)">' + fmt(afterInvested) + '\u20ac</span>' + (diffInv > 0 ? ' <span style="font-size:9px;color:var(--green)">+' + fmt(diffInv) + '</span>' : '') + '</div>';
+        html += '<div style="font-size:11px;color:var(--text-muted);margin-bottom:3px">Cash <span style="float:right;font-family:var(--mono);color:var(--cyan)">' + fmt(remainCash) + '\u20ac</span></div>';
+        var diffRdt = totalRetAfter - totalRetBefore;
+        html += '<div style="font-size:11px;color:var(--text-muted);margin-bottom:3px">Rdt/an <span style="float:right;font-family:var(--mono);color:var(--green);font-weight:700">+' + fmt(totalRetAfter) + '\u20ac</span>' + (diffRdt > 0 ? ' <span style="font-size:9px;color:var(--green)">+' + fmt(diffRdt) + '</span>' : diffRdt < 0 ? ' <span style="font-size:9px;color:var(--red)">' + fmt(diffRdt) + '</span>' : '') + '</div>';
+        html += '<div style="font-size:11px;color:var(--text-muted)">Yield <span style="float:right;font-family:var(--mono);color:' + (yAfter > yBefore ? 'var(--green)' : 'var(--text-bright)') + '">' + yAfter.toFixed(1) + '%</span></div>';
+        html += '</div></div>';
 
-        // Arbitrage
-        html += '<tr style="border-top:2px solid var(--accent);background:rgba(59,130,246,0.06)"><td style="padding:12px 16px;font-weight:700;color:var(--accent);font-size:13px">\ud83d\udd04 Arbitrage</td>';
-        html += '<td colspan="3" style="padding:12px 16px;text-align:center"><div style="font-size:18px;font-weight:800;color:var(--cyan);font-family:var(--mono)">' + fmt(deployedAmount) + '\u20ac \u00e0 d\u00e9ployer</div>';
-        var det = [];
-        if (liqStruct > 0) { var us = Math.min(deployedAmount, liqStruct); if (us > 0) det.push('<span style="color:#A855F7">\ud83e\udd8e Bond 12M arbitr\u00e9 \u2192 ' + fmt(us) + '\u20ac vers Swiss Life</span>'); }
-        var ue = Math.max(0, deployedAmount - Math.min(deployedAmount, liqStruct));
-        if (ue > 0 && extBC > 0) det.push('<span style="color:#3B82F6">\ud83c\udfe2 ByCam \u2192 ' + fmt(Math.min(ue, extBC)) + '\u20ac vers autres banques</span>');
-        if (ue > 0 && extCM > 0) det.push('<span style="color:#A855F7">\ud83e\udd8e Ext. Cam. \u2192 ' + fmt(Math.min(ue, extCM)) + '\u20ac</span>');
-        if (ue > 0 && extBC === 0 && extCM === 0 && liqExt > 0) det.push('<span style="color:var(--green)">\ud83d\udcb5 Ext. \u2192 ' + fmt(ue) + '\u20ac</span>');
-        if (det.length > 0) { html += '<div style="margin-top:6px;font-size:11px;text-align:left;display:inline-block">'; det.forEach(function(d) { html += '<div style="padding:2px 0">' + d + '</div>'; }); html += '</div>'; }
-        html += '</td></tr></tbody></table></div>';
+        // ── BLOC 2: ACTION CARDS ──
+        subs.forEach(function(p) {
+            var isArb = p._v4match === 'ARBITRAGE' || p.recommendation === 'ARBITRER';
+            var borderC = isArb ? 'rgba(78,205,196,0.3)' : 'rgba(6,214,160,0.3)';
+            var bgC = isArb ? 'rgba(78,205,196,0.04)' : 'rgba(6,214,160,0.04)';
+            var c = _gc(p.grade);
+            html += '<div style="border:1px solid ' + borderC + ';background:' + bgC + ';border-radius:var(--radius-sm);padding:12px;margin-bottom:8px">';
+            // Header
+            html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">';
+            html += '<span style="font-size:12px;font-weight:700;color:' + (isArb ? 'var(--cyan)' : 'var(--green)') + '">' + (isArb ? '\ud83d\udd04 ARBITRER' : '\u2705 SOUSCRIRE') + '</span>';
+            html += _sourceLabel(p);
+            html += '</div>';
+            // Arbitrage flow
+            if (isArb) {
+                html += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;font-size:10px;color:var(--text-muted)">';
+                html += '<span style="background:var(--bg-elevated);padding:3px 6px;border-radius:4px">' + (p.bankName || '') + ' liquidit\u00e9</span>';
+                html += '<span style="color:var(--cyan)">\u2192</span>';
+                html += '<span style="font-family:var(--mono);font-weight:700;color:var(--cyan)">' + fmt(p.allocatedAmount) + '\u20ac</span>';
+                html += '<span style="color:var(--cyan)">\u2192</span>';
+                html += '</div>';
+            }
+            // Product
+            html += '<div style="display:flex;align-items:center;gap:10px">';
+            html += '<div>' + _badge(p.grade, p.score) + '</div>';
+            html += '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;color:var(--text-bright);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + (p.name || '') + '</div>';
+            html += '<div style="font-size:10px;color:var(--text-dim)">' + (p.bankName || '') + (p.capitalProtected ? ' \u00b7 \ud83d\udee1\ufe0f garanti' : '') + '</div></div>';
+            html += '<div style="text-align:right"><div style="font-family:var(--mono);font-weight:700;font-size:14px;color:var(--cyan)">' + fmt(p.allocatedAmount) + '\u20ac</div>';
+            html += '<div style="font-family:var(--mono);font-size:11px;color:var(--green)">+' + fmt(p.expectedReturn || p.annualReturn || 0) + '\u20ac/an</div></div></div>';
+            // Details
+            html += '<div style="display:flex;gap:10px;margin-top:6px;font-size:10px;color:var(--text-dim)">';
+            html += '<span>Coupon ' + _cpn(p.coupon) + '%</span>';
+            if (p.probCoupon) html += '<span>P=' + Math.round(p.probCoupon * 100) + '%</span>';
+            if (p._rn != null) html += '<span>BS net ' + p._rn.toFixed(1) + '%</span>';
+            if ((p.excessVsCat || 0) > 0) html += '<span style="color:var(--green)">+' + fmt(p.excessVsCat) + '\u20ac vs CAT</span>';
+            html += '</div></div>';
+        });
 
-        // Subscription plan
-        if (subs.length > 0) {
-            html += '<div style="border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:16px">';
-            html += '<div style="padding:12px 16px;background:var(--bg-elevated);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">';
-            html += '<span style="font-size:13px;font-weight:700;color:var(--green)">\u2705 Plan de souscription</span>';
-            html += '<span style="font-size:11px;color:var(--text-dim)">' + subs.length + ' produit(s) \u2192 +' + fmt(deployedReturn) + '\u20ac/an esp\u00e9r\u00e9</span></div>';
-            html += '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="background:var(--bg-elevated);border-bottom:1px solid var(--border)">';
-            html += '<th style="padding:10px 12px;text-align:left;color:var(--text-muted)">Produit</th>';
-            html += '<th style="padding:10px 6px;text-align:center;color:var(--text-muted)">Grade</th>';
-            html += '<th style="padding:10px 6px;text-align:center;color:var(--text-muted)">Coupon</th>';
-            html += '<th style="padding:10px 6px;text-align:right;color:var(--text-muted)">Montant</th>';
-            html += '<th style="padding:10px 6px;text-align:right;color:var(--text-muted)">Esp\u00e9r\u00e9/an</th>';
-            html += '<th style="padding:10px 6px;text-align:right;color:var(--text-muted)">vs CAT</th>';
-            html += '<th style="padding:10px 6px;text-align:center;color:var(--text-muted)">Source</th>';
-            html += '</tr></thead><tbody>';
-            subs.forEach(function(p) {
-                var gc = { A:'#06D6A0', B:'#4ECDC4', C:'#FFB627', D:'#E85D04', F:'#EF233C' }[p.grade] || '#888';
-                var er = p.expectedReturn || p.annualReturn || 0;
-                var prob = p.probCoupon ? ' (P=' + Math.round(p.probCoupon * 100) + '%)' : '';
-                html += '<tr style="border-bottom:1px solid var(--border)">';
-                html += '<td style="padding:10px 12px"><strong style="color:var(--text-bright)">' + (p.name || '').substring(0, 30) + '</strong><div style="font-size:9px;color:var(--text-dim)">' + (p.bankName || '') + prob + '</div></td>';
-                html += '<td style="padding:10px 6px;text-align:center"><span style="display:inline-block;width:26px;height:26px;line-height:26px;text-align:center;border-radius:6px;background:' + gc + '22;color:' + gc + ';font-weight:700;font-size:13px">' + p.grade + '</span></td>';
-                html += '<td style="padding:10px 6px;text-align:center;font-family:var(--mono);font-weight:700;color:var(--green);font-size:13px">' + (typeof p.coupon === 'number' ? p.coupon.toFixed(1) : (parseFloat(p.coupon) || 0).toFixed(1)) + '%</td>';
-                html += '<td style="padding:10px 6px;text-align:right;font-family:var(--mono);font-weight:700;color:var(--cyan);font-size:13px">' + fmt(p.allocatedAmount) + '\u20ac</td>';
-                html += '<td style="padding:10px 6px;text-align:right;font-family:var(--mono);font-weight:600;color:var(--green)">+' + fmt(er) + '\u20ac</td>';
-                html += '<td style="padding:10px 6px;text-align:right;font-family:var(--mono);font-weight:600;color:' + ((p.excessVsCat || 0) >= 0 ? 'var(--green)' : 'var(--red)') + '">' + ((p.excessVsCat || 0) >= 0 ? '+' : '') + fmt(p.excessVsCat || 0) + '\u20ac</td>';
-                html += '<td style="padding:10px 6px;text-align:center">' + _sourceLabel(p) + '</td></tr>';
-            });
-            var totEx = subs.reduce(function(s, p) { return s + (p.excessVsCat || 0); }, 0);
-            html += '<tr style="border-top:2px solid var(--accent);background:var(--bg-elevated)"><td style="padding:10px 12px;font-weight:800;color:var(--text-bright)" colspan="3">TOTAL</td>';
-            html += '<td style="padding:10px 6px;text-align:right;font-family:var(--mono);font-weight:800;color:var(--cyan)">' + fmt(deployedAmount) + '\u20ac</td>';
-            html += '<td style="padding:10px 6px;text-align:right;font-family:var(--mono);font-weight:800;color:var(--green)">+' + fmt(deployedReturn) + '\u20ac</td>';
-            html += '<td style="padding:10px 6px;text-align:right;font-family:var(--mono);font-weight:800;color:' + (totEx >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (totEx >= 0 ? '+' : '') + fmt(totEx) + '\u20ac</td><td></td></tr>';
-            html += '</tbody></table></div></div>';
+        // Cash card
+        if (remainCash > 0) {
+            html += '<div style="border:1px solid rgba(148,163,184,0.2);background:rgba(148,163,184,0.03);border-radius:var(--radius-sm);padding:12px;margin-bottom:8px">';
+            html += '<div style="display:flex;align-items:center;justify-content:space-between">';
+            html += '<div><div style="font-size:12px;font-weight:700;color:var(--text-muted)">\ud83d\udcb0 Cash conserv\u00e9</div>';
+            html += '<div style="font-size:10px;color:var(--text-dim);margin-top:2px">' + (a.cashReason || 'CAT ' + catRate.toFixed(1) + '% sans risque') + '</div></div>';
+            html += '<div style="text-align:right"><div style="font-family:var(--mono);font-weight:700;font-size:14px;color:var(--text-bright)">' + fmt(remainCash) + '\u20ac</div>';
+            html += '<div style="font-family:var(--mono);font-size:11px;color:var(--text-muted)">+' + fmt(remainCashReturn) + '\u20ac/an</div></div></div></div>';
         }
+
+        // No deployment
+        if (subs.length === 0 && liqTotal > 0) {
+            html += '<div style="padding:16px;text-align:center;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:8px"><div style="font-size:12px;color:var(--text-muted)">\ud83d\udcb0 Garder ' + fmt(liqTotal) + '\u20ac en CAT (' + catRate.toFixed(1) + '%). Aucune proposition ne justifie le risque.</div></div>';
+        }
+
         return { html: html, subscriptions: subs, nonAlloc: nonAlloc, pfInvested: pfInvested, pfReturn: pfReturn };
     }
 
@@ -186,20 +199,32 @@
         if (typeof renderStructOptimizationTable !== 'function') return false;
         renderStructOptimizationTable = function(a) {
             var r = _buildTableHTML(a); var html = r.html;
+            // Portfolio (collapsible)
             if (a.portfolioAnalysis && a.portfolioAnalysis.length > 0) {
-                html += '<div style="border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:16px">';
-                html += '<div style="padding:8px 14px;background:var(--bg-elevated);display:flex;justify-content:space-between"><span style="font-size:11px;font-weight:600;color:var(--text-dim)">\ud83d\udd12 Portefeuille</span><span style="font-size:10px;color:var(--text-dim)">' + fmt(r.pfInvested) + '\u20ac \u2192 +' + fmt(r.pfReturn) + '\u20ac/an</span></div>';
-                html += '<div style="padding:6px 14px;max-height:120px;overflow-y:auto">';
+                html += '<details style="margin-bottom:8px;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden">';
+                html += '<summary style="padding:8px 14px;background:var(--bg-elevated);cursor:pointer;font-size:11px;font-weight:600;color:var(--text-dim);display:flex;justify-content:space-between;align-items:center"><span>\ud83d\udd12 Portefeuille (' + a.portfolioAnalysis.length + ')</span><span style="font-weight:400">' + fmt(r.pfInvested) + '\u20ac \u2192 +' + fmt(r.pfReturn) + '\u20ac/an</span></summary>';
                 a.portfolioAnalysis.forEach(function(p) {
-                    var gc = { A:'#06D6A0', B:'#4ECDC4', C:'#FFB627', D:'#E85D04', F:'#EF233C' }[p.grade] || '#888';
-                    html += '<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:10px"><span><span style="display:inline-block;width:16px;height:16px;line-height:16px;text-align:center;border-radius:4px;background:' + gc + '22;color:' + gc + ';font-weight:700;font-size:9px;margin-right:6px">' + (p.grade || '?') + '</span>' + (p.name || '').substring(0, 30) + '</span><span style="font-family:var(--mono);color:var(--text-dim)">' + fmt(p.amount) + '\u20ac \u00e0 ' + (typeof p.coupon === 'number' ? p.coupon.toFixed(1) : (parseFloat(p.coupon) || 0).toFixed(1)) + '% = +' + fmt(p.annualReturn) + '\u20ac</span></div>';
+                    var c = _gc(p.grade);
+                    html += '<div style="padding:6px 14px;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px;font-size:10px;opacity:0.8">';
+                    html += '<span style="width:18px;height:18px;line-height:18px;text-align:center;border-radius:4px;background:' + c + '22;color:' + c + ';font-weight:700;font-size:9px;flex-shrink:0">' + (p.grade || '?') + '</span>';
+                    html += '<span style="flex:1;color:var(--text-bright);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (p.name || '').substring(0, 30) + '</span>';
+                    html += '<span style="font-family:var(--mono);color:var(--text-dim)">' + fmt(p.amount) + '\u20ac</span>';
+                    html += '<span style="font-family:var(--mono);color:var(--green)">+' + fmt(p.annualReturn) + '\u20ac</span></div>';
                 });
-                html += '</div></div>';
+                html += '</details>';
             }
+            // Ecart\u00e9s (collapsible)
             if (r.nonAlloc.length > 0) {
-                html += '<div style="border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:16px"><div style="padding:8px 14px;background:var(--bg-elevated)"><span style="font-size:11px;font-weight:600;color:var(--text-dim)">\u274c \u00c9cart\u00e9s (' + r.nonAlloc.length + ')</span></div><div style="padding:6px 14px">';
-                r.nonAlloc.forEach(function(p) { html += '<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:10px;' + (p.recommendation === 'REJETER' ? 'opacity:0.5' : '') + '"><span>' + (p.name || '').substring(0, 35) + '</span><span style="color:' + (p.recommendation === 'ATTENDRE' ? 'var(--orange)' : 'var(--red)') + ';font-weight:600">' + p.recommendation + ' ' + (typeof p.coupon === 'number' ? p.coupon.toFixed(1) : (parseFloat(p.coupon) || 0).toFixed(1)) + '% ' + p.grade + '</span></div>'; });
-                html += '</div></div>';
+                html += '<details style="margin-bottom:8px;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden">';
+                html += '<summary style="padding:8px 14px;background:var(--bg-elevated);cursor:pointer;font-size:11px;color:var(--text-muted);display:flex;justify-content:space-between;align-items:center"><span>\u274c \u00c9cart\u00e9s (' + r.nonAlloc.length + ')</span><span style="font-size:10px;color:var(--text-dim)">cliquer pour voir</span></summary>';
+                r.nonAlloc.forEach(function(p) {
+                    var rc = { 'ATTENDRE':'var(--orange)', 'PASSER':'var(--red)', 'IMPOSSIBLE':'#888' }[p.recommendation] || 'var(--text-dim)';
+                    html += '<div style="padding:4px 14px;border-top:1px solid var(--border);display:flex;align-items:center;gap:6px;font-size:10px;opacity:0.6">';
+                    html += '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (p.name || '').substring(0, 35) + '</span>';
+                    html += '<span style="font-family:var(--mono)">' + _cpn(p.coupon) + '%</span>';
+                    html += '<span style="padding:2px 6px;border-radius:8px;font-size:9px;font-weight:600;color:' + rc + ';background:' + rc + '12">' + p.recommendation + '</span></div>';
+                });
+                html += '</details>';
             }
             return html;
         };
@@ -228,9 +253,12 @@
             html += '<div style="display:flex;gap:8px;align-items:center"><span style="font-size:10px;color:var(--text-dim)">' + ds + '</span><button class="btn sm ai-glow" onclick="showStructuredOptimizer()">\ud83d\udd04</button></div></div>';
             html += res.html;
             if (res.nonAlloc.length > 0) {
-                html += '<div style="border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:16px"><div style="padding:6px 14px;background:var(--bg-elevated)"><span style="font-size:10px;font-weight:600;color:var(--text-dim)">\u274c \u00c9cart\u00e9s (' + res.nonAlloc.length + ')</span></div><div style="padding:4px 14px">';
-                res.nonAlloc.forEach(function(p) { html += '<div style="display:flex;justify-content:space-between;padding:2px 0;font-size:10px;opacity:0.6"><span>' + (p.name || '').substring(0, 30) + '</span><span style="color:var(--red)">' + (typeof p.coupon === 'number' ? p.coupon.toFixed(1) : (parseFloat(p.coupon) || 0).toFixed(1)) + '% ' + p.grade + '</span></div>'; });
-                html += '</div></div>';
+                html += '<details style="margin-bottom:8px;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden">';
+                html += '<summary style="padding:6px 14px;background:var(--bg-elevated);cursor:pointer;font-size:10px;color:var(--text-dim)">\u274c \u00c9cart\u00e9s (' + res.nonAlloc.length + ')</summary>';
+                res.nonAlloc.forEach(function(p) {
+                    html += '<div style="padding:3px 14px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:10px;opacity:0.6"><span>' + (p.name || '').substring(0, 30) + '</span><span style="color:var(--red)">' + _cpn(p.coupon) + '% ' + p.grade + '</span></div>';
+                });
+                html += '</details>';
             }
             if (r.summary) {
                 html += '<div style="background:linear-gradient(135deg,rgba(59,130,246,0.06),rgba(139,92,246,0.06));border:1px solid rgba(59,130,246,0.2);border-radius:var(--radius);overflow:hidden">';
