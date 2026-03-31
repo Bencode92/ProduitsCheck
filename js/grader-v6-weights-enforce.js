@@ -16,7 +16,7 @@
 (function() {
   'use strict';
 
-  var V6 = { p1: 0.30, p2: 0.15, p3: 0.25, p4: 0.30 };
+  var V6 = { p1: 0.30, p2: 0.20, p3: 0.15, p4: 0.30 };
 
   function _patch() {
     if (typeof ProposalGrader === 'undefined' || !ProposalGrader.grade) return false;
@@ -39,7 +39,7 @@
         if (correct !== result.score) {
           console.log('[v6-enforce] ' + result.score + ' \u2192 ' + correct +
             ' | P1=' + p1 + ' P2=' + p2 + ' P3=' + p3 + ' P4=' + p4 +
-            ' | W: 30/15/25/30');
+            ' | W: 30/20/15/30');
           result.score = correct;
           result.grade = correct >= 75 ? 'A' : correct >= 60 ? 'B' : correct >= 45 ? 'C' : correct >= 25 ? 'D' : 'F';
         }

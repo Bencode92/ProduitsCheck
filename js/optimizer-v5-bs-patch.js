@@ -93,6 +93,105 @@
     return { crisis: 0.25, recession: 0.20, stagflation: 0.15 }[regime] || 0.10;
   }
 
+  // ─── Proactive recommendations engine ─────────────────
+  function _buildRecommendations(regime, catRate, cashPct, actionCount) {
+    var recos = [];
+    var r = (regime || 'neutral').toLowerCase();
+    var mi = null;
+    try {
+      // MI data may be cached by grader-mi-patch or grader-rates-patch
+      if (typeof _mktCache !== 'undefined' && _mktCache && _mktCache._mi) mi = _mktCache._mi;
+    } catch(e) {}
+
+    var avoided = '';
+    var bondStrat = null;
+    var maxDur = 5;
+    try {
+      if (mi) {
+        avoided = (mi.avoided_sectors || '').toLowerCase();
+      }
+      // Try loading full MI for bond strategy
+      if (typeof github !== 'undefined' && github.readFile) {
+        // Don't block — use cached data if available
+      }
+    } catch(e) {}
+
+    // ─── Regime-specific recommendations ───
+    if (r === 'stagflation' || r === 'recession') {
+      recos.push({
+        icon: '\ud83d\udee1\ufe0f',
+        type: 'Taux fixe callable',
+        criteria: 'Coupon garanti \u2265 4.5%, \u00e9metteur IG (A- min), maturit\u00e9 \u2264 10 ans',
+        why: 'Coupon garanti insensible au march\u00e9. En ' + r + ', faible probabilit\u00e9 de rappel \u2192 lock-in du coupon.'
+      });
+      recos.push({
+        icon: '\ud83c\udfaf',
+        type: 'Dispersion capital garanti',
+        criteria: 'Capital 100% garanti, maturit\u00e9 \u2264 3 ans, sous-jacents \u2265 6 actions',
+        why: 'La volatilit\u00e9 haute en ' + r + ' est un atout (plus de dispersion). Z\u00e9ro risque capital.'
+      });
+      recos.push({
+        icon: '\ud83d\udcb0',
+        type: 'Capital garanti digitale',
+        criteria: 'Capital 100% garanti, coupon conditionnel, trigger \u2264 90%, maturit\u00e9 \u2264 3 ans',
+        why: 'Rendement conditionnel mais capital prot\u00e9g\u00e9. Pr\u00e9f\u00e9rer trigger bas et courte dur\u00e9e.'
+      });
+    }
+
+    if (r === 'stagflation') {
+      recos.push({
+        icon: '\u26a0\ufe0f',
+        type: '\u00c9viter',
+        criteria: 'Autocall single-stock' + (avoided ? ', secteurs : ' + avoided : '') + ', maturit\u00e9 > 6 ans, d\u00e9cr\u00e9ment > 3%',
+        why: 'March\u00e9 stagnant \u2192 autocall non rappel\u00e9 \u2192 capital bloqu\u00e9 longtemps. D\u00e9cr\u00e9ment mange le coupon.'
+      });
+    } else if (r === 'bull' || r === 'risk-on' || r === 'expansion') {
+      recos.push({
+        icon: '\ud83d\ude80',
+        type: 'Autocall / Phoenix sur indices',
+        criteria: 'Sous-jacent indice large (SX5E, CAC 40), coupon \u2265 7%, barri\u00e8re \u2264 60%',
+        why: 'March\u00e9 haussier \u2192 forte prob de rappel anticip\u00e9. Privil\u00e9gier indices diversifi\u00e9s.'
+      });
+      recos.push({
+        icon: '\ud83c\udfaf',
+        type: 'Phoenix m\u00e9moire single-stock',
+        criteria: 'Action quality (Buffett > 60), vol < 30%, coupon \u2265 8%, m\u00e9moire',
+        why: 'En bull, m\u00eame une action volatile reste au-dessus du trigger. La m\u00e9moire accumule.'
+      });
+    } else if (r === 'neutral') {
+      recos.push({
+        icon: '\u2696\ufe0f',
+        type: 'Basket autocall diversifi\u00e9',
+        criteria: 'Panier \u2265 4 sous-jacents, secteurs mixtes, coupon \u2265 6%, barri\u00e8re \u2264 55%',
+        why: 'Diversification du panier r\u00e9duit le risque worst-of. Pr\u00e9f\u00e9rer barri\u00e8re basse.'
+      });
+    }
+
+    // ─── Cash guidance ───
+    if (cashPct >= 50) {
+      recos.push({
+        icon: '\ud83d\udcb5',
+        type: 'Cash \u2192 CAT / Bond 12M',
+        criteria: 'Garder ' + cashPct + '% en CAT (' + catRate.toFixed(1) + '%) ou Bond 12M',
+        why: actionCount === 0
+          ? 'Aucune proposition ne justifie le risque. Le cash est la meilleure position.'
+          : 'Qualit\u00e9 insuffisante des propositions restantes. Attendre de meilleures offres.'
+      });
+    }
+
+    // ─── Duration guidance from bond strategy ───
+    if (r === 'stagflation' || r === 'recession') {
+      recos.push({
+        icon: '\u23f3',
+        type: 'Duration courte',
+        criteria: 'Privil\u00e9gier maturit\u00e9 \u2264 4 ans, \u00e9viter > 7 ans',
+        why: 'Risque de hausse de taux \u2192 duration longue = capital bloqu\u00e9 \u00e0 rendement insuffisant.'
+      });
+    }
+
+    return recos;
+  }
+
   function _detectSector(unds) {
     if (!unds || unds.length === 0) return 'autre';
     var joined = unds.join(' ').toLowerCase();
@@ -354,9 +453,13 @@
           ? 'Qualit\u00e9 moyenne des propositions → ' + result.cashRetainedPct + '% en cash.'
           : result.cashRetainedPct + '% cash r\u00e9sidu (d\u00e9ploiement s\u00e9lectif).';
 
+      // ═══ Phase 6: Proactive recommendations ═══
+      result._recos = _buildRecommendations(regime, catRate, result.cashRetainedPct, subs.length);
+
       console.log('[opt-v5] deployed=' + fmt(result.deployedAmount || 0) + '\u20ac (' +
         (100 - result.cashRetainedPct) + '%) | cash=' + fmt(result.cashRetained) +
-        '\u20ac (' + result.cashRetainedPct + '%) | actions=' + subs.length);
+        '\u20ac (' + result.cashRetainedPct + '%) | actions=' + subs.length +
+        ' | recos=' + result._recos.length);
       return result;
     };
 
@@ -376,6 +479,22 @@
           html += _mc('Diversification', v.divRatio.toFixed(2) + 'x', 'var(--cyan)', '>1 = diversifi\u00e9');
           html += '</div>';
         }
+        // Proactive recommendations
+        if (analysis._recos && analysis._recos.length > 0) {
+          html += '<div style="background:linear-gradient(135deg,rgba(59,130,246,0.05),rgba(139,92,246,0.05));border:1px solid rgba(59,130,246,0.15);border-radius:var(--radius-sm);padding:12px;margin-bottom:12px">';
+          html += '<div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:8px">\ud83d\udca1 Recommandations — que chercher ?</div>';
+          analysis._recos.forEach(function(r) {
+            var bg = r.type === '\u00c9viter' ? 'rgba(239,35,60,0.06)' : 'rgba(59,130,246,0.04)';
+            var border = r.type === '\u00c9viter' ? 'rgba(239,35,60,0.15)' : 'rgba(59,130,246,0.10)';
+            html += '<div style="background:' + bg + ';border:1px solid ' + border + ';border-radius:6px;padding:8px 10px;margin-bottom:6px">';
+            html += '<div style="font-size:12px;font-weight:600">' + r.icon + ' ' + r.type + '</div>';
+            html += '<div style="font-size:11px;color:var(--text-muted);margin-top:2px">' + r.criteria + '</div>';
+            html += '<div style="font-size:10px;color:var(--text-dim);margin-top:2px;font-style:italic">' + r.why + '</div>';
+            html += '</div>';
+          });
+          html += '</div>';
+        }
+
         html += _prevRender(analysis);
         return html;
       };

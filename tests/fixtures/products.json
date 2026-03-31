@@ -28,7 +28,7 @@
     "participationRate": 1.0,
     "expectedRank": 1,
     "expectedGrade": "B",
-    "expectedScore": 67,
+    "expectedScore": 63,
     "expectedBsRendementNet": 10.45
   },
   {
@@ -62,8 +62,8 @@
     "bankId": "SG",
     "emitter": "Société Générale",
     "expectedRank": 2,
-    "expectedGrade": "B",
-    "expectedScore": 61,
+    "expectedGrade": "C",
+    "expectedScore": 59,
     "expectedBsRendementNet": null
   },
   {
@@ -96,9 +96,9 @@
     },
     "autocall": true,
     "autocallThreshold": 100,
-    "expectedRank": 3,
-    "expectedGrade": "C",
-    "expectedScore": 45,
+    "expectedRank": 5,
+    "expectedGrade": "D",
+    "expectedScore": 41,
     "expectedBsRendementNet": 3.17
   },
   {
@@ -128,9 +128,9 @@
       "possible": false,
       "type": "none"
     },
-    "expectedRank": 4,
-    "expectedGrade": "C",
-    "expectedScore": 47,
+    "expectedRank": 3,
+    "expectedGrade": "D",
+    "expectedScore": 44,
     "expectedBsRendementNet": 1.20
   },
   {
@@ -163,9 +163,9 @@
     },
     "autocall": true,
     "autocallThreshold": 100,
-    "expectedRank": 5,
+    "expectedRank": 7,
     "expectedGrade": "D",
-    "expectedScore": 37,
+    "expectedScore": 33,
     "expectedBsRendementNet": 1.66
   },
   {
@@ -198,9 +198,9 @@
     },
     "autocall": true,
     "autocallThreshold": 100,
-    "expectedRank": 6,
+    "expectedRank": 8,
     "expectedGrade": "D",
-    "expectedScore": 35,
+    "expectedScore": 31,
     "expectedBsRendementNet": 0.30
   },
   {
@@ -234,7 +234,7 @@
     },
     "autocall": true,
     "autocallThreshold": 100,
-    "expectedRank": 7,
+    "expectedRank": 4,
     "expectedGrade": "D",
     "expectedScore": 44,
     "expectedBsRendementNet": 1.22
@@ -270,7 +270,7 @@
     },
     "autocall": true,
     "autocallThreshold": 100,
-    "expectedRank": 8,
+    "expectedRank": 6,
     "expectedGrade": "D",
     "expectedScore": 34,
     "expectedBsRendementNet": 1.69
@@ -308,8 +308,8 @@
     "autocall": true,
     "autocallThreshold": 100,
     "expectedRank": 9,
-    "expectedGrade": "D",
-    "expectedScore": 25,
+    "expectedGrade": "F",
+    "expectedScore": 21,
     "expectedBsRendementNet": -10.57
   }
 ]

@@ -317,7 +317,7 @@ async function main() {
   // v6-weights-enforce's setInterval callbacks don't reliably fire in Node's
   // vm context (closures lose their sandbox scope). Apply its logic manually:
   // wrap grade() to recalculate total with v6 weights (30/15/25/30).
-  const V6W = { p1: 0.30, p2: 0.15, p3: 0.25, p4: 0.30 };
+  const V6W = { p1: 0.30, p2: 0.20, p3: 0.15, p4: 0.30 };
   const _prevGrade = ctx.ProposalGrader.grade;
   ctx.ProposalGrader.grade = function(product) {
     return _prevGrade.call(ctx.ProposalGrader, product).then(function(result) {

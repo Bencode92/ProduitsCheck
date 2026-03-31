@@ -14,7 +14,7 @@
 (function() {
   'use strict';
 
-  var V6_WEIGHTS = { p1: 0.30, p2: 0.15, p3: 0.25, p4: 0.30 };
+  var V6_WEIGHTS = { p1: 0.30, p2: 0.20, p3: 0.15, p4: 0.30 };
 
   // ─── Recalibrate P3: base 50 with structure-based adjustments ───
   function _recalibrateP3(oldP3, product) {
@@ -238,7 +238,7 @@
       };
     }
 
-    console.log('[v6-cal v1.2] Active: P3 base 50, W 30/15/25/30, Phoenix +5, SS -5, P4 BS (exempt guaranteed rates)');
+    console.log('[v6-cal v1.3] Active: P3 base 50, W 30/20/15/30, Phoenix +5, SS -5, P4 BS (exempt guaranteed rates)');
     return true;
   }
 
