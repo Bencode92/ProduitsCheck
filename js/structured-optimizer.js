@@ -93,6 +93,7 @@ function buildStructuredOptimization() {
             grade: g.grade, score: g.score || 0,
             coupon: typeof norm.coupon === 'number' ? norm.coupon : (parseFloat(norm.coupon) || 0), couponType: norm.couponType,
             capitalProtected: norm.capitalProtection,
+            hasBarrier: norm.barrier > 0 && norm.barrier < 100,
             nominal: parseFloat(p.investedAmount || p.nominal) || 0
         };
     });

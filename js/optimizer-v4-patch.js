@@ -183,8 +183,11 @@
                 result.allocationPlan.forEach(function(a) {
                     // --- SEUIL DYNAMIQUE ---
                     // Capital garanti products have zero capital risk → lower threshold
+                    // But only if truly no barrier risk (not autocalls with parsing errors)
                     var effectiveSeuil = threshold.seuil;
-                    if (a.capitalProtected) {
+                    var trueCapGaranti = a.capitalProtected && !a.hasBarrier &&
+                        (a.couponType === 'garanti' || a.couponType === 'fixe' || a.couponType === 'conditionnel');
+                    if (trueCapGaranti) {
                         effectiveSeuil = Math.min(threshold.seuil, 50);
                     }
                     if (a.score < effectiveSeuil) {

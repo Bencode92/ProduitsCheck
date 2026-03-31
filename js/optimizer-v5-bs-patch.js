@@ -226,6 +226,12 @@
       var hasV4 = !!(result._v4);
       var catRate = result.catBenchmark || 2.5;
       var regime = hasV4 ? (result._v4.regime || 'neutral') : 'neutral';
+      // Fallback: read regime from MI cache if v4 didn't set it
+      if (regime === 'neutral') {
+        try {
+          if (typeof _mktCache !== 'undefined' && _mktCache && _mktCache._mi && _mktCache._mi.regime) regime = _mktCache._mi.regime.toLowerCase();
+        } catch(e) {}
+      }
       var seuil = hasV4 ? (result._v4.seuil || 55) : 55;
       var fmt = typeof formatNumber === 'function' ? formatNumber : function(n) { return n; };
 
@@ -370,13 +376,15 @@
           }
         }
 
-        // Recalculate returns with BS rendementNet
+        // Recalculate returns with BS rendementNet for ALL allocated products
         result.allocationPlan.forEach(function(a) {
-          if (a.allocatedAmount > 0) {
+          if (a.allocatedAmount > 0 && a._rn != null) {
             a.annualReturn = Math.round(a.allocatedAmount * a._rn / 100);
             a.expectedReturn = a.annualReturn;
             a.catReturn = Math.round(a.allocatedAmount * catRate / 100);
             a.excessVsCat = a.annualReturn - a.catReturn;
+            // Fix display: show BS rendement as coupon for UI
+            a.coupon = Math.round(a._rn * 10) / 10;
 
             var parts = [];
             if (a._v4source) parts.push(a._v4source);
