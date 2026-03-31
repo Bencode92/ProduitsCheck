@@ -241,7 +241,7 @@
   "_bsRendementNet": 10.45,
   "grading": {
     "grade": "B",
-    "score": 73,
+    "score": 72,
     "killCriteria": {
       "triggered": false,
       "reasons": []
@@ -251,7 +251,7 @@
         "score": 95,
         "base": 82,
         "delta": 13,
-        "reasoning": "BS: Dispersion: prob=95% (mecanique), rdt median hist=11% | Rdt net: 10.4% - 0.0% = 10.4%/an | Spread vs CAT: 7.9%",
+        "reasoning": "BS: Dispersion: prob=95%, rdt median hist=11% | Rdt net: 10.4% - 0.0% = 10.4%/an | Spread vs CAT: 7.9%",
         "_bs": {
           "score": 95,
           "probCoupon": 95,
@@ -271,34 +271,33 @@
             25
           ],
           "matEsperee": 3,
-          "reasoning": "Dispersion: prob=95% (mecanique), rdt median hist=11% | Rdt net: 10.4% - 0.0% = 10.4%/an",
-          "method": "BS-simplifie-v1.1"
+          "reasoning": "Dispersion: prob=95%, rdt median hist=11% | Rdt net: 10.4% - 0.0% = 10.4%/an",
+          "method": "BS-simplifie-v1.2"
         }
       },
       "underlyingQuality": {
         "score": 68,
         "base": 70,
         "delta": -2,
-        "reasoning": "Qualité: base 70 → -2 = 68 (100% tech en stagflation avec IT évité (-1.22% momentum), betas élevés (1.07-1.92) et VIX 22 = environnement très défavorable) | Worst: Tesla B:17"
+        "reasoning": "Qualité: base 70 → -2 = 68 (Régime STAGFLATION défavorable aux tech (7/8 SJ dans secteur évité), betas élevés (1.07-1.92) amplifient le risque baissier) | Worst: Tesla B:17"
       },
       "portfolioFit": {
-        "score": 74,
+        "score": 65,
         "base": 72,
-        "delta": 2,
-        "reasoning": "Fit: base 72 → +2 = 74 (Capital garanti idéal en stagflation pour protéger contre l'inflation (2.83% PCE) et la volatilité croissante)"
+        "delta": -2,
+        "reasoning": "Fit: base 50 → 65 (pairs, dispersion) | Fit: base 72 → -2 = 70 (Surexposition tech problématique en stagflation, diversification sectorielle insuffisante malgré le capital garanti)"
       },
       "riskPremium": {
         "score": 52,
         "base": 5,
-        "delta": 2,
+        "delta": 0,
         "reasoning": "Capital garanti: spread 3.0% - CAT 2.5% - illiq 0.3% = 0.2% | ✅ Dispersion: vol = moteur de rendement (+25pts) + capital garanti | Illiq. premium +1.1% (-6pts)"
       }
     },
-    "verdict": "En régime stagflationnaire avec VIX à 22, ce produit dispersion sur tech mega-caps offre une protection capitale totale mais un rendement réel négatif (-1.52%). Les volatilités élevées (NVDA 48%, TSLA 57%) maximisent les chances de toucher le coupon annuel de 1.31%. Cependant, 100% d'exposition au secteur IT évité (-1.22% momentum) avec des betas élevés (moyenne 1.36) expose à une forte volatilité sans upside.",
+    "verdict": "Produit défensif adapté au contexte stagflationniste grâce au capital GARANTI, mais rendement décevant de 1.31% annuel ne couvre pas l'inflation. La stratégie DISPERSION profite de la volatilité élevée (NVDA 48%, TSLA 58%) pour générer le coupon, mais l'exposition 100% tech est risquée avec 7/8 sous-jacents dans des secteurs évités. Malgré le capital protégé, le couple risque/rendement reste médiocre avec un gain maximum de 3.94% sur 3 ans.",
     "keyRisks": [
-      "Rendement réel négatif de -1.52% avec inflation à 2.83%",
-      "100% exposition tech mega-caps en stagflation défavorable",
-      "Opportunité manquée vs TIPS ou secteur energy favorisé"
+      "Rendement réel NÉGATIF en stagflation (1.31% < inflation 2.8%)",
+      "Concentration sectorielle tech vulnérable si recession tech prolongée"
     ],
     "negotiationPoints": [],
     "scenarios": {
@@ -317,29 +316,29 @@
       "stress": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.1,
+        "probability": 0.15,
         "duration_years": 3
       },
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.05,
+        "probability": 0.15,
         "duration_years": 3
       }
     },
     "confidenceInterval": {
-      "low": 48,
-      "high": 62,
+      "low": 44,
+      "high": 58,
       "halfWidth": 7,
       "gradeStable": false,
-      "gradeRange": "C-B",
-      "label": "C [48-62]"
+      "gradeRange": "D-C",
+      "label": "C [44-58]"
     },
     "metadata": {
-      "gradedAt": "2026-03-31T08:27:36.885Z",
-      "durationMs": 22428,
+      "gradedAt": "2026-03-31T08:28:43.904Z",
+      "durationMs": 22181,
       "aiUsed": true,
-      "version": "5.2",
+      "version": "6.1",
       "productType": "dispersion",
       "marketDataAvailable": true,
       "catBenchmark": 2.5,
@@ -356,13 +355,13 @@
       "expectedMaturity": 3,
       "maxMaturity": 3,
       "maxBeta": 1.92,
-      "baseScore": 54,
+      "baseScore": 51,
       "baseGrade": "C",
       "adjustments": {
         "p1": 2,
         "p2": -2,
-        "p3": 2,
-        "p4": 2
+        "p3": -2,
+        "p4": 0
       },
       "barrier_sigma": null,
       "barrier_sigma_label": null,
@@ -370,15 +369,15 @@
       "liquidity_level": "L4",
       "liquidity_score": 10,
       "liquidity_label": "Illiquide",
-      "ci_low": 48,
-      "ci_high": 62,
-      "ci_label": "C [48-62]",
+      "ci_low": 44,
+      "ci_high": 58,
+      "ci_label": "C [44-58]",
       "issuer_rating": "A",
       "issuer_tier": "IG",
       "hasDecrement": false,
       "decrementDrag": 0,
       "structureType": "dispersion",
-      "bsMethod": "BS-simplifie-v1.1",
+      "bsMethod": "BS-simplifie-v1.2",
       "bsProbCoupon": 95,
       "bsRendementNet": 10.45,
       "bsPerteEsperee": 0,
@@ -394,6 +393,15 @@
         25
       ],
       "bsMatEsperee": 3,
+      "isBasket": false,
+      "v6Weights": {
+        "p1": 0.3,
+        "p2": 0.15,
+        "p3": 0.25,
+        "p4": 0.3
+      },
+      "p3Recalibrated": true,
+      "p4BsCorrected": false,
       "stockData": [
         {
           "name": "NVIDIA",
