@@ -233,7 +233,7 @@
   "_bsRendementNet": -8.4,
   "grading": {
     "grade": "D",
-    "score": 26,
+    "score": 33,
     "killCriteria": {
       "triggered": false,
       "reasons": []
@@ -261,71 +261,71 @@
         }
       },
       "underlyingQuality": {
-        "score": 25,
+        "score": 45,
         "base": 40,
-        "delta": -15,
-        "reasoning": "Qualité: base 40 → -15 = 25 (Secteur materials neutre en stagflation, mais l'or sous-performe historiquement avec un dollar fort (DTWEXBGS 120) et des taux réels en hausse) | Worst: Indice Solactive GDX EUR AR 5% B:35"
+        "delta": 5,
+        "reasoning": "Qualité: base 40 → +5 = 45 (L'or bénéficie historiquement de la stagflation (hedge inflation), beta défensif 0.53 et sector materials neutre compensent le DD de -30.84%) | Worst: Indice Solactive GDX EUR AR 5% B:35"
       },
       "portfolioFit": {
         "score": 58,
         "base": 80,
-        "delta": 5,
-        "reasoning": "Fit: base 50 → 58 (single-index, autocall) | Fit: base 80 → +5 = 85 (L'or offre une diversification pertinente en stagflation malgré le dollar fort, avec un beta faible de 0.53)"
+        "delta": 0,
+        "reasoning": "Fit: base 50 → 58 (single-index, autocall) | Fit: base 80"
       },
       "riskPremium": {
-        "score": 28,
+        "score": 35,
         "base": 0,
         "delta": -5,
-        "reasoning": "Capital garanti: spread 4.5×2=9.0% - CAT 2.5% - illiq 0.5% = 6.0% | ⚠ Spread réel après drag: 9% - 4.03% drag - 2.5% CAT = 2.47% (-20pts) | v6-BS: P4 70→35 (rdtNet BS=-8.4% vs CAT 2.5%) | Illiq. premium +1.3% (-7pts)"
+        "reasoning": "Capital garanti: spread 4.5×2=9.0% - CAT 2.5% - illiq 0.5% = 6.0% | ⚠ Spread réel après drag: 9% - 4.03% drag - 2.5% CAT = 2.47% (-20pts) | v6-BS: P4 70→35 (rdtNet BS=-8.4% vs CAT 2.5%)"
       }
     },
-    "verdict": "Produit risqué en stagflation avec score ajusté de 23/100. Le régime actuel pénalise doublement les minières aurifères : dollar fort à 120 qui pèse sur l'or et hausse des coûts énergétiques (Brent >$100) qui comprime les marges. Avec une volatilité de 38.92% et un drawdown historique de -30.84%, la barrière coupon à 60% sera probablement touchée rapidement, annulant les coupons. Le rendement de 9% ne compense pas le risque de perte en capital sur un secteur materials neutre face à l'inflation. Décrément de 5% avec div réel de seulement 0.97% crée un drag invisible de 4.03%/an sur la performance.",
+    "verdict": "En régime stagflationnaire, ce produit sur minières aurifères offre une exposition défensive intéressante avec 9% de coupon annualisé. Le beta 0.53 et la nature contra-cyclique de l'or en font un hedge inflation pertinent, mais la volatilité élevée (38.92%) et le décrément 5% pénalisent le profil risque/rendement. Avec une probabilité de rappel anticipé très faible (1%), l'investisseur doit se préparer à détenir le produit plusieurs années dans un contexte macro incertain. Décrément de 5% avec div réel de seulement 0.97% crée un drag invisible de 4.03%/an sur la performance.",
     "keyRisks": [
-      "Dollar fort (120) et taux réels en hausse pénalisent structurellement l'or et les minières",
-      "Choc énergétique (Brent >$100) comprime les marges des producteurs aurifères",
-      "Volatilité élevée (38.92%) augmente le risque de toucher rapidement la barrière coupon",
+      "Décrément 5% érode significativement la performance si l'or stagne",
+      "Volatilité 38.92% rend les coupons incertains (barrière 60%)",
+      "Dollar fort (DTWEXBGS 120) pèse négativement sur l'or",
       "Barrière à 0.8σ (Danger) — vol 38.92%"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 9,
-        "return_eur": 9000,
-        "probability": 0.15,
-        "duration_years": 1
+        "return_pct": 18,
+        "return_eur": 18000,
+        "probability": 0.2,
+        "duration_years": 2
       },
       "base": {
-        "return_pct": 0,
-        "return_eur": 0,
+        "return_pct": 22.5,
+        "return_eur": 22500,
         "probability": 0.35,
-        "duration_years": 3
+        "duration_years": 2.5
       },
       "stress": {
-        "return_pct": -15,
-        "return_eur": -15000,
-        "probability": 0.35,
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.3,
         "duration_years": 5
       },
       "worst": {
-        "return_pct": -30,
-        "return_eur": -30000,
+        "return_pct": -35,
+        "return_eur": -35000,
         "probability": 0.15,
         "duration_years": 5
       }
     },
     "confidenceInterval": {
-      "low": 26,
-      "high": 46,
+      "low": 28,
+      "high": 48,
       "halfWidth": 10,
       "gradeStable": false,
       "gradeRange": "D-C",
-      "label": "D [26-46]"
+      "label": "D [28-48]"
     },
     "metadata": {
-      "gradedAt": "2026-03-31T08:38:16.010Z",
-      "durationMs": 21297,
+      "gradedAt": "2026-03-31T10:48:53.225Z",
+      "durationMs": 19839,
       "aiUsed": true,
-      "version": "6.1",
+      "version": "6.2",
       "productType": "autocall",
       "marketDataAvailable": true,
       "catBenchmark": 2.5,
@@ -347,8 +347,8 @@
       "baseGrade": "D",
       "adjustments": {
         "p1": -10,
-        "p2": -15,
-        "p3": 5,
+        "p2": 5,
+        "p3": 0,
         "p4": -5
       },
       "barrier_sigma": 0.8,
@@ -357,9 +357,9 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 26,
-      "ci_high": 46,
-      "ci_label": "D [26-46]",
+      "ci_low": 28,
+      "ci_high": 48,
+      "ci_label": "D [28-48]",
       "issuer_rating": "A",
       "issuer_tier": "IG",
       "hasDecrement": true,
@@ -386,6 +386,10 @@
       },
       "p3Recalibrated": true,
       "p4BsCorrected": true,
+      "isGuaranteedRate": false,
+      "barrierDistance": 50,
+      "barrierAlert": "safe",
+      "barrierWorst": "Indice Solactive GDX EUR AR 5%",
       "stockData": [
         {
           "name": "Indice Solactive GDX EUR AR 5%",
@@ -398,5 +402,21 @@
         }
       ]
     }
+  },
+  "_barrierDistance": {
+    "distance": 50,
+    "barrier": 50,
+    "worstUnderlying": "Indice Solactive GDX EUR AR 5%",
+    "worstPct": 100,
+    "alert": "safe",
+    "details": [
+      {
+        "name": "Indice Solactive GDX EUR AR 5%",
+        "price": 85.79,
+        "pctOfStrike": 100,
+        "distance": 50,
+        "dd3y": 30.84
+      }
+    ]
   }
 }
