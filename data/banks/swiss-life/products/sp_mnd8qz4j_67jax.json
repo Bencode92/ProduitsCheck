@@ -237,43 +237,62 @@
   "_couponProbability": 56.1,
   "_bsRendementNet": 2.58,
   "grading": {
-    "grade": "D",
-    "score": 30,
+    "grade": "C",
+    "score": 46,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 41,
-        "base": 46,
-        "delta": -5,
-        "reasoning": "Rendement: base 46 → -5 = 41 (Barrière 95% très exigeante en stagflation avec 3 SJ dans secteurs évités (ISP/SAN financials, ASML tech) et ENR très volatile (60%)) | Coupon 9.7%, barrière 60% | Barr.coupon 95% | Mat espérée: ~3.3a (prob mat: 24%)"
+        "score": 51,
+        "base": 62,
+        "delta": 0,
+        "reasoning": "BS: Basket vol=21% (avg 4 SJ corr=0.4) | P(panier>95% T=3.3a) = 56.1% | Breach 60%: P=18.1% -> perte esperee 2.9%/an | Rdt net: 5.4% - 2.9% = 2.6%/an | Spread vs CAT: 0.1%",
+        "_bsDelta": -11,
+        "_bs": {
+          "score": 51,
+          "probCoupon": 56.1,
+          "couponEffectif": 9.7,
+          "rendementEspere": 5.44,
+          "perteEsperee": 2.86,
+          "rendementNet": 2.58,
+          "drag": 0,
+          "vols": [
+            37.09,
+            24.51,
+            28.12,
+            24.51
+          ],
+          "matEsperee": 3.3,
+          "reasoning": "Basket vol=21% (avg 4 SJ corr=0.4) | P(panier>95% T=3.3a) = 56.1% | Breach 60%: P=18.1% -> perte esperee 2.9%/an | Rdt net: 5.4% - 2.9% = 2.6%/an",
+          "method": "BS-simplifie-v1.2"
+        }
       },
       "underlyingQuality": {
-        "score": 28,
+        "score": 55,
         "base": 33,
         "delta": -5,
-        "reasoning": "Qualité: base 33 → -5 = 28 (3/4 SJ dans secteurs à éviter selon MI (financials, tech) + betas élevés (ASML 1.29, ENR 1.56) vulnérables en régime stagflationniste) | Worst: Intesa Sanpaolo S.p.A. B:25"
+        "reasoning": "Qualité: base 33 → -5 = 28 (3 sous-jacents sur 4 dans secteurs évités (ISP/SAN financials, ASML tech), seul ENR bénéficie du contexte energy mais volatilité extrême) | Worst: Intesa Sanpaolo S.p.A. B:25 | Basket équipondéré 4 actifs: P2 +27pts (diversification)"
       },
       "portfolioFit": {
-        "score": 80,
+        "score": 62,
         "base": 80,
         "delta": 0,
-        "reasoning": "Fit: base 80"
+        "reasoning": "Fit: base 50 → 62 (basket, autocall) | Fit: base 80"
       },
       "riskPremium": {
-        "score": 0,
+        "score": 35,
         "base": 5,
         "delta": -5,
-        "reasoning": "Prime: base 5 → -5 = 0 (Spread 4.7% insuffisant vs risque réel avec barrière 95% et worst-of structure en période de stress macro) | 9.7% vs CAT 2.5% (spread 7.2%)"
+        "reasoning": "Capital garanti: spread 9.7% - CAT 2.5% - illiq 0.5% = 6.7% | v6-BS: P4 90→35 (rdtNet BS=2.6% vs CAT 2.5%)"
       }
     },
-    "verdict": "Produit TRÈS RISQUÉ (note finale: 4/100) en régime stagflationniste avec VIX 22 et Brent >$100. La barrière coupon à 95% sur worst-of avec 3/4 SJ dans secteurs évités (financials ISP/SAN, tech ASML) rend les coupons quasi-inaccessibles. ENR (vol 60%, DD -72%) et l'exposition cyclique créent un risque capital majeur sur la barrière 60%. Le rendement 9.7% ne compense pas le risque de perte en capital dans ce contexte macro hostile.",
+    "verdict": "Produit très risqué (score 14/100) en régime stagflation avec 3 sous-jacents sur 4 dans des secteurs à éviter. La barrière coupon à 95% sera difficile à tenir avec ENR à -71.9% de son plus haut et volatilité 60%. Le coupon de 9.7% ne compense pas l'exposition aux banques européennes sous pression de taux et à ASML face au ralentissement tech. Probabilité de perte en capital élevée.",
     "keyRisks": [
-      "Barrière 95% irréaliste avec 3 SJ dans secteurs évités par le marché en stagflation",
-      "ENR ultra-volatile (60%) avec DD -72% menace directement le capital à 60%",
-      "Choc pétrolier >$110 amplifierait la correction sur financials/tech déjà sous pression",
+      "ENR (worst performer -71.9%) peut entraîner une perte totale avec barrière à 60%",
+      "Banques européennes vulnérables si BCE maintient taux élevés en stagflation",
+      "Choc pétrolier >$110 aggraverait la volatilité déjà extrême",
       "Barrière à 0.34σ (Critique) — vol 60.47%"
     ],
     "negotiationPoints": [],
@@ -285,21 +304,21 @@
         "duration_years": 1
       },
       "base": {
+        "return_pct": 4.85,
+        "return_eur": 14550,
+        "probability": 0.25,
+        "duration_years": 3
+      },
+      "stress": {
         "return_pct": 0,
         "return_eur": 0,
         "probability": 0.35,
         "duration_years": 6
       },
-      "stress": {
-        "return_pct": -15,
-        "return_eur": -15000,
-        "probability": 0.35,
-        "duration_years": 4
-      },
       "worst": {
         "return_pct": -40,
         "return_eur": -40000,
-        "probability": 0.15,
+        "probability": 0.25,
         "duration_years": 6
       }
     },
@@ -312,10 +331,10 @@
       "label": "D [19-41]"
     },
     "metadata": {
-      "gradedAt": "2026-03-31T13:21:36.282Z",
-      "durationMs": 22747,
+      "gradedAt": "2026-03-31T13:32:08.285Z",
+      "durationMs": 22226,
       "aiUsed": true,
-      "version": "5.2",
+      "version": "6.2",
       "productType": "autocall",
       "marketDataAvailable": true,
       "catBenchmark": 2.5,
@@ -328,7 +347,7 @@
       "hasBarrier": true,
       "barrierPct": 60,
       "barrierCouponPct": 95,
-      "couponProbability": null,
+      "couponProbability": 56.1,
       "expectedMaturity": 3.3,
       "maxMaturity": 6,
       "probReachMaturity": 24,
@@ -354,7 +373,79 @@
       "issuer_tier": "IG",
       "hasDecrement": false,
       "decrementDrag": 0,
-      "structureType": "autocall"
+      "structureType": "autocall",
+      "bsMethod": "BS-simplifie-v1.2",
+      "bsProbCoupon": 56.1,
+      "bsRendementNet": 2.58,
+      "bsPerteEsperee": 2.86,
+      "bsCouponEffectif": 9.7,
+      "bsVols": [
+        37.09,
+        24.51,
+        28.12,
+        24.51
+      ],
+      "bsMatEsperee": 3.3,
+      "isBasket": true,
+      "v6Weights": {
+        "p1": 0.3,
+        "p2": 0.2,
+        "p3": 0.15,
+        "p4": 0.3
+      },
+      "p3Recalibrated": true,
+      "p4BsCorrected": true,
+      "isGuaranteedRate": false,
+      "stockData": [
+        {
+          "name": "ASML Holding N.V.",
+          "ticker": "ASML",
+          "sector": "Technologie de l'information",
+          "perf_ytd": 20.69,
+          "perf_1y": 80.43,
+          "volatility_3y": 37.09,
+          "max_drawdown_3y": 45.12,
+          "buffett_score": 50,
+          "quality_score": 71,
+          "buffett_grade": "C"
+        },
+        {
+          "name": "Intesa Sanpaolo S.p.A.",
+          "ticker": "ISP",
+          "sector": "Finance",
+          "perf_ytd": -13.93,
+          "perf_1y": 7.89,
+          "volatility_3y": 24.76,
+          "max_drawdown_3y": 21.19,
+          "buffett_score": 25,
+          "quality_score": 61,
+          "buffett_grade": "D"
+        },
+        {
+          "name": "Siemens Energy AG",
+          "ticker": "ENR",
+          "sector": "Industries",
+          "perf_ytd": 17.94,
+          "perf_1y": 163.74,
+          "volatility_3y": 60.47,
+          "max_drawdown_3y": 71.9,
+          "buffett_score": 40,
+          "quality_score": 41,
+          "buffett_grade": "C"
+        },
+        {
+          "name": "Banco Santander S.A.",
+          "ticker": "SAN",
+          "sector": "Finance",
+          "perf_ytd": -5.76,
+          "perf_1y": 49.4,
+          "volatility_3y": 28.42,
+          "max_drawdown_3y": 20.79,
+          "buffett_score": 40,
+          "quality_score": 71,
+          "buffett_grade": "C"
+        }
+      ]
     }
   }
 }
