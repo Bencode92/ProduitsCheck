@@ -237,18 +237,18 @@
   "_couponProbability": 51.3,
   "_bsRendementNet": 3.71,
   "grading": {
-    "grade": "B",
-    "score": 73,
+    "grade": "C",
+    "score": 55,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 57,
+        "score": 52,
         "base": 32,
-        "delta": 25,
-        "reasoning": "BS: P(SJ>100% | vol=20% T=1.6a) = 51.3% | Breach 60%: P=3.9% -> perte esperee 1.3%/an | Rdt net: 5.0% - 1.3% = 3.7%/an | Spread vs CAT: 1.2%",
+        "delta": 20,
+        "reasoning": "BS: P(SJ>100% | vol=20% T=1.6a) = 51.3% | Breach 60%: P=3.9% -> perte esperee 1.3%/an | Rdt net: 5.0% - 1.3% = 3.7%/an | Spread vs CAT: 1.2% [IA capped ±20]",
         "_bs": {
           "score": 57,
           "probCoupon": 51.3,
@@ -262,33 +262,33 @@
           ],
           "matEsperee": 1.6,
           "reasoning": "P(SJ>100% | vol=20% T=1.6a) = 51.3% | Breach 60%: P=3.9% -> perte esperee 1.3%/an | Rdt net: 5.0% - 1.3% = 3.7%/an",
-          "method": "BS-simplifie-v1.1"
+          "method": "BS-simplifie-v1.2"
         }
       },
       "underlyingQuality": {
-        "score": 79,
-        "base": 94,
+        "score": 71,
+        "base": 86,
         "delta": -15,
-        "reasoning": "Qualité: base 94 → -15 = 79 (Secteur financials explicitement évité par le marché, beta proche de 1 amplifie le risque en contexte stagflationniste défavorable aux banques) | Worst: Euro Stoxx Banks B:85"
+        "reasoning": "Qualité: base 86 → -15 = 71 (Secteur financials explicitement ÉVITÉ (-1.63% performance), beta élevé (0.96) en régime stagflationniste avec choc énergétique amplifiant les risques) | Worst: Euro Stoxx Banks B:67"
       },
       "portfolioFit": {
-        "score": 75,
+        "score": 58,
         "base": 80,
         "delta": -5,
-        "reasoning": "Fit: base 80 → -5 = 75 (Surpondération sectorielle dangereuse en régime stagflationniste, diversification insuffisante face au risque systémique bancaire)"
+        "reasoning": "Fit: base 50 → 58 (single-index, autocall) | Fit: base 80 → -5 = 75 (Produit mal adapté au contexte actuel: exposition concentrée sur un secteur en difficulté sans diversification)"
       },
       "riskPremium": {
-        "score": 83,
+        "score": 39,
         "base": 5,
         "delta": 0,
-        "reasoning": "Capital garanti: spread 4.85×2=9.7% - CAT 2.5% - illiq 0.5% = 6.7% | Illiq. premium +1.3% (-7pts)"
+        "reasoning": "Capital garanti: spread 4.85×2=9.7% - CAT 2.5% - illiq 0.5% = 6.7% | v6-BS: P4 90→46 (rdtNet BS=3.7% vs CAT 2.5%) | Illiq. premium +1.3% (-7pts)"
       }
     },
-    "verdict": "Produit à ÉVITER en contexte de stagflation avec le secteur bancaire sous pression (-1.63% momentum). Le coupon de 9.7% ne compense pas le risque de perte en capital avec une barrière à 60% vulnérable dans un environnement de taux élevés et croissance faible. La probabilité de maturation à 1% et l'espérance à 1.6 ans masquent mal le risque de rester bloqué 5 ans avec des banques en difficulté.",
+    "verdict": "Produit INADAPTÉ au régime stagflationniste actuel. L'Euro Stoxx Banks est dans le secteur financials ÉVITÉ par le MI (-1.63% de performance), avec un beta de 0.96 qui amplifie la volatilité en période de stress (VIX à 22). Le coupon de 9.7% est attractif mais la probabilité de le toucher est fortement réduite avec une barrière à 80% difficile à maintenir quand les banques souffrent de la compression des marges et du risque de défaut accru. Score final ajusté: 17/100 (MAUVAIS).",
     "keyRisks": [
-      "Secteur bancaire évité par les investisseurs en stagflation - risque de sous-performance structurelle",
-      "Choc pétrolier >$100 peut déclencher une crise bancaire via défauts sur crédits",
-      "VIX à 22 avec volatilité 19.15% augmente fortement le risque de toucher la barrière capitale"
+      "Secteur bancaire européen vulnérable en stagflation: hausse des défauts + marges comprimées",
+      "Choc énergétique (Brent >$100) impacte négativement les bilans bancaires via exposition corporate",
+      "Concentration sectorielle sans diversification dans un secteur explicitement évité"
     ],
     "negotiationPoints": [],
     "scenarios": {
@@ -299,37 +299,37 @@
         "duration_years": 1
       },
       "base": {
-        "return_pct": 4.85,
-        "return_eur": 9700,
-        "probability": 0.3,
-        "duration_years": 2
-      },
-      "stress": {
         "return_pct": 0,
         "return_eur": 0,
+        "probability": 0.35,
+        "duration_years": 5
+      },
+      "stress": {
+        "return_pct": -15,
+        "return_eur": -15000,
         "probability": 0.35,
         "duration_years": 5
       },
       "worst": {
         "return_pct": -25,
         "return_eur": -25000,
-        "probability": 0.2,
+        "probability": 0.15,
         "duration_years": 5
       }
     },
     "confidenceInterval": {
-      "low": 38,
-      "high": 54,
+      "low": 33,
+      "high": 49,
       "halfWidth": 8,
       "gradeStable": false,
       "gradeRange": "D-C",
-      "label": "C [38-54]"
+      "label": "D [33-49]"
     },
     "metadata": {
-      "gradedAt": "2026-03-30T16:03:57.401Z",
-      "durationMs": 19652,
+      "gradedAt": "2026-03-31T08:29:24.233Z",
+      "durationMs": 20990,
       "aiUsed": true,
-      "version": "5.2",
+      "version": "6.1",
       "productType": "autocall",
       "marketDataAvailable": true,
       "catBenchmark": 2.5,
@@ -347,7 +347,7 @@
       "maxMaturity": 5,
       "probReachMaturity": 1,
       "maxBeta": 0.96,
-      "baseScore": 53,
+      "baseScore": 47,
       "baseGrade": "C",
       "adjustments": {
         "p1": -10,
@@ -361,16 +361,16 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 38,
-      "ci_high": 54,
-      "ci_label": "C [38-54]",
+      "ci_low": 33,
+      "ci_high": 49,
+      "ci_label": "D [33-49]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
       "decrementDrag": 0,
       "structureType": "autocall",
       "couponPerPeriod": 4.85,
-      "bsMethod": "BS-simplifie-v1.1",
+      "bsMethod": "BS-simplifie-v1.2",
       "bsProbCoupon": 51.3,
       "bsRendementNet": 3.71,
       "bsPerteEsperee": 1.27,
@@ -379,18 +379,27 @@
         19.86
       ],
       "bsMatEsperee": 1.6,
+      "isBasket": false,
+      "v6Weights": {
+        "p1": 0.3,
+        "p2": 0.15,
+        "p3": 0.25,
+        "p4": 0.3
+      },
+      "p3Recalibrated": true,
+      "p4BsCorrected": true,
       "stockData": [
         {
           "name": "Euro Stoxx Banks",
           "ticker": "ENX",
           "sector": "Finance",
-          "perf_ytd": 3.44,
-          "perf_1y": -2.79,
-          "volatility_3y": 19.15,
+          "perf_ytd": 5.62,
+          "perf_1y": -1.39,
+          "volatility_3y": 19.18,
           "max_drawdown_3y": 25.7,
-          "buffett_score": null,
-          "quality_score": 85,
-          "buffett_grade": null
+          "buffett_score": 67,
+          "quality_score": 63,
+          "buffett_grade": "B"
         }
       ]
     }
