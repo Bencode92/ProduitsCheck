@@ -236,9 +236,11 @@
   "aiCategoryColor": "#2EC4B6",
   "aiOpinion": "Produit offrant un rendement attractif de 7% annuel avec possibilité de remboursement anticipé dès 95%, mais exposé au risque de perte en capital avec une barrière relativement basse à 60%. La diversification sur 4 secteurs différents (banque, énergie, tech) réduit les risques mais l'absence de protection du capital reste le principal point faible sur 6 ans.",
   "aiAnalyzedAt": "2026-03-30T19:47:42.334Z",
+  "_couponProbability": 55.3,
+  "_bsRendementNet": 0.72,
   "grading": {
     "grade": "C",
-    "score": 59,
+    "score": 45,
     "killCriteria": {
       "triggered": false,
       "reasons": []
@@ -272,26 +274,26 @@
         "score": 55,
         "base": 33,
         "delta": -5,
-        "reasoning": "Qualité: base 33 → -5 = 28 (3/4 sous-jacents dans secteurs évités (financials: ISP/SAN, tech: ASML) en stagflation avec VIX 22, seul ENR dans energy favorisé mais ultra-volatil (60%).) | Worst: Intesa Sanpaolo B:25 | Basket équipondéré 4 actifs: P2 +27pts (diversification)"
+        "reasoning": "Qualité: base 33 → -5 = 28 (75% du panier dans des secteurs évités en stagflation: ISP/SAN (financials -1.63%), ASML (tech -1.22%), seul ENR (energy +1.76%) bénéficie) | Worst: Intesa Sanpaolo B:25 | Basket équipondéré 4 actifs: P2 +27pts (diversification)"
       },
       "portfolioFit": {
-        "score": 75,
+        "score": 62,
         "base": 80,
         "delta": -5,
-        "reasoning": "Fit: base 80 → -5 = 75 (Surexposition sectorielle problématique en stagflation, manque de diversification avec 50% financials dans un secteur en difficulté.)"
+        "reasoning": "Fit: base 50 → 62 (basket, autocall) | Fit: base 80 → -5 = 75 (La forte volatilité (ENR 60.47%) et le drawdown extrême (-71.9%) réduisent l'attrait malgré le coupon élevé)"
       },
       "riskPremium": {
-        "score": 73,
+        "score": 28,
         "base": 67,
         "delta": -5,
-        "reasoning": "Capital garanti: spread 7.0% - CAT 2.5% - illiq 0.5% = 4.0% | Illiq. premium +1.4% (-7pts)"
+        "reasoning": "Capital garanti: spread 7.0% - CAT 2.5% - illiq 0.5% = 4.0% | v6-BS: P4 80→35 (rdtNet BS=0.7% vs CAT 2.5%) | Illiq. premium +1.4% (-7pts)"
       }
     },
-    "verdict": "Produit hautement risqué avec score ajusté de 42/100 en régime stagflationnaire. Les 3/4 des sous-jacents appartiennent aux secteurs évités (financials -1.63% momentum, tech -1.22%) avec seul ENR dans l'energy favorisé mais affichant -71.9% depuis ses sommets. La barrière coupon à 62% semble insuffisante face aux drawdowns actuels (ISP -21%, ENR -72%, ASML -45%) et au VIX à 22 en contexte de choc pétrolier >$100.",
+    "verdict": "Produit toxique en stagflation avec 75% d'exposition aux secteurs les plus pénalisés (financials -1.63%, tech -1.22%). Le drawdown de -71.9% sur ENR et la volatilité moyenne de 37.7% rendent la barrière à 62% très vulnérable. Avec un VIX à 22 et le Brent à $103.79, la probabilité de toucher le coupon de 7% est faible face au risque de perte en capital jusqu'à -40%.",
     "keyRisks": [
-      "Exposition toxique avec 75% des sous-jacents dans secteurs évités en stagflation",
-      "ENR malgré secteur energy favorisé reste ultra-risqué (vol 60%, DD -72%)",
-      "Spirale prix-salaires avec pétrole >$100 peut aggraver la répression financière",
+      "Concentration fatale dans les secteurs évités (3/4 sous-jacents)",
+      "Choc pétrolier >$110 amplifiant la volatilité sur ENR déjà à 60%",
+      "Drawdown extrême de -71.9% sur ENR compromet toute récupération",
       "Barrière à 0.34σ (Critique) — vol 60.47%"
     ],
     "negotiationPoints": [],
@@ -305,35 +307,35 @@
       "base": {
         "return_pct": 3.5,
         "return_eur": 10500,
-        "probability": 0.3,
+        "probability": 0.25,
         "duration_years": 3
       },
       "stress": {
         "return_pct": -15,
         "return_eur": -15000,
-        "probability": 0.35,
-        "duration_years": 5
+        "probability": 0.4,
+        "duration_years": 6
       },
       "worst": {
-        "return_pct": -40,
-        "return_eur": -40000,
+        "return_pct": -35,
+        "return_eur": -35000,
         "probability": 0.2,
         "duration_years": 6
       }
     },
     "confidenceInterval": {
-      "low": 36,
-      "high": 58,
+      "low": 40,
+      "high": 62,
       "halfWidth": 11,
       "gradeStable": false,
-      "gradeRange": "D-C",
-      "label": "C [36-58]"
+      "gradeRange": "D-B",
+      "label": "C [40-62]"
     },
     "metadata": {
-      "gradedAt": "2026-03-30T19:48:04.536Z",
-      "durationMs": 23996,
+      "gradedAt": "2026-03-31T08:39:13.056Z",
+      "durationMs": 21509,
       "aiUsed": true,
-      "version": "5.2",
+      "version": "6.1",
       "productType": "autocall",
       "marketDataAvailable": true,
       "catBenchmark": 2.5,
@@ -351,7 +353,7 @@
       "maxMaturity": 6,
       "probReachMaturity": 24,
       "maxBeta": 1.56,
-      "baseScore": 52,
+      "baseScore": 56,
       "baseGrade": "C",
       "adjustments": {
         "p1": -5,
@@ -365,9 +367,9 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 36,
-      "ci_high": 58,
-      "ci_label": "C [36-58]",
+      "ci_low": 40,
+      "ci_high": 62,
+      "ci_label": "C [40-62]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
@@ -386,6 +388,14 @@
       ],
       "bsMatEsperee": 3.3,
       "isBasket": true,
+      "v6Weights": {
+        "p1": 0.3,
+        "p2": 0.15,
+        "p3": 0.25,
+        "p4": 0.3
+      },
+      "p3Recalibrated": true,
+      "p4BsCorrected": true,
       "stockData": [
         {
           "name": "Intesa Sanpaolo",
@@ -437,7 +447,5 @@
         }
       ]
     }
-  },
-  "_couponProbability": 55.3,
-  "_bsRendementNet": 0.72
+  }
 }
