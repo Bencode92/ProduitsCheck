@@ -182,7 +182,12 @@
             if (result.allocationPlan) {
                 result.allocationPlan.forEach(function(a) {
                     // --- SEUIL DYNAMIQUE ---
-                    if (a.score < threshold.seuil) {
+                    // Capital garanti products have zero capital risk → lower threshold
+                    var effectiveSeuil = threshold.seuil;
+                    if (a.capitalProtected) {
+                        effectiveSeuil = Math.min(threshold.seuil, 50);
+                    }
+                    if (a.score < effectiveSeuil) {
                         a.allocatedAmount = 0;
                         a.annualReturn = 0;
                         a.expectedReturn = 0;
@@ -190,7 +195,7 @@
                         a.excessVsCat = 0;
                         if (a.score >= 45) {
                             a.recommendation = 'ATTENDRE';
-                            a.reason = 'Score ' + a.score + ' < seuil ' + threshold.seuil + ' (' + threshold.regime + '). \u00c0 reconsid\u00e9rer si march\u00e9 s\'am\u00e9liore.';
+                            a.reason = 'Score ' + a.score + ' < seuil ' + effectiveSeuil + ' (' + threshold.regime + '). \u00c0 reconsid\u00e9rer si march\u00e9 s\'am\u00e9liore.';
                         } else {
                             a.recommendation = 'PASSER';
                             a.reason = 'Score ' + a.score + ' insuffisant (' + threshold.regime + '). Risque trop \u00e9lev\u00e9 vs rendement.';
