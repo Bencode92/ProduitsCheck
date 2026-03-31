@@ -123,15 +123,16 @@
       var result = _prevBuild();
       if (!result || !result.allocationPlan) return result;
 
-      // v1.1: gracefully handle missing v4 — use result._v4 if present
+      // v1.2: selective allocation — only deploy if product truly beats cash
       var hasV4 = !!(result._v4);
       var catRate = result.catBenchmark || 2.5;
       var regime = hasV4 ? (result._v4.regime || 'neutral') : 'neutral';
       var seuil = hasV4 ? (result._v4.seuil || 55) : 55;
-      var cr = _cashRes(regime);
-      var depMax = (result.totalLiquidity || 0) * (1 - cr);
-      var maxPer = depMax * 0.30;
       var fmt = typeof formatNumber === 'function' ? formatNumber : function(n) { return n; };
+
+      // No forced deployment cap — cash is the default, allocation must be earned
+      var totalLiq = result.totalLiquidity || 0;
+      var maxPer = totalLiq * 0.30; // max 30% in any single product
 
       // ═══ Phase 1: Enrich with BS data ═══
       var actionable = [];
@@ -156,22 +157,32 @@
           a._hasBS = false;
         }
 
-        // ═══ Phase 2: BS gate ═══
+        // ═══ Phase 2: Selective quality gate ═══
+        // Require risk-adjusted premium: spread must compensate for vol
+        // minSpread = max(1.0%, vol × 0.05) — higher vol needs more premium
         var isAct = (a.recommendation === 'SOUSCRIRE' || a.recommendation === 'ARBITRER');
+        var spread = a._rn - catRate;
+        var minSpread = Math.max(1.0, a._vol * 0.05);
+
         if (isAct && a._rn < 0) {
           a.allocatedAmount = 0; a.annualReturn = 0; a.catReturn = 0; a.excessVsCat = 0;
           a.recommendation = 'PASSER';
           a.reason = '\u26a0 BS rdt net ' + a._rn.toFixed(1) + '%/an (n\u00e9gatif). Garder en CAT.';
-        } else if (isAct && a._rn < catRate) {
+        } else if (isAct && spread < minSpread) {
           a.allocatedAmount = 0; a.annualReturn = 0; a.catReturn = 0; a.excessVsCat = 0;
           a.recommendation = 'ATTENDRE';
-          a.reason = 'BS rdt net ' + a._rn.toFixed(1) + '% < CAT ' + catRate.toFixed(1) + '%. Prime insuffisante.';
+          a.reason = 'Spread ' + spread.toFixed(1) + '% < min ' + minSpread.toFixed(1) +
+            '% (vol ' + Math.round(a._vol) + '%). Prime insuffisante vs cash.';
         } else if (isAct) {
+          // Compute individual Sharpe vs CAT
+          a._sharpe = a._vol > 0 ? spread / a._vol : 0;
           actionable.push(a);
         }
       });
 
-      // ═══ Phase 3: Inverse-vol sizing ═══
+      // ═══ Phase 3: Quality-weighted sizing ═══
+      // Only deploy cash proportional to aggregate quality.
+      // If only 1 mediocre product passes, don't deploy 90% of cash into it.
       if (actionable.length > 0) {
         var tw = 0;
         actionable.forEach(function(a) {
@@ -181,6 +192,13 @@
           a._w = (1 / vol) * sf * spf;
           tw += a._w;
         });
+
+        // Deployment budget scales with number and quality of candidates
+        // avgSharpe of candidates determines how much cash to deploy
+        var avgSharpe = actionable.reduce(function(s, a) { return s + (a._sharpe || 0); }, 0) / actionable.length;
+        // deployRatio: 0.3 at sharpe=0.05, 0.6 at sharpe=0.15, 0.85 at sharpe=0.30+
+        var deployRatio = Math.min(0.85, Math.max(0.20, avgSharpe * 3));
+        var depMax = totalLiq * deployRatio;
 
         actionable.forEach(function(a) {
           var t = Math.round((a._w / tw) * depMax / 1000) * 1000;
@@ -327,7 +345,18 @@
           ' DD\u2248' + result._v5.maxDrawdownEst + '% Div=' + result._v5.divRatio + 'x');
       }
 
-      console.log('[opt-v5] v4=' + hasV4 + ' | deployed=' + fmt(result.deployedAmount || 0) + '\u20ac | actions=' + subs.length);
+      // Cash retained info
+      result.cashRetained = totalLiq - (result.deployedAmount || 0);
+      result.cashRetainedPct = totalLiq > 0 ? Math.round(result.cashRetained / totalLiq * 100) : 100;
+      result.cashReason = subs.length === 0
+        ? 'Aucune proposition ne justifie le risque vs CAT. 100% cash.'
+        : result.cashRetainedPct > 50
+          ? 'Qualit\u00e9 moyenne des propositions → ' + result.cashRetainedPct + '% en cash.'
+          : result.cashRetainedPct + '% cash r\u00e9sidu (d\u00e9ploiement s\u00e9lectif).';
+
+      console.log('[opt-v5] deployed=' + fmt(result.deployedAmount || 0) + '\u20ac (' +
+        (100 - result.cashRetainedPct) + '%) | cash=' + fmt(result.cashRetained) +
+        '\u20ac (' + result.cashRetainedPct + '%) | actions=' + subs.length);
       return result;
     };
 
