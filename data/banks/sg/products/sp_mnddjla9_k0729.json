@@ -218,83 +218,84 @@
   "aiAnalyzedAt": "2026-03-30T16:00:21.448Z",
   "envelope": "",
   "grading": {
-    "grade": "C",
-    "score": 58,
+    "grade": "B",
+    "score": 61,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 62,
-        "base": 64,
-        "delta": 1,
-        "reasoning": "Rendement: base 64 → +1 = 65 (Taux fixe insensible à la volatilité et au stress de marché, coupon 4.6% garanti dans un contexte stagflationniste où les taux remontent) | Coupon 4.6%, protégé | Mat espérée: ~2.3a (prob mat: 1%) | ⚠ Maturité 10a = incertitude accrue (-3pts)"
+        "score": 69,
+        "base": 73,
+        "delta": -1,
+        "reasoning": "Rendement: base 73 → -1 = 72 (Probabilité de call très faible (20%) en stagflation avec stance hawkish, l'investisseur sera probablement bloqué 10 ans) | Coupon 4.6%, protégé | Mat espérée: ~2.3a (prob mat: 1%) | ⚠ Maturité 10a = incertitude accrue (-3pts)"
       },
       "underlyingQuality": {
-        "score": 66,
-        "base": 65,
-        "delta": 1,
-        "reasoning": "Qualité: base 65 → +1 = 66 (Produit sans sous-jacent action bénéficie du régime stagflationniste avec taux en hausse, aucune exposition aux secteurs évités)"
+        "score": 72,
+        "base": 73,
+        "delta": -1,
+        "reasoning": "Qualité: base 73 → -1 = 72 (Produit taux fixe sans exposition actions mais duration 10Y très élevée en contexte stagflationniste défavorable aux obligations longues)"
       },
       "portfolioFit": {
         "score": 55,
         "base": 70,
-        "delta": 1,
-        "reasoning": "Fit: base 50 → 55 (none, taux_fixe) | Fit: base 70 → +1 = 71 (Asset refuge idéal en stagflation avec capital garanti et rendement fixe supérieur à l'inflation anticipée)"
+        "delta": 0,
+        "reasoning": "Fit: base 50 → 55 (none, taux_fixe) | Fit: base 70"
       },
       "riskPremium": {
         "score": 51,
-        "base": 26,
+        "base": 40,
         "delta": -1,
         "reasoning": "Capital garanti: spread 4.6% - CAT 2.5% - illiq 0.7% = 1.4%"
       }
     },
-    "verdict": "Produit défensif optimal en stagflation avec coupon fixe 4.6% garanti et capital protégé, idéal pour sécuriser du rendement alors que le VIX à 22 et le Brent >$100 créent de l'instabilité. Le risque principal reste le rappel anticipé par l'émetteur si les taux baissent, limitant le rendement total à ~10.6% sur 2.3 ans. Dans ce contexte de pentification de la courbe (+46bps), la probabilité de call précoce reste faible à court terme.",
+    "verdict": "Produit défensif avec capital garanti mais profil risque/rendement défavorable en stagflation. Le coupon 4.6% offre seulement 145bps au-dessus du taux AAA 10Y, prime insuffisante pour compenser le risque crédit émetteur et l'option de call défavorable (prob 20%). Duration extrême de ~10 ans expose fortement à la hausse des taux en régime hawkish, avec perte potentielle de 10% pour +100bps de taux.",
     "keyRisks": [
-      "Call anticipé limitant le rendement à 2.3 ans au lieu de 10 ans",
-      "Coût d'opportunité si les taux continuent de monter significativement"
+      "Duration 10 ans = perte ~10% si taux +100bps en stagflation",
+      "Risque crédit émetteur avec spread 145bps insuffisant vs stress actuel",
+      "Immobilisation capital 10 ans si non callé (prob 80%)"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 46,
-        "return_eur": 46000,
+        "return_pct": 14.5,
+        "return_eur": 14500,
         "probability": 0.2,
-        "duration_years": 10
+        "duration_years": 3
       },
       "base": {
-        "return_pct": 10.6,
-        "return_eur": 10600,
-        "probability": 0.6,
-        "duration_years": 2.3
+        "return_pct": 46,
+        "return_eur": 46000,
+        "probability": 0.45,
+        "duration_years": 10
       },
       "stress": {
-        "return_pct": 4.6,
-        "return_eur": 4600,
-        "probability": 0.15,
-        "duration_years": 1
+        "return_pct": 36,
+        "return_eur": 36000,
+        "probability": 0.25,
+        "duration_years": 10
       },
       "worst": {
-        "return_pct": 4.6,
-        "return_eur": 4600,
-        "probability": 0.05,
+        "return_pct": -100,
+        "return_eur": -100000,
+        "probability": 0.1,
         "duration_years": 1
       }
     },
     "confidenceInterval": {
-      "low": 46,
-      "high": 64,
+      "low": 53,
+      "high": 71,
       "halfWidth": 9,
       "gradeStable": false,
       "gradeRange": "C-B",
-      "label": "C [46-64]"
+      "label": "B [53-71]"
     },
     "metadata": {
-      "gradedAt": "2026-03-31T08:37:35.963Z",
-      "durationMs": 19849,
+      "gradedAt": "2026-03-31T10:47:06.349Z",
+      "durationMs": 20851,
       "aiUsed": true,
-      "version": "6.1",
+      "version": "6.2",
       "productType": "taux_fixe",
       "marketDataAvailable": false,
       "catBenchmark": 2.5,
@@ -312,12 +313,12 @@
       "maxMaturity": 10,
       "probReachMaturity": 1,
       "maxBeta": null,
-      "baseScore": 54,
-      "baseGrade": "C",
+      "baseScore": 62,
+      "baseGrade": "B",
       "adjustments": {
-        "p1": 1,
-        "p2": 1,
-        "p3": 1,
+        "p1": -1,
+        "p2": -1,
+        "p3": 0,
         "p4": -1
       },
       "barrier_sigma": null,
@@ -326,9 +327,9 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Callable LT",
-      "ci_low": 46,
-      "ci_high": 64,
-      "ci_label": "C [46-64]",
+      "ci_low": 53,
+      "ci_high": 71,
+      "ci_label": "B [53-71]",
       "issuer_rating": "A",
       "issuer_tier": "IG",
       "hasDecrement": false,
@@ -341,7 +342,8 @@
         "p4": 0.3
       },
       "p3Recalibrated": true,
-      "p4BsCorrected": false
+      "p4BsCorrected": false,
+      "isGuaranteedRate": true
     }
   }
 }
