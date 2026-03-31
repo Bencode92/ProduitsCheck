@@ -218,84 +218,84 @@
   "aiAnalyzedAt": "2026-03-30T16:00:21.448Z",
   "envelope": "",
   "grading": {
-    "grade": "B",
-    "score": 61,
+    "grade": "C",
+    "score": 58,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 69,
+        "score": 72,
         "base": 73,
         "delta": -1,
-        "reasoning": "Rendement: base 73 → -1 = 72 (Probabilité de call très faible (20%) en stagflation avec stance hawkish, l'investisseur sera probablement bloqué 10 ans) | Coupon 4.6%, protégé | Mat espérée: ~2.3a (prob mat: 1%) | ⚠ Maturité 10a = incertitude accrue (-3pts)"
+        "reasoning": "Rendement: base 73 → -1 = 72 (Probabilité de call faible (20%) en stagflation avec stance hawkish, l'investisseur touchera probablement les coupons sur 10 ans mais avec risque duration élevé) | Coupon 4.6%, protégé | Mat espérée: ~2.3a (prob mat: 1%)"
       },
       "underlyingQuality": {
         "score": 72,
         "base": 73,
         "delta": -1,
-        "reasoning": "Qualité: base 73 → -1 = 72 (Produit taux fixe sans exposition actions mais duration 10Y très élevée en contexte stagflationniste défavorable aux obligations longues)"
+        "reasoning": "Qualité: base 73 → -1 = 72 (Contexte stagflationniste défavorable aux produits longs fixed income, duration 10 ans très exposée si inflation persiste et BCE forcée de remonter les taux)"
       },
       "portfolioFit": {
-        "score": 55,
+        "score": 71,
         "base": 70,
-        "delta": 0,
-        "reasoning": "Fit: base 50 → 55 (none, taux_fixe) | Fit: base 70"
+        "delta": 1,
+        "reasoning": "Fit: base 70 → +1 = 71 (Dans un portefeuille diversifié, le coupon garanti 4.6% offre une protection contre la volatilité actions en stagflation)"
       },
       "riskPremium": {
-        "score": 51,
+        "score": 39,
         "base": 40,
         "delta": -1,
-        "reasoning": "Capital garanti: spread 4.6% - CAT 2.5% - illiq 0.7% = 1.4%"
+        "reasoning": "Prime: base 40 → -1 = 39 (Spread 145bps vs AAA 10Y insuffisant pour compenser le risque crédit émetteur et l'optionnalité callable défavorable en environnement hawkish) | 4.6% vs CAT 2.5% (spread 2.1%)"
       }
     },
-    "verdict": "Produit défensif avec capital garanti mais profil risque/rendement défavorable en stagflation. Le coupon 4.6% offre seulement 145bps au-dessus du taux AAA 10Y, prime insuffisante pour compenser le risque crédit émetteur et l'option de call défavorable (prob 20%). Duration extrême de ~10 ans expose fortement à la hausse des taux en régime hawkish, avec perte potentielle de 10% pour +100bps de taux.",
+    "verdict": "En régime stagflationniste avec VIX à 22 et Brent >$100, ce produit callable 10 ans offre un coupon fixe 4.6% attractif mais présente des risques duration majeurs. La faible probabilité de call (20%) suggère une immobilisation longue du capital avec exposition maximale à une remontée des taux BCE. Le spread de 145bps vs AAA 10Y compense mal le risque crédit émetteur et l'option call défavorable. Score ajusté: 44/100, recommandation négative sauf pour investisseurs cherchant du yield fixe long terme.",
     "keyRisks": [
-      "Duration 10 ans = perte ~10% si taux +100bps en stagflation",
-      "Risque crédit émetteur avec spread 145bps insuffisant vs stress actuel",
-      "Immobilisation capital 10 ans si non callé (prob 80%)"
+      "Duration 10 ans très exposée si BCE forcée de remonter les taux au-delà de 2.15% pour combattre l'inflation",
+      "Risque crédit émetteur non compensé par le spread de 145bps en environnement macro dégradé",
+      "Option call peu probable (20%) = capital immobilisé 10 ans avec coût d'opportunité élevé si taux montent"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 14.5,
-        "return_eur": 14500,
+        "return_pct": 4.6,
+        "return_eur": 13800,
         "probability": 0.2,
         "duration_years": 3
       },
       "base": {
-        "return_pct": 46,
+        "return_pct": 4.6,
         "return_eur": 46000,
         "probability": 0.45,
         "duration_years": 10
       },
       "stress": {
-        "return_pct": 36,
-        "return_eur": 36000,
+        "return_pct": 2,
+        "return_eur": 20000,
         "probability": 0.25,
         "duration_years": 10
       },
       "worst": {
-        "return_pct": -100,
-        "return_eur": -100000,
+        "return_pct": -10,
+        "return_eur": -10000,
         "probability": 0.1,
-        "duration_years": 1
+        "duration_years": 10
       }
     },
     "confidenceInterval": {
-      "low": 53,
-      "high": 71,
+      "low": 49,
+      "high": 67,
       "halfWidth": 9,
       "gradeStable": false,
       "gradeRange": "C-B",
-      "label": "B [53-71]"
+      "label": "C [49-67]"
     },
     "metadata": {
-      "gradedAt": "2026-03-31T10:47:06.349Z",
-      "durationMs": 20851,
+      "gradedAt": "2026-03-31T12:17:42.775Z",
+      "durationMs": 31271,
       "aiUsed": true,
-      "version": "6.2",
+      "version": "5.2",
       "productType": "taux_fixe",
       "marketDataAvailable": false,
       "catBenchmark": 2.5,
@@ -313,12 +313,12 @@
       "maxMaturity": 10,
       "probReachMaturity": 1,
       "maxBeta": null,
-      "baseScore": 62,
-      "baseGrade": "B",
+      "baseScore": 59,
+      "baseGrade": "C",
       "adjustments": {
         "p1": -1,
         "p2": -1,
-        "p3": 0,
+        "p3": 1,
         "p4": -1
       },
       "barrier_sigma": null,
@@ -327,23 +327,14 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Callable LT",
-      "ci_low": 53,
-      "ci_high": 71,
-      "ci_label": "B [53-71]",
+      "ci_low": 49,
+      "ci_high": 67,
+      "ci_label": "C [49-67]",
       "issuer_rating": "A",
       "issuer_tier": "IG",
       "hasDecrement": false,
       "decrementDrag": 0,
-      "structureType": "taux_fixe",
-      "v6Weights": {
-        "p1": 0.3,
-        "p2": 0.15,
-        "p3": 0.25,
-        "p4": 0.3
-      },
-      "p3Recalibrated": true,
-      "p4BsCorrected": false,
-      "isGuaranteedRate": true
+      "structureType": "taux_fixe"
     }
   }
 }
