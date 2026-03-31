@@ -240,7 +240,7 @@
   "_bsRendementNet": 0.72,
   "grading": {
     "grade": "C",
-    "score": 46,
+    "score": 45,
     "killCriteria": {
       "triggered": false,
       "reasons": []
@@ -250,32 +250,32 @@
         "score": 33,
         "base": 38,
         "delta": -5,
-        "reasoning": "Rendement: base 38 → -5 = 33 (Régime stagflationniste pénalise les coupons avec 2 SJ tech (ASML, ENR) dans des secteurs évités et volatilité élevée (ENR 60%)) | Coupon 7%, barrière 60% | Barr.coupon 62% | Mat espérée: ~3.3a (prob mat: 24%)"
+        "reasoning": "Rendement: base 38 → -5 = 33 (Barrière coupon 62% insuffisante en stagflation avec ENR ultra-volatil (60.47%) et tech ASML (37.09%) sous pression sectorielle) | Coupon 7%, barrière 60% | Barr.coupon 62% | Mat espérée: ~3.3a (prob mat: 24%)"
       },
       "underlyingQuality": {
         "score": 28,
         "base": 33,
         "delta": -5,
-        "reasoning": "Qualité: base 33 → -5 = 28 (3/4 SJ dans secteurs évités (financials: ISP/SAN, tech: ASML) en stagflation, seul ENR favorisé mais très volatil (DD 71.9%)) | Worst: Intesa Sanpaolo B:25"
+        "reasoning": "Qualité: base 33 → -5 = 28 (3 secteurs évités sur 4 (financials ISP/SAN, tech ASML) + ENR beta 1.56 toxique en stagflation + DD ENR -71.9%) | Worst: Intesa Sanpaolo B:25"
       },
       "portfolioFit": {
-        "score": 80,
+        "score": 75,
         "base": 80,
-        "delta": 0,
-        "reasoning": "Fit: base 80"
+        "delta": -5,
+        "reasoning": "Fit: base 80 → -5 = 75 (Worst-of inadapté en stagflation: corrélations élevées entre financials et tech amplifient le risque systémique)"
       },
       "riskPremium": {
         "score": 62,
         "base": 67,
         "delta": -5,
-        "reasoning": "Prime: base 67 → -5 = 62 (Spread élevé justifié par la volatilité extrême d'ENR (60%) et le contexte macro défavorable) | 7% vs CAT 2.5% (spread 4.5%)"
+        "reasoning": "Prime: base 67 → -5 = 62 (Spread implicite 7% trompeur: ne compense pas le risque extrême ENR + 75% du panier dans secteurs évités) | 7% vs CAT 2.5% (spread 4.5%)"
       }
     },
-    "verdict": "Produit très risqué en régime stagflationniste avec 75% des SJ dans des secteurs évités par le marché. Le worst-of ISP (banque italienne) présente un risque systémique élevé avec beta 0.85 et le secteur financier sous pression. La volatilité extrême d'ENR (60.47%) et le drawdown de 71.9% compromettent sérieusement la probabilité de coupons malgré la barrière à 62%. Le coupon de 7% ne compense pas le risque de perte en capital avec 3 SJ vulnérables.",
+    "verdict": "Produit toxique en régime stagflationniste avec 75% d'exposition aux secteurs évités (financials/tech). ENR affiche une volatilité extrême de 60.47% et un drawdown de -71.9%, rendant la barrière coupon 62% insuffisante. Le coupon 7% ne compense pas le risque d'un worst-of où 3 sous-jacents sur 4 sont structurellement défavorisés, avec une probabilité de maturité complète de seulement 24%.",
     "keyRisks": [
-      "Risque systémique bancaire (ISP/SAN) en stagflation avec resserrement monétaire",
-      "Volatilité extrême ENR (60%) peut déclencher barrière rapidement",
-      "Choc pétrolier >$110 impacterait négativement ASML et les banques",
+      "ENR volatilité 60.47% peut franchir barrière 60% rapidement en stagflation",
+      "Corrélation élevée financials/tech amplifie le risque systémique du worst-of",
+      "Choc pétrolier >$110 déclencherait spirale inflationniste fatale aux valuations tech",
       "Barrière à 0.34σ (Critique) — vol 60.47%"
     ],
     "negotiationPoints": [],
@@ -296,7 +296,7 @@
         "return_pct": -15,
         "return_eur": -15000,
         "probability": 0.35,
-        "duration_years": 6
+        "duration_years": 4
       },
       "worst": {
         "return_pct": -40,
@@ -306,16 +306,16 @@
       }
     },
     "confidenceInterval": {
-      "low": 35,
-      "high": 57,
+      "low": 34,
+      "high": 56,
       "halfWidth": 11,
       "gradeStable": false,
       "gradeRange": "D-C",
-      "label": "C [35-57]"
+      "label": "C [34-56]"
     },
     "metadata": {
-      "gradedAt": "2026-03-31T13:11:18.702Z",
-      "durationMs": 21171,
+      "gradedAt": "2026-03-31T13:23:03.751Z",
+      "durationMs": 22080,
       "aiUsed": true,
       "version": "5.2",
       "productType": "autocall",
@@ -340,7 +340,7 @@
       "adjustments": {
         "p1": -5,
         "p2": -5,
-        "p3": 0,
+        "p3": -5,
         "p4": -5
       },
       "barrier_sigma": 0.34,
@@ -349,9 +349,9 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 35,
-      "ci_high": 57,
-      "ci_label": "C [35-57]",
+      "ci_low": 34,
+      "ci_high": 56,
+      "ci_label": "C [34-56]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
