@@ -1,13 +1,14 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Grader v6 Calibration Patch v1.1
+// STRUCTBOARD — Grader v6 Calibration Patch v1.2
 //
 // Loaded AFTER grader-p1-expected-return-patch.js (outermost)
 // 1. Recalibrate P3 from base 70→50 with discriminating adjustments
 // 2. Apply v6 weights: P1=30%, P2=15%, P3=25%, P4=30%
 // 3. Phoenix memory bonus +5pts on P1
 // 4. Single-stock penalty -5pts on P1
-// 5. Cap IA delta to ±20pts (was ±15)
+// 5. Cap IA delta to ±20pts
 // 6. [v1.1] P4 BS correction: use BS net spread instead of facial
+// 7. [v1.2] EXEMPT guaranteed rate products from P4 BS correction
 // ═══════════════════════════════════════════════════════════════
 
 (function() {
@@ -74,11 +75,28 @@
     return Math.max(5, Math.min(95, oldP1 + adj));
   }
 
-  // ─── [v1.1] P4 BS correction ───
-  // P4 (Prime vs CAT) uses facial coupon spread. When BS data shows
-  // the real risk-adjusted return is much lower, P4 is inflated.
-  // Fix: cap P4 when BS net spread << facial spread.
+  // ─── [v1.2] Check if product is guaranteed rate (exempt from P4 BS) ───
+  function _isGuaranteedRateProduct(product) {
+    // Flag set by rates-patch v1.2
+    if (product._isGuaranteedRate) return true;
+    // Fallback detection
+    var st = (product.structureType || '').toLowerCase();
+    var ct = (product.couponType || '').toLowerCase();
+    var ut = (product.underlyingType || '').toLowerCase();
+    if (st === 'taux_fixe' || st === 'callable') return true;
+    if ((ct === 'fixe' || ct === 'garanti') && (ut === 'none' || ut === '' || ut === 'rates' || ut === 'credit')) return true;
+    return false;
+  }
+
+  // ─── [v1.1] P4 BS correction (v1.2: exempt guaranteed rate products) ───
   function _adjustP4WithBS(oldP4, product, catRate) {
+    // v1.2: Do NOT correct P4 for guaranteed rate products
+    // Their coupon is contractually guaranteed, not conditional on market
+    if (_isGuaranteedRateProduct(product)) {
+      console.log('[v6-cal] P4 BS: EXEMPT (guaranteed rate product)');
+      return oldP4;
+    }
+
     var bsRn = product._bsRendementNet;
     if (bsRn === undefined || bsRn === null) return oldP4;
 
@@ -89,28 +107,23 @@
     var facialSpread = facialRate - catRate;
     var bsSpread = bsRn - catRate;
 
-    // Only correct if BS significantly disagrees with facial
     if (facialSpread <= 0 || bsSpread >= facialSpread * 0.7) return oldP4;
 
-    // Correction factor: how much of the facial spread is real
     var ratio = Math.max(0.25, bsSpread / Math.max(0.1, facialSpread));
     var newP4;
 
     if (bsSpread <= 0) {
-      // BS says return doesn't even beat CAT → P4 capped at 35
       newP4 = Math.min(oldP4, 35);
     } else if (bsSpread < 2) {
-      // Small positive spread → moderate P4
       newP4 = Math.min(oldP4, Math.max(35, Math.round(oldP4 * ratio)));
     } else {
-      // Decent spread but still below facial → proportional reduction
       newP4 = Math.max(30, Math.round(oldP4 * ratio));
     }
 
     return Math.max(10, Math.min(95, newP4));
   }
 
-  // ─── Cap IA deltas to ±20 (was ±15 in v5) ───
+  // ─── Cap IA deltas to ±20 ───
   function _capIADelta(pillar) {
     if (!pillar || pillar.delta === undefined) return;
     var MAX_IA = 20;
@@ -168,7 +181,7 @@
             ')';
         }
 
-        // 3b. [v1.1] Adjust P4 with BS data
+        // 3b. [v1.1/v1.2] Adjust P4 with BS data (exempt guaranteed rates)
         var catRate = (result.metadata && result.metadata.catBenchmark) || 2.5;
         var oldP4 = result.pillars.riskPremium.score;
         var newP4 = _adjustP4WithBS(oldP4, product, catRate);
@@ -201,19 +214,15 @@
             ' | P1=' + p1s + ' P2=' + p2s + ' P3=' + p3s + ' P4=' + p4s +
             ' | W: 30/15/25/30');
           result.score = newTotal;
-          if (newTotal >= 75) result.grade = 'A';
-          else if (newTotal >= 60) result.grade = 'B';
-          else if (newTotal >= 45) result.grade = 'C';
-          else if (newTotal >= 25) result.grade = 'D';
-          else result.grade = 'F';
+          result.grade = newTotal >= 75 ? 'A' : newTotal >= 60 ? 'B' : newTotal >= 45 ? 'C' : newTotal >= 25 ? 'D' : 'F';
         }
 
-        // Update metadata
         if (result.metadata) {
           result.metadata.v6Weights = V6_WEIGHTS;
           result.metadata.p3Recalibrated = true;
           result.metadata.p4BsCorrected = (newP4 !== oldP4);
-          result.metadata.version = '6.1';
+          result.metadata.isGuaranteedRate = _isGuaranteedRateProduct(product);
+          result.metadata.version = '6.2';
         }
 
         return result;
@@ -229,7 +238,7 @@
       };
     }
 
-    console.log('[v6-cal v1.1] Calibration active: P3 base 50, weights 30/15/25/30, Phoenix +5, SS -5, P4 BS correction');
+    console.log('[v6-cal v1.2] Active: P3 base 50, W 30/15/25/30, Phoenix +5, SS -5, P4 BS (exempt guaranteed rates)');
     return true;
   }
 
