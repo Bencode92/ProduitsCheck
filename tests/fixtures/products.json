@@ -1,0 +1,315 @@
+[
+  {
+    "id": "dispersion-boostee",
+    "name": "Dispersion Boostée",
+    "structureType": "dispersion",
+    "underlyingType": "pairs",
+    "underlyings": ["Siemens Energy", "ASML"],
+    "maturityYears": 3,
+    "maturity": "3 ans",
+    "currency": "EUR",
+    "coupon": {
+      "rate": 12.0,
+      "type": "conditionnel",
+      "frequency": "annuel",
+      "trigger": 100,
+      "memory": false
+    },
+    "capitalProtection": {
+      "protected": true,
+      "level": 100,
+      "barrier": null,
+      "barrierType": "europeenne"
+    },
+    "earlyRedemption": {
+      "possible": false,
+      "type": "none"
+    },
+    "participationRate": 1.0,
+    "expectedRank": 1,
+    "expectedGrade": "C",
+    "expectedScore": 48,
+    "expectedBsRendementNet": 10.45
+  },
+  {
+    "id": "taux-fixe-callable-sg",
+    "name": "Taux Fixe Callable SG",
+    "structureType": "taux_fixe",
+    "underlyingType": "none",
+    "underlyings": [],
+    "maturityYears": 10,
+    "maturity": "10 ans",
+    "currency": "EUR",
+    "coupon": {
+      "rate": 4.6,
+      "type": "garanti",
+      "frequency": "annuel",
+      "trigger": null,
+      "memory": false
+    },
+    "capitalProtection": {
+      "protected": true,
+      "level": 100,
+      "barrier": null,
+      "barrierType": "europeenne"
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "callable"
+    },
+    "autocall": false,
+    "callable": true,
+    "bankId": "SG",
+    "emitter": "Société Générale",
+    "expectedRank": 2,
+    "expectedGrade": "B",
+    "expectedScore": 61,
+    "expectedBsRendementNet": null
+  },
+  {
+    "id": "euro-stoxx-banks",
+    "name": "Euro Stoxx Banks Autocall",
+    "structureType": "autocall",
+    "underlyingType": "single-index",
+    "underlyings": ["SX7E"],
+    "maturityYears": 5,
+    "maturity": "5 ans",
+    "currency": "EUR",
+    "coupon": {
+      "rate": 9.7,
+      "type": "conditionnel",
+      "frequency": "annuel",
+      "trigger": 100,
+      "memory": false
+    },
+    "capitalProtection": {
+      "protected": false,
+      "barrier": 60,
+      "barrierType": "europeenne"
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "autocall",
+      "trigger": 100,
+      "frequency": "annuel",
+      "startSemester": 2
+    },
+    "autocall": true,
+    "autocallThreshold": 100,
+    "expectedRank": 3,
+    "expectedGrade": "D",
+    "expectedScore": 44,
+    "expectedBsRendementNet": 3.17
+  },
+  {
+    "id": "digitale-wo-lvmh-aca",
+    "name": "Digitale WO LVMH/ACA",
+    "structureType": "capital_garanti",
+    "underlyingType": "worst-of",
+    "underlyings": ["LVMH", "Crédit Agricole"],
+    "maturityYears": 3,
+    "maturity": "3 ans",
+    "currency": "EUR",
+    "worstOf": true,
+    "coupon": {
+      "rate": 5.0,
+      "type": "conditionnel",
+      "frequency": "annuel",
+      "trigger": 100,
+      "memory": false
+    },
+    "capitalProtection": {
+      "protected": true,
+      "level": 100,
+      "barrier": null,
+      "barrierType": "europeenne"
+    },
+    "earlyRedemption": {
+      "possible": false,
+      "type": "none"
+    },
+    "expectedRank": 4,
+    "expectedGrade": "C",
+    "expectedScore": 47,
+    "expectedBsRendementNet": 1.20
+  },
+  {
+    "id": "objectif-mai-2026",
+    "name": "Objectif Mai 2026",
+    "structureType": "autocall",
+    "underlyingType": "basket",
+    "underlyings": ["ASML", "Banco Santander", "Siemens Energy", "LVMH"],
+    "maturityYears": 6,
+    "maturity": "6 ans",
+    "currency": "EUR",
+    "coupon": {
+      "rate": 9.7,
+      "type": "conditionnel",
+      "frequency": "annuel",
+      "trigger": 100,
+      "memory": false
+    },
+    "capitalProtection": {
+      "protected": false,
+      "barrier": 60,
+      "barrierType": "europeenne"
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "autocall",
+      "trigger": 100,
+      "frequency": "annuel",
+      "startSemester": 2
+    },
+    "autocall": true,
+    "autocallThreshold": 100,
+    "expectedRank": 5,
+    "expectedGrade": "D",
+    "expectedScore": 33,
+    "expectedBsRendementNet": 1.66
+  },
+  {
+    "id": "oxygene-objectif",
+    "name": "Oxygène Objectif",
+    "structureType": "autocall",
+    "underlyingType": "basket",
+    "underlyings": ["ASML", "Banco Santander", "Siemens Energy", "LVMH"],
+    "maturityYears": 6,
+    "maturity": "6 ans",
+    "currency": "EUR",
+    "coupon": {
+      "rate": 7.0,
+      "type": "conditionnel",
+      "frequency": "annuel",
+      "trigger": 100,
+      "memory": false
+    },
+    "capitalProtection": {
+      "protected": false,
+      "barrier": 60,
+      "barrierType": "europeenne"
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "autocall",
+      "trigger": 100,
+      "frequency": "annuel",
+      "startSemester": 2
+    },
+    "autocall": true,
+    "autocallThreshold": 100,
+    "expectedRank": 6,
+    "expectedGrade": "D",
+    "expectedScore": 32,
+    "expectedBsRendementNet": 0.30
+  },
+  {
+    "id": "phoenix-richemont",
+    "name": "Phoenix Richemont",
+    "structureType": "phoenix_memoire",
+    "underlyingType": "single-stock",
+    "underlyings": ["Richemont"],
+    "maturityYears": 6,
+    "maturity": "6 ans",
+    "currency": "EUR",
+    "coupon": {
+      "rate": 8.0,
+      "type": "conditionnel",
+      "frequency": "semestriel",
+      "trigger": 70,
+      "memory": true
+    },
+    "hasMemory": true,
+    "capitalProtection": {
+      "protected": false,
+      "barrier": 60,
+      "barrierType": "europeenne"
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "autocall",
+      "trigger": 100,
+      "frequency": "semestriel",
+      "startSemester": 2
+    },
+    "autocall": true,
+    "autocallThreshold": 100,
+    "expectedRank": 7,
+    "expectedGrade": "D",
+    "expectedScore": 42,
+    "expectedBsRendementNet": 1.22
+  },
+  {
+    "id": "athena-isp",
+    "name": "Athena ISP",
+    "structureType": "autocall",
+    "underlyingType": "single-stock",
+    "underlyings": ["Intesa Sanpaolo"],
+    "maturityYears": 10,
+    "maturity": "10 ans",
+    "currency": "EUR",
+    "coupon": {
+      "rate": 7.5,
+      "type": "conditionnel",
+      "frequency": "annuel",
+      "trigger": 100,
+      "memory": false
+    },
+    "capitalProtection": {
+      "protected": false,
+      "barrier": 50,
+      "barrierCoupon": 100,
+      "barrierType": "europeenne"
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "autocall",
+      "trigger": 100,
+      "frequency": "annuel",
+      "startSemester": 2
+    },
+    "autocall": true,
+    "autocallThreshold": 100,
+    "expectedRank": 8,
+    "expectedGrade": "D",
+    "expectedScore": 31,
+    "expectedBsRendementNet": 1.69
+  },
+  {
+    "id": "gold-miners",
+    "name": "Gold Miners Autocall",
+    "structureType": "autocall",
+    "underlyingType": "single-index",
+    "underlyings": ["GDX"],
+    "maturityYears": 5,
+    "maturity": "5 ans",
+    "currency": "EUR",
+    "decrementPct": 5.0,
+    "actualDividendYield": 1.5,
+    "coupon": {
+      "rate": 8.0,
+      "type": "conditionnel",
+      "frequency": "annuel",
+      "trigger": 100,
+      "memory": false
+    },
+    "capitalProtection": {
+      "protected": false,
+      "barrier": 60,
+      "barrierType": "europeenne"
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "autocall",
+      "trigger": 100,
+      "frequency": "annuel",
+      "startSemester": 2
+    },
+    "autocall": true,
+    "autocallThreshold": 100,
+    "expectedRank": 9,
+    "expectedGrade": "F",
+    "expectedScore": 23,
+    "expectedBsRendementNet": -10.57
+  }
+]

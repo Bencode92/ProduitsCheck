@@ -1,0 +1,9 @@
+{
+  "name": "structboard",
+  "version": "6.2.0",
+  "private": true,
+  "scripts": {
+    "test": "node tests/simulate-grading.js",
+    "test:grading": "node tests/simulate-grading.js"
+  }
+}
