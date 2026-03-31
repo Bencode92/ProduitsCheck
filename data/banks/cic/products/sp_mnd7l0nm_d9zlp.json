@@ -269,13 +269,13 @@
         "score": 58,
         "base": 60,
         "delta": -2,
-        "reasoning": "Qualité: base 60 → -2 = 58 (ACA dans financials (secteur évité, -1.63% momentum) et LVMH sensible au ralentissement chinois en stagflation) | Worst: Crédit Agricole S.A. B:40"
+        "reasoning": "Qualité: base 60 → -2 = 58 (ACA (worst-of) est dans le secteur financier explicitement évité en stagflation, avec un momentum négatif de -1.63%) | Worst: Crédit Agricole S.A. B:40"
       },
       "portfolioFit": {
         "score": 60,
         "base": 80,
         "delta": 2,
-        "reasoning": "Fit: base 50 → 60 (worst-of, capital_garanti) | Fit: base 80 → +2 = 82 (Capital garanti offre protection bienvenue en stagflation avec VIX 22 et choc pétrolier potentiel)"
+        "reasoning": "Fit: base 50 → 60 (worst-of, capital_garanti) | Fit: base 80 → +2 = 82 (Capital garanti très pertinent en régime stagflationniste avec volatilité élevée et choc énergétique)"
       },
       "riskPremium": {
         "score": 35,
@@ -284,11 +284,10 @@
         "reasoning": "Capital garanti: spread 6.2% - CAT 2.5% - illiq 0.3% = 3.3% | v6-BS: P4 77→35 (rdtNet BS=1.6% vs CAT 2.5%)"
       }
     },
-    "verdict": "Produit à capital garanti peu attractif en stagflation avec barrière coupon 100% difficile à atteindre. ACA (financials évitées, beta 0.83) particulièrement vulnérable avec Brent >$100 pesant sur les marges bancaires. Le rendement potentiel de 6.15% ne compense pas le risque élevé de 0% coupon sur 3 ans, surtout avec le worst-of amplifiant la probabilité d'échec.",
+    "verdict": "En régime de stagflation confirmé (Brent >$100, PCE élevé), ce produit capital garanti offre une protection bienvenue mais des perspectives de coupon très limitées. Le worst-of ACA, dans le secteur financier évité avec momentum négatif (-1.63%), rend improbable l'atteinte de la barrière coupon à 100%. Avec un score ajusté de 44/100, le produit convient uniquement aux investisseurs ultra-conservateurs privilégiant la protection du capital en environnement hostile.",
     "keyRisks": [
-      "Forte probabilité de 0% coupon avec barrière 100% en stagflation",
-      "ACA dans secteur financials évité avec momentum -1.63%",
-      "Choc pétrolier >$110 pourrait déclencher récession"
+      "Coupon conditionnel très difficile à atteindre avec barrière 100% en stagflation",
+      "Exposition au secteur financier explicitement évité selon l'analyse macro"
     ],
     "negotiationPoints": [],
     "scenarios": {
@@ -301,19 +300,19 @@
       "base": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.5,
+        "probability": 0.6,
         "duration_years": 3
       },
       "stress": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.25,
+        "probability": 0.2,
         "duration_years": 3
       },
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.1,
+        "probability": 0.05,
         "duration_years": 3
       }
     },
@@ -326,10 +325,10 @@
       "label": "C [52-66]"
     },
     "metadata": {
-      "gradedAt": "2026-03-31T08:36:29.990Z",
-      "durationMs": 17204,
+      "gradedAt": "2026-03-31T10:48:21.311Z",
+      "durationMs": 16798,
       "aiUsed": true,
-      "version": "6.1",
+      "version": "6.2",
       "productType": "capital_garanti",
       "marketDataAvailable": true,
       "catBenchmark": 2.5,
@@ -387,6 +386,7 @@
       },
       "p3Recalibrated": true,
       "p4BsCorrected": true,
+      "isGuaranteedRate": false,
       "stockData": [
         {
           "name": "LVMH Moët Hennessy Louis Vuitton SA",
