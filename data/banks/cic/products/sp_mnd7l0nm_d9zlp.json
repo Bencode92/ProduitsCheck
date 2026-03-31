@@ -237,7 +237,7 @@
   "_bsRendementNet": 1.59,
   "grading": {
     "grade": "C",
-    "score": 53,
+    "score": 54,
     "killCriteria": {
       "triggered": false,
       "reasons": []
@@ -247,71 +247,71 @@
         "score": 84,
         "base": 86,
         "delta": -2,
-        "reasoning": "Rendement: base 86 → -2 = 84 (Barrière à 100% en stagflation avec VIX élevé rend le coupon très improbable, surtout avec CA en secteur évité) | Coupon 6.15%, protégé | Barr.coupon 100%"
+        "reasoning": "Rendement: base 86 → -2 = 84 (Barrière à 100% en stagflation avec volatilité élevée (VIX 22) réduit fortement la probabilité du coupon, surtout avec ACA (financials évité).) | Coupon 6.15%, protégé | Barr.coupon 100%"
       },
       "underlyingQuality": {
         "score": 58,
         "base": 60,
         "delta": -2,
-        "reasoning": "Qualité: base 60 → -2 = 58 (CA dans financials évités (-1.63% momentum) + betas défensifs inadaptés en stagflation + stress volatilité) | Worst: Crédit Agricole S.A. B:40"
+        "reasoning": "Qualité: base 60 → -2 = 58 (Worst-of sur ACA (secteur financials évité avec -1.63% momentum) en stagflation + choc énergétique = contexte très défavorable.) | Worst: Crédit Agricole S.A. B:40"
       },
       "portfolioFit": {
         "score": 82,
         "base": 80,
         "delta": 2,
-        "reasoning": "Fit: base 80 → +2 = 82 (Capital garanti pertinent en contexte stagflationnaire pour sécuriser le portefeuille)"
+        "reasoning": "Fit: base 80 → +2 = 82 (Capital garanti offre une protection précieuse en régime stagflationnaire avec stress volatilité et énergie.)"
       },
       "riskPremium": {
-        "score": 13,
+        "score": 15,
         "base": 15,
-        "delta": -2,
-        "reasoning": "Prime: base 15 → -2 = 13 (Spread implicite de 615bps surévalué vs risque réel avec barrière 100% et worst-of structure) | 6.15% vs CAT 2.5% (spread 3.7%)"
+        "delta": 0,
+        "reasoning": "Prime: base 15 | 6.15% vs CAT 2.5% (spread 3.7%)"
       }
     },
-    "verdict": "Produit mal calibré pour le régime stagflationnaire actuel avec une barrière coupon irréaliste à 100% sur un worst-of incluant CA dans les financials évités (-1.63% momentum). Le coupon de 6.15% ne compensera probablement jamais vu la structure, laissant uniquement le capital garanti après 3 ans. Avec VIX à 22 et choc pétrolier à $103, la probabilité de toucher un seul coupon est inférieure à 10%.",
+    "verdict": "Produit inadapté au régime stagflationnaire actuel. La barrière à 100% sur un worst-of incluant Crédit Agricole (secteur financials évité, momentum -1.63%) rend le coupon de 6.15% quasi-inatteignable avec VIX à 22. Le capital garanti limite les pertes mais le rendement espéré est proche de 0% sur 3 ans dans ce contexte de choc énergétique (Brent $103.79) et stress volatilité.",
     "keyRisks": [
-      "Barrière 100% irréaliste = 0% coupon probable sur 3 ans",
-      "CA en secteur évité avec momentum négatif en stagflation",
-      "Opportunity cost élevé vs TIPS ou obligations court terme"
+      "Probabilité de coupon <20% avec barrière 100% en stagflation",
+      "Exposition à ACA (financials) secteur évité avec beta 0.83",
+      "Opportunity cost élevé vs TIPS en environnement inflationniste"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 6.15,
-        "return_eur": 6150,
-        "probability": 0.05,
-        "duration_years": 1
+        "return_eur": 18450,
+        "probability": 0.15,
+        "duration_years": 3
       },
       "base": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.85,
+        "probability": 0.5,
         "duration_years": 3
       },
       "stress": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.08,
+        "probability": 0.3,
         "duration_years": 3
       },
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.02,
+        "probability": 0.05,
         "duration_years": 3
       }
     },
     "confidenceInterval": {
-      "low": 46,
-      "high": 60,
+      "low": 47,
+      "high": 61,
       "halfWidth": 7,
       "gradeStable": false,
       "gradeRange": "C-B",
-      "label": "C [46-60]"
+      "label": "C [47-61]"
     },
     "metadata": {
-      "gradedAt": "2026-03-31T12:18:04.088Z",
-      "durationMs": 19582,
+      "gradedAt": "2026-03-31T13:12:48.413Z",
+      "durationMs": 17160,
       "aiUsed": true,
       "version": "5.2",
       "productType": "capital_garanti",
@@ -336,7 +336,7 @@
         "p1": -2,
         "p2": -2,
         "p3": 2,
-        "p4": -2
+        "p4": 0
       },
       "barrier_sigma": null,
       "barrier_sigma_label": null,
@@ -344,9 +344,9 @@
       "liquidity_level": "L4",
       "liquidity_score": 10,
       "liquidity_label": "Illiquide",
-      "ci_low": 46,
-      "ci_high": 60,
-      "ci_label": "C [46-60]",
+      "ci_low": 47,
+      "ci_high": 61,
+      "ci_label": "C [47-61]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
