@@ -231,178 +231,6 @@
   "envelope": "",
   "_couponProbability": 45.1,
   "_bsRendementNet": -8.4,
-  "grading": {
-    "grade": "D",
-    "score": 33,
-    "killCriteria": {
-      "triggered": false,
-      "reasons": []
-    },
-    "pillars": {
-      "adjustedReturn": {
-        "score": 5,
-        "base": 22,
-        "delta": -17,
-        "reasoning": "BS: P(SJ>95% | vol=39% T=2.5a) = 45.1% | Breach 50%: P=32.4% -> perte esperee 8.4%/an | Drag decrement: -4.03%/an | Rdt net: 4.1% - 8.4% - 4.0% = -8.4%/an | Spread vs CAT: -10.9%",
-        "_bs": {
-          "score": 5,
-          "probCoupon": 45.1,
-          "couponEffectif": 9,
-          "rendementEspere": 4.06,
-          "perteEsperee": 8.43,
-          "rendementNet": -8.4,
-          "drag": 4.03,
-          "vols": [
-            38.92
-          ],
-          "matEsperee": 2.5,
-          "reasoning": "P(SJ>95% | vol=39% T=2.5a) = 45.1% | Breach 50%: P=32.4% -> perte esperee 8.4%/an | Drag decrement: -4.03%/an | Rdt net: 4.1% - 8.4% - 4.0% = -8.4%/an",
-          "method": "BS-simplifie-v1.2"
-        }
-      },
-      "underlyingQuality": {
-        "score": 45,
-        "base": 40,
-        "delta": 5,
-        "reasoning": "Qualité: base 40 → +5 = 45 (L'or bénéficie historiquement de la stagflation (hedge inflation), beta défensif 0.53 et sector materials neutre compensent le DD de -30.84%) | Worst: Indice Solactive GDX EUR AR 5% B:35"
-      },
-      "portfolioFit": {
-        "score": 58,
-        "base": 80,
-        "delta": 0,
-        "reasoning": "Fit: base 50 → 58 (single-index, autocall) | Fit: base 80"
-      },
-      "riskPremium": {
-        "score": 35,
-        "base": 0,
-        "delta": -5,
-        "reasoning": "Capital garanti: spread 4.5×2=9.0% - CAT 2.5% - illiq 0.5% = 6.0% | ⚠ Spread réel après drag: 9% - 4.03% drag - 2.5% CAT = 2.47% (-20pts) | v6-BS: P4 70→35 (rdtNet BS=-8.4% vs CAT 2.5%)"
-      }
-    },
-    "verdict": "En régime stagflationnaire, ce produit sur minières aurifères offre une exposition défensive intéressante avec 9% de coupon annualisé. Le beta 0.53 et la nature contra-cyclique de l'or en font un hedge inflation pertinent, mais la volatilité élevée (38.92%) et le décrément 5% pénalisent le profil risque/rendement. Avec une probabilité de rappel anticipé très faible (1%), l'investisseur doit se préparer à détenir le produit plusieurs années dans un contexte macro incertain. Décrément de 5% avec div réel de seulement 0.97% crée un drag invisible de 4.03%/an sur la performance.",
-    "keyRisks": [
-      "Décrément 5% érode significativement la performance si l'or stagne",
-      "Volatilité 38.92% rend les coupons incertains (barrière 60%)",
-      "Dollar fort (DTWEXBGS 120) pèse négativement sur l'or",
-      "Barrière à 0.8σ (Danger) — vol 38.92%"
-    ],
-    "negotiationPoints": [],
-    "scenarios": {
-      "optimistic": {
-        "return_pct": 18,
-        "return_eur": 18000,
-        "probability": 0.2,
-        "duration_years": 2
-      },
-      "base": {
-        "return_pct": 22.5,
-        "return_eur": 22500,
-        "probability": 0.35,
-        "duration_years": 2.5
-      },
-      "stress": {
-        "return_pct": 0,
-        "return_eur": 0,
-        "probability": 0.3,
-        "duration_years": 5
-      },
-      "worst": {
-        "return_pct": -35,
-        "return_eur": -35000,
-        "probability": 0.15,
-        "duration_years": 5
-      }
-    },
-    "confidenceInterval": {
-      "low": 28,
-      "high": 48,
-      "halfWidth": 10,
-      "gradeStable": false,
-      "gradeRange": "D-C",
-      "label": "D [28-48]"
-    },
-    "metadata": {
-      "gradedAt": "2026-03-31T10:48:53.225Z",
-      "durationMs": 19839,
-      "aiUsed": true,
-      "version": "6.2",
-      "productType": "autocall",
-      "marketDataAvailable": true,
-      "catBenchmark": 2.5,
-      "catSource": "fallback-2026",
-      "couponAnnualized": 9,
-      "couponRaw": 9,
-      "couponMultiplier": 2,
-      "couponFrequency": "semestriel",
-      "isInPortfolio": false,
-      "hasBarrier": true,
-      "barrierPct": 50,
-      "barrierCouponPct": 60,
-      "couponProbability": 45.1,
-      "expectedMaturity": 2.5,
-      "maxMaturity": 5,
-      "probReachMaturity": 1,
-      "maxBeta": 0.53,
-      "baseScore": 40,
-      "baseGrade": "D",
-      "adjustments": {
-        "p1": -10,
-        "p2": 5,
-        "p3": 0,
-        "p4": -5
-      },
-      "barrier_sigma": 0.8,
-      "barrier_sigma_label": "Danger",
-      "barrier_sigma_danger": true,
-      "liquidity_level": "L3",
-      "liquidity_score": 40,
-      "liquidity_label": "Rappelable 12M",
-      "ci_low": 28,
-      "ci_high": 48,
-      "ci_label": "D [28-48]",
-      "issuer_rating": "A",
-      "issuer_tier": "IG",
-      "hasDecrement": true,
-      "decrementDrag": 4.03,
-      "structureType": "autocall",
-      "couponPerPeriod": 4.5,
-      "decrementPct": 5,
-      "dividendYield": 0.97,
-      "bsMethod": "BS-simplifie-v1.2",
-      "bsProbCoupon": 45.1,
-      "bsRendementNet": -8.4,
-      "bsPerteEsperee": 8.43,
-      "bsCouponEffectif": 9,
-      "bsVols": [
-        38.92
-      ],
-      "bsMatEsperee": 2.5,
-      "isBasket": false,
-      "v6Weights": {
-        "p1": 0.3,
-        "p2": 0.15,
-        "p3": 0.25,
-        "p4": 0.3
-      },
-      "p3Recalibrated": true,
-      "p4BsCorrected": true,
-      "isGuaranteedRate": false,
-      "barrierDistance": 50,
-      "barrierAlert": "safe",
-      "barrierWorst": "Indice Solactive GDX EUR AR 5%",
-      "stockData": [
-        {
-          "name": "Indice Solactive GDX EUR AR 5%",
-          "ticker": "GDX",
-          "sector": "Index",
-          "perf_ytd": 0.07,
-          "perf_1y": 88.26,
-          "volatility_3y": 38.92,
-          "max_drawdown_3y": -30.84
-        }
-      ]
-    }
-  },
   "_barrierDistance": {
     "distance": 50,
     "barrier": 50,
@@ -418,5 +246,126 @@
         "dd3y": 30.84
       }
     ]
+  },
+  "grading": {
+    "grade": "D",
+    "score": 28,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 18,
+        "base": 28,
+        "delta": -10,
+        "reasoning": "Rendement: base 28 → -10 = 18 (En stagflation avec VIX à 22, la probabilité d'autocall à 95% est très faible, mais l'or profite généralement de l'inflation élevée, offrant une protection partielle) | Coupon 4.5%, barrière 50% | Barr.coupon 60% | Mat espérée: ~2.5a (prob mat: 1%)"
+      },
+      "underlyingQuality": {
+        "score": 45,
+        "base": 40,
+        "delta": 5,
+        "reasoning": "Qualité: base 40 → +5 = 45 (Les minières aurifères (beta 0.53) bénéficient du régime stagflationnaire avec Brent >$100 et PCE élevé, l'or étant une valeur refuge contre l'inflation) | Worst: Indice Solactive GDX EUR AR 5% B:35"
+      },
+      "portfolioFit": {
+        "score": 90,
+        "base": 80,
+        "delta": 10,
+        "reasoning": "Fit: base 80 → +10 = 90 (En stagflation, l'exposition aux matières premières via les minières aurifères offre une excellente diversification et protection contre l'érosion monétaire)"
+      },
+      "riskPremium": {
+        "score": 0,
+        "base": 0,
+        "delta": -5,
+        "reasoning": "Prime: base 0 → -5 = 0 (Spread de 4.5% faible pour une volatilité de 38.92% et un DD de -30.84%, reflétant mal le risque réel du sous-jacent) | 4.5% vs CAT 2.5% (spread 2.0%)"
+      }
+    },
+    "verdict": "Produit intéressant en contexte stagflationnaire grâce à l'exposition aux minières aurifères qui bénéficient traditionnellement de l'inflation élevée et de l'incertitude macro. Avec un beta de 0.53, le sous-jacent offre une décorrélation partielle au marché, particulièrement pertinente quand les secteurs tech et financiers sont sous pression. Le coupon de 4.5% est modeste mais la barrière à 60% offre une marge de sécurité raisonnable face à la volatilité de 38.92%. La probabilité d'autocall reste très faible (1%) dans ce contexte de marché stressé.",
+    "keyRisks": [
+      "Volatilité élevée de 38.92% avec historique de DD à -30.84%",
+      "Dollar fort (DXY 120) peut peser sur les matières premières malgré l'inflation",
+      "Risque de remontée agressive des taux si la Fed surprend hawkish",
+      "Barrière à 0.8σ (Danger) — vol 38.92%"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 9,
+        "return_eur": 22500,
+        "probability": 0.3,
+        "duration_years": 2.5
+      },
+      "base": {
+        "return_pct": 4.5,
+        "return_eur": 22500,
+        "probability": 0.4,
+        "duration_years": 5
+      },
+      "stress": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.2,
+        "duration_years": 5
+      },
+      "worst": {
+        "return_pct": -15,
+        "return_eur": -15000,
+        "probability": 0.1,
+        "duration_years": 5
+      }
+    },
+    "confidenceInterval": {
+      "low": 18,
+      "high": 38,
+      "halfWidth": 10,
+      "gradeStable": false,
+      "gradeRange": "F-D",
+      "label": "D [18-38]"
+    },
+    "metadata": {
+      "gradedAt": "2026-03-31T12:17:09.669Z",
+      "durationMs": 21164,
+      "aiUsed": true,
+      "version": "5.2",
+      "productType": "autocall",
+      "marketDataAvailable": true,
+      "catBenchmark": 2.5,
+      "catSource": "fallback-2026",
+      "couponAnnualized": 4.5,
+      "couponRaw": 4.5,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": true,
+      "barrierPct": 50,
+      "barrierCouponPct": 60,
+      "couponProbability": null,
+      "expectedMaturity": 2.5,
+      "maxMaturity": 5,
+      "probReachMaturity": 1,
+      "maxBeta": 0.53,
+      "baseScore": 28,
+      "baseGrade": "D",
+      "adjustments": {
+        "p1": -10,
+        "p2": 5,
+        "p3": 10,
+        "p4": -5
+      },
+      "barrier_sigma": 0.8,
+      "barrier_sigma_label": "Danger",
+      "barrier_sigma_danger": true,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Rappelable 12M",
+      "ci_low": 18,
+      "ci_high": 38,
+      "ci_label": "D [18-38]",
+      "issuer_rating": "A",
+      "issuer_tier": "IG",
+      "hasDecrement": true,
+      "decrementDrag": 4.03,
+      "structureType": "autocall"
+    }
   }
 }
