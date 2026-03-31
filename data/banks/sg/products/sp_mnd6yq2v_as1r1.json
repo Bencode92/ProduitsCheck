@@ -240,62 +240,85 @@
   "_couponProbability": 95,
   "_bsRendementNet": 10.45,
   "grading": {
-    "grade": "D",
-    "score": 35,
+    "grade": "B",
+    "score": 69,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 29,
-        "base": 27,
-        "delta": 2,
-        "reasoning": "Rendement: base 27 → +2 = 29 (Produit dispersion avec capital garanti : la volatilité élevée (moyenne 36.5%) est un atout majeur, offrant une prime attractive sans risque de perte en capital) | Coupon 1.3144444444444445%, protégé"
+        "score": 95,
+        "base": 78,
+        "delta": 0,
+        "reasoning": "BS: Dispersion: prob=95%, rdt median hist=11% | Rdt net: 10.4% - 0.0% = 10.4%/an | Spread vs CAT: 7.9%",
+        "_bsDelta": 17,
+        "_bs": {
+          "score": 95,
+          "probCoupon": 95,
+          "couponEffectif": 11,
+          "rendementEspere": 10.45,
+          "perteEsperee": 0,
+          "rendementNet": 10.45,
+          "drag": 0,
+          "vols": [
+            25,
+            25.87,
+            25,
+            25,
+            31.19,
+            25,
+            25,
+            25
+          ],
+          "matEsperee": 3,
+          "reasoning": "Dispersion: prob=95%, rdt median hist=11% | Rdt net: 10.4% - 0.0% = 10.4%/an",
+          "method": "BS-simplifie-v1.2"
+        }
       },
       "underlyingQuality": {
         "score": 68,
         "base": 70,
         "delta": -2,
-        "reasoning": "Qualité: base 70 → -2 = 68 (Stagflation défavorable aux tech (7/8 du panier), avec 5 sous-jacents dans les secteurs évités (NVDA, META, NFLX, GOOGL, MSFT) et betas élevés (moy. 1.33)) | Worst: Tesla B:17"
+        "reasoning": "Qualité: base 70 → -2 = 68 (7/8 sous-jacents dans tech/comm services (secteurs évités), betas élevés (1.62-1.92) vulnérables en stagflation) | Worst: Tesla B:17"
       },
       "portfolioFit": {
-        "score": 70,
+        "score": 65,
         "base": 72,
-        "delta": -2,
-        "reasoning": "Fit: base 72 → -2 = 70 (Concentration excessive sur tech growth en stagflation, mais la garantie du capital et la duration courte (3 ans) compensent partiellement)"
+        "delta": 2,
+        "reasoning": "Fit: base 50 → 65 (pairs, dispersion) | Fit: base 72 → +2 = 74 (Capital garanti offre protection précieuse en stagflation, dispersion permet de profiter de la volatilité élevée)"
       },
       "riskPremium": {
-        "score": 7,
+        "score": 58,
         "base": 5,
-        "delta": 2,
-        "reasoning": "Prime: base 5 → +2 = 7 (Structure dispersion transparente avec capital garanti, spread faible justifié par l'absence de risque en capital) | 1.3144444444444445% vs CAT 2.5% (spread -1.2%)"
+        "delta": 0,
+        "reasoning": "Capital garanti: spread 3.0% - CAT 2.5% - illiq 0.3% = 0.2% | ✅ Dispersion: vol = moteur de rendement (+25pts) + capital garanti"
       }
     },
-    "verdict": "Produit défensif adapté au contexte stagflationniste grâce au capital garanti, mais le coupon de 1.31% annualisé est insuffisant face à une inflation >2.8%. La dispersion sur 8 tech leaders offre une prime de volatilité intéressante (vol moyenne 36.5%), mais 87.5% du panier est exposé aux secteurs évités en stagflation. Le worst performer Tesla (B=17%, vol=57.5%) présente un risque significatif de sous-performance prolongée.",
+    "verdict": "En régime stagflationniste avec VIX à 22 et Brent >$100, ce produit de dispersion sur tech mega-caps est mal positionné. Le capital garanti est un atout majeur, mais le coupon de 1.31% annualisé reste très faible face à l'inflation. Avec 7/8 sous-jacents dans les secteurs évités (tech/comm services) et des betas élevés (jusqu'à 1.92 pour NVDA), le timing est défavorable malgré la protection du capital.",
     "keyRisks": [
-      "Coupon réel négatif avec inflation à 2.83% (perte de pouvoir d'achat de -1.52%/an)",
-      "Exposition massive aux tech (7/8) en régime stagflationniste défavorable",
-      "Tesla en position critique (DD=-53.77%) pourrait plomber la performance dispersion"
+      "Sous-performance structurelle du secteur tech en stagflation",
+      "Coupon réel négatif avec PCE à 2.83%",
+      "Tesla (worst performer) avec volatilité 57.52% limite fortement le potentiel"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 3.94,
+        "return_pct": 1.31,
         "return_eur": 3943,
         "probability": 0.2,
         "duration_years": 3
       },
       "base": {
-        "return_pct": 1.31,
-        "return_eur": 3943,
-        "probability": 0.45,
+        "return_pct": 0.8,
+        "return_eur": 2400,
+        "probability": 0.4,
         "duration_years": 3
       },
       "stress": {
-        "return_pct": 0.5,
-        "return_eur": 1500,
-        "probability": 0.25,
+        "return_pct": 0.3,
+        "return_eur": 900,
+        "probability": 0.3,
         "duration_years": 3
       },
       "worst": {
@@ -306,18 +329,18 @@
       }
     },
     "confidenceInterval": {
-      "low": 28,
-      "high": 42,
+      "low": 40,
+      "high": 54,
       "halfWidth": 7,
-      "gradeStable": true,
-      "gradeRange": "D",
-      "label": "D [28-42]"
+      "gradeStable": false,
+      "gradeRange": "D-C",
+      "label": "C [40-54]"
     },
     "metadata": {
-      "gradedAt": "2026-03-31T13:11:43.919Z",
-      "durationMs": 23389,
+      "gradedAt": "2026-03-31T13:14:01.266Z",
+      "durationMs": 18746,
       "aiUsed": true,
-      "version": "5.2",
+      "version": "6.2",
       "productType": "dispersion",
       "marketDataAvailable": true,
       "catBenchmark": 2.5,
@@ -330,17 +353,17 @@
       "hasBarrier": false,
       "barrierPct": 0,
       "barrierCouponPct": null,
-      "couponProbability": null,
+      "couponProbability": 95,
       "expectedMaturity": 3,
       "maxMaturity": 3,
       "maxBeta": 1.92,
-      "baseScore": 34,
-      "baseGrade": "D",
+      "baseScore": 47,
+      "baseGrade": "C",
       "adjustments": {
-        "p1": 2,
+        "p1": -2,
         "p2": -2,
-        "p3": -2,
-        "p4": 2
+        "p3": 2,
+        "p4": 0
       },
       "barrier_sigma": null,
       "barrier_sigma_label": null,
@@ -348,14 +371,138 @@
       "liquidity_level": "L4",
       "liquidity_score": 10,
       "liquidity_label": "Illiquide",
-      "ci_low": 28,
-      "ci_high": 42,
-      "ci_label": "D [28-42]",
+      "ci_low": 40,
+      "ci_high": 54,
+      "ci_label": "C [40-54]",
       "issuer_rating": "A",
       "issuer_tier": "IG",
       "hasDecrement": false,
       "decrementDrag": 0,
-      "structureType": "dispersion"
+      "structureType": "dispersion",
+      "bsMethod": "BS-simplifie-v1.2",
+      "bsProbCoupon": 95,
+      "bsRendementNet": 10.45,
+      "bsPerteEsperee": 0,
+      "bsCouponEffectif": 11,
+      "bsVols": [
+        25,
+        25.87,
+        25,
+        25,
+        31.19,
+        25,
+        25,
+        25
+      ],
+      "bsMatEsperee": 3,
+      "isBasket": false,
+      "v6Weights": {
+        "p1": 0.3,
+        "p2": 0.2,
+        "p3": 0.15,
+        "p4": 0.3
+      },
+      "p3Recalibrated": true,
+      "p4BsCorrected": false,
+      "isGuaranteedRate": false,
+      "stockData": [
+        {
+          "name": "NVIDIA",
+          "ticker": "NVDA",
+          "sector": "Technologie de l'information",
+          "perf_ytd": -11.49,
+          "perf_1y": 48.15,
+          "volatility_3y": 48.08,
+          "max_drawdown_3y": 36.89,
+          "buffett_score": 50,
+          "quality_score": 87,
+          "buffett_grade": "C"
+        },
+        {
+          "name": "Meta Platforms",
+          "ticker": "META",
+          "sector": "La communication",
+          "perf_ytd": -18.68,
+          "perf_1y": -10.92,
+          "volatility_3y": 35.51,
+          "max_drawdown_3y": 34.21,
+          "buffett_score": 67,
+          "quality_score": 77,
+          "buffett_grade": "B"
+        },
+        {
+          "name": "Netflix",
+          "ticker": "NFLX",
+          "sector": "La communication",
+          "perf_ytd": -0.84,
+          "perf_1y": -4.81,
+          "volatility_3y": 33.41,
+          "max_drawdown_3y": 43.35,
+          "buffett_score": 83,
+          "quality_score": 75,
+          "buffett_grade": "A"
+        },
+        {
+          "name": "Amazon.com",
+          "ticker": "AMZN",
+          "sector": "Biens de consommation cycliques",
+          "perf_ytd": -12.94,
+          "perf_1y": -0.21,
+          "volatility_3y": 31.13,
+          "max_drawdown_3y": 30.88,
+          "buffett_score": 50,
+          "quality_score": 64,
+          "buffett_grade": "C"
+        },
+        {
+          "name": "Alphabet (Ex Google)",
+          "ticker": "GOOGL",
+          "sector": "La communication",
+          "perf_ytd": -12.64,
+          "perf_1y": 68.55,
+          "volatility_3y": 28.96,
+          "max_drawdown_3y": 29.89,
+          "buffett_score": 67,
+          "quality_score": 79,
+          "buffett_grade": "B"
+        },
+        {
+          "name": "Microsoft",
+          "ticker": "MSFT",
+          "sector": "Technologie de l'information",
+          "perf_ytd": -25.81,
+          "perf_1y": -8.13,
+          "volatility_3y": 23.47,
+          "max_drawdown_3y": 34.18,
+          "buffett_score": 67,
+          "quality_score": 83,
+          "buffett_grade": "B"
+        },
+        {
+          "name": "Apple",
+          "ticker": "AAPL",
+          "sector": "Technologie de l'information",
+          "perf_ytd": -9.3,
+          "perf_1y": 10.15,
+          "volatility_3y": 25.48,
+          "max_drawdown_3y": 33.43,
+          "buffett_score": 50,
+          "quality_score": 73,
+          "buffett_grade": "C"
+        },
+        {
+          "name": "Tesla",
+          "ticker": "TSLA",
+          "sector": "Biens de consommation cycliques",
+          "perf_ytd": -20.99,
+          "perf_1y": 30.1,
+          "volatility_3y": 57.52,
+          "max_drawdown_3y": 53.77,
+          "buffett_score": 17,
+          "quality_score": 35,
+          "buffett_grade": "D"
+        }
+      ]
     }
   }
 }
