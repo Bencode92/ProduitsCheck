@@ -241,19 +241,19 @@
         "score": 16,
         "base": 25,
         "delta": -9,
-        "reasoning": "Rendement: base 25 → -9 = 16 (En stagflation avec tech évité et ASML beta 1.29, probabilité coupon fortement réduite malgré barrière 60%) | Coupon 3.5%, barrière 60% | Barr.coupon 60% | Mat espérée: ~1.6a (prob mat: 0%)"
+        "reasoning": "Rendement: base 25 → -9 = 16 (Barrière 60% insuffisante en stagflation avec vol 37% et tech sector évité (-1.22% momentum)) | Coupon 3.5%, barrière 60% | Barr.coupon 60% | Mat espérée: ~1.6a (prob mat: 0%)"
       },
       "underlyingQuality": {
         "score": 58,
         "base": 67,
         "delta": -9,
-        "reasoning": "Qualité: base 67 → -9 = 58 (ASML secteur tech évité (-1.22% momentum), DD -45%, volatilité 37% en régime stagflationniste hostile) | Worst: ASML Holding NV B:50"
+        "reasoning": "Qualité: base 67 → -9 = 58 (ASML (tech) dans secteur évité par le marché, beta 1.29 amplifie la baisse en stagflation) | Worst: ASML Holding NV B:50"
       },
       "portfolioFit": {
-        "score": 80,
+        "score": 75,
         "base": 80,
-        "delta": 0,
-        "reasoning": "Fit: base 80"
+        "delta": -5,
+        "reasoning": "Fit: base 80 → -5 = 75 (Concentration mono-titre sur tech cyclique inadaptée au régime stagflationniste actuel)"
       },
       "riskPremium": {
         "score": 0,
@@ -262,37 +262,37 @@
         "reasoning": "Prime: base 0 | 3.5% vs CAT 2.5% (spread 1.0%)"
       }
     },
-    "verdict": "Produit très risqué en stagflation avec ASML dans le secteur tech évité (-1.22% momentum) et DD -45%. Le coupon 3.5% ne compense pas le risque avec beta 1.29 et volatilité 37%. Probabilité élevée de toucher la barrière 60% avant l'autocall, exposition directe au stress technologique actuel.",
+    "verdict": "Produit mal adapté au contexte stagflationniste actuel. ASML (DD -45%, vol 37%) appartient au secteur tech évité (-1.22% momentum) avec un beta élevé (1.29) qui amplifiera les pertes. Le coupon de 3.5% annualisé est insuffisant face au risque de perte capitale avec une barrière à 60% seulement. En régime stagflation avec VIX à 22 et choc pétrolier ($103.79), les valeurs tech cycliques sont particulièrement vulnérables.",
     "keyRisks": [
-      "Secteur tech sous pression en stagflation avec sortie de capitaux",
-      "Barrière 60% vulnérable avec DD actuel -45% et volatilité 37%",
-      "Duration longue (6a) expose aux chocs macro répétés",
+      "Secteur tech évité en stagflation, ASML déjà en DD -45%",
+      "Barrière 60% fragile avec volatilité 37% et beta 1.29",
+      "Choc pétrolier >$110 pourrait accélérer la rotation hors tech",
       "Barrière à 0.56σ (Danger) — vol 37.09%"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 10.5,
-        "return_eur": 10500,
+        "return_pct": 3.5,
+        "return_eur": 3500,
         "probability": 0.15,
-        "duration_years": 3
+        "duration_years": 1
       },
       "base": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.35,
-        "duration_years": 6
+        "probability": 0.3,
+        "duration_years": 3
       },
       "stress": {
         "return_pct": -20,
         "return_eur": -20000,
         "probability": 0.35,
-        "duration_years": 6
+        "duration_years": 4
       },
       "worst": {
         "return_pct": -40,
         "return_eur": -40000,
-        "probability": 0.15,
+        "probability": 0.2,
         "duration_years": 6
       }
     },
@@ -305,8 +305,8 @@
       "label": "D [20-36]"
     },
     "metadata": {
-      "gradedAt": "2026-03-31T12:15:40.995Z",
-      "durationMs": 14490,
+      "gradedAt": "2026-03-31T13:10:31.498Z",
+      "durationMs": 17969,
       "aiUsed": true,
       "version": "5.2",
       "productType": "autocall",
@@ -331,7 +331,7 @@
       "adjustments": {
         "p1": -9,
         "p2": -9,
-        "p3": 0,
+        "p3": -5,
         "p4": 0
       },
       "barrier_sigma": 0.56,
