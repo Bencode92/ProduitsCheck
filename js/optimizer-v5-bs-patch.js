@@ -1,7 +1,8 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Optimizer v5 BS Risk Patch
+// STRUCTBOARD — Optimizer v5 BS Risk Patch v1.1
 //
 // Loaded AFTER optimizer-v4-patch.js (outermost optimizer layer)
+// v1.1: Fix v4 detection (removed toString check, use runtime flag)
 //
 // Chantier 1: BS rendementNet replaces facial coupon
 //   - annualReturn = allocatedAmount × rendementNet (not facial coupon)
@@ -20,9 +21,11 @@
 
   function _findProposal(id) {
     var found = null;
-    Object.values(app.state.proposals || {}).forEach(function(arr) {
-      arr.forEach(function(p) { if (p.id === id) found = p; });
-    });
+    try {
+      Object.values(app.state.proposals || {}).forEach(function(arr) {
+        arr.forEach(function(p) { if (p.id === id) found = p; });
+      });
+    } catch(e) {}
     return found;
   }
 
@@ -99,18 +102,18 @@
 
   function _patch() {
     if (typeof buildStructuredOptimization !== 'function') return false;
-    // Wait for v4 to have patched (v4 uses result._v4 in its body)
-    if (buildStructuredOptimization.toString().indexOf('_v4') < 0) return false;
 
     var _prevBuild = buildStructuredOptimization;
 
     window.buildStructuredOptimization = function() {
-      var result = _prevBuild(); // v4 → original chain
+      var result = _prevBuild();
       if (!result || !result.allocationPlan) return result;
 
+      // v1.1: gracefully handle missing v4 — use result._v4 if present
+      var hasV4 = !!(result._v4);
       var catRate = result.catBenchmark || 2.5;
-      var regime = (result._v4 && result._v4.regime) || 'neutral';
-      var seuil = (result._v4 && result._v4.seuil) || 55;
+      var regime = hasV4 ? (result._v4.regime || 'neutral') : 'neutral';
+      var seuil = hasV4 ? (result._v4.seuil || 55) : 55;
       var cr = _cashRes(regime);
       var depMax = (result.totalLiquidity || 0) * (1 - cr);
       var maxPer = depMax * 0.30;
@@ -131,7 +134,6 @@
           a._pe = bs.perteEsperee;
           a._hasBS = true;
         } else {
-          // Fallback: facial × 0.65 conservative
           var fc = typeof a.coupon === 'object' ? (a.coupon.rate || 0) : (parseFloat(a.coupon) || 0);
           a._rn = fc * 0.65;
           a._pc = 65;
@@ -213,13 +215,13 @@
         result.remainingCash = (result.totalLiquidity || 0) - result.deployedAmount;
       }
 
-      // Update "ne rien faire" after v5 filtering
+      // Update “ne rien faire” after v5 filtering
       var subs = (result.allocationPlan || []).filter(function(a) {
         return a.recommendation === 'ARBITRER' || a.recommendation === 'SOUSCRIRE';
       });
-      if (result._v4) {
+      if (hasV4) {
         result._v4.nothingToDo = subs.length === 0;
-        if (result._v4.nothingToDo && !result._v4._origNothing) {
+        if (result._v4.nothingToDo) {
           result._v4.nothingReason = 'Aucune proposition avec rendement BS net > CAT (' +
             catRate.toFixed(1) + '%). Garder la liquidit\u00e9 en placement s\u00fbr.';
         }
@@ -250,7 +252,7 @@
           divRatio: pv > 0 ? Math.round(av / pv * 100) / 100 : 1,
           posCount: live.length,
           avgVol: Math.round(av * 10) / 10,
-          method: 'BS-vol-sizing-v5'
+          method: 'BS-vol-sizing-v5.1'
         };
 
         console.log('[opt-v5] Pf: rdt=' + result._v5.portfolioReturn + '%/an vol=' +
@@ -258,6 +260,7 @@
           ' DD\u2248' + result._v5.maxDrawdownEst + '% Div=' + result._v5.divRatio + 'x');
       }
 
+      console.log('[opt-v5] v4=' + hasV4 + ' | deployed=' + fmt(result.deployedAmount || 0) + '\u20ac | actions=' + subs.length);
       return result;
     };
 
@@ -294,15 +297,18 @@
       };
     }
 
-    console.log('[opt-v5] BS return + vol-sizing + risk metrics active');
+    console.log('[opt-v5] v1.1 BS return + vol-sizing + risk metrics active');
     return true;
   }
 
-  // Wait for v4 to be applied before patching
-  var att = 0;
-  var iv = setInterval(function() {
-    att++;
-    if (_patch()) { clearInterval(iv); }
-    else if (att > 200) { console.warn('[opt-v5] Timeout waiting for v4'); clearInterval(iv); }
-  }, 250);
+  // v1.1: simplified detection — just need buildStructuredOptimization to exist
+  // v5 wraps whatever is there (v4 or base), checks result._v4 at runtime
+  if (!_patch()) {
+    var att = 0;
+    var iv = setInterval(function() {
+      att++;
+      if (_patch()) { clearInterval(iv); }
+      else if (att > 80) { console.warn('[opt-v5] Timeout — buildStructuredOptimization not found'); clearInterval(iv); }
+    }, 200);
+  }
 })();

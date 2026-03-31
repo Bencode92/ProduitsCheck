@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Grader v6 Calibration Patch
+// STRUCTBOARD — Grader v6 Calibration Patch v1.1
 //
 // Loaded AFTER grader-p1-expected-return-patch.js (outermost)
 // 1. Recalibrate P3 from base 70→50 with discriminating adjustments
@@ -7,6 +7,7 @@
 // 3. Phoenix memory bonus +5pts on P1
 // 4. Single-stock penalty -5pts on P1
 // 5. Cap IA delta to ±20pts (was ±15)
+// 6. [v1.1] P4 BS correction: use BS net spread instead of facial
 // ═══════════════════════════════════════════════════════════════
 
 (function() {
@@ -16,7 +17,6 @@
 
   // ─── Recalibrate P3: base 50 with structure-based adjustments ───
   function _recalibrateP3(oldP3, product) {
-    // Start from 50 instead of 70
     var base = 50;
     var st = (product.structureType || '').toLowerCase();
     var ut = (product.underlyingType || '').toLowerCase();
@@ -25,35 +25,30 @@
     var isCapGaranti = product.capitalProtection &&
       ((product.capitalProtection.protected === true) || st === 'capital_garanti');
 
-    // Structure-based adjustments
     if (st === 'dispersion' || ut === 'pairs') {
-      base += 15; // Non-directional, inherent diversification
+      base += 15;
     } else if (st === 'capital_garanti' || isCapGaranti) {
-      base += 10; // Capital protection = portfolio stabilizer
+      base += 10;
     } else if (ut === 'basket') {
-      base += 12; // Diversified basket
+      base += 12;
     } else if (ut === 'single-index') {
-      base += 8;  // Broad index = decent diversification
+      base += 8;
     } else if (ut === 'worst-of' || ut === 'worst_of') {
-      if (n <= 2) base += 0;      // WO 2 = neutral
-      else if (n <= 3) base -= 5;  // WO 3 = mild concentration
-      else base -= 10;             // WO 4+ = high concentration
+      if (n <= 2) base += 0;
+      else if (n <= 3) base -= 5;
+      else base -= 10;
     } else if (ut === 'single-stock') {
-      base -= 10; // Single stock = high concentration
+      base -= 10;
     } else if (ut === 'none' || st === 'taux_fixe') {
-      base += 5;  // No equity risk = diversifier
+      base += 5;
     }
 
-    // Maturity adjustment
     var my = parseFloat(product.maturityYears) || 5;
-    if (my <= 2) base += 5;       // Short = liquid
-    else if (my > 7) base -= 5;   // Long = illiquid
+    if (my <= 2) base += 5;
+    else if (my > 7) base -= 5;
 
-    // Transfer old portfolio overlap penalties (from v5 P3)
-    // The old P3 had overlap penalties baked in, preserve them
-    var overlapDelta = oldP3 - 70; // v5 base was 70
+    var overlapDelta = oldP3 - 70;
     if (overlapDelta < 0) {
-      // Overlap penalties: keep them but scale to new base
       base += Math.max(-20, overlapDelta);
     }
 
@@ -69,19 +64,50 @@
     var st = (product.structureType || '').toLowerCase();
     if (st === 'phoenix_memoire') hasMemory = true;
 
-    // Phoenix memory bonus: +5pts (BS only gives +8% prob, this adds value
-    // for the coupon catch-up mechanism over multiple periods)
     if (hasMemory) adj += 5;
-
-    // Single-stock penalty: -5pts (idiosyncratic risk, fat tails)
     if (ut === 'single-stock') adj -= 5;
 
-    // Single-stock with barrier < 65%: additional -3pts
     var cp = product.capitalProtection || {};
     var barrier = parseFloat(cp.barrier) || 0;
     if (ut === 'single-stock' && barrier > 0 && barrier < 65) adj -= 3;
 
     return Math.max(5, Math.min(95, oldP1 + adj));
+  }
+
+  // ─── [v1.1] P4 BS correction ───
+  // P4 (Prime vs CAT) uses facial coupon spread. When BS data shows
+  // the real risk-adjusted return is much lower, P4 is inflated.
+  // Fix: cap P4 when BS net spread << facial spread.
+  function _adjustP4WithBS(oldP4, product, catRate) {
+    var bsRn = product._bsRendementNet;
+    if (bsRn === undefined || bsRn === null) return oldP4;
+
+    var coupon = product.coupon || {};
+    var facialRate = parseFloat(coupon.rate || coupon) || 0;
+    if (!facialRate) return oldP4;
+
+    var facialSpread = facialRate - catRate;
+    var bsSpread = bsRn - catRate;
+
+    // Only correct if BS significantly disagrees with facial
+    if (facialSpread <= 0 || bsSpread >= facialSpread * 0.7) return oldP4;
+
+    // Correction factor: how much of the facial spread is real
+    var ratio = Math.max(0.25, bsSpread / Math.max(0.1, facialSpread));
+    var newP4;
+
+    if (bsSpread <= 0) {
+      // BS says return doesn't even beat CAT → P4 capped at 35
+      newP4 = Math.min(oldP4, 35);
+    } else if (bsSpread < 2) {
+      // Small positive spread → moderate P4
+      newP4 = Math.min(oldP4, Math.max(35, Math.round(oldP4 * ratio)));
+    } else {
+      // Decent spread but still below facial → proportional reduction
+      newP4 = Math.max(30, Math.round(oldP4 * ratio));
+    }
+
+    return Math.max(10, Math.min(95, newP4));
   }
 
   // ─── Cap IA deltas to ±20 (was ±15 in v5) ───
@@ -119,7 +145,7 @@
         var newP3 = _recalibrateP3(oldP3, product);
         if (newP3 !== oldP3) {
           result.pillars.portfolioFit.reasoning =
-            'Fit: base 50 → ' + newP3 +
+            'Fit: base 50 \u2192 ' + newP3 +
             ' (' + (product.underlyingType || '?') + ', ' +
             (product.structureType || '?') + ')' +
             (result.pillars.portfolioFit.reasoning ?
@@ -137,9 +163,24 @@
             (result.pillars.adjustedReturn.reasoning || '') +
             ' | v6: ' + (delta > 0 ? '+' : '') + delta +
             'pts (' +
-            ((product.coupon && product.coupon.memory) ? 'mémoire+5' : '') +
+            ((product.coupon && product.coupon.memory) ? 'm\u00e9moire+5' : '') +
             ((product.underlyingType || '').toLowerCase() === 'single-stock' ? ' SS-5' : '') +
             ')';
+        }
+
+        // 3b. [v1.1] Adjust P4 with BS data
+        var catRate = (result.metadata && result.metadata.catBenchmark) || 2.5;
+        var oldP4 = result.pillars.riskPremium.score;
+        var newP4 = _adjustP4WithBS(oldP4, product, catRate);
+        if (newP4 !== oldP4) {
+          var bsRn = product._bsRendementNet || 0;
+          console.log('[v6-cal] P4 BS correction: ' + oldP4 + ' \u2192 ' + newP4 +
+            ' (facial spread vs BS net ' + bsRn.toFixed(1) + '%)');
+          result.pillars.riskPremium.score = newP4;
+          result.pillars.riskPremium.reasoning =
+            (result.pillars.riskPremium.reasoning || '') +
+            ' | v6-BS: P4 ' + oldP4 + '\u2192' + newP4 +
+            ' (rdtNet BS=' + bsRn.toFixed(1) + '% vs CAT ' + catRate.toFixed(1) + '%)';
         }
 
         // 4. Recalculate total with v6 weights
@@ -156,7 +197,7 @@
         );
 
         if (newTotal !== result.score) {
-          console.log('[v6-cal] Total: ' + result.score + ' → ' + newTotal +
+          console.log('[v6-cal] Total: ' + result.score + ' \u2192 ' + newTotal +
             ' | P1=' + p1s + ' P2=' + p2s + ' P3=' + p3s + ' P4=' + p4s +
             ' | W: 30/15/25/30');
           result.score = newTotal;
@@ -171,14 +212,14 @@
         if (result.metadata) {
           result.metadata.v6Weights = V6_WEIGHTS;
           result.metadata.p3Recalibrated = true;
-          result.metadata.version = '6.0';
+          result.metadata.p4BsCorrected = (newP4 !== oldP4);
+          result.metadata.version = '6.1';
         }
 
         return result;
       });
     };
 
-    // Also update the config for UI display
     if (typeof GRADING_CONFIG !== 'undefined') {
       GRADING_CONFIG.weightsProposal = {
         adjustedReturn: V6_WEIGHTS.p1,
@@ -188,7 +229,7 @@
       };
     }
 
-    console.log('[v6-cal] Calibration active: P3 base 50, weights 30/15/25/30, Phoenix +5, SS -5');
+    console.log('[v6-cal v1.1] Calibration active: P3 base 50, weights 30/15/25/30, Phoenix +5, SS -5, P4 BS correction');
     return true;
   }
 
