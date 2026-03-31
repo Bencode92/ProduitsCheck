@@ -241,19 +241,19 @@
         "score": 16,
         "base": 25,
         "delta": -9,
-        "reasoning": "Rendement: base 25 → -9 = 16 (Barrière 60% insuffisante en stagflation avec vol 37% et tech sector évité (-1.22% momentum)) | Coupon 3.5%, barrière 60% | Barr.coupon 60% | Mat espérée: ~1.6a (prob mat: 0%)"
+        "reasoning": "Rendement: base 25 → -9 = 16 (Régime stagflationnaire défavorable au tech + volatilité 37% + drawdown 45% réduisent fortement la probabilité du coupon) | Coupon 3.5%, barrière 60% | Barr.coupon 60% | Mat espérée: ~1.6a (prob mat: 0%)"
       },
       "underlyingQuality": {
         "score": 58,
         "base": 67,
         "delta": -9,
-        "reasoning": "Qualité: base 67 → -9 = 58 (ASML (tech) dans secteur évité par le marché, beta 1.29 amplifie la baisse en stagflation) | Worst: ASML Holding NV B:50"
+        "reasoning": "Qualité: base 67 → -9 = 58 (ASML dans secteur tech évité (-1.22% perf) + beta 1.29 en stagflation + drawdown sévère de 45%) | Worst: ASML Holding NV B:50"
       },
       "portfolioFit": {
         "score": 75,
         "base": 80,
         "delta": -5,
-        "reasoning": "Fit: base 80 → -5 = 75 (Concentration mono-titre sur tech cyclique inadaptée au régime stagflationniste actuel)"
+        "reasoning": "Fit: base 80 → -5 = 75 (Concentration 100% tech en stagflation avec choc énergétique réduit la pertinence portfolio)"
       },
       "riskPremium": {
         "score": 0,
@@ -262,37 +262,37 @@
         "reasoning": "Prime: base 0 | 3.5% vs CAT 2.5% (spread 1.0%)"
       }
     },
-    "verdict": "Produit mal adapté au contexte stagflationniste actuel. ASML (DD -45%, vol 37%) appartient au secteur tech évité (-1.22% momentum) avec un beta élevé (1.29) qui amplifiera les pertes. Le coupon de 3.5% annualisé est insuffisant face au risque de perte capitale avec une barrière à 60% seulement. En régime stagflation avec VIX à 22 et choc pétrolier ($103.79), les valeurs tech cycliques sont particulièrement vulnérables.",
+    "verdict": "Produit très risqué avec score final de 3/100. ASML, leader semiconducteurs avec drawdown 45% et volatilité 37%, souffre en stagflation (secteur tech évité -1.22%). Barrière à 60% insuffisante face au beta 1.29 et risque de correction >40%. Coupon 3.5% ne compense pas le risque de perte capitale dans un contexte de choc énergétique et resserrement monétaire.",
     "keyRisks": [
-      "Secteur tech évité en stagflation, ASML déjà en DD -45%",
-      "Barrière 60% fragile avec volatilité 37% et beta 1.29",
-      "Choc pétrolier >$110 pourrait accélérer la rotation hors tech",
+      "Perte capitale >40% si ASML reste sous barrière 60% (probabilité élevée en stagflation)",
+      "Secteur tech particulièrement vulnérable avec momentum négatif et beta élevé",
+      "Durée réelle probablement maximale (6 ans) sans coupon si correction persiste",
       "Barrière à 0.56σ (Danger) — vol 37.09%"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 3.5,
-        "return_eur": 3500,
+        "return_pct": 10.5,
+        "return_eur": 10500,
         "probability": 0.15,
         "duration_years": 1
       },
       "base": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.3,
-        "duration_years": 3
+        "probability": 0.35,
+        "duration_years": 4
       },
       "stress": {
         "return_pct": -20,
         "return_eur": -20000,
         "probability": 0.35,
-        "duration_years": 4
+        "duration_years": 6
       },
       "worst": {
-        "return_pct": -40,
-        "return_eur": -40000,
-        "probability": 0.2,
+        "return_pct": -45,
+        "return_eur": -45000,
+        "probability": 0.15,
         "duration_years": 6
       }
     },
@@ -305,8 +305,8 @@
       "label": "D [20-36]"
     },
     "metadata": {
-      "gradedAt": "2026-03-31T13:10:31.498Z",
-      "durationMs": 17969,
+      "gradedAt": "2026-03-31T13:22:16.492Z",
+      "durationMs": 16957,
       "aiUsed": true,
       "version": "5.2",
       "productType": "autocall",
