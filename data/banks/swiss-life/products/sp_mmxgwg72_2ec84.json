@@ -199,29 +199,29 @@
         "reasoning": "Prime: base 42 | 5.7% vs CAT 2.5% (spread 3.2%)"
       }
     },
-    "verdict": "Produit capital garanti sur ENI offrant une protection totale dans un contexte stagflationniste favorable au secteur energy. Le coupon de 5.7% est attractif mais conditionnel à l'autocall, avec une maturité espérée de 2.3 ans qui pourrait s'allonger significativement (probabilité de maturité complète élevée). La garantie du capital compense le risque de non-perception des coupons dans un environnement de VIX à 22 et Brent à $103.79.",
+    "verdict": "En régime stagflationnaire avec Brent à $103.79, ce produit capital garanti sur ENI (secteur energy favorisé) offre une protection solide. Le coupon de 5.7% est attractif mais conditionnel à l'autocall (seuil 100%), ce qui peut être difficile à atteindre rapidement. Avec un beta de 0.71 et le capital garanti, c'est un placement défensif adapté au contexte actuel, bien que la maturité longue (12 ans) et la probabilité faible d'autocall rapide limitent l'attrait.",
     "keyRisks": [
-      "Risque de duration: forte probabilité d'aller à maturité 12 ans sans coupon si ENI reste sous 100%",
-      "Coût d'opportunité élevé: capital immobilisé longtemps pour potentiellement 0% de rendement"
+      "Risque de non-perception des coupons si ENI reste sous 100% (worst case: 0% de rendement)",
+      "Duration longue de 12 ans avec capital immobilisé si pas d'autocall"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 5.7,
+        "return_pct": 11.4,
         "return_eur": 3420,
         "probability": 0.2,
         "duration_years": 2
       },
       "base": {
         "return_pct": 5.7,
-        "return_eur": 7866,
-        "probability": 0.3,
-        "duration_years": 4.5
+        "return_eur": 9570,
+        "probability": 0.35,
+        "duration_years": 6
       },
       "stress": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.35,
+        "probability": 0.3,
         "duration_years": 12
       },
       "worst": {
@@ -240,8 +240,8 @@
       "label": "C [47-61]"
     },
     "metadata": {
-      "gradedAt": "2026-03-31T12:13:10.455Z",
-      "durationMs": 21449,
+      "gradedAt": "2026-03-31T13:07:59.938Z",
+      "durationMs": 20501,
       "aiUsed": true,
       "version": "5.2",
       "productType": "capital_garanti",
