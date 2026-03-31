@@ -233,62 +233,77 @@
   "_couponProbability": 61.8,
   "_bsRendementNet": 3.71,
   "grading": {
-    "grade": "D",
-    "score": 40,
+    "grade": "C",
+    "score": 57,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 45,
-        "base": 46,
-        "delta": -1,
-        "reasoning": "Rendement: base 46 → -1 = 45 (En stagflation avec ISP dans un secteur évité (-1.63% momentum), la probabilité de maintien au-dessus de 91% sur 10 ans est fortement réduite) | Coupon 3%, protégé | Barr.coupon 91% | Mat espérée: ~1.4a (prob mat: 0%)"
+        "score": 52,
+        "base": 75,
+        "delta": 0,
+        "reasoning": "BS: P(SJ>91% | vol=25% T=1.4a) = 61.8% | Rdt net: 3.7% - 0.0% = 3.7%/an | Spread vs CAT: 1.2% | v6: -5pts ( SS-5)",
+        "_bsDelta": -18,
+        "_bs": {
+          "score": 57,
+          "probCoupon": 61.8,
+          "couponEffectif": 6,
+          "rendementEspere": 3.71,
+          "perteEsperee": 0,
+          "rendementNet": 3.71,
+          "drag": 0,
+          "vols": [
+            24.51
+          ],
+          "matEsperee": 1.4,
+          "reasoning": "P(SJ>91% | vol=25% T=1.4a) = 61.8% | Rdt net: 3.7% - 0.0% = 3.7%/an",
+          "method": "BS-simplifie-v1.2"
+        }
       },
       "underlyingQuality": {
         "score": 58,
         "base": 59,
         "delta": -1,
-        "reasoning": "Qualité: base 59 → -1 = 58 (ISP est une banque italienne dans le secteur financials explicitement évité par le MI, avec beta 0.85 exposé au stress stagflationniste) | Worst: Intesa Sanpaolo S.p.A. B:25"
+        "reasoning": "Qualité: base 59 → -1 = 58 (ISP dans financials (secteur ÉVITÉ par MI) avec beta 0.85 vulnérable en stagflation + stress pétrolier impactant les marges bancaires) | Worst: Intesa Sanpaolo S.p.A. B:25"
       },
       "portfolioFit": {
-        "score": 81,
+        "score": 55,
         "base": 80,
         "delta": 1,
-        "reasoning": "Fit: base 80 → +1 = 81 (Capital garanti offre une protection précieuse en régime stagflationniste, mais rendement 3% insuffisant face à l'inflation)"
+        "reasoning": "Fit: base 50 → 55 (single-stock, autocall) | Fit: base 80 → +1 = 81 (Capital garanti offre une protection cruciale en régime stagflationnaire avec VIX à 22 et volatility_stress signalé)"
       },
       "riskPremium": {
-        "score": 8,
-        "base": 8,
-        "delta": 0,
-        "reasoning": "Prime: base 8 | 3% vs CAT 2.5% (spread 0.5%)"
+        "score": 72,
+        "base": 49,
+        "delta": -1,
+        "reasoning": "Capital garanti: spread 3×2=6.0% - CAT 2.5% - illiq 0.7% = 2.8%"
       }
     },
-    "verdict": "Produit inadapté au contexte stagflationniste actuel. ISP, banque italienne dans le secteur financials évité (momentum -1.63%), présente un risque élevé sur 10 ans malgré le capital garanti. Avec seulement 3% annualisé face à une inflation PCE à 2.83% et Brent >$100, le rendement réel est négatif. La probabilité de maturation à 0% et l'espérance à 1.4 ans suggèrent un risque de blocage prolongé sous le seuil autocall de 91%.",
+    "verdict": "Produit défensif avec capital garanti mais sous-jacent ISP mal positionné en stagflation (financials évités, momentum -1.63%). Le coupon 6% est attractif mais la probabilité de toucher les autocalls diminue avec le stress sectoriel bancaire. La garantie du capital à 10 ans justifie l'investissement pour un profil prudent acceptant potentiellement d'attendre la maturité finale.",
     "keyRisks": [
-      "Rendement réel négatif en stagflation (3% - inflation >2.83%)",
-      "ISP dans secteur financials évité avec risque de stress bancaire européen",
-      "Durée potentielle de 10 ans avec capital bloqué à rendement insuffisant"
+      "Risque de non-perception des coupons si ISP reste sous 91% en environnement stagflationnaire hostile aux banques",
+      "Duration longue (10 ans) avec taux en hausse potentielle si Fed reste hawkish face à PCE >2.8%"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 3,
-        "return_eur": 4200,
+        "return_pct": 8.4,
+        "return_eur": 8400,
         "probability": 0.2,
         "duration_years": 1.4
       },
       "base": {
-        "return_pct": 3,
-        "return_eur": 15000,
-        "probability": 0.3,
+        "return_pct": 30,
+        "return_eur": 30000,
+        "probability": 0.35,
         "duration_years": 5
       },
       "stress": {
-        "return_pct": 3,
-        "return_eur": 30000,
-        "probability": 0.35,
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.3,
         "duration_years": 10
       },
       "worst": {
@@ -299,42 +314,42 @@
       }
     },
     "confidenceInterval": {
-      "low": 33,
-      "high": 47,
+      "low": 55,
+      "high": 69,
       "halfWidth": 7,
       "gradeStable": false,
-      "gradeRange": "D-C",
-      "label": "D [33-47]"
+      "gradeRange": "C-B",
+      "label": "B [55-69]"
     },
     "metadata": {
-      "gradedAt": "2026-03-31T13:21:11.864Z",
-      "durationMs": 20329,
+      "gradedAt": "2026-03-31T13:32:40.203Z",
+      "durationMs": 20794,
       "aiUsed": true,
-      "version": "5.2",
+      "version": "6.2",
       "productType": "autocall",
       "marketDataAvailable": true,
       "catBenchmark": 2.5,
       "catSource": "fallback-2026",
-      "couponAnnualized": 3,
-      "couponRaw": 3,
-      "couponMultiplier": 1,
-      "couponFrequency": "annuel",
+      "couponAnnualized": 6,
+      "couponRaw": 6,
+      "couponMultiplier": 2,
+      "couponFrequency": "semestriel",
       "isInPortfolio": false,
       "hasBarrier": false,
       "barrierPct": 0,
       "barrierCouponPct": 91,
-      "couponProbability": null,
+      "couponProbability": 61.8,
       "expectedMaturity": 1.4,
       "maxMaturity": 10,
       "probReachMaturity": 0,
       "maxBeta": 0.85,
-      "baseScore": 40,
-      "baseGrade": "D",
+      "baseScore": 62,
+      "baseGrade": "B",
       "adjustments": {
         "p1": -1,
         "p2": -1,
         "p3": 1,
-        "p4": 0
+        "p4": -1
       },
       "barrier_sigma": null,
       "barrier_sigma_label": null,
@@ -342,14 +357,48 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 33,
-      "ci_high": 47,
-      "ci_label": "D [33-47]",
+      "ci_low": 55,
+      "ci_high": 69,
+      "ci_label": "B [55-69]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
       "decrementDrag": 0,
-      "structureType": "autocall"
+      "structureType": "autocall",
+      "couponPerPeriod": 3,
+      "bsMethod": "BS-simplifie-v1.2",
+      "bsProbCoupon": 61.8,
+      "bsRendementNet": 3.71,
+      "bsPerteEsperee": 0,
+      "bsCouponEffectif": 6,
+      "bsVols": [
+        24.51
+      ],
+      "bsMatEsperee": 1.4,
+      "isBasket": false,
+      "v6Weights": {
+        "p1": 0.3,
+        "p2": 0.2,
+        "p3": 0.15,
+        "p4": 0.3
+      },
+      "p3Recalibrated": true,
+      "p4BsCorrected": false,
+      "isGuaranteedRate": false,
+      "stockData": [
+        {
+          "name": "Intesa Sanpaolo S.p.A.",
+          "ticker": "ISP",
+          "sector": "Finance",
+          "perf_ytd": -13.93,
+          "perf_1y": 7.89,
+          "volatility_3y": 24.76,
+          "max_drawdown_3y": 21.19,
+          "buffett_score": 25,
+          "quality_score": 61,
+          "buffett_grade": "D"
+        }
+      ]
     }
   }
 }
