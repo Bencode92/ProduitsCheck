@@ -250,13 +250,13 @@
         "score": 33,
         "base": 38,
         "delta": -5,
-        "reasoning": "Rendement: base 38 → -5 = 33 (Barrière coupon à 62% mais avec Siemens Energy ultra-volatile (60.47%) et DD -71.9% en régime stagflationniste, probabilité de toucher la barrière élevée) | Coupon 7%, barrière 60% | Barr.coupon 62% | Mat espérée: ~3.3a (prob mat: 24%)"
+        "reasoning": "Rendement: base 38 → -5 = 33 (Régime stagflationniste pénalise les coupons avec 2 SJ tech (ASML, ENR) dans des secteurs évités et volatilité élevée (ENR 60%)) | Coupon 7%, barrière 60% | Barr.coupon 62% | Mat espérée: ~3.3a (prob mat: 24%)"
       },
       "underlyingQuality": {
         "score": 28,
         "base": 33,
         "delta": -5,
-        "reasoning": "Qualité: base 33 → -5 = 28 (3 sous-jacents sur 4 dans des secteurs évités (ISP/SAN: financials -1.63%, ASML: tech -1.22%) avec betas élevés en stagflation) | Worst: Intesa Sanpaolo B:25"
+        "reasoning": "Qualité: base 33 → -5 = 28 (3/4 SJ dans secteurs évités (financials: ISP/SAN, tech: ASML) en stagflation, seul ENR favorisé mais très volatil (DD 71.9%)) | Worst: Intesa Sanpaolo B:25"
       },
       "portfolioFit": {
         "score": 80,
@@ -268,14 +268,14 @@
         "score": 62,
         "base": 67,
         "delta": -5,
-        "reasoning": "Prime: base 67 → -5 = 62 (Spread de 218bps insuffisant pour compenser le risque worst-of avec 3 secteurs sous pression et VIX à 22) | 7% vs CAT 2.5% (spread 4.5%)"
+        "reasoning": "Prime: base 67 → -5 = 62 (Spread élevé justifié par la volatilité extrême d'ENR (60%) et le contexte macro défavorable) | 7% vs CAT 2.5% (spread 4.5%)"
       }
     },
-    "verdict": "Produit très risqué en stagflation avec 75% des sous-jacents dans des secteurs évités par le marché. Le worst-of ISP (financials -1.63%) et la présence de Siemens Energy (DD -71.9%, vol 60.47%) créent un profil asymétrique défavorable. Avec un score ajusté de 35/100, le couple rendement/risque est inadéquat malgré le coupon de 7% annualisé.",
+    "verdict": "Produit très risqué en régime stagflationniste avec 75% des SJ dans des secteurs évités par le marché. Le worst-of ISP (banque italienne) présente un risque systémique élevé avec beta 0.85 et le secteur financier sous pression. La volatilité extrême d'ENR (60.47%) et le drawdown de 71.9% compromettent sérieusement la probabilité de coupons malgré la barrière à 62%. Le coupon de 7% ne compense pas le risque de perte en capital avec 3 SJ vulnérables.",
     "keyRisks": [
-      "Siemens Energy en chute libre (-71.9% DD) pourrait déclencher une perte en capital",
-      "3/4 des sous-jacents dans des secteurs en bear market (financials/tech)",
-      "Barrière coupon à 62% vulnérable avec la volatilité extrême d'ENR (60.47%)",
+      "Risque systémique bancaire (ISP/SAN) en stagflation avec resserrement monétaire",
+      "Volatilité extrême ENR (60%) peut déclencher barrière rapidement",
+      "Choc pétrolier >$110 impacterait négativement ASML et les banques",
       "Barrière à 0.34σ (Critique) — vol 60.47%"
     ],
     "negotiationPoints": [],
@@ -287,14 +287,14 @@
         "duration_years": 1
       },
       "base": {
-        "return_pct": 14,
-        "return_eur": 14000,
+        "return_pct": 3.5,
+        "return_eur": 10500,
         "probability": 0.3,
-        "duration_years": 2
+        "duration_years": 3
       },
       "stress": {
-        "return_pct": 0,
-        "return_eur": 0,
+        "return_pct": -15,
+        "return_eur": -15000,
         "probability": 0.35,
         "duration_years": 6
       },
@@ -314,8 +314,8 @@
       "label": "C [35-57]"
     },
     "metadata": {
-      "gradedAt": "2026-03-31T12:16:24.822Z",
-      "durationMs": 19317,
+      "gradedAt": "2026-03-31T13:11:18.702Z",
+      "durationMs": 21171,
       "aiUsed": true,
       "version": "5.2",
       "productType": "autocall",
