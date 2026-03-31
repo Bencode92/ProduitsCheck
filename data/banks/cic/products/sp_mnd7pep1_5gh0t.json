@@ -269,26 +269,26 @@
         "score": 71,
         "base": 86,
         "delta": -15,
-        "reasoning": "Qualité: base 86 → -15 = 71 (Secteur financials explicitement ÉVITÉ (-1.63% performance), beta élevé (0.96) en régime stagflationniste avec choc énergétique amplifiant les risques) | Worst: Euro Stoxx Banks B:67"
+        "reasoning": "Qualité: base 86 → -15 = 71 (Secteur financials explicitement évité en stagflation, beta 0.96 amplifie le stress macro, DD déjà à -25.7%) | Worst: Euro Stoxx Banks B:67"
       },
       "portfolioFit": {
         "score": 58,
         "base": 80,
         "delta": -5,
-        "reasoning": "Fit: base 50 → 58 (single-index, autocall) | Fit: base 80 → -5 = 75 (Produit mal adapté au contexte actuel: exposition concentrée sur un secteur en difficulté sans diversification)"
+        "reasoning": "Fit: base 50 → 58 (single-index, autocall) | Fit: base 80 → -5 = 75 (Exposition sectorielle bancaire inadaptée en stagflation où les marges sont compressées par les taux)"
       },
       "riskPremium": {
-        "score": 39,
+        "score": 46,
         "base": 5,
         "delta": 0,
-        "reasoning": "Capital garanti: spread 4.85×2=9.7% - CAT 2.5% - illiq 0.5% = 6.7% | v6-BS: P4 90→46 (rdtNet BS=3.7% vs CAT 2.5%) | Illiq. premium +1.3% (-7pts)"
+        "reasoning": "Capital garanti: spread 4.85×2=9.7% - CAT 2.5% - illiq 0.5% = 6.7% | v6-BS: P4 90→46 (rdtNet BS=3.7% vs CAT 2.5%)"
       }
     },
-    "verdict": "Produit INADAPTÉ au régime stagflationniste actuel. L'Euro Stoxx Banks est dans le secteur financials ÉVITÉ par le MI (-1.63% de performance), avec un beta de 0.96 qui amplifie la volatilité en période de stress (VIX à 22). Le coupon de 9.7% est attractif mais la probabilité de le toucher est fortement réduite avec une barrière à 80% difficile à maintenir quand les banques souffrent de la compression des marges et du risque de défaut accru. Score final ajusté: 17/100 (MAUVAIS).",
+    "verdict": "En régime stagflationniste avec VIX à 22 et secteur bancaire explicitement évité (-1.63% momentum), ce produit présente un profil risque/rendement défavorable. La barrière coupon à 80% offre peu de protection alors que l'indice est déjà en DD de -25.7%, dans un contexte où les banques souffrent de la pentification de la courbe (+46bps) et du stress crédit. Le coupon de 9.7% ne compense pas le risque de perte en capital avec une barrière à 60% sur un secteur en difficulté structurelle.",
     "keyRisks": [
-      "Secteur bancaire européen vulnérable en stagflation: hausse des défauts + marges comprimées",
-      "Choc énergétique (Brent >$100) impacte négativement les bilans bancaires via exposition corporate",
-      "Concentration sectorielle sans diversification dans un secteur explicitement évité"
+      "Secteur bancaire évité en stagflation avec compression des marges d'intérêt",
+      "Probabilité élevée de non-paiement des coupons avec barrière à 80%",
+      "Risque de perte en capital significatif si barrière 60% touchée"
     ],
     "negotiationPoints": [],
     "scenarios": {
@@ -301,18 +301,18 @@
       "base": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.35,
+        "probability": 0.4,
         "duration_years": 5
       },
       "stress": {
         "return_pct": -15,
         "return_eur": -15000,
-        "probability": 0.35,
+        "probability": 0.3,
         "duration_years": 5
       },
       "worst": {
-        "return_pct": -25,
-        "return_eur": -25000,
+        "return_pct": -40,
+        "return_eur": -40000,
         "probability": 0.15,
         "duration_years": 5
       }
@@ -326,10 +326,10 @@
       "label": "D [33-49]"
     },
     "metadata": {
-      "gradedAt": "2026-03-31T08:29:24.233Z",
-      "durationMs": 20990,
+      "gradedAt": "2026-03-31T10:47:51.340Z",
+      "durationMs": 19138,
       "aiUsed": true,
-      "version": "6.1",
+      "version": "6.2",
       "productType": "autocall",
       "marketDataAvailable": true,
       "catBenchmark": 2.5,
@@ -388,6 +388,7 @@
       },
       "p3Recalibrated": true,
       "p4BsCorrected": true,
+      "isGuaranteedRate": false,
       "stockData": [
         {
           "name": "Euro Stoxx Banks",
