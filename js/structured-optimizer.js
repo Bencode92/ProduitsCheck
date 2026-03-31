@@ -233,80 +233,162 @@ async function runStructOptimizer() {
     }
 }
 
-// ═══ TABLE ═══════════════════════════════════════════════
+// ═══ TABLE v2 — Card-based UI ═══════════════════════════
 function renderStructOptimizationTable(analysis) {
     var a = analysis;
-    var totalReturn = a.totalPortfolioReturn + a.deployedReturn;
-    var totalInvested = a.totalPortfolioInvested + a.deployedAmount;
-    var totalCatReturn = Math.round(totalInvested * a.catBenchmark / 100);
+    var fmt = formatNumber;
+    var cpn = function(v) { return typeof v === 'number' ? v.toFixed(1) : (parseFloat(v) || 0).toFixed(1); };
+    var gc = function(g) { return { A:'#06D6A0', B:'#4ECDC4', C:'#FFB627', D:'#E85D04', F:'#EF233C' }[g] || '#888'; };
+    var badge = function(g, s) { var c = gc(g); return '<span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:' + c + '22;color:' + c + ';font-weight:700;font-size:13px">' + g + '</span>' + (s != null ? '<span style="font-size:10px;color:var(--text-dim);margin-left:4px">' + s + '</span>' : ''); };
 
-    // ── Summary cards ──
-    var html = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:12px">';
-    html += '<div style="background:var(--bg-card);padding:12px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted)">Rendement total</div><div style="font-size:20px;font-weight:800;color:var(--green);font-family:var(--mono)">+' + formatNumber(totalReturn) + '\u20ac<span style="font-size:11px">/an</span></div><div style="font-size:10px;color:var(--text-dim)">' + formatNumber(totalInvested) + '\u20ac invest.</div></div>';
-    html += '<div style="background:var(--bg-card);padding:12px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted)">Si tout en CAT</div><div style="font-size:20px;font-weight:800;color:var(--orange);font-family:var(--mono)">+' + formatNumber(totalCatReturn) + '\u20ac<span style="font-size:11px">/an</span></div><div style="font-size:10px;color:var(--text-dim)">' + a.catBenchmark.toFixed(2) + '%</div></div>';
-    html += '<div style="background:var(--bg-card);padding:12px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted)">Exc\u00e9dent vs CAT</div><div style="font-size:20px;font-weight:800;color:' + (totalReturn - totalCatReturn >= 0 ? 'var(--green)' : 'var(--red)') + ';font-family:var(--mono)">' + (totalReturn - totalCatReturn >= 0 ? '+' : '') + formatNumber(totalReturn - totalCatReturn) + '\u20ac</div><div style="font-size:10px;color:var(--text-dim)">rendement suppl.</div></div>';
-    html += '<div style="background:var(--bg-card);padding:12px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted)">Liquidit\u00e9 dispo</div><div style="font-size:20px;font-weight:800;color:var(--cyan);font-family:var(--mono)">' + formatNumber(a.totalLiquidity) + '\u20ac</div><div style="font-size:10px;color:var(--text-dim)">\u2192 ' + formatNumber(a.deployedAmount) + '\u20ac \u00e0 d\u00e9ployer</div></div>';
+    var beforeReturn = a.totalPortfolioReturn;
+    var beforeInvested = a.totalPortfolioInvested;
+    var afterReturn = beforeReturn + a.deployedReturn;
+    var afterInvested = beforeInvested + a.deployedAmount;
+    var beforeCash = a.totalLiquidity;
+    var afterCash = a.remainingCash || (a.totalLiquidity - a.deployedAmount);
+    var catRate = a.catBenchmark || 2.5;
+    var beforeYield = beforeInvested > 0 ? (beforeReturn / beforeInvested * 100) : 0;
+    var afterYield = afterInvested > 0 ? (afterReturn / afterInvested * 100) : 0;
+    var cashReturn = Math.round(afterCash * catRate / 100);
+    var totalAfterReturn = afterReturn + cashReturn;
+
+    var subs = (a.allocationPlan || []).filter(function(p) { return p.allocatedAmount > 0; });
+    var rejected = (a.allocationPlan || []).filter(function(p) { return p.allocatedAmount <= 0; });
+
+    var html = '';
+
+    // ═══ BLOC 1: AVANT → APRES ═══
+    html += '<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:0;margin-bottom:16px;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden">';
+    // Avant
+    html += '<div style="padding:16px;background:var(--bg-card)">';
+    html += '<div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);font-weight:600;margin-bottom:10px">Avant</div>';
+    html += '<div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">Investi <span style="float:right;font-family:var(--mono);color:var(--text-bright)">' + fmt(beforeInvested) + '\u20ac</span></div>';
+    html += '<div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">Cash <span style="float:right;font-family:var(--mono);color:var(--text-bright)">' + fmt(beforeCash) + '\u20ac</span></div>';
+    html += '<div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">Rdt/an <span style="float:right;font-family:var(--mono);color:var(--green);font-weight:700">+' + fmt(beforeReturn) + '\u20ac</span></div>';
+    html += '<div style="font-size:11px;color:var(--text-muted)">Yield <span style="float:right;font-family:var(--mono);color:var(--text-bright)">' + beforeYield.toFixed(1) + '%</span></div>';
     html += '</div>';
+    // Arrow
+    html += '<div style="display:flex;align-items:center;padding:0 12px;background:var(--bg-card);font-size:24px;color:var(--accent)">\u2192</div>';
+    // Apres
+    html += '<div style="padding:16px;background:var(--bg-card)">';
+    html += '<div style="font-size:10px;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:10px">Apr\u00e8s</div>';
+    var diffInv = afterInvested - beforeInvested;
+    html += '<div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">Investi <span style="float:right;font-family:var(--mono);color:var(--text-bright)">' + fmt(afterInvested) + '\u20ac</span>' + (diffInv > 0 ? ' <span style="font-size:9px;color:var(--green)">+' + fmt(diffInv) + '</span>' : '') + '</div>';
+    html += '<div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">Cash <span style="float:right;font-family:var(--mono);color:var(--cyan)">' + fmt(afterCash) + '\u20ac</span></div>';
+    var diffRdt = afterReturn - beforeReturn;
+    html += '<div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">Rdt/an <span style="float:right;font-family:var(--mono);color:var(--green);font-weight:700">+' + fmt(afterReturn) + '\u20ac</span>' + (diffRdt > 0 ? ' <span style="font-size:9px;color:var(--green)">+' + fmt(diffRdt) + '</span>' : '') + '</div>';
+    html += '<div style="font-size:11px;color:var(--text-muted)">Yield <span style="float:right;font-family:var(--mono);color:' + (afterYield > beforeYield ? 'var(--green)' : 'var(--text-bright)') + '">' + afterYield.toFixed(1) + '%</span></div>';
+    html += '</div></div>';
 
-    // ── Deployment summary bar ──
-    if (a.deployedAmount > 0) {
-        html += '<div style="display:flex;gap:16px;margin-bottom:12px;padding:10px 14px;background:rgba(6,214,160,0.05);border:1px solid rgba(6,214,160,0.15);border-radius:var(--radius-sm);font-size:11px;align-items:center">';
-        html += '<span style="color:var(--green);font-weight:700">\u2705 Plan de d\u00e9ploiement</span>';
-        html += '<span style="color:var(--text-bright)">' + formatNumber(a.deployedAmount) + '\u20ac \u2192 +' + formatNumber(a.deployedReturn) + '\u20ac/an</span>';
-        html += '<span style="color:var(--text-dim)">vs CAT +' + formatNumber(a.deployedCatReturn) + '\u20ac</span>';
-        html += '<span style="color:var(--green);font-weight:600">exc\u00e9dent +' + formatNumber(a.deployedExcess) + '\u20ac/an</span>';
-        if (a.remainingCash > 0) html += '<span style="color:var(--text-muted)">reste ' + formatNumber(a.remainingCash) + '\u20ac en cash</span>';
+    // ═══ BLOC 2: ACTIONS (cartes) ═══
+    if (subs.length > 0) {
+        subs.forEach(function(p) {
+            var isArbitrage = p.recommendation === 'ARBITRER' || (p._v4match === 'ARBITRAGE');
+            var source = p._v4source || (isArbitrage ? '\u267b\ufe0f Arbitrage' : '\ud83d\udcb5 Cash');
+            var icon = isArbitrage ? '\ud83d\udd04' : '\u2705';
+            var label = isArbitrage ? 'ARBITRER' : 'SOUSCRIRE';
+            var borderColor = isArbitrage ? 'rgba(78,205,196,0.3)' : 'rgba(6,214,160,0.3)';
+            var bgColor = isArbitrage ? 'rgba(78,205,196,0.04)' : 'rgba(6,214,160,0.04)';
+            var c = gc(p.grade);
+
+            html += '<div style="border:1px solid ' + borderColor + ';background:' + bgColor + ';border-radius:var(--radius-sm);padding:14px;margin-bottom:10px">';
+            // Header: action type
+            html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">';
+            html += '<span style="font-size:13px;font-weight:700;color:' + (isArbitrage ? 'var(--cyan)' : 'var(--green)') + '">' + icon + ' ' + label + '</span>';
+            html += '<span style="font-size:10px;color:var(--text-dim)">' + source + '</span>';
+            html += '</div>';
+
+            // Source → Amount → Product (visual flow)
+            if (isArbitrage) {
+                html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:11px">';
+                html += '<span style="color:var(--text-muted);background:var(--bg-elevated);padding:4px 8px;border-radius:4px">' + (p.bankName || '') + ' liquidit\u00e9</span>';
+                html += '<span style="color:var(--cyan);font-size:16px">\u2192</span>';
+                html += '<span style="font-family:var(--mono);font-weight:700;color:var(--cyan)">' + fmt(p.allocatedAmount) + '\u20ac</span>';
+                html += '<span style="color:var(--cyan);font-size:16px">\u2192</span>';
+                html += '</div>';
+            }
+
+            // Product card
+            html += '<div style="display:flex;align-items:center;gap:12px">';
+            html += '<div>' + badge(p.grade, p.score) + '</div>';
+            html += '<div style="flex:1;min-width:0">';
+            html += '<div style="font-size:12px;font-weight:600;color:var(--text-bright);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + p.name + '</div>';
+            html += '<div style="font-size:10px;color:var(--text-dim)">' + p.bankName + (p.capitalProtected ? ' \u00b7 \ud83d\udee1\ufe0f capital garanti' : '') + '</div>';
+            html += '</div>';
+            html += '<div style="text-align:right">';
+            html += '<div style="font-family:var(--mono);font-weight:700;font-size:14px;color:var(--cyan)">' + fmt(p.allocatedAmount) + '\u20ac</div>';
+            html += '<div style="font-family:var(--mono);font-size:11px;color:var(--green)">+' + fmt(p.annualReturn) + '\u20ac/an</div>';
+            html += '</div></div>';
+
+            // Details line
+            html += '<div style="display:flex;gap:12px;margin-top:8px;font-size:10px;color:var(--text-muted)">';
+            html += '<span>Coupon ' + cpn(p.coupon) + '%</span>';
+            if (p._pc) html += '<span>P(coupon) ' + Math.round(p._pc) + '%</span>';
+            if (p._rn != null) html += '<span>Rdt net BS ' + p._rn.toFixed(1) + '%</span>';
+            if (p.excessVsCat > 0) html += '<span style="color:var(--green)">+' + fmt(p.excessVsCat) + '\u20ac vs CAT</span>';
+            html += '</div></div>';
+        });
+    }
+
+    // Cash card
+    if (afterCash > 0) {
+        html += '<div style="border:1px solid rgba(148,163,184,0.2);background:rgba(148,163,184,0.03);border-radius:var(--radius-sm);padding:14px;margin-bottom:10px">';
+        html += '<div style="display:flex;align-items:center;justify-content:space-between">';
+        html += '<div>';
+        html += '<div style="font-size:13px;font-weight:700;color:var(--text-muted)">\ud83d\udcb0 Cash conserv\u00e9</div>';
+        html += '<div style="font-size:10px;color:var(--text-dim);margin-top:2px">' + (a.cashReason || 'CAT ' + catRate.toFixed(1) + '% sans risque') + '</div>';
+        html += '</div>';
+        html += '<div style="text-align:right">';
+        html += '<div style="font-family:var(--mono);font-weight:700;font-size:14px;color:var(--text-bright)">' + fmt(afterCash) + '\u20ac</div>';
+        html += '<div style="font-family:var(--mono);font-size:11px;color:var(--text-muted)">+' + fmt(cashReturn) + '\u20ac/an \u00e0 ' + catRate.toFixed(1) + '%</div>';
+        html += '</div></div></div>';
+    }
+
+    // No action message
+    if (subs.length === 0 && a.totalLiquidity > 0) {
+        html += '<div style="padding:20px;text-align:center;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:10px">';
+        html += '<div style="font-size:14px;margin-bottom:4px">\ud83d\udcb0</div>';
+        html += '<div style="font-size:12px;color:var(--text-muted)">Aucune proposition ne justifie le risque. Garder ' + fmt(a.totalLiquidity) + '\u20ac en CAT (' + catRate.toFixed(1) + '%).</div>';
         html += '</div>';
     }
-
-    // ── Portfolio table (info only, locked) ──
-    if (a.portfolioAnalysis.length > 0) {
-        html += '<div style="border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:16px">';
-        html += '<div style="padding:10px 14px;background:var(--bg-elevated);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;font-weight:600;color:var(--text-bright)">\ud83d\udd12 Portefeuille (bloqu\u00e9)</span><span style="font-size:10px;color:var(--text-dim)">' + formatNumber(a.totalPortfolioInvested) + '\u20ac \u2192 +' + formatNumber(a.totalPortfolioReturn) + '\u20ac/an</span></div>';
-        html += '<div style="max-height:250px;overflow-y:auto"><table style="width:100%;border-collapse:collapse;font-size:11px"><thead style="position:sticky;top:0;z-index:1"><tr style="background:var(--bg-elevated);border-bottom:1px solid var(--border)">';
-        html += '<th style="padding:6px 10px;text-align:left;color:var(--text-muted);font-weight:500">Produit</th><th style="padding:6px;text-align:center;color:var(--text-muted);font-weight:500">Grade</th><th style="padding:6px;text-align:right;color:var(--text-muted);font-weight:500">Investi</th><th style="padding:6px;text-align:center;color:var(--text-muted);font-weight:500">Coupon</th><th style="padding:6px;text-align:right;color:var(--text-muted);font-weight:500">/an</th><th style="padding:6px;text-align:right;color:var(--text-muted);font-weight:500">vs CAT</th>';
-        html += '</tr></thead><tbody>';
-        a.portfolioAnalysis.forEach(function(p) {
-            var gc = { A:'#06D6A0', B:'#4ECDC4', C:'#FFB627', D:'#E85D04', F:'#EF233C' }[p.grade] || '#888';
-            html += '<tr style="border-bottom:1px solid var(--border);opacity:0.75"><td style="padding:6px 10px"><strong style="color:var(--text-bright)">' + p.name.substring(0, 30) + '</strong><div style="font-size:9px;color:var(--text-dim)">' + p.bankName + '</div></td>';
-            html += '<td style="padding:6px;text-align:center"><span style="display:inline-block;width:22px;height:22px;line-height:22px;text-align:center;border-radius:5px;background:' + gc + '22;color:' + gc + ';font-weight:700;font-size:11px">' + (p.grade || '?') + '</span></td>';
-            html += '<td style="padding:6px;text-align:right;font-family:var(--mono);font-size:10px">' + formatNumber(p.amount) + '\u20ac</td>';
-            html += '<td style="padding:6px;text-align:center;font-family:var(--mono);font-weight:700;color:var(--green);font-size:10px">' + (typeof p.coupon === 'number' ? p.coupon.toFixed(1) : parseFloat(p.coupon) || 0) + '%</td>';
-            html += '<td style="padding:6px;text-align:right;font-family:var(--mono);font-weight:600;color:var(--green);font-size:10px">+' + formatNumber(p.annualReturn) + '\u20ac</td>';
-            html += '<td style="padding:6px;text-align:right;font-family:var(--mono);font-weight:600;font-size:10px;color:' + (p.excessVsCat >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (p.excessVsCat >= 0 ? '+' : '') + formatNumber(p.excessVsCat) + '\u20ac</td></tr>';
-        });
-        html += '</tbody></table></div></div>';
-    }
-
-    // ── Allocation table (the action plan) ──
-    if (a.allocationPlan.length > 0) {
-        html += '<div style="border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:16px">';
-        html += '<div style="padding:10px 14px;background:var(--bg-elevated);border-bottom:1px solid var(--border);display:flex;justify-content:space-between"><span style="font-size:12px;font-weight:600;color:var(--cyan)">\ud83d\udce8 Allocation liquidit\u00e9 ' + formatNumber(a.totalLiquidity) + '\u20ac</span><span style="font-size:10px;color:var(--text-dim)">' + a.allocationPlan.length + ' propositions</span></div>';
-        html += '<div style="max-height:350px;overflow-y:auto"><table style="width:100%;border-collapse:collapse;font-size:11px"><thead style="position:sticky;top:0;z-index:1"><tr style="background:var(--bg-elevated);border-bottom:1px solid var(--border)">';
-        html += '<th style="padding:8px 10px;text-align:left;color:var(--text-muted);font-weight:500">Proposition</th><th style="padding:8px 6px;text-align:center;color:var(--text-muted);font-weight:500">Grade</th><th style="padding:8px 6px;text-align:center;color:var(--text-muted);font-weight:500">Coupon</th><th style="padding:8px 6px;text-align:right;color:var(--text-muted);font-weight:500">Montant</th><th style="padding:8px 6px;text-align:right;color:var(--text-muted);font-weight:500">/an</th><th style="padding:8px 6px;text-align:right;color:var(--text-muted);font-weight:500">vs CAT</th><th style="padding:8px 6px;text-align:center;color:var(--text-muted);font-weight:500">Action</th>';
-        html += '</tr></thead><tbody>';
-        a.allocationPlan.forEach(function(p) {
-            var rc = p.recommendation === 'SOUSCRIRE' ? 'var(--green)' : p.recommendation === 'ENVISAGER' ? 'var(--cyan)' : p.recommendation === 'ATTENDRE' ? 'var(--orange)' : 'var(--red)';
-            var ri = p.recommendation === 'SOUSCRIRE' ? '\u2705' : p.recommendation === 'ENVISAGER' ? '\ud83d\udca1' : p.recommendation === 'ATTENDRE' ? '\u23f3' : '\u274c';
-            var gc = { A:'#06D6A0', B:'#4ECDC4', C:'#FFB627', D:'#E85D04', F:'#EF233C' }[p.grade] || '#EF233C';
-            var hasAlloc = p.allocatedAmount > 0;
-            html += '<tr style="border-bottom:1px solid var(--border);' + (!hasAlloc ? 'opacity:0.5' : '') + '"><td style="padding:8px 10px"><strong style="color:var(--text-bright)">' + p.name.substring(0, 35) + '</strong><div style="font-size:10px;color:var(--text-dim)">' + p.bankName + (p.capitalProtected ? ' \u00b7 prot\u00e9g\u00e9' : '') + '</div></td>';
-            html += '<td style="padding:8px 6px;text-align:center"><span style="display:inline-block;width:24px;height:24px;line-height:24px;text-align:center;border-radius:6px;background:' + gc + '22;color:' + gc + ';font-weight:700;font-size:12px">' + p.grade + '</span></td>';
-            html += '<td style="padding:8px 6px;text-align:center;font-family:var(--mono);font-weight:700;color:var(--green)">' + (typeof p.coupon === 'number' ? p.coupon.toFixed(1) : parseFloat(p.coupon) || 0) + '%</td>';
-            html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);font-weight:' + (hasAlloc ? '700' : '400') + ';color:' + (hasAlloc ? 'var(--cyan)' : 'var(--text-dim)') + '">' + (hasAlloc ? formatNumber(p.allocatedAmount) + '\u20ac' : '\u2014') + '</td>';
-            html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);font-weight:600;color:' + (hasAlloc ? 'var(--green)' : 'var(--text-dim)') + '">' + (hasAlloc ? '+' + formatNumber(p.annualReturn) + '\u20ac' : '\u2014') + '</td>';
-            html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);font-weight:600;color:' + (p.excessVsCat > 0 ? 'var(--green)' : p.excessVsCat < 0 ? 'var(--red)' : 'var(--text-dim)') + '">' + (hasAlloc ? (p.excessVsCat >= 0 ? '+' : '') + formatNumber(p.excessVsCat) + '\u20ac' : '\u2014') + '</td>';
-            html += '<td style="padding:8px 6px;text-align:center"><span style="padding:3px 8px;border-radius:10px;font-size:10px;font-weight:600;color:' + rc + ';background:' + rc + '12;border:1px solid ' + rc + '30">' + ri + ' ' + p.recommendation + '</span></td></tr>';
-        });
-        html += '</tbody></table></div></div>';
-    }
-
-    if (a.allocationPlan.length === 0 && a.totalLiquidity > 0) {
-        html += '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:12px">' + formatNumber(a.totalLiquidity) + '\u20ac disponibles mais aucune proposition grad\u00e9e. Ajoutez des brochures et lancez le grading.</div>';
-    }
     if (a.totalLiquidity === 0) {
-        html += '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:12px">Aucune liquidit\u00e9 d\u00e9tect\u00e9e. Marquez des produits comme \u00ab $ Liquidit\u00e9 \u00bb pour d\u00e9bloquer l\'optimisation.</div>';
+        html += '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:12px">Aucune liquidit\u00e9. Marquez des produits comme \u00ab $ Liquidit\u00e9 \u00bb.</div>';
     }
+
+    // ═══ BLOC 3: PORTEFEUILLE EXISTANT (compact) ═══
+    if (a.portfolioAnalysis.length > 0) {
+        html += '<details style="margin-bottom:10px;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden">';
+        html += '<summary style="padding:10px 14px;background:var(--bg-elevated);cursor:pointer;font-size:12px;font-weight:600;color:var(--text-bright);display:flex;justify-content:space-between;align-items:center"><span>\ud83d\udd12 Portefeuille existant (' + a.portfolioAnalysis.length + ')</span><span style="font-size:10px;color:var(--text-dim);font-weight:400">' + fmt(a.totalPortfolioInvested) + '\u20ac \u2192 +' + fmt(a.totalPortfolioReturn) + '\u20ac/an</span></summary>';
+        a.portfolioAnalysis.forEach(function(p) {
+            var c = gc(p.grade);
+            html += '<div style="padding:8px 14px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;font-size:11px;opacity:0.8">';
+            html += '<span style="width:22px;height:22px;line-height:22px;text-align:center;border-radius:5px;background:' + c + '22;color:' + c + ';font-weight:700;font-size:10px;flex-shrink:0">' + (p.grade || '?') + '</span>';
+            html += '<span style="flex:1;color:var(--text-bright);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + p.name.substring(0, 35) + '</span>';
+            html += '<span style="font-family:var(--mono);color:var(--text-dim)">' + fmt(p.amount) + '\u20ac</span>';
+            html += '<span style="font-family:var(--mono);color:var(--green)">+' + fmt(p.annualReturn) + '\u20ac</span>';
+            html += '</div>';
+        });
+        html += '</details>';
+    }
+
+    // ═══ BLOC 4: ECARTES (collapsible) ═══
+    if (rejected.length > 0) {
+        html += '<details style="margin-bottom:10px;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden">';
+        html += '<summary style="padding:10px 14px;background:var(--bg-elevated);cursor:pointer;font-size:12px;color:var(--text-muted);display:flex;justify-content:space-between;align-items:center"><span>\u274c \u00c9cart\u00e9s (' + rejected.length + ')</span><span style="font-size:10px;color:var(--text-dim)">cliquer pour d\u00e9tailler</span></summary>';
+        rejected.forEach(function(p) {
+            var c = gc(p.grade);
+            var rc = { 'ATTENDRE':'var(--orange)', 'PASSER':'var(--red)', 'IMPOSSIBLE':'#888' }[p.recommendation] || 'var(--text-dim)';
+            html += '<div style="padding:6px 14px;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px;font-size:10px;opacity:0.6">';
+            html += '<span style="width:20px;height:20px;line-height:20px;text-align:center;border-radius:4px;background:' + c + '22;color:' + c + ';font-weight:700;font-size:9px;flex-shrink:0">' + p.grade + '</span>';
+            html += '<span style="flex:1;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + p.name.substring(0, 35) + '</span>';
+            html += '<span style="font-family:var(--mono);color:var(--text-dim)">' + cpn(p.coupon) + '%</span>';
+            html += '<span style="padding:2px 6px;border-radius:8px;font-size:9px;font-weight:600;color:' + rc + ';background:' + rc + '12">' + p.recommendation + '</span>';
+            html += '</div>';
+        });
+        html += '</details>';
+    }
+
     return html;
 }
 
