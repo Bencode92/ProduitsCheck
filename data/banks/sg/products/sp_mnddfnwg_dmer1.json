@@ -259,58 +259,58 @@
         "score": 18,
         "base": 28,
         "delta": -10,
-        "reasoning": "Rendement: base 28 → -10 = 18 (En stagflation avec VIX à 22, la probabilité d'atteindre le seuil autocall 95% est fortement réduite sur un indice volatil (38.92%)) | Coupon 4.5%, barrière 50% | Barr.coupon 60% | Mat espérée: ~2.5a (prob mat: 1%)"
+        "reasoning": "Rendement: base 28 → -10 = 18 (En stagflation avec VIX à 22 et volatilité élevée (38.92%), la probabilité d'autocall rapide est fortement réduite malgré le seuil à 95%) | Coupon 4.5%, barrière 50% | Barr.coupon 60% | Mat espérée: ~2.5a (prob mat: 1%)"
       },
       "underlyingQuality": {
         "score": 45,
         "base": 40,
         "delta": 5,
-        "reasoning": "Qualité: base 40 → +5 = 45 (L'or bénéficie historiquement de la stagflation (hedge inflation), beta faible 0.53 offre décorrélation, mais volatilité élevée limite le bonus) | Worst: Indice Solactive GDX EUR AR 5% B:35"
+        "reasoning": "Qualité: base 40 → +5 = 45 (L'or bénéficie historiquement de la stagflation comme hedge anti-inflation, compensant partiellement le beta faible de 0.53) | Worst: Indice Solactive GDX EUR AR 5% B:35"
       },
       "portfolioFit": {
         "score": 75,
         "base": 80,
         "delta": -5,
-        "reasoning": "Fit: base 80 → -5 = 75 (Score élevé trompeur : en stagflation, l'allocation or est pertinente mais la structure autocall sur miners très volatils est risquée)"
+        "reasoning": "Fit: base 80 → -5 = 75 (Avec un indice décrément 5% et une volatilité de 38.92%, le produit offre peu de diversification dans un portefeuille déjà stressé)"
       },
       "riskPremium": {
         "score": 0,
         "base": 0,
-        "delta": 0,
-        "reasoning": "Prime: base 0 | 4.5% vs CAT 2.5% (spread 2.0%)"
+        "delta": -15,
+        "reasoning": "Prime: base 0 → -15 = 0 (Le décrément de 5% en stagflation avec Brent >$100 est excessivement pénalisant sur un actif déjà volatil) | 4.5% vs CAT 2.5% (spread 2.0%)"
       }
     },
-    "verdict": "Produit paradoxal en stagflation : l'exposition aux mines d'or est cohérente (hedge inflation historique), mais la structure autocall avec seuil 95% sur un indice volatil à 38.92% rend les coupons très incertains. Le décrément 5% érode significativement la performance dans un contexte où l'or pourrait surperformer. Avec une probabilité de maturité de seulement 1% et un DD de -30.84%, le risque de perte en capital est substantiel malgré la barrière à 50%.",
+    "verdict": "Produit hautement risqué en régime de stagflation avec un score ajusté de 13/100. Le décrément de 5% annuel combiné à une volatilité de 38.92% et un drawdown de -30.84% créent un profil asymétrique défavorable. Malgré l'attrait de l'or en période inflationniste, la structure avec barrière capitale à 50% non protégé et le mécanisme de décrément rendent le produit inadapté au contexte actuel de stress avec VIX à 22.",
     "keyRisks": [
-      "Décrément 5% annuel ampute la performance dans un contexte favorable à l'or",
-      "Volatilité extrême (38.92%) rend les autocalls improbables malgré la stagflation",
-      "Dollar fort (DTWEXBGS 120) pèse sur les commodities malgré l'inflation",
+      "Décrément de 5% annuel qui érode mécaniquement la performance dans un contexte déjà volatil",
+      "Barrière capitale à 50% non protégé avec une volatilité de 38.92% et un historique de DD à -30.84%",
+      "Risque de non-remboursement du capital en cas de choc pétrolier >$110 amplifiant la stagflation",
       "Barrière à 0.8σ (Danger) — vol 38.92%"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 9,
-        "return_eur": 9000,
+        "return_pct": 4.5,
+        "return_eur": 4500,
         "probability": 0.15,
         "duration_years": 1
       },
       "base": {
-        "return_pct": 11.25,
-        "return_eur": 28125,
-        "probability": 0.3,
+        "return_pct": 2.25,
+        "return_eur": 5625,
+        "probability": 0.35,
         "duration_years": 2.5
       },
       "stress": {
-        "return_pct": 22.5,
-        "return_eur": 22500,
-        "probability": 0.4,
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.3,
         "duration_years": 5
       },
       "worst": {
         "return_pct": -30,
         "return_eur": -30000,
-        "probability": 0.15,
+        "probability": 0.2,
         "duration_years": 5
       }
     },
@@ -323,8 +323,8 @@
       "label": "D [16-36]"
     },
     "metadata": {
-      "gradedAt": "2026-03-31T13:12:06.455Z",
-      "durationMs": 20920,
+      "gradedAt": "2026-03-31T13:23:47.164Z",
+      "durationMs": 19628,
       "aiUsed": true,
       "version": "5.2",
       "productType": "autocall",
@@ -350,7 +350,7 @@
         "p1": -10,
         "p2": 5,
         "p3": -5,
-        "p4": 0
+        "p4": -15
       },
       "barrier_sigma": 0.8,
       "barrier_sigma_label": "Danger",
