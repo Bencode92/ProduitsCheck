@@ -238,7 +238,7 @@
   "_bsRendementNet": 2.58,
   "grading": {
     "grade": "D",
-    "score": 29,
+    "score": 30,
     "killCriteria": {
       "triggered": false,
       "reasons": []
@@ -248,32 +248,32 @@
         "score": 41,
         "base": 46,
         "delta": -5,
-        "reasoning": "Rendement: base 46 → -5 = 41 (Régime stagflation + tech/financials évités réduisent fortement la probabilité de toucher le coupon 9.7% avec barrière 95%) | Coupon 9.7%, barrière 60% | Barr.coupon 95% | Mat espérée: ~3.3a (prob mat: 24%)"
+        "reasoning": "Rendement: base 46 → -5 = 41 (Barrière 95% très exigeante en stagflation avec 3 SJ dans secteurs évités (ISP/SAN financials, ASML tech) et ENR très volatile (60%)) | Coupon 9.7%, barrière 60% | Barr.coupon 95% | Mat espérée: ~3.3a (prob mat: 24%)"
       },
       "underlyingQuality": {
         "score": 28,
         "base": 33,
         "delta": -5,
-        "reasoning": "Qualité: base 33 → -5 = 28 (3 sous-jacents sur 4 dans secteurs évités (ASML tech -1.22%, ISP/SAN financials -1.63%) avec betas élevés en stagflation) | Worst: Intesa Sanpaolo S.p.A. B:25"
+        "reasoning": "Qualité: base 33 → -5 = 28 (3/4 SJ dans secteurs à éviter selon MI (financials, tech) + betas élevés (ASML 1.29, ENR 1.56) vulnérables en régime stagflationniste) | Worst: Intesa Sanpaolo S.p.A. B:25"
       },
       "portfolioFit": {
-        "score": 75,
+        "score": 80,
         "base": 80,
-        "delta": -5,
-        "reasoning": "Fit: base 80 → -5 = 75 (Surpondération sectorielle dangereuse en stagflation avec 50% financials et 25% tech cyclique)"
+        "delta": 0,
+        "reasoning": "Fit: base 80"
       },
       "riskPremium": {
         "score": 0,
         "base": 5,
         "delta": -5,
-        "reasoning": "Prime: base 5 → -5 = 0 (Spread 9.7% insuffisant vs risques: ENR DD -71.9%, volatilités extrêmes (ENR 60.47%, ASML 37.09%) et VIX 22) | 9.7% vs CAT 2.5% (spread 7.2%)"
+        "reasoning": "Prime: base 5 → -5 = 0 (Spread 4.7% insuffisant vs risque réel avec barrière 95% et worst-of structure en période de stress macro) | 9.7% vs CAT 2.5% (spread 7.2%)"
       }
     },
-    "verdict": "Produit très risqué en régime stagflation avec 75% d'exposition aux secteurs évités (tech/financials momentum négatif). Le coupon 9.7% ne compense pas le risque worst-of avec ENR à -71.9% du plus haut et volatilité 60.47%. Probabilité de perte en capital élevée avec barrière 60% vulnérable si le choc pétrolier >$110 se matérialise, particulièrement pour les financials européens déjà sous pression.",
+    "verdict": "Produit TRÈS RISQUÉ (note finale: 4/100) en régime stagflationniste avec VIX 22 et Brent >$100. La barrière coupon à 95% sur worst-of avec 3/4 SJ dans secteurs évités (financials ISP/SAN, tech ASML) rend les coupons quasi-inaccessibles. ENR (vol 60%, DD -72%) et l'exposition cyclique créent un risque capital majeur sur la barrière 60%. Le rendement 9.7% ne compense pas le risque de perte en capital dans ce contexte macro hostile.",
     "keyRisks": [
-      "ENR proche barrière capital (-71.9% DD) avec vol 60.47% en secteur energy volatile",
-      "75% d'exposition aux secteurs évités (tech/financials) en stagflation avec momentum négatif",
-      "Choc pétrolier >$110 pourrait déclencher stress systémique sur financials européens",
+      "Barrière 95% irréaliste avec 3 SJ dans secteurs évités par le marché en stagflation",
+      "ENR ultra-volatile (60%) avec DD -72% menace directement le capital à 60%",
+      "Choc pétrolier >$110 amplifierait la correction sur financials/tech déjà sous pression",
       "Barrière à 0.34σ (Critique) — vol 60.47%"
     ],
     "negotiationPoints": [],
@@ -285,35 +285,35 @@
         "duration_years": 1
       },
       "base": {
-        "return_pct": 3.2,
-        "return_eur": 9600,
-        "probability": 0.3,
-        "duration_years": 3
-      },
-      "stress": {
         "return_pct": 0,
         "return_eur": 0,
         "probability": 0.35,
         "duration_years": 6
       },
+      "stress": {
+        "return_pct": -15,
+        "return_eur": -15000,
+        "probability": 0.35,
+        "duration_years": 4
+      },
       "worst": {
         "return_pct": -40,
         "return_eur": -40000,
-        "probability": 0.2,
+        "probability": 0.15,
         "duration_years": 6
       }
     },
     "confidenceInterval": {
-      "low": 18,
-      "high": 40,
+      "low": 19,
+      "high": 41,
       "halfWidth": 11,
       "gradeStable": false,
       "gradeRange": "F-D",
-      "label": "D [18-40]"
+      "label": "D [19-41]"
     },
     "metadata": {
-      "gradedAt": "2026-03-31T13:09:49.220Z",
-      "durationMs": 21690,
+      "gradedAt": "2026-03-31T13:21:36.282Z",
+      "durationMs": 22747,
       "aiUsed": true,
       "version": "5.2",
       "productType": "autocall",
@@ -338,7 +338,7 @@
       "adjustments": {
         "p1": -5,
         "p2": -5,
-        "p3": -5,
+        "p3": 0,
         "p4": -5
       },
       "barrier_sigma": 0.34,
@@ -347,9 +347,9 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 18,
-      "ci_high": 40,
-      "ci_label": "D [18-40]",
+      "ci_low": 19,
+      "ci_high": 41,
+      "ci_label": "D [19-41]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
