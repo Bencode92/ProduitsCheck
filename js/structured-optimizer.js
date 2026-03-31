@@ -92,7 +92,7 @@ function buildStructuredOptimization() {
             bankName: (typeof BANKS !== 'undefined' ? (BANKS.find(function(b) { return b.id === p.bankId; }) || {}).name : '') || p.bankId || '',
             grade: g.grade, score: g.score || 0,
             coupon: typeof norm.coupon === 'number' ? norm.coupon : (parseFloat(norm.coupon) || 0), couponType: norm.couponType,
-            capitalProtected: norm.capitalProtection,
+            capitalProtected: norm.capitalProtection && !(norm.autocall && norm.barrier > 0 && norm.barrier < 100),
             hasBarrier: norm.barrier > 0 && norm.barrier < 100,
             nominal: parseFloat(p.investedAmount || p.nominal) || 0
         };
@@ -195,7 +195,13 @@ async function runStructOptimizer() {
     var results = document.getElementById('struct-optimizer-results');
     if (!results) return;
     try {
-        // Re-grade ALL proposals to ensure v6.3 scores (not stale cached grades)
+        // Step 1: Load MI data BEFORE running optimizer (needed by v2/v4)
+        if (typeof _loadOptimizerMI === 'function') {
+            results.innerHTML = '<div style="display:flex;align-items:center;gap:10px;padding:20px;color:var(--text-muted)"><div class="spinner"></div>Chargement Market Intelligence...</div>';
+            await _loadOptimizerMI();
+        }
+
+        // Step 2: Re-grade ALL proposals to ensure v6.3 scores
         var allP = [];
         Object.values(app.state.proposals || {}).forEach(function(arr) {
             arr.forEach(function(p) { if (p.status !== 'rejected' && p.status !== 'subscribed') allP.push(p); });
@@ -216,6 +222,7 @@ async function runStructOptimizer() {
             }
         }
 
+        // Step 3: Run optimizer (v2→v3→v4→v5 chain)
         var analysis = buildStructuredOptimization();
         var html = renderStructOptimizationTable(analysis);
         html += '<div id="ai-struct-summary" style="margin-top:16px"><div style="display:flex;align-items:center;gap:10px;padding:16px;color:var(--text-muted);background:var(--accent-glow);border-radius:var(--radius-sm)"><div class="spinner"></div>Claude analyse...</div></div>';

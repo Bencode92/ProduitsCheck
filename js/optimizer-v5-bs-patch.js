@@ -254,8 +254,13 @@
           a._pe = bs.perteEsperee;
           a._hasBS = true;
         } else {
+          // Fallback: try to get coupon from original product, not normalized plan
           var fc = typeof a.coupon === 'object' ? (a.coupon.rate || 0) : (parseFloat(a.coupon) || 0);
-          a._rn = fc * 0.65;
+          if (fc <= 0 && prop) {
+            var rawC = prop.coupon;
+            fc = typeof rawC === 'object' ? (parseFloat(rawC.rate || rawC.rateIfCalled || rawC.rateIfMaturity) || 0) : (parseFloat(rawC) || 0);
+          }
+          a._rn = fc > 0 ? fc * 0.65 : 0;
           a._pc = 65;
           a._vol = 25;
           a._pe = 0;
