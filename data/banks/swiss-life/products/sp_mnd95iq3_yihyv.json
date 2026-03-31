@@ -230,123 +230,108 @@
   "_couponProbability": 47.6,
   "_bsRendementNet": -7.17,
   "grading": {
-    "grade": "C",
-    "score": 49,
+    "grade": "D",
+    "score": 28,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 5,
-        "base": 31,
-        "delta": -26,
-        "reasoning": "BS: P(SJ>100% | vol=37% T=1.6a) = 44.1% | Memoire: prob x 1.08 = 47.6% | Breach 60%: P=32.3% -> perte esperee 10.5%/an | Rdt net: 3.3% - 10.5% = -7.2%/an | Spread vs CAT: -9.7%",
-        "_bs": {
-          "score": 5,
-          "probCoupon": 47.6,
-          "couponEffectif": 7,
-          "rendementEspere": 3.33,
-          "perteEsperee": 10.5,
-          "rendementNet": -7.17,
-          "drag": 0,
-          "vols": [
-            37.09
-          ],
-          "matEsperee": 1.6,
-          "reasoning": "P(SJ>100% | vol=37% T=1.6a) = 44.1% | Memoire: prob x 1.08 = 47.6% | Breach 60%: P=32.3% -> perte esperee 10.5%/an | Rdt net: 3.3% - 10.5% = -7.2%/an",
-          "method": "BS-simplifie-v1.2"
-        }
+        "score": 16,
+        "base": 25,
+        "delta": -9,
+        "reasoning": "Rendement: base 25 → -9 = 16 (En stagflation avec tech évité et ASML beta 1.29, probabilité coupon fortement réduite malgré barrière 60%) | Coupon 3.5%, barrière 60% | Barr.coupon 60% | Mat espérée: ~1.6a (prob mat: 0%)"
       },
       "underlyingQuality": {
         "score": 58,
         "base": 67,
         "delta": -9,
-        "reasoning": "Qualité: base 67 → -9 = 58 (ASML dans secteur tech ÉVITÉ (-1.22% momentum), beta élevé 1.29 en régime stagflationnaire hostile aux valeurs de croissance) | Worst: ASML Holding NV B:50"
+        "reasoning": "Qualité: base 67 → -9 = 58 (ASML secteur tech évité (-1.22% momentum), DD -45%, volatilité 37% en régime stagflationniste hostile) | Worst: ASML Holding NV B:50"
       },
       "portfolioFit": {
-        "score": 75,
+        "score": 80,
         "base": 80,
-        "delta": -5,
-        "reasoning": "Fit: base 80 → -5 = 75 (Concentration mono-ligne sur tech cyclique inadaptée en stagflation où diversification sectorielle cruciale)"
+        "delta": 0,
+        "reasoning": "Fit: base 80"
       },
       "riskPremium": {
-        "score": 73,
-        "base": 9,
+        "score": 0,
+        "base": 0,
         "delta": 0,
-        "reasoning": "Capital garanti: spread 3.5×2=7.0% - CAT 2.5% - illiq 0.5% = 4.0% | Illiq. premium +1.4% (-7pts)"
+        "reasoning": "Prime: base 0 | 3.5% vs CAT 2.5% (spread 1.0%)"
       }
     },
-    "verdict": "Produit INADAPTÉ au contexte stagflationnaire actuel. ASML (tech, beta 1.29) est dans un secteur ÉVITÉ avec momentum négatif -1.22%, alors que le régime favorise uniquement l'énergie. La barrière à 60% offre une protection insuffisante face à la volatilité de 37% et le drawdown historique de -45%. Le coupon de 7% ne compense pas le risque de perte en capital sur une valeur tech cyclique en phase de stress macro.",
+    "verdict": "Produit très risqué en stagflation avec ASML dans le secteur tech évité (-1.22% momentum) et DD -45%. Le coupon 3.5% ne compense pas le risque avec beta 1.29 et volatilité 37%. Probabilité élevée de toucher la barrière 60% avant l'autocall, exposition directe au stress technologique actuel.",
     "keyRisks": [
-      "Secteur tech sous pression en stagflation avec hausse des taux réels",
-      "Volatilité 37% et beta 1.29 amplifient le risque de franchissement barrière 60%",
-      "Concentration mono-ligne sur cyclique tech alors que seul l'énergie performe",
+      "Secteur tech sous pression en stagflation avec sortie de capitaux",
+      "Barrière 60% vulnérable avec DD actuel -45% et volatilité 37%",
+      "Duration longue (6a) expose aux chocs macro répétés",
       "Barrière à 0.56σ (Danger) — vol 37.09%"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 7,
-        "return_eur": 7000,
-        "probability": 0.15,
-        "duration_years": 1
-      },
-      "base": {
-        "return_pct": 3.5,
+        "return_pct": 10.5,
         "return_eur": 10500,
-        "probability": 0.25,
+        "probability": 0.15,
         "duration_years": 3
       },
+      "base": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.35,
+        "duration_years": 6
+      },
       "stress": {
-        "return_pct": -15,
-        "return_eur": -15000,
-        "probability": 0.4,
+        "return_pct": -20,
+        "return_eur": -20000,
+        "probability": 0.35,
         "duration_years": 6
       },
       "worst": {
         "return_pct": -40,
         "return_eur": -40000,
-        "probability": 0.2,
+        "probability": 0.15,
         "duration_years": 6
       }
     },
     "confidenceInterval": {
-      "low": 33,
-      "high": 49,
+      "low": 20,
+      "high": 36,
       "halfWidth": 8,
       "gradeStable": false,
-      "gradeRange": "D-C",
-      "label": "D [33-49]"
+      "gradeRange": "F-D",
+      "label": "D [20-36]"
     },
     "metadata": {
-      "gradedAt": "2026-03-30T19:55:44.028Z",
-      "durationMs": 20588,
+      "gradedAt": "2026-03-31T12:15:40.995Z",
+      "durationMs": 14490,
       "aiUsed": true,
       "version": "5.2",
       "productType": "autocall",
       "marketDataAvailable": true,
       "catBenchmark": 2.5,
       "catSource": "fallback-2026",
-      "couponAnnualized": 7,
-      "couponRaw": 7,
-      "couponMultiplier": 2,
-      "couponFrequency": "semestriel",
+      "couponAnnualized": 3.5,
+      "couponRaw": 3.5,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
       "isInPortfolio": false,
       "hasBarrier": true,
       "barrierPct": 60,
       "barrierCouponPct": 60,
-      "couponProbability": 47.6,
+      "couponProbability": null,
       "expectedMaturity": 1.6,
       "maxMaturity": 6,
       "probReachMaturity": 0,
       "maxBeta": 1.29,
-      "baseScore": 47,
-      "baseGrade": "C",
+      "baseScore": 33,
+      "baseGrade": "D",
       "adjustments": {
         "p1": -9,
         "p2": -9,
-        "p3": -5,
+        "p3": 0,
         "p4": 0
       },
       "barrier_sigma": 0.56,
@@ -355,39 +340,14 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 33,
-      "ci_high": 49,
-      "ci_label": "D [33-49]",
+      "ci_low": 20,
+      "ci_high": 36,
+      "ci_label": "D [20-36]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
       "decrementDrag": 0,
-      "structureType": "autocall",
-      "couponPerPeriod": 3.5,
-      "bsMethod": "BS-simplifie-v1.2",
-      "bsProbCoupon": 47.6,
-      "bsRendementNet": -7.17,
-      "bsPerteEsperee": 10.5,
-      "bsCouponEffectif": 7,
-      "bsVols": [
-        37.09
-      ],
-      "bsMatEsperee": 1.6,
-      "isBasket": false,
-      "stockData": [
-        {
-          "name": "ASML Holding NV",
-          "ticker": "ASML",
-          "sector": "Technologie de l'information",
-          "perf_ytd": 20.69,
-          "perf_1y": 80.43,
-          "volatility_3y": 37.09,
-          "max_drawdown_3y": 45.12,
-          "buffett_score": 50,
-          "quality_score": 71,
-          "buffett_grade": "C"
-        }
-      ]
+      "structureType": "autocall"
     }
   }
 }
