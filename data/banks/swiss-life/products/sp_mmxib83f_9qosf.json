@@ -169,55 +169,55 @@
         "score": 83,
         "base": 85,
         "delta": -2,
-        "reasoning": "Rendement: base 85 → -2 = 83 (En stagflation avec VIX à 22, la probabilité d'autocall rapide chute drastiquement, surtout pour BNP dans le secteur financier évité) | Coupon 7.5%, protégé | Mat espérée: ~1.3a (prob mat: 0%)"
+        "reasoning": "Rendement: base 85 → -2 = 83 (En stagflation avec VIX à 22, la probabilité d'autocall rapide diminue car BNP (financials, secteur évité) subira des pressions baissières) | Coupon 7.5%, protégé | Mat espérée: ~1.3a (prob mat: 0%)"
       },
       "underlyingQuality": {
         "score": 68,
         "base": 70,
         "delta": -2,
-        "reasoning": "Qualité: base 70 → -2 = 68 (BNP est dans le secteur financier explicitement évité (-1.63% momentum), avec beta 0.96 en régime stagflationnaire hostile aux banques) | Worst: Action BNP Paribas (FR0000131104) B:50"
+        "reasoning": "Qualité: base 70 → -2 = 68 (BNP dans le secteur financials explicitement évité (-1.63% momentum), beta proche de 1 en période de stagflation défavorable aux banques) | Worst: Action BNP Paribas (FR0000131104) B:50"
       },
       "portfolioFit": {
-        "score": 72,
+        "score": 70,
         "base": 70,
-        "delta": 2,
+        "delta": 0,
         "reasoning": "En portefeuille"
       },
       "riskPremium": {
         "score": 61,
         "base": 63,
         "delta": -2,
-        "reasoning": "Prime: base 63 → -2 = 61 (Spread de 7.5% paraît insuffisant vu le stress sectoriel sur les financières et la durée espérée qui s'allongera en stagflation) | 7.5% vs CAT 2.5% (spread 5.0%)"
+        "reasoning": "Prime: base 63 → -2 = 61 (Spread de 7.5% peut sembler attractif mais reflète le risque accru sur BNP en stagflation, durée espérée de 1.3a probablement sous-estimée) | 7.5% vs CAT 2.5% (spread 5.0%)"
       }
     },
-    "verdict": "Produit mal adapté au régime de stagflation actuel avec BNP dans le secteur financier évité (-1.63% momentum). Le capital garanti limite les pertes mais la probabilité d'autocall rapide est compromise avec VIX à 22 et stress sectoriel. Le coupon de 7.5% ne compense pas suffisamment le risque d'immobilisation prolongée (8 ans max) dans un contexte où les banques souffrent de la pentification de la courbe et du risque de crédit accru.",
+    "verdict": "Ce Phoenix sur BNP offre un coupon de 7.5% annualisé avec capital garanti, mais le contexte de stagflation pénalise fortement le secteur bancaire (-1.63% de momentum sectoriel). Avec un VIX à 22 et le pétrole à $103, BNP (beta 0.96) subira la volatilité du marché, réduisant les chances d'autocall rapide. Le capital garanti et la barrière à 60% protègent en cas de stress prolongé, mais l'investisseur doit se préparer à une détention potentiellement longue (8 ans max) avec des coupons trimestriels conditionnels.",
     "keyRisks": [
-      "Secteur financier explicitement évité en stagflation, BNP sous-performera",
-      "Durée réelle probablement >3 ans avec autocall compromise par volatilité élevée"
+      "Secteur financials évité en stagflation, BNP pourrait sous-performer significativement",
+      "Risque de blocage prolongé si BNP reste sous 100%, immobilisant 30k€ jusqu'à 8 ans"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 7.5,
-        "return_eur": 2250,
-        "probability": 0.15,
-        "duration_years": 1
+        "return_pct": 9.4,
+        "return_eur": 2813,
+        "probability": 0.2,
+        "duration_years": 1.5
       },
       "base": {
-        "return_pct": 15,
-        "return_eur": 4500,
-        "probability": 0.35,
-        "duration_years": 2
-      },
-      "stress": {
-        "return_pct": 30,
-        "return_eur": 9000,
+        "return_pct": 7.5,
+        "return_eur": 15000,
         "probability": 0.35,
         "duration_years": 4
       },
+      "stress": {
+        "return_pct": 3.8,
+        "return_eur": 9000,
+        "probability": 0.3,
+        "duration_years": 6
+      },
       "worst": {
-        "return_pct": 60,
-        "return_eur": 18000,
+        "return_pct": 0,
+        "return_eur": 0,
         "probability": 0.15,
         "duration_years": 8
       }
@@ -231,8 +231,8 @@
       "label": "B [64-78]"
     },
     "metadata": {
-      "gradedAt": "2026-03-31T13:08:43.598Z",
-      "durationMs": 19709,
+      "gradedAt": "2026-03-31T13:20:28.106Z",
+      "durationMs": 21571,
       "aiUsed": true,
       "version": "5.2",
       "productType": "autocall",
@@ -257,7 +257,7 @@
       "adjustments": {
         "p1": -2,
         "p2": -2,
-        "p3": 2,
+        "p3": 0,
         "p4": -2
       },
       "barrier_sigma": null,
