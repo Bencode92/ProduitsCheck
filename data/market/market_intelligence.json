@@ -1,41 +1,41 @@
 {
-  "timestamp": "2026-03-30T18:53:31.016300",
+  "timestamp": "2026-03-31T15:44:19.220586",
   "version": "1.0.0",
   "model": "claude-opus-4-20250514",
   "market_data_input": {
-    "date": "2026-03-30",
+    "date": "2026-03-31",
     "brent_usd": 103.79,
-    "brent_usd_avg5d": 104.73737999999999,
-    "gold_usd": 4516.27348,
-    "silver_usd": 70.38255,
+    "brent_usd_avg5d": 107.414464,
+    "gold_usd": 4615.07982,
+    "silver_usd": 73.66067,
     "vix": 22.0,
     "fed_funds_rate": 3.64,
     "fed_funds_rate_delta_6m": 0.0,
     "cpi_yoy_pct": 2.4,
     "cpi_index": 327.46,
     "ig_spread_bps": 135.0,
-    "hy_spread_bps": 342.0,
-    "us_10y_yield": 4.42,
-    "us_2y_yield": 3.96,
-    "yield_curve_2s10s": 46.0,
-    "breakeven_5y": 2.56,
-    "sp500_level": 632.4,
-    "trade_weighted_usd": 120.2757,
-    "eurusd": 1.14647,
-    "nasdaq_change_1d_pct": -0.68879394,
-    "xlu_perf_1d_pct": 0.96512359,
-    "xle_perf_1d_pct": -0.63938837,
+    "hy_spread_bps": 346.0,
+    "us_10y_yield": 4.44,
+    "us_2y_yield": 3.88,
+    "yield_curve_2s10s": 56.0,
+    "breakeven_5y": 2.57,
+    "sp500_level": 641.02,
+    "trade_weighted_usd": 120.8851,
+    "eurusd": 1.1519,
+    "nasdaq_change_1d_pct": 1.61298,
+    "xlu_perf_1d_pct": -1.16507,
+    "xle_perf_1d_pct": 0.95222874,
     "cpi_core_mom_pct": 0.22,
     "pce_yoy_pct": 2.83,
-    "vix_trend": "Rising",
-    "hy_spread_trend": "Widening",
+    "vix_trend": "Stable",
+    "hy_spread_trend": "Stable",
     "_stress_flags": [
       "volatility_stress",
       "energy_shock"
     ],
-    "gold_price": 4515.58419,
+    "gold_price": 4620.30483,
     "gold_ath_120d": 5330.94854,
-    "gold_drawdown_from_ath_pct": 15.294920667157683,
+    "gold_drawdown_from_ath_pct": 13.330530292457112,
     "radar_regime": "neutral",
     "radar_confidence": 0.6,
     "favored_sectors": "energy",
@@ -49,11 +49,11 @@
   "ai_response": {
     "regime": "stagflation",
     "regime_confidence": 4,
-    "regime_rationale": "Brent >$100 + PCE 2.83% au-dessus de la cible Fed + courbe pentifiée (46bps) signalent une stagflation naissante. VIX à 22 et spreads HY widening confirment le stress croissant.",
+    "regime_rationale": "Brent >$100 + PCE 2.83% au-dessus de la cible Fed + courbe pentifiée (56bps) signalent une stagflation naissante. VIX à 22 et spreads contenus indiquent que le marché sous-estime ce risque.",
     "adjustments": [
       {
         "type": "thematic_cap_delta",
-        "action": "Surpondérer energy/oil dans un contexte de choc pétrolier",
+        "action": "Surpondérer energy/oil face au choc pétrolier",
         "params": {
           "theme": "energy_oil",
           "delta_pct": 5
@@ -63,11 +63,11 @@
           "Modéré"
         ],
         "conviction": 5,
-        "rationale": "Brent >$100 avec momentum energy confirmé par RADAR = hedge inflation naturel"
+        "rationale": "Brent >$100 avec momentum RADAR favorable = hedge naturel contre l'inflation importée"
       },
       {
         "type": "thematic_cap_delta",
-        "action": "Réduire tech/AI sensible aux taux élevés",
+        "action": "Réduire tech/growth sensible aux taux",
         "params": {
           "theme": "ai_infra",
           "delta_pct": -3
@@ -77,11 +77,11 @@
           "Modéré"
         ],
         "conviction": 4,
-        "rationale": "Tech avoided par RADAR + 10Y à 4.42% = headwind duration pour les growth stocks"
+        "rationale": "Tech avoided par RADAR + duration risk avec 10Y à 4.44% = réduire l'exposition growth"
       },
       {
         "type": "mandatory_hedge_delta",
-        "action": "Augmenter allocation or comme hedge stagflation",
+        "action": "Renforcer l'or comme hedge stagflationniste",
         "params": {
           "hedge": "gold",
           "delta_pct": 3
@@ -91,37 +91,25 @@
           "Stable"
         ],
         "conviction": 4,
-        "rationale": "Gold à -15% du ATH = point d'entrée attractif pour hedge inflation + dollar fort"
+        "rationale": "Gold à -13% de l'ATH offre un point d'entrée attractif dans un contexte inflationniste"
       },
       {
         "type": "bond_preference",
-        "action": "Privilégier TIPS vs nominal bonds",
+        "action": "Privilégier TIPS et duration courte",
         "params": {
-          "action": "prefer_tips"
-        },
-        "profiles": [
-          "Modéré",
-          "Stable"
-        ],
-        "conviction": 5,
-        "rationale": "Breakeven 5Y à 2.56% sous-estime le risque avec Brent >$100"
-      },
-      {
-        "type": "bond_preference",
-        "action": "Raccourcir duration maximale",
-        "params": {
-          "action": "shorten_duration",
+          "action": "prefer_tips",
           "max_dur": 4.0
         },
         "profiles": [
-          "Stable"
+          "Stable",
+          "Modéré"
         ],
-        "conviction": 4,
-        "rationale": "Courbe pentifiée + Fed en pause = risque de bear steepening si inflation persiste"
+        "conviction": 5,
+        "rationale": "Breakeven 5Y à 2.57% sous-estime le risque d'inflation avec pétrole >$100"
       },
       {
         "type": "bond_floor_delta",
-        "action": "Augmenter floor obligataire défensif",
+        "action": "Augmenter l'allocation obligataire défensive",
         "params": {
           "delta_pct": 5
         },
@@ -129,22 +117,23 @@
           "Stable"
         ],
         "conviction": 3,
-        "rationale": "VIX rising + spreads widening = augmenter la protection obligataire"
+        "rationale": "Protection contre le risque de récession si la Fed sur-réagit à l'inflation"
       },
       {
         "type": "cash_tactical",
-        "action": "Constitution poche cash pour opportunités",
+        "action": "Constitution d'une poche cash opportuniste",
         "params": {},
         "profiles": [
           "Agressif",
-          "Modéré"
+          "Modéré",
+          "Stable"
         ],
         "conviction": 3,
-        "rationale": "Transition vers stagflation = garder munitions pour acheter la capitulation"
+        "rationale": "VIX à 22 en régime stagflationniste = volatilité à venir, cash pour acheter les dips"
       }
     ],
     "bond_strategy": {
-      "regime_summary": "Privilégier TIPS et duration courte (<4y) pour naviguer le risque stagflationniste",
+      "regime_summary": "Duration courte (<4y) + TIPS obligatoires pour se protéger de l'inflation importée",
       "prefer_tips": true,
       "prefer_treasury": true,
       "avoid_hy": true,
@@ -157,28 +146,28 @@
       "_doc": "Cash tactique: poche à garder non investie pour opportunités futures ou protection",
       "Agressif": 5,
       "Modéré": 8,
-      "Stable": 3,
-      "rationale": "Cash élevé en transition stagflationniste pour capitaliser sur la volatilité à venir"
+      "Stable": 10,
+      "rationale": "Cash élevé justifié par la transition vers un régime stagflationniste non pricé par le marché"
     },
     "_cash_guidance": "MINIMUM CASH: Agressif 2% si VIX>20 (option d'achat sur la vol), Modéré 3%, Stable 0% (T-bills = cash productif). Le cash est une POSITION, pas une absence de position.",
     "crypto_allocation": {
       "_doc": "Cap crypto max par profil selon le régime. Crypto = risk asset, réduire en stress.",
       "Agressif": 3,
-      "Modéré": 0,
+      "Modéré": 1,
       "Stable": 0,
       "rationale": "Crypto réduit en stagflation: corrélation positive avec tech + sensibilité aux taux réels"
     },
     "warnings": [
       "Risque de choc pétrolier si Brent dépasse $110 (spirale inflationniste)",
-      "Fed pourrait surprendre hawkish si PCE reste >2.5% (bear steepening violent)",
-      "Dollar fort (DTWEXBGS 120) pèse sur EM et commodities hors pétrole"
+      "Fed en position délicate: inflation élevée mais croissance fragile",
+      "Spreads HY à 346bps sous-estiment le risque de défaut en stagflation"
     ],
     "market_interpretation": {
       "_doc": "Champs interprétatifs dérivés des données brutes. L'AI déduit ce que les API ne fournissent pas.",
-      "geopolitical_risk": "Tensions géopolitiques élevées reflétées dans Brent >$100 malgré dollar fort",
+      "geopolitical_risk": "Tensions géopolitiques élevées reflétées dans Brent >$100, probablement liées à des disruptions d'approvisionnement",
       "fed_stance": "hawkish_hold",
-      "prob_hike_next_fomc_pct": 35,
-      "sentiment_estimate": "fear",
+      "prob_hike_next_fomc_pct": 65,
+      "sentiment_estimate": "neutral",
       "dollar_assessment": "neutral"
     }
   },
@@ -203,17 +192,8 @@
       {
         "action": "prefer_tips",
         "profiles": [
-          "Modéré",
-          "Stable"
-        ],
-        "max_dur": null,
-        "fund_types": [],
-        "rule_id": "ai_stagflation"
-      },
-      {
-        "action": "shorten_duration",
-        "profiles": [
-          "Stable"
+          "Stable",
+          "Modéré"
         ],
         "max_dur": 4.0,
         "fund_types": [],
@@ -275,23 +255,23 @@
     "cash_tactical": {
       "Agressif": 5,
       "Modéré": 8,
-      "Stable": 3
+      "Stable": 10
     },
-    "cash_tactical_rationale": "Cash élevé en transition stagflationniste pour capitaliser sur la volatilité à venir",
+    "cash_tactical_rationale": "Cash élevé justifié par la transition vers un régime stagflationniste non pricé par le marché",
     "crypto_allocation": {
       "Agressif": 3,
-      "Modéré": 0,
+      "Modéré": 1,
       "Stable": 0
     },
     "ai_regime": "stagflation",
     "ai_regime_confidence": 4,
     "ai_warnings": [
       "Risque de choc pétrolier si Brent dépasse $110 (spirale inflationniste)",
-      "Fed pourrait surprendre hawkish si PCE reste >2.5% (bear steepening violent)",
-      "Dollar fort (DTWEXBGS 120) pèse sur EM et commodities hors pétrole"
+      "Fed en position délicate: inflation élevée mais croissance fragile",
+      "Spreads HY à 346bps sous-estiment le risque de défaut en stagflation"
     ],
     "ai_bond_strategy": {
-      "regime_summary": "Privilégier TIPS et duration courte (<4y) pour naviguer le risque stagflationniste",
+      "regime_summary": "Duration courte (<4y) + TIPS obligatoires pour se protéger de l'inflation importée",
       "prefer_tips": true,
       "prefer_treasury": true,
       "avoid_hy": true,
@@ -304,7 +284,7 @@
   "regime": "stagflation",
   "warnings": [
     "Risque de choc pétrolier si Brent dépasse $110 (spirale inflationniste)",
-    "Fed pourrait surprendre hawkish si PCE reste >2.5% (bear steepening violent)",
-    "Dollar fort (DTWEXBGS 120) pèse sur EM et commodities hors pétrole"
+    "Fed en position délicate: inflation élevée mais croissance fragile",
+    "Spreads HY à 346bps sous-estiment le risque de défaut en stagflation"
   ]
 }
