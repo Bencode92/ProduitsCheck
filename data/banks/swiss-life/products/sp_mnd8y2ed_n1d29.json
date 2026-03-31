@@ -239,123 +239,109 @@
   "_couponProbability": 51.2,
   "_bsRendementNet": -1.47,
   "grading": {
-    "grade": "B",
-    "score": 60,
+    "grade": "D",
+    "score": 31,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 26,
-        "base": 33,
-        "delta": -7,
-        "reasoning": "BS: P(SJ>100% | vol=28% T=1.6a) = 47.4% | Memoire: prob x 1.08 = 51.2% | Breach 60%: P=16.3% -> perte esperee 5.3%/an | Rdt net: 3.8% - 5.3% = -1.5%/an | Spread vs CAT: -4.0%",
-        "_bs": {
-          "score": 26,
-          "probCoupon": 51.2,
-          "couponEffectif": 7.5,
-          "rendementEspere": 3.84,
-          "perteEsperee": 5.31,
-          "rendementNet": -1.47,
-          "drag": 0,
-          "vols": [
-            28
-          ],
-          "matEsperee": 1.6,
-          "reasoning": "P(SJ>100% | vol=28% T=1.6a) = 47.4% | Memoire: prob x 1.08 = 51.2% | Breach 60%: P=16.3% -> perte esperee 5.3%/an | Rdt net: 3.8% - 5.3% = -1.5%/an",
-          "method": "BS-simplifie-v1.1"
-        }
+        "score": 17,
+        "base": 26,
+        "delta": -9,
+        "reasoning": "Rendement: base 26 → -9 = 17 (En stagflation avec VIX à 22, la probabilité de toucher le coupon diminue fortement pour un autocall à seuil 100% sur une action luxury goods vulnérable) | Coupon 3.75%, barrière 60% | Barr.coupon 75% | Mat espérée: ~1.6a (prob mat: 0%)"
       },
       "underlyingQuality": {
-        "score": 72,
+        "score": 68,
         "base": 77,
-        "delta": -5,
-        "reasoning": "Qualité: base 77 → -5 = 72 (Secteur financials explicitement évité en stagflation, et le luxe est très sensible au ralentissement économique avec pétrole >$100) | Worst: RICHEMONT (CIE FIN.) B:67"
+        "delta": -9,
+        "reasoning": "Qualité: base 77 → -9 = 68 (Richemont exposé au ralentissement chinois et à la baisse du pouvoir d'achat en stagflation, secteur luxury cyclique inadapté au contexte macro actuel) | Worst: RICHEMONT (CIE FIN.) B:67"
       },
       "portfolioFit": {
-        "score": 75,
+        "score": 80,
         "base": 80,
-        "delta": -5,
-        "reasoning": "Fit: base 80 → -5 = 75 (Produit mono sous-jacent sur secteur cyclique défavorisé, peu adapté au contexte stagflationniste actuel)"
+        "delta": 0,
+        "reasoning": "Fit: base 80"
       },
       "riskPremium": {
-        "score": 76,
-        "base": 5,
-        "delta": 0,
-        "reasoning": "Capital garanti: spread 3.75×2=7.5% - CAT 2.5% - illiq 0.5% = 4.5% | Illiq. premium +1.4% (-7pts)"
+        "score": 0,
+        "base": 0,
+        "delta": -5,
+        "reasoning": "Prime: base 0 → -5 = 0 (Le spread de 0% suggère une sous-évaluation du risque stagflationniste sur le secteur du luxe) | 3.75% vs CAT 2.5% (spread 1.3%)"
       }
     },
-    "verdict": "Produit très risqué en contexte de stagflation avec VIX à 22 et pétrole >$100. Richemont (B=67, DD=-33%) dans le secteur financials évité pourrait voir son cours fortement impacté par la baisse du pouvoir d'achat des consommateurs de luxe. Le coupon de 7.5% semble attractif mais la probabilité de le toucher est faible (score P1 ajusté à 32/100). Avec une maturité espérée de seulement 1.6 an mais 0% de probabilité d'autocall, le capital est fortement exposé.",
+    "verdict": "Produit très risqué en contexte de stagflation avec Brent >$100 et VIX à 22. Richemont (DD -33%, beta 1.04) souffrira de la baisse du pouvoir d'achat et du ralentissement chinois. L'autocall à 100% a peu de chances de se déclencher rapidement, exposant l'investisseur à 6 ans de volatilité avec une barrière capital à 60% seulement. Le coupon de 3.75% ne compense pas le risque de perte en capital dans ce régime macro hostile au luxe.",
     "keyRisks": [
-      "Secteur luxe très vulnérable en stagflation avec inflation >2.8% et pétrole >$100",
-      "Barrière capitale à 60% insuffisante vu le DD actuel de -33% et la volatilité à 30.56%",
+      "Secteur luxe très exposé au ralentissement économique en stagflation",
+      "Barrière capital à 60% insuffisante avec volatilité à 30.56%",
+      "Duration longue (6 ans) inadaptée au contexte de hausse des taux",
       "Barrière à 0.68σ (Danger) — vol 30.56%"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 7.5,
-        "return_eur": 7500,
+        "return_pct": 3.75,
+        "return_eur": 3750,
         "probability": 0.15,
         "duration_years": 1
       },
       "base": {
-        "return_pct": 3.75,
+        "return_pct": 11.25,
         "return_eur": 11250,
-        "probability": 0.3,
+        "probability": 0.25,
         "duration_years": 3
       },
       "stress": {
-        "return_pct": 0,
-        "return_eur": 0,
+        "return_pct": -10,
+        "return_eur": -10000,
         "probability": 0.35,
         "duration_years": 6
       },
       "worst": {
-        "return_pct": -15,
-        "return_eur": -15000,
-        "probability": 0.2,
+        "return_pct": -40,
+        "return_eur": -40000,
+        "probability": 0.25,
         "duration_years": 6
       }
     },
     "confidenceInterval": {
-      "low": 36,
-      "high": 52,
+      "low": 23,
+      "high": 39,
       "halfWidth": 8,
       "gradeStable": false,
-      "gradeRange": "D-C",
-      "label": "D [36-52]"
+      "gradeRange": "F-D",
+      "label": "D [23-39]"
     },
     "metadata": {
-      "gradedAt": "2026-03-30T19:00:15.120Z",
-      "durationMs": 21922,
+      "gradedAt": "2026-03-31T12:15:24.111Z",
+      "durationMs": 18607,
       "aiUsed": true,
       "version": "5.2",
       "productType": "autocall",
       "marketDataAvailable": true,
       "catBenchmark": 2.5,
       "catSource": "fallback-2026",
-      "couponAnnualized": 7.5,
-      "couponRaw": 7.5,
-      "couponMultiplier": 2,
-      "couponFrequency": "semestriel",
+      "couponAnnualized": 3.75,
+      "couponRaw": 3.75,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
       "isInPortfolio": false,
       "hasBarrier": true,
       "barrierPct": 60,
       "barrierCouponPct": 75,
-      "couponProbability": 51.2,
+      "couponProbability": null,
       "expectedMaturity": 1.6,
       "maxMaturity": 6,
       "probReachMaturity": 0,
       "maxBeta": 1.04,
-      "baseScore": 49,
-      "baseGrade": "C",
+      "baseScore": 35,
+      "baseGrade": "D",
       "adjustments": {
         "p1": -9,
-        "p2": -5,
-        "p3": -5,
-        "p4": 0
+        "p2": -9,
+        "p3": 0,
+        "p4": -5
       },
       "barrier_sigma": 0.68,
       "barrier_sigma_label": "Danger",
@@ -363,38 +349,14 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 36,
-      "ci_high": 52,
-      "ci_label": "D [36-52]",
+      "ci_low": 23,
+      "ci_high": 39,
+      "ci_label": "D [23-39]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
       "decrementDrag": 0,
-      "structureType": "autocall",
-      "couponPerPeriod": 3.75,
-      "bsMethod": "BS-simplifie-v1.1",
-      "bsProbCoupon": 51.2,
-      "bsRendementNet": -1.47,
-      "bsPerteEsperee": 5.31,
-      "bsCouponEffectif": 7.5,
-      "bsVols": [
-        28
-      ],
-      "bsMatEsperee": 1.6,
-      "stockData": [
-        {
-          "name": "RICHEMONT (CIE FIN.)",
-          "ticker": "CFR",
-          "sector": "Biens de consommation cycliques",
-          "perf_ytd": -20.26,
-          "perf_1y": -15.36,
-          "volatility_3y": 30.56,
-          "max_drawdown_3y": 32.93,
-          "buffett_score": 67,
-          "quality_score": 56,
-          "buffett_grade": "B"
-        }
-      ]
+      "structureType": "autocall"
     }
   }
 }
