@@ -1,41 +1,6 @@
 {
-  "lastUpdated": "2026-03-31T12:28:52.410Z",
+  "lastUpdated": "2026-03-31T12:28:55.258Z",
   "rates": [
-    {
-      "bankId": "cic",
-      "bankName": "CIC",
-      "durationMonths": 60,
-      "rate": 2.9,
-      "productType": "cat",
-      "date": "2026-03-31",
-      "rateType": "progressif",
-      "rateSchedule": [
-        {
-          "period": "Année 1",
-          "rate": 2.2
-        },
-        {
-          "period": "Année 2",
-          "rate": 2.5
-        },
-        {
-          "period": "Année 3",
-          "rate": 2.9
-        },
-        {
-          "period": "Année 4",
-          "rate": 3.3
-        },
-        {
-          "period": "Année 5",
-          "rate": 3.62
-        }
-      ],
-      "withdrawalConditions": "50% si retrait période 1, taux période précédente sinon",
-      "notice": "32 jours",
-      "productName": "CAT Progressif 60 mois",
-      "calculationBase": null
-    },
     {
       "bankId": "sg",
       "bankName": "Société Générale",
