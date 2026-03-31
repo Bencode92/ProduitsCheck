@@ -240,7 +240,7 @@
   "_bsRendementNet": -1.47,
   "grading": {
     "grade": "D",
-    "score": 31,
+    "score": 30,
     "killCriteria": {
       "triggered": false,
       "reasons": []
@@ -250,32 +250,32 @@
         "score": 17,
         "base": 26,
         "delta": -9,
-        "reasoning": "Rendement: base 26 → -9 = 17 (En stagflation avec VIX à 22, la probabilité de toucher le coupon diminue fortement pour un autocall à seuil 100% sur une action luxury goods vulnérable) | Coupon 3.75%, barrière 60% | Barr.coupon 75% | Mat espérée: ~1.6a (prob mat: 0%)"
+        "reasoning": "Rendement: base 26 → -9 = 17 (Stagflation + SJ cyclique (luxe) = probabilité coupon fortement réduite, barrière 75% vulnérable dans ce contexte) | Coupon 3.75%, barrière 60% | Barr.coupon 75% | Mat espérée: ~1.6a (prob mat: 0%)"
       },
       "underlyingQuality": {
-        "score": 68,
+        "score": 69,
         "base": 77,
-        "delta": -9,
-        "reasoning": "Qualité: base 77 → -9 = 68 (Richemont exposé au ralentissement chinois et à la baisse du pouvoir d'achat en stagflation, secteur luxury cyclique inadapté au contexte macro actuel) | Worst: RICHEMONT (CIE FIN.) B:67"
+        "delta": -8,
+        "reasoning": "Qualité: base 77 → -8 = 69 (Richemont exposé au ralentissement chinois en stagflation, beta 1.04 amplifie la volatilité, DD déjà élevé à -33%) | Worst: RICHEMONT (CIE FIN.) B:67"
       },
       "portfolioFit": {
-        "score": 80,
+        "score": 75,
         "base": 80,
-        "delta": 0,
-        "reasoning": "Fit: base 80"
+        "delta": -5,
+        "reasoning": "Fit: base 80 → -5 = 75 (Produit moins adapté en stagflation, duration longue (6a) inadéquate avec inflation élevée)"
       },
       "riskPremium": {
         "score": 0,
         "base": 0,
-        "delta": -5,
-        "reasoning": "Prime: base 0 → -5 = 0 (Le spread de 0% suggère une sous-évaluation du risque stagflationniste sur le secteur du luxe) | 3.75% vs CAT 2.5% (spread 1.3%)"
+        "delta": 0,
+        "reasoning": "Prime: base 0 | 3.75% vs CAT 2.5% (spread 1.3%)"
       }
     },
-    "verdict": "Produit très risqué en contexte de stagflation avec Brent >$100 et VIX à 22. Richemont (DD -33%, beta 1.04) souffrira de la baisse du pouvoir d'achat et du ralentissement chinois. L'autocall à 100% a peu de chances de se déclencher rapidement, exposant l'investisseur à 6 ans de volatilité avec une barrière capital à 60% seulement. Le coupon de 3.75% ne compense pas le risque de perte en capital dans ce régime macro hostile au luxe.",
+    "verdict": "Produit INADAPTÉ au contexte stagflationniste actuel (PCE 2.83%, Brent $103.79). Richemont, acteur du luxe cyclique avec beta 1.04, souffrira du ralentissement macro et de la hausse des taux réels. Avec un drawdown déjà à -33% et une volatilité de 30.56%, la probabilité d'autocall précoce est quasi-nulle et le risque de toucher la barrière capital (60%) est significatif sur 6 ans.",
     "keyRisks": [
-      "Secteur luxe très exposé au ralentissement économique en stagflation",
-      "Barrière capital à 60% insuffisante avec volatilité à 30.56%",
-      "Duration longue (6 ans) inadaptée au contexte de hausse des taux",
+      "Choc pétrolier >$110 détruisant la demande luxe chinoise",
+      "Spirale stagflationniste forçant des hausses de taux agressives",
+      "Beta 1.04 amplifiant toute correction des marchés actions",
       "Barrière à 0.68σ (Danger) — vol 30.56%"
     ],
     "negotiationPoints": [],
@@ -287,35 +287,35 @@
         "duration_years": 1
       },
       "base": {
-        "return_pct": 11.25,
-        "return_eur": 11250,
-        "probability": 0.25,
-        "duration_years": 3
-      },
-      "stress": {
-        "return_pct": -10,
-        "return_eur": -10000,
+        "return_pct": 0,
+        "return_eur": 0,
         "probability": 0.35,
         "duration_years": 6
+      },
+      "stress": {
+        "return_pct": -15,
+        "return_eur": -15000,
+        "probability": 0.35,
+        "duration_years": 4
       },
       "worst": {
         "return_pct": -40,
         "return_eur": -40000,
-        "probability": 0.25,
+        "probability": 0.15,
         "duration_years": 6
       }
     },
     "confidenceInterval": {
-      "low": 23,
-      "high": 39,
+      "low": 22,
+      "high": 38,
       "halfWidth": 8,
       "gradeStable": false,
       "gradeRange": "F-D",
-      "label": "D [23-39]"
+      "label": "D [22-38]"
     },
     "metadata": {
-      "gradedAt": "2026-03-31T12:15:24.111Z",
-      "durationMs": 18607,
+      "gradedAt": "2026-03-31T13:10:11.171Z",
+      "durationMs": 19641,
       "aiUsed": true,
       "version": "5.2",
       "productType": "autocall",
@@ -339,9 +339,9 @@
       "baseGrade": "D",
       "adjustments": {
         "p1": -9,
-        "p2": -9,
-        "p3": 0,
-        "p4": -5
+        "p2": -8,
+        "p3": -5,
+        "p4": 0
       },
       "barrier_sigma": 0.68,
       "barrier_sigma_label": "Danger",
@@ -349,9 +349,9 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 23,
-      "ci_high": 39,
-      "ci_label": "D [23-39]",
+      "ci_low": 22,
+      "ci_high": 38,
+      "ci_label": "D [22-38]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
