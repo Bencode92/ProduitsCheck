@@ -194,6 +194,23 @@ async function runStructOptimizer() {
     var results = document.getElementById('struct-optimizer-results');
     if (!results) return;
     try {
+        // Auto-grade ungraded proposals before optimizing
+        var allP = [];
+        Object.values(app.state.proposals || {}).forEach(function(arr) {
+            arr.forEach(function(p) { if (p.status !== 'rejected' && p.status !== 'subscribed') allP.push(p); });
+        });
+        var ungraded = allP.filter(function(p) {
+            return !p.grading || !p.grading.grade || p.grading.grade === '?';
+        });
+        if (ungraded.length > 0 && typeof ProposalGrader !== 'undefined' && ProposalGrader.grade) {
+            results.innerHTML = '<div style="display:flex;align-items:center;gap:10px;padding:20px;color:var(--text-muted)"><div class="spinner"></div>Grading de ' + ungraded.length + ' proposition(s)...</div>';
+            for (var gi = 0; gi < ungraded.length; gi++) {
+                try { await ProposalGrader.grade(ungraded[gi]); } catch(e) {
+                    console.warn('[optimizer] Grade failed: ' + (ungraded[gi].name || ungraded[gi].id));
+                }
+            }
+        }
+
         var analysis = buildStructuredOptimization();
         var html = renderStructOptimizationTable(analysis);
         html += '<div id="ai-struct-summary" style="margin-top:16px"><div style="display:flex;align-items:center;gap:10px;padding:16px;color:var(--text-muted);background:var(--accent-glow);border-radius:var(--radius-sm)"><div class="spinner"></div>Claude analyse...</div></div>';
