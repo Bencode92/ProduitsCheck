@@ -240,105 +240,84 @@
   "_couponProbability": 95,
   "_bsRendementNet": 10.45,
   "grading": {
-    "grade": "B",
-    "score": 72,
+    "grade": "D",
+    "score": 34,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 95,
-        "base": 82,
-        "delta": 13,
-        "reasoning": "BS: Dispersion: prob=95%, rdt median hist=11% | Rdt net: 10.4% - 0.0% = 10.4%/an | Spread vs CAT: 7.9%",
-        "_bs": {
-          "score": 95,
-          "probCoupon": 95,
-          "couponEffectif": 11,
-          "rendementEspere": 10.45,
-          "perteEsperee": 0,
-          "rendementNet": 10.45,
-          "drag": 0,
-          "vols": [
-            25,
-            25.87,
-            25,
-            25,
-            31.19,
-            25,
-            25,
-            25
-          ],
-          "matEsperee": 3,
-          "reasoning": "Dispersion: prob=95%, rdt median hist=11% | Rdt net: 10.4% - 0.0% = 10.4%/an",
-          "method": "BS-simplifie-v1.2"
-        }
+        "score": 29,
+        "base": 27,
+        "delta": 2,
+        "reasoning": "Rendement: base 27 → +2 = 29 (Produit dispersion avec capital garanti, la forte volatilité (48-58%) des tech stocks en stagflation est un atout majeur pour générer du coupon) | Coupon 1.3144444444444445%, protégé"
       },
       "underlyingQuality": {
         "score": 68,
         "base": 70,
         "delta": -2,
-        "reasoning": "Qualité: base 70 → -2 = 68 (En stagflation, 5/8 sous-jacents dans des secteurs évités (Tech: NVDA, AAPL, MSFT, GOOGL; Com Services: META, NFLX) avec betas élevés (NVDA 1.92, TSLA 1.62) amplifient le risque.) | Worst: Tesla B:17"
+        "reasoning": "Qualité: base 70 → -2 = 68 (100% tech stocks (secteur évité) avec betas élevés (1.07-1.92) en régime stagflationnaire, risque de correction sévère) | Worst: Tesla B:17"
       },
       "portfolioFit": {
-        "score": 65,
+        "score": 70,
         "base": 72,
         "delta": -2,
-        "reasoning": "Fit: base 50 → 65 (pairs, dispersion) | Fit: base 72 → -2 = 70 (Portefeuille surexposé aux secteurs évités par le régime stagflationniste, la dispersion offre une protection partielle mais insuffisante.)"
+        "reasoning": "Fit: base 72 → -2 = 70 (Surexposition tech déjà présente dans la plupart des portefeuilles, manque de diversification sectorielle)"
       },
       "riskPremium": {
-        "score": 58,
+        "score": 5,
         "base": 5,
-        "delta": 2,
-        "reasoning": "Capital garanti: spread 3.0% - CAT 2.5% - illiq 0.3% = 0.2% | ✅ Dispersion: vol = moteur de rendement (+25pts) + capital garanti"
+        "delta": 0,
+        "reasoning": "Prime: base 5 | 1.3144444444444445% vs CAT 2.5% (spread -1.2%)"
       }
     },
-    "verdict": "Ce produit DISPERSION exploite intelligemment la volatilité élevée (moyenne 36.5%) pour générer du rendement SANS RISQUE sur le capital, particulièrement adapté en stagflation où la préservation prime. Avec 5/8 sous-jacents dans les secteurs évités (tech/com services) et des betas agressifs (NVDA 1.92), la structure capture la dispersion inter-titres pour bonifier le coupon. Le capital garanti à 100% offre une protection totale dans ce contexte de stress (VIX 22, Brent $103), transformant la volatilité en opportunité avec un rendement minimal de 3.94% sur 3 ans.",
+    "verdict": "Produit dispersion paradoxal en stagflation : d'un côté, le capital garanti et la mécanique dispersion bénéficient de la volatilité élevée (48-58%) pour générer du coupon. De l'autre, 100% d'exposition aux tech stocks (secteur le plus évité avec -1.22% de momentum) face à une Fed hawkish et un pétrole à $104. Avec Tesla en worst performer (-53.77% DD) et des betas moyens de 1.3, le timing est risqué malgré la protection capitale.",
     "keyRisks": [
-      "Coupon limité à 1.31% annuel si dispersion faible entre les 8 titres",
-      "Opportunité manquée si rebond tech post-stagflation avec capital bloqué 3 ans"
+      "Concentration 100% tech en régime stagflationnaire défavorable",
+      "Coupon faible (1.31%) face à l'inflation à 2.83%",
+      "Corrélation élevée entre les 8 tech stocks limitant l'effet dispersion"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 2.5,
-        "return_eur": 2500,
-        "probability": 0.3,
-        "duration_years": 1
-      },
-      "base": {
-        "return_pct": 3.94,
-        "return_eur": 3940,
-        "probability": 0.45,
-        "duration_years": 3
-      },
-      "stress": {
         "return_pct": 3.94,
         "return_eur": 3940,
         "probability": 0.2,
         "duration_years": 3
       },
+      "base": {
+        "return_pct": 1.31,
+        "return_eur": 1310,
+        "probability": 0.4,
+        "duration_years": 3
+      },
+      "stress": {
+        "return_pct": 0.5,
+        "return_eur": 500,
+        "probability": 0.3,
+        "duration_years": 3
+      },
       "worst": {
-        "return_pct": 3.94,
-        "return_eur": 3940,
-        "probability": 0.05,
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.1,
         "duration_years": 3
       }
     },
     "confidenceInterval": {
-      "low": 44,
-      "high": 58,
+      "low": 27,
+      "high": 41,
       "halfWidth": 7,
-      "gradeStable": false,
-      "gradeRange": "D-C",
-      "label": "C [44-58]"
+      "gradeStable": true,
+      "gradeRange": "D",
+      "label": "D [27-41]"
     },
     "metadata": {
-      "gradedAt": "2026-03-31T10:49:32.969Z",
-      "durationMs": 25420,
+      "gradedAt": "2026-03-31T12:16:46.746Z",
+      "durationMs": 20241,
       "aiUsed": true,
-      "version": "6.2",
+      "version": "5.2",
       "productType": "dispersion",
       "marketDataAvailable": true,
       "catBenchmark": 2.5,
@@ -351,17 +330,17 @@
       "hasBarrier": false,
       "barrierPct": 0,
       "barrierCouponPct": null,
-      "couponProbability": 95,
+      "couponProbability": null,
       "expectedMaturity": 3,
       "maxMaturity": 3,
       "maxBeta": 1.92,
-      "baseScore": 51,
-      "baseGrade": "C",
+      "baseScore": 34,
+      "baseGrade": "D",
       "adjustments": {
         "p1": 2,
         "p2": -2,
         "p3": -2,
-        "p4": 2
+        "p4": 0
       },
       "barrier_sigma": null,
       "barrier_sigma_label": null,
@@ -369,138 +348,14 @@
       "liquidity_level": "L4",
       "liquidity_score": 10,
       "liquidity_label": "Illiquide",
-      "ci_low": 44,
-      "ci_high": 58,
-      "ci_label": "C [44-58]",
+      "ci_low": 27,
+      "ci_high": 41,
+      "ci_label": "D [27-41]",
       "issuer_rating": "A",
       "issuer_tier": "IG",
       "hasDecrement": false,
       "decrementDrag": 0,
-      "structureType": "dispersion",
-      "bsMethod": "BS-simplifie-v1.2",
-      "bsProbCoupon": 95,
-      "bsRendementNet": 10.45,
-      "bsPerteEsperee": 0,
-      "bsCouponEffectif": 11,
-      "bsVols": [
-        25,
-        25.87,
-        25,
-        25,
-        31.19,
-        25,
-        25,
-        25
-      ],
-      "bsMatEsperee": 3,
-      "isBasket": false,
-      "v6Weights": {
-        "p1": 0.3,
-        "p2": 0.15,
-        "p3": 0.25,
-        "p4": 0.3
-      },
-      "p3Recalibrated": true,
-      "p4BsCorrected": false,
-      "isGuaranteedRate": false,
-      "stockData": [
-        {
-          "name": "NVIDIA",
-          "ticker": "NVDA",
-          "sector": "Technologie de l'information",
-          "perf_ytd": -11.49,
-          "perf_1y": 48.15,
-          "volatility_3y": 48.08,
-          "max_drawdown_3y": 36.89,
-          "buffett_score": 50,
-          "quality_score": 87,
-          "buffett_grade": "C"
-        },
-        {
-          "name": "Meta Platforms",
-          "ticker": "META",
-          "sector": "La communication",
-          "perf_ytd": -18.68,
-          "perf_1y": -10.92,
-          "volatility_3y": 35.51,
-          "max_drawdown_3y": 34.21,
-          "buffett_score": 67,
-          "quality_score": 77,
-          "buffett_grade": "B"
-        },
-        {
-          "name": "Netflix",
-          "ticker": "NFLX",
-          "sector": "La communication",
-          "perf_ytd": -0.84,
-          "perf_1y": -4.81,
-          "volatility_3y": 33.41,
-          "max_drawdown_3y": 43.35,
-          "buffett_score": 83,
-          "quality_score": 75,
-          "buffett_grade": "A"
-        },
-        {
-          "name": "Amazon.com",
-          "ticker": "AMZN",
-          "sector": "Biens de consommation cycliques",
-          "perf_ytd": -12.94,
-          "perf_1y": -0.21,
-          "volatility_3y": 31.13,
-          "max_drawdown_3y": 30.88,
-          "buffett_score": 50,
-          "quality_score": 64,
-          "buffett_grade": "C"
-        },
-        {
-          "name": "Alphabet (Ex Google)",
-          "ticker": "GOOGL",
-          "sector": "La communication",
-          "perf_ytd": -12.64,
-          "perf_1y": 68.55,
-          "volatility_3y": 28.96,
-          "max_drawdown_3y": 29.89,
-          "buffett_score": 67,
-          "quality_score": 79,
-          "buffett_grade": "B"
-        },
-        {
-          "name": "Microsoft",
-          "ticker": "MSFT",
-          "sector": "Technologie de l'information",
-          "perf_ytd": -25.81,
-          "perf_1y": -8.13,
-          "volatility_3y": 23.47,
-          "max_drawdown_3y": 34.18,
-          "buffett_score": 67,
-          "quality_score": 83,
-          "buffett_grade": "B"
-        },
-        {
-          "name": "Apple",
-          "ticker": "AAPL",
-          "sector": "Technologie de l'information",
-          "perf_ytd": -9.3,
-          "perf_1y": 10.15,
-          "volatility_3y": 25.48,
-          "max_drawdown_3y": 33.43,
-          "buffett_score": 50,
-          "quality_score": 73,
-          "buffett_grade": "C"
-        },
-        {
-          "name": "Tesla",
-          "ticker": "TSLA",
-          "sector": "Biens de consommation cycliques",
-          "perf_ytd": -20.99,
-          "perf_1y": 30.1,
-          "volatility_3y": 57.52,
-          "max_drawdown_3y": 53.77,
-          "buffett_score": 17,
-          "quality_score": 35,
-          "buffett_grade": "D"
-        }
-      ]
+      "structureType": "dispersion"
     }
   }
 }
