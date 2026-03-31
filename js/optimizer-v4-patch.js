@@ -204,16 +204,22 @@
                     }
 
                     // --- CONTRAINTE ENVELOPPE ---
-                    var match = sources ? _findCompatibleSource(a, sources) : { source: null, type: null, amount: 0 };
-                    if (!match.source || match.amount <= 0) {
-                        a.allocatedAmount = 0;
-                        a.annualReturn = 0;
-                        a.expectedReturn = 0;
-                        a.catReturn = 0;
-                        a.excessVsCat = 0;
-                        a.recommendation = 'IMPOSSIBLE';
-                        a.reason = '\ud83d\udd12 Pas de liquidit\u00e9 ' + (a.bankName || '') + ' disponible. N\u00e9cessite cash externe ou liquidit\u00e9 ' + (a.bankName || '') + '.';
-                        return;
+                    var match = sources ? _findCompatibleSource(a, sources) : null;
+                    if (!match || !match.source || match.amount <= 0) {
+                        // Fallback: use total available liquidity for subscription
+                        var totalAvail = (result.totalLiquidity || 0) - deployedTotal;
+                        if (totalAvail > 5000) {
+                            match = { source: { total: totalAvail }, type: 'SOUSCRIPTION', amount: totalAvail, label: '\ud83d\udcb5 Souscription' };
+                        } else {
+                            a.allocatedAmount = 0;
+                            a.annualReturn = 0;
+                            a.expectedReturn = 0;
+                            a.catReturn = 0;
+                            a.excessVsCat = 0;
+                            a.recommendation = 'IMPOSSIBLE';
+                            a.reason = '\ud83d\udd12 Liquidit\u00e9 \u00e9puis\u00e9e.';
+                            return;
+                        }
                     }
 
                     // Track pool usage
