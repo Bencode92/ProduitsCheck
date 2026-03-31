@@ -159,8 +159,8 @@
   },
   "structureType": "basket",
   "grading": {
-    "grade": "B",
-    "score": 64,
+    "grade": "C",
+    "score": 53,
     "killCriteria": {
       "triggered": false,
       "reasons": []
@@ -170,13 +170,13 @@
         "score": 55,
         "base": 57,
         "delta": -2,
-        "reasoning": "Rendement: base 57 → -2 = 55 (En stagflation, les banques italiennes (BMPS, UCG) souffrent et la volatilité élevée (30-37%) réduit fortement la probabilité de toucher les coupons) | Coupon 7%, protégé | Mat espérée: ~5.5a (prob mat: 27%)"
+        "reasoning": "Rendement: base 57 → -2 = 55 (En stagflation avec VIX à 22, la probabilité de toucher le coupon chute drastiquement, surtout avec Novo Nordisk en DD -19% et 2 banques dans un secteur évité) | Coupon 7%, protégé | Mat espérée: ~5.5a (prob mat: 27%)"
       },
       "underlyingQuality": {
-        "score": 68,
-        "base": 49,
+        "score": 50,
+        "base": 52,
         "delta": -2,
-        "reasoning": "Qualité: base 49 → -2 = 47 (3/5 sous-jacents dans le secteur financier évité en stagflation, avec des betas élevés (0.9-1.0) amplifiant la baisse) | Worst: Veolia Environnement SA B:28 | Basket équipondéré 5 actifs: P2 +21pts (diversification)"
+        "reasoning": "Qualité: base 52 → -2 = 50 (Exposition catastrophique: 2 banques (BMPS, UCG) dans le secteur financials évité (-1.63% momentum), beta moyen élevé 0.89 inadapté à la stagflation) | Worst: Novo Nordisk A B:35"
       },
       "portfolioFit": {
         "score": 70,
@@ -185,17 +185,17 @@
         "reasoning": "En portefeuille"
       },
       "riskPremium": {
-        "score": 70,
+        "score": 53,
         "base": 55,
         "delta": -2,
-        "reasoning": "Capital garanti: spread 7.0% - CAT 2.5% - illiq 0.7% = 3.8% | Illiq. premium +1.8% (-9pts)"
+        "reasoning": "Prime: base 55 → -2 = 53 (Spread de 55 points insuffisant pour compenser le risque extrême du worst-of 5 SJ avec 2 banques en secteur évité) | 7% vs CAT 2.5% (spread 4.5%)"
       }
     },
-    "verdict": "Produit mal adapté au régime stagflationniste actuel avec 60% d'exposition aux financières italiennes (BMPS -25.5% YTD, UCG -24.1%) dans un secteur explicitement évité. La volatilité élevée (30-37% sur les banques) et le choc pétrolier à $103 compromettent sérieusement les chances de toucher le coupon de 7%. Seuls points positifs : capital garanti et présence de Novo Nordisk (beta 0.1) qui apporte une diversification défensive.",
+    "verdict": "Produit toxique en stagflation avec score ajusté de 35/100. L'exposition aux banques italiennes (40% du panier) dans un secteur évité par le marché (-1.63% momentum) et un VIX à 22 rendent le coupon de 7% quasi-inatteignable. Novo Nordisk déjà en DD -19% compromet toute chance d'autocall rapide, prolongeant l'exposition au risque stagflationniste.",
     "keyRisks": [
-      "Exposition massive aux banques italiennes en période de stress souverain potentiel",
-      "Choc énergétique persistant impactant Veolia et l'économie européenne",
-      "Probabilité de remboursement anticipé très faible (27%) impliquant blocage jusqu'à 10 ans"
+      "Banques italiennes vulnérables au resserrement BCE en stagflation",
+      "Novo Nordisk en DD -19% bloque l'autocall pour années",
+      "Choc pétrolier >$110 amplifierait la chute des financials"
     ],
     "negotiationPoints": [],
     "scenarios": {
@@ -206,35 +206,35 @@
         "duration_years": 1
       },
       "base": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.4,
+        "duration_years": 10
+      },
+      "stress": {
         "return_pct": 3.5,
         "return_eur": 10500,
         "probability": 0.3,
         "duration_years": 10
       },
-      "stress": {
-        "return_pct": 0,
-        "return_eur": 0,
-        "probability": 0.35,
-        "duration_years": 10
-      },
       "worst": {
-        "return_pct": 0,
-        "return_eur": 0,
-        "probability": 0.2,
+        "return_pct": -2,
+        "return_eur": -6000,
+        "probability": 0.15,
         "duration_years": 10
       }
     },
     "confidenceInterval": {
-      "low": 41,
-      "high": 63,
+      "low": 42,
+      "high": 64,
       "halfWidth": 11,
       "gradeStable": false,
       "gradeRange": "D-B",
-      "label": "C [41-63]"
+      "label": "C [42-64]"
     },
     "metadata": {
-      "gradedAt": "2026-03-30T08:54:43.014Z",
-      "durationMs": 20944,
+      "gradedAt": "2026-03-31T12:13:34.379Z",
+      "durationMs": 21879,
       "aiUsed": true,
       "version": "5.2",
       "productType": "autocall",
@@ -254,7 +254,7 @@
       "maxMaturity": 10,
       "probReachMaturity": 27,
       "maxBeta": 1.03,
-      "baseScore": 54,
+      "baseScore": 55,
       "baseGrade": "C",
       "adjustments": {
         "p1": -2,
@@ -268,73 +268,14 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 10M",
-      "ci_low": 41,
-      "ci_high": 63,
-      "ci_label": "C [41-63]",
+      "ci_low": 42,
+      "ci_high": 64,
+      "ci_label": "C [42-64]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
       "decrementDrag": 0,
-      "structureType": "basket",
-      "stockData": [
-        {
-          "name": "Banca Monte dei Paschi di Siena SpA",
-          "ticker": "BMPS",
-          "sector": "Finance",
-          "perf_ytd": -18.03,
-          "perf_1y": null,
-          "volatility_3y": 36.95,
-          "max_drawdown_3y": 25.51,
-          "buffett_score": null,
-          "quality_score": 48,
-          "buffett_grade": null
-        },
-        {
-          "name": "Enel SpA",
-          "ticker": "ENEL",
-          "sector": "Services publics",
-          "perf_ytd": 3.44,
-          "perf_1y": 21.36,
-          "volatility_3y": 18.96,
-          "max_drawdown_3y": 16.27,
-          "buffett_score": 30,
-          "quality_score": 38,
-          "buffett_grade": "D"
-        },
-        {
-          "name": "Novo Nordisk A",
-          "ticker": "NOVO NORDISK A",
-          "sector": "Commodity",
-          "volatility_3y": 22.25,
-          "max_drawdown_3y": -19.21
-        },
-        {
-          "name": "UniCredit SpA",
-          "ticker": "UCG",
-          "sector": "Finance",
-          "perf_ytd": -15.19,
-          "perf_1y": 13.24,
-          "volatility_3y": 30.08,
-          "max_drawdown_3y": 24.12,
-          "buffett_score": null,
-          "quality_score": 83,
-          "buffett_grade": null
-        },
-        {
-          "name": "Veolia Environnement SA",
-          "ticker": "VIE",
-          "sector": "Services publics",
-          "perf_ytd": 7.27,
-          "perf_1y": -1.54,
-          "volatility_3y": 19.21,
-          "max_drawdown_3y": 16.28,
-          "buffett_score": 28,
-          "quality_score": 64,
-          "buffett_grade": "D"
-        }
-      ]
-    },
-    "_isBasket": true,
-    "_basketInfo": "Panier équipondéré 5 actions"
+      "structureType": "basket"
+    }
   }
 }
