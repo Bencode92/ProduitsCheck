@@ -280,65 +280,64 @@
         "score": 68,
         "base": 70,
         "delta": -2,
-        "reasoning": "Qualité: base 70 → -2 = 68 (Portefeuille 100% tech/communication services en régime stagflationnaire hostile, betas élevés (moyenne 1.3) et drawdowns importants amplifiés par le choc énergétique) | Worst: Tesla B:17"
+        "reasoning": "Qualité: base 70 → -2 = 68 (Portefeuille surexposé tech (75%) en régime stagflationnaire défavorable, betas élevés (1.62 Tesla, 1.92 NVDA) amplifient le risque) | Worst: Tesla B:17"
       },
       "portfolioFit": {
         "score": 65,
         "base": 72,
         "delta": 2,
-        "reasoning": "Fit: base 50 → 65 (pairs, dispersion) | Fit: base 72 → +2 = 74 (Capital garanti devient un atout majeur en stagflation, protection totale contre le stress des marchés tech actuels)"
+        "reasoning": "Fit: base 50 → 65 (pairs, dispersion) | Fit: base 72 → +2 = 74 (Capital garanti = refuge idéal en stagflation, la volatilité élevée (57% Tesla) devient un atout pour capturer les rebonds)"
       },
       "riskPremium": {
         "score": 58,
         "base": 5,
-        "delta": -2,
+        "delta": 2,
         "reasoning": "Capital garanti: spread 3.0% - CAT 2.5% - illiq 0.3% = 0.2% | ✅ Dispersion: vol = moteur de rendement (+25pts) + capital garanti"
       }
     },
-    "verdict": "Produit défensif mais peu attractif en stagflation avec un coupon de 1.31% annualisé insuffisant face à l'inflation. Le capital garanti protège contre les -30% à -50% de drawdown observés sur le panier tech, mais le rendement réel sera négatif avec une inflation >2.8%. La structure dispersion sur 8 méga-caps tech en régime hostile limite fortement le potentiel de gain alors que 75% du panier appartient aux secteurs à éviter selon le MI.",
+    "verdict": "Ce produit dispersion offre une protection capitale cruciale en stagflation (VIX 22, Brent >$100) mais le rendement de 1.31% annualisé reste faible face à l'inflation. Le panier surpondéré tech (75% dans des secteurs évités par le MI) avec des betas élevés (NVDA 1.92, Tesla 1.62) limite fortement le potentiel de gain. Néanmoins, la garantie capital et la volatilité élevée (Tesla 57%) permettent de capturer des rebonds sans risque de perte, offrant un profil asymétrique intéressant pour 3% de l'allocation totale.",
     "keyRisks": [
-      "Rendement réel négatif avec inflation PCE à 2.83% vs coupon 1.31%",
-      "Coût d'opportunité élevé avec energy sector +1.76% et produits TIPS plus adaptés",
-      "Dispersion défavorable avec 6/8 titres dans secteurs évités en stagflation"
+      "Rendement réel négatif avec PCE à 2.83% vs coupon 1.31%",
+      "Concentration tech excessive (6/8) en régime stagflationnaire défavorable"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 3.94,
         "return_eur": 3940,
-        "probability": 0.15,
+        "probability": 0.25,
         "duration_years": 3
       },
       "base": {
         "return_pct": 1.31,
         "return_eur": 1310,
-        "probability": 0.4,
-        "duration_years": 1
+        "probability": 0.35,
+        "duration_years": 3
       },
       "stress": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.35,
+        "probability": 0.25,
         "duration_years": 3
       },
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.1,
+        "probability": 0.15,
         "duration_years": 3
       }
     },
     "confidenceInterval": {
-      "low": 39,
-      "high": 53,
+      "low": 40,
+      "high": 54,
       "halfWidth": 7,
       "gradeStable": false,
       "gradeRange": "D-C",
-      "label": "C [39-53]"
+      "label": "C [40-54]"
     },
     "metadata": {
-      "gradedAt": "2026-03-31T13:25:29.918Z",
-      "durationMs": 23428,
+      "gradedAt": "2026-03-31T13:25:33.962Z",
+      "durationMs": 21715,
       "aiUsed": true,
       "version": "6.2",
       "productType": "dispersion",
@@ -363,7 +362,7 @@
         "p1": -2,
         "p2": -2,
         "p3": 2,
-        "p4": -2
+        "p4": 2
       },
       "barrier_sigma": null,
       "barrier_sigma_label": null,
@@ -371,9 +370,9 @@
       "liquidity_level": "L4",
       "liquidity_score": 10,
       "liquidity_label": "Illiquide",
-      "ci_low": 39,
-      "ci_high": 53,
-      "ci_label": "C [39-53]",
+      "ci_low": 40,
+      "ci_high": 54,
+      "ci_label": "C [40-54]",
       "issuer_rating": "A",
       "issuer_tier": "IG",
       "hasDecrement": false,
