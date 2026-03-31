@@ -279,50 +279,50 @@
         "score": 68,
         "base": 70,
         "delta": -2,
-        "reasoning": "Qualité: base 70 → -2 = 68 (Régime STAGFLATION défavorable aux tech (7/8 SJ dans secteur évité), betas élevés (1.07-1.92) amplifient le risque baissier) | Worst: Tesla B:17"
+        "reasoning": "Qualité: base 70 → -2 = 68 (En stagflation, 5/8 sous-jacents dans des secteurs évités (Tech: NVDA, AAPL, MSFT, GOOGL; Com Services: META, NFLX) avec betas élevés (NVDA 1.92, TSLA 1.62) amplifient le risque.) | Worst: Tesla B:17"
       },
       "portfolioFit": {
         "score": 65,
         "base": 72,
         "delta": -2,
-        "reasoning": "Fit: base 50 → 65 (pairs, dispersion) | Fit: base 72 → -2 = 70 (Surexposition tech problématique en stagflation, diversification sectorielle insuffisante malgré le capital garanti)"
+        "reasoning": "Fit: base 50 → 65 (pairs, dispersion) | Fit: base 72 → -2 = 70 (Portefeuille surexposé aux secteurs évités par le régime stagflationniste, la dispersion offre une protection partielle mais insuffisante.)"
       },
       "riskPremium": {
-        "score": 52,
+        "score": 58,
         "base": 5,
-        "delta": 0,
-        "reasoning": "Capital garanti: spread 3.0% - CAT 2.5% - illiq 0.3% = 0.2% | ✅ Dispersion: vol = moteur de rendement (+25pts) + capital garanti | Illiq. premium +1.1% (-6pts)"
+        "delta": 2,
+        "reasoning": "Capital garanti: spread 3.0% - CAT 2.5% - illiq 0.3% = 0.2% | ✅ Dispersion: vol = moteur de rendement (+25pts) + capital garanti"
       }
     },
-    "verdict": "Produit défensif adapté au contexte stagflationniste grâce au capital GARANTI, mais rendement décevant de 1.31% annuel ne couvre pas l'inflation. La stratégie DISPERSION profite de la volatilité élevée (NVDA 48%, TSLA 58%) pour générer le coupon, mais l'exposition 100% tech est risquée avec 7/8 sous-jacents dans des secteurs évités. Malgré le capital protégé, le couple risque/rendement reste médiocre avec un gain maximum de 3.94% sur 3 ans.",
+    "verdict": "Ce produit DISPERSION exploite intelligemment la volatilité élevée (moyenne 36.5%) pour générer du rendement SANS RISQUE sur le capital, particulièrement adapté en stagflation où la préservation prime. Avec 5/8 sous-jacents dans les secteurs évités (tech/com services) et des betas agressifs (NVDA 1.92), la structure capture la dispersion inter-titres pour bonifier le coupon. Le capital garanti à 100% offre une protection totale dans ce contexte de stress (VIX 22, Brent $103), transformant la volatilité en opportunité avec un rendement minimal de 3.94% sur 3 ans.",
     "keyRisks": [
-      "Rendement réel NÉGATIF en stagflation (1.31% < inflation 2.8%)",
-      "Concentration sectorielle tech vulnérable si recession tech prolongée"
+      "Coupon limité à 1.31% annuel si dispersion faible entre les 8 titres",
+      "Opportunité manquée si rebond tech post-stagflation avec capital bloqué 3 ans"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 3.94,
-        "return_eur": 3943,
-        "probability": 0.85,
-        "duration_years": 3
+        "return_pct": 2.5,
+        "return_eur": 2500,
+        "probability": 0.3,
+        "duration_years": 1
       },
       "base": {
         "return_pct": 3.94,
-        "return_eur": 3943,
-        "probability": 0.85,
+        "return_eur": 3940,
+        "probability": 0.45,
         "duration_years": 3
       },
       "stress": {
-        "return_pct": 0,
-        "return_eur": 0,
-        "probability": 0.15,
+        "return_pct": 3.94,
+        "return_eur": 3940,
+        "probability": 0.2,
         "duration_years": 3
       },
       "worst": {
-        "return_pct": 0,
-        "return_eur": 0,
-        "probability": 0.15,
+        "return_pct": 3.94,
+        "return_eur": 3940,
+        "probability": 0.05,
         "duration_years": 3
       }
     },
@@ -335,10 +335,10 @@
       "label": "C [44-58]"
     },
     "metadata": {
-      "gradedAt": "2026-03-31T08:28:43.904Z",
-      "durationMs": 22181,
+      "gradedAt": "2026-03-31T10:49:32.969Z",
+      "durationMs": 25420,
       "aiUsed": true,
-      "version": "6.1",
+      "version": "6.2",
       "productType": "dispersion",
       "marketDataAvailable": true,
       "catBenchmark": 2.5,
@@ -361,7 +361,7 @@
         "p1": 2,
         "p2": -2,
         "p3": -2,
-        "p4": 0
+        "p4": 2
       },
       "barrier_sigma": null,
       "barrier_sigma_label": null,
@@ -402,6 +402,7 @@
       },
       "p3Recalibrated": true,
       "p4BsCorrected": false,
+      "isGuaranteedRate": false,
       "stockData": [
         {
           "name": "NVIDIA",
