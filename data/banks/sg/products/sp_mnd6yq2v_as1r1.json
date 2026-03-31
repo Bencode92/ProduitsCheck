@@ -240,43 +240,66 @@
   "_couponProbability": 95,
   "_bsRendementNet": 10.45,
   "grading": {
-    "grade": "D",
-    "score": 34,
+    "grade": "B",
+    "score": 69,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 25,
-        "base": 27,
-        "delta": -2,
-        "reasoning": "Rendement: base 27 → -2 = 25 (En stagflation avec VIX à 22, la forte volatilité du panier (moyenne >37%) et Tesla en worst performer à B=17 réduisent drastiquement la probabilité de toucher les coupons malgré la garantie capital) | Coupon 1.3144444444444445%, protégé"
+        "score": 95,
+        "base": 78,
+        "delta": 0,
+        "reasoning": "BS: Dispersion: prob=95%, rdt median hist=11% | Rdt net: 10.4% - 0.0% = 10.4%/an | Spread vs CAT: 7.9%",
+        "_bsDelta": 17,
+        "_bs": {
+          "score": 95,
+          "probCoupon": 95,
+          "couponEffectif": 11,
+          "rendementEspere": 10.45,
+          "perteEsperee": 0,
+          "rendementNet": 10.45,
+          "drag": 0,
+          "vols": [
+            25,
+            25.87,
+            25,
+            25,
+            31.19,
+            25,
+            25,
+            25
+          ],
+          "matEsperee": 3,
+          "reasoning": "Dispersion: prob=95%, rdt median hist=11% | Rdt net: 10.4% - 0.0% = 10.4%/an",
+          "method": "BS-simplifie-v1.2"
+        }
       },
       "underlyingQuality": {
         "score": 68,
         "base": 70,
         "delta": -2,
-        "reasoning": "Qualité: base 70 → -2 = 68 (Exposition 100% tech/communication (secteurs évités en stagflation), betas élevés (1.07-1.92) et drawdowns importants (30-54%) dans un contexte de choc énergétique) | Worst: Tesla B:17"
+        "reasoning": "Qualité: base 70 → -2 = 68 (Portefeuille 100% tech/communication services en régime stagflationnaire hostile, betas élevés (moyenne 1.3) et drawdowns importants amplifiés par le choc énergétique) | Worst: Tesla B:17"
       },
       "portfolioFit": {
-        "score": 74,
+        "score": 65,
         "base": 72,
         "delta": 2,
-        "reasoning": "Fit: base 72 → +2 = 74 (Structure dispersion avec capital garanti offre une protection bienvenue en stagflation, permettant de capturer la volatilité élevée sans risque de perte)"
+        "reasoning": "Fit: base 50 → 65 (pairs, dispersion) | Fit: base 72 → +2 = 74 (Capital garanti devient un atout majeur en stagflation, protection totale contre le stress des marchés tech actuels)"
       },
       "riskPremium": {
-        "score": 5,
+        "score": 58,
         "base": 5,
-        "delta": 0,
-        "reasoning": "Prime: base 5 | 1.3144444444444445% vs CAT 2.5% (spread -1.2%)"
+        "delta": -2,
+        "reasoning": "Capital garanti: spread 3.0% - CAT 2.5% - illiq 0.3% = 0.2% | ✅ Dispersion: vol = moteur de rendement (+25pts) + capital garanti"
       }
     },
-    "verdict": "Produit défensif adapté au régime stagflationniste grâce au capital garanti, mais le coupon annualisé de 1.31% est dérisoire face à une inflation >2.8%. L'exposition 100% tech (secteur évité, momentum -1.22%) avec des betas élevés et Tesla en worst performer (B=17, vol=58%) compromet fortement les chances de toucher les coupons. Le ratio risque/rendement est défavorable malgré la protection capital, avec un upside limité à 3.94% sur 3 ans.",
+    "verdict": "Produit défensif mais peu attractif en stagflation avec un coupon de 1.31% annualisé insuffisant face à l'inflation. Le capital garanti protège contre les -30% à -50% de drawdown observés sur le panier tech, mais le rendement réel sera négatif avec une inflation >2.8%. La structure dispersion sur 8 méga-caps tech en régime hostile limite fortement le potentiel de gain alors que 75% du panier appartient aux secteurs à éviter selon le MI.",
     "keyRisks": [
-      "Coupon quasi-nul face à l'inflation en stagflation",
-      "Exposition 100% secteurs évités avec betas élevés",
-      "Tesla (B=17) plombe la performance du panier"
+      "Rendement réel négatif avec inflation PCE à 2.83% vs coupon 1.31%",
+      "Coût d'opportunité élevé avec energy sector +1.76% et produits TIPS plus adaptés",
+      "Dispersion défavorable avec 6/8 titres dans secteurs évités en stagflation"
     ],
     "negotiationPoints": [],
     "scenarios": {
@@ -289,35 +312,35 @@
       "base": {
         "return_pct": 1.31,
         "return_eur": 1310,
-        "probability": 0.25,
-        "duration_years": 3
+        "probability": 0.4,
+        "duration_years": 1
       },
       "stress": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.45,
+        "probability": 0.35,
         "duration_years": 3
       },
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.15,
+        "probability": 0.1,
         "duration_years": 3
       }
     },
     "confidenceInterval": {
-      "low": 27,
-      "high": 41,
+      "low": 39,
+      "high": 53,
       "halfWidth": 7,
-      "gradeStable": true,
-      "gradeRange": "D",
-      "label": "D [27-41]"
+      "gradeStable": false,
+      "gradeRange": "D-C",
+      "label": "C [39-53]"
     },
     "metadata": {
-      "gradedAt": "2026-03-31T13:23:25.871Z",
-      "durationMs": 20333,
+      "gradedAt": "2026-03-31T13:25:29.918Z",
+      "durationMs": 23428,
       "aiUsed": true,
-      "version": "5.2",
+      "version": "6.2",
       "productType": "dispersion",
       "marketDataAvailable": true,
       "catBenchmark": 2.5,
@@ -330,17 +353,17 @@
       "hasBarrier": false,
       "barrierPct": 0,
       "barrierCouponPct": null,
-      "couponProbability": null,
+      "couponProbability": 95,
       "expectedMaturity": 3,
       "maxMaturity": 3,
       "maxBeta": 1.92,
-      "baseScore": 34,
-      "baseGrade": "D",
+      "baseScore": 47,
+      "baseGrade": "C",
       "adjustments": {
         "p1": -2,
         "p2": -2,
         "p3": 2,
-        "p4": 0
+        "p4": -2
       },
       "barrier_sigma": null,
       "barrier_sigma_label": null,
@@ -348,14 +371,138 @@
       "liquidity_level": "L4",
       "liquidity_score": 10,
       "liquidity_label": "Illiquide",
-      "ci_low": 27,
-      "ci_high": 41,
-      "ci_label": "D [27-41]",
+      "ci_low": 39,
+      "ci_high": 53,
+      "ci_label": "C [39-53]",
       "issuer_rating": "A",
       "issuer_tier": "IG",
       "hasDecrement": false,
       "decrementDrag": 0,
-      "structureType": "dispersion"
+      "structureType": "dispersion",
+      "bsMethod": "BS-simplifie-v1.2",
+      "bsProbCoupon": 95,
+      "bsRendementNet": 10.45,
+      "bsPerteEsperee": 0,
+      "bsCouponEffectif": 11,
+      "bsVols": [
+        25,
+        25.87,
+        25,
+        25,
+        31.19,
+        25,
+        25,
+        25
+      ],
+      "bsMatEsperee": 3,
+      "isBasket": false,
+      "v6Weights": {
+        "p1": 0.3,
+        "p2": 0.2,
+        "p3": 0.15,
+        "p4": 0.3
+      },
+      "p3Recalibrated": true,
+      "p4BsCorrected": false,
+      "isGuaranteedRate": false,
+      "stockData": [
+        {
+          "name": "NVIDIA",
+          "ticker": "NVDA",
+          "sector": "Technologie de l'information",
+          "perf_ytd": -11.49,
+          "perf_1y": 48.15,
+          "volatility_3y": 48.08,
+          "max_drawdown_3y": 36.89,
+          "buffett_score": 50,
+          "quality_score": 87,
+          "buffett_grade": "C"
+        },
+        {
+          "name": "Meta Platforms",
+          "ticker": "META",
+          "sector": "La communication",
+          "perf_ytd": -18.68,
+          "perf_1y": -10.92,
+          "volatility_3y": 35.51,
+          "max_drawdown_3y": 34.21,
+          "buffett_score": 67,
+          "quality_score": 77,
+          "buffett_grade": "B"
+        },
+        {
+          "name": "Netflix",
+          "ticker": "NFLX",
+          "sector": "La communication",
+          "perf_ytd": -0.84,
+          "perf_1y": -4.81,
+          "volatility_3y": 33.41,
+          "max_drawdown_3y": 43.35,
+          "buffett_score": 83,
+          "quality_score": 75,
+          "buffett_grade": "A"
+        },
+        {
+          "name": "Amazon.com",
+          "ticker": "AMZN",
+          "sector": "Biens de consommation cycliques",
+          "perf_ytd": -12.94,
+          "perf_1y": -0.21,
+          "volatility_3y": 31.13,
+          "max_drawdown_3y": 30.88,
+          "buffett_score": 50,
+          "quality_score": 64,
+          "buffett_grade": "C"
+        },
+        {
+          "name": "Alphabet (Ex Google)",
+          "ticker": "GOOGL",
+          "sector": "La communication",
+          "perf_ytd": -12.64,
+          "perf_1y": 68.55,
+          "volatility_3y": 28.96,
+          "max_drawdown_3y": 29.89,
+          "buffett_score": 67,
+          "quality_score": 79,
+          "buffett_grade": "B"
+        },
+        {
+          "name": "Microsoft",
+          "ticker": "MSFT",
+          "sector": "Technologie de l'information",
+          "perf_ytd": -25.81,
+          "perf_1y": -8.13,
+          "volatility_3y": 23.47,
+          "max_drawdown_3y": 34.18,
+          "buffett_score": 67,
+          "quality_score": 83,
+          "buffett_grade": "B"
+        },
+        {
+          "name": "Apple",
+          "ticker": "AAPL",
+          "sector": "Technologie de l'information",
+          "perf_ytd": -9.3,
+          "perf_1y": 10.15,
+          "volatility_3y": 25.48,
+          "max_drawdown_3y": 33.43,
+          "buffett_score": 50,
+          "quality_score": 73,
+          "buffett_grade": "C"
+        },
+        {
+          "name": "Tesla",
+          "ticker": "TSLA",
+          "sector": "Biens de consommation cycliques",
+          "perf_ytd": -20.99,
+          "perf_1y": 30.1,
+          "volatility_3y": 57.52,
+          "max_drawdown_3y": 53.77,
+          "buffett_score": 17,
+          "quality_score": 35,
+          "buffett_grade": "D"
+        }
+      ]
     }
   }
 }
