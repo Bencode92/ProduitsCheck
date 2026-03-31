@@ -91,7 +91,7 @@ function buildStructuredOptimization() {
             id: p.id, name: p.name || 'Proposition',
             bankName: (typeof BANKS !== 'undefined' ? (BANKS.find(function(b) { return b.id === p.bankId; }) || {}).name : '') || p.bankId || '',
             grade: g.grade, score: g.score || 0,
-            coupon: norm.coupon || 0, couponType: norm.couponType,
+            coupon: typeof norm.coupon === 'number' ? norm.coupon : (parseFloat(norm.coupon) || 0), couponType: norm.couponType,
             capitalProtected: norm.capitalProtection,
             nominal: parseFloat(p.investedAmount || p.nominal) || 0
         };
@@ -194,19 +194,23 @@ async function runStructOptimizer() {
     var results = document.getElementById('struct-optimizer-results');
     if (!results) return;
     try {
-        // Auto-grade ungraded proposals before optimizing
+        // Re-grade ALL proposals to ensure v6.3 scores (not stale cached grades)
         var allP = [];
         Object.values(app.state.proposals || {}).forEach(function(arr) {
             arr.forEach(function(p) { if (p.status !== 'rejected' && p.status !== 'subscribed') allP.push(p); });
         });
-        var ungraded = allP.filter(function(p) {
-            return !p.grading || !p.grading.grade || p.grading.grade === '?';
+        var toGrade = allP.filter(function(p) {
+            return !p.grading || !p.grading.grade || p.grading.grade === '?' ||
+                   !p.grading.metadata || p.grading.metadata.version !== '6.2';
         });
-        if (ungraded.length > 0 && typeof ProposalGrader !== 'undefined' && ProposalGrader.grade) {
-            results.innerHTML = '<div style="display:flex;align-items:center;gap:10px;padding:20px;color:var(--text-muted)"><div class="spinner"></div>Grading de ' + ungraded.length + ' proposition(s)...</div>';
-            for (var gi = 0; gi < ungraded.length; gi++) {
-                try { await ProposalGrader.grade(ungraded[gi]); } catch(e) {
-                    console.warn('[optimizer] Grade failed: ' + (ungraded[gi].name || ungraded[gi].id));
+        if (toGrade.length > 0 && typeof ProposalGrader !== 'undefined' && ProposalGrader.grade) {
+            results.innerHTML = '<div style="display:flex;align-items:center;gap:10px;padding:20px;color:var(--text-muted)"><div class="spinner"></div>Grading v6.3 de ' + toGrade.length + '/' + allP.length + ' proposition(s)...</div>';
+            for (var gi = 0; gi < toGrade.length; gi++) {
+                try {
+                    delete toGrade[gi].grading;
+                    await ProposalGrader.grade(toGrade[gi]);
+                } catch(e) {
+                    console.warn('[optimizer] Grade failed: ' + (toGrade[gi].name || toGrade[gi].id));
                 }
             }
         }
@@ -267,7 +271,7 @@ function renderStructOptimizationTable(analysis) {
             html += '<tr style="border-bottom:1px solid var(--border);opacity:0.75"><td style="padding:6px 10px"><strong style="color:var(--text-bright)">' + p.name.substring(0, 30) + '</strong><div style="font-size:9px;color:var(--text-dim)">' + p.bankName + '</div></td>';
             html += '<td style="padding:6px;text-align:center"><span style="display:inline-block;width:22px;height:22px;line-height:22px;text-align:center;border-radius:5px;background:' + gc + '22;color:' + gc + ';font-weight:700;font-size:11px">' + (p.grade || '?') + '</span></td>';
             html += '<td style="padding:6px;text-align:right;font-family:var(--mono);font-size:10px">' + formatNumber(p.amount) + '\u20ac</td>';
-            html += '<td style="padding:6px;text-align:center;font-family:var(--mono);font-weight:700;color:var(--green);font-size:10px">' + p.coupon + '%</td>';
+            html += '<td style="padding:6px;text-align:center;font-family:var(--mono);font-weight:700;color:var(--green);font-size:10px">' + (typeof p.coupon === 'number' ? p.coupon.toFixed(1) : parseFloat(p.coupon) || 0) + '%</td>';
             html += '<td style="padding:6px;text-align:right;font-family:var(--mono);font-weight:600;color:var(--green);font-size:10px">+' + formatNumber(p.annualReturn) + '\u20ac</td>';
             html += '<td style="padding:6px;text-align:right;font-family:var(--mono);font-weight:600;font-size:10px;color:' + (p.excessVsCat >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (p.excessVsCat >= 0 ? '+' : '') + formatNumber(p.excessVsCat) + '\u20ac</td></tr>';
         });
@@ -288,7 +292,7 @@ function renderStructOptimizationTable(analysis) {
             var hasAlloc = p.allocatedAmount > 0;
             html += '<tr style="border-bottom:1px solid var(--border);' + (!hasAlloc ? 'opacity:0.5' : '') + '"><td style="padding:8px 10px"><strong style="color:var(--text-bright)">' + p.name.substring(0, 35) + '</strong><div style="font-size:10px;color:var(--text-dim)">' + p.bankName + (p.capitalProtected ? ' \u00b7 prot\u00e9g\u00e9' : '') + '</div></td>';
             html += '<td style="padding:8px 6px;text-align:center"><span style="display:inline-block;width:24px;height:24px;line-height:24px;text-align:center;border-radius:6px;background:' + gc + '22;color:' + gc + ';font-weight:700;font-size:12px">' + p.grade + '</span></td>';
-            html += '<td style="padding:8px 6px;text-align:center;font-family:var(--mono);font-weight:700;color:var(--green)">' + p.coupon + '%</td>';
+            html += '<td style="padding:8px 6px;text-align:center;font-family:var(--mono);font-weight:700;color:var(--green)">' + (typeof p.coupon === 'number' ? p.coupon.toFixed(1) : parseFloat(p.coupon) || 0) + '%</td>';
             html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);font-weight:' + (hasAlloc ? '700' : '400') + ';color:' + (hasAlloc ? 'var(--cyan)' : 'var(--text-dim)') + '">' + (hasAlloc ? formatNumber(p.allocatedAmount) + '\u20ac' : '\u2014') + '</td>';
             html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);font-weight:600;color:' + (hasAlloc ? 'var(--green)' : 'var(--text-dim)') + '">' + (hasAlloc ? '+' + formatNumber(p.annualReturn) + '\u20ac' : '\u2014') + '</td>';
             html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);font-weight:600;color:' + (p.excessVsCat > 0 ? 'var(--green)' : p.excessVsCat < 0 ? 'var(--red)' : 'var(--text-dim)') + '">' + (hasAlloc ? (p.excessVsCat >= 0 ? '+' : '') + formatNumber(p.excessVsCat) + '\u20ac' : '\u2014') + '</td>';
@@ -314,15 +318,15 @@ async function getStructOptimizerAISummary(analysis) {
     var totalCatReturn = Math.round(totalInvested * a.catBenchmark / 100);
 
     var pfText = a.portfolioAnalysis.map(function(p) {
-        return '\u2022 ' + p.name.substring(0, 25) + ' | ' + formatNumber(p.amount) + '\u20ac \u00e0 ' + p.coupon + '% | Grade ' + p.grade + ' | +' + formatNumber(p.annualReturn) + '\u20ac/an';
+        return '\u2022 ' + p.name.substring(0, 25) + ' | ' + formatNumber(p.amount) + '\u20ac \u00e0 ' + (typeof p.coupon === 'number' ? p.coupon.toFixed(1) : parseFloat(p.coupon) || 0) + '% | Grade ' + p.grade + ' | +' + formatNumber(p.annualReturn) + '\u20ac/an';
     }).join('\n');
 
     var allocText = a.allocationPlan.filter(function(p) { return p.allocatedAmount > 0; }).map(function(p) {
-        return '\u2022 ' + p.name.substring(0, 25) + ' | Grade ' + p.grade + ' (' + p.score + '/100) | ' + formatNumber(p.allocatedAmount) + '\u20ac \u00e0 ' + p.coupon + '% \u2192 +' + formatNumber(p.annualReturn) + '\u20ac/an (vs CAT +' + formatNumber(p.catReturn) + '\u20ac) \u2192 ' + p.recommendation;
+        return '\u2022 ' + p.name.substring(0, 25) + ' | Grade ' + p.grade + ' (' + p.score + '/100) | ' + formatNumber(p.allocatedAmount) + '\u20ac \u00e0 ' + (typeof p.coupon === 'number' ? p.coupon.toFixed(1) : parseFloat(p.coupon) || 0) + '% \u2192 +' + formatNumber(p.annualReturn) + '\u20ac/an (vs CAT +' + formatNumber(p.catReturn) + '\u20ac) \u2192 ' + p.recommendation;
     }).join('\n');
 
     var waitText = a.allocationPlan.filter(function(p) { return p.recommendation === 'ATTENDRE' || p.recommendation === 'REJETER'; }).map(function(p) {
-        return '\u2022 ' + p.name.substring(0, 25) + ' | Grade ' + p.grade + ' (' + p.score + '/100) | ' + p.coupon + '% \u2192 ' + p.recommendation;
+        return '\u2022 ' + p.name.substring(0, 25) + ' | Grade ' + p.grade + ' (' + p.score + '/100) | ' + (typeof p.coupon === 'number' ? p.coupon.toFixed(1) : parseFloat(p.coupon) || 0) + '% \u2192 ' + p.recommendation;
     }).join('\n');
 
     var prompt = 'Directeur financier. Optimisation structur\u00e9s v1.1 \u2014 allocation de liquidit\u00e9.\n\n' +
