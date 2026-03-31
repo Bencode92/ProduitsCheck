@@ -234,17 +234,17 @@
   "_bsRendementNet": 3.71,
   "grading": {
     "grade": "B",
-    "score": 63,
+    "score": 60,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 57,
+        "score": 52,
         "base": 75,
         "delta": -18,
-        "reasoning": "BS: P(SJ>91% | vol=25% T=1.4a) = 61.8% | Rdt net: 3.7% - 0.0% = 3.7%/an | Spread vs CAT: 1.2%",
+        "reasoning": "BS: P(SJ>91% | vol=25% T=1.4a) = 61.8% | Rdt net: 3.7% - 0.0% = 3.7%/an | Spread vs CAT: 1.2% | v6: -5pts ( SS-5)",
         "_bs": {
           "score": 57,
           "probCoupon": 61.8,
@@ -258,74 +258,73 @@
           ],
           "matEsperee": 1.4,
           "reasoning": "P(SJ>91% | vol=25% T=1.4a) = 61.8% | Rdt net: 3.7% - 0.0% = 3.7%/an",
-          "method": "BS-simplifie-v1.1"
+          "method": "BS-simplifie-v1.2"
         }
       },
       "underlyingQuality": {
         "score": 58,
         "base": 59,
         "delta": -1,
-        "reasoning": "Qualité: base 59 → -1 = 58 (ISP dans le secteur financier explicitement évité (-1.63% momentum), beta 0.85 sensible au stress macro stagflationniste) | Worst: Intesa Sanpaolo S.p.A. B:25"
+        "reasoning": "Qualité: base 59 → -1 = 58 (ISP dans le secteur financier explicitement évité par le MI, avec beta 0.85 exposé au risque de resserrement monétaire en stagflation) | Worst: Intesa Sanpaolo S.p.A. B:25"
       },
       "portfolioFit": {
-        "score": 80,
+        "score": 55,
         "base": 80,
         "delta": 0,
-        "reasoning": "Fit: base 80"
+        "reasoning": "Fit: base 50 → 55 (single-stock, autocall) | Fit: base 80"
       },
       "riskPremium": {
-        "score": 63,
+        "score": 72,
         "base": 49,
         "delta": -1,
-        "reasoning": "Capital garanti: spread 3×2=6.0% - CAT 2.5% - illiq 0.7% = 2.8% | Illiq. premium +1.8% (-9pts)"
+        "reasoning": "Capital garanti: spread 3×2=6.0% - CAT 2.5% - illiq 0.7% = 2.8%"
       }
     },
-    "verdict": "Produit à éviter en contexte stagflationniste actuel. ISP opère dans le secteur financier explicitement déconseillé par l'analyse macro (-1.63% momentum sectoriel), avec un beta de 0.85 qui amplifie la vulnérabilité. La barrière à 91% sur 10 ans représente un risque significatif avec VIX à 22 et stress énergétique ($103.79/baril). Bien que le capital soit garanti, le couple rendement/risque de 6% annualisé est insuffisant face à une inflation PCE de 2.83% et aux risques sectoriels concentrés.",
+    "verdict": "Produit à capital garanti offrant 6% annualisé mais fortement pénalisé par le contexte stagflationniste défavorable aux banques. ISP (beta 0.85) appartient au secteur financier évité par le MI avec un momentum négatif de -1.63%. Le régime macro avec Brent >$100 et risque de resserrement Fed agressif menace directement les marges bancaires. Score final ajusté de 67 à 54 (C+), la garantie du capital reste le seul atout majeur.",
     "keyRisks": [
-      "Secteur financier en zone rouge avec momentum négatif -1.63% en stagflation",
-      "Duration 10 ans excessive avec barrière 91% vulnérable si stress macro persiste",
-      "Rendement réel négatif avec inflation >2.83% érode le pouvoir d'achat malgré capital garanti"
+      "Exposition au secteur financier en période de stagflation avec risque de compression des marges",
+      "Durée réelle potentiellement longue (10 ans) si les barrières autocall ne sont pas atteintes"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 6,
-        "return_eur": 8400,
+        "return_eur": 6000,
         "probability": 0.2,
-        "duration_years": 1.4
+        "duration_years": 1
       },
       "base": {
         "return_pct": 4,
-        "return_eur": 20000,
+        "return_eur": 12000,
         "probability": 0.35,
-        "duration_years": 5
+        "duration_years": 3
       },
       "stress": {
-        "return_pct": 0,
-        "return_eur": 0,
+        "return_pct": 2,
+        "return_eur": 10000,
         "probability": 0.3,
-        "duration_years": 10
+        "duration_years": 5
       },
       "worst": {
-        "return_pct": -2,
-        "return_eur": -20000,
+        "return_pct": 0,
+        "return_eur": 0,
         "probability": 0.15,
         "duration_years": 10
       }
     },
     "confidenceInterval": {
-      "low": 59,
-      "high": 73,
+      "low": 60,
+      "high": 74,
       "halfWidth": 7,
-      "gradeStable": false,
-      "gradeRange": "C-B",
-      "label": "B [59-73]"
+      "gradeStable": true,
+      "gradeRange": "B",
+      "label": "B [60-74]"
     },
     "metadata": {
-      "gradedAt": "2026-03-30T18:51:24.000Z",
-      "durationMs": 21777,
+      "gradedAt": "2026-03-31T10:45:59.362Z",
+      "durationMs": 23806,
       "aiUsed": true,
-      "version": "5.2",
+      "version": "6.2",
       "productType": "autocall",
       "marketDataAvailable": true,
       "catBenchmark": 2.5,
@@ -357,16 +356,16 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 59,
-      "ci_high": 73,
-      "ci_label": "B [59-73]",
+      "ci_low": 60,
+      "ci_high": 74,
+      "ci_label": "B [60-74]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
       "decrementDrag": 0,
       "structureType": "autocall",
       "couponPerPeriod": 3,
-      "bsMethod": "BS-simplifie-v1.1",
+      "bsMethod": "BS-simplifie-v1.2",
       "bsProbCoupon": 61.8,
       "bsRendementNet": 3.71,
       "bsPerteEsperee": 0,
@@ -375,6 +374,16 @@
         24.51
       ],
       "bsMatEsperee": 1.4,
+      "isBasket": false,
+      "v6Weights": {
+        "p1": 0.3,
+        "p2": 0.15,
+        "p3": 0.25,
+        "p4": 0.3
+      },
+      "p3Recalibrated": true,
+      "p4BsCorrected": false,
+      "isGuaranteedRate": false,
       "stockData": [
         {
           "name": "Intesa Sanpaolo S.p.A.",
