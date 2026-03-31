@@ -309,7 +309,10 @@
         result.pillars.adjustedReturn.reasoning =
           'BS: ' + bs.reasoning + ' | Spread vs CAT: ' + (bs.rendementNet - rfRate).toFixed(1) + '%';
         result.pillars.adjustedReturn.base = oldP1;
-        result.pillars.adjustedReturn.delta = bs.score - oldP1;
+        // delta=0: BS is a full replacement, not an IA adjustment.
+        // v6-cal's _capIADelta caps delta to ±20, which would destroy BS scores.
+        result.pillars.adjustedReturn.delta = 0;
+        result.pillars.adjustedReturn._bsDelta = bs.score - oldP1;
         result.pillars.adjustedReturn._bs = bs;
 
         console.log('[p1-bs] P1: ' + oldP1 + ' -> ' + bs.score +

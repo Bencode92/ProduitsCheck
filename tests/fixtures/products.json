@@ -27,8 +27,8 @@
     },
     "participationRate": 1.0,
     "expectedRank": 1,
-    "expectedGrade": "C",
-    "expectedScore": 48,
+    "expectedGrade": "B",
+    "expectedScore": 67,
     "expectedBsRendementNet": 10.45
   },
   {
@@ -97,8 +97,8 @@
     "autocall": true,
     "autocallThreshold": 100,
     "expectedRank": 3,
-    "expectedGrade": "D",
-    "expectedScore": 44,
+    "expectedGrade": "C",
+    "expectedScore": 45,
     "expectedBsRendementNet": 3.17
   },
   {
@@ -165,7 +165,7 @@
     "autocallThreshold": 100,
     "expectedRank": 5,
     "expectedGrade": "D",
-    "expectedScore": 33,
+    "expectedScore": 37,
     "expectedBsRendementNet": 1.66
   },
   {
@@ -200,7 +200,7 @@
     "autocallThreshold": 100,
     "expectedRank": 6,
     "expectedGrade": "D",
-    "expectedScore": 32,
+    "expectedScore": 35,
     "expectedBsRendementNet": 0.30
   },
   {
@@ -236,7 +236,7 @@
     "autocallThreshold": 100,
     "expectedRank": 7,
     "expectedGrade": "D",
-    "expectedScore": 42,
+    "expectedScore": 44,
     "expectedBsRendementNet": 1.22
   },
   {
@@ -272,7 +272,7 @@
     "autocallThreshold": 100,
     "expectedRank": 8,
     "expectedGrade": "D",
-    "expectedScore": 31,
+    "expectedScore": 34,
     "expectedBsRendementNet": 1.69
   },
   {
@@ -308,8 +308,8 @@
     "autocall": true,
     "autocallThreshold": 100,
     "expectedRank": 9,
-    "expectedGrade": "F",
-    "expectedScore": 23,
+    "expectedGrade": "D",
+    "expectedScore": 25,
     "expectedBsRendementNet": -10.57
   }
 ]
