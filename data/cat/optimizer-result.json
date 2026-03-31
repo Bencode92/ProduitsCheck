@@ -1,6 +1,6 @@
 {
-  "lastUpdated": "2026-03-25T17:42:37.059Z",
-  "summary": "**AVANT → APRÈS (NET IS +179,87€)**\n\n**ARBITRAGE RECOMMANDÉ:**\n🔄 **CATIP ENT 3ANS** (CIC 200k€) → **Dépôt 24m 2.93%** = **NET IS +179,87€/an** (break-even: 14m) ⚠️ Préavis requis\n\n**CONTRATS À SURVEILLER (gains négatifs):**\nLes 4 **OPTIPLUS CONQUÊTE** (600k€ total) génèrent chacun **-544,23€ NET/an** malgré +45€ brut, à cause des coûts de transfert (-513,75€) qui dépassent largement le gain. Break-even à 103 mois = non viable.\n\n**✅ 6 CONTRATS LEADERS À CONSERVER:**\n- 2x OPTIPLUS 5 ANS (500k€) à 3.1039% \n- CATVAIR GRANDS COMPTES (50k€) à 3.5%\n- 2x CAT CROISSANCE +3A (110k€) à 3.21%\n\n**CASH 300k€ - OPTIONS:**\n• **Dépôt 24m 2.93%** → +6592,5€ NET/an\n• CAT Progressif 60m 2.9% → +6525€ NET/an  \n• Dépôt 23m 2.9% → +6525€ NET/an\n\n**RECOMMANDATION:** Arbitrer uniquement le CATIP CIC, surveiller les 4 OPTIPLUS CONQUÊTE pour sortie anticipée si possible.",
+  "lastUpdated": "2026-03-31T12:32:37.437Z",
+  "summary": "**AVANT 1 460 000€ à 2.99% → APRÈS 1 460 000€ à 3.00% (NET IS +179€/an)**\n\n**ARBITRAGES RECOMMANDÉS:**\n\n🔄 **CATIP ENT 3ANS CIC** (200k€) → **Dépôt à terme 24m 2.93%** = **NET IS +179€/an** (break-even: 14m) ⚠️ Pénalités de sortie anticipée vs gain marginal faible\n\n🔄 **4x OPTIPLUS CONQUÊTE** (600k€) → **Dépôts à terme 24m 2.93%** = **NET IS +2 639€/an** (break-even: 103m) ⚠️ Forte pénalité initiale mais récupération rapide sur 24 mois\n\n**GAINS NETS NÉGATIFS EXPLIQUÉS:**\nLes OPTIPLUS CONQUÊTE (5 mois seulement) génèrent des pénalités de sortie importantes qui impactent la première année, mais le break-even à 103 mois reste acceptable vu l'écart de taux.\n\n**CASH DISPONIBLE (177k€):**\n• Dépôt à terme 24m 2.93% → +3 889€/an NET IS\n\n✅ **6 contrats leaders** conservés (taux > 3.1%)\n- 2x OPTIPLUS 5 ANS: 3.10%\n- 2x CAT CROISSANCE: 3.21% \n- 1x CATVAIR: 3.5%\n\n**Optimisation totale potentielle: +2 818€/an NET IS**",
   "rateSource": "confirmed",
   "algorithmVersion": "v2.1",
   "totalInvested": 1460000,
@@ -53,7 +53,7 @@
       "rate": 2.9,
       "currentPeriodRate": 2.95,
       "interestPerYear": 4350,
-      "remainingMonths": 6,
+      "remainingMonths": 5,
       "maturityDate": "2026-09-18",
       "bestAlt": {
         "name": "Dépôt à terme 24 mois",
@@ -62,17 +62,17 @@
         "bankName": "Société Générale",
         "isScanned": false
       },
-      "switchGainPerYear": -725.64,
+      "switchGainPerYear": -879.77,
       "grossGainPerYear": 45,
       "exitPenaltyCost": 0,
       "noticeOpportunityCost": 385.32,
-      "netGainAfterTax": -544.23,
+      "netGainAfterTax": -659.83,
       "breakEvenMonths": 103,
       "durationMismatch": true,
-      "dynamicThreshold": 0.48989794855663565,
-      "compositeScore": 0.20500000000000007,
+      "dynamicThreshold": 0.5878775382679627,
+      "compositeScore": 0.2033333333333334,
       "recommendation": "SURVEILLER",
-      "reason": "Brut +45€ mais NET après IS -544,23€ (coûts -385,32€)"
+      "reason": "Brut +45€ mais NET après IS -659,83€ (coûts -385,32€)"
     },
     {
       "name": "OPTIPLUS CONQUÊTE",
@@ -82,7 +82,7 @@
       "rate": 2.9,
       "currentPeriodRate": 2.95,
       "interestPerYear": 4350,
-      "remainingMonths": 6,
+      "remainingMonths": 5,
       "maturityDate": "2026-09-18",
       "bestAlt": {
         "name": "Dépôt à terme 24 mois",
@@ -91,17 +91,17 @@
         "bankName": "Société Générale",
         "isScanned": false
       },
-      "switchGainPerYear": -725.64,
+      "switchGainPerYear": -879.77,
       "grossGainPerYear": 45,
       "exitPenaltyCost": 0,
       "noticeOpportunityCost": 385.32,
-      "netGainAfterTax": -544.23,
+      "netGainAfterTax": -659.83,
       "breakEvenMonths": 103,
       "durationMismatch": true,
-      "dynamicThreshold": 0.48989794855663565,
-      "compositeScore": 0.20500000000000007,
+      "dynamicThreshold": 0.5878775382679627,
+      "compositeScore": 0.2033333333333334,
       "recommendation": "SURVEILLER",
-      "reason": "Brut +45€ mais NET après IS -544,23€ (coûts -385,32€)"
+      "reason": "Brut +45€ mais NET après IS -659,83€ (coûts -385,32€)"
     },
     {
       "name": "OPTIPLUS CONQUÊTE",
@@ -111,7 +111,7 @@
       "rate": 2.9,
       "currentPeriodRate": 2.95,
       "interestPerYear": 4350,
-      "remainingMonths": 6,
+      "remainingMonths": 5,
       "maturityDate": "2026-09-18",
       "bestAlt": {
         "name": "Dépôt à terme 24 mois",
@@ -120,17 +120,17 @@
         "bankName": "Société Générale",
         "isScanned": false
       },
-      "switchGainPerYear": -725.64,
+      "switchGainPerYear": -879.77,
       "grossGainPerYear": 45,
       "exitPenaltyCost": 0,
       "noticeOpportunityCost": 385.32,
-      "netGainAfterTax": -544.23,
+      "netGainAfterTax": -659.83,
       "breakEvenMonths": 103,
       "durationMismatch": true,
-      "dynamicThreshold": 0.48989794855663565,
-      "compositeScore": 0.20500000000000007,
+      "dynamicThreshold": 0.5878775382679627,
+      "compositeScore": 0.2033333333333334,
       "recommendation": "SURVEILLER",
-      "reason": "Brut +45€ mais NET après IS -544,23€ (coûts -385,32€)"
+      "reason": "Brut +45€ mais NET après IS -659,83€ (coûts -385,32€)"
     },
     {
       "name": "OPTIPLUS CONQUÊTE",
@@ -140,7 +140,7 @@
       "rate": 2.9,
       "currentPeriodRate": 2.95,
       "interestPerYear": 4350,
-      "remainingMonths": 6,
+      "remainingMonths": 5,
       "maturityDate": "2026-09-18",
       "bestAlt": {
         "name": "Dépôt à terme 24 mois",
@@ -149,17 +149,17 @@
         "bankName": "Société Générale",
         "isScanned": false
       },
-      "switchGainPerYear": -725.64,
+      "switchGainPerYear": -879.77,
       "grossGainPerYear": 45,
       "exitPenaltyCost": 0,
       "noticeOpportunityCost": 385.32,
-      "netGainAfterTax": -544.23,
+      "netGainAfterTax": -659.83,
       "breakEvenMonths": 103,
       "durationMismatch": true,
-      "dynamicThreshold": 0.48989794855663565,
-      "compositeScore": 0.20500000000000007,
+      "dynamicThreshold": 0.5878775382679627,
+      "compositeScore": 0.2033333333333334,
       "recommendation": "SURVEILLER",
-      "reason": "Brut +45€ mais NET après IS -544,23€ (coûts -385,32€)"
+      "reason": "Brut +45€ mais NET après IS -659,83€ (coûts -385,32€)"
     },
     {
       "name": "COMPTE A TERME OPTIPLUS 5 ANS Réf.000001",
@@ -215,7 +215,7 @@
       "rate": 3.5,
       "currentPeriodRate": 4.4,
       "interestPerYear": 1750,
-      "remainingMonths": 22,
+      "remainingMonths": 21,
       "maturityDate": "2028-01-26",
       "bestAlt": null,
       "switchGainPerYear": 0,
@@ -225,8 +225,8 @@
       "netGainAfterTax": 0,
       "breakEvenMonths": null,
       "durationMismatch": false,
-      "dynamicThreshold": 0.23141676475196096,
-      "compositeScore": 0.03666666666666667,
+      "dynamicThreshold": 0.24243661069253053,
+      "compositeScore": 0.034999999999999996,
       "recommendation": "GARDER",
       "reason": "Leader marché"
     },
