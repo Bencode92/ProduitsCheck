@@ -200,10 +200,10 @@
           "reasoning": "Prime: base 42 | 5.7% vs CAT 2.5% (spread 3.2%)"
         }
       },
-      "verdict": "En régime stagflationnaire avec Brent à $103.79, ce produit capital garanti sur ENI (secteur energy favorisé) offre une protection solide. Le coupon de 5.7% est attractif mais conditionnel à l'autocall (seuil 100%), ce qui peut être difficile à atteindre rapidement. Avec un beta de 0.71 et le capital garanti, c'est un placement défensif adapté au contexte actuel, bien que la maturité longue (12 ans) et la probabilité faible d'autocall rapide limitent l'attrait.",
+      "verdict": "En régime stagflationnaire avec VIX à 22, ce capital garanti sur ENI (secteur energy favorisé, +1.76% momentum) offre une protection complète du capital tout en captant le potentiel haussier du pétrole à 103.79$. Le coupon conditionnel de 5.7% annualisé reste attractif malgré la faible probabilité d'autocall précoce, ENI bénéficiant du contexte inflationniste avec un beta défensif de 0.71. Score ajusté de 59/100 reflète un produit solide pour investisseur prudent cherchant une exposition energy protégée.",
       "keyRisks": [
-        "Risque de non-perception des coupons si ENI reste sous 100% (worst case: 0% de rendement)",
-        "Duration longue de 12 ans avec capital immobilisé si pas d'autocall"
+        "Choc pétrolier >110$ pourrait paradoxalement pénaliser ENI via destruction de demande",
+        "Capital garanti mais coupon zéro probable sur plusieurs années si volatilité persiste"
       ],
       "negotiationPoints": [],
       "scenarios": {
@@ -214,21 +214,21 @@
           "duration_years": 2
         },
         "base": {
-          "return_pct": 5.7,
-          "return_eur": 9570,
-          "probability": 0.35,
-          "duration_years": 6
+          "return_pct": 13.11,
+          "return_eur": 3933,
+          "probability": 0.4,
+          "duration_years": 2.3
         },
         "stress": {
           "return_pct": 0,
           "return_eur": 0,
           "probability": 0.3,
-          "duration_years": 12
+          "duration_years": 6
         },
         "worst": {
           "return_pct": 0,
           "return_eur": 0,
-          "probability": 0.15,
+          "probability": 0.1,
           "duration_years": 12
         }
       },
@@ -241,8 +241,8 @@
         "label": "C [47-61]"
       },
       "metadata": {
-        "gradedAt": "2026-03-31T13:07:59.938Z",
-        "durationMs": 20501,
+        "gradedAt": "2026-03-31T13:19:39.982Z",
+        "durationMs": 19563,
         "aiUsed": true,
         "version": "5.2",
         "productType": "capital_garanti",
@@ -658,13 +658,13 @@
           "score": 55,
           "base": 57,
           "delta": -2,
-          "reasoning": "Rendement: base 57 → -2 = 55 (Régime stagflationnaire avec 2 banques italiennes (secteur financials évité) et worst-performer pharma dans un contexte de volatilité élevée (VIX 22) réduit fortement la probabilité de toucher les coupons) | Coupon 7%, protégé | Mat espérée: ~5.5a (prob mat: 27%)"
+          "reasoning": "Rendement: base 57 → -2 = 55 (En stagflation avec 3/5 sous-jacents dans le secteur financier évité et volatilités élevées (BMPS 36.9%), la probabilité de toucher le coupon 7% diminue fortement) | Coupon 7%, protégé | Mat espérée: ~5.5a (prob mat: 27%)"
         },
         "underlyingQuality": {
           "score": 50,
           "base": 52,
           "delta": -2,
-          "reasoning": "Qualité: base 52 → -2 = 50 (Exposition critique aux financials (BMPS, UCG) secteur explicitement évité en stagflation, avec betas élevés (0.9-1.0) et drawdowns >24% pour les banques) | Worst: Novo Nordisk A B:35"
+          "reasoning": "Qualité: base 52 → -2 = 50 (60% des sous-jacents (BMPS, UCG, ENEL) dans des secteurs évités en stagflation, avec des betas élevés (0.9-1.03) amplifiant la baisse) | Worst: Novo Nordisk A B:35"
         },
         "portfolioFit": {
           "score": 70,
@@ -676,39 +676,39 @@
           "score": 53,
           "base": 55,
           "delta": -2,
-          "reasoning": "Prime: base 55 → -2 = 53 (Spread de 55bps insuffisant en stagflation avec VIX à 22 et stress flags actifs, notamment pour un panier incluant des financials) | 7% vs CAT 2.5% (spread 4.5%)"
+          "reasoning": "Prime: base 55 → -2 = 53 (Spread de 200bps insuffisant pour compenser le risque worst-of à 5 sous-jacents en régime stagflationniste avec VIX à 22) | 7% vs CAT 2.5% (spread 4.5%)"
         }
       },
-      "verdict": "Produit très mal positionné pour le régime stagflationnaire actuel avec 40% d'exposition aux financials italiennes (secteur à éviter) et Novo Nordisk en worst-performer (-19% DD). Le capital garanti limite les pertes mais la probabilité de toucher les coupons de 7% annuels est fortement compromise par la volatilité élevée (VIX 22) et les drawdowns importants. Score final ajusté à 35/100 reflète un profil rendement/risque défavorable malgré la protection capitale.",
+      "verdict": "Produit très risqué en contexte de stagflation avec 60% des sous-jacents dans le secteur financier évité par le marché. La probabilité de coupon à 7% est fortement compromise avec des volatilités élevées (BMPS 36.9%, UCG 30%) et un worst-of à 5 sous-jacents. Le capital garanti offre une protection mais la maturité espérée de 5.5 ans pourrait s'étendre à 10 ans, immobilisant 30 000€ avec peu de rendement. Score final ajusté: 40 (D), produit à éviter dans ce contexte macro.",
       "keyRisks": [
-        "Exposition toxique aux banques italiennes en stagflation avec betas élevés",
-        "Worst-performer Novo Nordisk déjà en drawdown de -19%",
-        "Durée potentielle de 10 ans dans un contexte inflationniste érosif"
+        "Exposition massive au secteur financier (60%) en période de stress et stagflation",
+        "Risque de blocage prolongé jusqu'à 10 ans sans coupon si les banques italiennes restent sous pression",
+        "Choc pétrolier imminent (Brent >$103) pourrait aggraver la performance des financières européennes"
       ],
       "negotiationPoints": [],
       "scenarios": {
         "optimistic": {
-          "return_pct": 3.5,
-          "return_eur": 5250,
+          "return_pct": 7,
+          "return_eur": 10500,
           "probability": 0.15,
-          "duration_years": 1.5
+          "duration_years": 5
         },
         "base": {
-          "return_pct": 1.4,
-          "return_eur": 4200,
-          "probability": 0.3,
+          "return_pct": 2,
+          "return_eur": 6000,
+          "probability": 0.4,
           "duration_years": 10
         },
         "stress": {
           "return_pct": 0,
           "return_eur": 0,
-          "probability": 0.4,
+          "probability": 0.35,
           "duration_years": 10
         },
         "worst": {
           "return_pct": 0,
           "return_eur": 0,
-          "probability": 0.15,
+          "probability": 0.1,
           "duration_years": 10
         }
       },
@@ -721,8 +721,8 @@
         "label": "C [42-64]"
       },
       "metadata": {
-        "gradedAt": "2026-03-31T13:08:22.388Z",
-        "durationMs": 20948,
+        "gradedAt": "2026-03-31T13:20:04.819Z",
+        "durationMs": 23284,
         "aiUsed": true,
         "version": "5.2",
         "productType": "autocall",
@@ -938,55 +938,55 @@
           "score": 83,
           "base": 85,
           "delta": -2,
-          "reasoning": "Rendement: base 85 → -2 = 83 (En stagflation avec VIX à 22, la probabilité d'autocall rapide chute drastiquement, surtout pour BNP dans le secteur financier évité) | Coupon 7.5%, protégé | Mat espérée: ~1.3a (prob mat: 0%)"
+          "reasoning": "Rendement: base 85 → -2 = 83 (En stagflation avec VIX à 22, la probabilité d'autocall rapide diminue car BNP (financials, secteur évité) subira des pressions baissières) | Coupon 7.5%, protégé | Mat espérée: ~1.3a (prob mat: 0%)"
         },
         "underlyingQuality": {
           "score": 68,
           "base": 70,
           "delta": -2,
-          "reasoning": "Qualité: base 70 → -2 = 68 (BNP est dans le secteur financier explicitement évité (-1.63% momentum), avec beta 0.96 en régime stagflationnaire hostile aux banques) | Worst: Action BNP Paribas (FR0000131104) B:50"
+          "reasoning": "Qualité: base 70 → -2 = 68 (BNP dans le secteur financials explicitement évité (-1.63% momentum), beta proche de 1 en période de stagflation défavorable aux banques) | Worst: Action BNP Paribas (FR0000131104) B:50"
         },
         "portfolioFit": {
-          "score": 72,
+          "score": 70,
           "base": 70,
-          "delta": 2,
+          "delta": 0,
           "reasoning": "En portefeuille"
         },
         "riskPremium": {
           "score": 61,
           "base": 63,
           "delta": -2,
-          "reasoning": "Prime: base 63 → -2 = 61 (Spread de 7.5% paraît insuffisant vu le stress sectoriel sur les financières et la durée espérée qui s'allongera en stagflation) | 7.5% vs CAT 2.5% (spread 5.0%)"
+          "reasoning": "Prime: base 63 → -2 = 61 (Spread de 7.5% peut sembler attractif mais reflète le risque accru sur BNP en stagflation, durée espérée de 1.3a probablement sous-estimée) | 7.5% vs CAT 2.5% (spread 5.0%)"
         }
       },
-      "verdict": "Produit mal adapté au régime de stagflation actuel avec BNP dans le secteur financier évité (-1.63% momentum). Le capital garanti limite les pertes mais la probabilité d'autocall rapide est compromise avec VIX à 22 et stress sectoriel. Le coupon de 7.5% ne compense pas suffisamment le risque d'immobilisation prolongée (8 ans max) dans un contexte où les banques souffrent de la pentification de la courbe et du risque de crédit accru.",
+      "verdict": "Ce Phoenix sur BNP offre un coupon de 7.5% annualisé avec capital garanti, mais le contexte de stagflation pénalise fortement le secteur bancaire (-1.63% de momentum sectoriel). Avec un VIX à 22 et le pétrole à $103, BNP (beta 0.96) subira la volatilité du marché, réduisant les chances d'autocall rapide. Le capital garanti et la barrière à 60% protègent en cas de stress prolongé, mais l'investisseur doit se préparer à une détention potentiellement longue (8 ans max) avec des coupons trimestriels conditionnels.",
       "keyRisks": [
-        "Secteur financier explicitement évité en stagflation, BNP sous-performera",
-        "Durée réelle probablement >3 ans avec autocall compromise par volatilité élevée"
+        "Secteur financials évité en stagflation, BNP pourrait sous-performer significativement",
+        "Risque de blocage prolongé si BNP reste sous 100%, immobilisant 30k€ jusqu'à 8 ans"
       ],
       "negotiationPoints": [],
       "scenarios": {
         "optimistic": {
-          "return_pct": 7.5,
-          "return_eur": 2250,
-          "probability": 0.15,
-          "duration_years": 1
+          "return_pct": 9.4,
+          "return_eur": 2813,
+          "probability": 0.2,
+          "duration_years": 1.5
         },
         "base": {
-          "return_pct": 15,
-          "return_eur": 4500,
-          "probability": 0.35,
-          "duration_years": 2
-        },
-        "stress": {
-          "return_pct": 30,
-          "return_eur": 9000,
+          "return_pct": 7.5,
+          "return_eur": 15000,
           "probability": 0.35,
           "duration_years": 4
         },
+        "stress": {
+          "return_pct": 3.8,
+          "return_eur": 9000,
+          "probability": 0.3,
+          "duration_years": 6
+        },
         "worst": {
-          "return_pct": 60,
-          "return_eur": 18000,
+          "return_pct": 0,
+          "return_eur": 0,
           "probability": 0.15,
           "duration_years": 8
         }
@@ -1000,8 +1000,8 @@
         "label": "B [64-78]"
       },
       "metadata": {
-        "gradedAt": "2026-03-31T13:08:43.598Z",
-        "durationMs": 19709,
+        "gradedAt": "2026-03-31T13:20:28.106Z",
+        "durationMs": 21571,
         "aiUsed": true,
         "version": "5.2",
         "productType": "autocall",
@@ -1026,7 +1026,7 @@
         "adjustments": {
           "p1": -2,
           "p2": -2,
-          "p3": 2,
+          "p3": 0,
           "p4": -2
         },
         "barrier_sigma": null,
@@ -1209,13 +1209,13 @@
           "score": 78,
           "base": 79,
           "delta": -1,
-          "reasoning": "Rendement: base 79 → -1 = 78 (En stagflation avec taux courts élevés, l'indice TEC 10 risque de rester bas, réduisant fortement la probabilité du coupon conditionnel) | Coupon 6%, protégé | Mat espérée: ~1.2a (prob mat: 0%)"
+          "reasoning": "Rendement: base 79 → -1 = 78 (En stagflation avec taux longs sous pression, la probabilité d'atteindre le seuil autocall 24% sur TEC 10 est très faible) | Coupon 6%, protégé | Mat espérée: ~1.2a (prob mat: 0%)"
         },
         "underlyingQuality": {
           "score": 34,
           "base": 35,
           "delta": -1,
-          "reasoning": "Qualité: base 35 → -1 = 34 (Contexte stagflationniste défavorable aux taux longs, pentification de courbe et stress volatilité pénalisent fortement le TEC 10)"
+          "reasoning": "Qualité: base 35 → -1 = 34 (L'indice TEC 10 (taux d'État 10 ans) souffre en stagflation avec pentification de courbe et pressions inflationnistes)"
         },
         "portfolioFit": {
           "score": 70,
@@ -1227,39 +1227,38 @@
           "score": 48,
           "base": 49,
           "delta": -1,
-          "reasoning": "Prime: base 49 → -1 = 48 (Spread de 0.51% faible pour un produit complexe en environnement stagflationniste avec volatilité élevée) | 6% vs CAT 2.5% (spread 3.5%)"
+          "reasoning": "Prime: base 49 → -1 = 48 (Spread peu attractif en environnement stagflationniste où les taux montent structurellement) | 6% vs CAT 2.5% (spread 3.5%)"
         }
       },
-      "verdict": "En régime stagflationnaire avec VIX à 22 et choc pétrolier en cours, ce produit sur TEC 10 offre une protection capitale bienvenue mais des perspectives de rendement très limitées. Le coupon conditionnel de 6% semble irréaliste avec des taux longs sous pression et une pentification de courbe qui pénalise l'indice TEC 10. Score final ajusté de 55 à 25 (D), le capital garanti étant le seul atout dans ce contexte macro hostile où la Fed pourrait surprendre hawkish.",
+      "verdict": "Ce TARN sur TEC 10 offre un coupon conditionnel de 6% avec capital garanti, mais en régime stagflationniste les taux longs français devraient monter (actuellement ~3%), rendant l'autocall à 24% quasi-impossible. Le produit se comportera comme une obligation zéro-coupon de 10 ans avec des coupons sporadiques si le TEC 10 baisse temporairement. Score ajusté: 40/100 reflète la faible attractivité en contexte de taux haussiers où un simple BTF offrirait 3-4% sans condition.",
       "keyRisks": [
-        "Probabilité quasi-nulle d'atteindre le seuil de coupon avec TEC 10 plombé par la stagflation",
-        "Duration longue (10 ans) avec rendement potentiellement nul dans un contexte inflationniste",
-        "Coût d'opportunité élevé vs TIPS ou obligations courtes en environnement stagflationniste"
+        "Risque de bloquer le capital 10 ans sans coupon si taux restent élevés",
+        "Coût d'opportunité élevé vs obligations d'État classiques en période de taux hauts"
       ],
       "negotiationPoints": [],
       "scenarios": {
         "optimistic": {
-          "return_pct": 1.2,
-          "return_eur": 1200,
+          "return_pct": 6,
+          "return_eur": 6000,
           "probability": 0.1,
           "duration_years": 1
         },
         "base": {
-          "return_pct": 0,
-          "return_eur": 0,
-          "probability": 0.5,
-          "duration_years": 10
+          "return_pct": 2,
+          "return_eur": 6000,
+          "probability": 0.3,
+          "duration_years": 3
         },
         "stress": {
           "return_pct": 0,
           "return_eur": 0,
-          "probability": 0.3,
+          "probability": 0.45,
           "duration_years": 10
         },
         "worst": {
           "return_pct": 0,
           "return_eur": 0,
-          "probability": 0.1,
+          "probability": 0.15,
           "duration_years": 10
         }
       },
@@ -1272,8 +1271,8 @@
         "label": "C [45-63]"
       },
       "metadata": {
-        "gradedAt": "2026-03-31T13:09:05.238Z",
-        "durationMs": 20138,
+        "gradedAt": "2026-03-31T13:20:49.523Z",
+        "durationMs": 18989,
         "aiUsed": true,
         "version": "5.2",
         "productType": "capital_garanti",
