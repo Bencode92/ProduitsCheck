@@ -250,13 +250,13 @@
         "score": 19,
         "base": 28,
         "delta": -9,
-        "reasoning": "Rendement: base 28 → -9 = 19 (Barrières à 95% difficiles en stagflation avec 2 SJ tech/financials sous pression et ENR très volatil (60%)) | Coupon 9.7%, barrière 60% | Barr.coupon 95% | Mat espérée: ~3.3a (prob mat: 24%)"
+        "reasoning": "Rendement: base 28 → -9 = 19 (Barrière coupon à 95% très exigeante en stagflation avec ENR (vol 60%, DD -72%) et ASML (tech évité, beta 1.29) fragilisent la probabilité de toucher les coupons) | Coupon 9.7%, barrière 60% | Barr.coupon 95% | Mat espérée: ~3.3a (prob mat: 24%)"
       },
       "underlyingQuality": {
         "score": 24,
         "base": 33,
         "delta": -9,
-        "reasoning": "Qualité: base 33 → -9 = 24 (3 SJ sur 4 dans secteurs évités (ISP/SAN financials, ASML tech) avec betas élevés en régime hostile) | Worst: Intesa Sanpaolo S.p.A. B:25"
+        "reasoning": "Qualité: base 33 → -9 = 24 (3 sous-jacents sur 4 dans des secteurs évités (ISP/SAN financials, ASML tech) avec betas élevés et seul ENR (energy) favorisé mais ultra-volatil) | Worst: Intesa Sanpaolo S.p.A. B:25"
       },
       "portfolioFit": {
         "score": 80,
@@ -268,14 +268,14 @@
         "score": 0,
         "base": 5,
         "delta": -5,
-        "reasoning": "Prime: base 5 → -5 = 0 (Score D justifié mais spread vs risque réel insuffisant avec VIX 22 et stress flags actifs) | 9.7% vs CAT 2.5% (spread 7.2%)"
+        "reasoning": "Prime: base 5 → -5 = 0 (Note D justifiée, spread implicite trompeur avec worst-of 4 sous-jacents dont 3 secteurs évités) | 9.7% vs CAT 2.5% (spread 7.2%)"
       }
     },
-    "verdict": "Produit très risqué en stagflation avec 75% des sous-jacents dans des secteurs à éviter selon le MI. Le coupon de 9.7% ne compense pas l'exposition à ENR (DD -72%, vol 60%) et aux financials européennes sous pression de taux. Avec une probabilité de maturité de seulement 24% et des barrières hautes à 95%, le risque de blocage prolongé sans coupon est élevé dans ce régime macro hostile.",
+    "verdict": "Produit très risqué en régime stagflationniste avec 75% des sous-jacents dans des secteurs évités par le marché. La barrière coupon à 95% combinée à la volatilité extrême d'ENR (60%) et aux pressions sur les financières (ISP/SAN) et la tech (ASML) rendent les coupons très incertains. Le worst-of à 4 sous-jacents avec des corrélations sectorielles défavorables amplifie le risque de perte en capital (-60% de protection seulement).",
     "keyRisks": [
-      "ENR en DD sévère (-72%) avec volatilité extrême incompatible avec barrière 95%",
-      "Exposition massive aux secteurs évités (tech/financials) en stagflation",
-      "Choc pétrolier >$110 pourrait déclencher correction généralisée",
+      "Concentration sectorielle négative: 3/4 sous-jacents dans secteurs évités en stagflation",
+      "ENR ultra-volatil (60%) malgré secteur energy favorisé, DD déjà à -72%",
+      "Barrière coupon 95% irréaliste avec worst-of 4 actifs en stress macro",
       "Barrière à 0.34σ (Critique) — vol 60.47%"
     ],
     "negotiationPoints": [],
@@ -287,10 +287,10 @@
         "duration_years": 1
       },
       "base": {
-        "return_pct": 4.85,
-        "return_eur": 16005,
+        "return_pct": 4.8,
+        "return_eur": 14400,
         "probability": 0.3,
-        "duration_years": 3.3
+        "duration_years": 3
       },
       "stress": {
         "return_pct": 0,
@@ -314,8 +314,8 @@
       "label": "F [12-34]"
     },
     "metadata": {
-      "gradedAt": "2026-03-31T13:10:55.729Z",
-      "durationMs": 22199,
+      "gradedAt": "2026-03-31T13:22:40.170Z",
+      "durationMs": 21634,
       "aiUsed": true,
       "version": "5.2",
       "productType": "autocall",
