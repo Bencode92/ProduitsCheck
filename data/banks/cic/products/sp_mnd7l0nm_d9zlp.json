@@ -236,18 +236,18 @@
   "_couponProbability": 25.8,
   "_bsRendementNet": 1.59,
   "grading": {
-    "grade": "B",
-    "score": 67,
+    "grade": "C",
+    "score": 49,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 45,
+        "score": 50,
         "base": 61,
         "delta": -16,
-        "reasoning": "BS: WO probs: 46% x 45% = 23.9% (corr adj) | Memoire: prob x 1.08 = 25.8% | Rdt net: 1.6% - 0.0% = 1.6%/an | Spread vs CAT: -0.9%",
+        "reasoning": "BS: WO probs: 46% x 45% = 23.9% (corr adj) | Memoire: prob x 1.08 = 25.8% | Rdt net: 1.6% - 0.0% = 1.6%/an | Spread vs CAT: -0.9% | v6: +5pts (mémoire+5)",
         "_bs": {
           "score": 45,
           "probCoupon": 25.8,
@@ -257,37 +257,38 @@
           "rendementNet": 1.59,
           "drag": 0,
           "vols": [
-            29.28,
+            29.29,
             30
           ],
           "matEsperee": 3,
           "reasoning": "WO probs: 46% x 45% = 23.9% (corr adj) | Memoire: prob x 1.08 = 25.8% | Rdt net: 1.6% - 0.0% = 1.6%/an",
-          "method": "BS-simplifie-v1.1"
+          "method": "BS-simplifie-v1.2"
         }
       },
       "underlyingQuality": {
-        "score": 72,
-        "base": 74,
+        "score": 58,
+        "base": 60,
         "delta": -2,
-        "reasoning": "Qualité: base 74 → -2 = 72 (ACA dans financials évités (-1.63% momentum), LVMH luxe cyclique vulnérable si récession, betas <1 peu protecteurs en stagflation) | Worst: Crédit Agricole S.A. B:79"
+        "reasoning": "Qualité: base 60 → -2 = 58 (ACA dans financials (secteur évité, -1.63% momentum) et LVMH sensible au ralentissement chinois en stagflation) | Worst: Crédit Agricole S.A. B:40"
       },
       "portfolioFit": {
-        "score": 82,
+        "score": 60,
         "base": 80,
         "delta": 2,
-        "reasoning": "Fit: base 80 → +2 = 82 (Capital garanti très pertinent en régime stagflationnaire avec VIX à 22 et rotation sectorielle violente)"
+        "reasoning": "Fit: base 50 → 60 (worst-of, capital_garanti) | Fit: base 80 → +2 = 82 (Capital garanti offre protection bienvenue en stagflation avec VIX 22 et choc pétrolier potentiel)"
       },
       "riskPremium": {
-        "score": 77,
+        "score": 35,
         "base": 15,
         "delta": 0,
-        "reasoning": "Capital garanti: spread 6.2% - CAT 2.5% - illiq 0.3% = 3.3%"
+        "reasoning": "Capital garanti: spread 6.2% - CAT 2.5% - illiq 0.3% = 3.3% | v6-BS: P4 77→35 (rdtNet BS=1.6% vs CAT 2.5%)"
       }
     },
-    "verdict": "Produit défensif adapté au régime stagflationnaire grâce au capital garanti, mais coupon de 6.15% très incertain avec barrière à 100% sur worst-of incluant ACA (financials -1.63%) secteur évité. Le DD de 21.42% sur ACA suggère une probabilité élevée de non-paiement des coupons. Score final de 51/100 reflète la protection du capital mais la faible espérance de rendement en contexte macro adverse.",
+    "verdict": "Produit à capital garanti peu attractif en stagflation avec barrière coupon 100% difficile à atteindre. ACA (financials évitées, beta 0.83) particulièrement vulnérable avec Brent >$100 pesant sur les marges bancaires. Le rendement potentiel de 6.15% ne compense pas le risque élevé de 0% coupon sur 3 ans, surtout avec le worst-of amplifiant la probabilité d'échec.",
     "keyRisks": [
-      "Forte probabilité de 0% coupon avec ACA dans financials évités en stagflation",
-      "Worst-of amplifie le risque avec 2 secteurs cycliques vulnérables"
+      "Forte probabilité de 0% coupon avec barrière 100% en stagflation",
+      "ACA dans secteur financials évité avec momentum -1.63%",
+      "Choc pétrolier >$110 pourrait déclencher récession"
     ],
     "negotiationPoints": [],
     "scenarios": {
@@ -298,37 +299,37 @@
         "duration_years": 3
       },
       "base": {
-        "return_pct": 2,
-        "return_eur": 6000,
-        "probability": 0.3,
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.5,
         "duration_years": 3
       },
       "stress": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.4,
+        "probability": 0.25,
         "duration_years": 3
       },
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.15,
+        "probability": 0.1,
         "duration_years": 3
       }
     },
     "confidenceInterval": {
-      "low": 56,
-      "high": 70,
+      "low": 52,
+      "high": 66,
       "halfWidth": 7,
       "gradeStable": false,
       "gradeRange": "C-B",
-      "label": "B [56-70]"
+      "label": "C [52-66]"
     },
     "metadata": {
-      "gradedAt": "2026-03-30T16:03:18.459Z",
-      "durationMs": 20194,
+      "gradedAt": "2026-03-31T08:36:29.990Z",
+      "durationMs": 17204,
       "aiUsed": true,
-      "version": "5.2",
+      "version": "6.1",
       "productType": "capital_garanti",
       "marketDataAvailable": true,
       "catBenchmark": 2.5,
@@ -345,8 +346,8 @@
       "expectedMaturity": 3,
       "maxMaturity": 3,
       "maxBeta": 0.89,
-      "baseScore": 64,
-      "baseGrade": "B",
+      "baseScore": 59,
+      "baseGrade": "C",
       "adjustments": {
         "p1": -2,
         "p2": -2,
@@ -359,48 +360,57 @@
       "liquidity_level": "L4",
       "liquidity_score": 10,
       "liquidity_label": "Illiquide",
-      "ci_low": 56,
-      "ci_high": 70,
-      "ci_label": "B [56-70]",
+      "ci_low": 52,
+      "ci_high": 66,
+      "ci_label": "C [52-66]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
       "decrementDrag": 0,
       "structureType": "capital_garanti",
-      "bsMethod": "BS-simplifie-v1.1",
+      "bsMethod": "BS-simplifie-v1.2",
       "bsProbCoupon": 25.8,
       "bsRendementNet": 1.59,
       "bsPerteEsperee": 0,
       "bsCouponEffectif": 6.15,
       "bsVols": [
-        29.28,
+        29.29,
         30
       ],
       "bsMatEsperee": 3,
+      "isBasket": false,
+      "v6Weights": {
+        "p1": 0.3,
+        "p2": 0.15,
+        "p3": 0.25,
+        "p4": 0.3
+      },
+      "p3Recalibrated": true,
+      "p4BsCorrected": true,
       "stockData": [
         {
           "name": "LVMH Moët Hennessy Louis Vuitton SA",
           "ticker": "MC",
           "sector": "Biens de consommation cycliques",
-          "perf_ytd": -29.34,
-          "perf_1y": -20.75,
-          "volatility_3y": 29.28,
+          "perf_ytd": -28.12,
+          "perf_1y": -19.39,
+          "volatility_3y": 29.29,
           "max_drawdown_3y": 51.49,
-          "buffett_score": 81,
-          "quality_score": 65,
+          "buffett_score": 83,
+          "quality_score": 66,
           "buffett_grade": "A"
         },
         {
           "name": "Crédit Agricole S.A.",
           "ticker": "ACA",
           "sector": "Finance",
-          "perf_ytd": -9.57,
-          "perf_1y": -6.7,
-          "volatility_3y": 21.28,
+          "perf_ytd": -9.69,
+          "perf_1y": -6.96,
+          "volatility_3y": 21.24,
           "max_drawdown_3y": 21.42,
-          "buffett_score": null,
-          "quality_score": 79,
-          "buffett_grade": null
+          "buffett_score": 40,
+          "quality_score": 80,
+          "buffett_grade": "C"
         }
       ]
     }
