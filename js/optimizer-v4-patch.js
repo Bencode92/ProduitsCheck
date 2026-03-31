@@ -365,6 +365,7 @@
             };
         }
 
+        buildStructuredOptimization._v4Patched = true;
         console.log('[optimizer-v4] Patch applied: dynamic threshold + envelope constraints + ne rien faire + diversification warnings');
         return true;
     }

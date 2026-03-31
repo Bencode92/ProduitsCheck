@@ -215,6 +215,8 @@
 
   function _patch() {
     if (typeof buildStructuredOptimization !== 'function') return false;
+    // Wait for v4 to wrap first — v5 MUST be outermost
+    if (!buildStructuredOptimization._v4Patched) return false;
 
     var _prevBuild = buildStructuredOptimization;
 
