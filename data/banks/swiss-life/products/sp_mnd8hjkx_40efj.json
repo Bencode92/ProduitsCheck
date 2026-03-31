@@ -234,7 +234,7 @@
   "_bsRendementNet": 3.71,
   "grading": {
     "grade": "D",
-    "score": 39,
+    "score": 40,
     "killCriteria": {
       "triggered": false,
       "reasons": []
@@ -244,19 +244,19 @@
         "score": 45,
         "base": 46,
         "delta": -1,
-        "reasoning": "Rendement: base 46 → -1 = 45 (Barrière à 91% trop proche du spot en stagflation avec ISP dans le secteur financier évité (DD 21%, vol 25%)) | Coupon 3%, protégé | Barr.coupon 91% | Mat espérée: ~1.4a (prob mat: 0%)"
+        "reasoning": "Rendement: base 46 → -1 = 45 (En stagflation avec ISP dans un secteur évité (-1.63% momentum), la probabilité de maintien au-dessus de 91% sur 10 ans est fortement réduite) | Coupon 3%, protégé | Barr.coupon 91% | Mat espérée: ~1.4a (prob mat: 0%)"
       },
       "underlyingQuality": {
         "score": 58,
         "base": 59,
         "delta": -1,
-        "reasoning": "Qualité: base 59 → -1 = 58 (ISP dans secteur financier ÉVITÉ par MI (-1.63% momentum) + beta 0.85 en régime stagflation défavorable aux banques) | Worst: Intesa Sanpaolo S.p.A. B:25"
+        "reasoning": "Qualité: base 59 → -1 = 58 (ISP est une banque italienne dans le secteur financials explicitement évité par le MI, avec beta 0.85 exposé au stress stagflationniste) | Worst: Intesa Sanpaolo S.p.A. B:25"
       },
       "portfolioFit": {
-        "score": 79,
+        "score": 81,
         "base": 80,
-        "delta": -1,
-        "reasoning": "Fit: base 80 → -1 = 79 (Capital garanti mais coupon 3% insuffisant vs inflation PCE 2.83% en stagflation = rendement réel négatif)"
+        "delta": 1,
+        "reasoning": "Fit: base 80 → +1 = 81 (Capital garanti offre une protection précieuse en régime stagflationniste, mais rendement 3% insuffisant face à l'inflation)"
       },
       "riskPremium": {
         "score": 8,
@@ -265,29 +265,29 @@
         "reasoning": "Prime: base 8 | 3% vs CAT 2.5% (spread 0.5%)"
       }
     },
-    "verdict": "Produit INADAPTÉ au contexte stagflationniste actuel. ISP (secteur financier évité, -1.63% momentum) avec barrière coupon à 91% trop risquée vu la volatilité 25% et le drawdown 21%. Le capital garanti est positif mais le rendement réel est NÉGATIF (3% coupon - 2.83% inflation). Avec VIX à 22 et stress énergétique, la probabilité de toucher les coupons est faible sur 10 ans.",
+    "verdict": "Produit inadapté au contexte stagflationniste actuel. ISP, banque italienne dans le secteur financials évité (momentum -1.63%), présente un risque élevé sur 10 ans malgré le capital garanti. Avec seulement 3% annualisé face à une inflation PCE à 2.83% et Brent >$100, le rendement réel est négatif. La probabilité de maturation à 0% et l'espérance à 1.4 ans suggèrent un risque de blocage prolongé sous le seuil autocall de 91%.",
     "keyRisks": [
-      "ISP dans secteur financier ÉVITÉ en stagflation avec momentum négatif -1.63%",
-      "Rendement réel négatif: coupon 3% < inflation PCE 2.83%",
-      "Barrière 91% vulnérable avec volatilité 25% et choc pétrolier potentiel"
+      "Rendement réel négatif en stagflation (3% - inflation >2.83%)",
+      "ISP dans secteur financials évité avec risque de stress bancaire européen",
+      "Durée potentielle de 10 ans avec capital bloqué à rendement insuffisant"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 3,
-        "return_eur": 3000,
-        "probability": 0.15,
-        "duration_years": 1
+        "return_eur": 4200,
+        "probability": 0.2,
+        "duration_years": 1.4
       },
       "base": {
-        "return_pct": 1.5,
+        "return_pct": 3,
         "return_eur": 15000,
-        "probability": 0.35,
-        "duration_years": 10
+        "probability": 0.3,
+        "duration_years": 5
       },
       "stress": {
-        "return_pct": 0,
-        "return_eur": 0,
+        "return_pct": 3,
+        "return_eur": 30000,
         "probability": 0.35,
         "duration_years": 10
       },
@@ -299,16 +299,16 @@
       }
     },
     "confidenceInterval": {
-      "low": 32,
-      "high": 46,
+      "low": 33,
+      "high": 47,
       "halfWidth": 7,
       "gradeStable": false,
       "gradeRange": "D-C",
-      "label": "D [32-46]"
+      "label": "D [33-47]"
     },
     "metadata": {
-      "gradedAt": "2026-03-31T13:09:25.910Z",
-      "durationMs": 19171,
+      "gradedAt": "2026-03-31T13:21:11.864Z",
+      "durationMs": 20329,
       "aiUsed": true,
       "version": "5.2",
       "productType": "autocall",
@@ -333,7 +333,7 @@
       "adjustments": {
         "p1": -1,
         "p2": -1,
-        "p3": -1,
+        "p3": 1,
         "p4": 0
       },
       "barrier_sigma": null,
@@ -342,9 +342,9 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 32,
-      "ci_high": 46,
-      "ci_label": "D [32-46]",
+      "ci_low": 33,
+      "ci_high": 47,
+      "ci_label": "D [33-47]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
