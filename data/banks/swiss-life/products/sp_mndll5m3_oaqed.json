@@ -250,32 +250,32 @@
         "score": 19,
         "base": 28,
         "delta": -9,
-        "reasoning": "Rendement: base 28 → -9 = 19 (Barrière coupon à 95% vulnérable avec ENR volatilité 60% et 3 SJ dans secteurs évités en stagflation) | Coupon 9.7%, barrière 60% | Barr.coupon 95% | Mat espérée: ~3.3a (prob mat: 24%)"
+        "reasoning": "Rendement: base 28 → -9 = 19 (Barrières à 95% difficiles en stagflation avec 2 SJ tech/financials sous pression et ENR très volatil (60%)) | Coupon 9.7%, barrière 60% | Barr.coupon 95% | Mat espérée: ~3.3a (prob mat: 24%)"
       },
       "underlyingQuality": {
         "score": 24,
         "base": 33,
         "delta": -9,
-        "reasoning": "Qualité: base 33 → -9 = 24 (3/4 SJ dans secteurs évités (ASML tech, ISP/SAN financials), seul ENR dans energy favorisé mais très volatil) | Worst: Intesa Sanpaolo S.p.A. B:25"
+        "reasoning": "Qualité: base 33 → -9 = 24 (3 SJ sur 4 dans secteurs évités (ISP/SAN financials, ASML tech) avec betas élevés en régime hostile) | Worst: Intesa Sanpaolo S.p.A. B:25"
       },
       "portfolioFit": {
-        "score": 85,
+        "score": 80,
         "base": 80,
-        "delta": 5,
-        "reasoning": "Fit: base 80 → +5 = 85 (Diversification sectorielle offre protection partielle contre rotation stagflationniste)"
+        "delta": 0,
+        "reasoning": "Fit: base 80"
       },
       "riskPremium": {
         "score": 0,
         "base": 5,
         "delta": -5,
-        "reasoning": "Prime: base 5 → -5 = 0 (Spread déjà ajusté mais reste optimiste vu le stress macro et 3 SJ dans secteurs sous pression) | 9.7% vs CAT 2.5% (spread 7.2%)"
+        "reasoning": "Prime: base 5 → -5 = 0 (Score D justifié mais spread vs risque réel insuffisant avec VIX 22 et stress flags actifs) | 9.7% vs CAT 2.5% (spread 7.2%)"
       }
     },
-    "verdict": "Produit très mal positionné pour le régime stagflationniste actuel avec 75% des sous-jacents dans des secteurs évités (tech/financials). Le worst-of ISP (financials) avec beta 0.85 reste vulnérable aux pressions de taux, tandis qu'ENR (energy) offre peu de protection malgré son secteur favorisé vu sa volatilité extrême de 60%. La barrière coupon à 95% paraît ambitieuse dans ce contexte de VIX à 22 et Brent >$100, suggérant une probabilité de non-paiement élevée sur les premières années.",
+    "verdict": "Produit très risqué en stagflation avec 75% des sous-jacents dans des secteurs à éviter selon le MI. Le coupon de 9.7% ne compense pas l'exposition à ENR (DD -72%, vol 60%) et aux financials européennes sous pression de taux. Avec une probabilité de maturité de seulement 24% et des barrières hautes à 95%, le risque de blocage prolongé sans coupon est élevé dans ce régime macro hostile.",
     "keyRisks": [
-      "Rotation sectorielle défavorable: 3/4 SJ dans secteurs évités en stagflation",
-      "Risque de rappel prématuré limité vu barrière 95% et volatilités élevées",
-      "Choc pétrolier >$110 pourrait déclencher correction violente sur tech/financials",
+      "ENR en DD sévère (-72%) avec volatilité extrême incompatible avec barrière 95%",
+      "Exposition massive aux secteurs évités (tech/financials) en stagflation",
+      "Choc pétrolier >$110 pourrait déclencher correction généralisée",
       "Barrière à 0.34σ (Critique) — vol 60.47%"
     ],
     "negotiationPoints": [],
@@ -287,10 +287,10 @@
         "duration_years": 1
       },
       "base": {
-        "return_pct": 19.4,
-        "return_eur": 19400,
+        "return_pct": 4.85,
+        "return_eur": 16005,
         "probability": 0.3,
-        "duration_years": 2
+        "duration_years": 3.3
       },
       "stress": {
         "return_pct": 0,
@@ -299,8 +299,8 @@
         "duration_years": 6
       },
       "worst": {
-        "return_pct": -25,
-        "return_eur": -25000,
+        "return_pct": -40,
+        "return_eur": -40000,
         "probability": 0.2,
         "duration_years": 6
       }
@@ -314,8 +314,8 @@
       "label": "F [12-34]"
     },
     "metadata": {
-      "gradedAt": "2026-03-31T12:16:03.813Z",
-      "durationMs": 21309,
+      "gradedAt": "2026-03-31T13:10:55.729Z",
+      "durationMs": 22199,
       "aiUsed": true,
       "version": "5.2",
       "productType": "autocall",
@@ -340,7 +340,7 @@
       "adjustments": {
         "p1": -9,
         "p2": -9,
-        "p3": 5,
+        "p3": 0,
         "p4": -5
       },
       "barrier_sigma": 0.34,
