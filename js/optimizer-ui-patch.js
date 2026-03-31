@@ -165,7 +165,7 @@
                 html += '<tr style="border-bottom:1px solid var(--border)">';
                 html += '<td style="padding:10px 12px"><strong style="color:var(--text-bright)">' + (p.name || '').substring(0, 30) + '</strong><div style="font-size:9px;color:var(--text-dim)">' + (p.bankName || '') + prob + '</div></td>';
                 html += '<td style="padding:10px 6px;text-align:center"><span style="display:inline-block;width:26px;height:26px;line-height:26px;text-align:center;border-radius:6px;background:' + gc + '22;color:' + gc + ';font-weight:700;font-size:13px">' + p.grade + '</span></td>';
-                html += '<td style="padding:10px 6px;text-align:center;font-family:var(--mono);font-weight:700;color:var(--green);font-size:13px">' + p.coupon + '%</td>';
+                html += '<td style="padding:10px 6px;text-align:center;font-family:var(--mono);font-weight:700;color:var(--green);font-size:13px">' + (typeof p.coupon === 'number' ? p.coupon.toFixed(1) : (parseFloat(p.coupon) || 0).toFixed(1)) + '%</td>';
                 html += '<td style="padding:10px 6px;text-align:right;font-family:var(--mono);font-weight:700;color:var(--cyan);font-size:13px">' + fmt(p.allocatedAmount) + '\u20ac</td>';
                 html += '<td style="padding:10px 6px;text-align:right;font-family:var(--mono);font-weight:600;color:var(--green)">+' + fmt(er) + '\u20ac</td>';
                 html += '<td style="padding:10px 6px;text-align:right;font-family:var(--mono);font-weight:600;color:' + ((p.excessVsCat || 0) >= 0 ? 'var(--green)' : 'var(--red)') + '">' + ((p.excessVsCat || 0) >= 0 ? '+' : '') + fmt(p.excessVsCat || 0) + '\u20ac</td>';
@@ -192,13 +192,13 @@
                 html += '<div style="padding:6px 14px;max-height:120px;overflow-y:auto">';
                 a.portfolioAnalysis.forEach(function(p) {
                     var gc = { A:'#06D6A0', B:'#4ECDC4', C:'#FFB627', D:'#E85D04', F:'#EF233C' }[p.grade] || '#888';
-                    html += '<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:10px"><span><span style="display:inline-block;width:16px;height:16px;line-height:16px;text-align:center;border-radius:4px;background:' + gc + '22;color:' + gc + ';font-weight:700;font-size:9px;margin-right:6px">' + (p.grade || '?') + '</span>' + (p.name || '').substring(0, 30) + '</span><span style="font-family:var(--mono);color:var(--text-dim)">' + fmt(p.amount) + '\u20ac \u00e0 ' + p.coupon + '% = +' + fmt(p.annualReturn) + '\u20ac</span></div>';
+                    html += '<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:10px"><span><span style="display:inline-block;width:16px;height:16px;line-height:16px;text-align:center;border-radius:4px;background:' + gc + '22;color:' + gc + ';font-weight:700;font-size:9px;margin-right:6px">' + (p.grade || '?') + '</span>' + (p.name || '').substring(0, 30) + '</span><span style="font-family:var(--mono);color:var(--text-dim)">' + fmt(p.amount) + '\u20ac \u00e0 ' + (typeof p.coupon === 'number' ? p.coupon.toFixed(1) : (parseFloat(p.coupon) || 0).toFixed(1)) + '% = +' + fmt(p.annualReturn) + '\u20ac</span></div>';
                 });
                 html += '</div></div>';
             }
             if (r.nonAlloc.length > 0) {
                 html += '<div style="border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:16px"><div style="padding:8px 14px;background:var(--bg-elevated)"><span style="font-size:11px;font-weight:600;color:var(--text-dim)">\u274c \u00c9cart\u00e9s (' + r.nonAlloc.length + ')</span></div><div style="padding:6px 14px">';
-                r.nonAlloc.forEach(function(p) { html += '<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:10px;' + (p.recommendation === 'REJETER' ? 'opacity:0.5' : '') + '"><span>' + (p.name || '').substring(0, 35) + '</span><span style="color:' + (p.recommendation === 'ATTENDRE' ? 'var(--orange)' : 'var(--red)') + ';font-weight:600">' + p.recommendation + ' ' + p.coupon + '% ' + p.grade + '</span></div>'; });
+                r.nonAlloc.forEach(function(p) { html += '<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:10px;' + (p.recommendation === 'REJETER' ? 'opacity:0.5' : '') + '"><span>' + (p.name || '').substring(0, 35) + '</span><span style="color:' + (p.recommendation === 'ATTENDRE' ? 'var(--orange)' : 'var(--red)') + ';font-weight:600">' + p.recommendation + ' ' + (typeof p.coupon === 'number' ? p.coupon.toFixed(1) : (parseFloat(p.coupon) || 0).toFixed(1)) + '% ' + p.grade + '</span></div>'; });
                 html += '</div></div>';
             }
             return html;
@@ -229,7 +229,7 @@
             html += res.html;
             if (res.nonAlloc.length > 0) {
                 html += '<div style="border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:16px"><div style="padding:6px 14px;background:var(--bg-elevated)"><span style="font-size:10px;font-weight:600;color:var(--text-dim)">\u274c \u00c9cart\u00e9s (' + res.nonAlloc.length + ')</span></div><div style="padding:4px 14px">';
-                res.nonAlloc.forEach(function(p) { html += '<div style="display:flex;justify-content:space-between;padding:2px 0;font-size:10px;opacity:0.6"><span>' + (p.name || '').substring(0, 30) + '</span><span style="color:var(--red)">' + p.coupon + '% ' + p.grade + '</span></div>'; });
+                res.nonAlloc.forEach(function(p) { html += '<div style="display:flex;justify-content:space-between;padding:2px 0;font-size:10px;opacity:0.6"><span>' + (p.name || '').substring(0, 30) + '</span><span style="color:var(--red)">' + (typeof p.coupon === 'number' ? p.coupon.toFixed(1) : (parseFloat(p.coupon) || 0).toFixed(1)) + '% ' + p.grade + '</span></div>'; });
                 html += '</div></div>';
             }
             if (r.summary) {
