@@ -169,39 +169,38 @@
         "score": 83,
         "base": 85,
         "delta": -2,
-        "reasoning": "Rendement: base 85 → -2 = 83 (En stagflation, BNP (financials évité, -1.63% momentum) aura du mal à franchir le seuil 100% pour déclencher l'autocall, réduisant la probabilité de coupons rapides) | Coupon 7.5%, protégé | Mat espérée: ~1.3a (prob mat: 0%)"
+        "reasoning": "Rendement: base 85 → -2 = 83 (En stagflation avec VIX à 22, la probabilité d'autocall rapide chute drastiquement, surtout pour BNP dans le secteur financier évité) | Coupon 7.5%, protégé | Mat espérée: ~1.3a (prob mat: 0%)"
       },
       "underlyingQuality": {
         "score": 68,
         "base": 70,
         "delta": -2,
-        "reasoning": "Qualité: base 70 → -2 = 68 (Secteur financials explicitement évité en stagflation avec momentum négatif (-1.63%), beta proche de 1 amplifie l'exposition au stress macro) | Worst: Action BNP Paribas (FR0000131104) B:50"
+        "reasoning": "Qualité: base 70 → -2 = 68 (BNP est dans le secteur financier explicitement évité (-1.63% momentum), avec beta 0.96 en régime stagflationnaire hostile aux banques) | Worst: Action BNP Paribas (FR0000131104) B:50"
       },
       "portfolioFit": {
-        "score": 70,
+        "score": 72,
         "base": 70,
-        "delta": 0,
+        "delta": 2,
         "reasoning": "En portefeuille"
       },
       "riskPremium": {
         "score": 61,
         "base": 63,
         "delta": -2,
-        "reasoning": "Prime: base 63 → -2 = 61 (Spread attractif mais potentiellement trompeur vu le contexte sectoriel défavorable et le VIX élevé à 22) | 7.5% vs CAT 2.5% (spread 5.0%)"
+        "reasoning": "Prime: base 63 → -2 = 61 (Spread de 7.5% paraît insuffisant vu le stress sectoriel sur les financières et la durée espérée qui s'allongera en stagflation) | 7.5% vs CAT 2.5% (spread 5.0%)"
       }
     },
-    "verdict": "Ce Phoenix sur BNP présente un profil risqué en stagflation actuelle. Le secteur financials est explicitement évité (momentum -1.63%) et BNP, avec son beta de 0.96, subira pleinement le stress macro. La barrière à 60% offre certes une protection confortable (42.88% de marge), mais la probabilité d'autocall rapide est faible avec le seuil à 100%. Le coupon de 7.5% est attractif mais reflète les risques sectoriels élevés dans un contexte de hausse des taux et choc pétrolier.",
+    "verdict": "Produit mal adapté au régime de stagflation actuel avec BNP dans le secteur financier évité (-1.63% momentum). Le capital garanti limite les pertes mais la probabilité d'autocall rapide est compromise avec VIX à 22 et stress sectoriel. Le coupon de 7.5% ne compense pas suffisamment le risque d'immobilisation prolongée (8 ans max) dans un contexte où les banques souffrent de la pentification de la courbe et du risque de crédit accru.",
     "keyRisks": [
-      "Secteur financials évité en stagflation avec momentum négatif persistant",
-      "Risque de bear steepening si la Fed reste hawkish face à l'inflation >2.5%",
-      "Choc pétrolier potentiel (Brent >$110) impactant les marges bancaires"
+      "Secteur financier explicitement évité en stagflation, BNP sous-performera",
+      "Durée réelle probablement >3 ans avec autocall compromise par volatilité élevée"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 7.5,
         "return_eur": 2250,
-        "probability": 0.2,
+        "probability": 0.15,
         "duration_years": 1
       },
       "base": {
@@ -213,12 +212,12 @@
       "stress": {
         "return_pct": 30,
         "return_eur": 9000,
-        "probability": 0.3,
+        "probability": 0.35,
         "duration_years": 4
       },
       "worst": {
-        "return_pct": 0,
-        "return_eur": 0,
+        "return_pct": 60,
+        "return_eur": 18000,
         "probability": 0.15,
         "duration_years": 8
       }
@@ -232,8 +231,8 @@
       "label": "B [64-78]"
     },
     "metadata": {
-      "gradedAt": "2026-03-31T12:13:55.569Z",
-      "durationMs": 19065,
+      "gradedAt": "2026-03-31T13:08:43.598Z",
+      "durationMs": 19709,
       "aiUsed": true,
       "version": "5.2",
       "productType": "autocall",
@@ -258,7 +257,7 @@
       "adjustments": {
         "p1": -2,
         "p2": -2,
-        "p3": 0,
+        "p3": 2,
         "p4": -2
       },
       "barrier_sigma": null,
