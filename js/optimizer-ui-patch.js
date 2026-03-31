@@ -92,7 +92,15 @@
         var pfInvested = a.totalPortfolioInvested || 0, pfReturn = a.totalPortfolioReturn || 0;
         var liqTotal = a.totalLiquidity || 0, catRate = a.catBenchmark || 2.5;
         var liqReturn = Math.round(liqTotal * catRate / 100);
-        var deployedAmount = a.deployedAmount || 0, deployedReturn = a.deployedReturn || 0;
+        var deployedAmount = a.deployedAmount || 0;
+        // Recalculate deployedReturn from BS if available (v4 may have used facial coupon = 0)
+        var deployedReturn = a.deployedReturn || 0;
+        if (deployedReturn === 0 && subs.length > 0) {
+            deployedReturn = subs.reduce(function(s, p) {
+                if (p._rn && p.allocatedAmount > 0) return s + Math.round(p.allocatedAmount * p._rn / 100);
+                return s + (p.annualReturn || 0);
+            }, 0);
+        }
         var remainCash = a.remainingCash || (liqTotal - deployedAmount);
         var remainCashReturn = Math.round(remainCash * catRate / 100);
         var afterInvested = pfInvested + deployedAmount;
@@ -141,6 +149,14 @@
 
         // ── BLOC 2: ACTION CARDS ──
         subs.forEach(function(p) {
+            // Fix: if BS rendement exists but annualReturn is 0, recalculate here
+            if (p._rn && p.allocatedAmount > 0 && (!p.annualReturn || p.annualReturn === 0)) {
+                p.annualReturn = Math.round(p.allocatedAmount * p._rn / 100);
+                p.expectedReturn = p.annualReturn;
+                p.catReturn = Math.round(p.allocatedAmount * catRate / 100);
+                p.excessVsCat = p.annualReturn - p.catReturn;
+                p.coupon = Math.round(p._rn * 10) / 10;
+            }
             var isArb = p._v4match === 'ARBITRAGE' || p.recommendation === 'ARBITRER';
             var borderC = isArb ? 'rgba(78,205,196,0.3)' : 'rgba(6,214,160,0.3)';
             var bgC = isArb ? 'rgba(78,205,196,0.04)' : 'rgba(6,214,160,0.04)';
