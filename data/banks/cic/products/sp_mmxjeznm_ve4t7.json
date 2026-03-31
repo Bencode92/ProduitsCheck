@@ -150,24 +150,24 @@
   "maturityYears": 10,
   "structureType": "capital_garanti",
   "grading": {
-    "grade": "B",
-    "score": 62,
+    "grade": "C",
+    "score": 54,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 80,
+        "score": 78,
         "base": 79,
-        "delta": 1,
-        "reasoning": "Rendement: base 79 → +1 = 80 (TEC 10 à 6% très réaliste en stagflation avec hausse des taux longs, probabilité de coupon élevée) | Coupon 6%, protégé | Mat espérée: ~1.2a (prob mat: 0%)"
+        "delta": -1,
+        "reasoning": "Rendement: base 79 → -1 = 78 (En stagflation, le TEC 10 sera volatil face aux anticipations de politique monétaire restrictive, réduisant la probabilité d'atteindre le seuil autocall de 24%) | Coupon 6%, protégé | Mat espérée: ~1.2a (prob mat: 0%)"
       },
       "underlyingQuality": {
-        "score": 36,
+        "score": 34,
         "base": 35,
-        "delta": 1,
-        "reasoning": "Qualité: base 35 → +1 = 36 (Indice obligataire parfait en stagflation, pentification de la courbe booste le TEC 10, zéro risque sectoriel)"
+        "delta": -1,
+        "reasoning": "Qualité: base 35 → -1 = 34 (Le TEC 10 souffrira en stagflation: hausse des taux courts (inflation) et aplatissement de la courbe (récession) créent un environnement défavorable pour cet indice obligataire)"
       },
       "portfolioFit": {
         "score": 71,
@@ -176,55 +176,55 @@
         "reasoning": "En portefeuille"
       },
       "riskPremium": {
-        "score": 72,
+        "score": 48,
         "base": 49,
         "delta": -1,
-        "reasoning": "Capital garanti: spread 6.0% - CAT 2.5% - illiq 0.7% = 2.8%"
+        "reasoning": "Prime: base 49 → -1 = 48 (Le spread de 157bps reste élevé mais justifié par la complexité du produit et le risque de durée longue en environnement stagflationniste) | 6% vs CAT 2.5% (spread 3.5%)"
       }
     },
-    "verdict": "Produit idéalement positionné pour la stagflation actuelle avec le TEC 10 qui devrait surperformer grâce à la pentification de la courbe (spread 2Y10Y à 46bps). Le capital garanti offre une protection totale dans un contexte de VIX à 22 et de rotation sectorielle violente. Avec un coupon de 6% sur un indice de taux longs en hausse et une maturité courte espérée de 1.2 ans, le couple rendement/risque est excellent pour naviguer la stagflation.",
+    "verdict": "Ce produit à capital garanti sur TEC 10 obtient un score ajusté de 45 (D), fortement pénalisé par le contexte stagflationniste défavorable aux obligations à 10 ans. Avec une probabilité d'autocall quasi-nulle et une maturité espérée de seulement 1.2 ans, le produit risque de verser peu de coupons avant remboursement. Le capital garanti protège contre les pertes mais le rendement réel sera probablement négatif face à une inflation >2.8%.",
     "keyRisks": [
-      "Risque de duration si la Fed pivote et les taux baissent brutalement",
-      "Opportunité manquée si l'inflation persiste et les taux montent au-delà de 6%"
+      "Risque de duration: hausse brutale des taux longs en cas de dérapage inflationniste",
+      "Risque d'opportunité: immobilisation longue du capital pour un rendement potentiellement nul"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 7.2,
         "return_eur": 7200,
-        "probability": 0.35,
-        "duration_years": 1
+        "probability": 0.15,
+        "duration_years": 1.2
       },
       "base": {
-        "return_pct": 12,
-        "return_eur": 12000,
-        "probability": 0.4,
-        "duration_years": 2
-      },
-      "stress": {
         "return_pct": 6,
         "return_eur": 6000,
-        "probability": 0.2,
+        "probability": 0.3,
         "duration_years": 1
+      },
+      "stress": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.4,
+        "duration_years": 10
       },
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.05,
+        "probability": 0.15,
         "duration_years": 10
       }
     },
     "confidenceInterval": {
-      "low": 46,
-      "high": 64,
+      "low": 45,
+      "high": 63,
       "halfWidth": 9,
       "gradeStable": false,
       "gradeRange": "C-B",
-      "label": "C [46-64]"
+      "label": "C [45-63]"
     },
     "metadata": {
-      "gradedAt": "2026-03-30T08:55:53.486Z",
-      "durationMs": 17801,
+      "gradedAt": "2026-03-31T12:14:19.037Z",
+      "durationMs": 21533,
       "aiUsed": true,
       "version": "5.2",
       "productType": "capital_garanti",
@@ -247,8 +247,8 @@
       "baseScore": 55,
       "baseGrade": "C",
       "adjustments": {
-        "p1": 1,
-        "p2": 1,
+        "p1": -1,
+        "p2": -1,
         "p3": 1,
         "p4": -1
       },
@@ -258,9 +258,9 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 8M",
-      "ci_low": 46,
-      "ci_high": 64,
-      "ci_label": "C [46-64]",
+      "ci_low": 45,
+      "ci_high": 63,
+      "ci_label": "C [45-63]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
