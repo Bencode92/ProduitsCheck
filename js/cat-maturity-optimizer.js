@@ -174,13 +174,15 @@
       });
     }
 
-    // Option C: Structured product
+    // Option C: Structured product (capped, not full amount)
     var structOptions = _getStructuredOptions(group.entity, group.totalAmount, bestCatRate);
     if (structOptions.length > 0) {
       var best = structOptions[0];
-      var allocAmount = Math.min(group.totalAmount, best.minInvestment > 0 ? Math.max(best.minInvestment, group.totalAmount * 0.30) : group.totalAmount * 0.30);
+      // Cap at min investment or 30% of total, whichever is higher
+      var cap30 = Math.round(group.totalAmount * 0.30 / 1000) * 1000;
+      var allocAmount = best.minInvestment > cap30 ? best.minInvestment : cap30;
+      allocAmount = Math.min(allocAmount, group.totalAmount);
       allocAmount = Math.round(allocAmount / 1000) * 1000;
-      if (best.minInvestment > 0 && allocAmount < best.minInvestment) allocAmount = best.minInvestment;
       var remainInCat = group.totalAmount - allocAmount;
 
       var structReturn = Math.round(allocAmount * best.rdtNet / 100);
@@ -207,19 +209,20 @@
       });
     }
 
-    // Option D: Wait (if rates rising)
-    if (macro.rateTrend === 'rising') {
-      var monthlyCost = Math.round(group.totalAmount * group.avgRate / 100 / 12);
+    // Option D: Wait — always propose if time allows (> 3 months to maturity)
+    if (group.monthsToMaturity > 3) {
+      var trendMsg = macro.rateTrend === 'rising' ? 'taux en hausse — attendre peut payer' :
+                     macro.rateTrend === 'falling' ? 'taux en baisse — ne pas trop attendre' :
+                     'taux stables — marge de manœuvre';
       options.push({
         type: 'wait',
-        label: 'Attendre 3 mois (taux en hausse)',
+        label: 'Attendre de meilleures offres',
         icon: '⏳',
-        rate: null,
-        product: 'Coût d\'attente : ' + _fmt(monthlyCost) + '€/mois de manque à gagner',
-        annualReturn: 0,
-        delta: -monthlyCost * 3,
-        deltaLabel: '-' + _fmt(monthlyCost * 3) + '€ sur 3 mois',
-        forwardRate: macro.forwardRate12m
+        rate: group.avgRate,
+        product: group.monthsToMaturity + ' mois avant échéance · ' + trendMsg,
+        annualReturn: Math.round(group.totalAmount * group.avgRate / 100),
+        delta: 0, // same as current
+        deltaLabel: 'Garder le taux actuel ' + group.avgRate.toFixed(2) + '%'
       });
     }
 
