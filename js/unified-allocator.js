@@ -617,6 +617,11 @@
       html += _renderEntityResult(entKey, result.entities[entKey]);
     });
 
+    // CAT maturity recommendations
+    if (typeof _renderMaturityOptimizer === 'function') {
+      html += _renderMaturityOptimizer();
+    }
+
     // Combined summary
     html += '<div style="border:2px solid var(--accent);border-radius:var(--radius);overflow:hidden;margin-top:8px">';
     html += '<div style="padding:12px 16px;background:rgba(59,130,246,0.08);display:flex;justify-content:space-between;align-items:center">';
