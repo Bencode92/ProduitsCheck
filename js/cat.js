@@ -229,10 +229,13 @@ function renderPlacementCard(d) {
   let rateDisplay = `${d.rate}%`;
   if (isProgressif && typeof _calcRemainingEffectiveRate === 'function') {
     const rer = _calcRemainingEffectiveRate(d);
-    if (rer !== d.rate) {
-      const arrow = rer > d.rate ? '↑' : '↓';
-      const rerColor = rer > d.rate ? '#34D399' : '#FBBF24';
-      rateDisplay = `<span style="font-size:11px">${d.rate}%</span><span style="display:block;font-size:10px;color:${rerColor};font-weight:700">${arrow}${rer}%</span>`;
+    const gap = Math.abs(rer - d.rate);
+    if (gap >= 0.2) {
+      // Big gap: show remaining rate as primary, TRAAB as secondary
+      rateDisplay = `<span style="font-size:13px;font-weight:700">${rer}%</span><span style="display:block;font-size:9px;color:#5A6B8A">TRAAB ${d.rate}%</span>`;
+    } else if (gap > 0) {
+      // Small gap: just show remaining rate
+      rateDisplay = `${rer}%`;
     }
   }
 
