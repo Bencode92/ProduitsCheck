@@ -1,0 +1,494 @@
+// ═══════════════════════════════════════════════════════════════════════════════
+// STRUCTBOARD — Unified Allocator v1.0
+// Combines CAT rates + Structured products into a single allocation engine.
+// Questionnaire-based: user defines cash horizons, allocator optimizes across
+// both CAT and structured products per time bucket.
+// ═══════════════════════════════════════════════════════════════════════════════
+
+(function() {
+  'use strict';
+
+  var _state = {
+    tranches: null,     // user-defined or auto from MI regime
+    result: null,       // allocation result
+    mode: 'auto',       // 'auto' or 'manual'
+    totalCash: 0
+  };
+
+  // ─── MI regime profiles ────────────────────────────────
+  var REGIME_PROFILES = {
+    stagflation: { court: 0.60, moyen: 0.25, long: 0.15, label: 'Stagflation — priorité liquidité' },
+    recession:   { court: 0.55, moyen: 0.30, long: 0.15, label: 'Récession — prudence maximale' },
+    crisis:      { court: 0.70, moyen: 0.20, long: 0.10, label: 'Crise — cash is king' },
+    neutral:     { court: 0.40, moyen: 0.35, long: 0.25, label: 'Neutre — équilibré' },
+    bull:        { court: 0.25, moyen: 0.35, long: 0.40, label: 'Haussier — déploiement maximal' },
+    'risk-on':   { court: 0.20, moyen: 0.35, long: 0.45, label: 'Risk-on — agressif' },
+    expansion:   { court: 0.30, moyen: 0.35, long: 0.35, label: 'Expansion — croissance' }
+  };
+
+  // ─── Horizon buckets ───────────────────────────────────
+  var HORIZONS = [
+    { id: 'immediat',   label: 'Immédiat', sublabel: '< 3 mois',   icon: '🔴', maxMonths: 3,   color: '#EF233C' },
+    { id: 'court',      label: 'Court terme', sublabel: '3-12 mois', icon: '🟠', maxMonths: 12,  color: '#FFB627' },
+    { id: 'moyen',      label: 'Moyen terme', sublabel: '1-3 ans',   icon: '🟡', maxMonths: 36,  color: '#4ECDC4' },
+    { id: 'long',       label: 'Long terme', sublabel: '3-7 ans',    icon: '🟢', maxMonths: 84,  color: '#06D6A0' }
+  ];
+
+  // ─── Get current regime ────────────────────────────────
+  function _getRegime() {
+    try {
+      if (typeof _getOptimizerMI === 'function') {
+        var mi = _getOptimizerMI();
+        if (mi && mi.regime) return mi.regime.toLowerCase();
+      }
+      if (typeof _mktCache !== 'undefined' && _mktCache && _mktCache._mi && _mktCache._mi.regime) {
+        return _mktCache._mi.regime.toLowerCase();
+      }
+    } catch(e) {}
+    return 'neutral';
+  }
+
+  // ─── Compute total available cash ──────────────────────
+  function _computeTotalCash() {
+    var total = 0;
+    // Swiss Life structured liquidity (Bond 12M etc.)
+    var portfolio = app.state.portfolio || [];
+    portfolio.forEach(function(p) {
+      if ((p.grading && p.grading.grade === '-') || (typeof _isLiquidityProduct === 'function' && typeof _graderNormalize === 'function' && _isLiquidityProduct(_graderNormalize(p)))) {
+        total += parseFloat(p.investedAmount) || 0;
+      }
+    });
+    // External cash (ByCam, Cameleons)
+    try {
+      if (typeof catManager !== 'undefined' && catManager.objectives) {
+        total += parseFloat(catManager.objectives.cashByCam) || 0;
+        total += parseFloat(catManager.objectives.cashCameleons) || 0;
+      }
+    } catch(e) {}
+    return total;
+  }
+
+  // ─── Get CAT rates by duration ─────────────────────────
+  function _getCATRates() {
+    try {
+      if (typeof catManager !== 'undefined' && catManager.rates && catManager.rates.rates) {
+        return catManager.rates.rates;
+      }
+    } catch(e) {}
+    return [];
+  }
+
+  // ─── Get graded structured products ────────────────────
+  function _getStructuredCandidates() {
+    var candidates = [];
+    Object.values(app.state.proposals || {}).forEach(function(arr) {
+      arr.forEach(function(p) {
+        if (p.status === 'rejected' || p.status === 'subscribed') return;
+        if (!p.grading || !p.grading.grade || p.grading.grade === '?' || p.grading.grade === '-') return;
+        var cp = p.capitalProtection || {};
+        var isCapGaranti = cp.protected === true || (p.structureType || '').indexOf('capital_garanti') >= 0 || (p.structureType || '').indexOf('dispersion') >= 0 || (p.structureType || '').indexOf('taux_fixe') >= 0;
+        var rdtNet = p._bsRendementNet || (p.grading.metadata && p.grading.metadata.bsRendementNet) || p._ratesRendementNet || null;
+        candidates.push({
+          id: p.id,
+          name: p.name || 'Produit',
+          bankName: p.bankId || '',
+          grade: p.grading.grade,
+          score: p.grading.score || 0,
+          maturityYears: parseFloat(p.maturityYears) || 5,
+          maturityMonths: (parseFloat(p.maturityYears) || 5) * 12,
+          rdtNet: rdtNet,
+          coupon: (p.coupon && p.coupon.rate) || parseFloat(p.coupon) || 0,
+          capitalGaranti: isCapGaranti,
+          structureType: p.structureType || '',
+          type: 'structured'
+        });
+      });
+    });
+    return candidates;
+  }
+
+  // ─── Best candidates for a time bucket ─────────────────
+  function _bestForHorizon(horizon, catRates, structCandidates, allocated) {
+    var maxMonths = horizon.maxMonths;
+    var candidates = [];
+
+    // CAT candidates: duration <= horizon
+    catRates.forEach(function(r) {
+      if (r.durationMonths <= maxMonths) {
+        candidates.push({
+          id: 'cat_' + r.bankId + '_' + r.durationMonths,
+          name: r.productName || ('CAT ' + r.bankName + ' ' + r.durationMonths + 'M'),
+          bankName: r.bankName,
+          rate: r.rate,
+          durationMonths: r.durationMonths,
+          type: 'cat',
+          capitalGaranti: true,
+          liquidity: r.durationMonths <= 3 ? 'J+32' : r.durationMonths <= 12 ? 'Préavis' : 'Échéance',
+          minAmount: r.minAmount || 0
+        });
+      }
+    });
+
+    // Structured candidates: maturity fits horizon AND capital garanti
+    structCandidates.forEach(function(s) {
+      if (allocated[s.id]) return; // already used in another tranche
+      if (s.maturityMonths <= maxMonths && s.capitalGaranti && s.rdtNet != null && s.rdtNet > 0) {
+        candidates.push({
+          id: s.id,
+          name: s.name,
+          bankName: s.bankName,
+          rate: s.rdtNet,
+          durationMonths: s.maturityMonths,
+          type: 'structured',
+          capitalGaranti: s.capitalGaranti,
+          grade: s.grade,
+          score: s.score,
+          structureType: s.structureType,
+          liquidity: 'Échéance'
+        });
+      }
+    });
+
+    // Sort by rate descending
+    candidates.sort(function(a, b) { return b.rate - a.rate; });
+    return candidates;
+  }
+
+  // ─── Allocate across all tranches ──────────────────────
+  function _allocate(tranches, totalCash) {
+    var catRates = _getCATRates();
+    var structCandidates = _getStructuredCandidates();
+    var allocated = {}; // track which structured products are used
+    var results = [];
+    var cashBefore = totalCash;
+
+    // Best CAT rate for "before" comparison
+    var bestCatRate = 0;
+    catRates.forEach(function(r) { if (r.rate > bestCatRate) bestCatRate = r.rate; });
+    if (bestCatRate === 0) bestCatRate = 2.5; // fallback
+
+    tranches.forEach(function(tr) {
+      var budget = tr.amount;
+      if (budget <= 0) { results.push({ horizon: tr.horizon, amount: 0, allocations: [] }); return; }
+
+      var candidates = _bestForHorizon(tr.horizon, catRates, structCandidates, allocated);
+      var allocs = [];
+      var remaining = budget;
+
+      candidates.forEach(function(c) {
+        if (remaining <= 0) return;
+        var amount = Math.min(remaining, remaining); // take as much as possible
+        // FGDR limit: max 100K per bank for CAT
+        if (c.type === 'cat') {
+          var bankUsed = allocs.filter(function(a) { return a.bankName === c.bankName && a.type === 'cat'; }).reduce(function(s, a) { return s + a.amount; }, 0);
+          amount = Math.min(amount, 100000 - bankUsed);
+        }
+        if (c.minAmount && amount < c.minAmount) return;
+        amount = Math.round(amount / 1000) * 1000;
+        if (amount < 1000) return;
+
+        allocs.push({
+          id: c.id,
+          name: c.name,
+          bankName: c.bankName,
+          rate: c.rate,
+          amount: amount,
+          annualReturn: Math.round(amount * c.rate / 100),
+          durationMonths: c.durationMonths,
+          type: c.type,
+          capitalGaranti: c.capitalGaranti,
+          grade: c.grade || null,
+          score: c.score || null,
+          structureType: c.structureType || null,
+          liquidity: c.liquidity
+        });
+
+        remaining -= amount;
+        if (c.type === 'structured') allocated[c.id] = true;
+      });
+
+      results.push({
+        horizon: tr.horizon,
+        amount: budget,
+        allocated: budget - remaining,
+        remaining: remaining,
+        allocations: allocs
+      });
+    });
+
+    // Compute totals
+    var totalAllocated = results.reduce(function(s, r) { return s + r.allocated; }, 0);
+    var totalReturn = results.reduce(function(s, r) { return s + r.allocations.reduce(function(s2, a) { return s2 + a.annualReturn; }, 0); }, 0);
+    var catEquivReturn = Math.round(totalCash * bestCatRate / 100);
+    var weightedRate = totalAllocated > 0 ? (totalReturn / totalAllocated * 100) : 0;
+
+    return {
+      tranches: results,
+      totalCash: totalCash,
+      totalAllocated: totalAllocated,
+      totalUnallocated: totalCash - totalAllocated,
+      totalReturn: totalReturn,
+      catEquivReturn: catEquivReturn,
+      excessVsCat: totalReturn - catEquivReturn,
+      weightedRate: Math.round(weightedRate * 100) / 100,
+      bestCatRate: bestCatRate,
+      regime: _getRegime()
+    };
+  }
+
+  // ═══ RENDER ════════════════════════════════════════════
+
+  function _fmt(n) { return typeof formatNumber === 'function' ? formatNumber(n) : String(Math.round(n)); }
+
+  function _renderQuestionnaire(container, totalCash) {
+    var regime = _getRegime();
+    var profile = REGIME_PROFILES[regime] || REGIME_PROFILES.neutral;
+
+    var html = '<div class="section">';
+    html += '<div class="section-header"><div class="section-title"><span class="dot" style="background:var(--accent)"></span>💰 Allocateur Unifié</div></div>';
+
+    // Regime badge
+    html += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:12px 16px;background:var(--bg-elevated);border-radius:var(--radius-sm);border:1px solid var(--border)">';
+    html += '<span style="font-size:12px;font-weight:700;color:var(--accent)">🌍 ' + regime.toUpperCase() + '</span>';
+    html += '<span style="font-size:11px;color:var(--text-muted)">' + profile.label + '</span>';
+    html += '<span style="font-size:13px;font-weight:700;color:var(--cyan);margin-left:auto">' + _fmt(totalCash) + '€ disponibles</span>';
+    html += '</div>';
+
+    // Mode toggle
+    html += '<div style="display:flex;gap:8px;margin-bottom:16px">';
+    html += '<button class="btn sm ' + (_state.mode === 'auto' ? 'primary' : '') + '" onclick="_allocatorSetMode(\'auto\')">🤖 Profil auto (' + regime + ')</button>';
+    html += '<button class="btn sm ' + (_state.mode === 'manual' ? 'primary' : '') + '" onclick="_allocatorSetMode(\'manual\')">✏️ Définir mes horizons</button>';
+    html += '</div>';
+
+    if (_state.mode === 'manual') {
+      // Manual questionnaire
+      html += '<div style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;margin-bottom:16px;background:var(--bg-card)">';
+      html += '<div style="font-size:12px;font-weight:700;color:var(--text-bright);margin-bottom:12px">Répartissez vos ' + _fmt(totalCash) + '€ par horizon de besoin :</div>';
+
+      var remainingCalc = totalCash;
+      HORIZONS.forEach(function(h, i) {
+        var val = (_state.tranches && _state.tranches[i]) ? _state.tranches[i].amount : 0;
+        html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">';
+        html += '<span style="font-size:16px;width:24px;text-align:center">' + h.icon + '</span>';
+        html += '<div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--text-bright)">' + h.label + '</div>';
+        html += '<div style="font-size:10px;color:var(--text-dim)">' + h.sublabel + '</div></div>';
+        html += '<input type="number" id="alloc-' + h.id + '" value="' + val + '" min="0" step="1000" style="width:120px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--bg-elevated);color:var(--text-bright);font-family:var(--mono);font-size:13px;text-align:right" onchange="_allocatorUpdateRemaining()">';
+        html += '<span style="font-size:11px;color:var(--text-dim);width:20px">€</span>';
+        html += '</div>';
+      });
+
+      // Libre
+      html += '<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">';
+      html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">';
+      html += '<span style="font-size:16px;width:24px;text-align:center">➕</span>';
+      html += '<div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--text-bright)">Tranche libre</div>';
+      html += '<div style="display:flex;gap:6px;align-items:center">';
+      html += '<input type="text" id="alloc-libre-label" placeholder="Ex: travaux sept 2027" style="flex:1;padding:4px 8px;border:1px solid var(--border);border-radius:4px;background:var(--bg-elevated);color:var(--text-bright);font-size:11px">';
+      html += '<input type="number" id="alloc-libre-months" placeholder="Mois" min="1" max="120" style="width:60px;padding:4px 8px;border:1px solid var(--border);border-radius:4px;background:var(--bg-elevated);color:var(--text-bright);font-size:11px">';
+      html += '</div></div>';
+      html += '<input type="number" id="alloc-libre" value="0" min="0" step="1000" style="width:120px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--bg-elevated);color:var(--text-bright);font-family:var(--mono);font-size:13px;text-align:right" onchange="_allocatorUpdateRemaining()">';
+      html += '<span style="font-size:11px;color:var(--text-dim);width:20px">€</span>';
+      html += '</div></div>';
+
+      // Remaining
+      html += '<div id="alloc-remaining" style="margin-top:8px;font-size:11px;color:var(--text-muted)"></div>';
+      html += '</div>';
+    } else {
+      // Auto mode — show profile distribution
+      html += '<div style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;margin-bottom:16px;background:var(--bg-card)">';
+      html += '<div style="font-size:12px;font-weight:700;color:var(--text-bright);margin-bottom:12px">Répartition automatique (' + regime + ') :</div>';
+
+      var autoTranches = [
+        { pct: 1.0 - (profile.court + profile.moyen + profile.long), label: 'Immédiat', icon: '🔴' },
+        { pct: profile.court, label: 'Court terme', icon: '🟠' },
+        { pct: profile.moyen, label: 'Moyen terme', icon: '🟡' },
+        { pct: profile.long, label: 'Long terme', icon: '🟢' }
+      ];
+      // Fix: immediat takes what's left (ensure no negative)
+      if (autoTranches[0].pct < 0) autoTranches[0].pct = 0;
+
+      autoTranches.forEach(function(t) {
+        var amount = Math.round(totalCash * t.pct / 1000) * 1000;
+        html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">';
+        html += '<span style="font-size:14px">' + t.icon + '</span>';
+        html += '<span style="flex:1;font-size:12px;color:var(--text-bright)">' + t.label + '</span>';
+        html += '<span style="font-size:11px;color:var(--text-dim)">' + Math.round(t.pct * 100) + '%</span>';
+        html += '<span style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--cyan)">' + _fmt(amount) + '€</span>';
+        html += '</div>';
+      });
+      html += '</div>';
+    }
+
+    // Optimize button
+    html += '<button class="btn primary ai-glow" style="width:100%;padding:14px;font-size:14px" onclick="_allocatorRun()">⚡ Optimiser mon allocation</button>';
+    html += '</div>';
+
+    container.innerHTML = html;
+
+    // Update remaining display
+    if (_state.mode === 'manual') _allocatorUpdateRemaining();
+  }
+
+  function _renderResult(container, result) {
+    var html = '<div class="section">';
+    html += '<div class="section-header"><div class="section-title"><span class="dot" style="background:var(--accent)"></span>💰 Allocation Optimisée</div>';
+    html += '<button class="btn sm" onclick="_allocatorReset()">← Modifier</button></div>';
+
+    // Avant → Après
+    var catReturn = result.catEquivReturn;
+    var catRate = result.bestCatRate;
+    html += '<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:0;margin-bottom:14px;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden">';
+    html += '<div style="padding:14px;background:var(--bg-card)">';
+    html += '<div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);font-weight:600;margin-bottom:8px">Tout en CAT</div>';
+    html += '<div style="font-size:11px;color:var(--text-muted);margin-bottom:3px">Montant <span style="float:right;font-family:var(--mono);color:var(--text-bright)">' + _fmt(result.totalCash) + '€</span></div>';
+    html += '<div style="font-size:11px;color:var(--text-muted);margin-bottom:3px">Taux <span style="float:right;font-family:var(--mono)">' + catRate.toFixed(1) + '%</span></div>';
+    html += '<div style="font-size:11px;color:var(--text-muted)">Rdt/an <span style="float:right;font-family:var(--mono);color:var(--orange)">+' + _fmt(catReturn) + '€</span></div>';
+    html += '</div>';
+    html += '<div style="display:flex;align-items:center;padding:0 10px;background:var(--bg-card);font-size:22px;color:var(--accent)">→</div>';
+    html += '<div style="padding:14px;background:var(--bg-card)">';
+    html += '<div style="font-size:10px;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:8px">Allocation optimisée</div>';
+    html += '<div style="font-size:11px;color:var(--text-muted);margin-bottom:3px">Déployé <span style="float:right;font-family:var(--mono);color:var(--text-bright)">' + _fmt(result.totalAllocated) + '€</span></div>';
+    html += '<div style="font-size:11px;color:var(--text-muted);margin-bottom:3px">Taux moy <span style="float:right;font-family:var(--mono);color:var(--green)">' + result.weightedRate.toFixed(1) + '%</span></div>';
+    html += '<div style="font-size:11px;color:var(--text-muted)">Rdt/an <span style="float:right;font-family:var(--mono);color:var(--green);font-weight:700">+' + _fmt(result.totalReturn) + '€</span>' +
+      (result.excessVsCat > 0 ? ' <span style="font-size:9px;color:var(--green)">+' + _fmt(result.excessVsCat) + '</span>' : '') + '</div>';
+    html += '</div></div>';
+
+    // Tranches
+    result.tranches.forEach(function(tr) {
+      if (tr.amount <= 0) return;
+      var h = HORIZONS.find(function(x) { return x.id === tr.horizon.id; }) || tr.horizon;
+      html += '<div style="border:1px solid ' + (h.color || 'var(--border)') + '33;border-left:3px solid ' + (h.color || 'var(--accent)') + ';border-radius:var(--radius-sm);padding:12px;margin-bottom:10px;background:var(--bg-card)">';
+      html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">';
+      html += '<span style="font-size:13px;font-weight:700;color:' + (h.color || 'var(--text-bright)') + '">' + (h.icon || '📌') + ' ' + h.label + ' <span style="font-weight:400;color:var(--text-dim);font-size:11px">' + (h.sublabel || '') + '</span></span>';
+      html += '<span style="font-family:var(--mono);font-weight:700;color:var(--cyan)">' + _fmt(tr.amount) + '€</span>';
+      html += '</div>';
+
+      if (tr.allocations.length === 0) {
+        html += '<div style="font-size:11px;color:var(--text-dim);padding:4px 0">Aucun véhicule optimal trouvé — garder en fonds monétaire.</div>';
+      }
+
+      tr.allocations.forEach(function(a) {
+        var isCat = a.type === 'cat';
+        var borderC = isCat ? 'rgba(255,182,39,0.2)' : 'rgba(6,214,160,0.2)';
+        var bgC = isCat ? 'rgba(255,182,39,0.03)' : 'rgba(6,214,160,0.03)';
+        var typeLabel = isCat ? '🏦 CAT' : '📦 Structuré';
+        var gradeHtml = a.grade ? ' <span style="display:inline-block;width:20px;height:20px;line-height:20px;text-align:center;border-radius:4px;background:' + ({A:'#06D6A0',B:'#4ECDC4',C:'#FFB627',D:'#E85D04',F:'#EF233C'}[a.grade] || '#888') + '22;color:' + ({A:'#06D6A0',B:'#4ECDC4',C:'#FFB627',D:'#E85D04',F:'#EF233C'}[a.grade] || '#888') + ';font-weight:700;font-size:10px">' + a.grade + '</span>' : '';
+
+        html += '<div style="background:' + bgC + ';border:1px solid ' + borderC + ';border-radius:6px;padding:8px 10px;margin-bottom:4px;display:flex;align-items:center;gap:10px">';
+        html += '<div style="flex:1;min-width:0">';
+        html += '<div style="font-size:11px;font-weight:600;color:var(--text-bright);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + a.name + gradeHtml + '</div>';
+        html += '<div style="font-size:10px;color:var(--text-dim)">' + typeLabel + ' · ' + a.bankName + (a.capitalGaranti ? ' · 🛡️' : '') + ' · ' + a.durationMonths + 'M</div>';
+        html += '</div>';
+        html += '<div style="text-align:right;white-space:nowrap">';
+        html += '<div style="font-family:var(--mono);font-weight:700;color:var(--cyan);font-size:12px">' + _fmt(a.amount) + '€</div>';
+        html += '<div style="font-family:var(--mono);font-size:10px;color:var(--green)">' + a.rate.toFixed(1) + '% → +' + _fmt(a.annualReturn) + '€/an</div>';
+        html += '</div></div>';
+      });
+      html += '</div>';
+    });
+
+    // Unallocated
+    if (result.totalUnallocated > 0) {
+      html += '<div style="border:1px solid rgba(148,163,184,0.2);border-radius:var(--radius-sm);padding:12px;margin-bottom:10px;background:rgba(148,163,184,0.03)">';
+      html += '<div style="display:flex;align-items:center;justify-content:space-between">';
+      html += '<div><div style="font-size:12px;font-weight:700;color:var(--text-muted)">💰 Non alloué</div>';
+      html += '<div style="font-size:10px;color:var(--text-dim)">Fonds monétaire / compte courant</div></div>';
+      html += '<div style="text-align:right"><div style="font-family:var(--mono);font-weight:700;font-size:14px;color:var(--text-bright)">' + _fmt(result.totalUnallocated) + '€</div></div>';
+      html += '</div></div>';
+    }
+
+    // Summary
+    html += '<div style="border:2px solid var(--accent);border-radius:var(--radius);overflow:hidden;margin-top:16px">';
+    html += '<div style="padding:12px 16px;background:rgba(59,130,246,0.08);display:flex;justify-content:space-between;align-items:center">';
+    html += '<span style="font-size:13px;font-weight:700;color:var(--accent)">📊 Synthèse</span>';
+    html += '<span style="font-size:11px;color:var(--text-dim)">Régime ' + result.regime + '</span>';
+    html += '</div>';
+    html += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border)">';
+    html += '<div style="background:var(--bg-card);padding:12px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted)">Rendement/an</div><div style="font-size:18px;font-weight:800;color:var(--green);font-family:var(--mono)">+' + _fmt(result.totalReturn) + '€</div></div>';
+    html += '<div style="background:var(--bg-card);padding:12px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted)">Taux moyen</div><div style="font-size:18px;font-weight:800;color:var(--cyan);font-family:var(--mono)">' + result.weightedRate.toFixed(1) + '%</div></div>';
+    html += '<div style="background:var(--bg-card);padding:12px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted)">vs tout CAT</div><div style="font-size:18px;font-weight:800;color:' + (result.excessVsCat >= 0 ? 'var(--green)' : 'var(--red)') + ';font-family:var(--mono)">' + (result.excessVsCat >= 0 ? '+' : '') + _fmt(result.excessVsCat) + '€</div></div>';
+    html += '<div style="background:var(--bg-card);padding:12px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted)">Capital garanti</div><div style="font-size:18px;font-weight:800;color:var(--green);font-family:var(--mono)">🛡️ 100%</div></div>';
+    html += '</div></div>';
+
+    html += '</div>';
+    container.innerHTML = html;
+  }
+
+  // ═══ ACTIONS ═══════════════════════════════════════════
+
+  window._allocatorSetMode = function(mode) {
+    _state.mode = mode;
+    renderUnifiedAllocator(document.getElementById('main-content'));
+  };
+
+  window._allocatorUpdateRemaining = function() {
+    var total = _state.totalCash;
+    var used = 0;
+    HORIZONS.forEach(function(h) {
+      var el = document.getElementById('alloc-' + h.id);
+      if (el) used += parseFloat(el.value) || 0;
+    });
+    var libreEl = document.getElementById('alloc-libre');
+    if (libreEl) used += parseFloat(libreEl.value) || 0;
+    var remaining = total - used;
+    var el = document.getElementById('alloc-remaining');
+    if (el) {
+      el.innerHTML = remaining >= 0
+        ? '<span style="color:var(--green)">Reste à répartir : ' + _fmt(remaining) + '€</span>'
+        : '<span style="color:var(--red)">⚠️ Dépassement de ' + _fmt(-remaining) + '€</span>';
+    }
+  };
+
+  window._allocatorReset = function() {
+    _state.result = null;
+    renderUnifiedAllocator(document.getElementById('main-content'));
+  };
+
+  window._allocatorRun = function() {
+    var totalCash = _state.totalCash;
+    var tranches = [];
+
+    if (_state.mode === 'manual') {
+      HORIZONS.forEach(function(h) {
+        var el = document.getElementById('alloc-' + h.id);
+        var amount = el ? (parseFloat(el.value) || 0) : 0;
+        tranches.push({ horizon: h, amount: amount });
+      });
+      // Libre
+      var libreAmount = parseFloat((document.getElementById('alloc-libre') || {}).value) || 0;
+      if (libreAmount > 0) {
+        var libreLabel = (document.getElementById('alloc-libre-label') || {}).value || 'Tranche libre';
+        var libreMonths = parseInt((document.getElementById('alloc-libre-months') || {}).value) || 24;
+        tranches.push({
+          horizon: { id: 'libre', label: libreLabel, sublabel: libreMonths + ' mois', icon: '📌', maxMonths: libreMonths, color: '#9382F6' },
+          amount: libreAmount
+        });
+      }
+      _state.tranches = tranches.map(function(t) { return { amount: t.amount }; });
+    } else {
+      var regime = _getRegime();
+      var profile = REGIME_PROFILES[regime] || REGIME_PROFILES.neutral;
+      // Auto: immediat gets the leftover
+      var immPct = 1.0 - profile.court - profile.moyen - profile.long;
+      if (immPct < 0) immPct = 0;
+      [immPct, profile.court, profile.moyen, profile.long].forEach(function(pct, i) {
+        tranches.push({ horizon: HORIZONS[i], amount: Math.round(totalCash * pct / 1000) * 1000 });
+      });
+    }
+
+    _state.result = _allocate(tranches, totalCash);
+    _renderResult(document.getElementById('main-content'), _state.result);
+  };
+
+  // ═══ MAIN RENDER ═══════════════════════════════════════
+  window.renderUnifiedAllocator = function(container) {
+    _state.totalCash = _computeTotalCash();
+    if (_state.result) {
+      _renderResult(container, _state.result);
+    } else {
+      _renderQuestionnaire(container, _state.totalCash);
+    }
+  };
+
+  console.log('[StructBoard] Unified Allocator v1.0 loaded');
+})();

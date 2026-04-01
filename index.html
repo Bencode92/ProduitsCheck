@@ -21,6 +21,7 @@
       <button class="nav-tab active" data-view="dashboard" onclick="switchMainView('dashboard')">Produits Structurés</button>
       <button class="nav-tab" data-view="cat" onclick="switchMainView('cat')">Comptes à Terme</button>
       <button class="nav-tab" data-view="parser" onclick="switchMainView('parser')">📄 Analyseur</button>
+      <button class="nav-tab" data-view="allocator" onclick="switchMainView('allocator')">⚡ Allocateur</button>
       <button class="nav-tab" data-view="analytics" onclick="switchMainView('analytics')">📊 Analytique</button>
     </div>
     <div class="topbar-actions">
@@ -33,62 +34,64 @@
   </div>
   <div id="modal"></div>
   <div id="toast-container"></div>
-  <script src="js/config.js?v=20260401e"></script>
-  <script src="js/github.js?v=20260401e"></script>
-  <script src="js/pdf.js?v=20260401e"></script>
-  <script src="js/pdf-capgaranti-fix.js?v=20260401e"></script>
-  <script src="js/scoring.js?v=20260401e"></script>
-  <script src="js/cat.js?v=20260401e"></script>
-  <script src="js/cat-ai.js?v=20260401e"></script>
-  <script src="js/app.js?v=20260401e"></script>
-  <script src="js/ui.js?v=20260401e"></script>
-  <script src="js/product-mechanism-patch.js?v=20260401e"></script>
-  <script src="js/tracking.js?v=20260401e"></script>
-  <script src="js/archive.js?v=20260401e"></script>
-  <script src="js/edit-modal.js?v=20260401e"></script>
-  <script src="js/strike-capture-patch.js?v=20260401e"></script>
-  <script src="js/proposal-ai.js?v=20260401e"></script>
-  <script src="js/deep-analysis.js?v=20260401e"></script>
+  <script src="js/config.js?v=20260401f"></script>
+  <script src="js/github.js?v=20260401f"></script>
+  <script src="js/pdf.js?v=20260401f"></script>
+  <script src="js/pdf-capgaranti-fix.js?v=20260401f"></script>
+  <script src="js/scoring.js?v=20260401f"></script>
+  <script src="js/cat.js?v=20260401f"></script>
+  <script src="js/cat-ai.js?v=20260401f"></script>
+  <script src="js/app.js?v=20260401f"></script>
+  <script src="js/ui.js?v=20260401f"></script>
+  <script src="js/product-mechanism-patch.js?v=20260401f"></script>
+  <script src="js/tracking.js?v=20260401f"></script>
+  <script src="js/archive.js?v=20260401f"></script>
+  <script src="js/edit-modal.js?v=20260401f"></script>
+  <script src="js/strike-capture-patch.js?v=20260401f"></script>
+  <script src="js/proposal-ai.js?v=20260401f"></script>
+  <script src="js/deep-analysis.js?v=20260401f"></script>
   <!-- v5.2 base grader (P1 heuristic, P2, P3, P4, Claude IA, UI) -->
-  <script src="js/proposal-grader-v5.js?v=20260401e"></script>
+  <script src="js/proposal-grader-v5.js?v=20260401f"></script>
   <!-- Helper patches: override _estimateCouponProb, _graderNormalize, etc. -->
-  <script src="js/grader-rates-patch.js?v=20260401e"></script>
-  <script src="js/grader-freq-fix.js?v=20260401e"></script>
-  <script src="js/grader-sprint1-patch.js?v=20260401e"></script>
-  <script src="js/grader-sprint2-patch.js?v=20260401e"></script>
-  <script src="js/grader-mi-patch.js?v=20260401e"></script>
-  <script src="js/grader-p1p2-structure-override.js?v=20260401e"></script>
-  <script src="js/grader-dispersion-patch.js?v=20260401e"></script>
-  <script src="js/grader-basket-fix.js?v=20260401e"></script>
-  <script src="js/basket-detection-v2.js?v=20260401e"></script>
+  <script src="js/grader-rates-patch.js?v=20260401f"></script>
+  <script src="js/grader-freq-fix.js?v=20260401f"></script>
+  <script src="js/grader-sprint1-patch.js?v=20260401f"></script>
+  <script src="js/grader-sprint2-patch.js?v=20260401f"></script>
+  <script src="js/grader-mi-patch.js?v=20260401f"></script>
+  <script src="js/grader-p1p2-structure-override.js?v=20260401f"></script>
+  <script src="js/grader-dispersion-patch.js?v=20260401f"></script>
+  <script src="js/grader-basket-fix.js?v=20260401f"></script>
+  <script src="js/basket-detection-v2.js?v=20260401f"></script>
   <!-- v7.0 consolidated grade() pipeline: replaces 7 grade() wrappers -->
   <!-- (annualize, decrement, trigger, dispersion-boost, p1-bs, v6-cal, v6-enforce) -->
-  <script src="js/proposal-grader-v7.js?v=20260401e"></script>
-  <script src="js/maturity-display-fix.js?v=20260401e"></script>
-  <script src="js/ui-patches.js?v=20260401e"></script>
-  <script src="js/cat-patches.js?v=20260401e"></script>
-  <script src="js/cat-optimizer.js?v=20260401e"></script>
-  <script src="js/cat-objectives-patch.js?v=20260401e"></script>
-  <script src="js/cat-scanner.js?v=20260401e"></script>
-  <script src="js/proposal-patches.js?v=20260401e"></script>
-  <script src="js/grader-ui-patch.js?v=20260401e"></script>
-  <script src="js/structured-optimizer.js?v=20260401e"></script>
-  <script src="js/optimizer-v2-patch.js?v=20260401e"></script>
-  <script src="js/optimizer-v3-patch.js?v=20260401e"></script>
-  <script src="js/optimizer-market-data-patch.js?v=20260401e"></script>
-  <script src="js/optimizer-ui-patch.js?v=20260401e"></script>
-  <script src="js/optimizer-coupon-fix.js?v=20260401e"></script>
-  <script src="js/optimizer-v4-patch.js?v=20260401e"></script>
+  <script src="js/proposal-grader-v7.js?v=20260401f"></script>
+  <script src="js/maturity-display-fix.js?v=20260401f"></script>
+  <script src="js/ui-patches.js?v=20260401f"></script>
+  <script src="js/cat-patches.js?v=20260401f"></script>
+  <script src="js/cat-optimizer.js?v=20260401f"></script>
+  <script src="js/cat-objectives-patch.js?v=20260401f"></script>
+  <script src="js/cat-scanner.js?v=20260401f"></script>
+  <script src="js/proposal-patches.js?v=20260401f"></script>
+  <script src="js/grader-ui-patch.js?v=20260401f"></script>
+  <script src="js/structured-optimizer.js?v=20260401f"></script>
+  <script src="js/optimizer-v2-patch.js?v=20260401f"></script>
+  <script src="js/optimizer-v3-patch.js?v=20260401f"></script>
+  <script src="js/optimizer-market-data-patch.js?v=20260401f"></script>
+  <script src="js/optimizer-ui-patch.js?v=20260401f"></script>
+  <script src="js/optimizer-coupon-fix.js?v=20260401f"></script>
+  <script src="js/optimizer-v4-patch.js?v=20260401f"></script>
   <!-- v5 BS optimizer v1.1: rendementNet + vol sizing + risk metrics -->
-  <script src="js/optimizer-v5-bs-patch.js?v=20260401e"></script>
-  <script src="js/dashboard-buttons.js?v=20260401e"></script>
-  <script src="js/liquidites-fix.js?v=20260401e"></script>
-  <script src="js/analytics.js?v=20260401e"></script>
+  <script src="js/optimizer-v5-bs-patch.js?v=20260401f"></script>
+  <script src="js/dashboard-buttons.js?v=20260401f"></script>
+  <script src="js/liquidites-fix.js?v=20260401f"></script>
+  <script src="js/analytics.js?v=20260401f"></script>
   <!-- Brochure parser -->
-  <script src="js/brochure-parser.js?v=20260401e"></script>
+  <script src="js/brochure-parser.js?v=20260401f"></script>
+  <!-- Unified allocator (CAT + Structured) -->
+  <script src="js/unified-allocator.js?v=20260401f"></script>
   <!-- Barrier distance + comparison view (post-grading features) -->
-  <script src="js/barrier-distance-patch.js?v=20260401e"></script>
-  <script src="js/comparison-view.js?v=20260401e"></script>
+  <script src="js/barrier-distance-patch.js?v=20260401f"></script>
+  <script src="js/comparison-view.js?v=20260401f"></script>
   <script>
     function switchMainView(view) {
       document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
@@ -96,6 +99,7 @@
       if (view === 'cat') { app.setState({ view: 'cat' }); renderCAT(document.getElementById('main-content')); }
       else if (view === 'analytics') { app.setState({ view: 'analytics' }); renderAnalytics(document.getElementById('main-content')); }
       else if (view === 'parser') { app.setState({ view: 'parser' }); renderBrochureParser(document.getElementById('main-content')); }
+      else if (view === 'allocator') { app.setState({ view: 'allocator' }); renderUnifiedAllocator(document.getElementById('main-content')); }
       else { app.goToDashboard(); }
     }
     document.addEventListener('DOMContentLoaded', async () => {
