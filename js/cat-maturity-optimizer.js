@@ -126,34 +126,40 @@
   }
 
   // ─── Get macro context ─────────────────────────────────
+  var _matMacroCache = null;
+
   function _getMacro() {
-    // Try the exported function from cat-optimizer-macro-patch
+    if (_matMacroCache) return _matMacroCache;
+
+    // Best source: cat-optimizer-macro-patch exports _loadCATMacroData
+    // which returns { macroContext: { rateTrend, regime, ... } }
     try {
       if (typeof _loadCATMacroData === 'function') {
-        // Check if already loaded via window global
-        var fn = _loadCATMacroData;
-        // The macro cache is inside the IIFE, but macroContext is returned
-        // We need to read from the unified allocator's _getMacroContext if available
+        // It's async but may already be loaded. Check the return cache.
+        var cache = _loadCATMacroData.__cache;
+        // The function stores result in a closure var, not accessible.
+        // But the unified allocator's _getMacroContext reads it.
       }
-      if (typeof _getMacroContext === 'function') return _getMacroContext();
+      if (typeof _getMacroContext === 'function') {
+        var mc = _getMacroContext();
+        if (mc && mc.rateTrend) { _matMacroCache = mc; return mc; }
+      }
     } catch(e) {}
 
-    // Fallback: derive from MI directly
+    // Direct fallback: read market_intelligence.json prob_hike
+    var result = { rateTrend: 'stable', regime: 'neutral', forwardRate12m: null };
     try {
       var mi = typeof _getOptimizerMI === 'function' ? _getOptimizerMI() : null;
-      if (mi) {
-        var trend = 'stable';
-        var probHike = mi.prob_hike_next_fomc_pct || (mi.market_interpretation && mi.market_interpretation.prob_hike_next_fomc_pct) || 0;
-        if (probHike > 50) trend = 'rising';
-        else if (probHike < 20) trend = 'falling';
-        return {
-          rateTrend: trend,
-          regime: (mi.regime || 'neutral').toLowerCase(),
-          forwardRate12m: null
-        };
-      }
+      if (mi) result.regime = (mi.regime || 'neutral').toLowerCase();
+
+      // In stagflation with hawkish fed → rates rising
+      if (result.regime === 'stagflation') result.rateTrend = 'rising';
+      else if (result.regime === 'recession') result.rateTrend = 'falling';
+      else if (result.regime === 'bull' || result.regime === 'expansion') result.rateTrend = 'stable';
     } catch(e) {}
-    return { rateTrend: 'stable', regime: 'neutral', forwardRate12m: null };
+
+    _matMacroCache = result;
+    return result;
   }
 
   // ─── Build recommendations for a group ─────────────────
