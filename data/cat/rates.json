@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-04-01T07:18:17.499Z",
+  "lastUpdated": "2026-04-01T07:18:34.882Z",
   "rates": [
     {
       "bankId": "sg",
@@ -887,54 +887,6 @@
       "confidence": "medium",
       "scanNote": "Anciens Toniciel non commercialisés - Minimum élevé",
       "scanSource": "https://www.auguste-patrimoine.fr/epargne/compte-a-terme-la-banque-postale"
-    },
-    {
-      "bankId": "bnp",
-      "bankName": "BNP Paribas",
-      "durationMonths": 12,
-      "rate": 3.35,
-      "productType": "cat",
-      "date": "2026-03-31",
-      "rateType": "fixe",
-      "withdrawalConditions": "Préavis 32 jours, pénalité appliquée",
-      "productName": "Dépôt à terme",
-      "minAmount": 50000,
-      "source": "web scan",
-      "confidence": "high",
-      "scanNote": "Site officiel BNP Paribas",
-      "scanSource": "https://mabanque.bnpparibas/fr/epargner/comptes-livrets-epargne/depot-a-terme"
-    },
-    {
-      "bankId": "bnp",
-      "bankName": "BNP Paribas",
-      "durationMonths": 6,
-      "rate": 4,
-      "productType": "cat",
-      "date": "2026-03-31",
-      "rateType": "fixe",
-      "withdrawalConditions": "Préavis 32 jours, pénalité appliquée",
-      "productName": "Dépôt à terme",
-      "minAmount": 50000,
-      "source": "web scan",
-      "confidence": "high",
-      "scanNote": "Site officiel BNP Paribas",
-      "scanSource": "https://mabanque.bnpparibas/fr/epargner/comptes-livrets-epargne/depot-a-terme"
-    },
-    {
-      "bankId": "bnp",
-      "bankName": "BNP Paribas",
-      "durationMonths": 12,
-      "rate": 2.1,
-      "productType": "cat",
-      "date": "2026-03-31",
-      "rateType": "fixe",
-      "withdrawalConditions": "Retrait anticipé possible avec pénalités",
-      "productName": "Compte à terme",
-      "minAmount": 250,
-      "source": "web scan",
-      "confidence": "high",
-      "scanNote": "Site officiel BNP Paribas",
-      "scanSource": "https://mabanque.bnpparibas/fr/epargner/comptes-livrets-epargne/depot-a-terme"
     },
     {
       "bankId": "ca",
