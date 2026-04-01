@@ -658,10 +658,19 @@
       (result.excessVsCat > 0 ? ' <span style="font-size:9px;color:var(--green)">+' + _fmt(result.excessVsCat) + '</span>' : '') + '</div>';
     html += '</div></div>';
 
-    // Per-entity results
-    Object.keys(result.entities).forEach(function(entKey) {
-      html += _renderEntityResult(entKey, result.entities[entKey]);
-    });
+    // Per-entity results — side by side
+    var entKeys = Object.keys(result.entities);
+    if (entKeys.length > 1) {
+      html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">';
+      entKeys.forEach(function(entKey) {
+        html += '<div>' + _renderEntityResult(entKey, result.entities[entKey]) + '</div>';
+      });
+      html += '</div>';
+    } else {
+      entKeys.forEach(function(entKey) {
+        html += _renderEntityResult(entKey, result.entities[entKey]);
+      });
+    }
 
     // CAT maturity recommendations
     if (typeof _renderMaturityOptimizer === 'function') {
