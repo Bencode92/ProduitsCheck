@@ -469,7 +469,7 @@ function renderOptimizationTable(analysis) {
 
     // v3 UX: Remaining effective rate is THE primary number
     const effectiveRate = d.remainingEffectiveRate || d.rate;
-    const showRemaining = d.isProgressif && d.remainingEffectiveRate !== d.rate;
+    const showRemaining = d.isProgressif && Math.abs((d.remainingEffectiveRate||0) - d.rate) >= 0.2;
     const effColor = d.bestAlt && d.bestAlt.rate > effectiveRate ? 'var(--orange)' : 'var(--green)';
     let rateCell = `<span style="font-family:var(--mono);font-weight:800;font-size:13px;color:${effColor}">${effectiveRate}%</span>`;
     if (showRemaining) {
@@ -549,7 +549,8 @@ function renderOptimizerDashboard() {
     const rowBg=isArb?'background:rgba(251,191,36,0.04);':'';
     const rowBorder=isArb?'border-left:3px solid var(--orange);':isSurv?'border-left:3px solid rgba(34,211,238,0.3);':'border-left:3px solid transparent;';
     const eff=d.remainingEffectiveRate||d.rate;
-    const rr=d.remainingEffectiveRate&&d.remainingEffectiveRate!==d.rate?'<div style="font-size:9px;color:'+(d.remainingEffectiveRate>d.rate?'var(--green)':'var(--orange)')+'">'+(d.remainingEffectiveRate>d.rate?'↑':'↓')+d.remainingEffectiveRate+'%</div>':'';
+    const rateGap=d.remainingEffectiveRate?Math.abs(d.remainingEffectiveRate-d.rate):0;
+    const rr=rateGap>=0.2?'<div style="font-size:9px;color:var(--text-dim)">TRAAB '+d.rate+'% · 📈</div>':'';
 
     // 12m column
     let col12m = '';
