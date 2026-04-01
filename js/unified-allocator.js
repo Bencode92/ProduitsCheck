@@ -13,8 +13,9 @@
     result: null,       // allocation result
     mode: 'auto',       // 'auto' or 'manual'
     totalCash: 0,
-    entities: {},       // { bycam: { cash, deposits, structLiq }, cameleons: { ... } }
-    includeStructLiq: {} // { cameleons: true/false }
+    entities: {},       // { bycam: { cash, deposits, structLiq, maturingCat }, cameleons: { ... } }
+    includeStructLiq: {}, // { cameleons: true/false }
+    includeMaturingCat: {} // { cameleons: true/false }
   };
 
   // ─── MI regime profiles ────────────────────────────────
@@ -55,8 +56,8 @@
   // ─── Compute cash per entity ────────────────────────────
   function _computeEntities() {
     var entities = {
-      bycam: { cash: 0, structLiq: 0, label: '🏢 ByCam' },
-      cameleons: { cash: 0, structLiq: 0, label: '🦎 Caméléons' }
+      bycam: { cash: 0, structLiq: 0, maturingCat: 0, maturingDetails: [], label: '🏢 ByCam' },
+      cameleons: { cash: 0, structLiq: 0, maturingCat: 0, maturingDetails: [], label: '🦎 Caméléons' }
     };
 
     // External cash — try catManager first, fallback to direct file read
@@ -87,9 +88,37 @@
       else entities.cameleons.structLiq += amount;
     });
 
-    // total = cash libre + structLiq if user opted in for arbitrage
-    entities.bycam.total = entities.bycam.cash + ((_state.includeStructLiq && _state.includeStructLiq.bycam) ? entities.bycam.structLiq : 0);
-    entities.cameleons.total = entities.cameleons.cash + ((_state.includeStructLiq && _state.includeStructLiq.cameleons) ? entities.cameleons.structLiq : 0);
+    // Detect CAT maturing within 8 months
+    try {
+      if (typeof catManager !== 'undefined' && catManager.deposits) {
+        var now = new Date();
+        var horizon = new Date(now);
+        horizon.setMonth(horizon.getMonth() + 8);
+        catManager.deposits.forEach(function(d) {
+          if (d.status !== 'active' || !d.maturityDate) return;
+          var mat = new Date(d.maturityDate);
+          if (mat > now && mat <= horizon) {
+            var ent = d.entity || 'cameleons';
+            var amount = parseFloat(d.amount) || 0;
+            if (entities[ent]) {
+              entities[ent].maturingCat += amount;
+              entities[ent].maturingDetails.push({
+                name: d.productName, amount: amount, rate: d.rate,
+                maturityDate: d.maturityDate, bankName: d.bankName
+              });
+            }
+          }
+        });
+      }
+    } catch(e) {}
+
+    // total = cash libre + structLiq (if opted in) + maturingCat (if opted in)
+    entities.bycam.total = entities.bycam.cash
+      + ((_state.includeStructLiq && _state.includeStructLiq.bycam) ? entities.bycam.structLiq : 0)
+      + ((_state.includeMaturingCat && _state.includeMaturingCat.bycam) ? entities.bycam.maturingCat : 0);
+    entities.cameleons.total = entities.cameleons.cash
+      + ((_state.includeStructLiq && _state.includeStructLiq.cameleons) ? entities.cameleons.structLiq : 0)
+      + ((_state.includeMaturingCat && _state.includeMaturingCat.cameleons) ? entities.cameleons.maturingCat : 0);
 
     return entities;
   }
@@ -361,7 +390,8 @@
       weightedRate: Math.round(weightedRate * 100) / 100,
       bestCatRate: bestCatRate,
       regime: _getRegime(),
-      isStructLiqOnly: hasStructLiq && !_state.entities[entityKey].cash
+      isStructLiqOnly: hasStructLiq && !_state.entities[entityKey].cash,
+      hasMaturingCat: !!(_state.includeMaturingCat && _state.includeMaturingCat[entityKey] && _state.entities[entityKey].maturingCat > 0)
     };
   }
 
@@ -386,6 +416,20 @@
       html += '<label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="alloc-sl-' + entKey + '" ' + (isChecked ? 'checked' : '') + ' onchange="_allocatorToggleSL(\'' + entKey + '\')" style="cursor:pointer"><span style="font-size:10px;color:var(--text-muted)">Optimiser</span></label>';
       html += '</div>';
       html += '<div style="color:var(--text-dim);margin-top:2px">Bond 12M — arbitrable uniquement vers produits Swiss Life</div>';
+      html += '</div>';
+    }
+
+    // Maturing CAT badge
+    if (ent.maturingCat > 0) {
+      var isMatChecked = _state.includeMaturingCat && _state.includeMaturingCat[entKey];
+      var matDate = ent.maturingDetails.length > 0 ? new Date(ent.maturingDetails[0].maturityDate).toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' }) : '';
+      var matRate = ent.maturingDetails.length > 0 ? ent.maturingDetails[0].rate : 0;
+      html += '<div style="background:rgba(255,182,39,0.06);border:1px solid rgba(255,182,39,0.15);border-radius:6px;padding:8px 10px;margin-bottom:10px;font-size:10px">';
+      html += '<div style="display:flex;align-items:center;justify-content:space-between">';
+      html += '<span style="color:var(--orange);font-weight:600">🔔 CAT à échéance : ' + _fmt(ent.maturingCat) + '€</span>';
+      html += '<label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="alloc-matcat-' + entKey + '" ' + (isMatChecked ? 'checked' : '') + ' onchange="_allocatorToggleMatCat(\'' + entKey + '\')" style="cursor:pointer"><span style="font-size:10px;color:var(--text-muted)">Inclure</span></label>';
+      html += '</div>';
+      html += '<div style="color:var(--text-dim);margin-top:2px">' + ent.maturingDetails.length + '× ' + (ent.maturingDetails[0] ? ent.maturingDetails[0].name : 'CAT') + ' · ' + matRate.toFixed(1) + '% · Échéance ' + matDate + '</div>';
       html += '</div>';
     }
 
@@ -639,6 +683,13 @@
   }
 
   // ═══ ACTIONS ═══════════════════════════════════════════
+
+  window._allocatorToggleMatCat = function(entKey) {
+    if (!_state.includeMaturingCat) _state.includeMaturingCat = {};
+    _state.includeMaturingCat[entKey] = !_state.includeMaturingCat[entKey];
+    _state.result = null;
+    renderUnifiedAllocator(document.getElementById('main-content'));
+  };
 
   window._allocatorToggleSL = function(entKey) {
     if (!_state.includeStructLiq) _state.includeStructLiq = {};
