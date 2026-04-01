@@ -39,6 +39,32 @@
             var btns = ''; if (p.grading) { btns = '<button onclick="triggerGrading(this)" style="margin-left:auto;padding:4px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;font-size:11px;display:flex;align-items:center;gap:4px">\ud83d\udd04 Actualiser</button>'; } if (!p.grading || (p.grading.grade !== '-')) { btns += '<button onclick="tagAsLiquidity(this)" style="padding:4px 12px;border-radius:6px;border:1px solid #94A3B844;background:transparent;color:#94A3B8;cursor:pointer;font-size:11px;margin-left:6px">$ Liquidit\u00e9</button>'; }
             var gradingHtml = ProposalGrader.renderSection(p.grading);
             if (p.grading && p.grading.metadata && p.grading.metadata.stockData && p.grading.metadata.stockData.length > 0) { var stockTableHtml = _renderStockTable(p.grading.metadata.stockData); var insertPoint = gradingHtml.indexOf('grid-template-columns:repeat(4'); if (insertPoint > 0) { var divStart = gradingHtml.lastIndexOf('<div style="display:grid', insertPoint); if (divStart > 0) gradingHtml = gradingHtml.substring(0, divStart) + stockTableHtml + gradingHtml.substring(divStart); } else { var risksPoint = gradingHtml.indexOf('<strong>Risques'); if (risksPoint > 0) { var divR = gradingHtml.lastIndexOf('<div', risksPoint); if (divR > 0) gradingHtml = gradingHtml.substring(0, divR) + stockTableHtml + gradingHtml.substring(divR); } else { var footerPoint = gradingHtml.lastIndexOf('<div style="font-size:10px'); if (footerPoint > 0) gradingHtml = gradingHtml.substring(0, footerPoint) + stockTableHtml + gradingHtml.substring(footerPoint); } } }
+            // v7.1: Regime scenarios widget
+            if (p.grading && p.grading.regimeScenarios) {
+                var rs = p.grading.regimeScenarios;
+                var _gc = function(g) { return {A:'#06D6A0',B:'#4ECDC4',C:'#FFB627',D:'#E85D04',F:'#EF233C'}[g] || '#888'; };
+                gradingHtml += '<div style="margin:12px 0"><div style="font-size:11px;font-weight:600;color:var(--text-muted);margin-bottom:6px">\ud83c\udf0d Sc\u00e9narios r\u00e9gime</div>';
+                gradingHtml += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">';
+                [rs.current, rs.bull, rs.crash].forEach(function(sc) {
+                    var c = _gc(sc.grade);
+                    var deltaHtml = sc.delta ? '<div style="font-size:10px;color:' + (sc.delta > 0 ? '#06D6A0' : '#EF233C') + '">' + (sc.delta > 0 ? '+' : '') + sc.delta + ' pts</div>' : '';
+                    gradingHtml += '<div style="text-align:center;padding:8px;border-radius:6px;background:' + c + '08;border:1px solid ' + c + '22">';
+                    gradingHtml += '<div style="font-size:9px;color:var(--text-dim)">' + sc.label + '</div>';
+                    gradingHtml += '<div style="font-size:20px;font-weight:800;color:' + c + '">' + sc.grade + '</div>';
+                    gradingHtml += '<div style="font-size:11px;color:var(--text-muted)">' + sc.score + '/100</div>';
+                    gradingHtml += deltaHtml + '</div>';
+                });
+                gradingHtml += '</div></div>';
+            }
+
+            // v7.1: Issuer credit badge
+            if (p.grading && p.grading.metadata && p.grading.metadata.issuerCDS) {
+                var cds = p.grading.metadata.issuerCDS;
+                var penalty = p.grading.metadata.issuerCreditPenalty || 0;
+                var rating = p.grading.metadata.issuer_rating || 'NR';
+                gradingHtml += '<div style="font-size:10px;color:var(--text-dim);margin-top:4px">\ud83c\udfe6 \u00c9metteur ' + rating + ' \u00b7 CDS ~' + cds + 'bps' + (penalty > 0 ? ' \u00b7 P4 -' + penalty + 'pts (risque cr\u00e9dit)' : '') + '</div>';
+            }
+
             gd.innerHTML = '<div class="fiche-section-header" style="display:flex;align-items:center"><span class="fiche-section-icon">\ud83c\udfaf</span><span class="fiche-section-title">Grading Unifi\u00e9</span>' + btns + '</div><div class="fiche-section-body">' + gradingHtml + '</div>';
 
             // [v2.1] CONDITIONAL ORDER: Portfolio → Suivi before Grading | Proposals → Grading first
