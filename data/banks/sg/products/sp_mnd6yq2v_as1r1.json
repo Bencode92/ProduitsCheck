@@ -515,5 +515,6 @@
         "delta": -7
       }
     }
-  }
+  },
+  "minInvestment": 100000
 }
