@@ -12,7 +12,8 @@
     tranches: null,     // user-defined or auto from MI regime
     result: null,       // allocation result
     mode: 'auto',       // 'auto' or 'manual'
-    totalCash: 0
+    totalCash: 0,
+    entities: {}        // { bycam: { cash, deposits, structLiq }, cameleons: { ... } }
   };
 
   // ─── MI regime profiles ────────────────────────────────
@@ -48,24 +49,36 @@
     return 'neutral';
   }
 
-  // ─── Compute total available cash ──────────────────────
-  function _computeTotalCash() {
-    var total = 0;
-    // Swiss Life structured liquidity (Bond 12M etc.)
-    var portfolio = app.state.portfolio || [];
-    portfolio.forEach(function(p) {
-      if ((p.grading && p.grading.grade === '-') || (typeof _isLiquidityProduct === 'function' && typeof _graderNormalize === 'function' && _isLiquidityProduct(_graderNormalize(p)))) {
-        total += parseFloat(p.investedAmount) || 0;
-      }
-    });
-    // External cash (ByCam, Cameleons)
+  // ─── Compute cash per entity ────────────────────────────
+  function _computeEntities() {
+    var entities = {
+      bycam: { cash: 0, structLiq: 0, label: '🏢 ByCam' },
+      cameleons: { cash: 0, structLiq: 0, label: '🦎 Caméléons' }
+    };
+
+    // External cash
     try {
       if (typeof catManager !== 'undefined' && catManager.objectives) {
-        total += parseFloat(catManager.objectives.cashByCam) || 0;
-        total += parseFloat(catManager.objectives.cashCameleons) || 0;
+        entities.bycam.cash = parseFloat(catManager.objectives.cashByCam) || 0;
+        entities.cameleons.cash = parseFloat(catManager.objectives.cashCameleons) || 0;
       }
     } catch(e) {}
-    return total;
+
+    // Structured liquidity (Bond 12M etc.) — check entity on portfolio items
+    var portfolio = app.state.portfolio || [];
+    portfolio.forEach(function(p) {
+      var isLiq = (p.grading && p.grading.grade === '-') || (typeof _isLiquidityProduct === 'function' && typeof _graderNormalize === 'function' && _isLiquidityProduct(_graderNormalize(p)));
+      if (!isLiq) return;
+      var amount = parseFloat(p.investedAmount) || 0;
+      var ent = p.entity || 'cameleons'; // default to cameleons if not set
+      if (entities[ent]) entities[ent].structLiq += amount;
+      else entities.cameleons.structLiq += amount;
+    });
+
+    entities.bycam.total = entities.bycam.cash + entities.bycam.structLiq;
+    entities.cameleons.total = entities.cameleons.cash + entities.cameleons.structLiq;
+
+    return entities;
   }
 
   // ─── Get CAT rates by duration ─────────────────────────
@@ -240,120 +253,104 @@
 
   function _fmt(n) { return typeof formatNumber === 'function' ? formatNumber(n) : String(Math.round(n)); }
 
+  function _renderEntityBlock(entKey, ent, regime, profile) {
+    var html = '';
+    html += '<div style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;background:var(--bg-card)">';
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">';
+    html += '<span style="font-size:13px;font-weight:700;color:var(--text-bright)">' + ent.label + '</span>';
+    html += '<div style="text-align:right">';
+    if (ent.cash > 0) html += '<span style="font-size:10px;color:var(--text-dim)">Cash ' + _fmt(ent.cash) + '€</span> ';
+    if (ent.structLiq > 0) html += '<span style="font-size:10px;color:#A855F7">Struct. ' + _fmt(ent.structLiq) + '€</span> ';
+    html += '<span style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--cyan);margin-left:8px">' + _fmt(ent.total) + '€</span>';
+    html += '</div></div>';
+
+    if (ent.total <= 0) {
+      html += '<div style="font-size:11px;color:var(--text-dim);text-align:center;padding:8px 0">Pas de liquidité disponible</div>';
+      html += '</div>';
+      return html;
+    }
+
+    if (_state.mode === 'manual') {
+      HORIZONS.forEach(function(h) {
+        var val = (_state.tranches && _state.tranches[entKey + '_' + h.id]) || 0;
+        html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">';
+        html += '<span style="font-size:14px;width:20px;text-align:center">' + h.icon + '</span>';
+        html += '<div style="flex:1"><div style="font-size:11px;font-weight:600;color:var(--text-bright)">' + h.label + '</div>';
+        html += '<div style="font-size:9px;color:var(--text-dim)">' + h.sublabel + '</div></div>';
+        html += '<input type="number" id="alloc-' + entKey + '-' + h.id + '" value="' + val + '" min="0" step="1000" style="width:100px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;background:var(--bg-elevated);color:var(--text-bright);font-family:var(--mono);font-size:12px;text-align:right" onchange="_allocatorUpdateRemaining()">';
+        html += '<span style="font-size:10px;color:var(--text-dim)">€</span></div>';
+      });
+      // Libre
+      html += '<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">';
+      html += '<div style="display:flex;align-items:center;gap:8px">';
+      html += '<span style="font-size:14px;width:20px;text-align:center">➕</span>';
+      html += '<input type="text" id="alloc-' + entKey + '-libre-label" placeholder="Ex: projet" style="flex:1;padding:4px 6px;border:1px solid var(--border);border-radius:4px;background:var(--bg-elevated);color:var(--text-bright);font-size:10px">';
+      html += '<input type="number" id="alloc-' + entKey + '-libre-months" placeholder="Mois" min="1" max="120" style="width:50px;padding:4px 6px;border:1px solid var(--border);border-radius:4px;background:var(--bg-elevated);color:var(--text-bright);font-size:10px">';
+      html += '<input type="number" id="alloc-' + entKey + '-libre" value="0" min="0" step="1000" style="width:100px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;background:var(--bg-elevated);color:var(--text-bright);font-family:var(--mono);font-size:12px;text-align:right" onchange="_allocatorUpdateRemaining()">';
+      html += '<span style="font-size:10px;color:var(--text-dim)">€</span></div></div>';
+      html += '<div id="alloc-remaining-' + entKey + '" style="margin-top:6px;font-size:10px;color:var(--text-muted)"></div>';
+    } else {
+      var immPct = Math.max(0, 1.0 - profile.court - profile.moyen - profile.long);
+      var pcts = [immPct, profile.court, profile.moyen, profile.long];
+      HORIZONS.forEach(function(h, i) {
+        var amount = Math.round(ent.total * pcts[i] / 1000) * 1000;
+        html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">';
+        html += '<span style="font-size:12px">' + h.icon + '</span>';
+        html += '<span style="flex:1;font-size:11px;color:var(--text-bright)">' + h.label + '</span>';
+        html += '<span style="font-size:10px;color:var(--text-dim)">' + Math.round(pcts[i] * 100) + '%</span>';
+        html += '<span style="font-family:var(--mono);font-size:12px;font-weight:700;color:var(--cyan)">' + _fmt(amount) + '€</span>';
+        html += '</div>';
+      });
+    }
+
+    html += '</div>';
+    return html;
+  }
+
   function _renderQuestionnaire(container, totalCash) {
     var regime = _getRegime();
     var profile = REGIME_PROFILES[regime] || REGIME_PROFILES.neutral;
+    var ents = _state.entities;
 
     var html = '<div class="section">';
     html += '<div class="section-header"><div class="section-title"><span class="dot" style="background:var(--accent)"></span>💰 Allocateur Unifié</div></div>';
 
-    // Regime badge
+    // Regime + total
     html += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:12px 16px;background:var(--bg-elevated);border-radius:var(--radius-sm);border:1px solid var(--border)">';
     html += '<span style="font-size:12px;font-weight:700;color:var(--accent)">🌍 ' + regime.toUpperCase() + '</span>';
     html += '<span style="font-size:11px;color:var(--text-muted)">' + profile.label + '</span>';
-    html += '<span style="font-size:13px;font-weight:700;color:var(--cyan);margin-left:auto">' + _fmt(totalCash) + '€ disponibles</span>';
+    html += '<span style="margin-left:auto;font-size:11px;color:var(--text-dim)">';
+    html += '🏢 ByCam ' + _fmt(ents.bycam.total) + '€ · 🦎 Cam. ' + _fmt(ents.cameleons.total) + '€';
+    html += '</span>';
+    html += '<span style="font-size:14px;font-weight:700;color:var(--cyan)">' + _fmt(totalCash) + '€</span>';
     html += '</div>';
 
     // Mode toggle
     html += '<div style="display:flex;gap:8px;margin-bottom:16px">';
-    html += '<button class="btn sm ' + (_state.mode === 'auto' ? 'primary' : '') + '" onclick="_allocatorSetMode(\'auto\')">🤖 Profil auto (' + regime + ')</button>';
-    html += '<button class="btn sm ' + (_state.mode === 'manual' ? 'primary' : '') + '" onclick="_allocatorSetMode(\'manual\')">✏️ Définir mes horizons</button>';
+    html += '<button class="btn sm ' + (_state.mode === 'auto' ? 'primary' : '') + '" onclick="_allocatorSetMode(\'auto\')">🤖 Auto (' + regime + ')</button>';
+    html += '<button class="btn sm ' + (_state.mode === 'manual' ? 'primary' : '') + '" onclick="_allocatorSetMode(\'manual\')">✏️ Personnalisé</button>';
     html += '</div>';
 
-    if (_state.mode === 'manual') {
-      // Manual questionnaire
-      html += '<div style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;margin-bottom:16px;background:var(--bg-card)">';
-      html += '<div style="font-size:12px;font-weight:700;color:var(--text-bright);margin-bottom:12px">Répartissez vos ' + _fmt(totalCash) + '€ par horizon de besoin :</div>';
-
-      var remainingCalc = totalCash;
-      HORIZONS.forEach(function(h, i) {
-        var val = (_state.tranches && _state.tranches[i]) ? _state.tranches[i].amount : 0;
-        html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">';
-        html += '<span style="font-size:16px;width:24px;text-align:center">' + h.icon + '</span>';
-        html += '<div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--text-bright)">' + h.label + '</div>';
-        html += '<div style="font-size:10px;color:var(--text-dim)">' + h.sublabel + '</div></div>';
-        html += '<input type="number" id="alloc-' + h.id + '" value="' + val + '" min="0" step="1000" style="width:120px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--bg-elevated);color:var(--text-bright);font-family:var(--mono);font-size:13px;text-align:right" onchange="_allocatorUpdateRemaining()">';
-        html += '<span style="font-size:11px;color:var(--text-dim);width:20px">€</span>';
-        html += '</div>';
-      });
-
-      // Libre
-      html += '<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">';
-      html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">';
-      html += '<span style="font-size:16px;width:24px;text-align:center">➕</span>';
-      html += '<div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--text-bright)">Tranche libre</div>';
-      html += '<div style="display:flex;gap:6px;align-items:center">';
-      html += '<input type="text" id="alloc-libre-label" placeholder="Ex: travaux sept 2027" style="flex:1;padding:4px 8px;border:1px solid var(--border);border-radius:4px;background:var(--bg-elevated);color:var(--text-bright);font-size:11px">';
-      html += '<input type="number" id="alloc-libre-months" placeholder="Mois" min="1" max="120" style="width:60px;padding:4px 8px;border:1px solid var(--border);border-radius:4px;background:var(--bg-elevated);color:var(--text-bright);font-size:11px">';
-      html += '</div></div>';
-      html += '<input type="number" id="alloc-libre" value="0" min="0" step="1000" style="width:120px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--bg-elevated);color:var(--text-bright);font-family:var(--mono);font-size:13px;text-align:right" onchange="_allocatorUpdateRemaining()">';
-      html += '<span style="font-size:11px;color:var(--text-dim);width:20px">€</span>';
-      html += '</div></div>';
-
-      // Remaining
-      html += '<div id="alloc-remaining" style="margin-top:8px;font-size:11px;color:var(--text-muted)"></div>';
-      html += '</div>';
-    } else {
-      // Auto mode — show profile distribution
-      html += '<div style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;margin-bottom:16px;background:var(--bg-card)">';
-      html += '<div style="font-size:12px;font-weight:700;color:var(--text-bright);margin-bottom:12px">Répartition automatique (' + regime + ') :</div>';
-
-      var autoTranches = [
-        { pct: 1.0 - (profile.court + profile.moyen + profile.long), label: 'Immédiat', icon: '🔴' },
-        { pct: profile.court, label: 'Court terme', icon: '🟠' },
-        { pct: profile.moyen, label: 'Moyen terme', icon: '🟡' },
-        { pct: profile.long, label: 'Long terme', icon: '🟢' }
-      ];
-      // Fix: immediat takes what's left (ensure no negative)
-      if (autoTranches[0].pct < 0) autoTranches[0].pct = 0;
-
-      autoTranches.forEach(function(t) {
-        var amount = Math.round(totalCash * t.pct / 1000) * 1000;
-        html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">';
-        html += '<span style="font-size:14px">' + t.icon + '</span>';
-        html += '<span style="flex:1;font-size:12px;color:var(--text-bright)">' + t.label + '</span>';
-        html += '<span style="font-size:11px;color:var(--text-dim)">' + Math.round(t.pct * 100) + '%</span>';
-        html += '<span style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--cyan)">' + _fmt(amount) + '€</span>';
-        html += '</div>';
-      });
-      html += '</div>';
-    }
+    // Two columns: ByCam + Caméléons
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">';
+    html += _renderEntityBlock('bycam', ents.bycam, regime, profile);
+    html += _renderEntityBlock('cameleons', ents.cameleons, regime, profile);
+    html += '</div>';
 
     // Optimize button
-    html += '<button class="btn primary ai-glow" style="width:100%;padding:14px;font-size:14px" onclick="_allocatorRun()">⚡ Optimiser mon allocation</button>';
+    html += '<button class="btn primary ai-glow" style="width:100%;padding:14px;font-size:14px" onclick="_allocatorRun()">⚡ Optimiser l\'allocation des 2 entités</button>';
     html += '</div>';
 
     container.innerHTML = html;
-
-    // Update remaining display
     if (_state.mode === 'manual') _allocatorUpdateRemaining();
   }
 
-  function _renderResult(container, result) {
-    var html = '<div class="section">';
-    html += '<div class="section-header"><div class="section-title"><span class="dot" style="background:var(--accent)"></span>💰 Allocation Optimisée</div>';
-    html += '<button class="btn sm" onclick="_allocatorReset()">← Modifier</button></div>';
+  function _renderEntityResult(entKey, result) {
+    var html = '';
+    html += '<div style="margin-bottom:16px">';
+    html += '<div style="font-size:13px;font-weight:700;color:var(--text-bright);margin-bottom:8px">' + result.entityLabel + ' — ' + _fmt(result.totalCash) + '€</div>';
 
-    // Avant → Après
-    var catReturn = result.catEquivReturn;
-    var catRate = result.bestCatRate;
-    html += '<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:0;margin-bottom:14px;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden">';
-    html += '<div style="padding:14px;background:var(--bg-card)">';
-    html += '<div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);font-weight:600;margin-bottom:8px">Tout en CAT</div>';
-    html += '<div style="font-size:11px;color:var(--text-muted);margin-bottom:3px">Montant <span style="float:right;font-family:var(--mono);color:var(--text-bright)">' + _fmt(result.totalCash) + '€</span></div>';
-    html += '<div style="font-size:11px;color:var(--text-muted);margin-bottom:3px">Taux <span style="float:right;font-family:var(--mono)">' + catRate.toFixed(1) + '%</span></div>';
-    html += '<div style="font-size:11px;color:var(--text-muted)">Rdt/an <span style="float:right;font-family:var(--mono);color:var(--orange)">+' + _fmt(catReturn) + '€</span></div>';
-    html += '</div>';
-    html += '<div style="display:flex;align-items:center;padding:0 10px;background:var(--bg-card);font-size:22px;color:var(--accent)">→</div>';
-    html += '<div style="padding:14px;background:var(--bg-card)">';
-    html += '<div style="font-size:10px;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:8px">Allocation optimisée</div>';
-    html += '<div style="font-size:11px;color:var(--text-muted);margin-bottom:3px">Déployé <span style="float:right;font-family:var(--mono);color:var(--text-bright)">' + _fmt(result.totalAllocated) + '€</span></div>';
-    html += '<div style="font-size:11px;color:var(--text-muted);margin-bottom:3px">Taux moy <span style="float:right;font-family:var(--mono);color:var(--green)">' + result.weightedRate.toFixed(1) + '%</span></div>';
-    html += '<div style="font-size:11px;color:var(--text-muted)">Rdt/an <span style="float:right;font-family:var(--mono);color:var(--green);font-weight:700">+' + _fmt(result.totalReturn) + '€</span>' +
-      (result.excessVsCat > 0 ? ' <span style="font-size:9px;color:var(--green)">+' + _fmt(result.excessVsCat) + '</span>' : '') + '</div>';
-    html += '</div></div>';
-
-    // Tranches
+    // Tranches for this entity
     result.tranches.forEach(function(tr) {
       if (tr.amount <= 0) return;
       var h = HORIZONS.find(function(x) { return x.id === tr.horizon.id; }) || tr.horizon;
@@ -387,22 +384,48 @@
       html += '</div>';
     });
 
-    // Unallocated
+    // Unallocated for this entity
     if (result.totalUnallocated > 0) {
-      html += '<div style="border:1px solid rgba(148,163,184,0.2);border-radius:var(--radius-sm);padding:12px;margin-bottom:10px;background:rgba(148,163,184,0.03)">';
+      html += '<div style="border:1px solid rgba(148,163,184,0.2);border-radius:var(--radius-sm);padding:10px;margin-bottom:8px;background:rgba(148,163,184,0.03)">';
       html += '<div style="display:flex;align-items:center;justify-content:space-between">';
-      html += '<div><div style="font-size:12px;font-weight:700;color:var(--text-muted)">💰 Non alloué</div>';
-      html += '<div style="font-size:10px;color:var(--text-dim)">Fonds monétaire / compte courant</div></div>';
-      html += '<div style="text-align:right"><div style="font-family:var(--mono);font-weight:700;font-size:14px;color:var(--text-bright)">' + _fmt(result.totalUnallocated) + '€</div></div>';
+      html += '<div><div style="font-size:11px;font-weight:600;color:var(--text-muted)">💰 Non alloué</div></div>';
+      html += '<div style="font-family:var(--mono);font-weight:700;color:var(--text-bright)">' + _fmt(result.totalUnallocated) + '€</div>';
       html += '</div></div>';
     }
-
-    // Summary
-    html += '<div style="border:2px solid var(--accent);border-radius:var(--radius);overflow:hidden;margin-top:16px">';
-    html += '<div style="padding:12px 16px;background:rgba(59,130,246,0.08);display:flex;justify-content:space-between;align-items:center">';
-    html += '<span style="font-size:13px;font-weight:700;color:var(--accent)">📊 Synthèse</span>';
-    html += '<span style="font-size:11px;color:var(--text-dim)">Régime ' + result.regime + '</span>';
     html += '</div>';
+    return html;
+  }
+
+  function _renderResult(container, result) {
+    var html = '<div class="section">';
+    html += '<div class="section-header"><div class="section-title"><span class="dot" style="background:var(--accent)"></span>💰 Allocation Optimisée</div>';
+    html += '<button class="btn sm" onclick="_allocatorReset()">← Modifier</button></div>';
+
+    // Avant → Après (combined)
+    html += '<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:0;margin-bottom:14px;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden">';
+    html += '<div style="padding:14px;background:var(--bg-card)">';
+    html += '<div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);font-weight:600;margin-bottom:8px">Tout en CAT</div>';
+    html += '<div style="font-size:11px;color:var(--text-muted);margin-bottom:3px">Total <span style="float:right;font-family:var(--mono);color:var(--text-bright)">' + _fmt(result.totalCash) + '€</span></div>';
+    html += '<div style="font-size:11px;color:var(--text-muted)">Rdt/an <span style="float:right;font-family:var(--mono);color:var(--orange)">+' + _fmt(result.totalCatEquiv) + '€</span></div>';
+    html += '</div>';
+    html += '<div style="display:flex;align-items:center;padding:0 10px;background:var(--bg-card);font-size:22px;color:var(--accent)">→</div>';
+    html += '<div style="padding:14px;background:var(--bg-card)">';
+    html += '<div style="font-size:10px;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:8px">Optimisé (CAT + Structurés)</div>';
+    html += '<div style="font-size:11px;color:var(--text-muted);margin-bottom:3px">Déployé <span style="float:right;font-family:var(--mono);color:var(--text-bright)">' + _fmt(result.totalAllocated) + '€</span></div>';
+    html += '<div style="font-size:11px;color:var(--text-muted)">Rdt/an <span style="float:right;font-family:var(--mono);color:var(--green);font-weight:700">+' + _fmt(result.totalReturn) + '€</span>' +
+      (result.excessVsCat > 0 ? ' <span style="font-size:9px;color:var(--green)">+' + _fmt(result.excessVsCat) + '</span>' : '') + '</div>';
+    html += '</div></div>';
+
+    // Per-entity results
+    Object.keys(result.entities).forEach(function(entKey) {
+      html += _renderEntityResult(entKey, result.entities[entKey]);
+    });
+
+    // Combined summary
+    html += '<div style="border:2px solid var(--accent);border-radius:var(--radius);overflow:hidden;margin-top:8px">';
+    html += '<div style="padding:12px 16px;background:rgba(59,130,246,0.08);display:flex;justify-content:space-between;align-items:center">';
+    html += '<span style="font-size:13px;font-weight:700;color:var(--accent)">📊 Synthèse combinée</span>';
+    html += '<span style="font-size:11px;color:var(--text-dim)">Régime ' + result.regime + '</span></div>';
     html += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border)">';
     html += '<div style="background:var(--bg-card);padding:12px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted)">Rendement/an</div><div style="font-size:18px;font-weight:800;color:var(--green);font-family:var(--mono)">+' + _fmt(result.totalReturn) + '€</div></div>';
     html += '<div style="background:var(--bg-card);padding:12px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted)">Taux moyen</div><div style="font-size:18px;font-weight:800;color:var(--cyan);font-family:var(--mono)">' + result.weightedRate.toFixed(1) + '%</div></div>';
@@ -422,21 +445,23 @@
   };
 
   window._allocatorUpdateRemaining = function() {
-    var total = _state.totalCash;
-    var used = 0;
-    HORIZONS.forEach(function(h) {
-      var el = document.getElementById('alloc-' + h.id);
-      if (el) used += parseFloat(el.value) || 0;
+    ['bycam', 'cameleons'].forEach(function(entKey) {
+      var total = _state.entities[entKey] ? _state.entities[entKey].total : 0;
+      var used = 0;
+      HORIZONS.forEach(function(h) {
+        var el = document.getElementById('alloc-' + entKey + '-' + h.id);
+        if (el) used += parseFloat(el.value) || 0;
+      });
+      var libreEl = document.getElementById('alloc-' + entKey + '-libre');
+      if (libreEl) used += parseFloat(libreEl.value) || 0;
+      var remaining = total - used;
+      var el = document.getElementById('alloc-remaining-' + entKey);
+      if (el) {
+        el.innerHTML = remaining >= 0
+          ? '<span style="color:var(--green)">Reste : ' + _fmt(remaining) + '€</span>'
+          : '<span style="color:var(--red)">⚠️ Dépassement ' + _fmt(-remaining) + '€</span>';
+      }
     });
-    var libreEl = document.getElementById('alloc-libre');
-    if (libreEl) used += parseFloat(libreEl.value) || 0;
-    var remaining = total - used;
-    var el = document.getElementById('alloc-remaining');
-    if (el) {
-      el.innerHTML = remaining >= 0
-        ? '<span style="color:var(--green)">Reste à répartir : ' + _fmt(remaining) + '€</span>'
-        : '<span style="color:var(--red)">⚠️ Dépassement de ' + _fmt(-remaining) + '€</span>';
-    }
   };
 
   window._allocatorReset = function() {
@@ -445,44 +470,59 @@
   };
 
   window._allocatorRun = function() {
-    var totalCash = _state.totalCash;
-    var tranches = [];
+    var regime = _getRegime();
+    var profile = REGIME_PROFILES[regime] || REGIME_PROFILES.neutral;
+    var allResults = { entities: {}, totalCash: _state.totalCash };
 
-    if (_state.mode === 'manual') {
-      HORIZONS.forEach(function(h) {
-        var el = document.getElementById('alloc-' + h.id);
-        var amount = el ? (parseFloat(el.value) || 0) : 0;
-        tranches.push({ horizon: h, amount: amount });
-      });
-      // Libre
-      var libreAmount = parseFloat((document.getElementById('alloc-libre') || {}).value) || 0;
-      if (libreAmount > 0) {
-        var libreLabel = (document.getElementById('alloc-libre-label') || {}).value || 'Tranche libre';
-        var libreMonths = parseInt((document.getElementById('alloc-libre-months') || {}).value) || 24;
-        tranches.push({
-          horizon: { id: 'libre', label: libreLabel, sublabel: libreMonths + ' mois', icon: '📌', maxMonths: libreMonths, color: '#9382F6' },
-          amount: libreAmount
+    ['bycam', 'cameleons'].forEach(function(entKey) {
+      var ent = _state.entities[entKey];
+      if (!ent || ent.total <= 0) return;
+      var tranches = [];
+
+      if (_state.mode === 'manual') {
+        HORIZONS.forEach(function(h) {
+          var el = document.getElementById('alloc-' + entKey + '-' + h.id);
+          tranches.push({ horizon: h, amount: el ? (parseFloat(el.value) || 0) : 0 });
+        });
+        var libreAmt = parseFloat((document.getElementById('alloc-' + entKey + '-libre') || {}).value) || 0;
+        if (libreAmt > 0) {
+          var lbl = (document.getElementById('alloc-' + entKey + '-libre-label') || {}).value || 'Libre';
+          var lmo = parseInt((document.getElementById('alloc-' + entKey + '-libre-months') || {}).value) || 24;
+          tranches.push({ horizon: { id: 'libre', label: lbl, sublabel: lmo + ' mois', icon: '📌', maxMonths: lmo, color: '#9382F6' }, amount: libreAmt });
+        }
+      } else {
+        var immPct = Math.max(0, 1.0 - profile.court - profile.moyen - profile.long);
+        [immPct, profile.court, profile.moyen, profile.long].forEach(function(pct, i) {
+          tranches.push({ horizon: HORIZONS[i], amount: Math.round(ent.total * pct / 1000) * 1000 });
         });
       }
-      _state.tranches = tranches.map(function(t) { return { amount: t.amount }; });
-    } else {
-      var regime = _getRegime();
-      var profile = REGIME_PROFILES[regime] || REGIME_PROFILES.neutral;
-      // Auto: immediat gets the leftover
-      var immPct = 1.0 - profile.court - profile.moyen - profile.long;
-      if (immPct < 0) immPct = 0;
-      [immPct, profile.court, profile.moyen, profile.long].forEach(function(pct, i) {
-        tranches.push({ horizon: HORIZONS[i], amount: Math.round(totalCash * pct / 1000) * 1000 });
-      });
-    }
 
-    _state.result = _allocate(tranches, totalCash);
-    _renderResult(document.getElementById('main-content'), _state.result);
+      allResults.entities[entKey] = _allocate(tranches, ent.total);
+      allResults.entities[entKey].entityLabel = ent.label;
+    });
+
+    // Compute combined totals
+    var totalReturn = 0, totalAllocated = 0, totalCatEquiv = 0;
+    Object.values(allResults.entities).forEach(function(r) {
+      totalReturn += r.totalReturn;
+      totalAllocated += r.totalAllocated;
+      totalCatEquiv += r.catEquivReturn;
+    });
+    allResults.totalReturn = totalReturn;
+    allResults.totalAllocated = totalAllocated;
+    allResults.totalCatEquiv = totalCatEquiv;
+    allResults.excessVsCat = totalReturn - totalCatEquiv;
+    allResults.weightedRate = totalAllocated > 0 ? Math.round(totalReturn / totalAllocated * 10000) / 100 : 0;
+    allResults.regime = regime;
+
+    _state.result = allResults;
+    _renderResult(document.getElementById('main-content'), allResults);
   };
 
   // ═══ MAIN RENDER ═══════════════════════════════════════
   window.renderUnifiedAllocator = function(container) {
-    _state.totalCash = _computeTotalCash();
+    _state.entities = _computeEntities();
+    _state.totalCash = _state.entities.bycam.total + _state.entities.cameleons.total;
     if (_state.result) {
       _renderResult(container, _state.result);
     } else {
