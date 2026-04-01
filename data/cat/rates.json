@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-04-01T07:07:51.207Z",
+  "lastUpdated": "2026-04-01T07:18:17.499Z",
   "rates": [
     {
       "bankId": "sg",
@@ -1015,6 +1015,347 @@
       "confidence": "medium",
       "scanNote": "Tonic Croissance disponible",
       "scanSource": "https://www.moneyvox.fr/placement/taux-compte-a-terme.php"
+    },
+    {
+      "bankId": "cic",
+      "bankName": "CIC",
+      "durationMonths": 2,
+      "rate": 2.2,
+      "productType": "cat",
+      "date": "2026-03-01",
+      "rateType": "fixe",
+      "rateSchedule": [],
+      "earlyExitSchedule": [
+        {
+          "period": "Mois 1",
+          "penalty": "Aucune rémunération"
+        }
+      ],
+      "withdrawalConditions": "Pas de rémunération le 1er mois si sortie anticipée",
+      "notice": "32 jours",
+      "productName": "CAT Fixe 2m",
+      "calculationBase": "exact/365",
+      "minAmount": null,
+      "maxAmount": null,
+      "category": null,
+      "source": "confirmed",
+      "confidence": "high"
+    },
+    {
+      "bankId": "cic",
+      "bankName": "CIC",
+      "durationMonths": 3,
+      "rate": 2.2,
+      "productType": "cat",
+      "date": "2026-03-01",
+      "rateType": "fixe",
+      "rateSchedule": [],
+      "earlyExitSchedule": [
+        {
+          "period": "Avant terme",
+          "penalty": "Aucune rémunération"
+        }
+      ],
+      "withdrawalConditions": "Pas de rémunération si sortie anticipée",
+      "notice": "32 jours",
+      "productName": "CAT Fixe 3m",
+      "calculationBase": "exact/365",
+      "minAmount": null,
+      "maxAmount": null,
+      "category": null,
+      "source": "confirmed",
+      "confidence": "high"
+    },
+    {
+      "bankId": "cic",
+      "bankName": "CIC",
+      "durationMonths": 6,
+      "rate": 2.3,
+      "productType": "cat",
+      "date": "2026-03-01",
+      "rateType": "fixe",
+      "rateSchedule": [],
+      "earlyExitSchedule": [
+        {
+          "period": "3 premiers mois",
+          "penalty": "Aucune rémunération"
+        },
+        {
+          "period": "Après 3 mois",
+          "penalty": "50% de la rémunération"
+        }
+      ],
+      "withdrawalConditions": "Pas de rémun. 3 premiers mois, 50% ensuite",
+      "notice": "32 jours",
+      "productName": "CAT Fixe 6m",
+      "calculationBase": "exact/365",
+      "minAmount": null,
+      "maxAmount": null,
+      "category": null,
+      "source": "confirmed",
+      "confidence": "high"
+    },
+    {
+      "bankId": "cic",
+      "bankName": "CIC",
+      "durationMonths": 12,
+      "rate": 2.4,
+      "productType": "cat",
+      "date": "2026-03-01",
+      "rateType": "fixe",
+      "rateSchedule": [],
+      "earlyExitSchedule": [
+        {
+          "period": "3 premiers mois",
+          "penalty": "Aucune rémunération"
+        },
+        {
+          "period": "Après 3 mois",
+          "penalty": "50% de la rémunération"
+        }
+      ],
+      "withdrawalConditions": "Pas de rémun. 3 premiers mois, 50% ensuite",
+      "notice": "32 jours",
+      "productName": "CAT Fixe 12m",
+      "calculationBase": "exact/365",
+      "minAmount": null,
+      "maxAmount": null,
+      "category": null,
+      "source": "confirmed",
+      "confidence": "high"
+    },
+    {
+      "bankId": "cic",
+      "bankName": "CIC",
+      "durationMonths": 18,
+      "rate": 2.6,
+      "productType": "cat",
+      "date": "2026-03-01",
+      "rateType": "progressif",
+      "rateSchedule": [
+        {
+          "fromMonth": 1,
+          "toMonth": 6,
+          "rate": 2.3,
+          "earlyRate": 1.15,
+          "label": "Semestre 1"
+        },
+        {
+          "fromMonth": 7,
+          "toMonth": 12,
+          "rate": 2.5,
+          "label": "Semestre 2"
+        },
+        {
+          "fromMonth": 13,
+          "toMonth": 18,
+          "rate": 3.01,
+          "label": "Semestre 3"
+        }
+      ],
+      "earlyExitSchedule": [
+        {
+          "period": "Période 1",
+          "penalty": "50% du taux de la période"
+        },
+        {
+          "period": "Autres périodes",
+          "penalty": "Taux de la période précédente"
+        }
+      ],
+      "withdrawalConditions": "50% taux période 1, taux précédent autres périodes",
+      "notice": "32 jours",
+      "productName": "CAT Progressif 18m",
+      "calculationBase": "exact/365",
+      "minAmount": null,
+      "maxAmount": null,
+      "category": null,
+      "source": "confirmed",
+      "confidence": "high"
+    },
+    {
+      "bankId": "cic",
+      "bankName": "CIC",
+      "durationMonths": 36,
+      "rate": 2.8,
+      "productType": "cat",
+      "date": "2026-03-01",
+      "rateType": "progressif",
+      "rateSchedule": [
+        {
+          "fromMonth": 1,
+          "toMonth": 12,
+          "rate": 2.3,
+          "earlyRate": 1.15,
+          "label": "Année 1"
+        },
+        {
+          "fromMonth": 13,
+          "toMonth": 24,
+          "rate": 2.8,
+          "label": "Année 2"
+        },
+        {
+          "fromMonth": 25,
+          "toMonth": 36,
+          "rate": 3.3,
+          "label": "Année 3"
+        }
+      ],
+      "earlyExitSchedule": [
+        {
+          "period": "Période 1",
+          "penalty": "50% du taux de la période"
+        },
+        {
+          "period": "Autres périodes",
+          "penalty": "Taux de la période précédente"
+        }
+      ],
+      "withdrawalConditions": "50% taux période 1, taux précédent autres périodes",
+      "notice": "32 jours",
+      "productName": "CAT Progressif 36m",
+      "calculationBase": "exact/365",
+      "minAmount": null,
+      "maxAmount": null,
+      "category": null,
+      "source": "confirmed",
+      "confidence": "high"
+    },
+    {
+      "bankId": "cic",
+      "bankName": "CIC",
+      "durationMonths": 60,
+      "rate": 2.9,
+      "productType": "cat",
+      "date": "2026-03-01",
+      "rateType": "progressif",
+      "rateSchedule": [
+        {
+          "fromMonth": 1,
+          "toMonth": 12,
+          "rate": 2.2,
+          "earlyRate": 1.1,
+          "label": "Année 1"
+        },
+        {
+          "fromMonth": 13,
+          "toMonth": 24,
+          "rate": 2.5,
+          "label": "Année 2"
+        },
+        {
+          "fromMonth": 25,
+          "toMonth": 36,
+          "rate": 2.9,
+          "label": "Année 3"
+        },
+        {
+          "fromMonth": 37,
+          "toMonth": 48,
+          "rate": 3.3,
+          "label": "Année 4"
+        },
+        {
+          "fromMonth": 49,
+          "toMonth": 60,
+          "rate": 3.62,
+          "label": "Année 5"
+        }
+      ],
+      "earlyExitSchedule": [
+        {
+          "period": "Période 1",
+          "penalty": "50% du taux de la période"
+        },
+        {
+          "period": "Autres périodes",
+          "penalty": "Taux de la période précédente"
+        }
+      ],
+      "withdrawalConditions": "50% taux période 1, taux précédent autres périodes",
+      "notice": "32 jours",
+      "productName": "CAT Progressif 60m",
+      "calculationBase": "exact/365",
+      "minAmount": null,
+      "maxAmount": null,
+      "category": null,
+      "source": "confirmed",
+      "confidence": "high"
+    },
+    {
+      "bankId": "cic",
+      "bankName": "CIC",
+      "durationMonths": 3,
+      "rate": 2.1,
+      "productType": "cat",
+      "date": "2026-03-01",
+      "rateType": "fixe",
+      "rateSchedule": [],
+      "earlyExitSchedule": [
+        {
+          "period": "Avant terme",
+          "penalty": "Aucune rémunération"
+        }
+      ],
+      "withdrawalConditions": "Pas de rémunération si sortie anticipée",
+      "notice": "32 jours",
+      "productName": "CAT Transition Fixe 3m",
+      "calculationBase": null,
+      "minAmount": 1500,
+      "maxAmount": 5000000,
+      "category": "transition",
+      "source": "confirmed",
+      "confidence": "high"
+    },
+    {
+      "bankId": "cic",
+      "bankName": "CIC",
+      "durationMonths": 18,
+      "rate": 2.5,
+      "productType": "cat",
+      "date": "2026-03-01",
+      "rateType": "progressif",
+      "rateSchedule": [
+        {
+          "fromMonth": 1,
+          "toMonth": 6,
+          "rate": 2.2,
+          "earlyRate": 1.1,
+          "label": "Semestre 1"
+        },
+        {
+          "fromMonth": 7,
+          "toMonth": 12,
+          "rate": 2.4,
+          "label": "Semestre 2"
+        },
+        {
+          "fromMonth": 13,
+          "toMonth": 18,
+          "rate": 2.9,
+          "label": "Semestre 3"
+        }
+      ],
+      "earlyExitSchedule": [
+        {
+          "period": "Avant fin 1er semestre",
+          "penalty": "50% du taux de souscription"
+        },
+        {
+          "period": "Entre fin 1er et 3ème semestre",
+          "penalty": "Taux de période précédente"
+        }
+      ],
+      "withdrawalConditions": "50% taux 1er sem., taux précédent ensuite",
+      "notice": "32 jours",
+      "productName": "CAT Transition Progressif 18m",
+      "calculationBase": "30/360 fin période, exact/365 en cours",
+      "minAmount": 1500,
+      "maxAmount": 5000000,
+      "category": "transition",
+      "source": "confirmed",
+      "confidence": "high"
     }
   ]
 }
