@@ -505,24 +505,32 @@
     if (result.totalUnallocated > 0) {
       var catOffers = _getCATOffers(result.totalUnallocated);
       html += '<div style="border:1px solid rgba(255,182,39,0.2);border-radius:var(--radius-sm);padding:10px;margin-bottom:8px;background:rgba(255,182,39,0.03)">';
-      html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:' + (catOffers.length > 0 ? '8px' : '0') + '">';
       var macro = _getMacroContext();
       var trendIcon = macro && macro.rateTrend === 'rising' ? '📈' : macro && macro.rateTrend === 'falling' ? '📉' : '➡️';
       var trendLabel = macro && macro.rateTrend === 'rising' ? 'Taux en hausse → court terme recommandé' : macro && macro.rateTrend === 'falling' ? 'Taux en baisse → verrouiller long terme' : 'Taux stables';
-      var maxDur = macro && macro.maxDurationMonths ? macro.maxDurationMonths + 'M max' : '';
-      html += '<div><div style="font-size:11px;font-weight:600;color:var(--orange)">🏦 À placer en CAT</div>';
-      html += '<div style="font-size:9px;color:var(--text-dim)">' + trendIcon + ' ' + trendLabel + (maxDur ? ' · ' + maxDur : '') + '</div></div>';
-      html += '<div style="text-align:right"><div style="font-family:var(--mono);font-weight:700;color:var(--text-bright)">' + _fmt(result.totalUnallocated) + '€</div>';
-      html += '<div style="font-family:var(--mono);font-size:10px;color:var(--orange)">+' + _fmt(Math.round(result.totalUnallocated * result.bestCatRate / 100)) + '€/an</div></div>';
-      html += '</div>';
-      // Show top 3 CAT offers
+
       if (catOffers.length > 0) {
-        catOffers.slice(0, 3).forEach(function(o) {
-          html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 8px;margin-top:4px;background:rgba(255,182,39,0.04);border-radius:4px;font-size:10px">';
-          html += '<span style="color:var(--text-muted)">' + o.bankName + ' — ' + o.productName + ' (' + o.durationMonths + 'M)</span>';
-          html += '<span style="font-family:var(--mono);font-weight:600;color:var(--orange)">' + o.rate.toFixed(1) + '%</span>';
-          html += '</div>';
-        });
+        var best = catOffers[0]; // already sorted by rate (adjusted for trend)
+        var annualReturn = Math.round(result.totalUnallocated * best.rate / 100);
+        html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">';
+        html += '<div><div style="font-size:11px;font-weight:600;color:var(--orange)">🏦 Placer en CAT</div>';
+        html += '<div style="font-size:9px;color:var(--text-dim)">' + trendIcon + ' ' + trendLabel + '</div></div>';
+        html += '<div style="text-align:right"><div style="font-family:var(--mono);font-weight:700;color:var(--text-bright)">' + _fmt(result.totalUnallocated) + '€</div>';
+        html += '<div style="font-family:var(--mono);font-size:10px;color:var(--orange)">+' + _fmt(annualReturn) + '€/an</div></div>';
+        html += '</div>';
+        // Single recommendation card
+        html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:rgba(255,182,39,0.06);border:1px solid rgba(255,182,39,0.15);border-radius:6px">';
+        html += '<div><div style="font-size:12px;font-weight:600;color:var(--text-bright)">' + best.bankName + ' — ' + best.productName + '</div>';
+        html += '<div style="font-size:10px;color:var(--text-dim)">' + best.durationMonths + ' mois</div></div>';
+        html += '<div style="text-align:right"><div style="font-family:var(--mono);font-weight:700;font-size:14px;color:var(--orange)">' + _fmt(result.totalUnallocated) + '€</div>';
+        html += '<div style="font-family:var(--mono);font-size:11px;color:var(--orange)">' + best.rate.toFixed(2) + '% → +' + _fmt(annualReturn) + '€/an</div></div>';
+        html += '</div>';
+      } else {
+        html += '<div style="display:flex;align-items:center;justify-content:space-between">';
+        html += '<div><div style="font-size:11px;font-weight:600;color:var(--orange)">🏦 À placer en CAT</div>';
+        html += '<div style="font-size:9px;color:var(--text-dim)">Aucune offre confirmée disponible</div></div>';
+        html += '<div style="font-family:var(--mono);font-weight:700;color:var(--text-bright)">' + _fmt(result.totalUnallocated) + '€</div>';
+        html += '</div>';
       }
       html += '</div>';
     }
