@@ -241,12 +241,18 @@
         });
       }
 
-      // Tag cash opportunities with macro fit
+      // Tag cash opportunities with macro fit + re-sort: macro-aligned first, then by rate
       if (analysis.cashOpportunities) {
         analysis.cashOpportunities.forEach(function(c) {
           c.macroFit = (ctx.urgency === 'place_now_short' && c.duration <= 12)
             || (ctx.urgency === 'lock_long' && c.duration >= 24)
             || ctx.urgency === 'normal';
+        });
+        // Sort: macroFit first, then by rate descending
+        analysis.cashOpportunities.sort(function(a, b) {
+          if (a.macroFit && !b.macroFit) return -1;
+          if (!a.macroFit && b.macroFit) return 1;
+          return b.rate - a.rate;
         });
       }
 

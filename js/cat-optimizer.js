@@ -524,7 +524,19 @@ function renderOptimizationTable(analysis) {
     </tr>`;
   });
   html+=`</tbody></table></div></div>`;
-  if(cashOpportunities.length>0){html+=`<div style="margin-top:16px"><h3 style="font-size:12px;color:var(--cyan);margin-bottom:8px">💰 Placer ${formatNumber(placable)}€</h3><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px">`;cashOpportunities.forEach((c,i)=>{html+=`<div style="background:var(--bg-elevated);border:1px solid ${i===0?'var(--cyan)':'var(--border)'};border-radius:var(--radius-sm);padding:10px">${i===0?'<div style="font-size:9px;color:var(--cyan);margin-bottom:4px">⭐</div>':''}<div style="display:flex;justify-content:space-between"><strong style="font-size:11px;color:var(--text-bright)">${c.name}</strong><span style="font-family:var(--mono);color:var(--green);font-weight:700">${c.rate}%</span></div><div style="font-size:10px;color:var(--text-muted);margin-top:4px">${c.duration}m · +${formatNumber(c.interestPerYear)}€/an${c.isScanned?' <span style="font-size:7px;color:var(--purple);background:rgba(139,92,246,0.15);padding:0 4px;border-radius:6px">web</span>':''}</div></div>`;});html+=`</div></div>`;}
+  if(cashOpportunities.length>0){
+    html+=`<div style="margin-top:16px"><h3 style="font-size:12px;color:var(--cyan);margin-bottom:8px">💰 Placer ${formatNumber(placable)}€</h3><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px">`;
+    cashOpportunities.forEach((c,i)=>{
+      const isFit = c.macroFit === true;
+      const isNotFit = c.macroFit === false;
+      const borderColor = isFit && i === 0 ? 'var(--cyan)' : isNotFit ? 'rgba(90,107,138,0.3)' : 'var(--border)';
+      const opacity = isNotFit ? 'opacity:0.6;' : '';
+      const fitBadge = isFit ? '<span style="font-size:7px;color:var(--cyan);background:rgba(34,211,238,0.12);padding:1px 6px;border-radius:6px;font-weight:600;margin-left:4px">MACRO</span>' : '';
+      const notFitBadge = isNotFit ? '<div style="font-size:8px;color:var(--text-dim);margin-top:2px">⚠️ durée non alignée macro</div>' : '';
+      html+=`<div style="background:var(--bg-elevated);border:1px solid ${borderColor};border-radius:var(--radius-sm);padding:10px;${opacity}">${isFit && i === 0?'<div style="font-size:9px;color:var(--cyan);margin-bottom:4px">⭐ Recommandé</div>':''}<div style="display:flex;justify-content:space-between;align-items:center"><strong style="font-size:11px;color:var(--text-bright)">${c.name}</strong>${fitBadge}<span style="font-family:var(--mono);color:var(--green);font-weight:700;margin-left:auto">${c.rate}%</span></div><div style="font-size:10px;color:var(--text-muted);margin-top:4px">${c.duration}m · +${formatNumber(c.interestPerYear)}€/an${c.isScanned?' <span style="font-size:7px;color:var(--purple);background:rgba(139,92,246,0.15);padding:0 4px;border-radius:6px">web</span>':''}</div>${notFitBadge}</div>`;
+    });
+    html+=`</div></div>`;
+  }
   return html;
 }
 
