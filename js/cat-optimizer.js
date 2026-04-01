@@ -479,15 +479,19 @@ function renderOptimizationTable(analysis) {
     // Impact column: 12-month € comparison
     let impactCell = '';
     if (d.keep12m > 0) {
-      // Always show keep12m as the baseline
       impactCell = `<div style="font-size:10px;color:var(--text-muted)">garder: <span style="font-family:var(--mono);color:var(--green)">${formatNumber(d.keep12m)}€</span></div>`;
       if (d.bestAlt && d.switch12m !== 0) {
-        const switchColor = d.switch12m > d.keep12m ? 'var(--cyan)' : 'var(--text-dim)';
-        impactCell += `<div style="font-size:10px;color:var(--text-muted)">arbitrer: <span style="font-family:var(--mono);color:${switchColor}">${formatNumber(d.switch12m)}€</span></div>`;
-        if (d.advantage12mAfterTax !== 0) {
-          const advColor = d.advantage12mAfterTax > 0 ? 'var(--green)' : 'var(--red)';
-          impactCell += `<div style="font-family:var(--mono);font-weight:700;font-size:11px;color:${advColor};margin-top:2px">${d.advantage12mAfterTax>0?'+':''}${formatNumber(d.advantage12mAfterTax)}€ net IS</div>`;
+        if (d.advantage12mAfterTax > 0) {
+          // ARBITRER wins: show both + green advantage
+          impactCell += `<div style="font-size:10px;color:var(--text-muted)">arbitrer: <span style="font-family:var(--mono);color:var(--cyan)">${formatNumber(d.switch12m)}€</span></div>`;
+          impactCell += `<div style="font-family:var(--mono);font-weight:700;font-size:11px;color:var(--green);margin-top:2px">+${formatNumber(d.advantage12mAfterTax)}€ net IS</div>`;
+        } else {
+          // GARDER wins: show advantage positively
+          const gain = Math.abs(d.advantage12mAfterTax);
+          impactCell += `<div style="font-size:9px;color:var(--text-dim);margin-top:2px">arbitrer perdrait ${formatNumber(gain)}€</div>`;
         }
+      } else if (!d.bestAlt) {
+        impactCell += `<div style="font-size:9px;color:var(--green)">leader marché</div>`;
       }
     } else {
       impactCell = `<span style="color:var(--text-dim)">—</span>`;
@@ -552,17 +556,19 @@ function renderOptimizerDashboard() {
     if (has12m && d.keep12m != null) {
       col12m = `<div style="font-size:10px;color:var(--text-muted)">garder: <span style="font-family:var(--mono);color:var(--green)">${formatNumber(d.keep12m)}€</span></div>`;
       if (d.bestAlt && d.switch12m) {
-        col12m += `<div style="font-size:10px;color:var(--text-muted)">arbitrer: <span style="font-family:var(--mono)">${formatNumber(d.switch12m)}€</span></div>`;
-        if (d.advantage12mAfterTax && d.advantage12mAfterTax !== 0) {
-          const c = d.advantage12mAfterTax > 0 ? 'var(--green)' : 'var(--red)';
-          col12m += `<div style="font-family:var(--mono);font-weight:700;font-size:11px;color:${c}">${d.advantage12mAfterTax>0?'+':''}${formatNumber(d.advantage12mAfterTax)}€</div>`;
+        if (d.advantage12mAfterTax > 0) {
+          col12m += `<div style="font-size:10px;color:var(--text-muted)">arbitrer: <span style="font-family:var(--mono);color:var(--cyan)">${formatNumber(d.switch12m)}€</span></div>`;
+          col12m += `<div style="font-family:var(--mono);font-weight:700;font-size:11px;color:var(--green)">+${formatNumber(d.advantage12mAfterTax)}€</div>`;
+        } else {
+          const gain = Math.abs(d.advantage12mAfterTax || 0);
+          col12m += `<div style="font-size:9px;color:var(--text-dim)">arbitrer perdrait ${formatNumber(gain)}€</div>`;
         }
       } else {
         col12m += `<div style="font-size:9px;color:var(--green)">leader marché</div>`;
       }
     } else {
       const g = d.switchGainPerYear || 0;
-      col12m = g !== 0 ? `<span style="font-family:var(--mono);font-weight:600;color:${g>0?'var(--green)':'var(--red)'}">${g>0?'+':''}${formatNumber(g)}€</span>` : '—';
+      col12m = g !== 0 ? `<span style="font-family:var(--mono);font-weight:600;color:${g>0?'var(--green)':'var(--text-dim)'}">${g>0?'+':''}${formatNumber(g)}€</span>` : '—';
     }
 
     html+=`<tr style="border-bottom:1px solid var(--border);${rowBg}${rowBorder}"><td style="padding:8px 10px"><strong style="color:var(--text-bright)">${d.name}</strong><div style="font-size:10px;color:var(--text-dim)">${d.bankName}${d.entity?' · '+d.entity:''}</div></td><td style="padding:8px 6px;text-align:right;font-family:var(--mono)">${formatNumber(d.amount)}€</td><td style="padding:8px 6px;text-align:center"><span style="font-family:var(--mono);font-weight:700;font-size:12px;color:var(--green)">${eff}%</span>${rr}</td><td style="padding:8px 6px;text-align:center;font-size:10px">${d.remainingMonths}m</td><td style="padding:8px 6px;text-align:center">${d.bestAlt?'<span style="font-family:var(--mono);font-weight:700;color:var(--cyan)">'+d.bestAlt.rate+'%</span>':'✨'}</td><td style="padding:8px 6px;text-align:right">${col12m}</td><td style="padding:8px 6px;text-align:center"><span style="padding:3px 8px;border-radius:10px;font-size:10px;font-weight:700;color:${rc};background:${rc}12;border:1px solid ${rc}30">${ri} ${d.recommendation}</span></td></tr>`;});
