@@ -20,7 +20,7 @@
   // Profils : immédiat = 1 - court - moyen - long (calculé auto)
   // CAT existants = la réserve, donc pas besoin de "court" élevé
   var REGIME_PROFILES = {
-    stagflation: { court: 0.20, moyen: 0.40, long: 0.40, label: 'Stagflation — capital garanti + rendement' },
+    stagflation: { court: 0.00, moyen: 0.50, long: 0.50, label: 'Stagflation — CAT existants = réserve, déployer moyen/long' },
     recession:   { court: 0.30, moyen: 0.40, long: 0.30, label: 'Récession — prudence, moyen terme' },
     crisis:      { court: 0.50, moyen: 0.30, long: 0.20, label: 'Crise — cash is king' },
     neutral:     { court: 0.15, moyen: 0.40, long: 0.45, label: 'Neutre — déploiement équilibré' },
@@ -115,10 +115,27 @@
         var cp = p.capitalProtection || {};
         var isCapGaranti = cp.protected === true || (p.structureType || '').indexOf('capital_garanti') >= 0 || (p.structureType || '').indexOf('dispersion') >= 0 || (p.structureType || '').indexOf('taux_fixe') >= 0;
         var rdtNet = p._bsRendementNet || (p.grading.metadata && p.grading.metadata.bsRendementNet) || p._ratesRendementNet || null;
-        // Fallback for taux fixe: use guaranteed coupon rate
+        // Fallback for taux fixe: compute TRI actualisé (not facial coupon)
         if (rdtNet == null && (p.structureType === 'taux_fixe' || isCapGaranti)) {
           var c = p.coupon;
-          rdtNet = typeof c === 'object' ? (parseFloat(c.rateIfCalled || c.rate) || 0) : (parseFloat(c) || 0);
+          var rateIfCalled = typeof c === 'object' ? (parseFloat(c.rateIfCalled) || parseFloat(c.rate) || 0) : (parseFloat(c) || 0);
+          var rateAtMaturity = typeof c === 'object' ? (parseFloat(c.rateIfMaturity) || rateIfCalled) : rateIfCalled;
+          var matY = parseFloat(p.maturityYears) || 5;
+
+          if (rateIfCalled > 0 && matY > 0) {
+            // Callable TRI: weighted by call probability
+            // In stagflation, call prob ~20% → most likely goes to maturity
+            var callProb = 0.20; // conservative default
+            // TRI if called (avg year 3): (1 + rate × years)^(1/years) - 1
+            var avgCallYear = Math.min(matY, Math.max(2, matY * 0.4));
+            var triCalled = Math.pow(1 + rateIfCalled / 100 * avgCallYear, 1 / avgCallYear) - 1;
+            // TRI at maturity
+            var triMaturity = Math.pow(1 + rateAtMaturity / 100 * matY, 1 / matY) - 1;
+            // Weighted TRI
+            rdtNet = Math.round((callProb * triCalled * 100 + (1 - callProb) * triMaturity * 100) * 100) / 100;
+          } else {
+            rdtNet = rateIfCalled;
+          }
         }
         candidates.push({
           id: p.id,
@@ -143,14 +160,17 @@
   // CAT deposits are NOT candidates — they ARE the reserve.
   // Only structured products are candidates for new allocation.
   // For horizons where no structured fits, cash stays in existing CAT.
-  function _bestForHorizon(horizon, structCandidates, allocated) {
+  function _bestForHorizon(horizon, structCandidates, allocated, bestCatRate) {
     var maxMonths = horizon.maxMonths;
     var candidates = [];
 
     // Structured candidates: maturity fits horizon AND capital garanti
+    // v7.1: minimum spread threshold — products > 5Y must beat CAT by +1%
     structCandidates.forEach(function(s) {
       if (allocated[s.id]) return;
       if (s.maturityMonths <= maxMonths && s.capitalGaranti && s.rdtNet != null && s.rdtNet > 0) {
+        var minSpread = s.maturityMonths > 60 ? 1.0 : 0; // >5Y needs +1% vs CAT
+        if (s.rdtNet < bestCatRate + minSpread) return; // doesn't beat CAT enough
         candidates.push({
           id: s.id,
           name: s.name,
@@ -184,7 +204,7 @@
       var budget = tr.amount;
       if (budget <= 0) { results.push({ horizon: tr.horizon, amount: 0, allocated: 0, remaining: 0, allocations: [] }); return; }
 
-      var candidates = _bestForHorizon(tr.horizon, structCandidates, allocated);
+      var candidates = _bestForHorizon(tr.horizon, structCandidates, allocated, bestCatRate);
       var allocs = [];
       var remaining = budget;
       // Max 30% of total entity cash per product (diversification)
