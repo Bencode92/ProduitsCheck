@@ -211,7 +211,12 @@ function _detectDateFromText(text) {
   const moisMatch = text.match(/(?:mois\s+d[e'u]\s*|valable[s]?\s+(?:pour\s+|en\s+)?|conditions?\s+(?:de\s+|du\s+)?|à\s+compter\s+du?\s+)(\w+)\s+(\d{4})/i);
   if (moisMatch) {
     const m = months[moisMatch[1].toLowerCase()];
-    if (m) return `${moisMatch[2]}-${m}-01`;
+    if (m) {
+      // Use last day of month (rates valid for the whole month)
+      const y = parseInt(moisMatch[2]), mi = parseInt(m);
+      const lastDay = new Date(y, mi, 0).getDate();
+      return `${moisMatch[2]}-${m}-${String(lastDay).padStart(2,'0')}`;
+    }
   }
   // "01/03/2026" or "01.03.2026"
   const dateMatch = text.match(/(\d{2})[/.](\d{2})[/.](\d{4})/);
