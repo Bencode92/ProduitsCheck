@@ -1,6 +1,6 @@
 {
-  "lastUpdated": "2026-04-01T12:02:45.667Z",
-  "summary": "## ANALYSE ARBITRAGE PORTEFEUILLE v3.1\n\n**Portefeuille actuel:** 1 460 000€ à 2.99% → +43 600€/an\n**Post-arbitrage:** Identique → **Gain net: 0€**\n\n### DÉCISIONS PAR CONTRAT (horizon 12m, net IS 25%):\n\n**COMPTE A TERME OPTIPLUS 5 ANS** (×2) : garder=7 501€ vs arbitrer=4 619€ → **GARDER** (+2 882€ net)\n\n**CATIP ENT 3ANS** : garder=5 317€ vs arbitrer=4 618€ → **GARDER** (+524€ net)\n*Taux restant 2.73% > meilleure alternative 2.8% sur 36m*\n\n**CATVAIR GRANDS COMPTES** : garder=2 360€ vs arbitrer=1 123€ → **GARDER** (+928€ net)\n*Taux restant exceptionnel 5.04%*\n\n**CAT CROISSANCE +3A** (×2) : garder=2 284€/1 903€ vs arbitrer=1 347€/1 123€ → **GARDER** (+701€/+584€ net)\n*Taux restant 4.16% très attractif*\n\n**OPTIPLUS CONQUÊTE** (×4) : garder=4 417€ vs arbitrer=3 370€ → **GARDER** (+785€ net chacun)\n*5m restants, taux 3.03% correct*\n\n### CASH 177 000€ - CONTEXTE MACRO:\nStagflation (4/5), BCE 2.15%, forward CAT 12m: +0.33%\n**Recommandation:** CAT Progressif 18m à 2.6% (+4 602€/an)\n*Privilégier court terme face à la volatilité*\n\n✅ **10 contrats à garder** | 🔄 **0 à arbitrer**\n**Gain préservé:** +6 406€ net vs arbitrage",
+  "lastUpdated": "2026-04-01T12:06:27.572Z",
+  "summary": "## ANALYSE OPTIMISATION v3.1 - HORIZON 12 MOIS\n\n**ARBITRAGES RECOMMANDÉS:**\n✅ **10 contrats** à garder | 🔄 **0** à arbitrer\n\n**DÉTAIL PAR CONTRAT:**\n- **COMPTE A TERME OPTIPLUS 5 ANS (x2)** garder=7 500€ vs arbitrer=0€ → GARDER (taux restant 3.12% > forward 3.32%)\n- **CATIP ENT 3ANS A PREAVIS** garder=5 317€ vs arbitrer=4 618€ → GARDER (-524€ net IS si arbitrage)\n- **CATVAIR GRANDS COMPTES 5 ANS** garder=2 360€ vs arbitrer=0€ → GARDER (taux restant 5.04% excellent)\n- **CAT CROISSANCE +3A PREAVIS (x2)** garder=2 284€/1 903€ vs arbitrer=0€ → GARDER (taux restant 4.16% attractif)\n- **OPTIPLUS CONQUÊTE (x4)** garder=4 417€ vs arbitrer=0€ → GARDER (5m restants + réinvestir 7m au meilleur taux)\n\n**ALLOCATION CASH 177 000€:**\nContexte stagflation + forward CAT 12m à 3.32% → Privilégier **CAT Progressif 18m à 2.6%** (+4 602€/an) pour capturer la remontée des taux anticipée.\n\n⚠️ **ALERTE:** 600 000€ arrivent à maturité dans 6m - anticiper réinvestissement avec forward rate 3.32%.\n\n**GAIN NET ARBITRAGE:** 0€\n**PERFORMANCE MAINTENUE:** 43 600€/an (2.99% effectif)",
   "rateSource": "confirmed",
   "algorithmVersion": "v3",
   "totalInvested": 1460000,
@@ -160,7 +160,7 @@
       "noticeOpportunityCost": 0,
       "netGainAfterTax": 0,
       "accelerationLoss": 0,
-      "keep12m": 2283.62,
+      "keep12m": 2283.63,
       "switch12m": 0,
       "advantage12m": 0,
       "advantage12mAfterTax": 0,
@@ -170,7 +170,7 @@
       "dynamicThreshold": 0.32806447167874586,
       "compositeScore": 0.028333333333333335,
       "recommendation": "GARDER",
-      "reason": "Leader marché (restant 4.16% > TRAAB 3.21%) · 12m: +2 283,62€"
+      "reason": "Leader marché (restant 4.16% > TRAAB 3.21%) · 12m: +2 283,63€"
     },
     {
       "name": "CAT CROISSANCE +3A PREAVIS (copie)",
