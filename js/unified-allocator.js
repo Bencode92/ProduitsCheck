@@ -58,13 +58,22 @@
       cameleons: { cash: 0, structLiq: 0, label: '🦎 Caméléons' }
     };
 
-    // External cash
+    // External cash — try catManager first, fallback to direct file read
     try {
       if (typeof catManager !== 'undefined' && catManager.objectives) {
         entities.bycam.cash = parseFloat(catManager.objectives.cashByCam) || 0;
         entities.cameleons.cash = parseFloat(catManager.objectives.cashCameleons) || 0;
       }
     } catch(e) {}
+    // Fallback: if catManager not loaded, read from cached objectives
+    if (entities.bycam.cash === 0 && entities.cameleons.cash === 0) {
+      try {
+        if (typeof catManager !== 'undefined' && typeof catManager.load === 'function' && !catManager.objectives) {
+          // catManager exists but objectives not loaded yet
+          console.log('[Allocator] catManager.objectives not loaded, using fallback');
+        }
+      } catch(e) {}
+    }
 
     // Structured liquidity (Bond 12M etc.) — check entity on portfolio items
     var portfolio = app.state.portfolio || [];
@@ -558,7 +567,15 @@
   };
 
   // ═══ MAIN RENDER ═══════════════════════════════════════
-  window.renderUnifiedAllocator = function(container) {
+  window.renderUnifiedAllocator = async function(container) {
+    // Ensure catManager data is loaded
+    try {
+      if (typeof catManager !== 'undefined' && typeof catManager.load === 'function' && !catManager.objectives) {
+        container.innerHTML = '<div style="display:flex;align-items:center;gap:10px;padding:20px;color:var(--text-muted)"><div class="spinner"></div>Chargement des données...</div>';
+        await catManager.load();
+      }
+    } catch(e) { console.warn('[Allocator] catManager load failed:', e.message); }
+
     _state.entities = _computeEntities();
     _state.totalCash = _state.entities.bycam.cash + _state.entities.cameleons.cash;
     if (_state.result) {
