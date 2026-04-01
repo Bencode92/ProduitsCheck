@@ -377,7 +377,28 @@
     }
 
     if (ent.total <= 0) {
-      html += '<div style="font-size:11px;color:var(--text-dim);text-align:center;padding:8px 0">Pas de liquidité disponible</div>';
+      // No free cash — but check if structLiq can be arbitraged
+      if (ent.structLiq > 0) {
+        var slCandidates = _getStructuredCandidates().filter(function(s) {
+          return s.bankName === 'swiss-life' && s.capitalGaranti && s.rdtNet != null && s.rdtNet > 2.5;
+        });
+        if (slCandidates.length > 0) {
+          slCandidates.sort(function(a, b) { return b.rdtNet - a.rdtNet; });
+          var best = slCandidates[0];
+          html += '<div style="background:rgba(6,214,160,0.06);border:1px solid rgba(6,214,160,0.15);border-radius:6px;padding:8px 10px;margin-bottom:6px;font-size:10px">';
+          html += '<div style="color:var(--green);font-weight:600">✅ Arbitrage recommandé</div>';
+          html += '<div style="color:var(--text-muted);margin-top:4px">Bond 12M (~2.5%) → <strong>' + best.name + '</strong> (' + best.rdtNet.toFixed(1) + '%/an, ' + best.grade + ')</div>';
+          html += '<div style="color:var(--text-dim);margin-top:2px">Gain : +' + _fmt(Math.round(ent.structLiq * (best.rdtNet - 2.5) / 100)) + '€/an vs Bond 12M</div>';
+          html += '</div>';
+        } else {
+          html += '<div style="background:rgba(255,182,39,0.06);border:1px solid rgba(255,182,39,0.15);border-radius:6px;padding:8px 10px;margin-bottom:6px;font-size:10px">';
+          html += '<div style="color:var(--orange);font-weight:600">🏦 Garder le Bond 12M</div>';
+          html += '<div style="color:var(--text-dim);margin-top:2px">Aucun produit Swiss Life ne bat le Bond 12M (~2.5%). Attendre de meilleures propositions.</div>';
+          html += '</div>';
+        }
+      } else {
+        html += '<div style="font-size:11px;color:var(--text-dim);text-align:center;padding:8px 0">Pas de liquidité disponible</div>';
+      }
       html += '</div>';
       return html;
     }
