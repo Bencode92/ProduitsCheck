@@ -13,7 +13,8 @@
     result: null,       // allocation result
     mode: 'auto',       // 'auto' or 'manual'
     totalCash: 0,
-    entities: {}        // { bycam: { cash, deposits, structLiq }, cameleons: { ... } }
+    entities: {},       // { bycam: { cash, deposits, structLiq }, cameleons: { ... } }
+    includeStructLiq: {} // { cameleons: true/false }
   };
 
   // ─── MI regime profiles ────────────────────────────────
@@ -86,9 +87,9 @@
       else entities.cameleons.structLiq += amount;
     });
 
-    // total = cash libre only. structLiq is reserved for Swiss Life arbitrage.
-    entities.bycam.total = entities.bycam.cash;
-    entities.cameleons.total = entities.cameleons.cash;
+    // total = cash libre + structLiq if user opted in for arbitrage
+    entities.bycam.total = entities.bycam.cash + ((_state.includeStructLiq && _state.includeStructLiq.bycam) ? entities.bycam.structLiq : 0);
+    entities.cameleons.total = entities.cameleons.cash + ((_state.includeStructLiq && _state.includeStructLiq.cameleons) ? entities.cameleons.structLiq : 0);
 
     return entities;
   }
@@ -278,6 +279,13 @@
   // ─── Allocate across all tranches ──────────────────────
   function _allocate(tranches, totalCash, entityKey) {
     var structCandidates = _getStructuredCandidates();
+    // If entity includes structLiq, only Swiss Life products are eligible for that portion
+    var hasStructLiq = _state.includeStructLiq && _state.includeStructLiq[entityKey];
+    if (hasStructLiq) {
+      structCandidates = structCandidates.filter(function(s) {
+        return s.bankName === 'swiss-life';
+      });
+    }
     var allocated = {};
     var results = [];
 
@@ -370,32 +378,20 @@
     html += '<span style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--cyan);margin-left:8px">' + _fmt(ent.cash) + '€</span>';
     html += '</div></div>';
     if (ent.structLiq > 0) {
+      var isChecked = _state.includeStructLiq && _state.includeStructLiq[entKey];
       html += '<div style="background:rgba(168,85,247,0.06);border:1px solid rgba(168,85,247,0.15);border-radius:6px;padding:8px 10px;margin-bottom:10px;font-size:10px">';
+      html += '<div style="display:flex;align-items:center;justify-content:space-between">';
       html += '<span style="color:#A855F7;font-weight:600">🔄 Arbitrage Swiss Life : ' + _fmt(ent.structLiq) + '€</span>';
+      html += '<label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="alloc-sl-' + entKey + '" ' + (isChecked ? 'checked' : '') + ' onchange="_allocatorToggleSL(\'' + entKey + '\')" style="cursor:pointer"><span style="font-size:10px;color:var(--text-muted)">Optimiser</span></label>';
+      html += '</div>';
       html += '<div style="color:var(--text-dim);margin-top:2px">Bond 12M — arbitrable uniquement vers produits Swiss Life</div>';
       html += '</div>';
     }
 
-    if (ent.total <= 0) {
-      // No free cash — but check if structLiq can be arbitraged
+    if (ent.total <= 0 && !(_state.includeStructLiq && _state.includeStructLiq[entKey])) {
+      // No free cash and structLiq not opted in
       if (ent.structLiq > 0) {
-        var slCandidates = _getStructuredCandidates().filter(function(s) {
-          return s.bankName === 'swiss-life' && s.capitalGaranti && s.rdtNet != null && s.rdtNet > 2.5;
-        });
-        if (slCandidates.length > 0) {
-          slCandidates.sort(function(a, b) { return b.rdtNet - a.rdtNet; });
-          var best = slCandidates[0];
-          html += '<div style="background:rgba(6,214,160,0.06);border:1px solid rgba(6,214,160,0.15);border-radius:6px;padding:8px 10px;margin-bottom:6px;font-size:10px">';
-          html += '<div style="color:var(--green);font-weight:600">✅ Arbitrage recommandé</div>';
-          html += '<div style="color:var(--text-muted);margin-top:4px">Bond 12M (~2.5%) → <strong>' + best.name + '</strong> (' + best.rdtNet.toFixed(1) + '%/an, ' + best.grade + ')</div>';
-          html += '<div style="color:var(--text-dim);margin-top:2px">Gain : +' + _fmt(Math.round(ent.structLiq * (best.rdtNet - 2.5) / 100)) + '€/an vs Bond 12M</div>';
-          html += '</div>';
-        } else {
-          html += '<div style="background:rgba(255,182,39,0.06);border:1px solid rgba(255,182,39,0.15);border-radius:6px;padding:8px 10px;margin-bottom:6px;font-size:10px">';
-          html += '<div style="color:var(--orange);font-weight:600">🏦 Garder le Bond 12M</div>';
-          html += '<div style="color:var(--text-dim);margin-top:2px">Aucun produit Swiss Life ne bat le Bond 12M (~2.5%). Attendre de meilleures propositions.</div>';
-          html += '</div>';
-        }
+        html += '<div style="font-size:10px;color:var(--text-dim);text-align:center;padding:8px 0">Cochez "Optimiser" ci-dessus pour chercher un arbitrage Swiss Life</div>';
       } else {
         html += '<div style="font-size:11px;color:var(--text-dim);text-align:center;padding:8px 0">Pas de liquidité disponible</div>';
       }
@@ -623,6 +619,14 @@
   }
 
   // ═══ ACTIONS ═══════════════════════════════════════════
+
+  window._allocatorToggleSL = function(entKey) {
+    if (!_state.includeStructLiq) _state.includeStructLiq = {};
+    _state.includeStructLiq[entKey] = !_state.includeStructLiq[entKey];
+    // If checked, add structLiq to entity total so it can be allocated
+    _state.result = null; // reset result
+    renderUnifiedAllocator(document.getElementById('main-content'));
+  };
 
   window._allocatorSetMode = function(mode) {
     _state.mode = mode;
