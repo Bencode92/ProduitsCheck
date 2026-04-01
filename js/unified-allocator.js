@@ -107,15 +107,19 @@
     return [];
   }
 
-  // Best CAT rate: max of existing deposits AND available offers
+  // Best CAT rate AVAILABLE for new placement (not existing deposits)
+  // Existing deposits are already placed — the benchmark for new cash
+  // is the best rate you can actually get NOW from available offers
   function _bestCATRate(entityFilter) {
     var best = 2.5; // fallback ECB
-    // From existing deposits
-    var deposits = _getCATDeposits(entityFilter);
-    deposits.forEach(function(d) { if (d.rate > best) best = d.rate; });
-    // From available offers (user-entered rates)
+    // From available offers only (what you can subscribe to today)
     var offers = _getCATOffers(0);
     offers.forEach(function(o) { if (o.rate > best) best = o.rate; });
+    // If no offers, fall back to existing deposits as proxy
+    if (offers.length === 0) {
+      var deposits = _getCATDeposits(entityFilter);
+      deposits.forEach(function(d) { if (d.rate > best) best = d.rate; });
+    }
     return best;
   }
 
@@ -478,6 +482,10 @@
         html += '<div style="font-family:var(--mono);font-weight:700;color:var(--cyan);font-size:12px">' + _fmt(a.amount) + '€</div>';
         html += '<div style="font-family:var(--mono);font-size:10px;color:var(--green)">' + a.rate.toFixed(1) + '% → +' + _fmt(a.annualReturn) + '€/an</div>';
         html += '</div></div>';
+        // Explain 30% cap if product hit the limit
+        if (a.amount >= result.totalCash * 0.29) {
+          html += '<div style="font-size:9px;color:var(--text-dim);margin-top:2px;padding-left:4px">Limité à ' + _fmt(a.amount) + '€ (30% max par produit — diversification risque émetteur)</div>';
+        }
       });
       html += '</div>';
     });
