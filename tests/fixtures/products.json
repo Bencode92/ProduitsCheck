@@ -178,7 +178,7 @@
     "autocallThreshold": 100,
     "expectedRank": 7,
     "expectedGrade": "D",
-    "expectedScore": 33,
+    "expectedScore": 32,
     "expectedBsRendementNet": 1.66
   },
   {
@@ -218,7 +218,7 @@
     "autocallThreshold": 100,
     "expectedRank": 8,
     "expectedGrade": "D",
-    "expectedScore": 31,
+    "expectedScore": 30,
     "expectedBsRendementNet": 0.3
   },
   {

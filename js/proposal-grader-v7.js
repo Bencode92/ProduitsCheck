@@ -296,14 +296,20 @@
   // ═══ SECTION 6: POST-PROCESSING ═══
 
   // P3 recalibration: base 50 with structure adjustments
-  function _recalibrateP3(oldP3, product) {
+  // v7.1: basket bonus conditioned on P2 quality (OpenAI feedback)
+  function _recalibrateP3(oldP3, product, p2Score) {
     var base = 50;
     var st = (product.structureType || '').toLowerCase();
     var ut = (product.underlyingType || '').toLowerCase();
     var n = (product.underlyings || []).length;
     if (st === 'dispersion' || ut === 'pairs') base += 15;
     else if (st === 'capital_garanti' || (product.capitalProtection && product.capitalProtection.protected)) base += 10;
-    else if (ut === 'basket') base += 12;
+    else if (ut === 'basket') {
+      // v7.1: basket bonus reduced if P2 is low (bad underlyings)
+      // Full +12 if P2 >= 60, reduced proportionally if lower
+      var basketBonus = p2Score >= 60 ? 12 : Math.round(12 * Math.max(0.25, p2Score / 60));
+      base += basketBonus;
+    }
     else if (ut === 'single-index') base += 8;
     else if (ut === 'worst-of' || ut === 'worst_of') { if (n <= 2) base += 0; else if (n <= 3) base -= 5; else base -= 10; }
     else if (ut === 'single-stock') base -= 10;
@@ -403,6 +409,49 @@
     if (isCG) result.pillars.adjustedReturn.score = Math.min(85, result.pillars.adjustedReturn.score + 10);
   }
 
+  // ═══ SECTION 6b: REGIME SCENARIOS ═══
+  // Simple 3-scenario analysis: current regime, bull, crash
+  // Not a Monte Carlo — just "what would change if regime shifts"
+  function _computeRegimeScenarios(result, product, bs, catRate, issuer) {
+    if (!result || !result.pillars) return null;
+
+    var p1 = result.pillars.adjustedReturn.score;
+    var p2 = result.pillars.underlyingQuality.score;
+    var p3 = result.pillars.portfolioFit.score;
+    var p4 = result.pillars.riskPremium.score;
+    var currentTotal = result.score;
+
+    // Bull scenario: sectors no longer avoided, vol down, prob coupon up
+    var bullP2 = Math.min(95, p2 + 10); // sectors no longer penalized
+    var bullP1 = bs ? Math.min(95, p1 + 8) : Math.min(95, p1 + 5); // higher prob coupon
+    var bullP4 = Math.min(95, p4 + 5); // lower illiquidity aversion
+    var bullTotal = Math.round(bullP1 * V7_WEIGHTS.p1 + bullP2 * V7_WEIGHTS.p2 + p3 * V7_WEIGHTS.p3 + bullP4 * V7_WEIGHTS.p4);
+
+    // Crash scenario: vol spikes, correlation → 1, prob coupon drops
+    var crashP2 = Math.max(5, p2 - 15); // quality degrades
+    var crashP1 = bs ? Math.max(5, p1 - 15) : Math.max(5, p1 - 10); // prob coupon drops
+    var crashP4 = Math.max(5, p4 - 8); // spread worse
+    // Capital garanti: P1 doesn't drop as much (still get capital back)
+    var isCG = product.capitalProtection && product.capitalProtection.protected;
+    if (isCG) { crashP1 = Math.max(10, p1 - 8); crashP4 = Math.max(10, p4 - 3); }
+    var crashTotal = Math.round(crashP1 * V7_WEIGHTS.p1 + crashP2 * V7_WEIGHTS.p2 + p3 * V7_WEIGHTS.p3 + crashP4 * V7_WEIGHTS.p4);
+
+    var _g = function(s) { return s >= 75 ? 'A' : s >= 60 ? 'B' : s >= 45 ? 'C' : s >= 25 ? 'D' : 'F'; };
+
+    return {
+      current: { score: currentTotal, grade: _g(currentTotal), label: 'Actuel (' + (_getRegime() || 'neutral') + ')' },
+      bull: { score: bullTotal, grade: _g(bullTotal), label: 'Bull / Risk-on', delta: bullTotal - currentTotal },
+      crash: { score: crashTotal, grade: _g(crashTotal), label: 'Crash / Récession', delta: crashTotal - currentTotal }
+    };
+  }
+
+  function _getRegime() {
+    try {
+      if (typeof _mktCache !== 'undefined' && _mktCache && _mktCache._mi && _mktCache._mi.regime) return _mktCache._mi.regime.toLowerCase();
+    } catch(e) {}
+    return 'neutral';
+  }
+
   // ═══ SECTION 7: CONSOLIDATED GRADE FUNCTION ═══
   function _waitForBase() {
     return new Promise(function(resolve) {
@@ -479,8 +528,9 @@
         }
       });
 
-      // 4b. Recalibrate P3
-      var newP3 = _recalibrateP3(result.pillars.portfolioFit.score, product);
+      // 4b. Recalibrate P3 (v7.1: basket bonus conditioned on P2)
+      var p2Score = result.pillars.underlyingQuality.score;
+      var newP3 = _recalibrateP3(result.pillars.portfolioFit.score, product, p2Score);
       result.pillars.portfolioFit.score = newP3;
 
       // 4c. Adjust P1 (memory +5, single-stock -5)
@@ -488,6 +538,26 @@
 
       // 4d. P4 BS correction (exempt guaranteed rates)
       result.pillars.riskPremium.score = _adjustP4WithBS(result.pillars.riskPremium.score, product, catRate);
+
+      // 4e. Issuer credit risk penalty on P4 (v7.1)
+      var issuer = (typeof ISSUER_RATINGS !== 'undefined') ? ISSUER_RATINGS[product.bankId || ''] : null;
+      if (issuer && issuer.cds_proxy && product.maturityYears) {
+        var matY = parseFloat(product.maturityYears) || 5;
+        // CDS proxy in bps. Annualized default prob ≈ cds / 10000 / 0.6
+        // P4 penalty = creditCost × maturity scaling (longer = more exposure)
+        var creditCostAnnual = issuer.cds_proxy / 100; // bps to % (e.g., 70bps = 0.70%)
+        var matScale = Math.min(2.0, Math.max(0.5, matY / 5)); // 1.0 at 5Y, 2.0 at 10Y+
+        var creditPenalty = Math.round(creditCostAnnual * matScale);
+        creditPenalty = Math.min(creditPenalty, 8); // cap at -8 pts
+
+        if (creditPenalty > 0) {
+          result.pillars.riskPremium.score = Math.max(5, result.pillars.riskPremium.score - creditPenalty);
+          if (result.metadata) {
+            result.metadata.issuerCreditPenalty = creditPenalty;
+            result.metadata.issuerCDS = issuer.cds_proxy;
+          }
+        }
+      }
 
       // Step 5: Final total with v7 weights (30/20/15/30)
       var p1 = result.pillars.adjustedReturn.score;
@@ -498,9 +568,12 @@
       result.score = total;
       result.grade = total >= 75 ? 'A' : total >= 60 ? 'B' : total >= 45 ? 'C' : total >= 25 ? 'D' : 'F';
 
+      // Step 6: Mini-scenarios (v7.1 — stagflation/bull/crash)
+      result.regimeScenarios = _computeRegimeScenarios(result, product, bs, catRate, issuer);
+
       if (result.metadata) {
         result.metadata.v6Weights = V7_WEIGHTS;
-        result.metadata.version = '7.0';
+        result.metadata.version = '7.1';
       }
 
       return result;
