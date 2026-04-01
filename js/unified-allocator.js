@@ -409,8 +409,9 @@
     html += '<div style="display:flex;align-items:center;padding:0 10px;background:var(--bg-card);font-size:22px;color:var(--accent)">→</div>';
     html += '<div style="padding:14px;background:var(--bg-card)">';
     html += '<div style="font-size:10px;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:8px">Optimisé (CAT + Structurés)</div>';
-    html += '<div style="font-size:11px;color:var(--text-muted);margin-bottom:3px">Déployé <span style="float:right;font-family:var(--mono);color:var(--text-bright)">' + _fmt(result.totalAllocated) + '€</span></div>';
-    html += '<div style="font-size:11px;color:var(--text-muted)">Rdt/an <span style="float:right;font-family:var(--mono);color:var(--green);font-weight:700">+' + _fmt(result.totalReturn) + '€</span>' +
+    html += '<div style="font-size:11px;color:var(--text-muted);margin-bottom:3px">Structurés <span style="float:right;font-family:var(--mono);color:var(--cyan)">' + _fmt(result.totalAllocated) + '€</span></div>';
+    html += '<div style="font-size:11px;color:var(--text-muted);margin-bottom:3px">En CAT <span style="float:right;font-family:var(--mono);color:var(--orange)">' + _fmt(result.totalUnallocated) + '€</span></div>';
+    html += '<div style="font-size:11px;color:var(--text-muted)">Rdt total/an <span style="float:right;font-family:var(--mono);color:var(--green);font-weight:700">+' + _fmt(result.totalReturnAll) + '€</span>' +
       (result.excessVsCat > 0 ? ' <span style="font-size:9px;color:var(--green)">+' + _fmt(result.excessVsCat) + '</span>' : '') + '</div>';
     html += '</div></div>';
 
@@ -425,7 +426,7 @@
     html += '<span style="font-size:13px;font-weight:700;color:var(--accent)">📊 Synthèse combinée</span>';
     html += '<span style="font-size:11px;color:var(--text-dim)">Régime ' + result.regime + '</span></div>';
     html += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border)">';
-    html += '<div style="background:var(--bg-card);padding:12px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted)">Rendement/an</div><div style="font-size:18px;font-weight:800;color:var(--green);font-family:var(--mono)">+' + _fmt(result.totalReturn) + '€</div></div>';
+    html += '<div style="background:var(--bg-card);padding:12px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted)">Rendement/an</div><div style="font-size:18px;font-weight:800;color:var(--green);font-family:var(--mono)">+' + _fmt(result.totalReturnAll) + '€</div></div>';
     html += '<div style="background:var(--bg-card);padding:12px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted)">Taux moyen</div><div style="font-size:18px;font-weight:800;color:var(--cyan);font-family:var(--mono)">' + result.weightedRate.toFixed(1) + '%</div></div>';
     html += '<div style="background:var(--bg-card);padding:12px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted)">vs tout CAT</div><div style="font-size:18px;font-weight:800;color:' + (result.excessVsCat >= 0 ? 'var(--green)' : 'var(--red)') + ';font-family:var(--mono)">' + (result.excessVsCat >= 0 ? '+' : '') + _fmt(result.excessVsCat) + '€</div></div>';
     html += '<div style="background:var(--bg-card);padding:12px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted)">Capital garanti</div><div style="font-size:18px;font-weight:800;color:var(--green);font-family:var(--mono)">🛡️ 100%</div></div>';
@@ -506,11 +507,23 @@
       totalAllocated += r.totalAllocated;
       totalCatEquiv += r.catEquivReturn;
     });
-    allResults.totalReturn = totalReturn;
+    // Include unallocated cash earning CAT rate in total return
+    var totalUnallocated = _state.totalCash - totalAllocated;
+    var bestCat = 2.5;
+    Object.values(allResults.entities).forEach(function(r) { if (r.bestCatRate > bestCat) bestCat = r.bestCatRate; });
+    var unallocatedReturn = Math.round(totalUnallocated * bestCat / 100);
+    var totalReturnAll = totalReturn + unallocatedReturn;
+
+    allResults.totalReturn = totalReturn; // structured only
+    allResults.totalReturnAll = totalReturnAll; // structured + CAT on unallocated
     allResults.totalAllocated = totalAllocated;
+    allResults.totalUnallocated = totalUnallocated;
+    allResults.unallocatedReturn = unallocatedReturn;
     allResults.totalCatEquiv = totalCatEquiv;
-    allResults.excessVsCat = totalReturn - totalCatEquiv;
-    allResults.weightedRate = totalAllocated > 0 ? Math.round(totalReturn / totalAllocated * 10000) / 100 : 0;
+    allResults.excessVsCat = totalReturnAll - totalCatEquiv;
+    allResults.bestCatRate = bestCat;
+    // Weighted rate on TOTAL cash (not just allocated)
+    allResults.weightedRate = _state.totalCash > 0 ? Math.round(totalReturnAll / _state.totalCash * 10000) / 100 : 0;
     allResults.regime = regime;
 
     _state.result = allResults;
