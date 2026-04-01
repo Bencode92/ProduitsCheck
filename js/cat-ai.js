@@ -531,12 +531,9 @@ async function deleteRatesByBankId(bankId, bankName, count) {
   catManager.rates.lastUpdated = new Date().toISOString();
   await catManager.saveRates();
   showToast(count + ' taux supprimés (' + bankName + ')', 'success');
-  if (catManager.rates.rates.length > 0) {
-    showDeleteRatesModal(); // refresh modal
-  } else {
-    closeModal();
-    renderCAT(document.getElementById('main-content'));
-  }
+  // Always close modal and refresh full dashboard so rates section updates
+  closeModal();
+  renderCAT(document.getElementById('main-content'));
 }
 
 async function deleteAllRatesConfirm(count) {
