@@ -187,10 +187,11 @@ renderCAT = function(container) {
     let ratesHTML = `<div class="section">
       <div class="section-header">
         <div class="section-title"><span class="dot" style="background:var(--accent)"></span>📊 Taux du Marché</div>
-        <div style="display:flex;gap:8px;align-items:center">
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
           <span style="font-size:11px;color:var(--text-dim)">${activeConfirmed.length} confirmé${activeConfirmed.length > 1 ? 's' : ''} · ${activeScanned.length} indicatif${activeScanned.length > 1 ? 's' : ''}</span>
           ${typeof showBankScannerModal === 'function' ? '<button class="btn sm ai-glow" onclick="showBankScannerModal()">🔍 Scanner</button>' : ''}
           <button class="btn sm" onclick="showCATRatesModal()">✏️ Gérer</button>
+          ${rates.length > 0 ? '<button class="btn sm" onclick="showDeleteRatesModal()" style="color:var(--red);border-color:rgba(248,113,113,0.25)">🗑 Supprimer</button>' : ''}
         </div>
       </div>`;
 

@@ -86,8 +86,20 @@ showCATRatesModal = function() {
       <button class="btn primary" style="width:100%;margin-top:8px" onclick="addMarketRate()">Ajouter</button>
     </div>
 
-    <div id="rates-section"><h3 id="rates-header" style="font-size:11px;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px">Taux enregistrés (${catManager.rates.rates.length})</h3>
-      <div id="rates-list">${renderRatesList()}</div></div>
+    <div id="rates-section">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <h3 id="rates-header" style="font-size:11px;color:var(--text-muted);text-transform:uppercase;margin:0">Taux enregistrés (${catManager.rates.rates.length})</h3>
+        <div style="display:flex;gap:6px;align-items:center">
+          <select id="rates-bulk-bank" style="font-size:10px;padding:4px 8px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text)">
+            <option value="">Par banque...</option>
+            ${[...new Set(catManager.rates.rates.map(r=>r.bankId))].map(bid=>{const b=BANKS.find(x=>x.id===bid);return '<option value="'+bid+'">'+(b?b.name:bid)+' ('+catManager.rates.rates.filter(r=>r.bankId===bid).length+')</option>';}).join('')}
+          </select>
+          <button class="btn sm" onclick="deleteRatesByBank()" style="font-size:10px;padding:4px 10px;color:var(--orange);border-color:rgba(251,191,36,0.3)">Suppr. banque</button>
+          <button class="btn sm" onclick="deleteAllRates()" style="font-size:10px;padding:4px 10px;color:var(--red);border-color:rgba(248,113,113,0.3)">Tout vider</button>
+        </div>
+      </div>
+      <div id="rates-list">${renderRatesList()}</div>
+    </div>
     <div class="modal-actions"><button class="btn" onclick="closeModal()">Fermer</button></div>
   </div></div>`;
   modal.classList.add('visible');
@@ -170,35 +182,147 @@ RÈGLES:
   }
 }
 
+// ─── Auto-detect bank from email text ───────────────────────
+function _detectBankFromText(text) {
+  const lower = text.toLowerCase();
+  for (const b of BANKS) {
+    const names = [b.name.toLowerCase()];
+    if (b.id === 'cic') names.push('cic', 'crédit industriel');
+    if (b.id === 'sg') names.push('société générale', 'socgen');
+    if (b.id === 'bnp') names.push('bnp paribas', 'bnp');
+    if (b.id === 'banque-populaire') names.push('banque populaire', 'optiplus', 'catvair');
+    if (b.id === 'lcl') names.push('lcl', 'crédit lyonnais');
+    if (b.id === 'credit-mutuel') names.push('crédit mutuel', 'credit mutuel');
+    if (b.id === 'ca') names.push('crédit agricole', 'credit agricole');
+    if (b.id === 'hsbc') names.push('hsbc');
+    if (b.id === 'bred') names.push('bred');
+    if (b.id === 'bpce') names.push('bpce');
+    if (names.some(n => lower.includes(n))) return b.id;
+  }
+  return null;
+}
+
+// ─── Auto-detect validity date from email text ──────────────
+function _detectDateFromText(text) {
+  const months = { janvier:'01',février:'02',mars:'03',avril:'04',mai:'05',juin:'06',
+    juillet:'07',août:'08',septembre:'09',octobre:'10',novembre:'11',décembre:'12',
+    janv:'01',fév:'02',fev:'02',avr:'04',juil:'07',sept:'09',oct:'10',nov:'11',déc:'12',dec:'12' };
+  // "mois de Mars 2026", "valable en mars 2026", "conditions mars 2026"
+  const moisMatch = text.match(/(?:mois\s+d[e'u]\s*|valable[s]?\s+(?:pour\s+|en\s+)?|conditions?\s+(?:de\s+|du\s+)?|à\s+compter\s+du?\s+)(\w+)\s+(\d{4})/i);
+  if (moisMatch) {
+    const m = months[moisMatch[1].toLowerCase()];
+    if (m) return `${moisMatch[2]}-${m}-01`;
+  }
+  // "01/03/2026" or "01.03.2026"
+  const dateMatch = text.match(/(\d{2})[/.](\d{2})[/.](\d{4})/);
+  if (dateMatch) return `${dateMatch[3]}-${dateMatch[2]}-${dateMatch[1]}`;
+  return null;
+}
+
+// ─── Validate parsed rates (sanity checks) ──────────────────
+function _validateParsedRates(products) {
+  const warnings = [];
+  const valid = products.filter(p => {
+    const rate = parseFloat(p.averageRate) || 0;
+    const dur = parseInt(p.durationMonths) || 0;
+    if (dur <= 0) { warnings.push(`"${p.name}": durée invalide`); return false; }
+    if (rate <= 0) { warnings.push(`"${p.name}": taux invalide`); return false; }
+    if (rate > 10) { warnings.push(`"${p.name}": taux ${rate}% suspect (>10%)`); return false; }
+    if (p.rateSchedule && p.rateSchedule.length > 0) {
+      for (const s of p.rateSchedule) {
+        if (parseFloat(s.rate) > 10) { warnings.push(`"${p.name}": palier ${s.rate}% suspect`); return false; }
+      }
+    }
+    return true;
+  });
+  return { valid, warnings };
+}
+
 // ─── Import IA des taux (from email text) ───────────────────
 async function importRatesFromText() {
   const text = document.getElementById('import-text')?.value;
-  const bankId = document.getElementById('import-bank')?.value;
-  const date = document.getElementById('import-date')?.value;
+  let bankId = document.getElementById('import-bank')?.value;
+  let date = document.getElementById('import-date')?.value;
   if (!text || text.trim().length < 20) { showToast('Collez le texte', 'error'); return; }
+
+  // Auto-detect bank if user left default
+  const detectedBank = _detectBankFromText(text);
+  if (detectedBank && detectedBank !== bankId) {
+    bankId = detectedBank;
+    const sel = document.getElementById('import-bank');
+    if (sel) sel.value = detectedBank;
+  }
+
+  // Auto-detect date from email text
+  const detectedDate = _detectDateFromText(text);
+  if (detectedDate) {
+    date = detectedDate;
+    const dateInput = document.getElementById('import-date');
+    if (dateInput) dateInput.value = detectedDate;
+  }
 
   const bank = BANKS.find(b => b.id === bankId);
   const progress = document.getElementById('import-progress');
   const status = document.getElementById('import-status');
   const results = document.getElementById('import-results');
   if (progress) progress.classList.remove('hidden');
-  if (status) status.textContent = 'Claude analyse...';
+  if (status) status.textContent = `Claude analyse${detectedBank ? ' (banque détectée: ' + (bank?.name || bankId) + ')' : ''}...`;
 
-  const prompt = `Extrais TOUTES les offres de taux de ce texte.
+  const prompt = `Tu es un analyste financier expert en comptes à terme. Extrais TOUS les produits CAT de cet email bancaire.
 
-TEXTE:
+EMAIL:
 ---
-${text.substring(0, 5000)}
+${text.substring(0, 8000)}
 ---
 
-JSON valide uniquement:
-{"products":[{"name":"CAT Fixe 12m","type":"cat","rateType":"fixe","durationMonths":12,"averageRate":2.40,"rateSchedule":[{"period":"Mois 1-12","rate":2.40}],"withdrawalConditions":"max 80 car","notice":"32 jours"}]}
+RÉPONDS UNIQUEMENT en JSON valide (pas de backticks, pas de texte autour):
+{
+  "detectedBank": "Nom de la banque si détectable dans le texte, sinon null",
+  "validityDate": "YYYY-MM-DD si mentionnée (ex: 'mars 2026' → '2026-03-01'), sinon null",
+  "products": [
+    {
+      "name": "CAT Fixe 12m",
+      "type": "cat",
+      "rateType": "fixe",
+      "durationMonths": 12,
+      "averageRate": 2.40,
+      "rateSchedule": [],
+      "earlyExitSchedule": [
+        {"period": "Mois 1", "penalty": "Aucune rémunération"},
+        {"period": "Mois 2-12", "penalty": "50% de la rémunération"}
+      ],
+      "withdrawalConditions": "Pas de rémun. 1er mois, 50% ensuite",
+      "notice": "32 jours",
+      "calculationBase": "exact/365",
+      "minAmount": null,
+      "maxAmount": null,
+      "category": null
+    }
+  ]
+}
 
-RÈGLES:
-- Chaque durée/taux = un produit séparé
-- Pour les progressifs: rateSchedule par période
-- averageRate = taux actuariel moyen annuel brut
-- withdrawalConditions: max 80 caractères`;
+RÈGLES CRITIQUES:
+1. Chaque durée/taux = un produit SÉPARÉ (un CAT fixe 2m et un CAT fixe 12m = 2 produits)
+2. Pour les PROGRESSIFS:
+   - rateType = "progressif"
+   - averageRate = TRAAB ou taux actuariel moyen annuel brut (souvent indiqué dans le titre)
+   - rateSchedule = tableau de paliers avec OBLIGATOIREMENT fromMonth/toMonth:
+     [{"fromMonth":1,"toMonth":6,"rate":2.30,"label":"Semestre 1"},{"fromMonth":7,"toMonth":12,"rate":2.50,"label":"Semestre 2"}]
+   - "semestre 1" = fromMonth 1, toMonth 6
+   - "semestre 2" = fromMonth 7, toMonth 12
+   - "année 1" = fromMonth 1, toMonth 12
+   - "année 2" = fromMonth 13, toMonth 24
+3. Pour les FIXES: rateType = "fixe", rateSchedule = []
+4. withdrawalConditions: résumé max 80 car des pénalités de sortie anticipée
+5. earlyExitSchedule: détail structuré des pénalités par période
+6. Si "retrait période 1 = 50% du taux" → earlyRate dans rateSchedule:
+   [{"fromMonth":1,"toMonth":6,"rate":2.30,"earlyRate":1.15,"label":"Semestre 1"}]
+7. notice: "32 jours" si préavis mentionné
+8. calculationBase: "exact/365" ou "30/360" si mentionné
+9. minAmount/maxAmount: montants min/max si mentionnés (ex: "minimum 1500€")
+10. category: tag si produit spécial (ex: "transition", "ESG", "vert")
+11. NE PAS inventer de taux — n'extraire que ce qui est explicitement écrit
+12. Si un même produit est décrit 2 fois (ex: taux fixe puis détail progressif pour même durée), prendre la version la plus détaillée`;
 
   try {
     const res = await fetch(CONFIG.AI_ENDPOINT, {
@@ -213,20 +337,86 @@ RÈGLES:
     if (progress) progress.classList.add('hidden');
     if (!parsed.products || parsed.products.length === 0) { if (results) results.innerHTML = '<div style="color:var(--orange);padding:10px;font-size:12px">⚠️ Aucun taux trouvé.</div>'; return; }
 
-    let html = `<div style="margin-top:12px"><h3 style="font-size:12px;color:var(--green);margin-bottom:8px">✅ ${parsed.products.length} produit(s)</h3>`;
-    parsed.products.forEach(p => {
-      const rateDisplay = p.rateType === 'progressif' && p.rateSchedule
-        ? p.rateSchedule.map(s => (s.period || '?') + ': ' + s.rate + '%').join(' → ')
-        : p.averageRate + '%';
-      html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--bg-elevated);border-radius:var(--radius-sm);margin-bottom:4px;font-size:12px">
-        <div style="flex:1"><strong style="color:var(--text-bright)">${p.name || 'CAT ' + p.durationMonths + 'm'}</strong>
-          <div style="color:var(--text-muted);font-size:10px">${p.rateType === 'progressif' ? '📈 ' : '📊 '}${rateDisplay}</div>
-          ${p.withdrawalConditions ? '<div style="color:var(--orange);font-size:9px">⚠️ ' + p.withdrawalConditions + '</div>' : ''}</div>
-        <div><span style="font-family:var(--mono);color:var(--green);font-size:14px;font-weight:600">${p.averageRate}%</span><span style="color:var(--text-dim);font-size:10px;margin-left:4px">${p.durationMonths}m</span></div></div>`;
+    // Use AI-detected bank if local detection missed it
+    if (parsed.detectedBank && !detectedBank) {
+      const aiBank = BANKS.find(b => b.name.toLowerCase().includes(parsed.detectedBank.toLowerCase().substring(0, 4)));
+      if (aiBank) { bankId = aiBank.id; const sel = document.getElementById('import-bank'); if (sel) sel.value = aiBank.id; }
+    }
+    // Use AI-detected date if local detection missed it
+    if (parsed.validityDate && !detectedDate) {
+      date = parsed.validityDate;
+      const dateInput = document.getElementById('import-date');
+      if (dateInput) dateInput.value = parsed.validityDate;
+    }
+
+    // Validate rates
+    const { valid: validProducts, warnings } = _validateParsedRates(parsed.products);
+    parsed.products = validProducts;
+
+    const bankObj = BANKS.find(b => b.id === bankId);
+    let html = `<div style="margin-top:12px">`;
+
+    // Header bar with detected info
+    html += `<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:linear-gradient(135deg,rgba(6,214,160,0.06),rgba(59,130,246,0.06));border:1px solid rgba(6,214,160,0.2);border-radius:var(--radius-sm);margin-bottom:12px">`;
+    html += `<div style="font-size:18px">✅</div>`;
+    html += `<div style="flex:1"><div style="font-size:13px;font-weight:700;color:var(--text-bright)">${parsed.products.length} produits extraits</div>`;
+    const meta = [];
+    if (detectedBank || parsed.detectedBank) meta.push(`🏦 ${bankObj?.name || bankId}`);
+    if (detectedDate || parsed.validityDate) meta.push(`📅 ${date}`);
+    meta.push('🔒 source confirmée');
+    html += `<div style="font-size:10px;color:var(--text-muted);margin-top:2px">${meta.join(' · ')}</div>`;
+    html += `</div></div>`;
+
+    if (warnings.length > 0) {
+      html += `<div style="font-size:10px;color:var(--orange);padding:6px 10px;background:rgba(251,191,36,0.05);border-radius:var(--radius-sm);margin-bottom:8px">⚠️ Exclus: ${warnings.join(', ')}</div>`;
+    }
+
+    // Group products by type for clear visual hierarchy
+    const fixe = parsed.products.filter(p => p.rateType !== 'progressif');
+    const progressif = parsed.products.filter(p => p.rateType === 'progressif' && !p.category);
+    const special = parsed.products.filter(p => p.category);
+    const groups = [];
+    if (fixe.length > 0) groups.push({ label: 'Taux Fixe', icon: '📊', color: 'var(--green)', items: fixe });
+    if (progressif.length > 0) groups.push({ label: 'Taux Progressif', icon: '📈', color: 'var(--purple)', items: progressif });
+    if (special.length > 0) groups.push({ label: special[0].category ? special[0].category.charAt(0).toUpperCase() + special[0].category.slice(1) : 'Spécial', icon: '🌱', color: 'var(--cyan)', items: special });
+
+    groups.forEach(g => {
+      // Find best rate in this group
+      const bestRate = Math.max(...g.items.map(p => parseFloat(p.averageRate) || 0));
+      html += `<div style="margin-bottom:10px">`;
+      html += `<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px"><span style="font-size:12px">${g.icon}</span><span style="font-size:11px;font-weight:700;color:${g.color};text-transform:uppercase;letter-spacing:0.5px">${g.label}</span><span style="font-size:10px;color:var(--text-dim)">${g.items.length} produit${g.items.length>1?'s':''}</span></div>`;
+
+      g.items.forEach(p => {
+        const isBest = parseFloat(p.averageRate) === bestRate && g.items.length > 1;
+        const rateDisplay = p.rateType === 'progressif' && p.rateSchedule && p.rateSchedule.length > 0
+          ? p.rateSchedule.map(s => (s.label || s.period || 'M' + s.fromMonth + '-' + s.toMonth) + ': ' + s.rate + '%').join(' → ')
+          : '';
+        const baseLabel = p.calculationBase ? `<span style="color:var(--text-dim);margin-left:6px">${p.calculationBase}</span>` : '';
+        const amountLabel = p.minAmount ? `<span style="color:var(--text-dim);margin-left:6px">min ${p.minAmount}€</span>` : '';
+
+        html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--bg-elevated);border-radius:var(--radius-sm);margin-bottom:3px;font-size:12px;border-left:3px solid ${isBest ? g.color : 'transparent'}">
+          <div style="flex:1">
+            <div style="display:flex;align-items:center;gap:6px">
+              <strong style="color:var(--text-bright)">${p.name || 'CAT ' + p.durationMonths + 'm'}</strong>
+              ${isBest ? '<span style="font-size:8px;color:var(--green);background:rgba(52,211,153,0.12);padding:1px 6px;border-radius:6px;font-weight:600">BEST</span>' : ''}
+              ${p.category ? '<span style="font-size:8px;color:var(--cyan);background:rgba(34,211,238,0.1);padding:1px 6px;border-radius:6px">' + p.category + '</span>' : ''}
+              ${amountLabel}${baseLabel}
+            </div>
+            ${rateDisplay ? '<div style="color:var(--text-muted);font-size:10px;margin-top:2px">' + rateDisplay + '</div>' : ''}
+            ${p.withdrawalConditions ? '<div style="color:var(--orange);font-size:9px;margin-top:2px">⚠️ ' + p.withdrawalConditions + '</div>' : ''}
+          </div>
+          <div style="text-align:right;min-width:70px">
+            <div style="font-family:var(--mono);color:var(--green);font-size:15px;font-weight:700">${p.averageRate}%</div>
+            <div style="color:var(--text-dim);font-size:10px">${p.durationMonths}m · ${p.rateType}</div>
+          </div>
+        </div>`;
+      });
+      html += `</div>`;
     });
-    html += `<button class="btn success lg" style="width:100%;margin-top:12px" onclick="confirmImportRates()">✅ Importer</button></div>`;
+
+    html += `<button class="btn success lg" style="width:100%;margin-top:8px;padding:12px;font-size:13px;font-weight:700" onclick="confirmImportRates()">✅ Importer ${parsed.products.length} taux dans la base</button></div>`;
     if (results) results.innerHTML = html;
-    window._pendingRatesImport = { parsed, bankId, bankName: bank?.name || bankId, date };
+    window._pendingRatesImport = { parsed, bankId, bankName: bankObj?.name || bankId, date };
   } catch (e) {
     if (progress) progress.classList.add('hidden');
     if (results) results.innerHTML = `<div style="color:var(--red);padding:10px;font-size:12px">❌ ${e.message}</div>`;
@@ -243,6 +433,7 @@ async function confirmImportRates() {
     const rate = parseFloat(p.averageRate) || 0;
     if (duration <= 0 || rate <= 0) continue;
 
+    // Dedup: remove existing rate for same bank + duration + product name
     const productKey = (p.name || '').toLowerCase().replace(/\s+/g, '-').substring(0, 30);
     catManager.rates.rates = catManager.rates.rates.filter(r =>
       !(r.bankId === bankId && r.durationMonths === duration && r.productType === (p.type || 'cat') && (r.productName || '').toLowerCase().replace(/\s+/g, '-').substring(0, 30) === productKey)
@@ -254,9 +445,16 @@ async function confirmImportRates() {
       date: date || new Date().toISOString().split('T')[0],
       rateType: p.rateType || 'fixe',
       rateSchedule: p.rateSchedule || null,
+      earlyExitSchedule: p.earlyExitSchedule || null,
       withdrawalConditions: p.withdrawalConditions || null,
       notice: p.notice || null,
       productName: p.name || null,
+      calculationBase: p.calculationBase || null,
+      minAmount: p.minAmount ? parseFloat(p.minAmount) : null,
+      maxAmount: p.maxAmount ? parseFloat(p.maxAmount) : null,
+      category: p.category || null,
+      source: 'confirmed',
+      confidence: 'high',
     });
     imported++;
   }
@@ -279,6 +477,121 @@ async function confirmImportRates() {
   window._pendingRatesImport = null;
 }
 
+// ─── Bulk delete rates ──────────────────────────────────────
+
+function showDeleteRatesModal() {
+  const rates = catManager.rates.rates;
+  if (!rates.length) { showToast('Aucun taux', 'error'); return; }
+
+  // Group by bank
+  const byBank = {};
+  rates.forEach(r => {
+    const key = r.bankId || 'autre';
+    if (!byBank[key]) byBank[key] = { name: r.bankName || key, count: 0, confirmed: 0, web: 0 };
+    byBank[key].count++;
+    if (r.source === 'web scan') byBank[key].web++; else byBank[key].confirmed++;
+  });
+
+  const modal = document.getElementById('modal');
+  let bankRows = Object.entries(byBank).map(([bankId, g]) => {
+    const bankColor = BANKS.find(b => b.id === bankId)?.color || 'var(--accent)';
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg-elevated);border-radius:var(--radius-sm);margin-bottom:4px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="width:8px;height:8px;border-radius:50%;background:${bankColor}"></span>
+        <div>
+          <strong style="color:var(--text-bright);font-size:12px">${g.name}</strong>
+          <div style="font-size:10px;color:var(--text-dim)">${g.confirmed} confirmé${g.confirmed>1?'s':''} · ${g.web} web</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <span style="font-family:var(--mono);font-size:13px;color:var(--text-bright);min-width:30px;text-align:right">${g.count}</span>
+        <button class="btn sm" onclick="deleteRatesByBankId('${bankId}','${g.name.replace(/'/g,"\\'")}',${g.count})" style="color:var(--red);border-color:rgba(248,113,113,0.25);font-size:10px;padding:4px 10px">Supprimer</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  modal.innerHTML = `<div class="modal-overlay" onclick="closeModal()"><div class="modal-content" onclick="event.stopPropagation()" style="max-width:480px">
+    <h2 class="modal-title">🗑 Supprimer des taux</h2>
+    <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px">${rates.length} taux au total. Supprimez par banque ou tout d'un coup.</p>
+
+    <div id="delete-rates-list">${bankRows}</div>
+
+    <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+      <button class="btn" style="width:100%;color:var(--red);border-color:rgba(248,113,113,0.3);font-weight:600" onclick="deleteAllRatesConfirm(${rates.length})">🗑 Tout supprimer (${rates.length} taux)</button>
+    </div>
+
+    <div class="modal-actions"><button class="btn" onclick="closeModal()">Fermer</button></div>
+  </div></div>`;
+  modal.classList.add('visible');
+}
+
+async function deleteRatesByBankId(bankId, bankName, count) {
+  if (!confirm('Supprimer les ' + count + ' taux de ' + bankName + ' ?')) return;
+  catManager.rates.rates = catManager.rates.rates.filter(r => r.bankId !== bankId);
+  catManager.rates.lastUpdated = new Date().toISOString();
+  await catManager.saveRates();
+  showToast(count + ' taux supprimés (' + bankName + ')', 'success');
+  if (catManager.rates.rates.length > 0) {
+    showDeleteRatesModal(); // refresh modal
+  } else {
+    closeModal();
+    renderCAT(document.getElementById('main-content'));
+  }
+}
+
+async function deleteAllRatesConfirm(count) {
+  if (!confirm('Supprimer TOUS les ' + count + ' taux ? Irréversible.')) return;
+  catManager.rates.rates = [];
+  catManager.rates.lastUpdated = new Date().toISOString();
+  await catManager.saveRates();
+  showToast(count + ' taux supprimés', 'success');
+  closeModal();
+  renderCAT(document.getElementById('main-content'));
+}
+
+function _refreshRatesUI() {
+  try {
+    const ratesList = document.getElementById('rates-list');
+    if (ratesList) ratesList.innerHTML = renderRatesList();
+    const ratesHeader = document.getElementById('rates-header');
+    if (ratesHeader) ratesHeader.textContent = `Taux enregistrés (${catManager.rates.rates.length})`;
+    // Refresh bank select options
+    const sel = document.getElementById('rates-bulk-bank');
+    if (sel) {
+      const bankIds = [...new Set(catManager.rates.rates.map(r => r.bankId))];
+      sel.innerHTML = '<option value="">Par banque...</option>' + bankIds.map(bid => {
+        const b = BANKS.find(x => x.id === bid);
+        return '<option value="' + bid + '">' + (b ? b.name : bid) + ' (' + catManager.rates.rates.filter(r => r.bankId === bid).length + ')</option>';
+      }).join('');
+    }
+  } catch(e) {}
+}
+
+async function deleteRatesByBank() {
+  const sel = document.getElementById('rates-bulk-bank');
+  const bankId = sel?.value;
+  if (!bankId) { showToast('Sélectionnez une banque', 'error'); return; }
+  const bankName = BANKS.find(b => b.id === bankId)?.name || bankId;
+  const count = catManager.rates.rates.filter(r => r.bankId === bankId).length;
+  if (!confirm(`Supprimer les ${count} taux de ${bankName} ?`)) return;
+  catManager.rates.rates = catManager.rates.rates.filter(r => r.bankId !== bankId);
+  catManager.rates.lastUpdated = new Date().toISOString();
+  await catManager.saveRates();
+  _refreshRatesUI();
+  showToast(`${count} taux supprimés (${bankName})`, 'success');
+}
+
+async function deleteAllRates() {
+  const count = catManager.rates.rates.length;
+  if (!count) { showToast('Aucun taux à supprimer', 'error'); return; }
+  if (!confirm(`Supprimer TOUS les ${count} taux ? Cette action est irréversible.`)) return;
+  catManager.rates.rates = [];
+  catManager.rates.lastUpdated = new Date().toISOString();
+  await catManager.saveRates();
+  _refreshRatesUI();
+  showToast(`${count} taux supprimés`, 'success');
+}
+
 // ─── Override renderRatesList — robust ──────────────────────
 const _originalRenderRatesList = renderRatesList;
 renderRatesList = function() {
@@ -288,13 +601,21 @@ renderRatesList = function() {
     return [...rates].sort((a, b) => (a.bankId || '').localeCompare(b.bankId || '') || a.durationMonths - b.durationMonths).map(r => {
       const name = r.productName || (r.bankName + ' ' + r.durationMonths + 'm');
       const isScanned = r.source === 'web scan';
+      const isConfirmed = r.source === 'confirmed';
       let scheduleDetail = '';
       if (r.rateSchedule && Array.isArray(r.rateSchedule) && r.rateSchedule.length > 0) {
         try { scheduleDetail = '<div style="font-size:10px;color:var(--text-dim);padding-left:16px">' + r.rateSchedule.map(s => (s.period || s.label || '?') + ': ' + s.rate + '%').join(' → ') + '</div>'; } catch(e) {}
       }
+      const sourceBadge = isScanned
+        ? ' <span style="font-size:8px;color:var(--purple);background:rgba(139,92,246,0.15);padding:1px 5px;border-radius:8px">web</span>'
+        : isConfirmed
+        ? ' <span style="font-size:8px;color:var(--green);background:rgba(6,214,160,0.15);padding:1px 5px;border-radius:8px">email</span>'
+        : '';
+      const categoryBadge = r.category ? ' <span style="font-size:8px;color:var(--cyan);background:rgba(59,130,246,0.12);padding:1px 5px;border-radius:8px">' + r.category + '</span>' : '';
+      const baseInfo = r.calculationBase ? '<span style="font-size:9px;color:var(--text-dim);margin-left:8px">' + r.calculationBase + '</span>' : '';
       return `<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:12px">
         <div style="display:flex;justify-content:space-between;align-items:center">
-          <span>🏦 <strong>${name}</strong>${r.rateType === 'progressif' ? ' <span style="color:var(--purple);font-size:10px">📈</span>' : ''}${isScanned ? ' <span style="font-size:8px;color:var(--purple);background:rgba(139,92,246,0.15);padding:1px 5px;border-radius:8px">web</span>' : ''}</span>
+          <span>🏦 <strong>${name}</strong>${r.rateType === 'progressif' ? ' <span style="color:var(--purple);font-size:10px">📈</span>' : ''}${sourceBadge}${categoryBadge}${baseInfo}</span>
           <span style="color:var(--green);font-family:var(--mono);font-weight:600">${r.rate}%</span>
         </div>${scheduleDetail}${r.withdrawalConditions ? '<div style="font-size:10px;color:var(--orange);padding-left:16px">⚠️ ' + r.withdrawalConditions + '</div>' : ''}</div>`;
     }).join('');

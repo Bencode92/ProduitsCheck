@@ -1,8 +1,10 @@
 // ═══════════════════════════════════════════════════════════════
-// STRUCTBOARD — Smart CAT Optimizer V5c — Expert review fixes
-// Fix 1: Explicit min 3 months filter (no more 0.25y floor bug)
+// STRUCTBOARD — Smart CAT Optimizer V3 — Remaining Effective Rate
+// Fix 1: Explicit min 3 months filter
 // Fix 2: IS tax factor (×0.75) on net gain
 // Fix 3: Stricter duration matching + break-even + mismatch warning
+// Fix 4: Uses REMAINING effective rate (not TRAAB) for progressive CATs
+//        + acceleration loss calculation for progressive schedules
 // ═══════════════════════════════════════════════════════════════
 
 let _lastOptimizerResult = null;
@@ -12,7 +14,7 @@ const _IS_TAX_RATE = 0.25; // Impôt sur les sociétés
 async function loadOptimizerResult() { try { const d = await github.readFile(`${CONFIG.DATA_PATH}/cat/optimizer-result.json`); if (d) _lastOptimizerResult = d; } catch(e) {} }
 
 async function saveOptimizerResult(summary, analysis) {
-  const result = { lastUpdated: new Date().toISOString(), summary, rateSource: _optimizerRateSource, algorithmVersion: 'v2.1',
+  const result = { lastUpdated: new Date().toISOString(), summary, rateSource: _optimizerRateSource, algorithmVersion: 'v3',
     totalInvested: analysis.totalInvested, totalInterestPerYear: analysis.totalInterestPerYear,
     weightedRate: analysis.weightedRate, optimizedInterest: analysis.optimizedInterest,
     optimizedRate: analysis.optimizedRate, totalPotentialGain: analysis.totalNetGain,
@@ -20,27 +22,84 @@ async function saveOptimizerResult(summary, analysis) {
     arbitrageCount: analysis.arbitrageCount, depositCount: analysis.depositAnalysis.length, rateCount: analysis._rateCount || 0,
     deposits: analysis.depositAnalysis.map(d => ({
       name: d.name, bankName: d.bankName, entity: d.entity, amount: d.amount,
-      rate: d.rate, currentPeriodRate: d.currentPeriodRate, interestPerYear: d.interestPerYear,
+      rate: d.rate, currentPeriodRate: d.currentPeriodRate, remainingEffectiveRate: d.remainingEffectiveRate, interestPerYear: d.interestPerYear,
       remainingMonths: d.remainingMonths, maturityDate: d.maturityDate,
       bestAlt: d.bestAlt, switchGainPerYear: d.netGainAnnual, grossGainPerYear: d.grossGainAnnual,
       exitPenaltyCost: d.exitPenaltyCost, noticeOpportunityCost: d.noticeOpportunityCost,
-      netGainAfterTax: d.netGainAfterTax, breakEvenMonths: d.breakEvenMonths,
-      durationMismatch: d.durationMismatch,
+      netGainAfterTax: d.netGainAfterTax, accelerationLoss: d.accelerationLoss || 0,
+      breakEvenMonths: d.breakEvenMonths, durationMismatch: d.durationMismatch, isProgressif: d.isProgressif,
       dynamicThreshold: d.dynamicThreshold, compositeScore: d.compositeScore,
       recommendation: d.recommendation, reason: d.reason,
     })),
   };
   _lastOptimizerResult = result;
-  await github.writeFile(`${CONFIG.DATA_PATH}/cat/optimizer-result.json`, result, '[StructBoard] Optimizer v2.1');
+  await github.writeFile(`${CONFIG.DATA_PATH}/cat/optimizer-result.json`, result, '[StructBoard] Optimizer v3');
 }
 
 // ═══ FORMATTING ══════════════════════════════════════════
 function _mdToHtmlTable(md) { return md.replace(/(\|[^\n]+\|\n)((?:\|[-:| ]+\|\n))(\|[^\n]+\|\n?)+/g, (match) => { const lines = match.trim().split('\n').filter(l => l.trim()); if (lines.length < 2) return match; const parseRow = (line) => line.split('|').filter((_, i, a) => i > 0 && i < a.length - 1).map(c => c.trim()); const headers = parseRow(lines[0]); const ds = /^\|[\s:-]+\|$/.test(lines[1].trim().replace(/\|/g, '|')) ? 2 : 1; let h = '<table style="width:100%;border-collapse:collapse;font-size:11px;margin:12px 0"><thead><tr>'; headers.forEach(x => { h += `<th style="padding:8px 10px;text-align:left;color:var(--accent);font-weight:600;border-bottom:2px solid var(--border)">${x.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')}</th>`; }); h += '</tr></thead><tbody>'; for (let i = ds; i < lines.length; i++) { const cells = parseRow(lines[i]); if (!cells.length) continue; h += '<tr style="border-bottom:1px solid var(--border)">'; cells.forEach((c, j) => { const s = j === 0 ? 'font-weight:600;color:var(--text-bright)' : c.includes('ARBITRER') ? 'color:var(--orange);font-weight:600' : c.includes('GARDER') ? 'color:var(--green);font-weight:600' : /^\+/.test(c) ? 'color:var(--green);font-family:var(--mono)' : ''; h += `<td style="padding:6px 10px;${s}">${c.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')}</td>`; }); h += '</tr>'; } h += '</tbody></table>'; return h; }); }
 function _formatOptimizerAI(t) { return t ? formatAIText(_mdToHtmlTable(t)) : ''; }
-function _renderAISummaryBlock(summary) { if (!summary) return ''; return `<div style="background:linear-gradient(135deg,rgba(59,130,246,0.06),rgba(139,92,246,0.06));border:1px solid rgba(59,130,246,0.2);border-radius:var(--radius);overflow:hidden"><div style="padding:12px 16px;background:rgba(59,130,246,0.08);border-bottom:1px solid rgba(59,130,246,0.15);display:flex;align-items:center;gap:8px"><span style="font-size:16px">🤖</span><span style="font-size:13px;font-weight:700;color:var(--accent)">Recommandations Claude (algo v2.1)</span></div><div style="padding:16px;font-size:12px;line-height:1.7;color:var(--text)" class="ai-summary">${_formatOptimizerAI(summary)}</div></div>`; }
+function _renderAISummaryBlock(summary) { if (!summary) return ''; return `<div style="background:linear-gradient(135deg,rgba(59,130,246,0.06),rgba(139,92,246,0.06));border:1px solid rgba(59,130,246,0.2);border-radius:var(--radius);overflow:hidden"><div style="padding:12px 16px;background:rgba(59,130,246,0.08);border-bottom:1px solid rgba(59,130,246,0.15);display:flex;align-items:center;gap:8px"><span style="font-size:16px">🤖</span><span style="font-size:13px;font-weight:700;color:var(--accent)">Recommandations Claude (algo v3)</span></div><div style="padding:16px;font-size:12px;line-height:1.7;color:var(--text)" class="ai-summary">${_formatOptimizerAI(summary)}</div></div>`; }
 
-// ═══ V2.1 ALGORITHM ══════════════════════════════════════
-const MIN_MONTHS_FOR_ARBITRAGE = 3; // FIX #1: Explicit filter, no arbitrage under 3 months
+// ═══ V3 ALGORITHM — Remaining Effective Rate ═════════════
+const MIN_MONTHS_FOR_ARBITRAGE = 3;
+
+// FIX #4: Calculate weighted average rate of REMAINING periods only
+// For progressive CATs, the TRAAB is misleading mid-term — what matters is the rate going forward
+function _calcRemainingEffectiveRate(deposit) {
+  const schedule = deposit.rateSchedule;
+  if (!schedule || schedule.length === 0) return parseFloat(deposit.rate) || 0;
+
+  const now = new Date();
+  const maturity = deposit.maturityDate ? new Date(deposit.maturityDate) : null;
+  if (!maturity || maturity <= now) return parseFloat(deposit.rate) || 0;
+
+  let totalWeightedRate = 0, totalDays = 0;
+
+  for (const step of schedule) {
+    const stepFrom = new Date(step.from);
+    const stepTo = new Date(step.to);
+    // Only consider the portion of this period that is in the future
+    const effectiveFrom = stepFrom > now ? stepFrom : now;
+    const effectiveTo = stepTo;
+    if (effectiveTo <= effectiveFrom) continue; // period fully elapsed
+
+    const days = (effectiveTo - effectiveFrom) / 864e5;
+    const rate = parseFloat(step.rate) || 0;
+    totalWeightedRate += rate * days;
+    totalDays += days;
+  }
+
+  if (totalDays <= 0) return parseFloat(deposit.rate) || 0;
+  return Math.round(totalWeightedRate / totalDays * 100) / 100;
+}
+
+// FIX #4: Calculate the total remaining interest if we KEEP the deposit until maturity
+// This is the opportunity cost of breaking early — we lose the future progressive acceleration
+function _calcRemainingInterest(deposit) {
+  const schedule = deposit.rateSchedule;
+  const amount = parseFloat(deposit.amount) || 0;
+  if (!schedule || schedule.length === 0) {
+    const rate = parseFloat(deposit.rate) || 0;
+    const now = new Date();
+    const maturity = deposit.maturityDate ? new Date(deposit.maturityDate) : null;
+    if (!maturity || maturity <= now) return 0;
+    const daysLeft = (maturity - now) / 864e5;
+    return Math.round(amount * (rate / 100) * (daysLeft / 365) * 100) / 100;
+  }
+
+  const now = new Date();
+  let total = 0;
+  for (const step of schedule) {
+    const stepFrom = new Date(step.from);
+    const stepTo = new Date(step.to);
+    const effectiveFrom = stepFrom > now ? stepFrom : now;
+    if (stepTo <= effectiveFrom) continue;
+    const days = (stepTo - effectiveFrom) / 864e5;
+    total += amount * (parseFloat(step.rate) || 0) / 100 * (days / 365);
+  }
+  return Math.round(total * 100) / 100;
+}
 
 function _dynamicThreshold(amount, monthsLeft) { const B=0.30,af=Math.sqrt(amount/100000),tf=12/Math.max(monthsLeft,3); return Math.max(0.05,Math.min(B/Math.max(af,0.3)*Math.min(tf,3),1)); }
 
@@ -85,21 +144,29 @@ function buildOptimizationAnalysis() {
     let currentPeriodRate=rate;
     if(d.rateSchedule&&d.rateSchedule.length>0){const cp=d.rateSchedule.find(s=>s.from<=nowStr&&s.to>=nowStr);if(cp)currentPeriodRate=cp.rate;}
 
+    // FIX #4: Remaining effective rate — the TRUE rate for arbitrage comparison
+    const remainingEffectiveRate = _calcRemainingEffectiveRate(d);
+    const remainingInterest = _calcRemainingInterest(d);
+    const isProgressif = d.rateSchedule && d.rateSchedule.length > 1;
+    // For comparison: use remaining effective rate, not TRAAB
+    const comparisonRate = remainingEffectiveRate;
+
     // FIX #1: No arbitrage if < 3 months remaining — skip search entirely
     if (remainingMonths < MIN_MONTHS_FOR_ARBITRAGE) {
       return { id:d.id, name:d.productName||'CAT', bankName:d.bankName, entity:d.entityName||'',
-        amount, rate, currentPeriodRate, durationMonths, elapsedMonths, remainingMonths, interestPerYear,
+        amount, rate, currentPeriodRate, remainingEffectiveRate, remainingInterest,
+        durationMonths, elapsedMonths, remainingMonths, interestPerYear,
         bestAlt:null, grossGainAnnual:0, exitPenaltyCost:0, noticeOpportunityCost:0,
         netGainAnnual:0, netGainAfterTax:0, netGainRemaining:0, breakEvenMonths:null, durationMismatch:false,
         switchGainPerYear:0, dynamicThreshold:0, fgdrScore:_calcFgdrScore(d,active,fgdrLimit), fgdrBonus:0, compositeScore:0,
         recommendation:'GARDER', reason:`< ${MIN_MONTHS_FOR_ARBITRAGE} mois restants — attendre maturité`,
-        maturityDate:d.maturityDate, exitPenalty:d.exitPenalty||'', altWithdrawalConditions:'' };
+        maturityDate:d.maturityDate, exitPenalty:d.exitPenalty||'', altWithdrawalConditions:'', isProgressif };
     }
 
-    // FIX #3: Stricter duration matching — prefer rates within ±50% of remaining duration
+    // Stricter duration matching — prefer rates within ±50% of remaining duration
+    // FIX #4: Compare against remainingEffectiveRate, not TRAAB
     const compatible=Object.values(bestByDuration).filter(r=>{
-      if(r.rate<=rate) return false;
-      // Strict match: target duration should be ≥ 50% of remaining and ≤ 200%
+      if(r.rate<=comparisonRate) return false;
       if(remainingMonths > 6) {
         const ratio = r.durationMonths / remainingMonths;
         if(ratio < 0.5 || ratio > 2.0) return false;
@@ -111,21 +178,40 @@ function buildOptimizationAnalysis() {
     // Duration mismatch warning
     const durationMismatch = bestAlt ? Math.abs(bestAlt.durationMonths - remainingMonths) > remainingMonths * 0.5 : false;
 
-    const spread=bestAlt?bestAlt.rate-rate:0;
+    // FIX #4: Spread uses remaining effective rate
+    const spread=bestAlt?bestAlt.rate-comparisonRate:0;
     const grossGainAnnual=bestAlt?Math.round(amount*spread/100*100)/100:0;
     const exitPenaltyCost=_calcExitPenaltyCost(d);
     const noticeOpportunityCost=bestAlt?_calcNoticeOpportunityCost(d,bestAlt.rate):0;
+
+    // FIX #4: For progressive CATs, add opportunity cost of losing future acceleration
+    // = remaining interest at current CAT vs remaining interest at flat alternative rate
+    let accelerationLoss = 0;
+    if (isProgressif && bestAlt && remainingMonths > 0) {
+      const altInterestRemaining = Math.round(amount * (bestAlt.rate / 100) * (remainingMonths / 12) * 100) / 100;
+      // If keeping the progressive CAT earns more than switching, that's an acceleration loss
+      if (remainingInterest > altInterestRemaining) {
+        accelerationLoss = Math.round((remainingInterest - altInterestRemaining) * 100) / 100;
+      }
+    }
+
     const totalOneTimeCosts=exitPenaltyCost+noticeOpportunityCost;
 
-    // FIX #1: Use actual years remaining (no artificial floor)
+    // Use actual years remaining
     const yearsRemaining = remainingMonths / 12;
     const amortizedCostAnnual = yearsRemaining > 0 ? totalOneTimeCosts / yearsRemaining : 0;
     const netGainAnnual=Math.round((grossGainAnnual-amortizedCostAnnual)*100)/100;
 
-    // FIX #2: Net gain after IS tax
+    // Net gain after IS tax
     const netGainAfterTax = Math.round(netGainAnnual * (1 - _IS_TAX_RATE) * 100) / 100;
 
-    // FIX #3: Break-even in months
+    // FIX #4: True net gain accounting for progressive acceleration loss
+    // accelerationLoss is total over remaining period, annualize it
+    const accelerationLossAnnual = yearsRemaining > 0 ? Math.round(accelerationLoss / yearsRemaining * 100) / 100 : 0;
+    const trueNetGainAnnual = Math.round((netGainAnnual - accelerationLossAnnual) * 100) / 100;
+    const trueNetGainAfterTax = Math.round(trueNetGainAnnual * (1 - _IS_TAX_RATE) * 100) / 100;
+
+    // Break-even in months (use true net gain)
     const grossGainMonthly = grossGainAnnual / 12;
     const breakEvenMonths = totalOneTimeCosts > 0 && grossGainMonthly > 0
       ? _calcBreakEvenMonths(totalOneTimeCosts, grossGainMonthly)
@@ -135,7 +221,8 @@ function buildOptimizationAnalysis() {
     const fgdrSc=_calcFgdrScore(d,active,fgdrLimit);
     const fgdrBonus=bestAlt?_calcFgdrBonus(d,bestAlt.bankName,active,fgdrLimit):0;
     const adjustedSpread=spread+fgdrBonus;
-    const normNG=Math.min(1,Math.max(0,netGainAfterTax/Math.max(amount*0.01,1)));
+    // FIX #4: Use trueNetGainAfterTax for scoring
+    const normNG=Math.min(1,Math.max(0,trueNetGainAfterTax/Math.max(amount*0.01,1)));
     const normS=Math.min(1,Math.max(0,adjustedSpread));
     const normF=fgdrBonus>0?fgdrBonus/0.15:0;
     const normT=Math.min(1,remainingMonths/60);
@@ -145,35 +232,46 @@ function buildOptimizationAnalysis() {
     const altIsScanned=bestAltFull?.source==='web scan';
     if(altIsScanned&&bestAltFull) webRatesUsed.add(bestAltFull.productName||bestAltFull.bankName+' '+bestAltFull.durationMonths+'m');
 
-    // Decision uses netGainAfterTax (FIX #2)
+    // FIX #4: Decision uses trueNetGainAfterTax (accounts for acceleration loss)
     let recommendation='GARDER',reason='Leader marché';
-    if(bestAlt && netGainAfterTax > 0 && adjustedSpread >= dynThreshold) {
-      // FIX #3: Warn if break-even exceeds remaining duration
+    if(bestAlt && trueNetGainAfterTax > 0 && adjustedSpread >= dynThreshold) {
       if(breakEvenMonths && breakEvenMonths > remainingMonths) {
         recommendation='SURVEILLER';
         reason=`Break-even ${breakEvenMonths}m > restant ${remainingMonths}m — coûts non amortis`;
       } else {
         recommendation='ARBITRER';
         const beStr = breakEvenMonths ? ` (break-even: ${breakEvenMonths}m)` : '';
-        reason=`NET après IS +${formatNumber(netGainAfterTax)}€/an → ${bestAlt.productName||bestAlt.bankName+' '+bestAlt.durationMonths+'m'}${beStr}`;
+        reason=`NET après IS +${formatNumber(trueNetGainAfterTax)}€/an → ${bestAlt.productName||bestAlt.bankName+' '+bestAlt.durationMonths+'m'}${beStr}`;
       }
     } else if(bestAlt && spread > 0) {
       recommendation='SURVEILLER';
-      if(netGainAfterTax <= 0) {
-        reason=`Brut +${formatNumber(grossGainAnnual)}€ mais NET après IS ${formatNumber(netGainAfterTax)}€ (coûts -${formatNumber(totalOneTimeCosts)}€)`;
+      if(trueNetGainAfterTax <= 0) {
+        const costDetail = accelerationLoss > 0
+          ? `coûts -${formatNumber(totalOneTimeCosts)}€ + perte accél. -${formatNumber(accelerationLoss)}€`
+          : `coûts -${formatNumber(totalOneTimeCosts)}€`;
+        reason=`Brut +${formatNumber(grossGainAnnual)}€ mais NET ${formatNumber(trueNetGainAfterTax)}€ (${costDetail})`;
       } else {
-        reason=`Écart ${spread.toFixed(2)}% < seuil ${dynThreshold.toFixed(2)}%`;
+        reason=`Écart ${spread.toFixed(2)}% < seuil ${dynThreshold.toFixed(2)}% (taux restant ${comparisonRate}%)`;
       }
-    } else if(rate >= (bestOverall?.rate||0)) { reason='Leader marché'; }
-    else { reason='Taux compétitif'; }
+    } else if(comparisonRate >= (bestOverall?.rate||0)) {
+      reason = isProgressif
+        ? `Leader marché (restant ${comparisonRate}% > TRAAB ${rate}%)`
+        : 'Leader marché';
+    } else {
+      reason = isProgressif
+        ? `Taux restant ${comparisonRate}% — pas de meilleur taux`
+        : 'Taux compétitif';
+    }
 
     return { id:d.id, name:d.productName||'CAT', bankName:d.bankName, entity:d.entityName||'',
-      amount, rate, currentPeriodRate, durationMonths, elapsedMonths, remainingMonths, interestPerYear,
+      amount, rate, currentPeriodRate, remainingEffectiveRate, remainingInterest,
+      durationMonths, elapsedMonths, remainingMonths, interestPerYear,
       bestAlt:bestAlt?{name:bestAlt.productName||bestAlt.bankName+' '+bestAlt.durationMonths+'m',rate:bestAlt.rate,duration:bestAlt.durationMonths,bankName:bestAlt.bankName,isScanned:altIsScanned}:null,
-      grossGainAnnual, exitPenaltyCost, noticeOpportunityCost, netGainAnnual, netGainAfterTax,
-      netGainRemaining:Math.round(netGainAfterTax*yearsRemaining*100)/100,
-      breakEvenMonths, durationMismatch,
-      switchGainPerYear:netGainAfterTax, // FIX #2: dashboard shows after-tax
+      grossGainAnnual, exitPenaltyCost, noticeOpportunityCost, accelerationLoss,
+      netGainAnnual:trueNetGainAnnual, netGainAfterTax:trueNetGainAfterTax,
+      netGainRemaining:Math.round(trueNetGainAfterTax*yearsRemaining*100)/100,
+      breakEvenMonths, durationMismatch, isProgressif,
+      switchGainPerYear:trueNetGainAfterTax,
       dynamicThreshold:dynThreshold, fgdrScore:fgdrSc, fgdrBonus, compositeScore,
       recommendation, reason, maturityDate:d.maturityDate, exitPenalty:d.exitPenalty||'', altWithdrawalConditions:bestAltFull?.withdrawalConditions||'' };
   });
@@ -216,7 +314,7 @@ showCATSimulator = function() {
   if(!allRates.length){showToast("Importez des taux d'abord",'error');return;}
   const modal=document.getElementById('modal'),n=catManager.deposits.filter(d=>d.status==='active').length;
   modal.innerHTML=`<div class="modal-overlay" onclick="closeModal()"><div class="modal-content modal-large" onclick="event.stopPropagation()" style="max-height:90vh;overflow-y:auto">
-    <h2 class="modal-title">⚡ Optimiseur v2.1</h2>
+    <h2 class="modal-title">⚡ Optimiseur v3</h2>
     <div style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:16px">
       <div style="font-size:12px;font-weight:600;color:var(--text-bright);margin-bottom:10px">📊 Comparer avec :</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -231,7 +329,7 @@ showCATSimulator = function() {
       </div>
     </div>
     <div style="background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.15);border-radius:var(--radius-sm);padding:10px;margin-bottom:16px;font-size:10px;color:var(--text-muted)">
-      <strong style="color:var(--accent)">v2.1</strong> : seuil dynamique, gain NET après IS (×0.75), break-even en mois, filtre <3m, matching durée strict.</div>
+      <strong style="color:var(--accent)">v3</strong> : taux effectif restant (pas TRAAB), perte accélération progressive, gain NET après IS (×0.75), break-even, filtre <3m.</div>
     <button class="btn ai-glow lg" style="width:100%" onclick="launchOptimizer()">⚡ Optimiser (${n} contrats)</button>
     <div id="optimizer-results" style="margin-top:16px"></div>
     <div class="modal-actions"><button class="btn" onclick="closeModal()">Fermer</button></div>
@@ -241,7 +339,7 @@ showCATSimulator = function() {
 
 function launchOptimizer() {
   _optimizerRateSource=document.querySelector('input[name="opt-source"]:checked')?.value||'confirmed';
-  document.getElementById('optimizer-results').innerHTML=`<div style="display:flex;align-items:center;gap:10px;padding:20px;color:var(--text-muted)"><div class="spinner"></div>Analyse v2.1...</div>`;
+  document.getElementById('optimizer-results').innerHTML=`<div style="display:flex;align-items:center;gap:10px;padding:20px;color:var(--text-muted)"><div class="spinner"></div>Analyse v3...</div>`;
   setTimeout(()=>runSmartOptimizer(),100);
 }
 
@@ -251,16 +349,16 @@ async function runSmartOptimizer() {
   try{
     const analysis=buildOptimizationAnalysis();
     const srcBadge=_optimizerRateSource==='confirmed'
-      ?'<span style="display:inline-block;padding:3px 10px;border-radius:10px;font-size:10px;font-weight:600;color:var(--green);background:rgba(6,214,160,0.1);border:1px solid rgba(6,214,160,0.3);margin-bottom:12px">✅ vs '+analysis._confirmedCount+' confirmés · v2.1 (NET après IS)</span>'
-      :'<span style="display:inline-block;padding:3px 10px;border-radius:10px;font-size:10px;font-weight:600;color:var(--purple);background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.3);margin-bottom:12px">🔍 vs '+analysis._rateCount+' taux · v2.1 (NET après IS)</span>';
+      ?'<span style="display:inline-block;padding:3px 10px;border-radius:10px;font-size:10px;font-weight:600;color:var(--green);background:rgba(6,214,160,0.1);border:1px solid rgba(6,214,160,0.3);margin-bottom:12px">✅ vs '+analysis._confirmedCount+' confirmés · v3 (NET après IS)</span>'
+      :'<span style="display:inline-block;padding:3px 10px;border-radius:10px;font-size:10px;font-weight:600;color:var(--purple);background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.3);margin-bottom:12px">🔍 vs '+analysis._rateCount+' taux · v3 (NET après IS)</span>';
     let html=srcBadge+renderOptimizationTable(analysis);
-    html+='<div id="ai-optimizer-summary" style="margin-top:16px"><div style="display:flex;align-items:center;gap:10px;padding:16px;color:var(--text-muted);background:var(--accent-glow);border-radius:var(--radius-sm)"><div class="spinner"></div>Claude analyse (v2.1)...</div></div>';
+    html+='<div id="ai-optimizer-summary" style="margin-top:16px"><div style="display:flex;align-items:center;gap:10px;padding:16px;color:var(--text-muted);background:var(--accent-glow);border-radius:var(--radius-sm)"><div class="spinner"></div>Claude analyse (v3)...</div></div>';
     results.innerHTML=html;
     const ai=await getAIOptimizerSummary(analysis);
     const d=document.getElementById('ai-optimizer-summary');
     if(d)d.innerHTML=_renderAISummaryBlock(ai);
     await saveOptimizerResult(ai,analysis);
-    showToast('v2.1 OK','success');
+    showToast('v3 OK','success');
     const ma=document.querySelector('.modal-actions');
     if(ma)ma.innerHTML=`<button class="btn" onclick="closeModal()">Fermer</button><button class="btn primary" onclick="closeModal();renderCAT(document.getElementById('main-content'));">✅ Dashboard</button>`;
   }catch(e){results.innerHTML=`<div style="color:var(--red);padding:16px">❌ ${e.message}</div>`;}
@@ -293,35 +391,79 @@ function renderOptimizationTable(analysis) {
     html+=`</div>`;
   }
 
-  // Table with break-even column
-  html+=`<div style="border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden"><div style="max-height:400px;overflow-y:auto"><table style="width:100%;border-collapse:collapse;font-size:11px"><thead style="position:sticky;top:0;z-index:1"><tr style="background:var(--bg-elevated);border-bottom:1px solid var(--border)">
-    <th style="padding:8px 10px;text-align:left;color:var(--text-muted);font-weight:500">Produit</th>
-    <th style="padding:8px 6px;text-align:right;color:var(--text-muted);font-weight:500">Montant</th>
-    <th style="padding:8px 6px;text-align:center;color:var(--text-muted);font-weight:500">Taux</th>
-    <th style="padding:8px 6px;text-align:center;color:var(--text-muted);font-weight:500">Restant</th>
-    <th style="padding:8px 6px;text-align:center;color:var(--text-muted);font-weight:500">Meilleur</th>
-    <th style="padding:8px 6px;text-align:right;color:var(--text-muted);font-weight:500" title="NET après IS 25%">NET/an</th>
-    <th style="padding:8px 6px;text-align:center;color:var(--text-muted);font-weight:500" title="Mois pour amortir les coûts">B/E</th>
-    <th style="padding:8px 6px;text-align:center;color:var(--text-muted);font-weight:500">Action</th>
+  // Table v3 — remaining effective rate as PRIMARY, visual row accents
+  html+=`<div style="border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden"><div style="max-height:450px;overflow-y:auto"><table style="width:100%;border-collapse:collapse;font-size:11px"><thead style="position:sticky;top:0;z-index:1"><tr style="background:var(--bg-elevated);border-bottom:2px solid var(--border)">
+    <th style="padding:10px 12px;text-align:left;color:var(--text-muted);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:0.5px">Produit</th>
+    <th style="padding:10px 8px;text-align:right;color:var(--text-muted);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:0.5px">Montant</th>
+    <th style="padding:10px 8px;text-align:center;color:var(--text-muted);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:0.5px" title="Taux effectif restant (ou TRAAB si fixe)">Taux effectif</th>
+    <th style="padding:10px 8px;text-align:center;color:var(--text-muted);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:0.5px">Durée</th>
+    <th style="padding:10px 8px;text-align:center;color:var(--text-muted);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:0.5px">Alternative</th>
+    <th style="padding:10px 8px;text-align:right;color:var(--text-muted);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:0.5px" title="Gain NET après IS 25% et coûts de sortie">Impact</th>
+    <th style="padding:10px 8px;text-align:center;color:var(--text-muted);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:0.5px"></th>
   </tr></thead><tbody>`;
   depositAnalysis.forEach(d=>{
-    const rc=d.recommendation==='ARBITRER'?'var(--orange)':d.recommendation==='SURVEILLER'?'var(--cyan)':'var(--green)';
-    const ri=d.recommendation==='ARBITRER'?'🔄':d.recommendation==='SURVEILLER'?'👀':'✅';
-    const sp=d.bestAlt?(d.bestAlt.rate-d.rate).toFixed(2):'—';
-    const ab=d.bestAlt?.isScanned?'<span style="font-size:7px;color:var(--purple);background:rgba(139,92,246,0.15);padding:0 4px;border-radius:6px">web</span>':'';
+    const isArbitrer = d.recommendation === 'ARBITRER';
+    const isSurveiller = d.recommendation === 'SURVEILLER';
+    const rc=isArbitrer?'var(--orange)':isSurveiller?'var(--cyan)':'var(--green)';
+    const ri=isArbitrer?'🔄':isSurveiller?'👀':'✅';
+    const ab=d.bestAlt?.isScanned?'<span style="font-size:7px;color:var(--purple);background:rgba(139,92,246,0.15);padding:1px 5px;border-radius:6px;margin-left:4px">web</span>':'';
     const beColor = d.breakEvenMonths && d.breakEvenMonths > d.remainingMonths ? 'var(--red)' : d.breakEvenMonths ? 'var(--text-bright)' : 'var(--text-dim)';
-    const beText = d.breakEvenMonths ? d.breakEvenMonths + 'm' : '—';
-    const dmWarn = d.durationMismatch ? '<div style="font-size:7px;color:var(--orange)">⚠️durée</div>' : '';
+    const beText = d.breakEvenMonths ? d.breakEvenMonths + 'm' : '';
+    const dmWarn = d.durationMismatch ? ' <span style="font-size:7px;color:var(--orange)">⚠️</span>' : '';
 
-    html+=`<tr style="border-bottom:1px solid var(--border)" onmouseover="this.style.background='var(--bg-elevated)'" onmouseout="this.style.background=''">
-      <td style="padding:8px 10px"><strong style="color:var(--text-bright)">${d.name}</strong><div style="font-size:10px;color:var(--text-dim)">${d.bankName}${d.entity?' · '+d.entity:''}${d.fgdrScore>0.3?' <span style="color:var(--orange)">⚠️FGDR</span>':''}</div></td>
-      <td style="padding:8px 6px;text-align:right;font-family:var(--mono)">${formatNumber(d.amount)}€</td>
-      <td style="padding:8px 6px;text-align:center"><span style="font-family:var(--mono);font-weight:700;color:${d.bestAlt&&d.bestAlt.rate>d.rate?'var(--orange)':'var(--green)'}">${d.rate}%</span>${d.currentPeriodRate!==d.rate?'<div style="font-size:9px;color:var(--text-dim)">palier '+d.currentPeriodRate+'%</div>':''}</td>
-      <td style="padding:8px 6px;text-align:center;font-size:10px">${d.remainingMonths}m</td>
-      <td style="padding:8px 6px;text-align:center">${d.bestAlt?'<span style="font-family:var(--mono);font-weight:700;color:var(--cyan)">'+d.bestAlt.rate+'%</span>'+ab+dmWarn+'<div style="font-size:9px;color:var(--text-dim)">'+d.bestAlt.name+'</div>':'<span style="color:var(--green)">✨</span>'}</td>
-      <td style="padding:8px 6px;text-align:right"><span style="font-family:var(--mono);font-weight:600;color:${d.netGainAfterTax>0?'var(--green)':d.netGainAfterTax<0?'var(--red)':'var(--text-dim)'}">${d.netGainAfterTax!==0?(d.netGainAfterTax>0?'+':'')+formatNumber(d.netGainAfterTax)+'€':'—'}</span>${d.exitPenaltyCost>0?'<div style="font-size:8px;color:var(--orange)">coûts -'+formatNumber(d.exitPenaltyCost+d.noticeOpportunityCost)+'€</div>':''}</td>
-      <td style="padding:8px 6px;text-align:center;font-size:10px;color:${beColor}">${beText}</td>
-      <td style="padding:8px 6px;text-align:center"><span style="padding:3px 8px;border-radius:10px;font-size:10px;font-weight:600;color:${rc};background:${rc}12;border:1px solid ${rc}30">${ri} ${d.recommendation}</span></td>
+    // Row accent: left border + subtle background for ARBITRER
+    const rowBg = isArbitrer ? 'background:rgba(251,191,36,0.04)' : '';
+    const rowBorder = isArbitrer ? 'border-left:3px solid var(--orange)' : isSurveiller ? 'border-left:3px solid rgba(34,211,238,0.3)' : 'border-left:3px solid transparent';
+
+    // v3 UX: Remaining effective rate is THE primary number
+    const effectiveRate = d.remainingEffectiveRate || d.rate;
+    const showRemaining = d.isProgressif && d.remainingEffectiveRate !== d.rate;
+    const effColor = d.bestAlt && d.bestAlt.rate > effectiveRate ? 'var(--orange)' : 'var(--green)';
+    let rateCell = `<span style="font-family:var(--mono);font-weight:800;font-size:13px;color:${effColor}">${effectiveRate}%</span>`;
+    if (showRemaining) {
+      rateCell += `<div style="font-size:9px;color:var(--text-dim);margin-top:1px">TRAAB ${d.rate}% · 📈</div>`;
+    }
+
+    // Impact column: combine gain + costs in a clear visual
+    let impactCell = '';
+    if (d.netGainAfterTax !== 0) {
+      const impactColor = d.netGainAfterTax > 0 ? 'var(--green)' : 'var(--red)';
+      impactCell = `<span style="font-family:var(--mono);font-weight:700;font-size:12px;color:${impactColor}">${d.netGainAfterTax>0?'+':''}${formatNumber(d.netGainAfterTax)}€</span>`;
+      impactCell += `<div style="font-size:9px;color:var(--text-dim)">/ an après IS</div>`;
+      // Costs breakdown on hover-visible line
+      const costs = [];
+      if (d.exitPenaltyCost > 0) costs.push(`sortie -${formatNumber(d.exitPenaltyCost)}€`);
+      if (d.noticeOpportunityCost > 0) costs.push(`préavis -${formatNumber(d.noticeOpportunityCost)}€`);
+      if (d.accelerationLoss > 0) costs.push(`<span style="color:var(--purple)">paliers -${formatNumber(d.accelerationLoss)}€</span>`);
+      if (costs.length > 0) impactCell += `<div style="font-size:8px;color:var(--orange);margin-top:2px">${costs.join(' · ')}</div>`;
+    } else {
+      impactCell = `<span style="color:var(--text-dim)">—</span>`;
+    }
+
+    // Alternative column with spread indicator
+    let altCell = '';
+    if (d.bestAlt) {
+      const spread = (d.bestAlt.rate - effectiveRate).toFixed(2);
+      const spreadColor = spread > 0 ? 'var(--cyan)' : 'var(--text-dim)';
+      altCell = `<span style="font-family:var(--mono);font-weight:700;color:var(--cyan)">${d.bestAlt.rate}%</span>${ab}${dmWarn}`;
+      altCell += `<div style="font-size:9px;color:var(--text-dim)">${d.bestAlt.name}</div>`;
+      if (spread > 0) altCell += `<div style="font-size:8px;color:${spreadColor}">+${spread}% spread</div>`;
+    } else {
+      altCell = `<span style="color:var(--green);font-size:13px" title="Meilleur taux du marché">✨</span>`;
+    }
+
+    // Duration with break-even inline
+    let durationCell = `<span style="font-weight:600">${d.remainingMonths}m</span>`;
+    if (beText) durationCell += `<div style="font-size:8px;color:${beColor}" title="Break-even">⏱ ${beText}</div>`;
+
+    html+=`<tr style="border-bottom:1px solid var(--border);${rowBg};${rowBorder};transition:background 0.15s" onmouseover="this.style.background='var(--bg-elevated)'" onmouseout="this.style.background='${isArbitrer?'rgba(251,191,36,0.04)':''}'">
+      <td style="padding:10px 12px"><strong style="color:var(--text-bright);font-size:12px">${d.name}</strong><div style="font-size:10px;color:var(--text-dim);margin-top:2px">${d.bankName}${d.entity?' · <span style="opacity:0.7">'+d.entity+'</span>':''}${d.fgdrScore>0.3?' <span style="color:var(--orange)">⚠️FGDR</span>':''}</div></td>
+      <td style="padding:10px 8px;text-align:right;font-family:var(--mono);font-weight:600">${formatNumber(d.amount)}€</td>
+      <td style="padding:10px 8px;text-align:center">${rateCell}</td>
+      <td style="padding:10px 8px;text-align:center;font-size:10px">${durationCell}</td>
+      <td style="padding:10px 8px;text-align:center">${altCell}</td>
+      <td style="padding:10px 8px;text-align:right">${impactCell}</td>
+      <td style="padding:10px 8px;text-align:center"><span style="display:inline-block;padding:4px 10px;border-radius:10px;font-size:10px;font-weight:700;color:${rc};background:${rc}12;border:1px solid ${rc}30;white-space:nowrap">${ri} ${d.recommendation}</span></td>
     </tr>`;
   });
   html+=`</tbody></table></div></div>`;
@@ -343,7 +485,8 @@ function renderOptimizerDashboard() {
     </div>`;
   if(deps.length>0){html+=`<div style="border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:16px"><div style="padding:10px 14px;background:var(--bg-elevated);border-bottom:1px solid var(--border);display:flex;justify-content:space-between"><span style="font-size:12px;font-weight:600;color:var(--text-bright)">📊 Contrats vs marché (NET après IS)</span><span style="font-size:10px;color:var(--text-dim)">${deps.length}</span></div><div style="max-height:320px;overflow-y:auto"><table style="width:100%;border-collapse:collapse;font-size:11px"><thead style="position:sticky;top:0;z-index:1"><tr style="background:var(--bg-elevated);border-bottom:1px solid var(--border)"><th style="padding:8px 10px;text-align:left;color:var(--text-muted);font-weight:500">Produit</th><th style="padding:8px 6px;text-align:right;color:var(--text-muted);font-weight:500">Montant</th><th style="padding:8px 6px;text-align:center;color:var(--text-muted);font-weight:500">Taux</th><th style="padding:8px 6px;text-align:center;color:var(--text-muted);font-weight:500">Restant</th><th style="padding:8px 6px;text-align:center;color:var(--text-muted);font-weight:500">Meilleur</th><th style="padding:8px 6px;text-align:right;color:var(--text-muted);font-weight:500">NET/an</th><th style="padding:8px 6px;text-align:center;color:var(--text-muted);font-weight:500">Action</th></tr></thead><tbody>`;
   deps.forEach(d=>{const rc=d.recommendation==='ARBITRER'?'var(--orange)':d.recommendation==='SURVEILLER'?'var(--cyan)':'var(--green)';const ri=d.recommendation==='ARBITRER'?'🔄':d.recommendation==='SURVEILLER'?'👀':'✅';const g=d.switchGainPerYear||0;
-    html+=`<tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 10px"><strong style="color:var(--text-bright)">${d.name}</strong><div style="font-size:10px;color:var(--text-dim)">${d.bankName}${d.entity?' · '+d.entity:''}</div></td><td style="padding:8px 6px;text-align:right;font-family:var(--mono)">${formatNumber(d.amount)}€</td><td style="padding:8px 6px;text-align:center"><span style="font-family:var(--mono);font-weight:700;color:var(--green)">${d.rate}%</span></td><td style="padding:8px 6px;text-align:center;font-size:10px">${d.remainingMonths}m</td><td style="padding:8px 6px;text-align:center">${d.bestAlt?'<span style="font-family:var(--mono);font-weight:700;color:var(--cyan)">'+d.bestAlt.rate+'%</span>':'✨'}</td><td style="padding:8px 6px;text-align:right;font-family:var(--mono);font-weight:600;color:${g>0?'var(--green)':g<0?'var(--red)':'var(--text-dim)'}">${g!==0?(g>0?'+':'')+formatNumber(g)+'€':'—'}</td><td style="padding:8px 6px;text-align:center"><span style="padding:3px 8px;border-radius:10px;font-size:10px;font-weight:600;color:${rc};background:${rc}12;border:1px solid ${rc}30">${ri} ${d.recommendation}</span></td></tr>`;});
+    const rr=d.remainingEffectiveRate&&d.remainingEffectiveRate!==d.rate?' <span style="font-size:9px;color:'+(d.remainingEffectiveRate>d.rate?'var(--green)':'var(--orange)')+'">'+(d.remainingEffectiveRate>d.rate?'↑':'↓')+d.remainingEffectiveRate+'%</span>':'';
+    html+=`<tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 10px"><strong style="color:var(--text-bright)">${d.name}</strong><div style="font-size:10px;color:var(--text-dim)">${d.bankName}${d.entity?' · '+d.entity:''}</div></td><td style="padding:8px 6px;text-align:right;font-family:var(--mono)">${formatNumber(d.amount)}€</td><td style="padding:8px 6px;text-align:center"><span style="font-family:var(--mono);font-weight:700;color:var(--green)">${d.rate}%</span>${rr}</td><td style="padding:8px 6px;text-align:center;font-size:10px">${d.remainingMonths}m</td><td style="padding:8px 6px;text-align:center">${d.bestAlt?'<span style="font-family:var(--mono);font-weight:700;color:var(--cyan)">'+d.bestAlt.rate+'%</span>':'✨'}</td><td style="padding:8px 6px;text-align:right;font-family:var(--mono);font-weight:600;color:${g>0?'var(--green)':g<0?'var(--red)':'var(--text-dim)'}">${g!==0?(g>0?'+':'')+formatNumber(g)+'€':'—'}</td><td style="padding:8px 6px;text-align:center"><span style="padding:3px 8px;border-radius:10px;font-size:10px;font-weight:600;color:${rc};background:${rc}12;border:1px solid ${rc}30">${ri} ${d.recommendation}</span></td></tr>`;});
   html+=`</tbody></table></div></div>`;}
   if(r.summary)html+=_renderAISummaryBlock(r.summary);
   html+=`</div>`;return html;
@@ -355,10 +498,10 @@ async function getAIOptimizerSummary(analysis) {
   const src=_optimizerRateSource==='confirmed'?'taux confirmés':'tous (confirmés + '+_webCount+' web)';
   const webNote=_optimizerRateSource==='all'&&_webCount>0?`\n\nTAUX WEB (${_webCount}):\n${(_webRatesSummary||[]).map(r=>`• ${r.name} (${r.bank}) ${r.rate}% — ${r.usedAsAlt?'✅ retenu':'❌ < contrats'}`).join('\n')}`:'';
 
-  const dText=depositAnalysis.map(d=>{let l=`• ${d.name} (${d.bankName}) | ${d.amount}€ à ${d.rate}%`;if(d.currentPeriodRate!==d.rate)l+=` (palier ${d.currentPeriodRate}%)`;l+=` | ${d.remainingMonths}m`;if(d.bestAlt){l+=` | Cible: ${d.bestAlt.rate}% (${d.bestAlt.name})${d.bestAlt.isScanned?' [web]':''}`;l+=` | Brut: +${d.grossGainAnnual}€`;if(d.exitPenaltyCost>0)l+=` | Pénalité: -${d.exitPenaltyCost}€`;l+=` | NET après IS: ${d.netGainAfterTax>0?'+':''}${d.netGainAfterTax}€/an`;if(d.breakEvenMonths)l+=` | Break-even: ${d.breakEvenMonths}m`;}l+=` → ${d.recommendation}`;return l;}).join('\n');
+  const dText=depositAnalysis.map(d=>{let l=`• ${d.name} (${d.bankName}) | ${d.amount}€ TRAAB ${d.rate}%`;if(d.remainingEffectiveRate&&d.remainingEffectiveRate!==d.rate)l+=` → RESTANT ${d.remainingEffectiveRate}%`;else if(d.currentPeriodRate!==d.rate)l+=` (palier ${d.currentPeriodRate}%)`;l+=` | ${d.remainingMonths}m`;if(d.bestAlt){l+=` | Cible: ${d.bestAlt.rate}% (${d.bestAlt.name})${d.bestAlt.isScanned?' [web]':''}`;l+=` | Brut: +${d.grossGainAnnual}€`;if(d.exitPenaltyCost>0)l+=` | Pénalité: -${d.exitPenaltyCost}€`;if(d.accelerationLoss>0)l+=` | Perte accél.: -${d.accelerationLoss}€`;l+=` | NET après IS: ${d.netGainAfterTax>0?'+':''}${d.netGainAfterTax}€/an`;if(d.breakEvenMonths)l+=` | Break-even: ${d.breakEvenMonths}m`;}l+=` → ${d.recommendation}`;return l;}).join('\n');
   const cText=placable>0&&cashOpportunities.length>0?'\n\n💰 CASH: '+formatNumber(placable)+'€\n'+cashOpportunities.slice(0,3).map(c=>`• ${c.name} ${c.rate}% → +${c.interestPerYear}€/an`).join('\n'):'';
 
-  const prompt=`Directeur financier. Optimisation v2.1 (gains NET après IS 25%). Source: ${src}.
+  const prompt=`Directeur financier. Optimisation v3 (taux effectif RESTANT, gains NET après IS 25%). Source: ${src}.
 
 **AVANT:** ${formatNumber(totalInvested)}€ à ${weightedRate.toFixed(2)}% = +${formatNumber(totalInterestPerYear)}€/an
 **APRÈS (NET IS):** ${optimizedRate.toFixed(2)}% = +${formatNumber(optimizedInterest)}€/an
@@ -367,13 +510,17 @@ Brut: +${formatNumber(totalGrossGain)}€ | Coûts: -${formatNumber(totalExitCos
 ${depositAnalysis.length} CONTRATS:
 ${dText}${cText}
 
+IMPORTANT v3: Pour les CAT progressifs, la comparaison utilise le TAUX EFFECTIF RESTANT (pondéré des paliers futurs), PAS le TRAAB.
+Exemple: un CAT TRAAB 3.21% mais restant 4.13% ne doit PAS être arbitré vers un 2.93%.
+
 FORMAT:
 - **AVANT → APRÈS (NET IS +Z€)**
+- Pour chaque progressif: mentionner TRAAB vs taux restant (ex: "TRAAB 3.21% mais restant 4.13%")
 - Chaque arbitrage: 🔄 **[Nom]** → **[cible]** = **NET IS +Z€/an** (break-even: Xm) ⚠️ [conditions]
-- Si gain NET IS négatif: expliquer
+- Si perte accélération: expliquer pourquoi garder malgré taux alternatif plus élevé que le TRAAB
 - ✅ **N contrats** leaders
 - Tous les gains sont après IS 25%
-- Max 180 mots`;
+- Max 200 mots`;
 
   const res=await fetch(CONFIG.AI_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,messages:[{role:'user',content:prompt}]})});
   if(!res.ok)throw new Error('IA: '+res.status);

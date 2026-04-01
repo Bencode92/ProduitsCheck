@@ -206,7 +206,37 @@ function renderPlacementsByBank(stats) {
 
 function renderPlacementCard(d) {
   const typeInfo=PLACEMENT_TYPES.find(t=>t.id===d.productType)||PLACEMENT_TYPES[0]; const exitInfo=EXIT_CONDITIONS.find(e=>e.id===d.exitCondition);
-  return `<div class="product-card" onclick="showEditPlacementModal('${d.id}')"><div class="product-card-header"><div class="product-card-name">${d.productName||typeInfo.name}</div><div class="product-card-bank" style="color:${typeInfo.color};border-color:${typeInfo.color}44;background:${typeInfo.color}11">${d.rate}%</div></div><div class="product-card-type">${typeInfo.icon} ${typeInfo.name}${exitInfo?' · '+exitInfo.name:''}</div><div class="product-card-grid"><div class="product-card-field"><span class="label">Montant</span><span class="value">${formatNumber(d.amount)}€</span></div><div class="product-card-field"><span class="label">Durée</span><span class="value">${d.durationMonths?d.durationMonths+' mois':'Indéterminée'}</span></div><div class="product-card-field"><span class="label">Échéance</span><span class="value">${d.maturityDate?formatDate(d.maturityDate):'—'}</span></div><div class="product-card-field"><span class="label">Intérêts</span><span class="value green">+${formatNumber(d.estimatedInterest)}€</span></div></div><div class="product-card-footer"><span class="status-badge" style="--badge-color:${typeInfo.color}">${typeInfo.icon} ${typeInfo.name}</span>${d.autoRenew?'<span class="status-badge" style="--badge-color:var(--cyan)">↻ Auto</span>':''}${d.aiSummary?'<span class="status-badge" style="--badge-color:var(--accent)">🤖 IA</span>':''}</div></div>`;
+
+  // Optimizer status from last result
+  let optBadge = '', optBorder = '';
+  if (_lastOptimizerResult && _lastOptimizerResult.deposits) {
+    const optDep = _lastOptimizerResult.deposits.find(x => x.name === (d.productName || 'CAT') && x.bankName === d.bankName && x.amount === (parseFloat(d.amount)||0));
+    if (optDep) {
+      if (optDep.recommendation === 'ARBITRER') {
+        optBadge = `<span style="position:absolute;top:8px;right:8px;padding:2px 8px;border-radius:8px;font-size:9px;font-weight:700;color:var(--orange);background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.25)">🔄 ARBITRER</span>`;
+        optBorder = 'border-left:3px solid var(--orange);';
+      } else if (optDep.recommendation === 'SURVEILLER') {
+        optBadge = `<span style="position:absolute;top:8px;right:8px;padding:2px 8px;border-radius:8px;font-size:9px;font-weight:700;color:var(--cyan);background:rgba(34,211,238,0.1);border:1px solid rgba(34,211,238,0.2)">👀</span>`;
+        optBorder = 'border-left:3px solid rgba(34,211,238,0.3);';
+      } else {
+        optBadge = `<span style="position:absolute;top:8px;right:8px;font-size:11px" title="Optimisé">✅</span>`;
+      }
+    }
+  }
+
+  // Remaining effective rate for progressive CATs
+  const isProgressif = d.rateSchedule && d.rateSchedule.length > 1;
+  let rateDisplay = `${d.rate}%`;
+  if (isProgressif && typeof _calcRemainingEffectiveRate === 'function') {
+    const rer = _calcRemainingEffectiveRate(d);
+    if (rer !== d.rate) {
+      const arrow = rer > d.rate ? '↑' : '↓';
+      const rerColor = rer > d.rate ? '#34D399' : '#FBBF24';
+      rateDisplay = `<span style="font-size:11px">${d.rate}%</span><span style="display:block;font-size:10px;color:${rerColor};font-weight:700">${arrow}${rer}%</span>`;
+    }
+  }
+
+  return `<div class="product-card" onclick="showEditPlacementModal('${d.id}')" style="position:relative;${optBorder}">${optBadge}<div class="product-card-header"><div class="product-card-name">${d.productName||typeInfo.name}</div><div class="product-card-bank" style="color:${typeInfo.color};border-color:${typeInfo.color}44;background:${typeInfo.color}11">${rateDisplay}</div></div><div class="product-card-type">${typeInfo.icon} ${typeInfo.name}${exitInfo?' · '+exitInfo.name:''}${isProgressif?' · <span style="color:var(--purple)">📈 progressif</span>':''}</div><div class="product-card-grid"><div class="product-card-field"><span class="label">Montant</span><span class="value">${formatNumber(d.amount)}€</span></div><div class="product-card-field"><span class="label">Durée</span><span class="value">${d.durationMonths?d.durationMonths+' mois':'Indéterminée'}</span></div><div class="product-card-field"><span class="label">Échéance</span><span class="value">${d.maturityDate?formatDate(d.maturityDate):'—'}</span></div><div class="product-card-field"><span class="label">Intérêts</span><span class="value green">+${formatNumber(d.estimatedInterest)}€</span></div></div><div class="product-card-footer"><span class="status-badge" style="--badge-color:${typeInfo.color}">${typeInfo.icon} ${typeInfo.name}</span>${d.autoRenew?'<span class="status-badge" style="--badge-color:var(--cyan)">↻ Auto</span>':''}${d.aiSummary?'<span class="status-badge" style="--badge-color:var(--accent)">🤖 IA</span>':''}</div></div>`;
 }
 
 // ═══ MODALS ═══
