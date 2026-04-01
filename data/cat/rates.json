@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-03-31T12:31:38.895Z",
+  "lastUpdated": "2026-04-01T06:36:12.408Z",
   "rates": [
     {
       "bankId": "sg",
@@ -1015,24 +1015,6 @@
       "confidence": "medium",
       "scanNote": "Tonic Croissance disponible",
       "scanSource": "https://www.moneyvox.fr/placement/taux-compte-a-terme.php"
-    },
-    {
-      "bankId": "cic",
-      "bankName": "CIC",
-      "durationMonths": 2,
-      "rate": 2.2,
-      "productType": "cat",
-      "date": "2026-04-30",
-      "rateType": "fixe",
-      "rateSchedule": [
-        {
-          "period": "Mois 1-2",
-          "rate": 2.2
-        }
-      ],
-      "withdrawalConditions": "Pas de rémunération le 1er mois si sortie anticipée",
-      "notice": null,
-      "productName": "CAT Fixe 2m"
     },
     {
       "bankId": "cic",
