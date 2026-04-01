@@ -82,14 +82,25 @@
     return entities;
   }
 
-  // ─── Get CAT rates by duration ─────────────────────────
-  function _getCATRates() {
+  // ─── Get real CAT deposits (user's own contracts, not web rates) ──
+  function _getCATDeposits(entityFilter) {
     try {
-      if (typeof catManager !== 'undefined' && catManager.rates && catManager.rates.rates) {
-        return catManager.rates.rates;
+      if (typeof catManager !== 'undefined' && catManager.deposits) {
+        return catManager.deposits.filter(function(d) {
+          if (d.status !== 'active') return false;
+          if (entityFilter && d.entity !== entityFilter) return false;
+          return true;
+        });
       }
     } catch(e) {}
     return [];
+  }
+
+  // Best CAT rate from user's deposits for a given entity
+  function _bestCATRate(entityFilter) {
+    var deposits = _getCATDeposits(entityFilter);
+    if (deposits.length === 0) return 2.5; // fallback ECB
+    return Math.max.apply(null, deposits.map(function(d) { return d.rate || 0; }));
   }
 
   // ─── Get graded structured products ────────────────────
@@ -122,30 +133,16 @@
   }
 
   // ─── Best candidates for a time bucket ─────────────────
-  function _bestForHorizon(horizon, catRates, structCandidates, allocated) {
+  // CAT deposits are NOT candidates — they ARE the reserve.
+  // Only structured products are candidates for new allocation.
+  // For horizons where no structured fits, cash stays in existing CAT.
+  function _bestForHorizon(horizon, structCandidates, allocated) {
     var maxMonths = horizon.maxMonths;
     var candidates = [];
 
-    // CAT candidates: duration <= horizon
-    catRates.forEach(function(r) {
-      if (r.durationMonths <= maxMonths) {
-        candidates.push({
-          id: 'cat_' + r.bankId + '_' + r.durationMonths,
-          name: r.productName || ('CAT ' + r.bankName + ' ' + r.durationMonths + 'M'),
-          bankName: r.bankName,
-          rate: r.rate,
-          durationMonths: r.durationMonths,
-          type: 'cat',
-          capitalGaranti: true,
-          liquidity: r.durationMonths <= 3 ? 'J+32' : r.durationMonths <= 12 ? 'Préavis' : 'Échéance',
-          minAmount: r.minAmount || 0
-        });
-      }
-    });
-
     // Structured candidates: maturity fits horizon AND capital garanti
     structCandidates.forEach(function(s) {
-      if (allocated[s.id]) return; // already used in another tranche
+      if (allocated[s.id]) return;
       if (s.maturityMonths <= maxMonths && s.capitalGaranti && s.rdtNet != null && s.rdtNet > 0) {
         candidates.push({
           id: s.id,
@@ -163,41 +160,32 @@
       }
     });
 
-    // Sort by rate descending
     candidates.sort(function(a, b) { return b.rate - a.rate; });
     return candidates;
   }
 
   // ─── Allocate across all tranches ──────────────────────
-  function _allocate(tranches, totalCash) {
-    var catRates = _getCATRates();
+  function _allocate(tranches, totalCash, entityKey) {
     var structCandidates = _getStructuredCandidates();
-    var allocated = {}; // track which structured products are used
+    var allocated = {};
     var results = [];
-    var cashBefore = totalCash;
 
-    // Best CAT rate for "before" comparison
-    var bestCatRate = 0;
-    catRates.forEach(function(r) { if (r.rate > bestCatRate) bestCatRate = r.rate; });
-    if (bestCatRate === 0) bestCatRate = 2.5; // fallback
+    // Best CAT rate from user's own deposits for comparison
+    var bestCatRate = _bestCATRate(entityKey);
 
     tranches.forEach(function(tr) {
       var budget = tr.amount;
-      if (budget <= 0) { results.push({ horizon: tr.horizon, amount: 0, allocations: [] }); return; }
+      if (budget <= 0) { results.push({ horizon: tr.horizon, amount: 0, allocated: 0, remaining: 0, allocations: [] }); return; }
 
-      var candidates = _bestForHorizon(tr.horizon, catRates, structCandidates, allocated);
+      var candidates = _bestForHorizon(tr.horizon, structCandidates, allocated);
       var allocs = [];
       var remaining = budget;
+      // Max 30% of total entity cash per product (diversification)
+      var maxPer = Math.round(totalCash * 0.30 / 1000) * 1000;
 
       candidates.forEach(function(c) {
         if (remaining <= 0) return;
-        var amount = Math.min(remaining, remaining); // take as much as possible
-        // FGDR limit: max 100K per bank for CAT
-        if (c.type === 'cat') {
-          var bankUsed = allocs.filter(function(a) { return a.bankName === c.bankName && a.type === 'cat'; }).reduce(function(s, a) { return s + a.amount; }, 0);
-          amount = Math.min(amount, 100000 - bankUsed);
-        }
-        if (c.minAmount && amount < c.minAmount) return;
+        var amount = Math.min(remaining, maxPer);
         amount = Math.round(amount / 1000) * 1000;
         if (amount < 1000) return;
 
@@ -392,12 +380,14 @@
       html += '</div>';
     });
 
-    // Unallocated for this entity
+    // Unallocated = stays in existing CAT (the reserve)
     if (result.totalUnallocated > 0) {
-      html += '<div style="border:1px solid rgba(148,163,184,0.2);border-radius:var(--radius-sm);padding:10px;margin-bottom:8px;background:rgba(148,163,184,0.03)">';
+      html += '<div style="border:1px solid rgba(255,182,39,0.2);border-radius:var(--radius-sm);padding:10px;margin-bottom:8px;background:rgba(255,182,39,0.03)">';
       html += '<div style="display:flex;align-items:center;justify-content:space-between">';
-      html += '<div><div style="font-size:11px;font-weight:600;color:var(--text-muted)">💰 Non alloué</div></div>';
-      html += '<div style="font-family:var(--mono);font-weight:700;color:var(--text-bright)">' + _fmt(result.totalUnallocated) + '€</div>';
+      html += '<div><div style="font-size:11px;font-weight:600;color:var(--orange)">🏦 Reste en CAT existant</div>';
+      html += '<div style="font-size:9px;color:var(--text-dim)">Votre réserve — taux ' + result.bestCatRate.toFixed(1) + '%</div></div>';
+      html += '<div style="text-align:right"><div style="font-family:var(--mono);font-weight:700;color:var(--text-bright)">' + _fmt(result.totalUnallocated) + '€</div>';
+      html += '<div style="font-family:var(--mono);font-size:10px;color:var(--orange)">+' + _fmt(Math.round(result.totalUnallocated * result.bestCatRate / 100)) + '€/an</div></div>';
       html += '</div></div>';
     }
     html += '</div>';
@@ -505,7 +495,7 @@
         });
       }
 
-      allResults.entities[entKey] = _allocate(tranches, ent.total);
+      allResults.entities[entKey] = _allocate(tranches, ent.total, entKey);
       allResults.entities[entKey].entityLabel = ent.label;
     });
 
