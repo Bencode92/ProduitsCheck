@@ -308,9 +308,10 @@
   // ─── Allocate across all tranches ──────────────────────
   function _allocate(tranches, totalCash, entityKey) {
     var structCandidates = _getStructuredCandidates();
-    // If entity includes structLiq, only Swiss Life products are eligible for that portion
-    var hasStructLiq = _state.includeStructLiq && _state.includeStructLiq[entityKey];
-    if (hasStructLiq) {
+    // Only restrict to Swiss Life if the entity cash is ONLY from structLiq (no free cash, no maturing CAT)
+    var ent = _state.entities[entityKey];
+    var hasOnlyStructLiq = (_state.includeStructLiq && _state.includeStructLiq[entityKey]) && ent && ent.cash === 0 && ent.maturingCat === 0;
+    if (hasOnlyStructLiq) {
       structCandidates = structCandidates.filter(function(s) {
         return s.bankName === 'swiss-life';
       });
@@ -390,7 +391,7 @@
       weightedRate: Math.round(weightedRate * 100) / 100,
       bestCatRate: bestCatRate,
       regime: _getRegime(),
-      isStructLiqOnly: hasStructLiq && !_state.entities[entityKey].cash,
+      isStructLiqOnly: hasOnlyStructLiq,
       hasMaturingCat: !!(_state.includeMaturingCat && _state.includeMaturingCat[entityKey] && _state.entities[entityKey].maturingCat > 0)
     };
   }
