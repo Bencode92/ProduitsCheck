@@ -107,11 +107,30 @@
     return [];
   }
 
-  // Best CAT rate from user's deposits for a given entity
+  // Best CAT rate: max of existing deposits AND available offers
   function _bestCATRate(entityFilter) {
+    var best = 2.5; // fallback ECB
+    // From existing deposits
     var deposits = _getCATDeposits(entityFilter);
-    if (deposits.length === 0) return 2.5; // fallback ECB
-    return Math.max.apply(null, deposits.map(function(d) { return d.rate || 0; }));
+    deposits.forEach(function(d) { if (d.rate > best) best = d.rate; });
+    // From available offers (user-entered rates)
+    var offers = _getCATOffers(0);
+    offers.forEach(function(o) { if (o.rate > best) best = o.rate; });
+    return best;
+  }
+
+  // ─── Get best CAT offers from user-entered rates ────────
+  function _getCATOffers(amount) {
+    try {
+      if (typeof catManager !== 'undefined' && catManager.rates && catManager.rates.rates) {
+        var offers = catManager.rates.rates.filter(function(r) {
+          return r.rate > 0 && (!r.minAmount || amount >= r.minAmount);
+        });
+        offers.sort(function(a, b) { return b.rate - a.rate; });
+        return offers;
+      }
+    } catch(e) {}
+    return [];
   }
 
   // ─── Get graded structured products ────────────────────
@@ -416,15 +435,26 @@
       html += '</div>';
     });
 
-    // Unallocated = stays in existing CAT (the reserve)
+    // Unallocated = propose best available CAT from user's rates
     if (result.totalUnallocated > 0) {
+      var catOffers = _getCATOffers(result.totalUnallocated);
       html += '<div style="border:1px solid rgba(255,182,39,0.2);border-radius:var(--radius-sm);padding:10px;margin-bottom:8px;background:rgba(255,182,39,0.03)">';
-      html += '<div style="display:flex;align-items:center;justify-content:space-between">';
-      html += '<div><div style="font-size:11px;font-weight:600;color:var(--orange)">🏦 Reste en CAT existant</div>';
-      html += '<div style="font-size:9px;color:var(--text-dim)">Votre réserve — taux ' + result.bestCatRate.toFixed(1) + '%</div></div>';
+      html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:' + (catOffers.length > 0 ? '8px' : '0') + '">';
+      html += '<div><div style="font-size:11px;font-weight:600;color:var(--orange)">🏦 À placer en CAT</div>';
+      html += '<div style="font-size:9px;color:var(--text-dim)">Meilleur taux disponible : ' + result.bestCatRate.toFixed(1) + '%</div></div>';
       html += '<div style="text-align:right"><div style="font-family:var(--mono);font-weight:700;color:var(--text-bright)">' + _fmt(result.totalUnallocated) + '€</div>';
       html += '<div style="font-family:var(--mono);font-size:10px;color:var(--orange)">+' + _fmt(Math.round(result.totalUnallocated * result.bestCatRate / 100)) + '€/an</div></div>';
-      html += '</div></div>';
+      html += '</div>';
+      // Show top 3 CAT offers
+      if (catOffers.length > 0) {
+        catOffers.slice(0, 3).forEach(function(o) {
+          html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 8px;margin-top:4px;background:rgba(255,182,39,0.04);border-radius:4px;font-size:10px">';
+          html += '<span style="color:var(--text-muted)">' + o.bankName + ' — ' + o.productName + ' (' + o.durationMonths + 'M)</span>';
+          html += '<span style="font-family:var(--mono);font-weight:600;color:var(--orange)">' + o.rate.toFixed(1) + '%</span>';
+          html += '</div>';
+        });
+      }
+      html += '</div>';
     }
     html += '</div>';
     return html;
