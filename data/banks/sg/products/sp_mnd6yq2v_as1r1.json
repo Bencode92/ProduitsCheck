@@ -241,7 +241,7 @@
   "_bsRendementNet": 10.45,
   "grading": {
     "grade": "B",
-    "score": 69,
+    "score": 67,
     "killCriteria": {
       "triggered": false,
       "reasons": []
@@ -249,97 +249,95 @@
     "pillars": {
       "adjustedReturn": {
         "score": 95,
-        "base": 78,
+        "base": 70,
         "delta": 0,
-        "reasoning": "BS: Dispersion: prob=95%, rdt median hist=11% | Rdt net: 10.4% - 0.0% = 10.4%/an | Spread vs CAT: 7.9%",
-        "_bsDelta": 17,
+        "reasoning": "Rendement: base 70 → -2 = 68 (En stagflation, les méga-techs surreprésentées (7/8) souffriront de la hausse des taux et compression des multiples, réduisant la probabilité de coupons élevés) | Coupon 1.3144444444444445%, protégé",
+        "_bsDelta": 25,
         "_bs": {
           "score": 95,
           "probCoupon": 95,
-          "couponEffectif": 11,
-          "rendementEspere": 10.45,
-          "perteEsperee": 0,
           "rendementNet": 10.45,
-          "drag": 0,
+          "perteEsperee": 0,
+          "couponEffectif": 11,
           "vols": [
             25,
-            25.87,
+            25.85,
             25,
             25,
-            31.19,
+            31.17,
             25,
             25,
             25
           ],
           "matEsperee": 3,
-          "reasoning": "Dispersion: prob=95%, rdt median hist=11% | Rdt net: 10.4% - 0.0% = 10.4%/an",
-          "method": "BS-simplifie-v1.2"
+          "isBasket": false
         }
       },
       "underlyingQuality": {
         "score": 68,
         "base": 70,
         "delta": -2,
-        "reasoning": "Qualité: base 70 → -2 = 68 (Portefeuille surexposé tech (75%) en régime stagflationnaire défavorable, betas élevés (1.62 Tesla, 1.92 NVDA) amplifient le risque) | Worst: Tesla B:17"
+        "reasoning": "Qualité: base 70 → -2 = 68 (Portefeuille catastrophique en stagflation: 87.5% tech (secteur évité), betas élevés (moy 1.35), Tesla fragile à B=17) | Worst: Tesla B:17"
       },
       "portfolioFit": {
         "score": 65,
         "base": 72,
         "delta": 2,
-        "reasoning": "Fit: base 50 → 65 (pairs, dispersion) | Fit: base 72 → +2 = 74 (Capital garanti = refuge idéal en stagflation, la volatilité élevée (57% Tesla) devient un atout pour capturer les rebonds)"
+        "reasoning": "Fit: base 72 → +2 = 74 (La dispersion avec capital garanti devient un atout précieux en stagflation, offrant protection et upside potentiel)"
       },
       "riskPremium": {
-        "score": 58,
+        "score": 52,
         "base": 5,
-        "delta": 2,
-        "reasoning": "Capital garanti: spread 3.0% - CAT 2.5% - illiq 0.3% = 0.2% | ✅ Dispersion: vol = moteur de rendement (+25pts) + capital garanti"
+        "delta": 0,
+        "reasoning": "Capital garanti: spread 3.0% - CAT 2.5% - illiq 0.3% = 0.2%"
       }
     },
-    "verdict": "Ce produit dispersion offre une protection capitale cruciale en stagflation (VIX 22, Brent >$100) mais le rendement de 1.31% annualisé reste faible face à l'inflation. Le panier surpondéré tech (75% dans des secteurs évités par le MI) avec des betas élevés (NVDA 1.92, Tesla 1.62) limite fortement le potentiel de gain. Néanmoins, la garantie capital et la volatilité élevée (Tesla 57%) permettent de capturer des rebonds sans risque de perte, offrant un profil asymétrique intéressant pour 3% de l'allocation totale.",
+    "verdict": "Produit paradoxalement adapté à la stagflation actuelle malgré un panier tech défavorable. Le capital garanti protège contre la correction attendue des méga-techs (secteur évité, VIX 22, Brent $103), tandis que la structure dispersion capte la volatilité élevée (NVDA 48%, TSLA 57%). Avec un rendement modeste de 1.31% annualisé mais sans risque de perte, c'est un placement défensif cohérent quand TIPS et obligations classiques peinent.",
     "keyRisks": [
-      "Rendement réel négatif avec PCE à 2.83% vs coupon 1.31%",
-      "Concentration tech excessive (6/8) en régime stagflationnaire défavorable"
+      "Correction sévère des techs en stagflation limitant les coupons à leur minimum",
+      "Tesla (B=17, vol=57%) peut plomber la performance du panier",
+      "Opportunité manquée si rotation vers energy/materials s'accélère"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 3.94,
-        "return_eur": 3940,
-        "probability": 0.25,
+        "return_pct": 4.5,
+        "return_eur": 4500,
+        "probability": 0.15,
         "duration_years": 3
       },
       "base": {
-        "return_pct": 1.31,
-        "return_eur": 1310,
-        "probability": 0.35,
+        "return_pct": 3.9,
+        "return_eur": 3900,
+        "probability": 0.4,
         "duration_years": 3
       },
       "stress": {
-        "return_pct": 0,
-        "return_eur": 0,
-        "probability": 0.25,
+        "return_pct": 1.5,
+        "return_eur": 1500,
+        "probability": 0.35,
         "duration_years": 3
       },
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.15,
+        "probability": 0.1,
         "duration_years": 3
       }
     },
     "confidenceInterval": {
-      "low": 40,
-      "high": 54,
+      "low": 46,
+      "high": 60,
       "halfWidth": 7,
       "gradeStable": false,
-      "gradeRange": "D-C",
-      "label": "C [40-54]"
+      "gradeRange": "C-B",
+      "label": "C [46-60]"
     },
     "metadata": {
-      "gradedAt": "2026-03-31T13:25:33.962Z",
-      "durationMs": 21715,
+      "gradedAt": "2026-04-01T07:28:30.248Z",
+      "durationMs": 22963,
       "aiUsed": true,
-      "version": "6.2",
+      "version": "7.0",
       "productType": "dispersion",
       "marketDataAvailable": true,
       "catBenchmark": 2.5,
@@ -356,13 +354,13 @@
       "expectedMaturity": 3,
       "maxMaturity": 3,
       "maxBeta": 1.92,
-      "baseScore": 47,
+      "baseScore": 54,
       "baseGrade": "C",
       "adjustments": {
         "p1": -2,
         "p2": -2,
         "p3": 2,
-        "p4": 2
+        "p4": 0
       },
       "barrier_sigma": null,
       "barrier_sigma_label": null,
@@ -370,25 +368,23 @@
       "liquidity_level": "L4",
       "liquidity_score": 10,
       "liquidity_label": "Illiquide",
-      "ci_low": 40,
-      "ci_high": 54,
-      "ci_label": "C [40-54]",
+      "ci_low": 46,
+      "ci_high": 60,
+      "ci_label": "C [46-60]",
       "issuer_rating": "A",
       "issuer_tier": "IG",
       "hasDecrement": false,
       "decrementDrag": 0,
       "structureType": "dispersion",
-      "bsMethod": "BS-simplifie-v1.2",
-      "bsProbCoupon": 95,
       "bsRendementNet": 10.45,
+      "bsProbCoupon": 95,
       "bsPerteEsperee": 0,
-      "bsCouponEffectif": 11,
       "bsVols": [
         25,
-        25.87,
+        25.85,
         25,
         25,
-        31.19,
+        31.17,
         25,
         25,
         25
@@ -401,9 +397,6 @@
         "p3": 0.15,
         "p4": 0.3
       },
-      "p3Recalibrated": true,
-      "p4BsCorrected": false,
-      "isGuaranteedRate": false,
       "stockData": [
         {
           "name": "NVIDIA",
