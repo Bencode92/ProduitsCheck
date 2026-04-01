@@ -62,6 +62,7 @@ window.showEditModal = function() {
     var strikePrice = p.strikePrice || '';
     var structureType = p.structureType || '';
     var decrementPct = p.decrementPct || '';
+    var minInvestment = p.minInvestment || '';
     var divYield = p.actualDividendYield || '';
 
     var envelopeOptions = ENVELOPES.map(function(e) {
@@ -132,6 +133,7 @@ window.showEditModal = function() {
         '<div class="form-field"><label>Type de structure</label><select id="fe-structure-type">' + structTypeOptions + '</select></div>' +
         '<div class="form-field"><label>Enveloppe</label><select id="fe-envelope">' + envelopeOptions + '</select></div>' +
         '<div class="form-field"><label>Montant investi (€)</label><input id="fe-invested" type="number" value="' + amount + '"></div>' +
+        '<div class="form-field"><label>Montant min (€)</label><input id="fe-mininvest" type="number" value="' + minInvestment + '" placeholder="Ex: 100000"></div>' +
         '<div class="form-field"><label>Maturité</label><input id="fe-maturity" value="' + escapeAttr(p.maturity || '') + '"></div>' +
         '<div class="form-field"><label>Niveau initial (strike)</label><input id="fe-strike-price" type="number" step="0.01" value="' + strikePrice + '" placeholder="Ex: 4950"></div>' +
         '<div class="form-field full"><label>Sous-jacents (séparés par virgule)</label><input id="fe-underlyings" value="' + escapeAttr(underlyings) + '"></div>' +
@@ -241,6 +243,7 @@ window.handleJSONImport = function() {
         // Décrément
         _setFieldValue('fe-decrement', json.decrementPct);
         _setFieldValue('fe-divyield', json.actualDividendYield);
+        _setFieldValue('fe-mininvest', json.minInvestment);
 
         // Underlyings
         if (json.underlyings && Array.isArray(json.underlyings)) {
@@ -394,6 +397,11 @@ window.handleEditSave = async function() {
     var newDivYield = document.getElementById('fe-divyield')?.value;
     if (newDivYield !== '') p.actualDividendYield = parseFloat(newDivYield);
     else delete p.actualDividendYield;
+
+    // ─── Montant minimum ───
+    var newMinInvest = document.getElementById('fe-mininvest')?.value;
+    if (newMinInvest !== '' && newMinInvest !== undefined) p.minInvestment = parseFloat(newMinInvest);
+    else delete p.minInvestment;
 
     // ─── Other fields ───
     var newAmount = document.getElementById('fe-invested')?.value;
