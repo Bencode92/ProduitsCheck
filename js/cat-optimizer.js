@@ -27,6 +27,7 @@ async function saveOptimizerResult(summary, analysis) {
       bestAlt: d.bestAlt, switchGainPerYear: d.netGainAnnual, grossGainPerYear: d.grossGainAnnual,
       exitPenaltyCost: d.exitPenaltyCost, noticeOpportunityCost: d.noticeOpportunityCost,
       netGainAfterTax: d.netGainAfterTax, accelerationLoss: d.accelerationLoss || 0,
+      keep12m: d.keep12m, switch12m: d.switch12m, advantage12m: d.advantage12m, advantage12mAfterTax: d.advantage12mAfterTax,
       breakEvenMonths: d.breakEvenMonths, durationMismatch: d.durationMismatch, isProgressif: d.isProgressif,
       dynamicThreshold: d.dynamicThreshold, compositeScore: d.compositeScore,
       recommendation: d.recommendation, reason: d.reason,
@@ -41,8 +42,62 @@ function _mdToHtmlTable(md) { return md.replace(/(\|[^\n]+\|\n)((?:\|[-:| ]+\|\n
 function _formatOptimizerAI(t) { return t ? formatAIText(_mdToHtmlTable(t)) : ''; }
 function _renderAISummaryBlock(summary) { if (!summary) return ''; return `<div style="background:linear-gradient(135deg,rgba(59,130,246,0.06),rgba(139,92,246,0.06));border:1px solid rgba(59,130,246,0.2);border-radius:var(--radius);overflow:hidden"><div style="padding:12px 16px;background:rgba(59,130,246,0.08);border-bottom:1px solid rgba(59,130,246,0.15);display:flex;align-items:center;gap:8px"><span style="font-size:16px">🤖</span><span style="font-size:13px;font-weight:700;color:var(--accent)">Recommandations Claude (algo v3)</span></div><div style="padding:16px;font-size:12px;line-height:1.7;color:var(--text)" class="ai-summary">${_formatOptimizerAI(summary)}</div></div>`; }
 
-// ═══ V3 ALGORITHM — Remaining Effective Rate ═════════════
+// ═══ V3.1 ALGORITHM — 12-Month Horizon Comparison ════════
 const MIN_MONTHS_FOR_ARBITRAGE = 3;
+const HORIZON_MONTHS = 12;
+const HORIZON_DAYS = 365;
+
+// Calculate total € earned over next 12 months for KEEP scenario
+// If CAT matures before 12m: interest until maturity + reinvest freed cash at bestReinvestRate
+function _calcKeepScenario12m(deposit, bestReinvestRate) {
+  const amount = parseFloat(deposit.amount) || 0;
+  const now = new Date();
+  const horizon = new Date(now); horizon.setMonth(horizon.getMonth() + HORIZON_MONTHS);
+  const maturity = deposit.maturityDate ? new Date(deposit.maturityDate) : null;
+  const schedule = deposit.rateSchedule;
+
+  let interestKeep = 0;
+
+  if (schedule && schedule.length > 0) {
+    // Progressive: sum interest from each remaining period, capped at horizon
+    for (const step of schedule) {
+      const stepFrom = new Date(step.from);
+      const stepTo = new Date(step.to);
+      const effectiveFrom = stepFrom > now ? stepFrom : now;
+      const effectiveTo = stepTo < horizon ? stepTo : horizon;
+      if (effectiveTo <= effectiveFrom) continue;
+      const days = (effectiveTo - effectiveFrom) / 864e5;
+      interestKeep += amount * (parseFloat(step.rate) || 0) / 100 * (days / 365);
+    }
+  } else {
+    // Fixed rate: interest until min(maturity, horizon)
+    const rate = parseFloat(deposit.rate) || 0;
+    const endDate = maturity && maturity < horizon ? maturity : horizon;
+    const days = Math.max(0, (endDate - now) / 864e5);
+    interestKeep += amount * (rate / 100) * (days / 365);
+  }
+
+  // If maturity falls within 12m horizon, reinvest freed amount at best rate for remaining months
+  if (maturity && maturity < horizon && maturity > now && bestReinvestRate > 0) {
+    const reinvestDays = (horizon - maturity) / 864e5;
+    interestKeep += amount * (bestReinvestRate / 100) * (reinvestDays / 365);
+  }
+
+  return Math.round(interestKeep * 100) / 100;
+}
+
+// Calculate total € earned over next 12 months for SWITCH scenario
+// Break now → pay exit costs → reinvest at altRate for altDuration (capped at 12m)
+function _calcSwitchScenario12m(deposit, altRate, exitCosts) {
+  const amount = parseFloat(deposit.amount) || 0;
+  const now = new Date();
+  // Notice period: 32 days where money earns nothing
+  const noticeDays = (deposit.exitCondition === 'notice') ? 32 : 0;
+  const investDays = Math.max(0, HORIZON_DAYS - noticeDays);
+  const grossInterest = amount * (altRate / 100) * (investDays / 365);
+  const netInterest = grossInterest - exitCosts;
+  return Math.round(netInterest * 100) / 100;
+}
 
 // FIX #4: Calculate weighted average rate of REMAINING periods only
 // For progressive CATs, the TRAAB is misleading mid-term — what matters is the rate going forward
@@ -196,23 +251,23 @@ function buildOptimizationAnalysis() {
     }
 
     const totalOneTimeCosts=exitPenaltyCost+noticeOpportunityCost;
-
-    // Use actual years remaining
     const yearsRemaining = remainingMonths / 12;
-    const amortizedCostAnnual = yearsRemaining > 0 ? totalOneTimeCosts / yearsRemaining : 0;
-    const netGainAnnual=Math.round((grossGainAnnual-amortizedCostAnnual)*100)/100;
 
-    // Net gain after IS tax
-    const netGainAfterTax = Math.round(netGainAnnual * (1 - _IS_TAX_RATE) * 100) / 100;
+    // ═══ V3.1: 12-MONTH HORIZON COMPARISON ═══
+    // Best reinvestment rate = best rate for 12m or closest duration
+    const bestReinvest = bestOverall ? bestOverall.rate : 0;
+    const keep12m = _calcKeepScenario12m(d, bestReinvest);
+    const switch12m = bestAlt ? _calcSwitchScenario12m(d, bestAlt.rate, totalOneTimeCosts) : 0;
+    const advantage12m = bestAlt ? Math.round((switch12m - keep12m) * 100) / 100 : 0;
+    // After IS 25%
+    const advantage12mAfterTax = Math.round(advantage12m * (1 - _IS_TAX_RATE) * 100) / 100;
 
-    // FIX #4: True net gain accounting for progressive acceleration loss
-    // accelerationLoss is total over remaining period, annualize it
-    const accelerationLossAnnual = yearsRemaining > 0 ? Math.round(accelerationLoss / yearsRemaining * 100) / 100 : 0;
-    const trueNetGainAnnual = Math.round((netGainAnnual - accelerationLossAnnual) * 100) / 100;
-    const trueNetGainAfterTax = Math.round(trueNetGainAnnual * (1 - _IS_TAX_RATE) * 100) / 100;
+    // Annualized for display consistency
+    const trueNetGainAfterTax = advantage12mAfterTax;
+    const trueNetGainAnnual = Math.round(advantage12m * (1 - _IS_TAX_RATE) * 100) / 100;
 
-    // Break-even in months (use true net gain)
-    const grossGainMonthly = grossGainAnnual / 12;
+    // Break-even in months
+    const grossGainMonthly = bestAlt ? Math.max(0, advantage12m) / 12 : 0;
     const breakEvenMonths = totalOneTimeCosts > 0 && grossGainMonthly > 0
       ? _calcBreakEvenMonths(totalOneTimeCosts, grossGainMonthly)
       : null;
@@ -221,7 +276,6 @@ function buildOptimizationAnalysis() {
     const fgdrSc=_calcFgdrScore(d,active,fgdrLimit);
     const fgdrBonus=bestAlt?_calcFgdrBonus(d,bestAlt.bankName,active,fgdrLimit):0;
     const adjustedSpread=spread+fgdrBonus;
-    // FIX #4: Use trueNetGainAfterTax for scoring
     const normNG=Math.min(1,Math.max(0,trueNetGainAfterTax/Math.max(amount*0.01,1)));
     const normS=Math.min(1,Math.max(0,adjustedSpread));
     const normF=fgdrBonus>0?fgdrBonus/0.15:0;
@@ -232,35 +286,32 @@ function buildOptimizationAnalysis() {
     const altIsScanned=bestAltFull?.source==='web scan';
     if(altIsScanned&&bestAltFull) webRatesUsed.add(bestAltFull.productName||bestAltFull.bankName+' '+bestAltFull.durationMonths+'m');
 
-    // FIX #4: Decision uses trueNetGainAfterTax (accounts for acceleration loss)
-    let recommendation='GARDER',reason='Leader marché';
-    if(bestAlt && trueNetGainAfterTax > 0 && adjustedSpread >= dynThreshold) {
+    // V3.1: Decision based on 12-month € comparison
+    let recommendation='GARDER',reason='';
+    const maturesWithin12m = remainingMonths <= 12;
+
+    if(bestAlt && advantage12mAfterTax > 0 && adjustedSpread >= dynThreshold) {
       if(breakEvenMonths && breakEvenMonths > remainingMonths) {
         recommendation='SURVEILLER';
-        reason=`Break-even ${breakEvenMonths}m > restant ${remainingMonths}m — coûts non amortis`;
+        reason=`Break-even ${breakEvenMonths}m > restant ${remainingMonths}m`;
       } else {
         recommendation='ARBITRER';
-        const beStr = breakEvenMonths ? ` (break-even: ${breakEvenMonths}m)` : '';
-        reason=`NET après IS +${formatNumber(trueNetGainAfterTax)}€/an → ${bestAlt.productName||bestAlt.bankName+' '+bestAlt.durationMonths+'m'}${beStr}`;
+        reason=`Sur 12m: garder=${formatNumber(keep12m)}€ vs arbitrer=${formatNumber(switch12m)}€ → +${formatNumber(advantage12mAfterTax)}€ net IS`;
       }
-    } else if(bestAlt && spread > 0) {
-      recommendation='SURVEILLER';
-      if(trueNetGainAfterTax <= 0) {
-        const costDetail = accelerationLoss > 0
-          ? `coûts -${formatNumber(totalOneTimeCosts)}€ + perte accél. -${formatNumber(accelerationLoss)}€`
-          : `coûts -${formatNumber(totalOneTimeCosts)}€`;
-        reason=`Brut +${formatNumber(grossGainAnnual)}€ mais NET ${formatNumber(trueNetGainAfterTax)}€ (${costDetail})`;
+    } else if(bestAlt && spread > 0 && advantage12mAfterTax <= 0) {
+      recommendation='GARDER';
+      if (maturesWithin12m) {
+        reason=`Garder + réinvestir à maturité: ${formatNumber(keep12m)}€/12m > arbitrer: ${formatNumber(switch12m)}€`;
       } else {
-        reason=`Écart ${spread.toFixed(2)}% < seuil ${dynThreshold.toFixed(2)}% (taux restant ${comparisonRate}%)`;
+        const costDetail = accelerationLoss > 0 ? ` (paliers futurs: +${formatNumber(accelerationLoss)}€)` : '';
+        reason=`Sur 12m: garder=${formatNumber(keep12m)}€ > arbitrer=${formatNumber(switch12m)}€${costDetail}`;
       }
     } else if(comparisonRate >= (bestOverall?.rate||0)) {
       reason = isProgressif
-        ? `Leader marché (restant ${comparisonRate}% > TRAAB ${rate}%)`
-        : 'Leader marché';
+        ? `Leader marché (restant ${comparisonRate}% > TRAAB ${rate}%) · 12m: +${formatNumber(keep12m)}€`
+        : `Leader marché · 12m: +${formatNumber(keep12m)}€`;
     } else {
-      reason = isProgressif
-        ? `Taux restant ${comparisonRate}% — pas de meilleur taux`
-        : 'Taux compétitif';
+      reason = `Taux restant ${comparisonRate}% · 12m: +${formatNumber(keep12m)}€`;
     }
 
     return { id:d.id, name:d.productName||'CAT', bankName:d.bankName, entity:d.entityName||'',
@@ -268,6 +319,7 @@ function buildOptimizationAnalysis() {
       durationMonths, elapsedMonths, remainingMonths, interestPerYear,
       bestAlt:bestAlt?{name:bestAlt.productName||bestAlt.bankName+' '+bestAlt.durationMonths+'m',rate:bestAlt.rate,duration:bestAlt.durationMonths,bankName:bestAlt.bankName,isScanned:altIsScanned}:null,
       grossGainAnnual, exitPenaltyCost, noticeOpportunityCost, accelerationLoss,
+      keep12m, switch12m, advantage12m, advantage12mAfterTax,
       netGainAnnual:trueNetGainAnnual, netGainAfterTax:trueNetGainAfterTax,
       netGainRemaining:Math.round(trueNetGainAfterTax*yearsRemaining*100)/100,
       breakEvenMonths, durationMismatch, isProgressif,
@@ -329,7 +381,7 @@ showCATSimulator = function() {
       </div>
     </div>
     <div style="background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.15);border-radius:var(--radius-sm);padding:10px;margin-bottom:16px;font-size:10px;color:var(--text-muted)">
-      <strong style="color:var(--accent)">v3</strong> : taux effectif restant (pas TRAAB), perte accélération progressive, gain NET après IS (×0.75), break-even, filtre <3m.</div>
+      <strong style="color:var(--accent)">v3.1</strong> : comparaison € sur 12 mois (garder+réinvestir vs arbitrer), taux effectif restant, NET après IS (×0.75).</div>
     <button class="btn ai-glow lg" style="width:100%" onclick="launchOptimizer()">⚡ Optimiser (${n} contrats)</button>
     <div id="optimizer-results" style="margin-top:16px"></div>
     <div class="modal-actions"><button class="btn" onclick="closeModal()">Fermer</button></div>
@@ -398,7 +450,7 @@ function renderOptimizationTable(analysis) {
     <th style="padding:10px 8px;text-align:center;color:var(--text-muted);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:0.5px" title="Taux effectif restant (ou TRAAB si fixe)">Taux effectif</th>
     <th style="padding:10px 8px;text-align:center;color:var(--text-muted);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:0.5px">Durée</th>
     <th style="padding:10px 8px;text-align:center;color:var(--text-muted);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:0.5px">Alternative</th>
-    <th style="padding:10px 8px;text-align:right;color:var(--text-muted);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:0.5px" title="Gain NET après IS 25% et coûts de sortie">Impact</th>
+    <th style="padding:10px 8px;text-align:right;color:var(--text-muted);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:0.5px" title="Comparaison € sur 12 mois: garder vs arbitrer">Sur 12 mois</th>
     <th style="padding:10px 8px;text-align:center;color:var(--text-muted);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:0.5px"></th>
   </tr></thead><tbody>`;
   depositAnalysis.forEach(d=>{
@@ -424,18 +476,19 @@ function renderOptimizationTable(analysis) {
       rateCell += `<div style="font-size:9px;color:var(--text-dim);margin-top:1px">TRAAB ${d.rate}% · 📈</div>`;
     }
 
-    // Impact column: combine gain + costs in a clear visual
+    // Impact column: 12-month € comparison
     let impactCell = '';
-    if (d.netGainAfterTax !== 0) {
-      const impactColor = d.netGainAfterTax > 0 ? 'var(--green)' : 'var(--red)';
-      impactCell = `<span style="font-family:var(--mono);font-weight:700;font-size:12px;color:${impactColor}">${d.netGainAfterTax>0?'+':''}${formatNumber(d.netGainAfterTax)}€</span>`;
-      impactCell += `<div style="font-size:9px;color:var(--text-dim)">/ an après IS</div>`;
-      // Costs breakdown on hover-visible line
-      const costs = [];
-      if (d.exitPenaltyCost > 0) costs.push(`sortie -${formatNumber(d.exitPenaltyCost)}€`);
-      if (d.noticeOpportunityCost > 0) costs.push(`préavis -${formatNumber(d.noticeOpportunityCost)}€`);
-      if (d.accelerationLoss > 0) costs.push(`<span style="color:var(--purple)">paliers -${formatNumber(d.accelerationLoss)}€</span>`);
-      if (costs.length > 0) impactCell += `<div style="font-size:8px;color:var(--orange);margin-top:2px">${costs.join(' · ')}</div>`;
+    if (d.keep12m > 0) {
+      // Always show keep12m as the baseline
+      impactCell = `<div style="font-size:10px;color:var(--text-muted)">garder: <span style="font-family:var(--mono);color:var(--green)">${formatNumber(d.keep12m)}€</span></div>`;
+      if (d.bestAlt && d.switch12m !== 0) {
+        const switchColor = d.switch12m > d.keep12m ? 'var(--cyan)' : 'var(--text-dim)';
+        impactCell += `<div style="font-size:10px;color:var(--text-muted)">arbitrer: <span style="font-family:var(--mono);color:${switchColor}">${formatNumber(d.switch12m)}€</span></div>`;
+        if (d.advantage12mAfterTax !== 0) {
+          const advColor = d.advantage12mAfterTax > 0 ? 'var(--green)' : 'var(--red)';
+          impactCell += `<div style="font-family:var(--mono);font-weight:700;font-size:11px;color:${advColor};margin-top:2px">${d.advantage12mAfterTax>0?'+':''}${formatNumber(d.advantage12mAfterTax)}€ net IS</div>`;
+        }
+      }
     } else {
       impactCell = `<span style="color:var(--text-dim)">—</span>`;
     }
@@ -498,28 +551,27 @@ async function getAIOptimizerSummary(analysis) {
   const src=_optimizerRateSource==='confirmed'?'taux confirmés':'tous (confirmés + '+_webCount+' web)';
   const webNote=_optimizerRateSource==='all'&&_webCount>0?`\n\nTAUX WEB (${_webCount}):\n${(_webRatesSummary||[]).map(r=>`• ${r.name} (${r.bank}) ${r.rate}% — ${r.usedAsAlt?'✅ retenu':'❌ < contrats'}`).join('\n')}`:'';
 
-  const dText=depositAnalysis.map(d=>{let l=`• ${d.name} (${d.bankName}) | ${d.amount}€ TRAAB ${d.rate}%`;if(d.remainingEffectiveRate&&d.remainingEffectiveRate!==d.rate)l+=` → RESTANT ${d.remainingEffectiveRate}%`;else if(d.currentPeriodRate!==d.rate)l+=` (palier ${d.currentPeriodRate}%)`;l+=` | ${d.remainingMonths}m`;if(d.bestAlt){l+=` | Cible: ${d.bestAlt.rate}% (${d.bestAlt.name})${d.bestAlt.isScanned?' [web]':''}`;l+=` | Brut: +${d.grossGainAnnual}€`;if(d.exitPenaltyCost>0)l+=` | Pénalité: -${d.exitPenaltyCost}€`;if(d.accelerationLoss>0)l+=` | Perte accél.: -${d.accelerationLoss}€`;l+=` | NET après IS: ${d.netGainAfterTax>0?'+':''}${d.netGainAfterTax}€/an`;if(d.breakEvenMonths)l+=` | Break-even: ${d.breakEvenMonths}m`;}l+=` → ${d.recommendation}`;return l;}).join('\n');
+  const dText=depositAnalysis.map(d=>{let l=`• ${d.name} (${d.bankName}) | ${d.amount}€ TRAAB ${d.rate}%`;if(d.remainingEffectiveRate&&d.remainingEffectiveRate!==d.rate)l+=` → RESTANT ${d.remainingEffectiveRate}%`;else if(d.currentPeriodRate!==d.rate)l+=` (palier ${d.currentPeriodRate}%)`;l+=` | ${d.remainingMonths}m | 12m: garder=${d.keep12m}€ vs arbitrer=${d.switch12m||0}€`;if(d.advantage12mAfterTax)l+=` → ${d.advantage12mAfterTax>0?'+':''}${d.advantage12mAfterTax}€ net IS`;if(d.bestAlt){l+=` | Cible: ${d.bestAlt.rate}% (${d.bestAlt.name})${d.bestAlt.isScanned?' [web]':''}`;}l+=` → ${d.recommendation}`;return l;}).join('\n');
   const cText=placable>0&&cashOpportunities.length>0?'\n\n💰 CASH: '+formatNumber(placable)+'€\n'+cashOpportunities.slice(0,3).map(c=>`• ${c.name} ${c.rate}% → +${c.interestPerYear}€/an`).join('\n'):'';
 
-  const prompt=`Directeur financier. Optimisation v3 (taux effectif RESTANT, gains NET après IS 25%). Source: ${src}.
+  const prompt=`Directeur financier. Optimisation v3.1 (comparaison € sur 12 mois, taux effectif RESTANT, NET après IS 25%). Source: ${src}.
 
-**AVANT:** ${formatNumber(totalInvested)}€ à ${weightedRate.toFixed(2)}% = +${formatNumber(totalInterestPerYear)}€/an
-**APRÈS (NET IS):** ${optimizedRate.toFixed(2)}% = +${formatNumber(optimizedInterest)}€/an
-Brut: +${formatNumber(totalGrossGain)}€ | Coûts: -${formatNumber(totalExitCost+totalNoticeCost)}€ | IS 25% | **NET: ${totalNetGain>0?'+':''}${formatNumber(totalNetGain)}€/an**${webNote}
+**PORTEFEUILLE:** ${formatNumber(totalInvested)}€ à ${weightedRate.toFixed(2)}% = +${formatNumber(totalInterestPerYear)}€/an
+**SI ARBITRAGES:** ${optimizedRate.toFixed(2)}% = +${formatNumber(optimizedInterest)}€/an | Gain net: ${totalNetGain>0?'+':''}${formatNumber(totalNetGain)}€${webNote}
 
 ${depositAnalysis.length} CONTRATS:
 ${dText}${cText}
 
-IMPORTANT v3: Pour les CAT progressifs, la comparaison utilise le TAUX EFFECTIF RESTANT (pondéré des paliers futurs), PAS le TRAAB.
-Exemple: un CAT TRAAB 3.21% mais restant 4.13% ne doit PAS être arbitré vers un 2.93%.
+MÉTHODE v3.1: Chaque contrat est comparé sur un HORIZON 12 MOIS en euros.
+- "garder" = intérêts restants + réinvestissement au meilleur taux si maturité < 12m
+- "arbitrer" = casser maintenant (coûts sortie + préavis 32j) puis replacer au meilleur taux
+- La décision se base sur: garder X€ vs arbitrer Y€ sur 12 mois, NET après IS 25%
 
 FORMAT:
-- **AVANT → APRÈS (NET IS +Z€)**
-- Pour chaque progressif: mentionner TRAAB vs taux restant (ex: "TRAAB 3.21% mais restant 4.13%")
-- Chaque arbitrage: 🔄 **[Nom]** → **[cible]** = **NET IS +Z€/an** (break-even: Xm) ⚠️ [conditions]
-- Si perte accélération: expliquer pourquoi garder malgré taux alternatif plus élevé que le TRAAB
-- ✅ **N contrats** leaders
-- Tous les gains sont après IS 25%
+- Pour chaque contrat: **[Nom]** garder=X€ vs arbitrer=Y€ → GARDER/ARBITRER (+/-Z€ net IS)
+- Si CAT mature < 12m: mentionner "garder X mois + réinvestir Y mois au meilleur taux"
+- Pour les progressifs: mentionner le taux restant vs TRAAB
+- ✅ **N contrats** à garder | 🔄 **N** à arbitrer
 - Max 200 mots`;
 
   const res=await fetch(CONFIG.AI_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,messages:[{role:'user',content:prompt}]})});
