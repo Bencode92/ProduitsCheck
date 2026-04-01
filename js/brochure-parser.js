@@ -34,6 +34,10 @@
     '- "coupon de X% par semestre écoulé" → rate=X, frequency="semestriel". Ne JAMAIS multiplier.',
     '- Si rappelé = Z%/an et maturité = W%/an (Z≠W) → rateIfCalled=Z, rateIfMaturity=W',
     '- "participation de X%" = participationRate. type="participation"',
+    '- DISPERSION: participationRate = le coefficient appliqué à la dispersion.',
+    '  Le rendement = participationRate × dispersion moyenne des paires.',
+    '  coupon.rate DOIT être = participationRate (pas 0). type="participation".',
+    '  Exemple: "participation de 7%" → coupon.rate=7, participationRate=7, type="participation"',
     '',
     'PAYMENT TIMING:',
     '- paymentTiming="periodic" si le coupon est versé à chaque rappel anticipé ou à chaque période',
@@ -204,6 +208,26 @@
     if (cp.protected && cp.barrier && cp.barrier < 100) { cp.protected = false; cp.level = null; }
 
     if (er.type === 'callable' && data.structureType === 'autocall') data.structureType = 'taux_fixe';
+
+    // v1.6: Dispersion fix — ensure coupon.rate = participationRate
+    if (data.structureType === 'dispersion') {
+      var pr = parseFloat(data.participationRate) || 0;
+      if (pr > 0 && (!c.rate || c.rate === 0)) {
+        c.rate = pr;
+        console.log('[Parser v1.6] Dispersion: coupon.rate set to participationRate ' + pr + '%');
+      }
+      if (!c.rate && !pr) {
+        // Neither parsed — default 7% (typical dispersion participation)
+        c.rate = 7;
+        data.participationRate = 7;
+        console.log('[Parser v1.6] Dispersion: default participationRate 7%');
+      }
+      c.type = 'participation';
+      // Capital always guaranteed for dispersion
+      cp.protected = true;
+      cp.level = 100;
+      cp.barrier = null;
+    }
 
     return data;
   }

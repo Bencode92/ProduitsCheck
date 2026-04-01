@@ -138,6 +138,8 @@
         var maturity = product.maturity || '5 ans';
         var sj = (product.underlyings || [])[0] || 'Sous-jacent';
         var participation = product.participationRate || coupon;
+        // Dispersion fallback: if participation is 0, use 7% (typical)
+        if ((product.structureType === 'dispersion' || structType === 'dispersion') && participation <= 0) participation = 7;
         var amount = 100000;
 
         switch(structType) {
