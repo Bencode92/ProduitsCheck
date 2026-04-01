@@ -216,11 +216,13 @@
             rdtNet = rateIfCalled;
           }
         }
+        var minInvest = parseFloat(p.minInvestment) || (p.aiParsed && parseFloat(p.aiParsed.minInvestment)) || 0;
         candidates.push({
           id: p.id,
           name: p.name || 'Produit',
           bankName: p.bankId || '',
           grade: p.grading.grade,
+          minInvestment: minInvest,
           score: p.grading.score || 0,
           maturityYears: parseFloat(p.maturityYears) || 5,
           maturityMonths: (parseFloat(p.maturityYears) || 5) * 12,
@@ -261,6 +263,7 @@
           grade: s.grade,
           score: s.score,
           structureType: s.structureType,
+          minInvestment: s.minInvestment || 0,
           liquidity: 'Échéance'
         });
       }
@@ -291,9 +294,15 @@
 
       candidates.forEach(function(c) {
         if (remaining <= 0) return;
-        var amount = Math.min(remaining, maxPer);
+        var minReq = c.minInvestment || 0;
+        // If minimum investment exceeds remaining budget, skip
+        if (minReq > 0 && remaining < minReq) return;
+        // If minimum > cap 30%, use minimum (override cap)
+        var effectiveMax = minReq > maxPer ? minReq : maxPer;
+        var amount = Math.min(remaining, effectiveMax);
         amount = Math.round(amount / 1000) * 1000;
         if (amount < 1000) return;
+        if (minReq > 0 && amount < minReq) return; // after rounding
 
         allocs.push({
           id: c.id,

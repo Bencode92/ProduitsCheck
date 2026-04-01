@@ -66,6 +66,11 @@
     '- "prélèvement forfaitaire X%" → decrementPct=X',
     '- "dividendes nets moyens Y%" → actualDividendYield=Y',
     '',
+    'MONTANT MINIMUM:',
+    '- "valeur nominale unitaire 100 000€" ou "coupure 100 000€" → minInvestment=100000',
+    '- "montant minimum de souscription : 1 000€" → minInvestment=1000',
+    '- Si non mentionné → minInvestment=null',
+    '',
     'UNDERLYING TYPE: "single-index", "single-stock", "worst-of", "basket", "pairs", "none"',
     'UNDERLYINGS: tableau de STRINGS simples uniquement.',
     '',
@@ -77,7 +82,7 @@
     '"participationRate":null,',
     '"capitalProtection":{"protected":false,"level":null,"barrier":null,"barrierCoupon":null,"barrierType":"europeenne"},',
     '"earlyRedemption":{"possible":false,"type":"","trigger":null,"frequency":"","startSemester":null,"stepDown":false,"stepDownPct":null},',
-    '"decrementPct":null,"actualDividendYield":null,"mechanism":"","risks":[],"summary":""}'
+    '"decrementPct":null,"actualDividendYield":null,"minInvestment":null,"mechanism":"","risks":[],"summary":""}'
   ].join('\n');
 
   var STRUCT_OPTS = [
@@ -247,6 +252,7 @@
         trigger: _gv('bp-barriercoupon') || _gv('bp-coupontrigger'),
         memory: _gv('bp-memory') || false, paymentTiming: _gv('bp-timing') || 'periodic' },
       participationRate: _gv('bp-participation'),
+      minInvestment: _gv('bp-mininvest'),
       capitalProtection: { protected: _gv('bp-capprotected') || false,
         level: _gv('bp-capprotected') ? (_gv('bp-caplevel') || 100) : null,
         barrier: _gv('bp-barrier'), barrierCoupon: _gv('bp-barriercoupon'), barrierType: 'europeenne' },
@@ -371,6 +377,7 @@
       _field('Si rappelé (%)', _inp('bp-rateIfCalled', c.rateIfCalled, 'number', '—')) +
       _field('Si maturité (%)', _inp('bp-rateIfMaturity', c.rateIfMaturity, 'number', '—')) +
       _field('Participation (%)', _inp('bp-participation', d.participationRate, 'number', '—')) +
+      _field('Montant min (€)', _inp('bp-mininvest', d.minInvestment, 'number', '—')) +
       _field('Trigger coupon (%)', _inp('bp-coupontrigger', c.trigger, 'number', '—')) +
       '<div class="bp-field">' + _tog('bp-memory', c.memory, 'Coupon à mémoire') + '</div>');
     html += _section('PROTECTION', '🛡️', 'var(--orange)',
