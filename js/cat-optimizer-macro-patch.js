@@ -106,9 +106,23 @@
         totalAmt += a; totalWeighted += a * r;
       });
       var avgCATRate = totalAmt > 0 ? totalWeighted / totalAmt : 0;
-      ctx.forwardSpread = Math.round((avgCATRate - ctx.ecbDepositRate) * 100) / 100;
-      // Forward = current deposit rate + expected hikes + observed spread
-      var probHikeVal = mi?.ai_response?.market_interpretation?.prob_hike_next_fomc_pct || 0;
+
+      // If deposits not loaded yet (async race), use market rates as fallback
+      if (avgCATRate === 0) {
+        var mktRates = (typeof catManager !== 'undefined' && catManager.rates && catManager.rates.rates) ? catManager.rates.rates : [];
+        if (mktRates.length > 0) {
+          var sum = 0;
+          mktRates.forEach(function(r) { sum += (parseFloat(r.rate) || 0); });
+          avgCATRate = sum / mktRates.length;
+        }
+      }
+      // If still no data, use a reasonable default spread of 1%
+      ctx.forwardSpread = avgCATRate > 0
+        ? Math.round((avgCATRate - ctx.ecbDepositRate) * 100) / 100
+        : 1.0;
+
+      var probHikeVal = mi && mi.ai_response && mi.ai_response.market_interpretation
+        ? (mi.ai_response.market_interpretation.prob_hike_next_fomc_pct || 0) : 0;
       var expectedHikeBps = probHikeVal / 100 * 50; // 2 hikes of 25bps if prob=100%
       var forwardDeposit = ctx.ecbDepositRate + expectedHikeBps / 100;
       ctx.forwardRate12m = Math.round((forwardDeposit + ctx.forwardSpread) * 100) / 100;
@@ -210,6 +224,8 @@
 
     var _origBuild = buildOptimizationAnalysis;
     window.buildOptimizationAnalysis = function() {
+      // Refresh macro context now that catManager.deposits is guaranteed loaded
+      if (_macroCache.loaded) _macroCache.macroContext = _deriveMacroContext();
       var analysis = _origBuild();
       var ctx = _macroCache.macroContext;
       if (!ctx) return analysis;
