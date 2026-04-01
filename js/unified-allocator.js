@@ -319,6 +319,7 @@
           grade: c.grade || null,
           score: c.score || null,
           structureType: c.structureType || null,
+          minInvestment: c.minInvestment || 0,
           liquidity: c.liquidity
         });
 
@@ -493,8 +494,28 @@
         html += '<div style="font-family:var(--mono);font-weight:700;color:var(--cyan);font-size:12px">' + _fmt(a.amount) + '€</div>';
         html += '<div style="font-family:var(--mono);font-size:10px;color:var(--green)">' + a.rate.toFixed(1) + '% → +' + _fmt(a.annualReturn) + '€/an</div>';
         html += '</div></div>';
-        // Explain 30% cap if product hit the limit
-        if (a.amount >= result.totalCash * 0.29) {
+
+        // Fourchette de rendement (pessimiste / médian / optimiste)
+        if (a.type === 'structured' && a.rate > 0) {
+          var optimiste = Math.round(a.amount * a.rate * 1.5 / 100);
+          var median = a.annualReturn;
+          var pessimiste = Math.round(a.amount * a.rate * 0.2 / 100);
+          html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:4px">';
+          html += '<div style="text-align:center;padding:4px;border-radius:4px;background:rgba(239,35,60,0.06);font-size:9px"><div style="color:var(--text-dim)">Pessimiste</div><div style="font-family:var(--mono);color:var(--red);font-weight:600">+' + _fmt(pessimiste) + '€</div></div>';
+          html += '<div style="text-align:center;padding:4px;border-radius:4px;background:rgba(78,205,196,0.06);font-size:9px"><div style="color:var(--text-dim)">Médian (BS)</div><div style="font-family:var(--mono);color:var(--cyan);font-weight:600">+' + _fmt(median) + '€</div></div>';
+          html += '<div style="text-align:center;padding:4px;border-radius:4px;background:rgba(6,214,160,0.06);font-size:9px"><div style="color:var(--text-dim)">Optimiste</div><div style="font-family:var(--mono);color:var(--green);font-weight:600">+' + _fmt(optimiste) + '€</div></div>';
+          html += '</div>';
+        }
+
+        // Warning concentration si min investment override le cap 30%
+        var cap30 = Math.round(result.totalCash * 0.30 / 1000) * 1000;
+        var pctOfCash = Math.round(a.amount / result.totalCash * 100);
+        if (a.minInvestment && a.minInvestment > cap30 && a.amount >= a.minInvestment) {
+          html += '<div style="background:rgba(255,182,39,0.08);border:1px solid rgba(255,182,39,0.2);border-radius:4px;padding:6px 8px;margin-top:4px;font-size:9px;color:var(--orange)">';
+          html += '⚠️ <strong>Concentration ' + pctOfCash + '%</strong> — le minimum d\'investissement (' + _fmt(a.minInvestment) + '€) dépasse le cap 30% (' + _fmt(cap30) + '€). ';
+          html += 'Accepté car capital garanti (risque contrepartie ' + (a.bankName || 'émetteur') + ' sur ' + Math.round(a.durationMonths / 12) + ' ans).';
+          html += '</div>';
+        } else if (a.amount >= result.totalCash * 0.29) {
           html += '<div style="font-size:9px;color:var(--text-dim);margin-top:2px;padding-left:4px">Limité à ' + _fmt(a.amount) + '€ (30% max par produit — diversification risque émetteur)</div>';
         }
       });
