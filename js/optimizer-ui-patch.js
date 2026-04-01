@@ -51,13 +51,18 @@
                 _lastStructOptResult._savedAllocation = (analysis.allocationPlan || []).map(function(a) {
                     return {
                         name: a.name, grade: a.grade, score: a.score,
-                        allocatedAmount: a.allocatedAmount, coupon: a.coupon,
-                        annualReturn: a.annualReturn, expectedReturn: a.expectedReturn,
+                        allocatedAmount: a.allocatedAmount,
+                        coupon: (a._rn && a.allocatedAmount > 0) ? Math.round(a._rn * 10) / 10 : a.coupon,
+                        annualReturn: (a._rn && a.allocatedAmount > 0) ? Math.round(a.allocatedAmount * a._rn / 100) : a.annualReturn,
+                        expectedReturn: a.expectedReturn,
                         catReturn: a.catReturn, excessVsCat: a.excessVsCat,
                         recommendation: a.recommendation, reason: a.reason, bankName: a.bankName,
                         probCoupon: a.probCoupon || null,
+                        capitalProtected: a.capitalProtected || false,
+                        _rn: a._rn || null, _pc: a._pc || null, _vol: a._vol || null,
                         _pool: a._pool || null, _poolLabel: a._poolLabel || null,
                         _sourceEntity: a._sourceEntity || null,
+                        _v4match: a._v4match || null,
                     };
                 });
                 _lastStructOptResult._savedEntity = analysis._entity || 'all';
@@ -188,9 +193,12 @@
             html += '<div style="font-family:var(--mono);font-size:11px;color:var(--green)">+' + fmt(p.expectedReturn || p.annualReturn || 0) + '\u20ac/an</div></div></div>';
             // Details
             html += '<div style="display:flex;gap:10px;margin-top:6px;font-size:10px;color:var(--text-dim)">';
-            html += '<span>Coupon ' + _cpn(p.coupon) + '%</span>';
+            if (p._rn != null) {
+                html += '<span>Rdt net ' + p._rn.toFixed(1) + '%/an</span>';
+            } else {
+                html += '<span>Coupon ' + _cpn(p.coupon) + '%</span>';
+            }
             if (p.probCoupon) html += '<span>P=' + Math.round(p.probCoupon * 100) + '%</span>';
-            if (p._rn != null) html += '<span>BS net ' + p._rn.toFixed(1) + '%</span>';
             if ((p.excessVsCat || 0) > 0) html += '<span style="color:var(--green)">+' + fmt(p.excessVsCat) + '\u20ac vs CAT</span>';
             html += '</div></div>';
         });
