@@ -528,6 +528,18 @@
     html += '<div style="margin-bottom:16px">';
     html += '<div style="font-size:13px;font-weight:700;color:var(--text-bright);margin-bottom:8px">' + result.entityLabel + ' — ' + _fmt(result.totalCash) + '€</div>';
 
+    // If nothing was allocated in any tranche AND cash > 0 → "en attente"
+    var hasAnyAllocation = result.tranches.some(function(tr) { return tr.allocations && tr.allocations.length > 0; });
+    var allTranchesEmpty = result.tranches.every(function(tr) { return tr.amount <= 0; });
+    if (allTranchesEmpty && result.totalCash > 0 && !result.isStructLiqOnly) {
+      html += '<div style="border:1px solid rgba(78,205,196,0.2);border-radius:var(--radius-sm);padding:12px;margin-bottom:8px;background:rgba(78,205,196,0.03)">';
+      html += '<div style="font-size:12px;font-weight:600;color:var(--cyan)">💰 Cash en attente d\'opportunité</div>';
+      html += '<div style="font-size:10px;color:var(--text-dim);margin-top:4px">Aucun horizon défini. Cash disponible pour le prochain produit structuré capital garanti.</div>';
+      html += '<div style="font-family:var(--mono);font-weight:700;color:var(--text-bright);margin-top:6px">' + _fmt(result.totalCash) + '€</div>';
+      html += '</div></div>';
+      return html;
+    }
+
     // Tranches for this entity
     result.tranches.forEach(function(tr) {
       if (tr.amount <= 0) return;

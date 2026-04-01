@@ -127,8 +127,31 @@
 
   // ─── Get macro context ─────────────────────────────────
   function _getMacro() {
+    // Try the exported function from cat-optimizer-macro-patch
     try {
-      if (typeof _macroCache !== 'undefined' && _macroCache && _macroCache.macroContext) return _macroCache.macroContext;
+      if (typeof _loadCATMacroData === 'function') {
+        // Check if already loaded via window global
+        var fn = _loadCATMacroData;
+        // The macro cache is inside the IIFE, but macroContext is returned
+        // We need to read from the unified allocator's _getMacroContext if available
+      }
+      if (typeof _getMacroContext === 'function') return _getMacroContext();
+    } catch(e) {}
+
+    // Fallback: derive from MI directly
+    try {
+      var mi = typeof _getOptimizerMI === 'function' ? _getOptimizerMI() : null;
+      if (mi) {
+        var trend = 'stable';
+        var probHike = mi.prob_hike_next_fomc_pct || (mi.market_interpretation && mi.market_interpretation.prob_hike_next_fomc_pct) || 0;
+        if (probHike > 50) trend = 'rising';
+        else if (probHike < 20) trend = 'falling';
+        return {
+          rateTrend: trend,
+          regime: (mi.regime || 'neutral').toLowerCase(),
+          forwardRate12m: null
+        };
+      }
     } catch(e) {}
     return { rateTrend: 'stable', regime: 'neutral', forwardRate12m: null };
   }
