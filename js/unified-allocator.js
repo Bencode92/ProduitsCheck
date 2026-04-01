@@ -391,7 +391,8 @@
       weightedRate: Math.round(weightedRate * 100) / 100,
       bestCatRate: bestCatRate,
       regime: _getRegime(),
-      isStructLiqOnly: hasOnlyStructLiq,
+      // Only show "Garder Bond 12M" if ALL the unallocated is from structLiq
+      isStructLiqOnly: hasOnlyStructLiq && !(_state.includeMaturingCat && _state.includeMaturingCat[entityKey]),
       hasMaturingCat: !!(_state.includeMaturingCat && _state.includeMaturingCat[entityKey] && _state.entities[entityKey].maturingCat > 0)
     };
   }
