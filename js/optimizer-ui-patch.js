@@ -93,14 +93,7 @@
         var liqTotal = a.totalLiquidity || 0, catRate = a.catBenchmark || 2.5;
         var liqReturn = Math.round(liqTotal * catRate / 100);
         var deployedAmount = a.deployedAmount || 0;
-        // Recalculate deployedReturn from BS if available (v4 may have used facial coupon = 0)
         var deployedReturn = a.deployedReturn || 0;
-        if (deployedReturn === 0 && subs.length > 0) {
-            deployedReturn = subs.reduce(function(s, p) {
-                if (p._rn && p.allocatedAmount > 0) return s + Math.round(p.allocatedAmount * p._rn / 100);
-                return s + (p.annualReturn || 0);
-            }, 0);
-        }
         var remainCash = a.remainingCash || (liqTotal - deployedAmount);
         var remainCashReturn = Math.round(remainCash * catRate / 100);
         var afterInvested = pfInvested + deployedAmount;
@@ -114,6 +107,16 @@
         var extBC = a._extByCam || a._savedExtByCam || 0, extCM = a._extCameleons || a._savedExtCameleons || 0;
         var allItems = a.allocationPlan || a._savedAllocation || a.allocation || [];
         var subs = allItems.filter(function(p) { return (p.allocatedAmount || 0) > 0; });
+        // Recalculate deployedReturn from BS if v4 used facial coupon (= 0)
+        if (deployedReturn === 0 && subs.length > 0) {
+            deployedReturn = subs.reduce(function(s, p) {
+                if (p._rn && p.allocatedAmount > 0) return s + Math.round(p.allocatedAmount * p._rn / 100);
+                return s + (p.annualReturn || 0);
+            }, 0);
+            // Recalculate dependent totals
+            totalRetAfter = pfReturn + deployedReturn + remainCashReturn;
+            yAfter = totalBefore > 0 ? (totalRetAfter / totalBefore * 100) : 0;
+        }
         var nonAlloc = allItems.filter(function(p) { return (p.allocatedAmount || 0) <= 0 && p.recommendation; });
         var eStr = a._entity || a._savedEntity || 'all';
         var eLbl = a._entityLabel || a._savedEntityLabel || _entityLabel(eStr);
