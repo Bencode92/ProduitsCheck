@@ -1,6 +1,6 @@
 {
-  "lastUpdated": "2026-04-01T07:59:37.420Z",
-  "summary": "**ANALYSE OPTIMISATION PORTEFEUILLE v3.1**\n\n**COMPTE A TERME OPTIPLUS 5 ANS (×2)** garder=7500€ vs arbitrer=0€ → **GARDER** (taux restant 3.12% > marché 2.99%)\n\n**CATIP ENT 3ANS A PREAVIS** garder=5317€ vs arbitrer=4618€ → **GARDER** (-524€ si arbitrage, taux restant 2.73% acceptable)\n\n**CATVAIR GRANDS COMPTES 5 ANS** garder=2360€ vs arbitrer=0€ → **GARDER** (excellent taux restant 5.04%)\n\n**CAT CROISSANCE +3A PREAVIS (×2)** garder=2283€+1903€ vs arbitrer=0€ → **GARDER** (taux restant 4.16% très avantageux)\n\n**OPTIPLUS CONQUÊTE (×4)** garder=4417€ vs arbitrer=0€ → **GARDER** (mature 5m + réinvestir 7m au meilleur taux, taux restant 3.03% > marché)\n\n**CASH 177 000€:** Placement optimal CAT Progressif 60m à 2.9% → +5133€/an\n\n**BILAN:**\n✅ **10 contrats** à garder | 🔄 **0** à arbitrer\n\n**Gain total maintenu:** 43 601€/an\n**Gain supplémentaire cash:** +5 133€/an\n**Rendement global optimisé:** 48 734€/an sur 1 637 000€ (2.98%)\n\nTous les contrats affichent des taux restants supérieurs ou équivalents au marché actuel. Aucun arbitrage rentable identifié.",
+  "lastUpdated": "2026-04-01T12:02:45.667Z",
+  "summary": "## ANALYSE ARBITRAGE PORTEFEUILLE v3.1\n\n**Portefeuille actuel:** 1 460 000€ à 2.99% → +43 600€/an\n**Post-arbitrage:** Identique → **Gain net: 0€**\n\n### DÉCISIONS PAR CONTRAT (horizon 12m, net IS 25%):\n\n**COMPTE A TERME OPTIPLUS 5 ANS** (×2) : garder=7 501€ vs arbitrer=4 619€ → **GARDER** (+2 882€ net)\n\n**CATIP ENT 3ANS** : garder=5 317€ vs arbitrer=4 618€ → **GARDER** (+524€ net)\n*Taux restant 2.73% > meilleure alternative 2.8% sur 36m*\n\n**CATVAIR GRANDS COMPTES** : garder=2 360€ vs arbitrer=1 123€ → **GARDER** (+928€ net)\n*Taux restant exceptionnel 5.04%*\n\n**CAT CROISSANCE +3A** (×2) : garder=2 284€/1 903€ vs arbitrer=1 347€/1 123€ → **GARDER** (+701€/+584€ net)\n*Taux restant 4.16% très attractif*\n\n**OPTIPLUS CONQUÊTE** (×4) : garder=4 417€ vs arbitrer=3 370€ → **GARDER** (+785€ net chacun)\n*5m restants, taux 3.03% correct*\n\n### CASH 177 000€ - CONTEXTE MACRO:\nStagflation (4/5), BCE 2.15%, forward CAT 12m: +0.33%\n**Recommandation:** CAT Progressif 18m à 2.6% (+4 602€/an)\n*Privilégier court terme face à la volatilité*\n\n✅ **10 contrats à garder** | 🔄 **0 à arbitrer**\n**Gain préservé:** +6 406€ net vs arbitrage",
   "rateSource": "confirmed",
   "algorithmVersion": "v3",
   "totalInvested": 1460000,
@@ -34,17 +34,17 @@
       "noticeOpportunityCost": 0,
       "netGainAfterTax": 0,
       "accelerationLoss": 0,
-      "keep12m": 7500.11,
+      "keep12m": 7500.52,
       "switch12m": 0,
       "advantage12m": 0,
       "advantage12mAfterTax": 0,
       "breakEvenMonths": null,
       "durationMismatch": false,
       "isProgressif": true,
-      "dynamicThreshold": 0.05692099788303082,
+      "dynamicThreshold": 0.06830519745963698,
       "compositeScore": 0.06666666666666667,
       "recommendation": "GARDER",
-      "reason": "Leader marché (restant 3.12% > TRAAB 3.1039%) · 12m: +7 500,11€"
+      "reason": "Leader marché (restant 3.12% > TRAAB 3.1039%) · 12m: +7 500,52€"
     },
     {
       "name": "COMPTE A TERME OPTIPLUS 5 ANS Réf.000002",
@@ -64,17 +64,17 @@
       "noticeOpportunityCost": 0,
       "netGainAfterTax": 0,
       "accelerationLoss": 0,
-      "keep12m": 7500.11,
+      "keep12m": 7500.52,
       "switch12m": 0,
       "advantage12m": 0,
       "advantage12mAfterTax": 0,
       "breakEvenMonths": null,
       "durationMismatch": false,
       "isProgressif": true,
-      "dynamicThreshold": 0.05692099788303082,
+      "dynamicThreshold": 0.06830519745963698,
       "compositeScore": 0.06666666666666667,
       "recommendation": "GARDER",
-      "reason": "Leader marché (restant 3.12% > TRAAB 3.1039%) · 12m: +7 500,11€"
+      "reason": "Leader marché (restant 3.12% > TRAAB 3.1039%) · 12m: +7 500,52€"
     },
     {
       "name": "CATIP ENT 3ANS A PREAVIS",
@@ -94,23 +94,23 @@
         "bankName": "CIC",
         "isScanned": false
       },
-      "switchGainPerYear": -524.11,
+      "switchGainPerYear": -524.18,
       "grossGainPerYear": 140,
       "exitPenaltyCost": 0,
       "noticeOpportunityCost": 490.96,
-      "netGainAfterTax": -524.11,
+      "netGainAfterTax": -524.18,
       "accelerationLoss": 0,
-      "keep12m": 5316.89,
+      "keep12m": 5316.99,
       "switch12m": 4618.08,
-      "advantage12m": -698.81,
-      "advantage12mAfterTax": -524.11,
+      "advantage12m": -698.91,
+      "advantage12mAfterTax": -524.18,
       "breakEvenMonths": null,
       "durationMismatch": false,
       "isProgressif": true,
-      "dynamicThreshold": 0.09091372900969895,
+      "dynamicThreshold": 0.10909647481163874,
       "compositeScore": 0.06416666666666662,
       "recommendation": "GARDER",
-      "reason": "Sur 12m: garder=5 316,89€ > arbitrer=4 618,08€"
+      "reason": "Sur 12m: garder=5 316,99€ > arbitrer=4 618,08€"
     },
     {
       "name": "CATVAIR GRANDS COMPTES 5 ANS",
@@ -130,17 +130,17 @@
       "noticeOpportunityCost": 0,
       "netGainAfterTax": 0,
       "accelerationLoss": 0,
-      "keep12m": 2359.82,
+      "keep12m": 2360,
       "switch12m": 0,
       "advantage12m": 0,
       "advantage12mAfterTax": 0,
       "breakEvenMonths": null,
       "durationMismatch": false,
       "isProgressif": true,
-      "dynamicThreshold": 0.24243661069253053,
+      "dynamicThreshold": 0.2909239328310366,
       "compositeScore": 0.034999999999999996,
       "recommendation": "GARDER",
-      "reason": "Leader marché (restant 5.04% > TRAAB 3.5%) · 12m: +2 359,82€"
+      "reason": "Leader marché (restant 5.04% > TRAAB 3.5%) · 12m: +2 360€"
     },
     {
       "name": "CAT CROISSANCE +3A PREAVIS",
@@ -160,17 +160,17 @@
       "noticeOpportunityCost": 0,
       "netGainAfterTax": 0,
       "accelerationLoss": 0,
-      "keep12m": 2283.23,
+      "keep12m": 2283.62,
       "switch12m": 0,
       "advantage12m": 0,
       "advantage12mAfterTax": 0,
       "breakEvenMonths": null,
       "durationMismatch": false,
       "isProgressif": true,
-      "dynamicThreshold": 0.2733870597322882,
+      "dynamicThreshold": 0.32806447167874586,
       "compositeScore": 0.028333333333333335,
       "recommendation": "GARDER",
-      "reason": "Leader marché (restant 4.16% > TRAAB 3.21%) · 12m: +2 283,23€"
+      "reason": "Leader marché (restant 4.16% > TRAAB 3.21%) · 12m: +2 283,62€"
     },
     {
       "name": "CAT CROISSANCE +3A PREAVIS (copie)",
@@ -190,17 +190,17 @@
       "noticeOpportunityCost": 0,
       "netGainAfterTax": 0,
       "accelerationLoss": 0,
-      "keep12m": 1902.69,
+      "keep12m": 1903.02,
       "switch12m": 0,
       "advantage12m": 0,
       "advantage12mAfterTax": 0,
       "breakEvenMonths": null,
       "durationMismatch": false,
       "isProgressif": true,
-      "dynamicThreshold": 0.29948051909077306,
+      "dynamicThreshold": 0.35937662290892763,
       "compositeScore": 0.028333333333333335,
       "recommendation": "GARDER",
-      "reason": "Leader marché (restant 4.16% > TRAAB 3.21%) · 12m: +1 902,69€"
+      "reason": "Leader marché (restant 4.16% > TRAAB 3.21%) · 12m: +1 903,02€"
     },
     {
       "name": "OPTIPLUS CONQUÊTE",
@@ -220,17 +220,17 @@
       "noticeOpportunityCost": 0,
       "netGainAfterTax": 0,
       "accelerationLoss": 0,
-      "keep12m": 4416.71,
+      "keep12m": 4416.68,
       "switch12m": 0,
       "advantage12m": 0,
       "advantage12mAfterTax": 0,
       "breakEvenMonths": null,
       "durationMismatch": false,
       "isProgressif": true,
-      "dynamicThreshold": 0.5878775382679627,
+      "dynamicThreshold": 0.7054530459215552,
       "compositeScore": 0.008333333333333333,
       "recommendation": "GARDER",
-      "reason": "Leader marché (restant 3.03% > TRAAB 2.9%) · 12m: +4 416,71€"
+      "reason": "Leader marché (restant 3.03% > TRAAB 2.9%) · 12m: +4 416,68€"
     },
     {
       "name": "OPTIPLUS CONQUÊTE",
@@ -250,17 +250,17 @@
       "noticeOpportunityCost": 0,
       "netGainAfterTax": 0,
       "accelerationLoss": 0,
-      "keep12m": 4416.71,
+      "keep12m": 4416.68,
       "switch12m": 0,
       "advantage12m": 0,
       "advantage12mAfterTax": 0,
       "breakEvenMonths": null,
       "durationMismatch": false,
       "isProgressif": true,
-      "dynamicThreshold": 0.5878775382679627,
+      "dynamicThreshold": 0.7054530459215552,
       "compositeScore": 0.008333333333333333,
       "recommendation": "GARDER",
-      "reason": "Leader marché (restant 3.03% > TRAAB 2.9%) · 12m: +4 416,71€"
+      "reason": "Leader marché (restant 3.03% > TRAAB 2.9%) · 12m: +4 416,68€"
     },
     {
       "name": "OPTIPLUS CONQUÊTE",
@@ -280,17 +280,17 @@
       "noticeOpportunityCost": 0,
       "netGainAfterTax": 0,
       "accelerationLoss": 0,
-      "keep12m": 4416.71,
+      "keep12m": 4416.68,
       "switch12m": 0,
       "advantage12m": 0,
       "advantage12mAfterTax": 0,
       "breakEvenMonths": null,
       "durationMismatch": false,
       "isProgressif": true,
-      "dynamicThreshold": 0.5878775382679627,
+      "dynamicThreshold": 0.7054530459215552,
       "compositeScore": 0.008333333333333333,
       "recommendation": "GARDER",
-      "reason": "Leader marché (restant 3.03% > TRAAB 2.9%) · 12m: +4 416,71€"
+      "reason": "Leader marché (restant 3.03% > TRAAB 2.9%) · 12m: +4 416,68€"
     },
     {
       "name": "OPTIPLUS CONQUÊTE",
@@ -310,17 +310,17 @@
       "noticeOpportunityCost": 0,
       "netGainAfterTax": 0,
       "accelerationLoss": 0,
-      "keep12m": 4416.71,
+      "keep12m": 4416.68,
       "switch12m": 0,
       "advantage12m": 0,
       "advantage12mAfterTax": 0,
       "breakEvenMonths": null,
       "durationMismatch": false,
       "isProgressif": true,
-      "dynamicThreshold": 0.5878775382679627,
+      "dynamicThreshold": 0.7054530459215552,
       "compositeScore": 0.008333333333333333,
       "recommendation": "GARDER",
-      "reason": "Leader marché (restant 3.03% > TRAAB 2.9%) · 12m: +4 416,71€"
+      "reason": "Leader marché (restant 3.03% > TRAAB 2.9%) · 12m: +4 416,68€"
     }
   ]
 }
