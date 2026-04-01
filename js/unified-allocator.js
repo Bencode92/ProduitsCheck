@@ -360,7 +360,8 @@
       excessVsCat: totalReturn - catEquivReturn,
       weightedRate: Math.round(weightedRate * 100) / 100,
       bestCatRate: bestCatRate,
-      regime: _getRegime()
+      regime: _getRegime(),
+      isStructLiqOnly: hasStructLiq && !_state.entities[entityKey].cash
     };
   }
 
@@ -539,38 +540,52 @@
       html += '</div>';
     });
 
-    // Unallocated = propose best available CAT from user's rates
+    // Unallocated cash — depends on source
     if (result.totalUnallocated > 0) {
-      var catOffers = _getCATOffers(result.totalUnallocated);
-      html += '<div style="border:1px solid rgba(255,182,39,0.2);border-radius:var(--radius-sm);padding:10px;margin-bottom:8px;background:rgba(255,182,39,0.03)">';
-      var macro = _getMacroContext();
-      var trendIcon = macro && macro.rateTrend === 'rising' ? '📈' : macro && macro.rateTrend === 'falling' ? '📉' : '➡️';
-      var trendLabel = macro && macro.rateTrend === 'rising' ? 'Taux en hausse → court terme recommandé' : macro && macro.rateTrend === 'falling' ? 'Taux en baisse → verrouiller long terme' : 'Taux stables';
+      // If this entity's cash is ALL from structLiq (Swiss Life), can't go to CIC
+      var isStructLiqOnly = result.isStructLiqOnly;
 
-      if (catOffers.length > 0) {
-        var best = catOffers[0]; // already sorted by rate (adjusted for trend)
-        var annualReturn = Math.round(result.totalUnallocated * best.rate / 100);
-        html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">';
-        html += '<div><div style="font-size:11px;font-weight:600;color:var(--orange)">🏦 Placer en CAT</div>';
-        html += '<div style="font-size:9px;color:var(--text-dim)">' + trendIcon + ' ' + trendLabel + '</div></div>';
-        html += '<div style="text-align:right"><div style="font-family:var(--mono);font-weight:700;color:var(--text-bright)">' + _fmt(result.totalUnallocated) + '€</div>';
-        html += '<div style="font-family:var(--mono);font-size:10px;color:var(--orange)">+' + _fmt(annualReturn) + '€/an</div></div>';
-        html += '</div>';
-        // Single recommendation card
-        html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:rgba(255,182,39,0.06);border:1px solid rgba(255,182,39,0.15);border-radius:6px">';
-        html += '<div><div style="font-size:12px;font-weight:600;color:var(--text-bright)">' + best.bankName + ' — ' + best.productName + '</div>';
-        html += '<div style="font-size:10px;color:var(--text-dim)">' + best.durationMonths + ' mois</div></div>';
-        html += '<div style="text-align:right"><div style="font-family:var(--mono);font-weight:700;font-size:14px;color:var(--orange)">' + _fmt(result.totalUnallocated) + '€</div>';
-        html += '<div style="font-family:var(--mono);font-size:11px;color:var(--orange)">' + best.rate.toFixed(2) + '% → +' + _fmt(annualReturn) + '€/an</div></div>';
-        html += '</div>';
-      } else {
+      if (isStructLiqOnly) {
+        // Swiss Life money stays in Bond 12M
+        html += '<div style="border:1px solid rgba(168,85,247,0.2);border-radius:var(--radius-sm);padding:10px;margin-bottom:8px;background:rgba(168,85,247,0.03)">';
         html += '<div style="display:flex;align-items:center;justify-content:space-between">';
-        html += '<div><div style="font-size:11px;font-weight:600;color:var(--orange)">🏦 À placer en CAT</div>';
-        html += '<div style="font-size:9px;color:var(--text-dim)">Aucune offre confirmée disponible</div></div>';
-        html += '<div style="font-family:var(--mono);font-weight:700;color:var(--text-bright)">' + _fmt(result.totalUnallocated) + '€</div>';
+        html += '<div><div style="font-size:11px;font-weight:600;color:#A855F7">🔄 Garder en Bond 12M</div>';
+        html += '<div style="font-size:9px;color:var(--text-dim)">Aucun produit Swiss Life ne bat le Bond 12M (~2.5%)</div></div>';
+        html += '<div style="text-align:right"><div style="font-family:var(--mono);font-weight:700;color:var(--text-bright)">' + _fmt(result.totalUnallocated) + '€</div>';
+        html += '<div style="font-family:var(--mono);font-size:10px;color:#A855F7">~2.5% → +' + _fmt(Math.round(result.totalUnallocated * 2.5 / 100)) + '€/an</div></div>';
+        html += '</div></div>';
+      } else {
+        // Free cash → propose best CAT
+        var catOffers = _getCATOffers(result.totalUnallocated);
+        html += '<div style="border:1px solid rgba(255,182,39,0.2);border-radius:var(--radius-sm);padding:10px;margin-bottom:8px;background:rgba(255,182,39,0.03)">';
+        var macro = _getMacroContext();
+        var trendIcon = macro && macro.rateTrend === 'rising' ? '📈' : macro && macro.rateTrend === 'falling' ? '📉' : '➡️';
+        var trendLabel = macro && macro.rateTrend === 'rising' ? 'Taux en hausse → court terme recommandé' : macro && macro.rateTrend === 'falling' ? 'Taux en baisse → verrouiller long terme' : 'Taux stables';
+
+        if (catOffers.length > 0) {
+          var best = catOffers[0];
+          var annualReturn = Math.round(result.totalUnallocated * best.rate / 100);
+          html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">';
+          html += '<div><div style="font-size:11px;font-weight:600;color:var(--orange)">🏦 Placer en CAT</div>';
+          html += '<div style="font-size:9px;color:var(--text-dim)">' + trendIcon + ' ' + trendLabel + '</div></div>';
+          html += '<div style="text-align:right"><div style="font-family:var(--mono);font-weight:700;color:var(--text-bright)">' + _fmt(result.totalUnallocated) + '€</div>';
+          html += '<div style="font-family:var(--mono);font-size:10px;color:var(--orange)">+' + _fmt(annualReturn) + '€/an</div></div>';
+          html += '</div>';
+          html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:rgba(255,182,39,0.06);border:1px solid rgba(255,182,39,0.15);border-radius:6px">';
+          html += '<div><div style="font-size:12px;font-weight:600;color:var(--text-bright)">' + best.bankName + ' — ' + best.productName + '</div>';
+          html += '<div style="font-size:10px;color:var(--text-dim)">' + best.durationMonths + ' mois</div></div>';
+          html += '<div style="text-align:right"><div style="font-family:var(--mono);font-weight:700;font-size:14px;color:var(--orange)">' + _fmt(result.totalUnallocated) + '€</div>';
+          html += '<div style="font-family:var(--mono);font-size:11px;color:var(--orange)">' + best.rate.toFixed(2) + '% → +' + _fmt(annualReturn) + '€/an</div></div>';
+          html += '</div>';
+        } else {
+          html += '<div style="display:flex;align-items:center;justify-content:space-between">';
+          html += '<div><div style="font-size:11px;font-weight:600;color:var(--orange)">🏦 À placer en CAT</div>';
+          html += '<div style="font-size:9px;color:var(--text-dim)">Aucune offre confirmée</div></div>';
+          html += '<div style="font-family:var(--mono);font-weight:700;color:var(--text-bright)">' + _fmt(result.totalUnallocated) + '€</div>';
+          html += '</div>';
+        }
         html += '</div>';
       }
-      html += '</div>';
     }
     html += '</div>';
     return html;
