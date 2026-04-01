@@ -75,8 +75,9 @@
       else entities.cameleons.structLiq += amount;
     });
 
-    entities.bycam.total = entities.bycam.cash + entities.bycam.structLiq;
-    entities.cameleons.total = entities.cameleons.cash + entities.cameleons.structLiq;
+    // total = cash libre only. structLiq is reserved for Swiss Life arbitrage.
+    entities.bycam.total = entities.bycam.cash;
+    entities.cameleons.total = entities.cameleons.cash;
 
     return entities;
   }
@@ -260,9 +261,14 @@
     html += '<span style="font-size:13px;font-weight:700;color:var(--text-bright)">' + ent.label + '</span>';
     html += '<div style="text-align:right">';
     if (ent.cash > 0) html += '<span style="font-size:10px;color:var(--text-dim)">Cash ' + _fmt(ent.cash) + '€</span> ';
-    if (ent.structLiq > 0) html += '<span style="font-size:10px;color:#A855F7">Struct. ' + _fmt(ent.structLiq) + '€</span> ';
-    html += '<span style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--cyan);margin-left:8px">' + _fmt(ent.total) + '€</span>';
+    html += '<span style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--cyan);margin-left:8px">' + _fmt(ent.cash) + '€</span>';
     html += '</div></div>';
+    if (ent.structLiq > 0) {
+      html += '<div style="background:rgba(168,85,247,0.06);border:1px solid rgba(168,85,247,0.15);border-radius:6px;padding:8px 10px;margin-bottom:10px;font-size:10px">';
+      html += '<span style="color:#A855F7;font-weight:600">🔄 Arbitrage Swiss Life : ' + _fmt(ent.structLiq) + '€</span>';
+      html += '<div style="color:var(--text-dim);margin-top:2px">Bond 12M — arbitrable uniquement vers produits Swiss Life</div>';
+      html += '</div>';
+    }
 
     if (ent.total <= 0) {
       html += '<div style="font-size:11px;color:var(--text-dim);text-align:center;padding:8px 0">Pas de liquidité disponible</div>';
@@ -319,10 +325,12 @@
     html += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:12px 16px;background:var(--bg-elevated);border-radius:var(--radius-sm);border:1px solid var(--border)">';
     html += '<span style="font-size:12px;font-weight:700;color:var(--accent)">🌍 ' + regime.toUpperCase() + '</span>';
     html += '<span style="font-size:11px;color:var(--text-muted)">' + profile.label + '</span>';
+    var totalStructLiq = ents.bycam.structLiq + ents.cameleons.structLiq;
     html += '<span style="margin-left:auto;font-size:11px;color:var(--text-dim)">';
-    html += '🏢 ByCam ' + _fmt(ents.bycam.total) + '€ · 🦎 Cam. ' + _fmt(ents.cameleons.total) + '€';
+    html += '🏢 ByCam ' + _fmt(ents.bycam.cash) + '€ · 🦎 Cam. ' + _fmt(ents.cameleons.cash) + '€';
+    if (totalStructLiq > 0) html += ' · <span style="color:#A855F7">🔄 SL ' + _fmt(totalStructLiq) + '€</span>';
     html += '</span>';
-    html += '<span style="font-size:14px;font-weight:700;color:var(--cyan)">' + _fmt(totalCash) + '€</span>';
+    html += '<span style="font-size:14px;font-weight:700;color:var(--cyan)">' + _fmt(totalCash) + '€ cash</span>';
     html += '</div>';
 
     // Mode toggle
@@ -522,7 +530,7 @@
   // ═══ MAIN RENDER ═══════════════════════════════════════
   window.renderUnifiedAllocator = function(container) {
     _state.entities = _computeEntities();
-    _state.totalCash = _state.entities.bycam.total + _state.entities.cameleons.total;
+    _state.totalCash = _state.entities.bycam.cash + _state.entities.cameleons.cash;
     if (_state.result) {
       _renderResult(container, _state.result);
     } else {
