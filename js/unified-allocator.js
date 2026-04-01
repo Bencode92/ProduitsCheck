@@ -120,17 +120,64 @@
   }
 
   // ─── Get best CAT offers from user-entered rates ────────
+  // v1.2: integrates MI-CAT macro context for duration filtering
   function _getCATOffers(amount) {
     try {
       if (typeof catManager !== 'undefined' && catManager.rates && catManager.rates.rates) {
         var offers = catManager.rates.rates.filter(function(r) {
           return r.rate > 0 && (!r.minAmount || amount >= r.minAmount);
         });
-        offers.sort(function(a, b) { return b.rate - a.rate; });
+        // Get macro context if available
+        var macro = _getMacroContext();
+        if (macro) {
+          // Filter by recommended max duration
+          if (macro.maxDurationMonths) {
+            offers = offers.filter(function(r) {
+              return r.durationMonths <= macro.maxDurationMonths;
+            });
+          }
+          // Adjust scoring: in rising trend, prefer shorter duration (to renew at higher rate)
+          if (macro.rateTrend === 'rising') {
+            offers.sort(function(a, b) {
+              // Prefer shorter durations in rising rate environment
+              var scoreA = a.rate - (a.durationMonths > 12 ? 0.3 : 0);
+              var scoreB = b.rate - (b.durationMonths > 12 ? 0.3 : 0);
+              return scoreB - scoreA;
+            });
+          } else if (macro.rateTrend === 'falling') {
+            // Lock in longest duration at best rate
+            offers.sort(function(a, b) {
+              var scoreA = a.rate + (a.durationMonths > 24 ? 0.2 : 0);
+              var scoreB = b.rate + (b.durationMonths > 24 ? 0.2 : 0);
+              return scoreB - scoreA;
+            });
+          } else {
+            offers.sort(function(a, b) { return b.rate - a.rate; });
+          }
+        } else {
+          offers.sort(function(a, b) { return b.rate - a.rate; });
+        }
         return offers;
       }
     } catch(e) {}
     return [];
+  }
+
+  function _getMacroContext() {
+    try {
+      if (typeof _loadCATMacroData !== 'undefined' && typeof _macroCache !== 'undefined' && _macroCache && _macroCache.macroContext) {
+        return _macroCache.macroContext;
+      }
+      // Fallback: try to derive from MI cache
+      var regime = _getRegime();
+      return {
+        rateTrend: 'stable',
+        regime: regime,
+        maxDurationMonths: regime === 'stagflation' ? 48 : regime === 'crisis' ? 24 : 60,
+        forwardRate12m: null
+      };
+    } catch(e) {}
+    return null;
   }
 
   // ─── Get graded structured products ────────────────────
@@ -440,8 +487,12 @@
       var catOffers = _getCATOffers(result.totalUnallocated);
       html += '<div style="border:1px solid rgba(255,182,39,0.2);border-radius:var(--radius-sm);padding:10px;margin-bottom:8px;background:rgba(255,182,39,0.03)">';
       html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:' + (catOffers.length > 0 ? '8px' : '0') + '">';
+      var macro = _getMacroContext();
+      var trendIcon = macro && macro.rateTrend === 'rising' ? '📈' : macro && macro.rateTrend === 'falling' ? '📉' : '➡️';
+      var trendLabel = macro && macro.rateTrend === 'rising' ? 'Taux en hausse → court terme recommandé' : macro && macro.rateTrend === 'falling' ? 'Taux en baisse → verrouiller long terme' : 'Taux stables';
+      var maxDur = macro && macro.maxDurationMonths ? macro.maxDurationMonths + 'M max' : '';
       html += '<div><div style="font-size:11px;font-weight:600;color:var(--orange)">🏦 À placer en CAT</div>';
-      html += '<div style="font-size:9px;color:var(--text-dim)">Meilleur taux disponible : ' + result.bestCatRate.toFixed(1) + '%</div></div>';
+      html += '<div style="font-size:9px;color:var(--text-dim)">' + trendIcon + ' ' + trendLabel + (maxDur ? ' · ' + maxDur : '') + '</div></div>';
       html += '<div style="text-align:right"><div style="font-family:var(--mono);font-weight:700;color:var(--text-bright)">' + _fmt(result.totalUnallocated) + '€</div>';
       html += '<div style="font-family:var(--mono);font-size:10px;color:var(--orange)">+' + _fmt(Math.round(result.totalUnallocated * result.bestCatRate / 100)) + '€/an</div></div>';
       html += '</div>';
@@ -598,13 +649,16 @@
 
   // ═══ MAIN RENDER ═══════════════════════════════════════
   window.renderUnifiedAllocator = async function(container) {
-    // Ensure catManager data is loaded
+    // Ensure catManager + macro data is loaded
     try {
+      container.innerHTML = '<div style="display:flex;align-items:center;gap:10px;padding:20px;color:var(--text-muted)"><div class="spinner"></div>Chargement des données...</div>';
       if (typeof catManager !== 'undefined' && typeof catManager.load === 'function' && !catManager.objectives) {
-        container.innerHTML = '<div style="display:flex;align-items:center;gap:10px;padding:20px;color:var(--text-muted)"><div class="spinner"></div>Chargement des données...</div>';
         await catManager.load();
       }
-    } catch(e) { console.warn('[Allocator] catManager load failed:', e.message); }
+      if (typeof _loadCATMacroData === 'function') {
+        await _loadCATMacroData();
+      }
+    } catch(e) { console.warn('[Allocator] Load failed:', e.message); }
 
     _state.entities = _computeEntities();
     _state.totalCash = _state.entities.bycam.cash + _state.entities.cameleons.cash;
