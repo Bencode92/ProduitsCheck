@@ -194,13 +194,7 @@ function loadScripts(ctx) {
     'js/grader-dispersion-patch.js',
     'js/grader-basket-fix.js',
     'js/basket-detection-v2.js',
-    'js/grader-annualize-patch.js',
-    'js/grader-decrement-patch.js',
-    'js/grader-trigger-penalty-patch.js',
-    'js/grader-dispersion-boost-patch.js',
-    'js/grader-p1-expected-return-patch.js',
-    'js/grader-v6-calibration-patch.js',
-    'js/grader-v6-weights-enforce.js'
+    'js/proposal-grader-v7.js'
   ];
 
   const context = vm.createContext(ctx);
@@ -308,34 +302,9 @@ async function main() {
   }
   console.log(`ProposalGrader v${ctx.ProposalGrader.version} loaded`);
 
-  // Simulate optimizer loading so sprint2's setInterval can fire
-  setTimeout(() => { ctx.buildStructuredOptimization = function() {}; }, 50);
-
-  // Wait for async patches (sprint2 setInterval, etc.)
-  await waitForPatches(ctx);
-
-  // v6-weights-enforce's setInterval callbacks don't reliably fire in Node's
-  // vm context (closures lose their sandbox scope). Apply its logic manually:
-  // wrap grade() to recalculate total with v6 weights (30/15/25/30).
-  const V6W = { p1: 0.30, p2: 0.20, p3: 0.15, p4: 0.30 };
-  const _prevGrade = ctx.ProposalGrader.grade;
-  ctx.ProposalGrader.grade = function(product) {
-    return _prevGrade.call(ctx.ProposalGrader, product).then(function(result) {
-      if (!result || !result.pillars || result.grade === '-') return result;
-      var p1 = result.pillars.adjustedReturn ? result.pillars.adjustedReturn.score : 0;
-      var p2 = result.pillars.underlyingQuality ? result.pillars.underlyingQuality.score : 0;
-      var p3 = result.pillars.portfolioFit ? result.pillars.portfolioFit.score : 0;
-      var p4 = result.pillars.riskPremium ? result.pillars.riskPremium.score : 0;
-      var correct = Math.round(p1 * V6W.p1 + p2 * V6W.p2 + p3 * V6W.p3 + p4 * V6W.p4);
-      if (correct !== result.score) {
-        console.log('[v6-enforce-sim] ' + result.score + ' -> ' + correct +
-          ' | P1=' + p1 + ' P2=' + p2 + ' P3=' + p3 + ' P4=' + p4);
-        result.score = correct;
-        result.grade = correct >= 75 ? 'A' : correct >= 60 ? 'B' : correct >= 45 ? 'C' : correct >= 25 ? 'D' : 'F';
-      }
-      return result;
-    });
-  };
+  // v7 uses a Promise-based init (_waitForBase), wait for it to settle
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  console.log(`ProposalGrader v${ctx.ProposalGrader.version} ready`);
 
   // Grade all products
   console.log('\nGrading products...\n');

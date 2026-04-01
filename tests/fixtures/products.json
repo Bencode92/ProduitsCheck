@@ -4,7 +4,10 @@
     "name": "Dispersion Boostée",
     "structureType": "dispersion",
     "underlyingType": "pairs",
-    "underlyings": ["Siemens Energy", "ASML"],
+    "underlyings": [
+      "Siemens Energy",
+      "ASML"
+    ],
     "maturityYears": 3,
     "maturity": "3 ans",
     "currency": "EUR",
@@ -28,7 +31,7 @@
     "participationRate": 1.0,
     "expectedRank": 1,
     "expectedGrade": "B",
-    "expectedScore": 63,
+    "expectedScore": 62,
     "expectedBsRendementNet": 10.45
   },
   {
@@ -63,7 +66,7 @@
     "emitter": "Société Générale",
     "expectedRank": 2,
     "expectedGrade": "C",
-    "expectedScore": 59,
+    "expectedScore": 58,
     "expectedBsRendementNet": null
   },
   {
@@ -71,7 +74,9 @@
     "name": "Euro Stoxx Banks Autocall",
     "structureType": "autocall",
     "underlyingType": "single-index",
-    "underlyings": ["SX7E"],
+    "underlyings": [
+      "SX7E"
+    ],
     "maturityYears": 5,
     "maturity": "5 ans",
     "currency": "EUR",
@@ -98,7 +103,7 @@
     "autocallThreshold": 100,
     "expectedRank": 5,
     "expectedGrade": "D",
-    "expectedScore": 41,
+    "expectedScore": 40,
     "expectedBsRendementNet": 3.17
   },
   {
@@ -106,7 +111,10 @@
     "name": "Digitale WO LVMH/ACA",
     "structureType": "capital_garanti",
     "underlyingType": "worst-of",
-    "underlyings": ["LVMH", "Crédit Agricole"],
+    "underlyings": [
+      "LVMH",
+      "Crédit Agricole"
+    ],
     "maturityYears": 3,
     "maturity": "3 ans",
     "currency": "EUR",
@@ -129,16 +137,21 @@
       "type": "none"
     },
     "expectedRank": 3,
-    "expectedGrade": "D",
-    "expectedScore": 44,
-    "expectedBsRendementNet": 1.20
+    "expectedGrade": "C",
+    "expectedScore": 46,
+    "expectedBsRendementNet": 1.2
   },
   {
     "id": "objectif-mai-2026",
     "name": "Objectif Mai 2026",
     "structureType": "autocall",
     "underlyingType": "basket",
-    "underlyings": ["ASML", "Banco Santander", "Siemens Energy", "LVMH"],
+    "underlyings": [
+      "ASML",
+      "Banco Santander",
+      "Siemens Energy",
+      "LVMH"
+    ],
     "maturityYears": 6,
     "maturity": "6 ans",
     "currency": "EUR",
@@ -173,7 +186,12 @@
     "name": "Oxygène Objectif",
     "structureType": "autocall",
     "underlyingType": "basket",
-    "underlyings": ["ASML", "Banco Santander", "Siemens Energy", "LVMH"],
+    "underlyings": [
+      "ASML",
+      "Banco Santander",
+      "Siemens Energy",
+      "LVMH"
+    ],
     "maturityYears": 6,
     "maturity": "6 ans",
     "currency": "EUR",
@@ -201,14 +219,16 @@
     "expectedRank": 8,
     "expectedGrade": "D",
     "expectedScore": 31,
-    "expectedBsRendementNet": 0.30
+    "expectedBsRendementNet": 0.3
   },
   {
     "id": "phoenix-richemont",
     "name": "Phoenix Richemont",
     "structureType": "phoenix_memoire",
     "underlyingType": "single-stock",
-    "underlyings": ["Richemont"],
+    "underlyings": [
+      "Richemont"
+    ],
     "maturityYears": 6,
     "maturity": "6 ans",
     "currency": "EUR",
@@ -244,7 +264,9 @@
     "name": "Athena ISP",
     "structureType": "autocall",
     "underlyingType": "single-stock",
-    "underlyings": ["Intesa Sanpaolo"],
+    "underlyings": [
+      "Intesa Sanpaolo"
+    ],
     "maturityYears": 10,
     "maturity": "10 ans",
     "currency": "EUR",
@@ -280,7 +302,9 @@
     "name": "Gold Miners Autocall",
     "structureType": "autocall",
     "underlyingType": "single-index",
-    "underlyings": ["GDX"],
+    "underlyings": [
+      "GDX"
+    ],
     "maturityYears": 5,
     "maturity": "5 ans",
     "currency": "EUR",
