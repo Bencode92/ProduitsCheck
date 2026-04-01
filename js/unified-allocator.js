@@ -129,6 +129,8 @@
     try {
       if (typeof catManager !== 'undefined' && catManager.rates && catManager.rates.rates) {
         var offers = catManager.rates.rates.filter(function(r) {
+          // Only use confirmed rates (user-entered), not web scan
+          if (r.source === 'web scan') return false;
           return r.rate > 0 && (!r.minAmount || amount >= r.minAmount);
         });
         // Get macro context if available
