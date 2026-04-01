@@ -63,7 +63,7 @@ class StructBoard {
   async addProposal(bankId, product) {
     if (!this.state.proposals[bankId]) this.state.proposals[bankId] = [];
     const proposal = { ...product, id: product.id || this._uid(), bankId, status: 'analyzing', receivedDate: new Date().toISOString().split('T')[0], conversation: [], conversationSummary: null, decision: null, decisionReason: null };
-    proposal.score = scoring.calculateScore(proposal, this.state.portfolio);
+    // Legacy scoring removed — grading v6.3 (ProposalGrader.grade) is the only scoring system
     this.state.proposals[bankId].push(proposal);
     await this._saveBankIndex(bankId);
     await this._saveProductFile(bankId, proposal);

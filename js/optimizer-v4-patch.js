@@ -320,7 +320,7 @@
             result._v4.nothingToDo = subscribes.length === 0;
             if (result._v4.nothingToDo) {
                 result._v4.nothingReason = 'Aucune proposition ne d\u00e9passe le seuil de ' + threshold.seuil + '/100 (' + threshold.regime + '). ' +
-                    'Recommandation : garder la liquidit\u00e9 en CAT/Bond 12M (' + (result.catBenchmark || 2.5) + '% sans risque) en attendant de meilleures opportunit\u00e9s.';
+                    'Recommandation : garder la liquidit\u00e9 en CAT/Bond 12M (' + (result.catBenchmark || 2.5).toFixed(1) + '% sans risque) en attendant de meilleures opportunit\u00e9s.';
             }
 
             // Diversification summary

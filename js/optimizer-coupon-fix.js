@@ -78,7 +78,7 @@
                 totalCatReturn: totalCatReturn,
                 totalExcess: totalReturn - totalCatReturn,
                 yieldPct: totalInvested > 0 ? Math.round(totalReturn / totalInvested * 10000) / 100 : 0,
-                catYieldPct: result.catBenchmark || 2.5
+                catYieldPct: Math.round((result.catBenchmark || 2.5) * 100) / 100
             };
 
             return result;
