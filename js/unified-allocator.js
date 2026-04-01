@@ -17,14 +17,16 @@
   };
 
   // ─── MI regime profiles ────────────────────────────────
+  // Profils : immédiat = 1 - court - moyen - long (calculé auto)
+  // CAT existants = la réserve, donc pas besoin de "court" élevé
   var REGIME_PROFILES = {
-    stagflation: { court: 0.60, moyen: 0.25, long: 0.15, label: 'Stagflation — priorité liquidité' },
-    recession:   { court: 0.55, moyen: 0.30, long: 0.15, label: 'Récession — prudence maximale' },
-    crisis:      { court: 0.70, moyen: 0.20, long: 0.10, label: 'Crise — cash is king' },
-    neutral:     { court: 0.40, moyen: 0.35, long: 0.25, label: 'Neutre — équilibré' },
-    bull:        { court: 0.25, moyen: 0.35, long: 0.40, label: 'Haussier — déploiement maximal' },
-    'risk-on':   { court: 0.20, moyen: 0.35, long: 0.45, label: 'Risk-on — agressif' },
-    expansion:   { court: 0.30, moyen: 0.35, long: 0.35, label: 'Expansion — croissance' }
+    stagflation: { court: 0.20, moyen: 0.40, long: 0.40, label: 'Stagflation — capital garanti + rendement' },
+    recession:   { court: 0.30, moyen: 0.40, long: 0.30, label: 'Récession — prudence, moyen terme' },
+    crisis:      { court: 0.50, moyen: 0.30, long: 0.20, label: 'Crise — cash is king' },
+    neutral:     { court: 0.15, moyen: 0.40, long: 0.45, label: 'Neutre — déploiement équilibré' },
+    bull:        { court: 0.10, moyen: 0.35, long: 0.55, label: 'Haussier — déploiement maximal' },
+    'risk-on':   { court: 0.05, moyen: 0.35, long: 0.60, label: 'Risk-on — agressif' },
+    expansion:   { court: 0.10, moyen: 0.40, long: 0.50, label: 'Expansion — croissance' }
   };
 
   // ─── Horizon buckets ───────────────────────────────────
@@ -32,7 +34,7 @@
     { id: 'immediat',   label: 'Immédiat', sublabel: '< 3 mois',   icon: '🔴', maxMonths: 3,   color: '#EF233C' },
     { id: 'court',      label: 'Court terme', sublabel: '3-12 mois', icon: '🟠', maxMonths: 12,  color: '#FFB627' },
     { id: 'moyen',      label: 'Moyen terme', sublabel: '1-3 ans',   icon: '🟡', maxMonths: 36,  color: '#4ECDC4' },
-    { id: 'long',       label: 'Long terme', sublabel: '3-7 ans',    icon: '🟢', maxMonths: 84,  color: '#06D6A0' }
+    { id: 'long',       label: 'Long terme', sublabel: '3-10 ans',   icon: '🟢', maxMonths: 120, color: '#06D6A0' }
   ];
 
   // ─── Get current regime ────────────────────────────────
@@ -113,6 +115,11 @@
         var cp = p.capitalProtection || {};
         var isCapGaranti = cp.protected === true || (p.structureType || '').indexOf('capital_garanti') >= 0 || (p.structureType || '').indexOf('dispersion') >= 0 || (p.structureType || '').indexOf('taux_fixe') >= 0;
         var rdtNet = p._bsRendementNet || (p.grading.metadata && p.grading.metadata.bsRendementNet) || p._ratesRendementNet || null;
+        // Fallback for taux fixe: use guaranteed coupon rate
+        if (rdtNet == null && (p.structureType === 'taux_fixe' || isCapGaranti)) {
+          var c = p.coupon;
+          rdtNet = typeof c === 'object' ? (parseFloat(c.rateIfCalled || c.rate) || 0) : (parseFloat(c) || 0);
+        }
         candidates.push({
           id: p.id,
           name: p.name || 'Produit',
