@@ -827,6 +827,13 @@
         h += '<td style="padding:4px 8px;text-align:right;font-family:var(--mono);font-size:10px;color:var(--orange)">+' + _fmt(cashR) + '€</td>';
         h += '<td style="padding:4px 8px;text-align:right;font-family:var(--mono);font-size:10px;color:var(--orange)">+' + _fmt(cashR) + '€</td></tr>';
       }
+      // Sub-total for this entity
+      h += '<tr style="border-bottom:2px solid var(--border);background:rgba(59,130,246,0.03)">';
+      h += '<td style="padding:6px 12px 6px 24px;font-weight:700;color:var(--text-bright);font-size:10px">Sous-total ' + label + '</td>';
+      h += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);font-size:10px;font-weight:700">' + _fmt(totalPat) + '€</td>';
+      h += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);font-size:10px;font-weight:600;color:var(--text-muted)">+' + _fmt(totalBefore) + '€</td>';
+      h += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);font-size:10px;font-weight:700;color:var(--green)">+' + _fmt(totalAfter) + '€</td>';
+      h += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);font-size:10px;font-weight:700;color:' + (totalAfter - totalBefore > 0 ? 'var(--green)' : 'var(--text-dim)') + '">' + (totalAfter - totalBefore > 0 ? '+' : '') + _fmt(totalAfter - totalBefore) + '€</td></tr>';
       return h;
     };
 
