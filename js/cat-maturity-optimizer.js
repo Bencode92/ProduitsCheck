@@ -272,10 +272,26 @@
     if (!analyses || analyses.length === 0) return '';
 
     var totalMaturing = analyses.reduce(function(s, a) { return s + a.group.totalAmount; }, 0);
+    // Check if allocator recommends keeping all contracts (Règle 1)
+    var _allKept = false;
+    try {
+      var _ar = window._allocatorResult;
+      if (_ar && _ar.entities) {
+        var _anyArbitrage = false;
+        Object.values(_ar.entities).forEach(function(entR) {
+          if (entR.contractActions) entR.contractActions.forEach(function(ca) {
+            if (ca.recommendation === 'arbitrer') _anyArbitrage = true;
+          });
+        });
+        _allKept = !_anyArbitrage;
+      }
+    } catch(e) {}
+    var statusLabel = _allKept ? '✋ à conserver (taux actuel > offres)' : 'à réallouer';
+    var statusColor = _allKept ? 'var(--green)' : 'var(--orange)';
     var html = '<div style="border:2px solid rgba(255,182,39,0.3);border-radius:var(--radius-sm);padding:14px;margin-bottom:14px;background:rgba(255,182,39,0.03)">';
     html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">';
     html += '<div style="font-size:13px;font-weight:700;color:var(--orange)">🔔 CAT à échéance (' + MATURITY_HORIZON_MONTHS + ' prochains mois)</div>';
-    html += '<div style="font-family:var(--mono);font-weight:700;color:var(--orange)">' + _fmt(totalMaturing) + '€ à réallouer</div>';
+    html += '<div style="font-family:var(--mono);font-weight:700;color:' + statusColor + '">' + _fmt(totalMaturing) + '€ ' + statusLabel + '</div>';
     html += '</div>';
 
     analyses.forEach(function(a) {

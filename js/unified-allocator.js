@@ -1312,6 +1312,7 @@
     allResults.objective = _state.objective || 'long';
 
     _state.result = allResults;
+    window._allocatorResult = allResults; // expose for cat-maturity-optimizer
     _renderResult(document.getElementById('main-content'), allResults);
   };
 
