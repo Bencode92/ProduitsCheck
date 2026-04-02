@@ -696,17 +696,128 @@
     // Issuer exposure + FGDR view
     html += _renderIssuerExposure(result);
 
-    // Combined summary
+    // Collect existing CAT returns for "avant" view
+    var catExistingReturn = 0;
+    var catExistingTotal = 0;
+    try {
+      if (typeof catManager !== 'undefined' && catManager.deposits) {
+        catManager.deposits.forEach(function(d) {
+          if (d.status !== 'active') return;
+          var amt = parseFloat(d.amount) || 0;
+          catExistingTotal += amt;
+          catExistingReturn += Math.round(amt * (parseFloat(d.rate) || 0) / 100);
+        });
+      }
+    } catch(e) {}
+
+    // Portfolio structured returns
+    var pfStructReturn = 0, pfStructTotal = 0, pfFundReturn = 0, pfFundTotal = 0;
+    try {
+      (app.state.portfolio || []).forEach(function(p) {
+        var amt = parseFloat(p.investedAmount) || 0;
+        if (p.grading && p.grading.grade === '-') {
+          pfFundTotal += amt;
+          pfFundReturn += Math.round(amt * 2.5 / 100);
+        } else if (p.grading && p.grading.score) {
+          pfStructTotal += amt;
+          var coupon = (p.coupon && p.coupon.rate) || parseFloat(p.coupon) || 0;
+          pfStructReturn += Math.round(amt * coupon / 100);
+        }
+      });
+    } catch(e) {}
+
+    var patrimoineTotal = catExistingTotal + pfStructTotal + pfFundTotal + _state.totalCash;
+    var avantReturn = catExistingReturn + pfStructReturn + pfFundReturn;
+    var apresReturn = avantReturn + result.totalReturn;
+    var avantTaux = patrimoineTotal > 0 ? Math.round(avantReturn / patrimoineTotal * 10000) / 100 : 0;
+    var apresTotalReturn = apresReturn;
+    var apresToux = patrimoineTotal > 0 ? Math.round(apresTotalReturn / patrimoineTotal * 10000) / 100 : 0;
+
+    // Combined summary — patrimoine view
     html += '<div style="border:2px solid var(--accent);border-radius:var(--radius);overflow:hidden;margin-top:8px">';
     html += '<div style="padding:12px 16px;background:rgba(59,130,246,0.08);display:flex;justify-content:space-between;align-items:center">';
-    html += '<span style="font-size:13px;font-weight:700;color:var(--accent)">📊 Synthèse combinée</span>';
+    html += '<span style="font-size:13px;font-weight:700;color:var(--accent)">📊 Synthèse patrimoniale</span>';
     html += '<span style="font-size:11px;color:var(--text-dim)">Régime ' + result.regime + '</span></div>';
-    html += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border)">';
-    html += '<div style="background:var(--bg-card);padding:12px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted)">Rendement/an</div><div style="font-size:18px;font-weight:800;color:var(--green);font-family:var(--mono)">+' + _fmt(result.totalReturnAll) + '€</div></div>';
-    html += '<div style="background:var(--bg-card);padding:12px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted)">Taux moyen</div><div style="font-size:18px;font-weight:800;color:var(--cyan);font-family:var(--mono)">' + result.weightedRate.toFixed(1) + '%</div></div>';
-    html += '<div style="background:var(--bg-card);padding:12px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted)">vs tout CAT</div><div style="font-size:18px;font-weight:800;color:' + (result.excessVsCat >= 0 ? 'var(--green)' : 'var(--red)') + ';font-family:var(--mono)">' + (result.excessVsCat >= 0 ? '+' : '') + _fmt(result.excessVsCat) + '€</div></div>';
-    html += '<div style="background:var(--bg-card);padding:12px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted)">Capital garanti</div><div style="font-size:18px;font-weight:800;color:var(--green);font-family:var(--mono)">🛡️ 100%</div></div>';
-    html += '</div></div>';
+
+    // Tableau récap
+    html += '<table style="width:100%;border-collapse:collapse;font-size:11px">';
+    html += '<thead><tr style="background:var(--bg-elevated);border-bottom:1px solid var(--border)">';
+    html += '<th style="padding:8px 12px;text-align:left;color:var(--text-muted)"></th>';
+    html += '<th style="padding:8px;text-align:right;color:var(--text-muted)">Patrimoine</th>';
+    html += '<th style="padding:8px;text-align:right;color:var(--text-muted)">Rdt/an avant</th>';
+    html += '<th style="padding:8px;text-align:right;color:var(--text-muted)">Rdt/an après</th>';
+    html += '<th style="padding:8px;text-align:right;color:var(--text-muted)">Diff</th>';
+    html += '</tr></thead><tbody>';
+
+    // CAT existants
+    html += '<tr style="border-bottom:1px solid var(--border)">';
+    html += '<td style="padding:6px 12px;color:var(--text-bright)">🏦 CAT existants</td>';
+    html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono)">' + _fmt(catExistingTotal) + '€</td>';
+    html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:var(--text-muted)">+' + _fmt(catExistingReturn) + '€</td>';
+    html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:var(--text-muted)">+' + _fmt(catExistingReturn) + '€</td>';
+    html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:var(--text-dim)">—</td></tr>';
+
+    // Structurés portefeuille
+    if (pfStructTotal > 0) {
+      html += '<tr style="border-bottom:1px solid var(--border)">';
+      html += '<td style="padding:6px 12px;color:var(--text-bright)">📦 Structurés (portefeuille)</td>';
+      html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono)">' + _fmt(pfStructTotal) + '€</td>';
+      html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:var(--text-muted)">+' + _fmt(pfStructReturn) + '€</td>';
+      html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:var(--text-muted)">+' + _fmt(pfStructReturn) + '€</td>';
+      html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:var(--text-dim)">—</td></tr>';
+    }
+
+    // Fonds (Bond 12M)
+    if (pfFundTotal > 0) {
+      html += '<tr style="border-bottom:1px solid var(--border)">';
+      html += '<td style="padding:6px 12px;color:var(--text-bright)">🔄 Fonds (Bond 12M)</td>';
+      html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono)">' + _fmt(pfFundTotal) + '€</td>';
+      html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:var(--text-muted)">+' + _fmt(pfFundReturn) + '€</td>';
+      html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:var(--text-muted)">+' + _fmt(pfFundReturn) + '€</td>';
+      html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:var(--text-dim)">—</td></tr>';
+    }
+
+    // New allocations
+    html += '<tr style="border-bottom:1px solid var(--border);background:rgba(6,214,160,0.04)">';
+    html += '<td style="padding:6px 12px;color:var(--green);font-weight:700">⚡ Nouvelles allocations</td>';
+    html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:var(--cyan);font-weight:700">' + _fmt(result.totalAllocated) + '€</td>';
+    html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:var(--text-dim)">0€</td>';
+    html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:var(--green);font-weight:700">+' + _fmt(result.totalReturn) + '€</td>';
+    html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:var(--green);font-weight:700">+' + _fmt(result.totalReturn) + '€</td></tr>';
+
+    // Cash non alloué → CAT
+    var cashInCat = result.totalReturnAll - result.totalReturn;
+    var cashAmount = _state.totalCash - result.totalAllocated;
+    if (cashAmount > 0) {
+      html += '<tr style="border-bottom:1px solid var(--border)">';
+      html += '<td style="padding:6px 12px;color:var(--orange)">🏦 Cash → CAT</td>';
+      html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono)">' + _fmt(cashAmount) + '€</td>';
+      html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:var(--text-dim)">0€</td>';
+      html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:var(--orange)">+' + _fmt(cashInCat) + '€</td>';
+      html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:var(--orange)">+' + _fmt(cashInCat) + '€</td></tr>';
+    }
+
+    // Total
+    html += '<tr style="border-top:2px solid var(--accent);background:var(--bg-elevated)">';
+    html += '<td style="padding:10px 12px;font-weight:800;color:var(--text-bright);font-size:12px">TOTAL PATRIMOINE</td>';
+    html += '<td style="padding:10px 8px;text-align:right;font-family:var(--mono);font-weight:800;color:var(--text-bright)">' + _fmt(patrimoineTotal) + '€</td>';
+    html += '<td style="padding:10px 8px;text-align:right;font-family:var(--mono);font-weight:700;color:var(--text-muted)">+' + _fmt(avantReturn) + '€</td>';
+    html += '<td style="padding:10px 8px;text-align:right;font-family:var(--mono);font-weight:800;color:var(--green)">+' + _fmt(apresTotalReturn) + '€</td>';
+    html += '<td style="padding:10px 8px;text-align:right;font-family:var(--mono);font-weight:800;color:var(--green)">+' + _fmt(result.totalReturn + cashInCat) + '€</td></tr>';
+
+    // Taux row
+    html += '<tr style="background:var(--bg-elevated)">';
+    html += '<td style="padding:6px 12px;color:var(--text-dim);font-size:10px">Taux moyen patrimoine</td>';
+    html += '<td></td>';
+    html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);font-size:10px;color:var(--text-dim)">' + avantTaux.toFixed(2) + '%</td>';
+    html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);font-size:10px;color:var(--green)">' + apresToux.toFixed(2) + '%</td>';
+    html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);font-size:10px;color:var(--green)">+' + (apresToux - avantTaux).toFixed(2) + '%</td></tr>';
+
+    html += '</tbody></table>';
+
+    // Capital garanti badge
+    html += '<div style="padding:8px 16px;background:rgba(6,214,160,0.06);text-align:center;font-size:11px;color:var(--green);font-weight:600">🛡️ Capital garanti 100% sur toutes les nouvelles allocations</div>';
+    html += '</div>';
 
     html += '</div>';
     container.innerHTML = html;
@@ -825,12 +936,24 @@
   function _renderIssuerExposure(result) {
     var issuers = {};
 
+    // Normalize bank names to avoid duplicates (cic vs CIC)
+    var _normBank = function(b) {
+      var map = {
+        'sg': 'Société Générale', 'societe generale': 'Société Générale', 'société générale': 'Société Générale',
+        'cic': 'CIC', 'swiss-life': 'Swiss Life', 'swisslife': 'Swiss Life',
+        'bnp': 'BNP Paribas', 'bnpp': 'BNP Paribas',
+        'banque populaire': 'Banque Populaire', 'bp': 'Banque Populaire'
+      };
+      var lower = (b || 'Inconnu').toLowerCase().trim();
+      return map[lower] || b || 'Inconnu';
+    };
+
     // 1. Collect from CAT deposits
     try {
       if (typeof catManager !== 'undefined' && catManager.deposits) {
         catManager.deposits.forEach(function(d) {
           if (d.status !== 'active') return;
-          var bank = d.bankName || 'Inconnu';
+          var bank = _normBank(d.bankName);
           if (!issuers[bank]) issuers[bank] = { cat: 0, structured: 0, fund: 0, total: 0 };
           issuers[bank].cat += parseFloat(d.amount) || 0;
         });
@@ -840,13 +963,11 @@
     // 2. Collect from portfolio (structured products + funds)
     try {
       (app.state.portfolio || []).forEach(function(p) {
+        var bank = _normBank(p.bankId);
         if (p.grading && p.grading.grade === '-') {
-          // Liquidity product (Bond 12M etc.)
-          var bank = p.bankId === 'swiss-life' ? 'Swiss Life' : (p.bankId || 'Inconnu');
           if (!issuers[bank]) issuers[bank] = { cat: 0, structured: 0, fund: 0, total: 0 };
           issuers[bank].fund += parseFloat(p.investedAmount) || 0;
         } else if (p.grading) {
-          var bank = p.bankId === 'swiss-life' ? 'Swiss Life' : p.bankId === 'sg' ? 'Société Générale' : (p.bankId || 'Inconnu');
           if (!issuers[bank]) issuers[bank] = { cat: 0, structured: 0, fund: 0, total: 0 };
           issuers[bank].structured += parseFloat(p.investedAmount) || 0;
         }
@@ -858,7 +979,7 @@
       (entResult.tranches || []).forEach(function(tr) {
         (tr.allocations || []).forEach(function(a) {
           if (a.type === 'structured') {
-            var bank = (a.bankName === 'sg' ? 'Société Générale' : a.bankName) || 'Inconnu';
+            var bank = _normBank(a.bankName);
             if (!issuers[bank]) issuers[bank] = { cat: 0, structured: 0, fund: 0, total: 0 };
             issuers[bank].structured += a.amount;
           }
