@@ -206,6 +206,36 @@
     return norm;
   }
 
+  // ═══ SECTION 4b: CORRELATION DATA (from stock-analysis-platform) ═══
+  var _corrData = null;
+  function _loadCorrData() {
+    if (_corrData !== null) return Promise.resolve(_corrData);
+    return fetch('data/market/corr_dispersion_tech.json').then(function(r) {
+      if (!r.ok) return null;
+      return r.json();
+    }).then(function(d) {
+      _corrData = d || false;
+      if (d && d.correlation_1y) {
+        console.log('[Grader v7] Correlation data loaded: avg=' + d.correlation_1y.avg.toFixed(3) + ' (' + (d._meta.tickers || []).join(',') + ')');
+      }
+      return _corrData;
+    }).catch(function() { _corrData = false; return false; });
+  }
+
+  function _getRealCorrelation(unds) {
+    if (!_corrData || !_corrData.correlation_1y || !_corrData._meta) return null;
+    // Check if the product underlyings match the correlation data tickers
+    var corrTickers = (_corrData._meta.tickers || []).map(function(t) { return t.toUpperCase(); });
+    var matched = 0;
+    (unds || []).forEach(function(u) {
+      var upper = u.toUpperCase();
+      if (corrTickers.some(function(t) { return upper.indexOf(t) >= 0 || t.indexOf(upper) >= 0; })) matched++;
+    });
+    // If at least 50% of underlyings match, use the real correlation
+    if (matched >= unds.length * 0.5) return _corrData.correlation_1y.avg;
+    return null;
+  }
+
   // ═══ SECTION 5: BS P1 CALCULATION ═══
   function _computeBSP1(product, norm, rfRate) {
     var coupon = product.coupon || {};
@@ -248,19 +278,29 @@
     var r = rfRate || 2.5;
     var probCoupon, couponEffectif, perteEsperee;
 
+    // Get real correlation if available (from stock-analysis-platform data)
+    var realCorr = _getRealCorrelation(unds);
+    var corrUsed = realCorr || 0.4; // fallback to 0.4
+
     if (isDispersion) {
       probCoupon = 0.95;
-      couponEffectif = norm._dispersionMedian ? (norm._dispersionMedian / matMax) : 11 / matMax;
-      // Use total median as rendement
-      couponEffectif = 11; // default dispersion median return
+      // Adjust dispersion return based on real correlation
+      // Higher correlation → less dispersion → lower return
+      // Base: 11% at corr 0.30, scales inversely
+      var dispBase = 11;
+      if (realCorr != null) {
+        // corr 0.30 → 12%, corr 0.43 → 9%, corr 0.60 → 6%, corr 0.90 → 1%
+        dispBase = Math.max(0.5, Math.round((1 - realCorr) * 16 * 10) / 10);
+      }
+      couponEffectif = dispBase;
     } else if (isBasket && vols.length > 1) {
-      var bVol = _basketVol(vols, 0.4);
+      var bVol = _basketVol(vols, corrUsed);
       probCoupon = _probAbove(triggerCoupon, bVol, matEsperee, r);
       couponEffectif = annRate;
     } else if (isWorstOf && vols.length > 1) {
       var probs = vols.map(function(v) { return _probAbove(triggerCoupon, v, matEsperee, r); });
       probCoupon = probs.reduce(function(a, b) { return a * b; }, 1);
-      var corrAdj = 1 + 0.15 * (vols.length - 1);
+      var corrAdj = 1 + (realCorr || 0.15) * (vols.length - 1);
       probCoupon = Math.min(probCoupon * corrAdj, Math.min.apply(null, probs));
       couponEffectif = annRate;
     } else {
@@ -464,8 +504,11 @@
   }
 
   _waitForBase().then(function() {
-    // Load vol data at startup
-    _loadVolData().then(function() {
+    // Load vol data + correlation data at startup
+    Promise.all([
+      _loadVolData(),
+      _loadCorrData()
+    ]).then(function() {
       console.log('[Grader v7] Vol data: ' + Object.keys(_volData.stocks).length + ' stocks, ' + Object.keys(_volData.indices).length + ' indices');
     });
 
