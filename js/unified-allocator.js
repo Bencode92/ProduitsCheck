@@ -689,6 +689,9 @@
       html += _renderMaturityOptimizer();
     }
 
+    // Issuer exposure + FGDR view
+    html += _renderIssuerExposure(result);
+
     // Combined summary
     html += '<div style="border:2px solid var(--accent);border-radius:var(--radius);overflow:hidden;margin-top:8px">';
     html += '<div style="padding:12px 16px;background:rgba(59,130,246,0.08);display:flex;justify-content:space-between;align-items:center">';
@@ -813,6 +816,117 @@
     _state.result = allResults;
     _renderResult(document.getElementById('main-content'), allResults);
   };
+
+  // ═══ ISSUER EXPOSURE + FGDR ═════════════════════════════
+  function _renderIssuerExposure(result) {
+    var issuers = {};
+
+    // 1. Collect from CAT deposits
+    try {
+      if (typeof catManager !== 'undefined' && catManager.deposits) {
+        catManager.deposits.forEach(function(d) {
+          if (d.status !== 'active') return;
+          var bank = d.bankName || 'Inconnu';
+          if (!issuers[bank]) issuers[bank] = { cat: 0, structured: 0, fund: 0, total: 0 };
+          issuers[bank].cat += parseFloat(d.amount) || 0;
+        });
+      }
+    } catch(e) {}
+
+    // 2. Collect from portfolio (structured products + funds)
+    try {
+      (app.state.portfolio || []).forEach(function(p) {
+        if (p.grading && p.grading.grade === '-') {
+          // Liquidity product (Bond 12M etc.)
+          var bank = p.bankId === 'swiss-life' ? 'Swiss Life' : (p.bankId || 'Inconnu');
+          if (!issuers[bank]) issuers[bank] = { cat: 0, structured: 0, fund: 0, total: 0 };
+          issuers[bank].fund += parseFloat(p.investedAmount) || 0;
+        } else if (p.grading) {
+          var bank = p.bankId === 'swiss-life' ? 'Swiss Life' : p.bankId === 'sg' ? 'Société Générale' : (p.bankId || 'Inconnu');
+          if (!issuers[bank]) issuers[bank] = { cat: 0, structured: 0, fund: 0, total: 0 };
+          issuers[bank].structured += parseFloat(p.investedAmount) || 0;
+        }
+      });
+    } catch(e) {}
+
+    // 3. Add proposed allocations from result
+    Object.values(result.entities || {}).forEach(function(entResult) {
+      (entResult.tranches || []).forEach(function(tr) {
+        (tr.allocations || []).forEach(function(a) {
+          if (a.type === 'structured') {
+            var bank = (a.bankName === 'sg' ? 'Société Générale' : a.bankName) || 'Inconnu';
+            if (!issuers[bank]) issuers[bank] = { cat: 0, structured: 0, fund: 0, total: 0 };
+            issuers[bank].structured += a.amount;
+          }
+        });
+      });
+    });
+
+    // Calculate totals
+    var grandTotal = 0;
+    Object.keys(issuers).forEach(function(bank) {
+      issuers[bank].total = issuers[bank].cat + issuers[bank].structured + issuers[bank].fund;
+      issuers[bank].fgdr = Math.min(100000, issuers[bank].cat); // FGDR covers CAT only, max 100K
+      issuers[bank].exposed = issuers[bank].total - issuers[bank].fgdr;
+      grandTotal += issuers[bank].total;
+    });
+
+    // Sort by total descending
+    var sorted = Object.keys(issuers).sort(function(a, b) { return issuers[b].total - issuers[a].total; });
+
+    // Render
+    var html = '<div style="border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:14px">';
+    html += '<div style="padding:10px 14px;background:var(--bg-elevated);display:flex;justify-content:space-between;align-items:center">';
+    html += '<span style="font-size:12px;font-weight:700;color:var(--text-bright)">🏛️ Exposition émetteur + FGDR</span>';
+    html += '<span style="font-size:10px;color:var(--text-dim)">Plafond FGDR : 100 000€/banque (CAT uniquement)</span>';
+    html += '</div>';
+
+    // Table header
+    html += '<table style="width:100%;border-collapse:collapse;font-size:11px">';
+    html += '<thead><tr style="background:var(--bg-elevated);border-bottom:1px solid var(--border)">';
+    html += '<th style="padding:6px 12px;text-align:left;color:var(--text-muted);font-weight:500">Émetteur</th>';
+    html += '<th style="padding:6px 8px;text-align:right;color:var(--text-muted);font-weight:500">CAT</th>';
+    html += '<th style="padding:6px 8px;text-align:right;color:var(--text-muted);font-weight:500">Structurés</th>';
+    html += '<th style="padding:6px 8px;text-align:right;color:var(--text-muted);font-weight:500">Fonds</th>';
+    html += '<th style="padding:6px 8px;text-align:right;color:var(--text-muted);font-weight:500">Total</th>';
+    html += '<th style="padding:6px 8px;text-align:right;color:var(--text-muted);font-weight:500">FGDR</th>';
+    html += '<th style="padding:6px 8px;text-align:right;color:var(--text-muted);font-weight:500">Exposé</th>';
+    html += '<th style="padding:6px 8px;text-align:center;color:var(--text-muted);font-weight:500">% patrimoine</th>';
+    html += '</tr></thead><tbody>';
+
+    sorted.forEach(function(bank) {
+      var d = issuers[bank];
+      var pct = grandTotal > 0 ? Math.round(d.total / grandTotal * 100) : 0;
+      var isWarning = pct > 30 || d.exposed > 500000;
+      var rowBg = isWarning ? 'rgba(255,182,39,0.04)' : '';
+
+      html += '<tr style="border-bottom:1px solid var(--border);background:' + rowBg + '">';
+      html += '<td style="padding:6px 12px;font-weight:600;color:var(--text-bright)">' + bank + '</td>';
+      html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:var(--text-muted)">' + (d.cat > 0 ? _fmt(d.cat) + '€' : '—') + '</td>';
+      html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:var(--cyan)">' + (d.structured > 0 ? _fmt(d.structured) + '€' : '—') + '</td>';
+      html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:var(--text-muted)">' + (d.fund > 0 ? _fmt(d.fund) + '€' : '—') + '</td>';
+      html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);font-weight:700;color:var(--text-bright)">' + _fmt(d.total) + '€</td>';
+      html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:var(--green)">' + (d.fgdr > 0 ? _fmt(d.fgdr) + '€' : '—') + '</td>';
+      html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:' + (d.exposed > 200000 ? 'var(--red)' : 'var(--orange)') + '">' + _fmt(d.exposed) + '€</td>';
+      html += '<td style="padding:6px 8px;text-align:center"><span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;' +
+        (isWarning ? 'background:rgba(255,182,39,0.12);color:var(--orange)' : 'background:rgba(6,214,160,0.12);color:var(--green)') + '">' + pct + '%' + (isWarning ? ' ⚠️' : '') + '</span></td>';
+      html += '</tr>';
+    });
+
+    // Total row
+    var totalFgdr = sorted.reduce(function(s, b) { return s + issuers[b].fgdr; }, 0);
+    var totalExposed = sorted.reduce(function(s, b) { return s + issuers[b].exposed; }, 0);
+    html += '<tr style="border-top:2px solid var(--accent);background:var(--bg-elevated)">';
+    html += '<td style="padding:8px 12px;font-weight:800;color:var(--text-bright)">TOTAL</td>';
+    html += '<td colspan="3"></td>';
+    html += '<td style="padding:8px 8px;text-align:right;font-family:var(--mono);font-weight:800;color:var(--text-bright)">' + _fmt(grandTotal) + '€</td>';
+    html += '<td style="padding:8px 8px;text-align:right;font-family:var(--mono);font-weight:700;color:var(--green)">' + _fmt(totalFgdr) + '€</td>';
+    html += '<td style="padding:8px 8px;text-align:right;font-family:var(--mono);font-weight:700;color:var(--red)">' + _fmt(totalExposed) + '€</td>';
+    html += '<td style="padding:8px 8px;text-align:center;font-size:10px;color:var(--text-dim)">' + Math.round(totalFgdr / grandTotal * 100) + '% couvert</td>';
+    html += '</tr></tbody></table></div>';
+
+    return html;
+  }
 
   // ═══ MAIN RENDER ═══════════════════════════════════════
   window.renderUnifiedAllocator = async function(container) {
