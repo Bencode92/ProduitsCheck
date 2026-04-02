@@ -401,58 +401,74 @@
         if (remaining <= 0) return;
         var minReq = c.minInvestment || 0;
 
-        // v2: When sourcing from maturing CAT contracts, limit to individual contract amounts
-        // Find how much we can actually source from available contracts that this product beats
-        var availableFromContracts = 0;
+        // v2.1: Per-contract sourcing — exit whole contracts only, minimum disruption
+        // Step 1: Identify free cash vs contract-locked cash in budget
+        var unusedContractTotal = maturingContracts.reduce(function(s, mc) {
+          return s + (contractUsed[mc.id] ? 0 : mc.amount);
+        }, 0);
+        var freeCashInBudget = Math.max(0, remaining - unusedContractTotal);
+
+        // Step 2: Find eligible contracts (product beats contract rate + spread)
+        var eligibleContracts = [];
         if (maturingContracts.length > 0) {
-          maturingContracts.forEach(function(mc) {
-            if (contractUsed[mc.id]) return;
-            // Only source from contracts where the structured product beats the contract rate + spread
+          eligibleContracts = maturingContracts.filter(function(mc) {
+            if (contractUsed[mc.id]) return false;
             var reqSpread = _spreadByDuration(c.durationMonths) * miFactor;
-            if (c.rate >= mc.rate + reqSpread) {
-              availableFromContracts += mc.amount;
-            }
-          });
+            return c.rate >= mc.rate + reqSpread;
+          }).sort(function(a, b) { return a.amount - b.amount; }); // smallest first
         }
 
-        // Total available = free cash portion + eligible contract amounts
-        var freeCashInBudget = Math.max(0, remaining - maturingContracts.reduce(function(s, mc) {
-          return s + (contractUsed[mc.id] ? 0 : mc.amount);
-        }, 0));
-        // If no maturing contracts, all budget is free cash (original behavior)
-        var effectiveAvailable = maturingContracts.length > 0
-          ? Math.min(remaining, freeCashInBudget + availableFromContracts)
-          : remaining;
+        // Step 3: Determine allocation amount
+        // Key rule: only exit WHOLE contracts, and only the minimum needed
+        var amount;
+        if (maturingContracts.length === 0) {
+          // No maturing contracts in play — pure free cash, original behavior
+          if (minReq > 0 && remaining < minReq) return;
+          var effectiveMax = minReq > maxPer ? minReq : maxPer;
+          amount = Math.min(remaining, effectiveMax);
+        } else {
+          // Maturing contracts in play — must respect contract boundaries
+          // Calculate: how many whole contracts to exit?
+          // The allocation = free cash + N whole contracts, where N is minimal
+          var neededFromContracts = Math.max(0, (minReq || 0) - freeCashInBudget);
+          var contractsToExit = [];
+          var contractSum = 0;
+          for (var ci = 0; ci < eligibleContracts.length; ci++) {
+            if (contractSum >= neededFromContracts && contractsToExit.length > 0) break;
+            contractsToExit.push(eligibleContracts[ci]);
+            contractSum += eligibleContracts[ci].amount;
+          }
 
-        if (effectiveAvailable <= 0) return;
-        // If minimum investment exceeds available budget, skip
-        if (minReq > 0 && effectiveAvailable < minReq) return;
-        // If minimum > cap 30%, use minimum (override cap)
-        var effectiveMax = minReq > maxPer ? minReq : maxPer;
-        var amount = Math.min(effectiveAvailable, effectiveMax);
+          // Total available = free cash + exited contracts
+          var totalFromContracts = contractsToExit.reduce(function(s, mc) { return s + mc.amount; }, 0);
+          var effectiveAvailable = freeCashInBudget + totalFromContracts;
+
+          if (effectiveAvailable <= 0) return;
+          if (minReq > 0 && effectiveAvailable < minReq) return;
+
+          // Cap: min(available, cap30) — but cap30 cannot split a contract
+          // If only 1 contract exited (150K) and cap30 = 213K → use 150K (contract amount)
+          // If free cash 50K + 1 contract 150K = 200K and cap30 = 213K → use 200K
+          var effectiveMax = minReq > maxPer ? minReq : maxPer;
+          amount = Math.min(effectiveAvailable, effectiveMax);
+
+          // Round DOWN to respect contract boundaries:
+          // amount can't exceed free cash + sum of whole exited contracts
+          amount = Math.min(amount, effectiveAvailable);
+        }
+
         amount = Math.round(amount / 1000) * 1000;
         if (amount < 1000) return;
         if (minReq > 0 && amount < minReq) return; // after rounding
 
-        // Mark which contracts are being sourced
-        var amountToSource = amount;
-        // First use free cash
-        var usedFreeCash = Math.min(freeCashInBudget, amountToSource);
-        amountToSource -= usedFreeCash;
-        // Then source from contracts (smallest first to minimize disruption)
-        if (amountToSource > 0 && maturingContracts.length > 0) {
-          var sortedContracts = maturingContracts.filter(function(mc) {
-            if (contractUsed[mc.id]) return false;
-            var reqSpread = _spreadByDuration(c.durationMonths) * miFactor;
-            return c.rate >= mc.rate + reqSpread;
-          }).sort(function(a, b) { return a.amount - b.amount; });
-
-          sortedContracts.forEach(function(mc) {
-            if (amountToSource <= 0) return;
-            var take = Math.min(mc.amount, amountToSource);
-            amountToSource -= take;
-            contractUsed[mc.id] = true;
-          });
+        // Mark which contracts are being sourced (whole contracts only)
+        var amountToSource = Math.max(0, amount - freeCashInBudget);
+        if (amountToSource > 0 && eligibleContracts.length > 0) {
+          for (var ci2 = 0; ci2 < eligibleContracts.length; ci2++) {
+            if (amountToSource <= 0) break;
+            contractUsed[eligibleContracts[ci2].id] = true;
+            amountToSource -= eligibleContracts[ci2].amount;
+          }
         }
 
         allocs.push({
@@ -491,36 +507,48 @@
     var catEquivReturn = Math.round(totalCash * bestCatRate / 100);
     var weightedRate = totalAllocated > 0 ? (totalReturn / totalAllocated * 100) : 0;
 
-    // v2: compute per-contract recommendations for maturing CAT
+    // v2.1: compute per-contract recommendations for maturing CAT
+    // Uses contractUsed map from allocation loop to know which contracts were exited
     var contractActions = [];
+    var keptContractsRate = 0; // highest rate among kept contracts (for Règle 1)
+    var keptContractsCount = 0;
     var hasMaturingCat = !!(_state.includeMaturingCat && _state.includeMaturingCat[entityKey] && ent && ent.maturingCat > 0);
     if (hasMaturingCat && ent && ent.maturingDetails.length > 0) {
       var catOffers = _getCATOffers(0);
       var bestOffer = catOffers.length > 0 ? catOffers[0] : null;
+
+      // Find which structured product was allocated (if any)
+      var allocatedStruct = null;
+      results.forEach(function(tr) {
+        tr.allocations.forEach(function(a) {
+          if (a.type === 'structured' && !allocatedStruct) allocatedStruct = a;
+        });
+      });
+
       ent.maturingDetails.forEach(function(c) {
         var action = { contract: c, recommendation: 'garder', reason: '', target: null };
-        // Check if any structured product was allocated from this entity's budget
-        var allocatedStruct = null;
-        results.forEach(function(tr) {
-          tr.allocations.forEach(function(a) {
-            if (a.type === 'structured' && !allocatedStruct) allocatedStruct = a;
-          });
-        });
-        if (allocatedStruct && allocatedStruct.rate >= c.rate + _spreadByDuration(allocatedStruct.durationMonths) * miFactor) {
+
+        if (contractUsed[c.id] && allocatedStruct) {
+          // This contract was exited for the structured product
           action.recommendation = 'arbitrer';
           action.reason = allocatedStruct.name + ' à ' + allocatedStruct.rate.toFixed(1) + '% bat ' + c.rate.toFixed(2) + '% + spread ' + (_spreadByDuration(allocatedStruct.durationMonths) * miFactor).toFixed(2) + '%';
           action.target = allocatedStruct;
         } else if (bestOffer && bestOffer.rate > c.rate) {
+          // A better CAT offer exists
           action.recommendation = 'renouveler';
           action.reason = bestOffer.bankName + ' ' + bestOffer.productName + ' à ' + bestOffer.rate.toFixed(2) + '% > ' + c.rate.toFixed(2) + '%';
           action.target = bestOffer;
-        } else if (bestOffer && bestOffer.rate <= c.rate) {
-          // Règle 1: NEVER switch to a worse CAT
-          action.recommendation = 'garder';
-          action.reason = 'Meilleure offre CAT (' + (bestOffer ? bestOffer.rate.toFixed(2) : '?') + '%) ≤ taux actuel ' + c.rate.toFixed(2) + '%';
         } else {
+          // Règle 1: no offer beats this contract → KEEP
           action.recommendation = 'garder';
-          action.reason = 'Aucune offre CAT confirmée, garder le contrat';
+          if (bestOffer) {
+            action.reason = 'Meilleure offre CAT (' + bestOffer.rate.toFixed(2) + '%) ≤ taux actuel ' + c.rate.toFixed(2) + '% → garder';
+          } else {
+            action.reason = 'Aucune offre CAT confirmée → garder le contrat';
+          }
+          // Track kept contracts rate for Règle 1 in main flow
+          if (c.rate > keptContractsRate) keptContractsRate = c.rate;
+          keptContractsCount++;
         }
         contractActions.push(action);
       });
@@ -541,7 +569,9 @@
       // Only show "Garder Bond 12M" if ALL the unallocated is from structLiq
       isStructLiqOnly: hasOnlyStructLiq && !(_state.includeMaturingCat && _state.includeMaturingCat[entityKey]),
       hasMaturingCat: hasMaturingCat,
-      contractActions: contractActions
+      contractActions: contractActions,
+      keptContractsRate: keptContractsRate,
+      keptContractsCount: keptContractsCount
     };
   }
 
@@ -803,15 +833,10 @@
         var trendIcon = macro && macro.rateTrend === 'rising' ? '📈' : macro && macro.rateTrend === 'falling' ? '📉' : '➡️';
         var trendLabel = macro && macro.rateTrend === 'rising' ? 'Taux en hausse → court terme recommandé' : macro && macro.rateTrend === 'falling' ? 'Taux en baisse → verrouiller long terme' : 'Taux stables';
 
-        // Règle 1: check if best offer actually beats existing CAT contracts
-        var bestSourceRate = 0;
-        if (result.contractActions && result.contractActions.length > 0) {
-          result.contractActions.forEach(function(ca) {
-            if (ca.recommendation === 'garder' && ca.contract.rate > bestSourceRate) {
-              bestSourceRate = ca.contract.rate;
-            }
-          });
-        }
+        // Règle 1: use keptContractsRate from allocator — the highest rate
+        // among contracts that were NOT exited for a structured product.
+        // If keptContractsRate > best CAT offer → don't switch, KEEP.
+        var bestSourceRate = result.keptContractsRate || 0;
 
         if (catOffers.length > 0 && catOffers[0].rate > bestSourceRate) {
           var best = catOffers[0];
@@ -1026,8 +1051,11 @@
       var newAlloc = entResult ? entResult.totalAllocated : 0;
       var newReturn = entResult ? entResult.totalReturn : 0;
       var cashA = entResult ? (entResult.totalCash - entResult.totalAllocated) : 0;
-      // Cash return: use best CAT rate, not the difference (which can be 0 if no tranche)
+      // Cash return: Règle 1 — if kept contracts have higher rate than best offer, use that
       var bestRate = entResult ? (entResult.bestCatRate || 2.8) : 2.8;
+      if (entResult && entResult.keptContractsRate > bestRate) {
+        bestRate = entResult.keptContractsRate; // kept OPTIPLUS at 2.90% > CIC 2.80%
+      }
       var cashR = cashA > 0 ? Math.round(cashA * bestRate / 100) : 0;
       var totalBefore = catR + stR + fuR;
       var isWaitingCalc = !entResult || (entResult.totalAllocated === 0 && newAlloc === 0);
@@ -1229,9 +1257,14 @@
       totalCatEquiv += r.catEquivReturn;
     });
     // Include unallocated cash earning CAT rate in total return
+    // Règle 1: if kept contracts have higher rate, use that for unallocated return calc
     var totalUnallocated = _state.totalCash - totalAllocated;
     var bestCat = 2.5;
-    Object.values(allResults.entities).forEach(function(r) { if (r.bestCatRate > bestCat) bestCat = r.bestCatRate; });
+    Object.values(allResults.entities).forEach(function(r) {
+      var effectiveRate = r.bestCatRate || 2.5;
+      if (r.keptContractsRate > effectiveRate) effectiveRate = r.keptContractsRate;
+      if (effectiveRate > bestCat) bestCat = effectiveRate;
+    });
     var unallocatedReturn = Math.round(totalUnallocated * bestCat / 100);
     var totalReturnAll = totalReturn + unallocatedReturn;
 
