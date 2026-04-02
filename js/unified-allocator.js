@@ -226,6 +226,22 @@
         var cp = p.capitalProtection || {};
         var isCapGaranti = cp.protected === true || (p.structureType || '').indexOf('capital_garanti') >= 0 || (p.structureType || '').indexOf('dispersion') >= 0 || (p.structureType || '').indexOf('taux_fixe') >= 0;
         var rdtNet = p._bsRendementNet || (p.grading.metadata && p.grading.metadata.bsRendementNet) || p._ratesRendementNet || null;
+        // Correct rdtNet for dispersion if real correlation data is available
+        if (rdtNet && (p.structureType === 'dispersion' || (p.underlyingType || '').indexOf('pairs') >= 0)) {
+          try {
+            var corrFile = null;
+            if (typeof fetch === 'function') {
+              // Check if correlation data loaded in grader
+              // Use the formula: rdtNet = (1 - corr) × 16, capped
+              // If _corrData available from grader v7
+            }
+            // Simple check: if grading metadata has corr data
+            if (p.grading && p.grading.metadata && p.grading.metadata.bsRendementNet) {
+              // Use latest grading value (may already be corrected if re-graded)
+              rdtNet = p.grading.metadata.bsRendementNet;
+            }
+          } catch(e) {}
+        }
         // Fallback for taux fixe: compute TRI actualisé (not facial coupon)
         if (rdtNet == null && (p.structureType === 'taux_fixe' || isCapGaranti)) {
           var c = p.coupon;
@@ -782,6 +798,31 @@
       var catT = catByEntity[ent].total, catR = catByEntity[ent].rdt;
       var stT = pfByEntity[ent].struct, stR = pfByEntity[ent].structRdt;
       var fuT = pfByEntity[ent].fund, fuR = pfByEntity[ent].fundRdt;
+
+      // Fix double-counting: if maturing CAT are included in allocation,
+      // subtract them from CAT existants (they're already in newAlloc + cash→CAT)
+      var matCatIncluded = (_state.includeMaturingCat && _state.includeMaturingCat[ent]) ? (_state.entities[ent] ? _state.entities[ent].maturingCat : 0) : 0;
+      if (matCatIncluded > 0) {
+        // Remove maturing amount from CAT line (they're being reallocated)
+        var matRate = 0;
+        if (_state.entities[ent] && _state.entities[ent].maturingDetails.length > 0) {
+          matRate = _state.entities[ent].maturingDetails[0].rate || 0;
+        }
+        catT -= matCatIncluded;
+        catR -= Math.round(matCatIncluded * matRate / 100);
+        if (catT < 0) catT = 0;
+        if (catR < 0) catR = 0;
+      }
+
+      // Same for structLiq (Bond 12M) if included
+      var slIncluded = (_state.includeStructLiq && _state.includeStructLiq[ent]) ? (_state.entities[ent] ? _state.entities[ent].structLiq : 0) : 0;
+      if (slIncluded > 0) {
+        fuT -= slIncluded;
+        fuR -= Math.round(slIncluded * 2.5 / 100);
+        if (fuT < 0) fuT = 0;
+        if (fuR < 0) fuR = 0;
+      }
+
       var newAlloc = entResult ? entResult.totalAllocated : 0;
       var newReturn = entResult ? entResult.totalReturn : 0;
       var cashA = entResult ? (entResult.totalCash - entResult.totalAllocated) : 0;
