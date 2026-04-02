@@ -926,8 +926,9 @@
       });
     }
 
-    // CAT maturity recommendations
-    if (typeof _renderMaturityOptimizer === 'function') {
+    // CAT maturity recommendations — only show if "Inclure" checkbox is checked
+    var anyMaturingIncluded = (_state.includeMaturingCat && (_state.includeMaturingCat.bycam || _state.includeMaturingCat.cameleons));
+    if (anyMaturingIncluded && typeof _renderMaturityOptimizer === 'function') {
       html += _renderMaturityOptimizer();
     }
 
