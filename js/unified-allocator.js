@@ -428,33 +428,27 @@
           amount = Math.min(remaining, effectiveMax);
         } else {
           // Maturing contracts in play — must respect contract boundaries
-          // Calculate: how many whole contracts to exit?
-          // The allocation = free cash + N whole contracts, where N is minimal
-          var neededFromContracts = Math.max(0, (minReq || 0) - freeCashInBudget);
+          // Always exit at least 1 eligible contract (the point is to redeploy contracts)
+          // Free cash in this context may be SL-constrained, so it doesn't replace a contract exit
+          if (eligibleContracts.length === 0) return; // no contract eligible → skip
+
+          // Exit exactly 1 contract (minimum disruption rule)
+          // If minReq > 1 contract, exit enough to cover
           var contractsToExit = [];
           var contractSum = 0;
           for (var ci = 0; ci < eligibleContracts.length; ci++) {
-            if (contractSum >= neededFromContracts && contractsToExit.length > 0) break;
             contractsToExit.push(eligibleContracts[ci]);
             contractSum += eligibleContracts[ci].amount;
+            if (contractSum >= (minReq || 0)) break; // enough to cover minInvest
           }
 
-          // Total available = free cash + exited contracts
-          var totalFromContracts = contractsToExit.reduce(function(s, mc) { return s + mc.amount; }, 0);
-          var effectiveAvailable = freeCashInBudget + totalFromContracts;
-
-          if (effectiveAvailable <= 0) return;
-          if (minReq > 0 && effectiveAvailable < minReq) return;
-
-          // Cap: min(available, cap30) — but cap30 cannot split a contract
-          // If only 1 contract exited (150K) and cap30 = 213K → use 150K (contract amount)
-          // If free cash 50K + 1 contract 150K = 200K and cap30 = 213K → use 200K
+          // Amount = exactly the exited contract(s), capped by cap30
+          // Do NOT add freeCash — it may be SL-constrained and shouldn't inflate the allocation
           var effectiveMax = minReq > maxPer ? minReq : maxPer;
-          amount = Math.min(effectiveAvailable, effectiveMax);
+          amount = Math.min(contractSum, effectiveMax);
 
-          // Round DOWN to respect contract boundaries:
-          // amount can't exceed free cash + sum of whole exited contracts
-          amount = Math.min(amount, effectiveAvailable);
+          if (amount <= 0) return;
+          if (minReq > 0 && amount < minReq) return;
         }
 
         amount = Math.round(amount / 1000) * 1000;
