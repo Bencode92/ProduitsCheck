@@ -1205,9 +1205,13 @@
       var remaining = total - used;
       var el = document.getElementById('alloc-remaining-' + entKey);
       if (el) {
-        el.innerHTML = remaining >= 0
-          ? '<span style="color:var(--green)">Reste : ' + _fmt(remaining) + '€</span>'
-          : '<span style="color:var(--red)">⚠️ Dépassement ' + _fmt(-remaining) + '€</span>';
+        if (total > 0 && used === 0) {
+          el.innerHTML = '<span style="color:var(--orange)">⚠️ ' + _fmt(total) + '€ disponibles — répartissez dans les tranches ci-dessus pour optimiser</span>';
+        } else if (remaining >= 0) {
+          el.innerHTML = '<span style="color:var(--green)">Reste : ' + _fmt(remaining) + '€</span>';
+        } else {
+          el.innerHTML = '<span style="color:var(--red)">⚠️ Dépassement ' + _fmt(-remaining) + '€</span>';
+        }
       }
     });
   };
