@@ -239,6 +239,7 @@
   "envelope": "",
   "_couponProbability": 95,
   "_bsRendementNet": 10.45,
+  "minInvestment": 100000,
   "grading": {
     "grade": "B",
     "score": 68,
@@ -251,7 +252,7 @@
         "score": 95,
         "base": 70,
         "delta": 0,
-        "reasoning": "Rendement: base 70 → -2 = 68 (En stagflation avec 6/8 sous-jacents dans des secteurs évités (tech/comm) et vol élevée, la probabilité de dispersion favorable diminue fortement) | Coupon 1.3144444444444445%, protégé",
+        "reasoning": "Rendement: base 70 → -2 = 68 (Régime stagflation + 6/8 sous-jacents tech cycliques = probabilité coupon très réduite malgré capital garanti) | Coupon 1.3144444444444445%, protégé",
         "_bsDelta": 25,
         "_bs": {
           "score": 95,
@@ -261,10 +262,10 @@
           "couponEffectif": 11,
           "vols": [
             25,
-            25.85,
+            25.92,
             25,
             25,
-            31.17,
+            31.37,
             25,
             25,
             25
@@ -277,13 +278,13 @@
         "score": 69,
         "base": 71,
         "delta": -2,
-        "reasoning": "Qualité: base 71 → -2 = 69 (75% du panier dans les secteurs évités par le MI (NVDA, META, NFLX, GOOGL, MSFT, TSLA) avec betas élevés en environnement stagflationniste hostile) | Worst: Tesla B:17"
+        "reasoning": "Qualité: base 71 → -2 = 69 (7/8 sous-jacents dans secteurs évités (tech/com-services), betas élevés >1.2, vulnérables au choc pétrolier) | Worst: Tesla B:17"
       },
       "portfolioFit": {
         "score": 65,
         "base": 72,
         "delta": 2,
-        "reasoning": "Fit: base 72 → +2 = 74 (La garantie du capital en stagflation devient un atout majeur, la dispersion permet de capter la volatilité sans risque de perte)"
+        "reasoning": "Fit: base 72 → +2 = 74 (Capital garanti + volatilité élevée = protection idéale en stagflation pour diversifier hors tech)"
       },
       "riskPremium": {
         "score": 52,
@@ -292,11 +293,10 @@
         "reasoning": "Capital garanti: spread 3.0% - CAT 2.5% - illiq 0.3% = 0.2%"
       }
     },
-    "verdict": "Dans un contexte de stagflation avec Brent à $104 et 75% des sous-jacents dans des secteurs évités, ce produit à capital garanti offre une protection précieuse malgré un coupon modeste de 1.31% annualisé. La forte dispersion du panier (Tesla à 17% vs META/MSFT/NFLX à 83%) limite les gains potentiels mais la garantie du capital compense largement en période d'incertitude macro. Score ajusté: 54 → 34 (D), reflétant la faible attractivité du rendement mais la valeur défensive du produit.",
+    "verdict": "Produit défensif adapté au contexte stagflationniste grâce au capital garanti, mais coupon de 1.31% annualisé insuffisant face à l'inflation >2.8%. L'exposition 100% tech/growth (7/8 titres dans secteurs évités, betas moyens >1.3) est toxique avec Brent >$120 et VIX à 22. La dispersion permet de capturer la volatilité (48-58% sur NVDA/TSLA) mais le rendement ne compense pas le coût d'opportunité vs TIPS ou cash.",
     "keyRisks": [
-      "Coupon très faible (1.31%) largement inférieur à l'inflation PCE à 2.83%",
-      "Performance limitée si les tech rebondissent post-stagflation",
-      "Coût d'opportunité élevé vs TIPS ou obligations courtes"
+      "Sous-performance garantie vs inflation (1.31% vs PCE 2.83%)",
+      "Exposition massive tech/growth en régime stagflation défavorable"
     ],
     "negotiationPoints": [],
     "scenarios": {
@@ -307,21 +307,21 @@
         "duration_years": 3
       },
       "base": {
-        "return_pct": 3.94,
-        "return_eur": 3940,
-        "probability": 0.45,
+        "return_pct": 1.31,
+        "return_eur": 1310,
+        "probability": 0.5,
         "duration_years": 3
       },
       "stress": {
-        "return_pct": 1.31,
-        "return_eur": 1310,
+        "return_pct": 0,
+        "return_eur": 0,
         "probability": 0.25,
-        "duration_years": 1
+        "duration_years": 3
       },
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.1,
+        "probability": 0.05,
         "duration_years": 3
       }
     },
@@ -334,8 +334,8 @@
       "label": "C [47-61]"
     },
     "metadata": {
-      "gradedAt": "2026-04-01T09:04:55.110Z",
-      "durationMs": 22368,
+      "gradedAt": "2026-04-02T12:22:01.797Z",
+      "durationMs": 20944,
       "aiUsed": true,
       "version": "7.1",
       "productType": "dispersion",
@@ -381,10 +381,10 @@
       "bsPerteEsperee": 0,
       "bsVols": [
         25,
-        25.85,
+        25.92,
         25,
         25,
-        31.17,
+        31.37,
         25,
         25,
         25
@@ -402,20 +402,20 @@
           "name": "NVIDIA",
           "ticker": "NVDA",
           "sector": "Technologie de l'information",
-          "perf_ytd": -6.5,
-          "perf_1y": 59,
+          "perf_ytd": -5.74,
+          "perf_1y": 62.21,
           "volatility_3y": 48.16,
           "max_drawdown_3y": 36.89,
           "buffett_score": 50,
-          "quality_score": 87,
+          "quality_score": 86,
           "buffett_grade": "C"
         },
         {
           "name": "Meta Platforms",
           "ticker": "META",
           "sector": "La communication",
-          "perf_ytd": -13.34,
-          "perf_1y": -0.82,
+          "perf_ytd": -12.26,
+          "perf_1y": 0.49,
           "volatility_3y": 35.69,
           "max_drawdown_3y": 34.21,
           "buffett_score": 83,
@@ -426,9 +426,9 @@
           "name": "Netflix",
           "ticker": "NFLX",
           "sector": "La communication",
-          "perf_ytd": 2.54,
-          "perf_1y": 2.95,
-          "volatility_3y": 33.46,
+          "perf_ytd": 1.94,
+          "perf_1y": 2.5,
+          "volatility_3y": 33.45,
           "max_drawdown_3y": 43.35,
           "buffett_score": 83,
           "quality_score": 75,
@@ -438,8 +438,8 @@
           "name": "Amazon.com",
           "ticker": "AMZN",
           "sector": "Biens de consommation cycliques",
-          "perf_ytd": -9.76,
-          "perf_1y": 8.08,
+          "perf_ytd": -8.77,
+          "perf_1y": 10.67,
           "volatility_3y": 31.2,
           "max_drawdown_3y": 30.88,
           "buffett_score": 67,
@@ -450,9 +450,9 @@
           "name": "Alphabet (Ex Google)",
           "ticker": "GOOGL",
           "sector": "La communication",
-          "perf_ytd": -8.13,
-          "perf_1y": 86.33,
-          "volatility_3y": 29.05,
+          "perf_ytd": -4.96,
+          "perf_1y": 92.37,
+          "volatility_3y": 29.1,
           "max_drawdown_3y": 29.89,
           "buffett_score": 67,
           "quality_score": 78,
@@ -462,8 +462,8 @@
           "name": "Microsoft",
           "ticker": "MSFT",
           "sector": "Technologie de l'information",
-          "perf_ytd": -23.46,
-          "perf_1y": -2.28,
+          "perf_ytd": -23.61,
+          "perf_1y": -1.58,
           "volatility_3y": 23.52,
           "max_drawdown_3y": 34.18,
           "buffett_score": 83,
@@ -474,8 +474,8 @@
           "name": "Apple",
           "ticker": "AAPL",
           "sector": "Technologie de l'information",
-          "perf_ytd": -6.65,
-          "perf_1y": 16.47,
+          "perf_ytd": -5.95,
+          "perf_1y": 15.11,
           "volatility_3y": 25.52,
           "max_drawdown_3y": 33.43,
           "buffett_score": 67,
@@ -486,9 +486,9 @@
           "name": "Tesla",
           "ticker": "TSLA",
           "sector": "Biens de consommation cycliques",
-          "perf_ytd": -17.34,
-          "perf_1y": 41.05,
-          "volatility_3y": 57.57,
+          "perf_ytd": -15.21,
+          "perf_1y": 47.14,
+          "volatility_3y": 57.58,
           "max_drawdown_3y": 53.77,
           "buffett_score": 17,
           "quality_score": 36,
@@ -515,6 +515,5 @@
         "delta": -7
       }
     }
-  },
-  "minInvestment": 100000
+  }
 }
