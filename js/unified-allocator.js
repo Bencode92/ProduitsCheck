@@ -749,53 +749,91 @@
     html += '<th style="padding:8px;text-align:right;color:var(--text-muted)">Diff</th>';
     html += '</tr></thead><tbody>';
 
-    // CAT existants
-    html += '<tr style="border-bottom:1px solid var(--border)">';
-    html += '<td style="padding:6px 12px;color:var(--text-bright)">🏦 CAT existants</td>';
-    html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono)">' + _fmt(catExistingTotal) + '€</td>';
-    html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:var(--text-muted)">+' + _fmt(catExistingReturn) + '€</td>';
-    html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:var(--text-muted)">+' + _fmt(catExistingReturn) + '€</td>';
-    html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:var(--text-dim)">—</td></tr>';
+    // Collect per entity
+    var catByEntity = { bycam: { total: 0, rdt: 0 }, cameleons: { total: 0, rdt: 0 } };
+    var pfByEntity = { bycam: { struct: 0, structRdt: 0, fund: 0, fundRdt: 0 }, cameleons: { struct: 0, structRdt: 0, fund: 0, fundRdt: 0 } };
+    try {
+      if (typeof catManager !== 'undefined' && catManager.deposits) {
+        catManager.deposits.forEach(function(d) {
+          if (d.status !== 'active') return;
+          var ent = d.entity || 'cameleons';
+          var amt = parseFloat(d.amount) || 0;
+          if (catByEntity[ent]) { catByEntity[ent].total += amt; catByEntity[ent].rdt += Math.round(amt * (parseFloat(d.rate) || 0) / 100); }
+        });
+      }
+    } catch(e) {}
+    try {
+      (app.state.portfolio || []).forEach(function(p) {
+        var ent = p.entity || 'cameleons';
+        var amt = parseFloat(p.investedAmount) || 0;
+        if (!pfByEntity[ent]) return;
+        if (p.grading && p.grading.grade === '-') {
+          pfByEntity[ent].fund += amt;
+          pfByEntity[ent].fundRdt += Math.round(amt * 2.5 / 100);
+        } else if (p.grading && p.grading.score) {
+          pfByEntity[ent].struct += amt;
+          var c = (p.coupon && p.coupon.rate) || parseFloat(p.coupon) || 0;
+          pfByEntity[ent].structRdt += Math.round(amt * c / 100);
+        }
+      });
+    } catch(e) {}
 
-    // Structurés portefeuille
-    if (pfStructTotal > 0) {
-      html += '<tr style="border-bottom:1px solid var(--border)">';
-      html += '<td style="padding:6px 12px;color:var(--text-bright)">📦 Structurés (portefeuille)</td>';
-      html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono)">' + _fmt(pfStructTotal) + '€</td>';
-      html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:var(--text-muted)">+' + _fmt(pfStructReturn) + '€</td>';
-      html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:var(--text-muted)">+' + _fmt(pfStructReturn) + '€</td>';
-      html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:var(--text-dim)">—</td></tr>';
-    }
+    var _entRow = function(label, icon, ent, entResult) {
+      var catT = catByEntity[ent].total, catR = catByEntity[ent].rdt;
+      var stT = pfByEntity[ent].struct, stR = pfByEntity[ent].structRdt;
+      var fuT = pfByEntity[ent].fund, fuR = pfByEntity[ent].fundRdt;
+      var newAlloc = entResult ? entResult.totalAllocated : 0;
+      var newReturn = entResult ? entResult.totalReturn : 0;
+      var cashR = entResult ? (entResult.totalReturnAll - entResult.totalReturn) : 0;
+      var cashA = entResult ? (entResult.totalCash - entResult.totalAllocated) : 0;
+      var totalBefore = catR + stR + fuR;
+      var totalAfter = totalBefore + newReturn + cashR;
+      var totalPat = catT + stT + fuT + (entResult ? entResult.totalCash : 0);
+      var h = '';
+      h += '<tr style="border-bottom:2px solid var(--accent);background:var(--bg-elevated)">';
+      h += '<td colspan="5" style="padding:8px 12px;font-weight:700;color:var(--text-bright);font-size:12px">' + icon + ' ' + label + '</td></tr>';
+      if (catT > 0) {
+        h += '<tr style="border-bottom:1px solid var(--border)"><td style="padding:4px 12px 4px 24px;color:var(--text-muted);font-size:10px">🏦 CAT</td>';
+        h += '<td style="padding:4px 8px;text-align:right;font-family:var(--mono);font-size:10px">' + _fmt(catT) + '€</td>';
+        h += '<td style="padding:4px 8px;text-align:right;font-family:var(--mono);font-size:10px;color:var(--text-dim)">+' + _fmt(catR) + '€</td>';
+        h += '<td style="padding:4px 8px;text-align:right;font-family:var(--mono);font-size:10px;color:var(--text-dim)">+' + _fmt(catR) + '€</td>';
+        h += '<td style="padding:4px 8px;text-align:right;font-size:10px;color:var(--text-dim)">—</td></tr>';
+      }
+      if (stT > 0) {
+        h += '<tr style="border-bottom:1px solid var(--border)"><td style="padding:4px 12px 4px 24px;color:var(--text-muted);font-size:10px">📦 Structurés (pf)</td>';
+        h += '<td style="padding:4px 8px;text-align:right;font-family:var(--mono);font-size:10px">' + _fmt(stT) + '€</td>';
+        h += '<td style="padding:4px 8px;text-align:right;font-family:var(--mono);font-size:10px;color:var(--text-dim)">+' + _fmt(stR) + '€</td>';
+        h += '<td style="padding:4px 8px;text-align:right;font-family:var(--mono);font-size:10px;color:var(--text-dim)">+' + _fmt(stR) + '€</td>';
+        h += '<td style="padding:4px 8px;text-align:right;font-size:10px;color:var(--text-dim)">—</td></tr>';
+      }
+      if (fuT > 0) {
+        h += '<tr style="border-bottom:1px solid var(--border)"><td style="padding:4px 12px 4px 24px;color:var(--text-muted);font-size:10px">🔄 Fonds</td>';
+        h += '<td style="padding:4px 8px;text-align:right;font-family:var(--mono);font-size:10px">' + _fmt(fuT) + '€</td>';
+        h += '<td style="padding:4px 8px;text-align:right;font-family:var(--mono);font-size:10px;color:var(--text-dim)">+' + _fmt(fuR) + '€</td>';
+        h += '<td style="padding:4px 8px;text-align:right;font-family:var(--mono);font-size:10px;color:var(--text-dim)">+' + _fmt(fuR) + '€</td>';
+        h += '<td style="padding:4px 8px;text-align:right;font-size:10px;color:var(--text-dim)">—</td></tr>';
+      }
+      if (newAlloc > 0) {
+        h += '<tr style="border-bottom:1px solid var(--border);background:rgba(6,214,160,0.04)"><td style="padding:4px 12px 4px 24px;color:var(--green);font-weight:600;font-size:10px">⚡ Nouvelles alloc</td>';
+        h += '<td style="padding:4px 8px;text-align:right;font-family:var(--mono);font-size:10px;color:var(--cyan);font-weight:600">' + _fmt(newAlloc) + '€</td>';
+        h += '<td style="padding:4px 8px;text-align:right;font-family:var(--mono);font-size:10px;color:var(--text-dim)">0€</td>';
+        h += '<td style="padding:4px 8px;text-align:right;font-family:var(--mono);font-size:10px;color:var(--green);font-weight:600">+' + _fmt(newReturn) + '€</td>';
+        h += '<td style="padding:4px 8px;text-align:right;font-family:var(--mono);font-size:10px;color:var(--green);font-weight:600">+' + _fmt(newReturn) + '€</td></tr>';
+      }
+      if (cashA > 0) {
+        h += '<tr style="border-bottom:1px solid var(--border)"><td style="padding:4px 12px 4px 24px;color:var(--orange);font-size:10px">🏦 Cash → CAT</td>';
+        h += '<td style="padding:4px 8px;text-align:right;font-family:var(--mono);font-size:10px">' + _fmt(cashA) + '€</td>';
+        h += '<td style="padding:4px 8px;text-align:right;font-size:10px;color:var(--text-dim)">0€</td>';
+        h += '<td style="padding:4px 8px;text-align:right;font-family:var(--mono);font-size:10px;color:var(--orange)">+' + _fmt(cashR) + '€</td>';
+        h += '<td style="padding:4px 8px;text-align:right;font-family:var(--mono);font-size:10px;color:var(--orange)">+' + _fmt(cashR) + '€</td></tr>';
+      }
+      return h;
+    };
 
-    // Fonds (Bond 12M)
-    if (pfFundTotal > 0) {
-      html += '<tr style="border-bottom:1px solid var(--border)">';
-      html += '<td style="padding:6px 12px;color:var(--text-bright)">🔄 Fonds (Bond 12M)</td>';
-      html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono)">' + _fmt(pfFundTotal) + '€</td>';
-      html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:var(--text-muted)">+' + _fmt(pfFundReturn) + '€</td>';
-      html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:var(--text-muted)">+' + _fmt(pfFundReturn) + '€</td>';
-      html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:var(--text-dim)">—</td></tr>';
-    }
-
-    // New allocations
-    html += '<tr style="border-bottom:1px solid var(--border);background:rgba(6,214,160,0.04)">';
-    html += '<td style="padding:6px 12px;color:var(--green);font-weight:700">⚡ Nouvelles allocations</td>';
-    html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:var(--cyan);font-weight:700">' + _fmt(result.totalAllocated) + '€</td>';
-    html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:var(--text-dim)">0€</td>';
-    html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:var(--green);font-weight:700">+' + _fmt(result.totalReturn) + '€</td>';
-    html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:var(--green);font-weight:700">+' + _fmt(result.totalReturn) + '€</td></tr>';
-
-    // Cash non alloué → CAT
-    var cashInCat = result.totalReturnAll - result.totalReturn;
-    var cashAmount = _state.totalCash - result.totalAllocated;
-    if (cashAmount > 0) {
-      html += '<tr style="border-bottom:1px solid var(--border)">';
-      html += '<td style="padding:6px 12px;color:var(--orange)">🏦 Cash → CAT</td>';
-      html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono)">' + _fmt(cashAmount) + '€</td>';
-      html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:var(--text-dim)">0€</td>';
-      html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:var(--orange)">+' + _fmt(cashInCat) + '€</td>';
-      html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:var(--orange)">+' + _fmt(cashInCat) + '€</td></tr>';
-    }
+    // ByCam
+    html += _entRow('ByCam', '🏢', 'bycam', result.entities.bycam || null);
+    // Caméléons
+    html += _entRow('Caméléons', '🦎', 'cameleons', result.entities.cameleons || null);
 
     // Total
     html += '<tr style="border-top:2px solid var(--accent);background:var(--bg-elevated)">';
