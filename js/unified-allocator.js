@@ -951,8 +951,12 @@
     }
 
     // CAT maturity recommendations — only show if "Inclure" checkbox is checked
+    // AND the allocator didn't already produce per-contract recommendations (avoids doublon)
     var anyMaturingIncluded = (_state.includeMaturingCat && (_state.includeMaturingCat.bycam || _state.includeMaturingCat.cameleons));
-    if (anyMaturingIncluded && typeof _renderMaturityOptimizer === 'function') {
+    var hasContractActions = Object.values(result.entities || {}).some(function(r) {
+      return r.contractActions && r.contractActions.length > 0;
+    });
+    if (anyMaturingIncluded && !hasContractActions && typeof _renderMaturityOptimizer === 'function') {
       html += _renderMaturityOptimizer();
     }
 
