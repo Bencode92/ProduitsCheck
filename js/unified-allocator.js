@@ -784,8 +784,10 @@
       var fuT = pfByEntity[ent].fund, fuR = pfByEntity[ent].fundRdt;
       var newAlloc = entResult ? entResult.totalAllocated : 0;
       var newReturn = entResult ? entResult.totalReturn : 0;
-      var cashR = entResult ? (entResult.totalReturnAll - entResult.totalReturn) : 0;
       var cashA = entResult ? (entResult.totalCash - entResult.totalAllocated) : 0;
+      // Cash return: use best CAT rate, not the difference (which can be 0 if no tranche)
+      var bestRate = entResult ? (entResult.bestCatRate || 2.8) : 2.8;
+      var cashR = cashA > 0 ? Math.round(cashA * bestRate / 100) : 0;
       var totalBefore = catR + stR + fuR;
       var totalAfter = totalBefore + newReturn + cashR;
       var totalPat = catT + stT + fuT + (entResult ? entResult.totalCash : 0);
