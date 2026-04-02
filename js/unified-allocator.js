@@ -114,12 +114,32 @@
       }
     } catch(e) {}
 
-    // total = cash libre + structLiq (if opted in) + maturingCat (if opted in)
+    // Check if any Swiss Life structured product beats Bond 12M (~2.5%)
+    // If not, structLiq should NOT be included in the allocation budget
+    var _slHasEligible = false;
+    try {
+      Object.values(app.state.proposals || {}).forEach(function(arr) {
+        arr.forEach(function(p) {
+          if (p.bankId === 'swiss-life' && p.grading && p.grading.score && p.status !== 'rejected') {
+            var rdtNet = p._bsRendementNet || (p.grading.metadata && p.grading.metadata.bsRendementNet) || 0;
+            if (rdtNet > 2.5) _slHasEligible = true;
+          }
+        });
+      });
+    } catch(e) {}
+
+    // total = cash libre + structLiq (if opted in AND eligible SL product exists) + maturingCat (if opted in)
+    var _slIncBycam = (_state.includeStructLiq && _state.includeStructLiq.bycam && _slHasEligible) ? entities.bycam.structLiq : 0;
+    var _slIncCam = (_state.includeStructLiq && _state.includeStructLiq.cameleons && _slHasEligible) ? entities.cameleons.structLiq : 0;
+    entities.bycam.structLiqIncluded = _slIncBycam;
+    entities.cameleons.structLiqIncluded = _slIncCam;
+    entities.bycam.slAutoKeep = (_state.includeStructLiq && _state.includeStructLiq.bycam && !_slHasEligible);
+    entities.cameleons.slAutoKeep = (_state.includeStructLiq && _state.includeStructLiq.cameleons && !_slHasEligible);
     entities.bycam.total = entities.bycam.cash
-      + ((_state.includeStructLiq && _state.includeStructLiq.bycam) ? entities.bycam.structLiq : 0)
+      + _slIncBycam
       + ((_state.includeMaturingCat && _state.includeMaturingCat.bycam) ? entities.bycam.maturingCat : 0);
     entities.cameleons.total = entities.cameleons.cash
-      + ((_state.includeStructLiq && _state.includeStructLiq.cameleons) ? entities.cameleons.structLiq : 0)
+      + _slIncCam
       + ((_state.includeMaturingCat && _state.includeMaturingCat.cameleons) ? entities.cameleons.maturingCat : 0);
 
     return entities;
@@ -589,7 +609,11 @@
       html += '<span style="color:#A855F7;font-weight:600">🔄 Arbitrage Swiss Life : ' + _fmt(ent.structLiq) + '€</span>';
       html += '<label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="alloc-sl-' + entKey + '" ' + (isChecked ? 'checked' : '') + ' onchange="_allocatorToggleSL(\'' + entKey + '\')" style="cursor:pointer"><span style="font-size:10px;color:var(--text-muted)">Optimiser</span></label>';
       html += '</div>';
-      html += '<div style="color:var(--text-dim);margin-top:2px">Bond 12M — arbitrable uniquement vers produits Swiss Life</div>';
+      if (ent.slAutoKeep) {
+        html += '<div style="color:var(--green);margin-top:2px">✋ Aucun produit Swiss Life ne bat 2.5% → garder en Bond 12M</div>';
+      } else {
+        html += '<div style="color:var(--text-dim);margin-top:2px">Bond 12M — arbitrable uniquement vers produits Swiss Life</div>';
+      }
       html += '</div>';
     }
 
