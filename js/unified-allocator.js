@@ -841,7 +841,8 @@
     html += '<td style="padding:10px 8px;text-align:right;font-family:var(--mono);font-weight:800;color:var(--text-bright)">' + _fmt(patrimoineTotal) + '€</td>';
     html += '<td style="padding:10px 8px;text-align:right;font-family:var(--mono);font-weight:700;color:var(--text-muted)">+' + _fmt(avantReturn) + '€</td>';
     html += '<td style="padding:10px 8px;text-align:right;font-family:var(--mono);font-weight:800;color:var(--green)">+' + _fmt(apresTotalReturn) + '€</td>';
-    html += '<td style="padding:10px 8px;text-align:right;font-family:var(--mono);font-weight:800;color:var(--green)">+' + _fmt(result.totalReturn + cashInCat) + '€</td></tr>';
+    var totalNewReturn = result.totalReturnAll || (result.totalReturn + (result.unallocatedReturn || 0));
+    html += '<td style="padding:10px 8px;text-align:right;font-family:var(--mono);font-weight:800;color:var(--green)">+' + _fmt(totalNewReturn) + '€</td></tr>';
 
     // Taux row
     html += '<tr style="background:var(--bg-elevated)">';
