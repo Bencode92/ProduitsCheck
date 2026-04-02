@@ -814,9 +814,13 @@
         if (catR < 0) catR = 0;
       }
 
-      // Same for structLiq (Bond 12M) if included
-      var slIncluded = (_state.includeStructLiq && _state.includeStructLiq[ent]) ? (_state.entities[ent] ? _state.entities[ent].structLiq : 0) : 0;
+      // Bond 12M (structLiq): always show in patrimoine as a separate line
+      // If included via checkbox → it's being reallocated (part of newAlloc + cash)
+      // If not included → stays as "Fonds" line
+      var slAmount = _state.entities[ent] ? _state.entities[ent].structLiq : 0;
+      var slIncluded = (_state.includeStructLiq && _state.includeStructLiq[ent]) ? slAmount : 0;
       if (slIncluded > 0) {
+        // Remove from fund line (it's in the allocation now)
         fuT -= slIncluded;
         fuR -= Math.round(slIncluded * 2.5 / 100);
         if (fuT < 0) fuT = 0;
@@ -857,6 +861,23 @@
         h += '<td style="padding:4px 8px;text-align:right;font-family:var(--mono);font-size:10px;color:var(--text-dim)">+' + _fmt(fuR) + '€</td>';
         h += '<td style="padding:4px 8px;text-align:right;font-size:10px;color:var(--text-dim)">—</td></tr>';
       }
+      // Bond 12M line (always show if entity has structLiq)
+      if (slAmount > 0) {
+        var slLabel = slIncluded > 0 ? '🔄 Bond 12M SL (réalloué)' : '🔄 Bond 12M SL';
+        var slRdt = Math.round(slAmount * 2.5 / 100);
+        h += '<tr style="border-bottom:1px solid var(--border)"><td style="padding:4px 12px 4px 24px;color:#A855F7;font-size:10px">' + slLabel + '</td>';
+        h += '<td style="padding:4px 8px;text-align:right;font-family:var(--mono);font-size:10px">' + _fmt(slAmount) + '€</td>';
+        h += '<td style="padding:4px 8px;text-align:right;font-family:var(--mono);font-size:10px;color:var(--text-dim)">+' + _fmt(slRdt) + '€</td>';
+        if (slIncluded > 0) {
+          h += '<td style="padding:4px 8px;text-align:right;font-size:10px;color:#A855F7">→ réalloué</td>';
+          h += '<td style="padding:4px 8px;text-align:right;font-size:10px;color:var(--text-dim)">—</td>';
+        } else {
+          h += '<td style="padding:4px 8px;text-align:right;font-family:var(--mono);font-size:10px;color:var(--text-dim)">+' + _fmt(slRdt) + '€</td>';
+          h += '<td style="padding:4px 8px;text-align:right;font-size:10px;color:var(--text-dim)">—</td>';
+        }
+        h += '</tr>';
+      }
+
       if (newAlloc > 0) {
         h += '<tr style="border-bottom:1px solid var(--border);background:rgba(6,214,160,0.04)"><td style="padding:4px 12px 4px 24px;color:var(--green);font-weight:600;font-size:10px">⚡ Nouvelles alloc</td>';
         h += '<td style="padding:4px 8px;text-align:right;font-family:var(--mono);font-size:10px;color:var(--cyan);font-weight:600">' + _fmt(newAlloc) + '€</td>';
