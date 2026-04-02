@@ -1055,10 +1055,10 @@
       }
 
       // Bond 12M (structLiq): always show in patrimoine as a separate line
-      // If included via checkbox → it's being reallocated (part of newAlloc + cash)
-      // If not included → stays as "Fonds" line
+      // If included via checkbox AND eligible SL product exists → it's being reallocated
+      // If checkbox checked but no SL product → auto-keep (slAutoKeep=true), treat as NOT included
       var slAmount = _state.entities[ent] ? _state.entities[ent].structLiq : 0;
-      var slIncluded = (_state.includeStructLiq && _state.includeStructLiq[ent]) ? slAmount : 0;
+      var slIncluded = _state.entities[ent] ? (_state.entities[ent].structLiqIncluded || 0) : 0;
       if (slIncluded > 0) {
         // Remove from fund line (it's in the allocation now)
         fuT -= slIncluded;
@@ -1106,7 +1106,8 @@
       }
       // Bond 12M line (always show if entity has structLiq)
       if (slAmount > 0) {
-        var slLabel = slIncluded > 0 ? '🔄 Bond 12M SL (réalloué)' : '🔄 Bond 12M SL';
+        var slIsAutoKeep = _state.entities[ent] && _state.entities[ent].slAutoKeep;
+        var slLabel = slIncluded > 0 ? '🔄 Bond 12M SL (réalloué)' : (slIsAutoKeep ? '✋ Bond 12M SL (garder)' : '🔄 Bond 12M SL');
         var slRdt = Math.round(slAmount * 2.5 / 100);
         h += '<tr style="border-bottom:1px solid var(--border)"><td style="padding:4px 12px 4px 24px;color:#A855F7;font-size:10px">' + slLabel + '</td>';
         h += '<td style="padding:4px 8px;text-align:right;font-family:var(--mono);font-size:10px">' + _fmt(slAmount) + '€</td>';
