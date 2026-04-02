@@ -12,6 +12,7 @@
     tranches: null,     // user-defined or auto from MI regime
     result: null,       // allocation result
     mode: 'auto',       // 'auto' or 'manual'
+    objective: 'long',  // 'long' | 'court' | 'attente'
     totalCash: 0,
     entities: {},       // { bycam: { cash, deposits, structLiq, maturingCat }, cameleons: { ... } }
     includeStructLiq: {}, // { cameleons: true/false }
@@ -88,7 +89,7 @@
       else entities.cameleons.structLiq += amount;
     });
 
-    // Detect CAT maturing within 8 months
+    // Detect CAT maturing within 8 months — per individual contract
     try {
       if (typeof catManager !== 'undefined' && catManager.deposits) {
         var now = new Date();
@@ -103,8 +104,9 @@
             if (entities[ent]) {
               entities[ent].maturingCat += amount;
               entities[ent].maturingDetails.push({
-                name: d.productName, amount: amount, rate: d.rate,
-                maturityDate: d.maturityDate, bankName: d.bankName
+                id: d.id, name: d.productName, amount: amount, rate: d.rate,
+                rateType: d.rateType || 'fixe', maturityDate: d.maturityDate,
+                bankName: d.bankName, bankId: d.bankId || ''
               });
             }
           }
@@ -285,21 +287,32 @@
     return candidates;
   }
 
+  // ─── Spread threshold by duration (illiquidity premium) ──
+  // v2: progressive scale — longer lock-up requires more spread
+  function _spreadByDuration(maturityMonths) {
+    if (maturityMonths <= 24) return 0.5;
+    if (maturityMonths <= 48) return 1.0;
+    if (maturityMonths <= 72) return 1.5;
+    return 2.0;
+  }
+
   // ─── Best candidates for a time bucket ─────────────────
   // CAT deposits are NOT candidates — they ARE the reserve.
   // Only structured products are candidates for new allocation.
   // For horizons where no structured fits, cash stays in existing CAT.
-  function _bestForHorizon(horizon, structCandidates, allocated, bestCatRate) {
+  function _bestForHorizon(horizon, structCandidates, allocated, refRate, miFactor) {
     var maxMonths = horizon.maxMonths;
     var candidates = [];
+    // refRate = the rate to beat (best CAT rate or source contract rate)
+    // miFactor = MI adjustment factor (default 1.0, from clamp(1 + prob_hike*0.5, 0.5, 1.5))
 
     // Structured candidates: maturity fits horizon AND capital garanti
-    // v7.1: minimum spread threshold — products > 5Y must beat CAT by +1%
+    // v2: progressive spread threshold adjusted by MI
     structCandidates.forEach(function(s) {
       if (allocated[s.id]) return;
       if (s.maturityMonths <= maxMonths && s.capitalGaranti && s.rdtNet != null && s.rdtNet > 0) {
-        var minSpread = s.maturityMonths > 60 ? 1.0 : 0; // >5Y needs +1% vs CAT
-        if (s.rdtNet < bestCatRate + minSpread) return; // doesn't beat CAT enough
+        var minSpread = _spreadByDuration(s.maturityMonths) * (miFactor || 1.0);
+        if (s.rdtNet < refRate + minSpread) return; // doesn't beat ref enough
         candidates.push({
           id: s.id,
           name: s.name,
@@ -321,6 +334,30 @@
     return candidates;
   }
 
+  // ─── MI factor for spread adjustment ────────────────────
+  // Higher prob_hike → higher spread required (opportunity cost of lock-up)
+  // Bounded: min 0.5 (falling rates), max 1.5 (strong hike probability)
+  function _computeMIFactor() {
+    var macro = _getMacroContext();
+    if (!macro) return 1.0;
+    var probHike = 0;
+    try {
+      // Read prob_hike from MI response
+      if (typeof _getOptimizerMI === 'function') {
+        var mi = _getOptimizerMI();
+        if (mi && mi.ai_response && mi.ai_response.market_interpretation) {
+          probHike = (mi.ai_response.market_interpretation.prob_hike_next_fomc_pct || 0) / 100;
+        }
+      }
+      if (probHike === 0 && typeof _mktCache !== 'undefined' && _mktCache && _mktCache._mi) {
+        var aiResp = _mktCache._mi.ai_response || {};
+        var mktInterp = aiResp.market_interpretation || {};
+        probHike = (mktInterp.prob_hike_next_fomc_pct || 0) / 100;
+      }
+    } catch(e) {}
+    return Math.max(0.5, Math.min(1.5, 1.0 + probHike * 0.5));
+  }
+
   // ─── Allocate across all tranches ──────────────────────
   function _allocate(tranches, totalCash, entityKey) {
     var structCandidates = _getStructuredCandidates();
@@ -334,15 +371,27 @@
     }
     var allocated = {};
     var results = [];
+    var hasMaturingIncluded = !!(_state.includeMaturingCat && _state.includeMaturingCat[entityKey] && ent && ent.maturingCat > 0);
 
     // Best CAT rate from user's own deposits for comparison
     var bestCatRate = _bestCATRate(entityKey);
+    // MI factor for spread adjustment
+    var miFactor = _computeMIFactor();
+    // Objective factor: 'court' raises the bar, 'attente' blocks structured allocation
+    var objective = _state.objective || 'long';
+    if (objective === 'court') miFactor *= 1.5; // much higher bar for structured
+    if (objective === 'attente') structCandidates = []; // no structured allocation at all
+
+    // v2: For maturing CAT, compute per-contract amount limits
+    // Each contract can only contribute its own amount to a structured product
+    var maturingContracts = (hasMaturingIncluded && ent && ent.maturingDetails) ? ent.maturingDetails.slice() : [];
+    var contractUsed = {}; // track which contracts have been sourced
 
     tranches.forEach(function(tr) {
       var budget = tr.amount;
       if (budget <= 0) { results.push({ horizon: tr.horizon, amount: 0, allocated: 0, remaining: 0, allocations: [] }); return; }
 
-      var candidates = _bestForHorizon(tr.horizon, structCandidates, allocated, bestCatRate);
+      var candidates = _bestForHorizon(tr.horizon, structCandidates, allocated, bestCatRate, miFactor);
       var allocs = [];
       var remaining = budget;
       // Max 30% of total entity cash per product (diversification)
@@ -351,14 +400,60 @@
       candidates.forEach(function(c) {
         if (remaining <= 0) return;
         var minReq = c.minInvestment || 0;
-        // If minimum investment exceeds remaining budget, skip
-        if (minReq > 0 && remaining < minReq) return;
+
+        // v2: When sourcing from maturing CAT contracts, limit to individual contract amounts
+        // Find how much we can actually source from available contracts that this product beats
+        var availableFromContracts = 0;
+        if (maturingContracts.length > 0) {
+          maturingContracts.forEach(function(mc) {
+            if (contractUsed[mc.id]) return;
+            // Only source from contracts where the structured product beats the contract rate + spread
+            var reqSpread = _spreadByDuration(c.durationMonths) * miFactor;
+            if (c.rate >= mc.rate + reqSpread) {
+              availableFromContracts += mc.amount;
+            }
+          });
+        }
+
+        // Total available = free cash portion + eligible contract amounts
+        var freeCashInBudget = Math.max(0, remaining - maturingContracts.reduce(function(s, mc) {
+          return s + (contractUsed[mc.id] ? 0 : mc.amount);
+        }, 0));
+        // If no maturing contracts, all budget is free cash (original behavior)
+        var effectiveAvailable = maturingContracts.length > 0
+          ? Math.min(remaining, freeCashInBudget + availableFromContracts)
+          : remaining;
+
+        if (effectiveAvailable <= 0) return;
+        // If minimum investment exceeds available budget, skip
+        if (minReq > 0 && effectiveAvailable < minReq) return;
         // If minimum > cap 30%, use minimum (override cap)
         var effectiveMax = minReq > maxPer ? minReq : maxPer;
-        var amount = Math.min(remaining, effectiveMax);
+        var amount = Math.min(effectiveAvailable, effectiveMax);
         amount = Math.round(amount / 1000) * 1000;
         if (amount < 1000) return;
         if (minReq > 0 && amount < minReq) return; // after rounding
+
+        // Mark which contracts are being sourced
+        var amountToSource = amount;
+        // First use free cash
+        var usedFreeCash = Math.min(freeCashInBudget, amountToSource);
+        amountToSource -= usedFreeCash;
+        // Then source from contracts (smallest first to minimize disruption)
+        if (amountToSource > 0 && maturingContracts.length > 0) {
+          var sortedContracts = maturingContracts.filter(function(mc) {
+            if (contractUsed[mc.id]) return false;
+            var reqSpread = _spreadByDuration(c.durationMonths) * miFactor;
+            return c.rate >= mc.rate + reqSpread;
+          }).sort(function(a, b) { return a.amount - b.amount; });
+
+          sortedContracts.forEach(function(mc) {
+            if (amountToSource <= 0) return;
+            var take = Math.min(mc.amount, amountToSource);
+            amountToSource -= take;
+            contractUsed[mc.id] = true;
+          });
+        }
 
         allocs.push({
           id: c.id,
@@ -396,6 +491,41 @@
     var catEquivReturn = Math.round(totalCash * bestCatRate / 100);
     var weightedRate = totalAllocated > 0 ? (totalReturn / totalAllocated * 100) : 0;
 
+    // v2: compute per-contract recommendations for maturing CAT
+    var contractActions = [];
+    var hasMaturingCat = !!(_state.includeMaturingCat && _state.includeMaturingCat[entityKey] && ent && ent.maturingCat > 0);
+    if (hasMaturingCat && ent && ent.maturingDetails.length > 0) {
+      var catOffers = _getCATOffers(0);
+      var bestOffer = catOffers.length > 0 ? catOffers[0] : null;
+      ent.maturingDetails.forEach(function(c) {
+        var action = { contract: c, recommendation: 'garder', reason: '', target: null };
+        // Check if any structured product was allocated from this entity's budget
+        var allocatedStruct = null;
+        results.forEach(function(tr) {
+          tr.allocations.forEach(function(a) {
+            if (a.type === 'structured' && !allocatedStruct) allocatedStruct = a;
+          });
+        });
+        if (allocatedStruct && allocatedStruct.rate >= c.rate + _spreadByDuration(allocatedStruct.durationMonths) * miFactor) {
+          action.recommendation = 'arbitrer';
+          action.reason = allocatedStruct.name + ' à ' + allocatedStruct.rate.toFixed(1) + '% bat ' + c.rate.toFixed(2) + '% + spread ' + (_spreadByDuration(allocatedStruct.durationMonths) * miFactor).toFixed(2) + '%';
+          action.target = allocatedStruct;
+        } else if (bestOffer && bestOffer.rate > c.rate) {
+          action.recommendation = 'renouveler';
+          action.reason = bestOffer.bankName + ' ' + bestOffer.productName + ' à ' + bestOffer.rate.toFixed(2) + '% > ' + c.rate.toFixed(2) + '%';
+          action.target = bestOffer;
+        } else if (bestOffer && bestOffer.rate <= c.rate) {
+          // Règle 1: NEVER switch to a worse CAT
+          action.recommendation = 'garder';
+          action.reason = 'Meilleure offre CAT (' + (bestOffer ? bestOffer.rate.toFixed(2) : '?') + '%) ≤ taux actuel ' + c.rate.toFixed(2) + '%';
+        } else {
+          action.recommendation = 'garder';
+          action.reason = 'Aucune offre CAT confirmée, garder le contrat';
+        }
+        contractActions.push(action);
+      });
+    }
+
     return {
       tranches: results,
       totalCash: totalCash,
@@ -406,10 +536,12 @@
       excessVsCat: totalReturn - catEquivReturn,
       weightedRate: Math.round(weightedRate * 100) / 100,
       bestCatRate: bestCatRate,
+      miFactor: miFactor,
       regime: _getRegime(),
       // Only show "Garder Bond 12M" if ALL the unallocated is from structLiq
       isStructLiqOnly: hasOnlyStructLiq && !(_state.includeMaturingCat && _state.includeMaturingCat[entityKey]),
-      hasMaturingCat: !!(_state.includeMaturingCat && _state.includeMaturingCat[entityKey] && _state.entities[entityKey].maturingCat > 0)
+      hasMaturingCat: hasMaturingCat,
+      contractActions: contractActions
     };
   }
 
@@ -437,17 +569,18 @@
       html += '</div>';
     }
 
-    // Maturing CAT badge
+    // Maturing CAT badge — list each contract individually
     if (ent.maturingCat > 0) {
       var isMatChecked = _state.includeMaturingCat && _state.includeMaturingCat[entKey];
-      var matDate = ent.maturingDetails.length > 0 ? new Date(ent.maturingDetails[0].maturityDate).toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' }) : '';
-      var matRate = ent.maturingDetails.length > 0 ? ent.maturingDetails[0].rate : 0;
       html += '<div style="background:rgba(255,182,39,0.06);border:1px solid rgba(255,182,39,0.15);border-radius:6px;padding:8px 10px;margin-bottom:10px;font-size:10px">';
       html += '<div style="display:flex;align-items:center;justify-content:space-between">';
-      html += '<span style="color:var(--orange);font-weight:600">🔔 CAT à échéance : ' + _fmt(ent.maturingCat) + '€</span>';
+      html += '<span style="color:var(--orange);font-weight:600">🔔 CAT à échéance : ' + _fmt(ent.maturingCat) + '€ (' + ent.maturingDetails.length + ' contrats)</span>';
       html += '<label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="alloc-matcat-' + entKey + '" ' + (isMatChecked ? 'checked' : '') + ' onchange="_allocatorToggleMatCat(\'' + entKey + '\')" style="cursor:pointer"><span style="font-size:10px;color:var(--text-muted)">Inclure</span></label>';
       html += '</div>';
-      html += '<div style="color:var(--text-dim);margin-top:2px">' + ent.maturingDetails.length + '× ' + (ent.maturingDetails[0] ? ent.maturingDetails[0].name : 'CAT') + ' · ' + matRate.toFixed(1) + '% · Échéance ' + matDate + '</div>';
+      ent.maturingDetails.forEach(function(c) {
+        var matDate = new Date(c.maturityDate).toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' });
+        html += '<div style="color:var(--text-dim);margin-top:2px;padding-left:4px">• ' + c.name + ' — ' + _fmt(c.amount) + '€ · ' + (c.rate || 0).toFixed(2) + '% · Éch. ' + matDate + '</div>';
+      });
       html += '</div>';
     }
 
@@ -520,9 +653,17 @@
     html += '</div>';
 
     // Mode toggle
-    html += '<div style="display:flex;gap:8px;margin-bottom:16px">';
+    html += '<div style="display:flex;gap:8px;margin-bottom:10px">';
     html += '<button class="btn sm ' + (_state.mode === 'auto' ? 'primary' : '') + '" onclick="_allocatorSetMode(\'auto\')">🤖 Auto (' + regime + ')</button>';
     html += '<button class="btn sm ' + (_state.mode === 'manual' ? 'primary' : '') + '" onclick="_allocatorSetMode(\'manual\')">✏️ Personnalisé</button>';
+    html += '</div>';
+
+    // Objective toggle — influences product selection, NOT risk limits
+    html += '<div style="display:flex;gap:6px;margin-bottom:16px;align-items:center">';
+    html += '<span style="font-size:10px;color:var(--text-muted);margin-right:4px">Objectif :</span>';
+    html += '<button class="btn sm ' + (_state.objective === 'long' ? 'primary' : '') + '" style="font-size:10px;padding:4px 10px" onclick="_allocatorSetObjective(\'long\')">📈 Long terme</button>';
+    html += '<button class="btn sm ' + (_state.objective === 'court' ? 'primary' : '') + '" style="font-size:10px;padding:4px 10px" onclick="_allocatorSetObjective(\'court\')">💧 Court terme</button>';
+    html += '<button class="btn sm ' + (_state.objective === 'attente' ? 'primary' : '') + '" style="font-size:10px;padding:4px 10px" onclick="_allocatorSetObjective(\'attente\')">⏸️ En attente</button>';
     html += '</div>';
 
     // Two columns: ByCam + Caméléons
@@ -618,6 +759,28 @@
       html += '</div>';
     });
 
+    // v2: Per-contract recommendations (Règle 1: never switch to worse CAT)
+    if (result.contractActions && result.contractActions.length > 0) {
+      html += '<div style="border:1px solid rgba(255,182,39,0.2);border-radius:var(--radius-sm);padding:10px;margin-bottom:8px;background:rgba(255,182,39,0.03)">';
+      html += '<div style="font-size:11px;font-weight:700;color:var(--orange);margin-bottom:8px">📋 Recommandation par contrat CAT</div>';
+      result.contractActions.forEach(function(ca) {
+        var c = ca.contract;
+        var recColor = ca.recommendation === 'arbitrer' ? 'var(--green)' : ca.recommendation === 'renouveler' ? 'var(--cyan)' : 'var(--orange)';
+        var recIcon = ca.recommendation === 'arbitrer' ? '⚡' : ca.recommendation === 'renouveler' ? '🔄' : '✋';
+        var recLabel = ca.recommendation === 'arbitrer' ? 'ARBITRER' : ca.recommendation === 'renouveler' ? 'RENOUVELER' : 'GARDER';
+        html += '<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;margin-bottom:4px;border-radius:6px;background:rgba(255,182,39,0.04);border:1px solid rgba(255,182,39,0.1)">';
+        html += '<div style="flex:1;min-width:0">';
+        html += '<div style="font-size:10px;font-weight:600;color:var(--text-bright);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + c.name + '</div>';
+        html += '<div style="font-size:9px;color:var(--text-dim)">' + _fmt(c.amount) + '€ · ' + (c.rate || 0).toFixed(2) + '% · ' + (c.bankName || '') + '</div>';
+        html += '</div>';
+        html += '<div style="text-align:right;white-space:nowrap">';
+        html += '<div style="font-size:10px;font-weight:700;color:' + recColor + '">' + recIcon + ' ' + recLabel + '</div>';
+        html += '<div style="font-size:8px;color:var(--text-dim);max-width:180px;text-align:right">' + ca.reason + '</div>';
+        html += '</div></div>';
+      });
+      html += '</div>';
+    }
+
     // Unallocated cash — depends on source
     if (result.totalUnallocated > 0) {
       // If this entity's cash is ALL from structLiq (Swiss Life), can't go to CIC
@@ -633,14 +796,48 @@
         html += '<div style="font-family:var(--mono);font-size:10px;color:#A855F7">~2.5% → +' + _fmt(Math.round(result.totalUnallocated * 2.5 / 100)) + '€/an</div></div>';
         html += '</div></div>';
       } else {
-        // Free cash → propose best CAT
+        // Free cash → propose best CAT only if it beats source contracts
         var catOffers = _getCATOffers(result.totalUnallocated);
         html += '<div style="border:1px solid rgba(255,182,39,0.2);border-radius:var(--radius-sm);padding:10px;margin-bottom:8px;background:rgba(255,182,39,0.03)">';
         var macro = _getMacroContext();
         var trendIcon = macro && macro.rateTrend === 'rising' ? '📈' : macro && macro.rateTrend === 'falling' ? '📉' : '➡️';
         var trendLabel = macro && macro.rateTrend === 'rising' ? 'Taux en hausse → court terme recommandé' : macro && macro.rateTrend === 'falling' ? 'Taux en baisse → verrouiller long terme' : 'Taux stables';
 
-        if (catOffers.length > 0) {
+        // Règle 1: check if best offer actually beats existing CAT contracts
+        var bestSourceRate = 0;
+        if (result.contractActions && result.contractActions.length > 0) {
+          result.contractActions.forEach(function(ca) {
+            if (ca.recommendation === 'garder' && ca.contract.rate > bestSourceRate) {
+              bestSourceRate = ca.contract.rate;
+            }
+          });
+        }
+
+        if (catOffers.length > 0 && catOffers[0].rate > bestSourceRate) {
+          var best = catOffers[0];
+          var annualReturn = Math.round(result.totalUnallocated * best.rate / 100);
+          html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">';
+          html += '<div><div style="font-size:11px;font-weight:600;color:var(--orange)">🏦 Placer en CAT</div>';
+          html += '<div style="font-size:9px;color:var(--text-dim)">' + trendIcon + ' ' + trendLabel + '</div></div>';
+          html += '<div style="text-align:right"><div style="font-family:var(--mono);font-weight:700;color:var(--text-bright)">' + _fmt(result.totalUnallocated) + '€</div>';
+          html += '<div style="font-family:var(--mono);font-size:10px;color:var(--orange)">+' + _fmt(annualReturn) + '€/an</div></div>';
+          html += '</div>';
+          html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:rgba(255,182,39,0.06);border:1px solid rgba(255,182,39,0.15);border-radius:6px">';
+          html += '<div><div style="font-size:12px;font-weight:600;color:var(--text-bright)">' + best.bankName + ' — ' + best.productName + '</div>';
+          html += '<div style="font-size:10px;color:var(--text-dim)">' + best.durationMonths + ' mois</div></div>';
+          html += '<div style="text-align:right"><div style="font-family:var(--mono);font-weight:700;font-size:14px;color:var(--orange)">' + _fmt(result.totalUnallocated) + '€</div>';
+          html += '<div style="font-family:var(--mono);font-size:11px;color:var(--orange)">' + best.rate.toFixed(2) + '% → +' + _fmt(annualReturn) + '€/an</div></div>';
+          html += '</div>';
+        } else if (bestSourceRate > 0) {
+          // Règle 1: existing CAT is better → GARDER
+          html += '<div style="display:flex;align-items:center;justify-content:space-between">';
+          html += '<div><div style="font-size:11px;font-weight:600;color:var(--green)">✋ Garder les CAT existants</div>';
+          html += '<div style="font-size:9px;color:var(--text-dim)">Meilleure offre (' + (catOffers.length > 0 ? catOffers[0].rate.toFixed(2) + '%' : 'aucune') + ') ≤ taux actuel (' + bestSourceRate.toFixed(2) + '%) — ne pas arbitrer</div></div>';
+          html += '<div style="text-align:right"><div style="font-family:var(--mono);font-weight:700;color:var(--text-bright)">' + _fmt(result.totalUnallocated) + '€</div>';
+          html += '<div style="font-family:var(--mono);font-size:10px;color:var(--green)">' + bestSourceRate.toFixed(2) + '%</div></div>';
+          html += '</div>';
+        } else if (catOffers.length > 0) {
+          // No source contract context (pure free cash) → propose normally
           var best = catOffers[0];
           var annualReturn = Math.round(result.totalUnallocated * best.rate / 100);
           html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">';
@@ -753,7 +950,8 @@
     html += '<div style="border:2px solid var(--accent);border-radius:var(--radius);overflow:hidden;margin-top:8px">';
     html += '<div style="padding:12px 16px;background:rgba(59,130,246,0.08);display:flex;justify-content:space-between;align-items:center">';
     html += '<span style="font-size:13px;font-weight:700;color:var(--accent)">📊 Synthèse patrimoniale</span>';
-    html += '<span style="font-size:11px;color:var(--text-dim)">Régime ' + result.regime + '</span></div>';
+    var objLabels = { long: '📈 Long terme', court: '💧 Court terme', attente: '⏸️ En attente' };
+    html += '<span style="font-size:11px;color:var(--text-dim)">Régime ' + result.regime + ' · ' + (objLabels[result.objective] || '') + '</span></div>';
 
     // Tableau récap
     html += '<table style="width:100%;border-collapse:collapse;font-size:11px">';
@@ -801,15 +999,13 @@
 
       // Fix double-counting: if maturing CAT are included in allocation,
       // subtract them from CAT existants (they're already in newAlloc + cash→CAT)
+      // v2: iterate per contract instead of using aggregate amount + first rate
       var matCatIncluded = (_state.includeMaturingCat && _state.includeMaturingCat[ent]) ? (_state.entities[ent] ? _state.entities[ent].maturingCat : 0) : 0;
-      if (matCatIncluded > 0) {
-        // Remove maturing amount from CAT line (they're being reallocated)
-        var matRate = 0;
-        if (_state.entities[ent] && _state.entities[ent].maturingDetails.length > 0) {
-          matRate = _state.entities[ent].maturingDetails[0].rate || 0;
-        }
-        catT -= matCatIncluded;
-        catR -= Math.round(matCatIncluded * matRate / 100);
+      if (matCatIncluded > 0 && _state.entities[ent] && _state.entities[ent].maturingDetails.length > 0) {
+        _state.entities[ent].maturingDetails.forEach(function(c) {
+          catT -= c.amount;
+          catR -= Math.round(c.amount * (c.rate || 0) / 100);
+        });
         if (catT < 0) catT = 0;
         if (catR < 0) catR = 0;
       }
@@ -958,6 +1154,13 @@
 
   window._allocatorSetMode = function(mode) {
     _state.mode = mode;
+    _state.result = null;
+    renderUnifiedAllocator(document.getElementById('main-content'));
+  };
+
+  window._allocatorSetObjective = function(obj) {
+    _state.objective = obj;
+    _state.result = null;
     renderUnifiedAllocator(document.getElementById('main-content'));
   };
 
@@ -1043,6 +1246,7 @@
     // Weighted rate on TOTAL cash (not just allocated)
     allResults.weightedRate = _state.totalCash > 0 ? Math.round(totalReturnAll / _state.totalCash * 10000) / 100 : 0;
     allResults.regime = regime;
+    allResults.objective = _state.objective || 'long';
 
     _state.result = allResults;
     _renderResult(document.getElementById('main-content'), allResults);
