@@ -116,14 +116,20 @@
 
     // Check if any Swiss Life structured product beats Bond 12M (~2.5%)
     // If not, structLiq should NOT be included in the allocation budget
+    // Only count products that are fully graded (not 'analyzing') with capital garanti
     var _slHasEligible = false;
     try {
+      var _validGrades = { A: 1, B: 1, C: 1 }; // D and F are too low quality
       Object.values(app.state.proposals || {}).forEach(function(arr) {
         arr.forEach(function(p) {
-          if (p.bankId === 'swiss-life' && p.grading && p.grading.score && p.status !== 'rejected') {
-            var rdtNet = p._bsRendementNet || (p.grading.metadata && p.grading.metadata.bsRendementNet) || 0;
-            if (rdtNet > 2.5) _slHasEligible = true;
-          }
+          if (p.bankId !== 'swiss-life') return;
+          if (!p.grading || !p.grading.grade || !_validGrades[p.grading.grade]) return;
+          if (p.status === 'rejected' || p.status === 'analyzing') return;
+          var cp = p.capitalProtection || {};
+          var isCapGaranti = cp.protected === true || (p.structureType || '').indexOf('capital_garanti') >= 0;
+          if (!isCapGaranti) return;
+          var rdtNet = p._bsRendementNet || (p.grading.metadata && p.grading.metadata.bsRendementNet) || 0;
+          if (rdtNet > 2.5) _slHasEligible = true;
         });
       });
     } catch(e) {}
