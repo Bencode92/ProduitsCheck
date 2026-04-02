@@ -564,23 +564,27 @@
         html += '<div style="background:' + bgC + ';border:1px solid ' + borderC + ';border-radius:6px;padding:8px 10px;margin-bottom:4px;display:flex;align-items:center;gap:10px">';
         html += '<div style="flex:1;min-width:0">';
         html += '<div style="font-size:11px;font-weight:600;color:var(--text-bright);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + a.name + gradeHtml + '</div>';
-        html += '<div style="font-size:10px;color:var(--text-dim)">' + typeLabel + ' · ' + a.bankName + (a.capitalGaranti ? ' · 🛡️' : '') + ' · ' + a.durationMonths + 'M</div>';
+        html += '<div style="font-size:10px;color:var(--text-dim)">' + typeLabel + ' · ' + a.bankName + (a.capitalGaranti ? ' · 🛡️' : '') + ' · ' + a.durationMonths + 'M' + (a.type === 'structured' ? ' · <span style="color:var(--red);font-weight:600">non FGDR</span>' : '') + '</div>';
         html += '</div>';
         html += '<div style="text-align:right;white-space:nowrap">';
         html += '<div style="font-family:var(--mono);font-weight:700;color:var(--cyan);font-size:12px">' + _fmt(a.amount) + '€</div>';
         html += '<div style="font-family:var(--mono);font-size:10px;color:var(--green)">' + a.rate.toFixed(1) + '% → +' + _fmt(a.annualReturn) + '€/an</div>';
         html += '</div></div>';
 
-        // Fourchette de rendement (pessimiste / médian / optimiste)
+        // Fourchette de rendement (pessimiste / médian / optimiste) + coût opportunité
         if (a.type === 'structured' && a.rate > 0) {
           var optimiste = Math.round(a.amount * a.rate * 1.5 / 100);
           var median = a.annualReturn;
           var pessimiste = Math.round(a.amount * a.rate * 0.2 / 100);
+          // Coût d'opportunité : si CAT monte à +0.5% et dispersion = 0
+          var catFutur = (result.bestCatRate || 2.9) + 0.5;
+          var coutOpportunite = Math.round(a.amount * catFutur / 100 * ((a.durationMonths || 36) / 12 - 1));
           html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:4px">';
           html += '<div style="text-align:center;padding:4px;border-radius:4px;background:rgba(239,35,60,0.06);font-size:9px"><div style="color:var(--text-dim)">Pessimiste</div><div style="font-family:var(--mono);color:var(--red);font-weight:600">+' + _fmt(pessimiste) + '€</div></div>';
-          html += '<div style="text-align:center;padding:4px;border-radius:4px;background:rgba(78,205,196,0.06);font-size:9px"><div style="color:var(--text-dim)">Médian (BS)</div><div style="font-family:var(--mono);color:var(--cyan);font-weight:600">+' + _fmt(median) + '€</div></div>';
+          html += '<div style="text-align:center;padding:4px;border-radius:4px;background:rgba(78,205,196,0.06);font-size:9px"><div style="color:var(--text-dim)">Médian</div><div style="font-family:var(--mono);color:var(--cyan);font-weight:600">+' + _fmt(median) + '€</div></div>';
           html += '<div style="text-align:center;padding:4px;border-radius:4px;background:rgba(6,214,160,0.06);font-size:9px"><div style="color:var(--text-dim)">Optimiste</div><div style="font-family:var(--mono);color:var(--green);font-weight:600">+' + _fmt(optimiste) + '€</div></div>';
           html += '</div>';
+          html += '<div style="font-size:8px;color:var(--text-dim);margin-top:2px;padding-left:4px">Coût opportunité si rendement nul + CAT monte à ' + catFutur.toFixed(1) + '% : -' + _fmt(coutOpportunite) + '€ sur ' + Math.round((a.durationMonths || 36) / 12) + ' ans (capital garanti)</div>';
         }
 
         // Warning concentration si min investment override le cap 30%
@@ -923,7 +927,30 @@
     html += '<td style="padding:8px 8px;text-align:right;font-family:var(--mono);font-weight:700;color:var(--green)">' + _fmt(totalFgdr) + '€</td>';
     html += '<td style="padding:8px 8px;text-align:right;font-family:var(--mono);font-weight:700;color:var(--red)">' + _fmt(totalExposed) + '€</td>';
     html += '<td style="padding:8px 8px;text-align:center;font-size:10px;color:var(--text-dim)">' + Math.round(totalFgdr / grandTotal * 100) + '% couvert</td>';
-    html += '</tr></tbody></table></div>';
+    html += '</tr></tbody></table>';
+
+    // Actionable warnings
+    var warnings = [];
+    sorted.forEach(function(bank) {
+      var d = issuers[bank];
+      var pct = grandTotal > 0 ? Math.round(d.total / grandTotal * 100) : 0;
+      if (d.cat > 100000) {
+        var nbBanques = Math.ceil(d.cat / 100000);
+        warnings.push('⚠️ <strong>' + bank + '</strong> : ' + _fmt(d.cat) + '€ en CAT → splitter sur ' + nbBanques + ' banques (FGDR 100K€/banque)');
+      }
+      if (d.structured > 0) {
+        warnings.push('🏛️ <strong>' + bank + '</strong> : ' + _fmt(d.structured) + '€ en structurés — <strong>non couvert FGDR</strong> (risque crédit ' + bank + ')');
+      }
+      if (pct > 40) {
+        warnings.push('📊 <strong>' + bank + '</strong> : ' + pct + '% du patrimoine — diversifier à la prochaine échéance');
+      }
+    });
+    if (warnings.length > 0) {
+      html += '<div style="padding:8px 12px;background:rgba(255,182,39,0.04);border-top:1px solid var(--border);font-size:10px">';
+      warnings.forEach(function(w) { html += '<div style="padding:2px 0;color:var(--text-muted)">' + w + '</div>'; });
+      html += '</div>';
+    }
+    html += '</div>';
 
     return html;
   }
