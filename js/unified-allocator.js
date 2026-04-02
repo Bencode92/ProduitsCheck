@@ -789,7 +789,8 @@
       var bestRate = entResult ? (entResult.bestCatRate || 2.8) : 2.8;
       var cashR = cashA > 0 ? Math.round(cashA * bestRate / 100) : 0;
       var totalBefore = catR + stR + fuR;
-      var totalAfter = totalBefore + newReturn + cashR;
+      var isWaitingCalc = !entResult || (entResult.totalAllocated === 0 && newAlloc === 0);
+      var totalAfter = totalBefore + newReturn + (isWaitingCalc ? 0 : cashR);
       var totalPat = catT + stT + fuT + (entResult ? entResult.totalCash : 0);
       var h = '';
       h += '<tr style="border-bottom:2px solid var(--accent);background:var(--bg-elevated)">';
@@ -823,11 +824,16 @@
         h += '<td style="padding:4px 8px;text-align:right;font-family:var(--mono);font-size:10px;color:var(--green);font-weight:600">+' + _fmt(newReturn) + '€</td></tr>';
       }
       if (cashA > 0) {
-        h += '<tr style="border-bottom:1px solid var(--border)"><td style="padding:4px 12px 4px 24px;color:var(--orange);font-size:10px">🏦 Cash → CAT</td>';
+        // If no allocation at all for this entity → cash is "en attente", not "→ CAT"
+        var isWaiting = !entResult || (entResult.totalAllocated === 0 && newAlloc === 0);
+        var cashLabel = isWaiting ? '💰 Cash disponible' : '🏦 Cash → CAT';
+        var cashColor = isWaiting ? 'var(--cyan)' : 'var(--orange)';
+        var cashReturnDisplay = isWaiting ? 0 : cashR; // waiting = 0 return (not placed yet)
+        h += '<tr style="border-bottom:1px solid var(--border)"><td style="padding:4px 12px 4px 24px;color:' + cashColor + ';font-size:10px">' + cashLabel + '</td>';
         h += '<td style="padding:4px 8px;text-align:right;font-family:var(--mono);font-size:10px">' + _fmt(cashA) + '€</td>';
         h += '<td style="padding:4px 8px;text-align:right;font-size:10px;color:var(--text-dim)">0€</td>';
-        h += '<td style="padding:4px 8px;text-align:right;font-family:var(--mono);font-size:10px;color:var(--orange)">+' + _fmt(cashR) + '€</td>';
-        h += '<td style="padding:4px 8px;text-align:right;font-family:var(--mono);font-size:10px;color:var(--orange)">+' + _fmt(cashR) + '€</td></tr>';
+        h += '<td style="padding:4px 8px;text-align:right;font-family:var(--mono);font-size:10px;color:' + cashColor + '">' + (cashReturnDisplay > 0 ? '+' + _fmt(cashReturnDisplay) + '€' : 'en attente') + '</td>';
+        h += '<td style="padding:4px 8px;text-align:right;font-family:var(--mono);font-size:10px;color:' + cashColor + '">' + (cashReturnDisplay > 0 ? '+' + _fmt(cashReturnDisplay) + '€' : '—') + '</td></tr>';
       }
       // Sub-total for this entity
       h += '<tr style="border-bottom:2px solid var(--border);background:rgba(59,130,246,0.03)">';
