@@ -170,7 +170,7 @@
   // is the best rate you can actually get NOW from available offers
   // SINGLE SOURCE OF TRUTH for CAT benchmark across all modules
   function _bestCATRate(entityFilter) {
-    var best = (typeof window._getCATBenchmark === 'function' ? window._getCATBenchmark() : 2.5);
+    var best = 2.5; // ECB floor fallback — NOT _getCATBenchmark (would be circular)
     // From available offers only (what you can subscribe to today)
     var offers = _getCATOffers(0);
     offers.forEach(function(o) { if (o.rate > best) best = o.rate; });
