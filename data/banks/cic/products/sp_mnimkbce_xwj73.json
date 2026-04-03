@@ -199,19 +199,19 @@
         "score": 67,
         "base": 64,
         "delta": -2,
-        "reasoning": "Rendement: base 64 → -2 = 62 (En stagflation, le TEC10 (taux long) risque de subir la pentification de la courbe, réduisant la probabilité d'atteindre 4.4%) | Coupon 4.6%, protégé | Barr.coupon 4.4%"
+        "reasoning": "Rendement: base 64 → -2 = 62 (En stagflation avec Brent >$120, les taux longs (TEC10) subissent une pression haussière réduisant la probabilité de rester sous 4.4%) | Coupon 4.6%, protégé | Barr.coupon 4.4%"
       },
       "underlyingQuality": {
         "score": 33,
         "base": 35,
         "delta": -2,
-        "reasoning": "Qualité: base 35 → -2 = 33 (Contexte stagflationnaire très défavorable aux taux longs avec risque de hausse brutale des taux courts par la Fed)"
+        "reasoning": "Qualité: base 35 → -2 = 33 (Le TEC10 est particulièrement vulnérable en stagflation avec une pentification de la courbe et des pressions inflationnistes)"
       },
       "portfolioFit": {
         "score": 60,
         "base": 80,
         "delta": 2,
-        "reasoning": "Fit: base 80 → +2 = 82 (Produit à capital garanti particulièrement pertinent en période de forte incertitude macro)"
+        "reasoning": "Fit: base 80 → +2 = 82 (Dans un contexte de taux élevés, un produit garanti avec rendement potentiel de 4.6% devient plus attractif pour diversifier)"
       },
       "riskPremium": {
         "score": 54,
@@ -220,35 +220,36 @@
         "reasoning": "Capital garanti: spread 4.6% - CAT 2.5% - illiq 0.5% = 1.6%"
       }
     },
-    "verdict": "Dans un contexte de stagflation avec Brent à $122 et inflation persistante, ce produit indexé sur le TEC10 présente des risques significatifs. La pentification de la courbe des taux et le risque hawkish de la Fed menacent directement la probabilité de toucher le coupon de 4.6% (barrière à 4.4%). Cependant, la garantie du capital offre une protection bienvenue dans cet environnement volatil, justifiant une note finale de 42/100.",
+    "verdict": "En régime de stagflation avec Brent à $121.88 et PCE à 2.83%, ce produit garanti sur TEC10 offre une protection bienvenue mais avec un coupon conditionnel fragile. La barrière à 4.4% risque d'être franchie rapidement si la Fed reste hawkish, limitant le rendement à 0% dans 60-70% des cas. Avec un score ajusté de 42/100, ce produit convient uniquement aux profils très conservateurs privilégiant la garantie du capital.",
     "keyRisks": [
-      "Hausse brutale des taux courts forçant le TEC10 au-dessus de 4.4%",
-      "Pentification extrême de la courbe en cas d'escalade du choc énergétique"
+      "Forte probabilité de non-versement du coupon si les taux longs dépassent 4.4%",
+      "Rendement potentiel limité à 4.6% dans un contexte inflationniste à 2.83%",
+      "Risque d'opportunité avec des taux sans risque potentiellement plus attractifs"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 4.6,
-        "return_eur": 4600,
-        "probability": 0.15,
-        "duration_years": 1
+        "return_eur": 23000,
+        "probability": 0.25,
+        "duration_years": 5
       },
       "base": {
-        "return_pct": 2.3,
-        "return_eur": 11500,
-        "probability": 0.3,
+        "return_pct": 1.84,
+        "return_eur": 9200,
+        "probability": 0.35,
         "duration_years": 5
       },
       "stress": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.4,
+        "probability": 0.3,
         "duration_years": 5
       },
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.15,
+        "probability": 0.1,
         "duration_years": 5
       }
     },
@@ -261,8 +262,8 @@
       "label": "C [43-61]"
     },
     "metadata": {
-      "gradedAt": "2026-04-03T11:55:42.073Z",
-      "durationMs": 17754,
+      "gradedAt": "2026-04-03T11:56:19.891Z",
+      "durationMs": 17852,
       "aiUsed": true,
       "version": "7.1",
       "productType": "capital_garanti",
