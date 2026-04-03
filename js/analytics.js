@@ -79,9 +79,10 @@ function getDistributionByBank() {
   return Object.entries(map).map(([name, value]) => ({ name, value })).sort((a,b) => b.value - a.value);
 }
 function getDistributionByEntity() {
-  const { products } = getPortfolioData();
+  const { products, catDeposits } = getPortfolioData();
   const map = {};
   products.forEach(p => { const entity = p.entity ? (MY_ENTITIES.find(e => e.id === p.entity)?.name || p.entity) : 'Non assigné'; map[entity] = (map[entity]||0) + (parseFloat(p.investedAmount)||0); });
+  catDeposits.forEach(d => { const entId = d.entity || (d.entityName === 'Caméleons' ? 'cameleons' : d.entityName === 'ByCam' ? 'bycam' : null); const entity = entId ? (MY_ENTITIES.find(e => e.id === entId)?.name || entId) : 'Non assigné'; map[entity] = (map[entity]||0) + (parseFloat(d.amount)||0); });
   return Object.entries(map).map(([name, value]) => ({ name, value })).sort((a,b) => b.value - a.value);
 }
 function getDistributionByType() {
