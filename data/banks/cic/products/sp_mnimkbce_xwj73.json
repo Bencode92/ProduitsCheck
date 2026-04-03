@@ -199,44 +199,44 @@
         "score": 67,
         "base": 64,
         "delta": -2,
-        "reasoning": "Rendement: base 64 → -2 = 62 (En stagflation, le TEC10 (taux long) risque de monter avec l'inflation persistante, réduisant la probabilité de toucher le coupon à 4.4%) | Coupon 4.6%, protégé | Barr.coupon 4.4%"
+        "reasoning": "Rendement: base 64 → -2 = 62 (En stagflation avec taux courts élevés, la probabilité que TEC10 reste >4.4% est réduite car la courbe pourrait s'inverser) | Coupon 4.6%, protégé | Barr.coupon 4.4%"
       },
       "underlyingQuality": {
         "score": 33,
         "base": 35,
         "delta": -2,
-        "reasoning": "Qualité: base 35 → -2 = 33 (Le TEC10 est un taux souverain, relativement stable mais défavorable en stagflation où les taux longs montent)"
+        "reasoning": "Qualité: base 35 → -2 = 33 (TEC10 très sensible à la politique BCE qui devra combattre l'inflation par hausse des taux courts, défavorable aux taux longs)"
       },
       "portfolioFit": {
         "score": 60,
         "base": 80,
         "delta": 2,
-        "reasoning": "Fit: base 80 → +2 = 82 (Protection capital totale très pertinente en stagflation, permet une exposition taux sans risque de perte)"
+        "reasoning": "Fit: base 80 → +2 = 82 (Produit de taux pertinent en stagflation pour sécuriser un rendement garanti face à l'inflation élevée)"
       },
       "riskPremium": {
         "score": 54,
         "base": 39,
-        "delta": 0,
+        "delta": -2,
         "reasoning": "Capital garanti: spread 4.6% - CAT 2.5% - illiq 0.5% = 1.6%"
       }
     },
-    "verdict": "En régime stagflationnaire avec Brent à $122 et inflation élevée, ce produit capital garanti sur TEC10 offre une protection bienvenue mais des perspectives de coupon limitées. Avec une barrière à 4.4% alors que les taux longs risquent de monter, la probabilité de toucher le coupon annuel de 4.6% est réduite. Le score ajusté de 54/100 reflète un produit défensif adapté au contexte mais peu rémunérateur, typique des solutions capital garanti en période d'incertitude.",
+    "verdict": "En régime stagflationnare avec Brent à 122$ et inflation PCE à 2.83%, ce produit sur TEC10 présente des défis majeurs. La BCE devra probablement relever ses taux courts pour combattre l'inflation, ce qui pourrait faire chuter le TEC10 sous la barrière de 4.4%. Avec un score final ajusté de 39/100, le rapport risque/rendement est défavorable malgré la garantie du capital.",
     "keyRisks": [
-      "Hausse des taux longs au-delà de 4.4% empêchant le versement des coupons",
-      "Coût d'opportunité élevé si l'inflation reste durablement au-dessus de 2.8%"
+      "Inversion de la courbe des taux probable en stagflation faisant chuter TEC10",
+      "Barrière à 4.4% trop proche du niveau actuel avec seulement 0.2% de marge"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 4.6,
-        "return_eur": 4600,
+        "return_eur": 23000,
         "probability": 0.2,
-        "duration_years": 1
+        "duration_years": 5
       },
       "base": {
         "return_pct": 2.3,
         "return_eur": 11500,
-        "probability": 0.4,
+        "probability": 0.35,
         "duration_years": 5
       },
       "stress": {
@@ -248,7 +248,7 @@
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.1,
+        "probability": 0.15,
         "duration_years": 5
       }
     },
@@ -261,8 +261,8 @@
       "label": "C [44-62]"
     },
     "metadata": {
-      "gradedAt": "2026-04-03T08:12:49.346Z",
-      "durationMs": 18583,
+      "gradedAt": "2026-04-03T08:19:25.732Z",
+      "durationMs": 15630,
       "aiUsed": true,
       "version": "7.1",
       "productType": "capital_garanti",
@@ -287,7 +287,7 @@
         "p1": -2,
         "p2": -2,
         "p3": 2,
-        "p4": 0
+        "p4": -2
       },
       "barrier_sigma": null,
       "barrier_sigma_label": null,
