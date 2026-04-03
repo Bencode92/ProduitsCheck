@@ -1015,12 +1015,22 @@
     html += '<div style="font-size:11px;color:var(--text-muted)">Rdt/an <span style="float:right;font-family:var(--mono);color:var(--orange)">+' + _fmt(result.totalCatEquiv) + '€</span></div>';
     html += '</div>';
     html += '<div style="display:flex;align-items:center;padding:0 10px;background:var(--bg-card);font-size:22px;color:var(--accent)">→</div>';
+    // Compute adverse scenario: structured returns at 30% of median (stress corr → high)
+    var structReturnMedian = result.totalReturn;
+    var structReturnAdverse = Math.round(structReturnMedian * 0.30);
+    var unallocReturn = result.unallocatedReturn || 0;
+    var totalReturnAdverse = structReturnAdverse + unallocReturn;
+
     html += '<div style="padding:14px;background:var(--bg-card)">';
     html += '<div style="font-size:10px;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:8px">Optimisé (CAT + Structurés)</div>';
     html += '<div style="font-size:11px;color:var(--text-muted);margin-bottom:3px">Structurés <span style="float:right;font-family:var(--mono);color:var(--cyan)">' + _fmt(result.totalAllocated) + '€</span></div>';
     html += '<div style="font-size:11px;color:var(--text-muted);margin-bottom:3px">En CAT <span style="float:right;font-family:var(--mono);color:var(--orange)">' + _fmt(result.totalUnallocated) + '€</span></div>';
     html += '<div style="font-size:11px;color:var(--text-muted)">Rdt total/an <span style="float:right;font-family:var(--mono);color:var(--green);font-weight:700">+' + _fmt(result.totalReturnAll) + '€</span>' +
       (result.excessVsCat > 0 ? ' <span style="font-size:9px;color:var(--green)">+' + _fmt(result.excessVsCat) + '</span>' : '') + '</div>';
+    if (structReturnMedian > 0) {
+      html += '<div style="font-size:10px;color:var(--text-dim);margin-top:4px;border-top:1px solid var(--border);padding-top:4px">Scénario adverse <span style="float:right;font-family:var(--mono);color:var(--orange)">+' + _fmt(totalReturnAdverse) + '€</span></div>';
+      html += '<div style="font-size:9px;color:var(--text-dim)">Si corrélation stress (rdtNet ×30%) <span style="float:right;color:var(--text-dim)">capital garanti</span></div>';
+    }
     html += '</div></div>';
 
     // Per-entity results — side by side
