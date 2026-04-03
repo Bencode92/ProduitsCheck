@@ -135,60 +135,6 @@ async function renderAnalytics(container) {
       <div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">🎯</span><span class="fiche-section-title">Par Type</span></div><div class="fiche-section-body"><canvas id="chart-type" height="150"></canvas></div></div>
       <div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">🏢</span><span class="fiche-section-title">Par Entreprise</span></div><div class="fiche-section-body"><canvas id="chart-entity" height="150"></canvas></div></div>
     </div>
-    <div class="fiche-section" style="margin-bottom:12px"><div class="fiche-section-header"><span class="fiche-section-icon">⏳</span><span class="fiche-section-title">Profil de Maturité</span></div><div class="fiche-section-body"><canvas id="chart-maturity" height="140"></canvas></div></div>
-    <div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">💰</span><span class="fiche-section-title">Détail Rendement par Produit</span></div>
-      <div class="fiche-section-body">
-        <table style="width:100%;font-size:12px;border-collapse:collapse">
-          <thead><tr style="border-bottom:2px solid var(--border);text-align:left">
-            <th style="padding:8px 6px;color:var(--text-dim);font-size:10px;text-transform:uppercase">Produit</th>
-            <th style="padding:8px 6px;color:var(--text-dim);font-size:10px;text-transform:uppercase">Entreprise</th>
-            <th style="padding:8px 6px;color:var(--text-dim);font-size:10px;text-transform:uppercase;text-align:right">Montant</th>
-            <th style="padding:8px 6px;color:var(--text-dim);font-size:10px;text-transform:uppercase;text-align:right">Coupon brut</th>
-            <th style="padding:8px 6px;color:var(--text-dim);font-size:10px;text-transform:uppercase;text-align:right">Taux annualisé</th>
-            <th style="padding:8px 6px;color:var(--text-dim);font-size:10px;text-transform:uppercase;text-align:right">Rendement/an</th>
-            <th style="padding:8px 6px;color:var(--text-dim);font-size:10px;text-transform:uppercase">Maturité</th>
-          </tr></thead>
-          <tbody>
-            ${products.map(p => {
-              const entityInfo = MY_ENTITIES.find(e => e.id === p.entity);
-              const annualRate = getAnnualizedRate(p);
-              const rawRate = parseFloat(p.coupon?.rate) || 0;
-              const freq = p.coupon?.frequency || '';
-              const isAnnualized = annualRate !== rawRate;
-              return `<tr style="border-bottom:1px solid var(--border)">
-                <td style="padding:8px 6px;color:var(--text-bright);font-weight:500">${p.name || '—'}</td>
-                <td style="padding:8px 6px">${entityInfo ? `<span style="color:${entityInfo.color}">${entityInfo.icon} ${entityInfo.name}</span>` : '—'}</td>
-                <td style="padding:8px 6px;text-align:right;font-family:var(--mono)">${formatNumber(p.investedAmount)}€</td>
-                <td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:var(--text-muted)">${rawRate ? rawRate.toFixed(2).replace('.',',') + '% ' + (freq ? '<span style="font-size:10px;color:var(--text-dim)">/' + freq + '</span>' : '') : '—'}</td>
-                <td style="padding:8px 6px;text-align:right;color:var(--green);font-family:var(--mono);font-weight:600">${annualRate ? annualRate.toFixed(2).replace('.',',') + '%' : '—'}${isAnnualized ? ' <span style="font-size:9px;color:var(--orange)">×' + Math.round(annualRate/rawRate) + '</span>' : ''}</td>
-                <td style="padding:8px 6px;text-align:right;color:var(--green);font-family:var(--mono);font-weight:700">${formatNumber(calcProductAnnualYield(p))}€</td>
-                <td style="padding:8px 6px;color:var(--text-muted)">${p.maturity || '—'}</td>
-              </tr>`;
-            }).join('')}
-            ${catDeposits.map(d => {
-              const interest = Math.round((parseFloat(d.amount)||0)*(parseFloat(d.rate)||0)/100);
-              return `<tr style="border-bottom:1px solid var(--border)">
-                <td style="padding:8px 6px;color:var(--text-bright);font-weight:500">${d.productName || 'CAT ' + (d.durationMonths||'') + 'm'}</td>
-                <td style="padding:8px 6px">—</td>
-                <td style="padding:8px 6px;text-align:right;font-family:var(--mono)">${formatNumber(d.amount)}€</td>
-                <td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:var(--text-muted)">${d.rate ? formatPct(d.rate) : '—'}</td>
-                <td style="padding:8px 6px;text-align:right;color:var(--green);font-family:var(--mono);font-weight:600">${d.rate ? formatPct(d.rate) : '—'}</td>
-                <td style="padding:8px 6px;text-align:right;color:var(--green);font-family:var(--mono);font-weight:700">${formatNumber(interest)}€</td>
-                <td style="padding:8px 6px;color:var(--text-muted)">${d.durationMonths ? d.durationMonths + ' mois' : '—'}</td>
-              </tr>`;
-            }).join('')}
-          </tbody>
-          <tfoot><tr style="border-top:2px solid var(--border);font-weight:700">
-            <td style="padding:10px 6px;color:var(--text-bright)" colspan="2">TOTAL</td>
-            <td style="padding:10px 6px;text-align:right;font-family:var(--mono);color:var(--text-bright)">${formatNumber(totalAll)}€</td>
-            <td></td>
-            <td style="padding:10px 6px;text-align:right;color:var(--green);font-family:var(--mono)">${avgYield.toFixed(2).replace('.',',')}%</td>
-            <td style="padding:10px 6px;text-align:right;color:var(--green);font-family:var(--mono);font-weight:700">${formatNumber(annualYieldTotal)}€/an</td>
-            <td></td>
-          </tr></tfoot>
-        </table>
-      </div>
-    </div>
     `;
   setTimeout(() => renderAllCharts(), 50);
 }
