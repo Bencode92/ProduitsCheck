@@ -38,7 +38,7 @@
             const gd = document.createElement('div'); gd.className = 'fiche-section'; gd.setAttribute('data-section', 'grading');
             var btns = ''; if (p.grading) { btns = '<button onclick="triggerGrading(this)" style="margin-left:auto;padding:4px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;font-size:11px;display:flex;align-items:center;gap:4px">\ud83d\udd04 Actualiser</button>'; } if (!p.grading || (p.grading.grade !== '-')) { btns += '<button onclick="tagAsLiquidity(this)" style="padding:4px 12px;border-radius:6px;border:1px solid #94A3B844;background:transparent;color:#94A3B8;cursor:pointer;font-size:11px;margin-left:6px">$ Liquidit\u00e9</button>'; }
             var gradingHtml = ProposalGrader.renderSection(p.grading);
-            if (p.grading && p.grading.metadata && p.grading.metadata.stockData && p.grading.metadata.stockData.length > 0) { var stockTableHtml = _renderStockTable(p.grading.metadata.stockData); var insertPoint = gradingHtml.indexOf('grid-template-columns:repeat(4'); if (insertPoint > 0) { var divStart = gradingHtml.lastIndexOf('<div style="display:grid', insertPoint); if (divStart > 0) gradingHtml = gradingHtml.substring(0, divStart) + stockTableHtml + gradingHtml.substring(divStart); } else { var risksPoint = gradingHtml.indexOf('<strong>Risques'); if (risksPoint > 0) { var divR = gradingHtml.lastIndexOf('<div', risksPoint); if (divR > 0) gradingHtml = gradingHtml.substring(0, divR) + stockTableHtml + gradingHtml.substring(divR); } else { var footerPoint = gradingHtml.lastIndexOf('<div style="font-size:10px'); if (footerPoint > 0) gradingHtml = gradingHtml.substring(0, footerPoint) + stockTableHtml + gradingHtml.substring(footerPoint); } } }
+            if (p.grading && p.grading.metadata && p.grading.metadata.stockData && p.grading.metadata.stockData.length > 0) { var st = (p.structureType || '').toLowerCase(); var stockTableHtml = st === 'range_accrual' ? _renderRangeAccrualBadge(p) : _renderStockTable(p.grading.metadata.stockData); var insertPoint = gradingHtml.indexOf('grid-template-columns:repeat(4'); if (insertPoint > 0) { var divStart = gradingHtml.lastIndexOf('<div style="display:grid', insertPoint); if (divStart > 0) gradingHtml = gradingHtml.substring(0, divStart) + stockTableHtml + gradingHtml.substring(divStart); } else { var risksPoint = gradingHtml.indexOf('<strong>Risques'); if (risksPoint > 0) { var divR = gradingHtml.lastIndexOf('<div', risksPoint); if (divR > 0) gradingHtml = gradingHtml.substring(0, divR) + stockTableHtml + gradingHtml.substring(divR); } else { var footerPoint = gradingHtml.lastIndexOf('<div style="font-size:10px'); if (footerPoint > 0) gradingHtml = gradingHtml.substring(0, footerPoint) + stockTableHtml + gradingHtml.substring(footerPoint); } } }
             // v7.1: Regime scenarios widget
             if (p.grading && p.grading.regimeScenarios) {
                 var rs = p.grading.regimeScenarios;
@@ -127,6 +127,45 @@
     }
 
     function _renderStockTable(stockData) { if (!stockData || stockData.length === 0) return ''; function _pc(v) { if (v == null) return '#888'; return v >= 10 ? '#06D6A0' : v >= 0 ? '#4ECDC4' : v >= -10 ? '#FFB627' : '#EF233C'; } function _sc(v) { if (v == null) return '#888'; return v >= 70 ? '#06D6A0' : v >= 50 ? '#4ECDC4' : v >= 30 ? '#FFB627' : '#EF233C'; } function _f(v, s) { if (v == null) return '<span style="color:#555">\u2014</span>'; var c = s === '%' ? _pc(v) : _sc(v); return '<span style="color:' + c + ';font-weight:600">' + (v >= 0 && s === '%' ? '+' : '') + v + (s || '') + '</span>'; } var cs = 'padding:4px 6px;font-size:11px;border-bottom:1px solid rgba(255,255,255,0.06);white-space:nowrap;'; var hs = cs + 'color:var(--text-muted);font-weight:500;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;'; var h = '<div style="margin:12px 0"><div style="font-size:11px;font-weight:600;color:var(--text-muted);margin-bottom:6px">\ud83d\udcca Sous-jacents</div><div style="overflow-x:auto;border-radius:8px;border:1px solid rgba(255,255,255,0.08)"><table style="width:100%;border-collapse:collapse;font-size:11px"><tr style="background:rgba(255,255,255,0.03)"><th style="' + hs + 'text-align:left">Nom</th><th style="' + hs + 'text-align:right">YTD</th><th style="' + hs + 'text-align:right">1 an</th><th style="' + hs + 'text-align:right">Vol 3Y</th><th style="' + hs + 'text-align:right">DD 3Y</th><th style="' + hs + 'text-align:right">Buffett</th><th style="' + hs + 'text-align:right">Quality</th></tr>'; stockData.forEach(function(s, i) { var bg = i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)'; h += '<tr style="background:' + bg + '"><td style="' + cs + 'text-align:left"><span style="font-weight:600;color:var(--text-primary,#e0e0e0)">' + s.name + '</span> <span style="color:#666;font-size:10px">' + s.ticker + '</span></td><td style="' + cs + 'text-align:right">' + _f(s.perf_ytd, '%') + '</td><td style="' + cs + 'text-align:right">' + _f(s.perf_1y, '%') + '</td><td style="' + cs + 'text-align:right">' + _f(s.volatility_3y, '%') + '</td><td style="' + cs + 'text-align:right">' + _f(s.max_drawdown_3y != null ? -Math.abs(s.max_drawdown_3y) : null, '%') + '</td><td style="' + cs + 'text-align:right">' + _f(s.buffett_score, '') + '<span style="font-size:9px;color:#666">/' + (s.buffett_grade || '?') + '</span></td><td style="' + cs + 'text-align:right">' + _f(s.quality_score, '') + '</td></tr>'; }); h += '</table></div></div>'; return h; }
+
+    function _renderRangeAccrualBadge(product) {
+      var ra = product.rangeAccrual || (product.aiParsed && product.aiParsed.rangeAccrual) || {};
+      var lower = ra.lowerBound || 1.75;
+      var upper = ra.upperBound || 3.50;
+      var ref = ra.reference || 'Euribor 3 mois';
+      var obs = ra.observation || 'daily';
+      var obsLabel = obs === 'daily' ? 'Journalière' : obs === 'weekly' ? 'Hebdomadaire' : 'Mensuelle';
+      // Estimate current rate from ECB data
+      var currentRate = 2.5; // default
+      try { if (typeof _mktCache !== 'undefined' && _mktCache && _mktCache.rates && _mktCache.rates.policy_rates && _mktCache.rates.policy_rates.ecb_deposit_rate) currentRate = _mktCache.rates.policy_rates.ecb_deposit_rate.current + 0.5; } catch(e) {}
+      var width = upper - lower;
+      var distToEdge = Math.min(currentRate - lower, upper - currentRate);
+      var isInRange = currentRate >= lower && currentRate <= upper;
+      var pos = isInRange ? Math.max(0, Math.min(1, (currentRate - lower) / width)) : (currentRate < lower ? 0 : 1);
+      var statusColor = isInRange ? (distToEdge > 0.5 ? '#06D6A0' : '#FFB627') : '#EF233C';
+      var statusLabel = isInRange ? 'DANS LE RANGE' : 'HORS RANGE';
+      var h = '<div style="margin:12px 0;border:1px solid rgba(168,85,247,0.2);border-radius:8px;padding:12px;background:rgba(168,85,247,0.03)">';
+      h += '<div style="font-size:11px;font-weight:600;color:#A855F7;margin-bottom:8px">📊 Corridor Range Accrual</div>';
+      h += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">';
+      h += '<div style="flex:1;font-size:10px;color:var(--text-dim)">' + ref + ' · Observation ' + obsLabel + '</div>';
+      h += '<div style="font-size:11px;font-weight:700;color:' + statusColor + '">' + statusLabel + '</div>';
+      h += '</div>';
+      // Visual corridor bar
+      h += '<div style="position:relative;height:24px;background:rgba(255,255,255,0.05);border-radius:12px;overflow:hidden;margin-bottom:6px">';
+      h += '<div style="position:absolute;left:0;top:0;height:100%;width:100%;background:rgba(168,85,247,0.15);border-radius:12px"></div>';
+      if (isInRange) h += '<div style="position:absolute;left:' + (pos * 100).toFixed(1) + '%;top:2px;width:8px;height:20px;background:' + statusColor + ';border-radius:4px;transform:translateX(-50%)"></div>';
+      h += '</div>';
+      h += '<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted)">';
+      h += '<span>' + lower.toFixed(2) + '%</span>';
+      h += '<span style="color:' + statusColor + ';font-weight:600">' + currentRate.toFixed(2) + '% actuel</span>';
+      h += '<span>' + upper.toFixed(2) + '%</span>';
+      h += '</div>';
+      h += '<div style="display:flex;gap:12px;margin-top:8px;font-size:10px">';
+      h += '<div>Distance borne basse: <span style="font-weight:600;color:var(--green)">' + (currentRate - lower).toFixed(2) + '%</span></div>';
+      h += '<div>Distance borne haute: <span style="font-weight:600;color:' + (upper - currentRate < 0.5 ? 'var(--red)' : 'var(--orange)') + '">' + (upper - currentRate).toFixed(2) + '%</span></div>';
+      h += '</div></div>';
+      return h;
+    }
 
     function _disableDeepAnalysis() { if (typeof window.injectDeepAnalysis === 'function' && !window._deepAnalysisDisabled) { window._origInjectDeepAnalysis = window.injectDeepAnalysis; window.injectDeepAnalysis = function() {}; window._deepAnalysisDisabled = true; } }
     _disableDeepAnalysis(); setTimeout(_disableDeepAnalysis, 100); setTimeout(_disableDeepAnalysis, 500);
