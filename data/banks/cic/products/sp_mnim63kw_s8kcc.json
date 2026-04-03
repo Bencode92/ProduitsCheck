@@ -212,19 +212,19 @@
         "score": 47,
         "base": 52,
         "delta": -5,
-        "reasoning": "Rendement: base 52 → -5 = 47 (En stagflation avec choc énergétique, la BCE pourrait maintenir des taux élevés plus longtemps, réduisant la probabilité que l'Euribor reste dans la range favorable au coupon) | Coupon 5.2%, protégé"
+        "reasoning": "Rendement: base 52 → -5 = 47 (En stagflation avec choc pétrolier à $122, la BCE pourrait maintenir des taux élevés plus longtemps, réduisant la probabilité que l'Euribor reste dans la range du Range Accrual) | Coupon 5.2%, protégé"
       },
       "underlyingQuality": {
         "score": 56,
         "base": 61,
         "delta": -5,
-        "reasoning": "Qualité: base 61 → -5 = 56 (Beta faible (0.13) protège partiellement, mais contexte stagflationnaire avec risque hawkish BCE défavorable aux produits de taux) | Worst: Taux Euribor 3 mois B:35"
+        "reasoning": "Qualité: base 61 → -5 = 56 (Produit de taux en régime stagflationnaire avec volatilité Euribor élevée (22.46%) et incertitude sur la politique BCE face au dilemme inflation/croissance) | Worst: Taux Euribor 3 mois B:35"
       },
       "portfolioFit": {
         "score": 57,
         "base": 62,
         "delta": 5,
-        "reasoning": "Fit: base 62 → +5 = 67 (Produit à capital garanti très pertinent en stagflation où les actifs risqués souffrent, offre protection et rendement supérieur aux obligations classiques)"
+        "reasoning": "Fit: base 62 → +5 = 67 (Range Accrual offre une protection partielle contre la volatilité des taux en stagflation, pertinent pour diversifier hors actions cycliques)"
       },
       "riskPremium": {
         "score": 56,
@@ -233,35 +233,35 @@
         "reasoning": "Capital garanti: spread 5.2% - CAT 2.5% - illiq 0.5% = 2.3%"
       }
     },
-    "verdict": "Produit défensif adapté au contexte stagflationnaire actuel avec capital garanti, mais le coupon de 5.2% semble ambitieux. Avec l'Euribor 3M actuellement élevé et une BCE potentiellement hawkish face à l'inflation à 2.83%, la probabilité de percevoir l'intégralité des coupons est réduite. Le choc pétrolier à $122 et les stress flags energy_shock renforcent le risque de taux durablement hauts, mais la garantie du capital offre une protection bienvenue quand les marchés actions et obligations souffrent.",
+    "verdict": "Ce Range Accrual sur Euribor 3M offre 5.2% annualisé avec capital garanti, mais en régime stagflationnaire avec pétrole à $122, la probabilité que l'Euribor reste dans la range favorable est réduite. La volatilité élevée de 22.46% sur l'Euribor et l'incertitude sur la réaction BCE face au dilemme croissance/inflation fragilisent le produit. Score ajusté à 46/100, reflétant un produit peu attractif où le rendement de 5.2% ne compense pas suffisamment les risques de non-paiement des coupons en environnement stagflationnaire.",
     "keyRisks": [
-      "Euribor 3M reste au-dessus de la range favorable si BCE maintient politique restrictive",
-      "Risque de call anticipé par l'émetteur si les taux baissent rapidement"
+      "Euribor hors range si BCE durcit face à l'inflation importée du pétrole",
+      "Volatilité des taux amplifiée par le dilemme politique monétaire en stagflation"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 5.2,
-        "return_eur": 26000,
+        "return_eur": 5200,
         "probability": 0.2,
-        "duration_years": 5
+        "duration_years": 1
       },
       "base": {
-        "return_pct": 3.1,
-        "return_eur": 15500,
-        "probability": 0.4,
-        "duration_years": 5
+        "return_pct": 13,
+        "return_eur": 13000,
+        "probability": 0.3,
+        "duration_years": 2.5
       },
       "stress": {
-        "return_pct": 1.5,
-        "return_eur": 7500,
-        "probability": 0.3,
-        "duration_years": 5
+        "return_pct": 7.8,
+        "return_eur": 7800,
+        "probability": 0.35,
+        "duration_years": 3
       },
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.1,
+        "probability": 0.15,
         "duration_years": 5
       }
     },
@@ -274,8 +274,8 @@
       "label": "C [43-59]"
     },
     "metadata": {
-      "gradedAt": "2026-04-03T08:04:15.223Z",
-      "durationMs": 21390,
+      "gradedAt": "2026-04-03T08:22:07.235Z",
+      "durationMs": 20592,
       "aiUsed": true,
       "version": "7.1",
       "productType": "rate",
