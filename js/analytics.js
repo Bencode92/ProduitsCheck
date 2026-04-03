@@ -153,7 +153,7 @@ function _renderMaturityTimeline(products, catDeposits) {
       name: d.productName || 'CAT',
       type: 'CAT',
       typeColor: 'var(--orange)',
-      entity: d.entityName || d.entity || '?',
+      entity: d.entity || (d.entityName === 'Caméleons' ? 'cameleons' : d.entityName === 'ByCam' ? 'bycam' : d.entityName) || '?',
       bank: d.bankName || '?',
       amount: amount,
       rate: rate,

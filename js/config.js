@@ -17,7 +17,7 @@ const CONFIG = {
 
 const MY_ENTITIES = [
   { id: 'bycam', name: 'ByCam', color: '#06D6A0', icon: '🏢' },
-  { id: 'cameleons', name: 'Caméleons', color: '#8338EC', icon: '🦎' },
+  { id: 'cameleons', name: 'Cam.', color: '#8338EC', icon: '🦎' },
 ];
 
 const BANKS_LIST = [
