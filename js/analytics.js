@@ -101,7 +101,13 @@ function getMaturityProfile() {
 
 // ═══ RENDER ANALYTICS VIEW ══════════════════════════════════
 
-function renderAnalytics(container) {
+async function renderAnalytics(container) {
+  // Ensure catManager is loaded before rendering
+  try {
+    if (typeof catManager !== 'undefined' && typeof catManager.load === 'function' && !catManager.deposits) {
+      await catManager.load();
+    }
+  } catch(e) {}
   const { products, catDeposits } = getPortfolioData();
   const totalStructured = products.reduce((s,p) => s + (parseFloat(p.investedAmount)||0), 0);
   const totalCAT = catDeposits.reduce((s,d) => s + (parseFloat(d.amount)||0), 0);
@@ -119,14 +125,17 @@ function renderAnalytics(container) {
       <div class="stat-card orange"><div class="stat-label">Rendement Moyen</div><div class="stat-value">${avgYield.toFixed(2).replace('.',',')}%</div><div class="stat-sub">Pondéré par montant</div></div>
       <div class="stat-card purple"><div class="stat-label">Nombre de Placements</div><div class="stat-value">${products.length + catDeposits.length}</div><div class="stat-sub">${products.length} structurés · ${catDeposits.length} CAT/PS</div></div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
-      <div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">📊</span><span class="fiche-section-title">Rendement Annuel par Produit</span></div><div class="fiche-section-body"><canvas id="chart-yield" height="280"></canvas></div></div>
-      <div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">📈</span><span class="fiche-section-title">Projection Flux de Trésorerie (10 ans)</span></div><div class="fiche-section-body"><canvas id="chart-cashflow" height="280"></canvas></div></div>
-      <div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">🏦</span><span class="fiche-section-title">Répartition par Banque</span></div><div class="fiche-section-body"><canvas id="chart-bank" height="280"></canvas></div></div>
-      <div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">🎯</span><span class="fiche-section-title">Répartition par Type</span></div><div class="fiche-section-body"><canvas id="chart-type" height="280"></canvas></div></div>
-      <div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">🏢</span><span class="fiche-section-title">Répartition par Entreprise</span></div><div class="fiche-section-body"><canvas id="chart-entity" height="280"></canvas></div></div>
-      <div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">⏳</span><span class="fiche-section-title">Profil de Maturité</span></div><div class="fiche-section-body"><canvas id="chart-maturity" height="280"></canvas></div></div>
+    ${_renderMaturityTimeline(products, catDeposits)}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+      <div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">📊</span><span class="fiche-section-title">Rendement Annuel par Produit</span></div><div class="fiche-section-body"><canvas id="chart-yield" height="160"></canvas></div></div>
+      <div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">📈</span><span class="fiche-section-title">Projection Flux de Trésorerie (10 ans)</span></div><div class="fiche-section-body"><canvas id="chart-cashflow" height="160"></canvas></div></div>
     </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">
+      <div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">🏦</span><span class="fiche-section-title">Par Banque</span></div><div class="fiche-section-body"><canvas id="chart-bank" height="150"></canvas></div></div>
+      <div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">🎯</span><span class="fiche-section-title">Par Type</span></div><div class="fiche-section-body"><canvas id="chart-type" height="150"></canvas></div></div>
+      <div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">🏢</span><span class="fiche-section-title">Par Entreprise</span></div><div class="fiche-section-body"><canvas id="chart-entity" height="150"></canvas></div></div>
+    </div>
+    <div class="fiche-section" style="margin-bottom:12px"><div class="fiche-section-header"><span class="fiche-section-icon">⏳</span><span class="fiche-section-title">Profil de Maturité</span></div><div class="fiche-section-body"><canvas id="chart-maturity" height="140"></canvas></div></div>
     <div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">💰</span><span class="fiche-section-title">Détail Rendement par Produit</span></div>
       <div class="fiche-section-body">
         <table style="width:100%;font-size:12px;border-collapse:collapse">
@@ -180,7 +189,7 @@ function renderAnalytics(container) {
         </table>
       </div>
     </div>
-    ${_renderMaturityTimeline(products, catDeposits)}`;
+    `;
   setTimeout(() => renderAllCharts(), 50);
 }
 
@@ -293,6 +302,7 @@ function _renderMaturityTimeline(products, catDeposits) {
   h += '<thead><tr style="border-bottom:2px solid var(--border);text-align:left">';
   h += '<th style="padding:6px;color:var(--text-dim);font-size:10px;text-transform:uppercase">Produit</th>';
   h += '<th style="padding:6px;color:var(--text-dim);font-size:10px;text-transform:uppercase">Type</th>';
+  h += '<th style="padding:6px;color:var(--text-dim);font-size:10px;text-transform:uppercase">Entité</th>';
   h += '<th style="padding:6px;color:var(--text-dim);font-size:10px;text-transform:uppercase">Banque</th>';
   h += '<th style="padding:6px;color:var(--text-dim);font-size:10px;text-transform:uppercase;text-align:right">Montant</th>';
   h += '<th style="padding:6px;color:var(--text-dim);font-size:10px;text-transform:uppercase;text-align:right">Taux</th>';
@@ -310,6 +320,7 @@ function _renderMaturityTimeline(products, catDeposits) {
     h += '<tr style="background:' + bg + ';border-bottom:1px solid var(--border)">';
     h += '<td style="padding:6px;color:var(--text-bright);font-weight:500">' + a.name + gradeHtml + '</td>';
     h += '<td style="padding:6px"><span style="color:' + a.typeColor + ';font-weight:600;font-size:10px">' + a.type + '</span></td>';
+    h += '<td style="padding:6px;font-size:10px;color:' + (a.entity === 'bycam' || a.entity === 'ByCam' ? 'var(--cyan)' : '#A855F7') + '">' + (a.entity === 'bycam' ? '🏢 ByCam' : a.entity === 'cameleons' ? '🦎 Cam.' : (a.entity || '?')) + '</td>';
     h += '<td style="padding:6px;color:var(--text-muted)">' + a.bank + '</td>';
     h += '<td style="padding:6px;text-align:right;font-family:var(--mono)">' + fmt(a.amount) + '€</td>';
     h += '<td style="padding:6px;text-align:right;font-family:var(--mono);color:var(--green)">' + a.rate.toFixed(2) + '%</td>';
@@ -322,7 +333,7 @@ function _renderMaturityTimeline(products, catDeposits) {
   });
 
   h += '</tbody><tfoot><tr style="border-top:2px solid var(--border);font-weight:700">';
-  h += '<td style="padding:8px 6px;color:var(--text-bright)" colspan="3">TOTAL</td>';
+  h += '<td style="padding:8px 6px;color:var(--text-bright)" colspan="4">TOTAL</td>';
   h += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:var(--text-bright)">' + fmt(totalAmount) + '€</td>';
   h += '<td></td>';
   h += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:var(--green);font-weight:700">+' + fmt(totalReturn) + '€/an</td>';
