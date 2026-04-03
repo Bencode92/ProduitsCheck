@@ -226,7 +226,7 @@
 
       // v1.2: selective allocation — only deploy if product truly beats cash
       var hasV4 = !!(result._v4);
-      var catRate = result.catBenchmark || 2.5;
+      var catRate = result.catBenchmark || (typeof window._getCATBenchmark === 'function' ? window._getCATBenchmark() : 2.5);
       var regime = hasV4 ? (result._v4.regime || 'neutral') : 'neutral';
       // Fallback: read regime from MI cache if v4 didn't set it
       if (regime === 'neutral') {

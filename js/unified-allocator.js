@@ -168,8 +168,9 @@
   // Best CAT rate AVAILABLE for new placement (not existing deposits)
   // Existing deposits are already placed — the benchmark for new cash
   // is the best rate you can actually get NOW from available offers
+  // SINGLE SOURCE OF TRUTH for CAT benchmark across all modules
   function _bestCATRate(entityFilter) {
-    var best = 2.5; // fallback ECB
+    var best = (typeof window._getCATBenchmark === 'function' ? window._getCATBenchmark() : 2.5);
     // From available offers only (what you can subscribe to today)
     var offers = _getCATOffers(0);
     offers.forEach(function(o) { if (o.rate > best) best = o.rate; });
@@ -180,6 +181,8 @@
     }
     return best;
   }
+  // Expose globally — all modules should use this instead of hardcoded 2.5%
+  window._getCATBenchmark = function() { return _bestCATRate(); };
 
   // ─── Get best CAT offers from user-entered rates ────────
   // v1.2: integrates MI-CAT macro context for duration filtering
@@ -1097,7 +1100,8 @@
       var newReturn = entResult ? entResult.totalReturn : 0;
       var cashA = entResult ? (entResult.totalCash - entResult.totalAllocated) : 0;
       // Cash return: Règle 1 — if kept contracts have higher rate than best offer, use that
-      var bestRate = entResult ? (entResult.bestCatRate || 2.8) : 2.8;
+      var _catFb = (typeof window._getCATBenchmark === 'function' ? window._getCATBenchmark() : 2.8);
+      var bestRate = entResult ? (entResult.bestCatRate || _catFb) : _catFb;
       if (entResult && entResult.keptContractsRate > bestRate) {
         bestRate = entResult.keptContractsRate; // kept OPTIPLUS at 2.90% > CIC 2.80%
       }
@@ -1309,9 +1313,9 @@
     // Include unallocated cash earning CAT rate in total return
     // Règle 1: if kept contracts have higher rate, use that for unallocated return calc
     var totalUnallocated = _state.totalCash - totalAllocated;
-    var bestCat = 2.5;
+    var bestCat = (typeof window._getCATBenchmark === 'function' ? window._getCATBenchmark() : 2.5);
     Object.values(allResults.entities).forEach(function(r) {
-      var effectiveRate = r.bestCatRate || 2.5;
+      var effectiveRate = r.bestCatRate || (typeof window._getCATBenchmark === 'function' ? window._getCATBenchmark() : 2.5);
       if (r.keptContractsRate > effectiveRate) effectiveRate = r.keptContractsRate;
       if (effectiveRate > bestCat) bestCat = effectiveRate;
     });

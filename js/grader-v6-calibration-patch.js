@@ -184,7 +184,7 @@
         }
 
         // 3b. [v1.1/v1.2] Adjust P4 with BS data (exempt guaranteed rates)
-        var catRate = (result.metadata && result.metadata.catBenchmark) || 2.5;
+        var catRate = (result.metadata && result.metadata.catBenchmark) || (typeof window._getCATBenchmark === 'function' ? window._getCATBenchmark() : 2.5);
         var oldP4 = result.pillars.riskPremium.score;
         var newP4 = _adjustP4WithBS(oldP4, product, catRate);
         if (newP4 !== oldP4) {

@@ -49,9 +49,9 @@ function buildStructuredOptimization() {
         arr.forEach(function(p) { if (p.status !== 'rejected' && p.status !== 'subscribed') allProposals.push(p); });
     });
 
-    // CAT benchmark
-    var catRate = 2.5;
-    try { if (typeof _lastOptimizerResult !== 'undefined' && _lastOptimizerResult && _lastOptimizerResult.weightedRate) catRate = _lastOptimizerResult.weightedRate; } catch(e) {}
+    // CAT benchmark — single source of truth
+    var catRate = (typeof window._getCATBenchmark === 'function') ? window._getCATBenchmark() : 2.5;
+    try { if (typeof _lastOptimizerResult !== 'undefined' && _lastOptimizerResult && _lastOptimizerResult.weightedRate && _lastOptimizerResult.weightedRate > catRate) catRate = _lastOptimizerResult.weightedRate; } catch(e) {}
 
     // ─── LIQUIDITY: find cash available ───
     var liquidityProducts = portfolio.filter(function(p) {
