@@ -179,8 +179,157 @@ function renderAnalytics(container) {
           </tr></tfoot>
         </table>
       </div>
-    </div>`;
+    </div>
+    ${_renderMaturityTimeline(products, catDeposits)}`;
   setTimeout(() => renderAllCharts(), 50);
+}
+
+// ═══ MATURITY TIMELINE TABLE ═══════════════════════════════
+function _renderMaturityTimeline(products, catDeposits) {
+  // Collect all assets with maturity dates
+  var assets = [];
+  catDeposits.forEach(function(d) {
+    if (d.status !== 'active' || !d.maturityDate) return;
+    var mat = new Date(d.maturityDate);
+    var amount = parseFloat(d.amount) || 0;
+    var rate = parseFloat(d.rate) || 0;
+    var annualReturn = Math.round(amount * rate / 100);
+    assets.push({
+      name: d.productName || 'CAT',
+      type: 'CAT',
+      typeColor: 'var(--orange)',
+      entity: d.entityName || d.entity || '?',
+      bank: d.bankName || '?',
+      amount: amount,
+      rate: rate,
+      annualReturn: annualReturn,
+      maturityDate: mat,
+      maturityYear: mat.getFullYear(),
+      maturityLabel: mat.toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' })
+    });
+  });
+  products.forEach(function(p) {
+    if (!p.maturityDate && !p.maturity) return;
+    var matDate = p.maturityDate ? new Date(p.maturityDate) : null;
+    if (!matDate && p.maturity) {
+      var yMatch = (p.maturity + '').match(/(\d+)/);
+      if (yMatch) {
+        matDate = new Date();
+        matDate.setFullYear(matDate.getFullYear() + parseInt(yMatch[1]));
+      }
+    }
+    if (!matDate) return;
+    var amount = parseFloat(p.investedAmount) || 0;
+    var rate = getAnnualizedRate(p);
+    var annualReturn = Math.round(amount * rate / 100);
+    var grade = (p.grading && p.grading.grade) || '?';
+    assets.push({
+      name: (p.name || 'Structuré').substring(0, 40),
+      type: 'Structuré',
+      typeColor: 'var(--cyan)',
+      grade: grade,
+      entity: p.entity || '?',
+      bank: p.bankId || '?',
+      amount: amount,
+      rate: rate,
+      annualReturn: annualReturn,
+      maturityDate: matDate,
+      maturityYear: matDate.getFullYear(),
+      maturityLabel: matDate.toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' })
+    });
+  });
+
+  if (assets.length === 0) return '';
+
+  // Sort by maturity date
+  assets.sort(function(a, b) { return a.maturityDate - b.maturityDate; });
+
+  // Group by year for summary
+  var byYear = {};
+  assets.forEach(function(a) {
+    var yr = a.maturityYear;
+    if (!byYear[yr]) byYear[yr] = { amount: 0, return: 0, count: 0 };
+    byYear[yr].amount += a.amount;
+    byYear[yr].return += a.annualReturn;
+    byYear[yr].count++;
+  });
+
+  var now = new Date();
+  var fmt = typeof formatNumber === 'function' ? formatNumber : function(n) { return String(Math.round(n)); };
+
+  // Build HTML
+  var h = '<div class="fiche-section" style="margin-top:16px"><div class="fiche-section-header"><span class="fiche-section-icon">📅</span><span class="fiche-section-title">Échéancier des Maturités (ALM)</span></div>';
+  h += '<div class="fiche-section-body">';
+
+  // Summary by year
+  var years = Object.keys(byYear).sort();
+  h += '<div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">';
+  years.forEach(function(yr) {
+    var y = byYear[yr];
+    var isNear = parseInt(yr) <= now.getFullYear() + 1;
+    var isEmpty = y.count === 0;
+    h += '<div style="flex:1;min-width:100px;padding:10px;border-radius:8px;border:1px solid ' + (isNear ? 'rgba(255,182,39,0.3)' : 'var(--border)') + ';background:' + (isNear ? 'rgba(255,182,39,0.04)' : 'var(--bg-card)') + ';text-align:center">';
+    h += '<div style="font-size:16px;font-weight:700;color:var(--text-bright)">' + yr + '</div>';
+    h += '<div style="font-size:12px;font-family:var(--mono);color:var(--cyan);font-weight:600">' + fmt(y.amount) + '€</div>';
+    h += '<div style="font-size:10px;color:var(--green)">+' + fmt(y.return) + '€/an</div>';
+    h += '<div style="font-size:9px;color:var(--text-dim)">' + y.count + ' placement' + (y.count > 1 ? 's' : '') + '</div>';
+    h += '</div>';
+  });
+  // Check for "gap years"
+  var minYear = parseInt(years[0]), maxYear = parseInt(years[years.length - 1]);
+  for (var yr = minYear; yr <= maxYear; yr++) {
+    if (!byYear[yr]) {
+      h += '<div style="flex:1;min-width:100px;padding:10px;border-radius:8px;border:1px dashed var(--red);background:rgba(239,35,60,0.04);text-align:center">';
+      h += '<div style="font-size:16px;font-weight:700;color:var(--red)">' + yr + '</div>';
+      h += '<div style="font-size:11px;color:var(--red)">Aucune échéance</div>';
+      h += '<div style="font-size:9px;color:var(--text-dim)">Trou de maturité</div>';
+      h += '</div>';
+    }
+  }
+  h += '</div>';
+
+  // Detailed table
+  h += '<table style="width:100%;font-size:11px;border-collapse:collapse">';
+  h += '<thead><tr style="border-bottom:2px solid var(--border);text-align:left">';
+  h += '<th style="padding:6px;color:var(--text-dim);font-size:10px;text-transform:uppercase">Produit</th>';
+  h += '<th style="padding:6px;color:var(--text-dim);font-size:10px;text-transform:uppercase">Type</th>';
+  h += '<th style="padding:6px;color:var(--text-dim);font-size:10px;text-transform:uppercase">Banque</th>';
+  h += '<th style="padding:6px;color:var(--text-dim);font-size:10px;text-transform:uppercase;text-align:right">Montant</th>';
+  h += '<th style="padding:6px;color:var(--text-dim);font-size:10px;text-transform:uppercase;text-align:right">Taux</th>';
+  h += '<th style="padding:6px;color:var(--text-dim);font-size:10px;text-transform:uppercase;text-align:right">Rdt/an</th>';
+  h += '<th style="padding:6px;color:var(--text-dim);font-size:10px;text-transform:uppercase">Échéance</th>';
+  h += '<th style="padding:6px;color:var(--text-dim);font-size:10px;text-transform:uppercase;text-align:right">Restant</th>';
+  h += '</tr></thead><tbody>';
+
+  var totalAmount = 0, totalReturn = 0;
+  assets.forEach(function(a, i) {
+    var bg = i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)';
+    var monthsLeft = Math.max(0, Math.round((a.maturityDate - now) / (1000 * 60 * 60 * 24 * 30)));
+    var urgencyColor = monthsLeft <= 6 ? 'var(--red)' : monthsLeft <= 12 ? 'var(--orange)' : 'var(--text-muted)';
+    var gradeHtml = a.grade ? ' <span style="display:inline-block;width:16px;height:16px;line-height:16px;text-align:center;border-radius:3px;background:' + ({A:'#06D6A022',B:'#4ECDC422',C:'#FFB62722',D:'#E85D0422',F:'#EF233C22'}[a.grade]||'#88888822') + ';color:' + ({A:'#06D6A0',B:'#4ECDC4',C:'#FFB627',D:'#E85D04',F:'#EF233C'}[a.grade]||'#888') + ';font-weight:700;font-size:9px">' + a.grade + '</span>' : '';
+    h += '<tr style="background:' + bg + ';border-bottom:1px solid var(--border)">';
+    h += '<td style="padding:6px;color:var(--text-bright);font-weight:500">' + a.name + gradeHtml + '</td>';
+    h += '<td style="padding:6px"><span style="color:' + a.typeColor + ';font-weight:600;font-size:10px">' + a.type + '</span></td>';
+    h += '<td style="padding:6px;color:var(--text-muted)">' + a.bank + '</td>';
+    h += '<td style="padding:6px;text-align:right;font-family:var(--mono)">' + fmt(a.amount) + '€</td>';
+    h += '<td style="padding:6px;text-align:right;font-family:var(--mono);color:var(--green)">' + a.rate.toFixed(2) + '%</td>';
+    h += '<td style="padding:6px;text-align:right;font-family:var(--mono);color:var(--green);font-weight:600">+' + fmt(a.annualReturn) + '€</td>';
+    h += '<td style="padding:6px;color:' + urgencyColor + ';font-weight:600">' + a.maturityLabel + '</td>';
+    h += '<td style="padding:6px;text-align:right;color:' + urgencyColor + ';font-size:10px">' + monthsLeft + ' mois</td>';
+    h += '</tr>';
+    totalAmount += a.amount;
+    totalReturn += a.annualReturn;
+  });
+
+  h += '</tbody><tfoot><tr style="border-top:2px solid var(--border);font-weight:700">';
+  h += '<td style="padding:8px 6px;color:var(--text-bright)" colspan="3">TOTAL</td>';
+  h += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:var(--text-bright)">' + fmt(totalAmount) + '€</td>';
+  h += '<td></td>';
+  h += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:var(--green);font-weight:700">+' + fmt(totalReturn) + '€/an</td>';
+  h += '<td colspan="2"></td>';
+  h += '</tr></tfoot></table>';
+  h += '</div></div>';
+  return h;
 }
 
 // ═══ CHART RENDERING ════════════════════════════════════════

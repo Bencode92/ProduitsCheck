@@ -330,21 +330,76 @@
     return 2.0;
   }
 
+  // ─── Issuer exposure (pre-allocation check) ─────────────
+  // Règle 6: max 30% du patrimoine par émetteur
+  var _normBank = function(b) {
+    var map = {
+      'sg': 'Société Générale', 'societe generale': 'Société Générale', 'société générale': 'Société Générale',
+      'cic': 'CIC', 'swiss-life': 'Swiss Life', 'swisslife': 'Swiss Life',
+      'bnp': 'BNP Paribas', 'bnpp': 'BNP Paribas',
+      'banque populaire': 'Banque Populaire', 'bp': 'Banque Populaire',
+      'banque-populaire': 'Banque Populaire'
+    };
+    var lower = (b || 'Inconnu').toLowerCase().trim();
+    return map[lower] || b || 'Inconnu';
+  };
+
+  function _computeIssuerExposure() {
+    var issuers = {};
+    var grandTotal = 0;
+    try {
+      if (typeof catManager !== 'undefined' && catManager.deposits) {
+        catManager.deposits.forEach(function(d) {
+          if (d.status !== 'active') return;
+          var bank = _normBank(d.bankName);
+          if (!issuers[bank]) issuers[bank] = 0;
+          issuers[bank] += parseFloat(d.amount) || 0;
+        });
+      }
+    } catch(e) {}
+    try {
+      (app.state.portfolio || []).forEach(function(p) {
+        var bank = _normBank(p.bankId);
+        if (!issuers[bank]) issuers[bank] = 0;
+        issuers[bank] += parseFloat(p.investedAmount) || 0;
+      });
+    } catch(e) {}
+    Object.values(issuers).forEach(function(v) { grandTotal += v; });
+    // Add free cash to total for percentage calculation
+    grandTotal += _state.totalCash || 0;
+    var pcts = {};
+    Object.keys(issuers).forEach(function(bank) {
+      pcts[bank] = grandTotal > 0 ? issuers[bank] / grandTotal : 0;
+    });
+    return { amounts: issuers, total: grandTotal, pcts: pcts };
+  }
+
   // ─── Best candidates for a time bucket ─────────────────
   // CAT deposits are NOT candidates — they ARE the reserve.
   // Only structured products are candidates for new allocation.
   // For horizons where no structured fits, cash stays in existing CAT.
-  function _bestForHorizon(horizon, structCandidates, allocated, refRate, miFactor) {
+  function _bestForHorizon(horizon, structCandidates, allocated, refRate, miFactor, issuerExposure) {
     var maxMonths = horizon.maxMonths;
     var candidates = [];
     // refRate = the rate to beat (best CAT rate or source contract rate)
     // miFactor = MI adjustment factor (default 1.0, from clamp(1 + prob_hike*0.5, 0.5, 1.5))
+    // issuerExposure = { amounts, total, pcts } from _computeIssuerExposure()
 
     // Structured candidates: maturity fits horizon AND capital garanti
     // v2: progressive spread threshold adjusted by MI
+    // v2.1 Règle 6: reject if issuer already > 30% of total patrimoine
     structCandidates.forEach(function(s) {
       if (allocated[s.id]) return;
       if (s.maturityMonths <= maxMonths && s.capitalGaranti && s.rdtNet != null && s.rdtNet > 0) {
+        // Règle 6: issuer concentration check
+        if (issuerExposure) {
+          var issuerName = _normBank(s.bankName);
+          var issuerPct = issuerExposure.pcts[issuerName] || 0;
+          if (issuerPct > 0.30) {
+            console.log('[Allocator] Règle 6: ' + s.name + ' rejeté — ' + issuerName + ' à ' + Math.round(issuerPct * 100) + '% > 30%');
+            return; // skip this candidate
+          }
+        }
         var minSpread = _spreadByDuration(s.maturityMonths) * (miFactor || 1.0);
         if (s.rdtNet < refRate + minSpread) return; // doesn't beat ref enough
         candidates.push({
@@ -415,6 +470,8 @@
     var objective = _state.objective || 'long';
     if (objective === 'court') miFactor *= 1.5; // much higher bar for structured
     if (objective === 'attente') structCandidates = []; // no structured allocation at all
+    // Règle 6: compute issuer exposure for concentration check
+    var issuerExposure = _computeIssuerExposure();
 
     // v2: For maturing CAT, compute per-contract amount limits
     // Each contract can only contribute its own amount to a structured product
@@ -425,7 +482,7 @@
       var budget = tr.amount;
       if (budget <= 0) { results.push({ horizon: tr.horizon, amount: 0, allocated: 0, remaining: 0, allocations: [] }); return; }
 
-      var candidates = _bestForHorizon(tr.horizon, structCandidates, allocated, bestCatRate, miFactor);
+      var candidates = _bestForHorizon(tr.horizon, structCandidates, allocated, bestCatRate, miFactor, issuerExposure);
       var allocs = [];
       var remaining = budget;
       // Max 30% of total entity cash per product (diversification)
@@ -587,6 +644,14 @@
           // Track kept contracts rate for Règle 1 in main flow
           if (c.rate > keptContractsRate) keptContractsRate = c.rate;
           keptContractsCount++;
+        }
+        // Règle 6: add diversification warning if issuer > 30%
+        if (issuerExposure) {
+          var contractIssuer = _normBank(c.bankName);
+          var contractIssuerPct = issuerExposure.pcts[contractIssuer] || 0;
+          if (contractIssuerPct > 0.30) {
+            action.diversificationWarning = contractIssuer + ' = ' + Math.round(contractIssuerPct * 100) + '% du patrimoine (max recommandé 30%). Diversifier à l\'échéance.';
+          }
         }
         contractActions.push(action);
       });
@@ -850,6 +915,9 @@
         html += '<div style="font-size:10px;font-weight:700;color:' + recColor + '">' + recIcon + ' ' + recLabel + '</div>';
         html += '<div style="font-size:8px;color:var(--text-dim);max-width:180px;text-align:right">' + ca.reason + '</div>';
         html += '</div></div>';
+        if (ca.diversificationWarning) {
+          html += '<div style="font-size:8px;color:var(--red);padding:3px 8px;margin-top:2px;background:rgba(239,35,60,0.06);border-radius:4px">⚠️ ' + ca.diversificationWarning + '</div>';
+        }
       });
       html += '</div>';
     }
@@ -1343,18 +1411,7 @@
   // ═══ ISSUER EXPOSURE + FGDR ═════════════════════════════
   function _renderIssuerExposure(result) {
     var issuers = {};
-
-    // Normalize bank names to avoid duplicates (cic vs CIC)
-    var _normBank = function(b) {
-      var map = {
-        'sg': 'Société Générale', 'societe generale': 'Société Générale', 'société générale': 'Société Générale',
-        'cic': 'CIC', 'swiss-life': 'Swiss Life', 'swisslife': 'Swiss Life',
-        'bnp': 'BNP Paribas', 'bnpp': 'BNP Paribas',
-        'banque populaire': 'Banque Populaire', 'bp': 'Banque Populaire'
-      };
-      var lower = (b || 'Inconnu').toLowerCase().trim();
-      return map[lower] || b || 'Inconnu';
-    };
+    // _normBank is defined at module scope (reused from Règle 6)
 
     // 1. Collect from CAT deposits
     try {
