@@ -219,42 +219,42 @@
   "envelope": "",
   "grading": {
     "grade": "C",
-    "score": 59,
+    "score": 58,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 69,
-        "base": 73,
-        "delta": -1,
-        "reasoning": "Rendement: base 73 → -1 = 72 (En stagflation avec stance hawkish, la probabilité de call est faible (20%), l'investisseur touchera probablement les coupons sur toute la durée.) | Coupon 4.6%, protégé | Mat espérée: ~2.3a (prob mat: 1%) | ⚠ Maturité 10a = incertitude accrue (-3pts)"
-      },
-      "underlyingQuality": {
         "score": 72,
         "base": 73,
         "delta": -1,
-        "reasoning": "Qualité: base 73 → -1 = 72 (Régime stagflation défavorable aux obligations longues, hausse des taux probable et VIX à 22 signalent un contexte de marché tendu.)"
+        "reasoning": "Rendement: base 73 → -1 = 72 (En stagflation avec stance hawkish_hold, probabilité de call très faible (20%) signifie immobilisation probable sur 10 ans) | Coupon 4.6%, protégé | Mat espérée: ~2.3a (prob mat: 1%)"
+      },
+      "underlyingQuality": {
+        "score": 66,
+        "base": 67,
+        "delta": -1,
+        "reasoning": "Qualité: base 67 → -1 = 66 (Produit sans sous-jacent en stagflation avec energy_shock, spread 1.55% insuffisant vs risque crédit émetteur sur 10 ans)"
       },
       "portfolioFit": {
-        "score": 55,
+        "score": 54,
         "base": 70,
-        "delta": 1,
-        "reasoning": "Fit: base 50 → 55 (none, taux_fixe) | Fit: base 70 → +1 = 71 (En stagflation, un taux fixe garanti offre une protection contre l'inflation et la volatilité, pertinent pour diversifier.)"
+        "delta": -1,
+        "reasoning": "Fit: base 70 → -1 = 69 (Duration 10 ans inadaptée en stagflation avec risque taux, TIPS préférés selon MI)"
       },
       "riskPremium": {
-        "score": 51,
-        "base": 40,
-        "delta": 0,
+        "score": 50,
+        "base": 41,
+        "delta": 1,
         "reasoning": "Capital garanti: spread 4.6% - CAT 2.5% - illiq 0.7% = 1.4%"
       }
     },
-    "verdict": "Produit défensif offrant 4.6% annuel garanti vs 3.15% du 10Y AAA, soit un spread de 145bps qui compense partiellement le risque de durée et l'option call. En régime stagflationnaire avec VIX à 22, la faible probabilité de call (20%) suggère une détention longue probable, exposant l'investisseur à un risque de duration significatif (DV01~10bps). Le capital garanti et le coupon fixe offrent une protection bienvenue contre la volatilité, mais le risque crédit émetteur reste non spécifié et critique sur 10 ans.",
+    "verdict": "Produit callable 4.6% offrant 155bps de spread vs AAA 10Y dans un contexte stagflationniste défavorable aux obligations longues. Avec probabilité de call faible (20%), l'investisseur risque l'immobilisation sur 10 ans alors que la MI recommande TIPS et évite le HY. Le spread de crédit paraît insuffisant pour compenser le risque émetteur et la duration élevée dans un régime hawkish.",
     "keyRisks": [
-      "Risque crédit émetteur non précisé sur 10 ans en contexte macro dégradé",
-      "Risque de duration élevé: -10% de valeur si taux +100bps",
-      "Risque de réinvestissement si call précoce en environnement de taux bas"
+      "Risque crédit émetteur sur 10 ans en stagflation",
+      "Duration excessive avec DV01 élevée si taux montent",
+      "Immobilisation probable du capital avec call peu probable"
     ],
     "negotiationPoints": [],
     "scenarios": {
@@ -267,39 +267,39 @@
       "base": {
         "return_pct": 46,
         "return_eur": 46000,
-        "probability": 0.5,
+        "probability": 0.35,
         "duration_years": 10
       },
       "stress": {
         "return_pct": 23,
         "return_eur": 23000,
-        "probability": 0.2,
+        "probability": 0.3,
         "duration_years": 5
       },
       "worst": {
         "return_pct": -50,
         "return_eur": -50000,
-        "probability": 0.1,
-        "duration_years": 10
+        "probability": 0.15,
+        "duration_years": 1
       }
     },
     "confidenceInterval": {
-      "low": 50,
-      "high": 68,
+      "low": 53,
+      "high": 71,
       "halfWidth": 9,
       "gradeStable": false,
       "gradeRange": "C-B",
-      "label": "C [50-68]"
+      "label": "B [53-71]"
     },
     "metadata": {
-      "gradedAt": "2026-03-31T13:27:43.816Z",
-      "durationMs": 22671,
+      "gradedAt": "2026-04-03T12:04:05.279Z",
+      "durationMs": 16152,
       "aiUsed": true,
-      "version": "6.2",
+      "version": "7.1",
       "productType": "taux_fixe",
       "marketDataAvailable": false,
-      "catBenchmark": 2.5,
-      "catSource": "fallback-2026",
+      "catBenchmark": 2.8,
+      "catSource": "allocator-confirmed",
       "couponAnnualized": 4.6,
       "couponRaw": 5,
       "couponMultiplier": 1,
@@ -313,13 +313,13 @@
       "maxMaturity": 10,
       "probReachMaturity": 1,
       "maxBeta": null,
-      "baseScore": 59,
-      "baseGrade": "C",
+      "baseScore": 63,
+      "baseGrade": "B",
       "adjustments": {
         "p1": -1,
         "p2": -1,
-        "p3": 1,
-        "p4": 0
+        "p3": -1,
+        "p4": 1
       },
       "barrier_sigma": null,
       "barrier_sigma_label": null,
@@ -327,23 +327,41 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Callable LT",
-      "ci_low": 50,
-      "ci_high": 68,
-      "ci_label": "C [50-68]",
+      "ci_low": 53,
+      "ci_high": 71,
+      "ci_label": "B [53-71]",
       "issuer_rating": "A",
       "issuer_tier": "IG",
       "hasDecrement": false,
       "decrementDrag": 0,
       "structureType": "taux_fixe",
+      "issuerCreditPenalty": 1,
+      "issuerCDS": 70,
       "v6Weights": {
         "p1": 0.3,
         "p2": 0.2,
         "p3": 0.15,
         "p4": 0.3
+      }
+    },
+    "regimeScenarios": {
+      "current": {
+        "score": 58,
+        "grade": "C",
+        "label": "Actuel (stagflation)"
       },
-      "p3Recalibrated": true,
-      "p4BsCorrected": false,
-      "isGuaranteedRate": true
+      "bull": {
+        "score": 63,
+        "grade": "B",
+        "label": "Bull / Risk-on",
+        "delta": 5
+      },
+      "crash": {
+        "score": 52,
+        "grade": "C",
+        "label": "Crash / Récession",
+        "delta": -6
+      }
     }
   }
 }
