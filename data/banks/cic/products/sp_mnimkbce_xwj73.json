@@ -1,0 +1,184 @@
+{
+  "id": "sp_mnimkbce_xwj73",
+  "name": "Digitale Mémoire TEC10 Avril 2031",
+  "type": "capital_garanti",
+  "structureType": "capital_garanti",
+  "emitter": "Crédit Industriel et Commercial",
+  "guarantor": "Crédit Industriel et Commercial",
+  "guarantorRating": {
+    "moodys": "Aa3",
+    "sp": "A+",
+    "fitch": "AA-"
+  },
+  "underlyings": [
+    "TEC 10"
+  ],
+  "underlyingType": "rates",
+  "currency": "EUR",
+  "maturity": "5 ans",
+  "maturityYears": 5,
+  "coupon": {
+    "rate": 4.6,
+    "rateIfCalled": null,
+    "rateIfMaturity": null,
+    "type": "conditionnel",
+    "frequency": "annuel",
+    "trigger": 4.4,
+    "memory": true,
+    "paymentTiming": "periodic"
+  },
+  "participationRate": null,
+  "capitalProtection": {
+    "protected": true,
+    "level": 100,
+    "barrier": null,
+    "barrierCoupon": 4.4,
+    "barrierType": "europeenne"
+  },
+  "earlyRedemption": {
+    "possible": false,
+    "type": "none",
+    "trigger": null,
+    "frequency": "annuel",
+    "startSemester": null,
+    "stepDown": false,
+    "stepDownPct": null
+  },
+  "decrementPct": null,
+  "actualDividendYield": null,
+  "mechanism": "Coupon annuel de 4,60% versé si l'indice TEC 10 est inférieur ou égal à 4,40% à la date de constatation annuelle. Effet mémoire : les coupons non versés sont mémorisés et payés rétroactivement dès que la condition est remplie. Capital garanti à 100% à l'échéance. Gain max 23% (4,60% × 5 ans). Rendement actuariel brut max 4,59%.",
+  "risks": [
+    "Risque de corridor : si TEC 10 > 4,40% à chaque constatation annuelle, aucun coupon versé (0% sur 5 ans)",
+    "Risque de crédit émetteur (CIC Aa3/A+/AA-)",
+    "Risque de perte en capital en cours de vie (avant échéance)",
+    "Risque de liquidité (spread ±1%)",
+    "Risque d'inflation érodant le rendement réel"
+  ],
+  "summary": "Digitale Mémoire sur TEC 10. Coupon 4,60%/an si TEC 10 ≤ 4,40% avec mémoire. Capital garanti 100% à 5 ans. TEC 10 actuel ~3,15% → marge de 1,25% sous le seuil. Émetteur CIC (Aa3/A+/AA-).",
+  "aiParsed": {
+    "name": "Digitale Mémoire TEC10 Avril 2031",
+    "type": "capital_garanti",
+    "structureType": "capital_garanti",
+    "isin": "XS3338270427",
+    "emitter": "Crédit Industriel et Commercial",
+    "guarantor": "Crédit Industriel et Commercial",
+    "guarantorRating": {
+      "moodys": "Aa3",
+      "sp": "A+",
+      "fitch": "AA-"
+    },
+    "underlyings": [
+      "TEC 10"
+    ],
+    "underlyingType": "rates",
+    "currency": "EUR",
+    "maturity": "5 ans",
+    "maturityYears": 5,
+    "coupon": {
+      "rate": 4.6,
+      "rateIfCalled": null,
+      "rateIfMaturity": null,
+      "type": "conditionnel",
+      "frequency": "annuel",
+      "trigger": 4.4,
+      "memory": true,
+      "paymentTiming": "periodic"
+    },
+    "participationRate": null,
+    "minInvestment": 10000,
+    "capitalProtection": {
+      "protected": true,
+      "level": 100,
+      "barrier": null,
+      "barrierCoupon": 4.4,
+      "barrierType": "europeenne"
+    },
+    "earlyRedemption": {
+      "possible": false,
+      "type": "none",
+      "trigger": null,
+      "frequency": "annuel",
+      "startSemester": null,
+      "stepDown": false,
+      "stepDownPct": null
+    },
+    "decrementPct": null,
+    "actualDividendYield": null,
+    "mechanism": "Coupon annuel de 4,60% versé si l'indice TEC 10 est inférieur ou égal à 4,40% à la date de constatation annuelle. Effet mémoire : les coupons non versés sont mémorisés et payés rétroactivement dès que la condition est remplie. Capital garanti à 100% à l'échéance. Gain max 23% (4,60% × 5 ans). Rendement actuariel brut max 4,59%.",
+    "risks": [
+      "Risque de corridor : si TEC 10 > 4,40% à chaque constatation annuelle, aucun coupon versé (0% sur 5 ans)",
+      "Risque de crédit émetteur (CIC Aa3/A+/AA-)",
+      "Risque de perte en capital en cours de vie (avant échéance)",
+      "Risque de liquidité (spread ±1%)",
+      "Risque d'inflation érodant le rendement réel"
+    ],
+    "summary": "Digitale Mémoire sur TEC 10. Coupon 4,60%/an si TEC 10 ≤ 4,40% avec mémoire. Capital garanti 100% à 5 ans. TEC 10 actuel ~3,15% → marge de 1,25% sous le seuil. Émetteur CIC (Aa3/A+/AA-).",
+    "aiParsed": {
+      "name": "Digitale Mémoire TEC10 Avril 2031",
+      "structureType": "capital_garanti",
+      "isin": "XS3338270427",
+      "emitter": "Crédit Industriel et Commercial",
+      "guarantor": "Crédit Industriel et Commercial",
+      "guarantorRating": {
+        "moodys": "Aa3",
+        "sp": "A+",
+        "fitch": "AA-"
+      },
+      "underlyings": [
+        "TEC 10"
+      ],
+      "underlyingType": "rates",
+      "currency": "EUR",
+      "maturity": "21 avril 2031",
+      "maturityYears": 5,
+      "coupon": {
+        "rate": 4.6,
+        "rateIfCalled": null,
+        "rateIfMaturity": null,
+        "type": "conditionnel",
+        "frequency": "annuel",
+        "trigger": 4.4,
+        "memory": true,
+        "paymentTiming": "periodic"
+      },
+      "participationRate": null,
+      "capitalProtection": {
+        "protected": true,
+        "level": 100,
+        "barrier": null,
+        "barrierCoupon": 4.4,
+        "barrierType": "europeenne"
+      },
+      "earlyRedemption": {
+        "possible": false,
+        "type": "none",
+        "trigger": null,
+        "frequency": null,
+        "startSemester": null,
+        "stepDown": false,
+        "stepDownPct": null
+      },
+      "decrementPct": null,
+      "actualDividendYield": null,
+      "minInvestment": 10000,
+      "mechanism": "Coupon annuel de 4,60% versé si TEC 10 ≤ 4,40% avec effet mémoire. Capital garanti à 100% à l'échéance.",
+      "risks": [
+        "Risque de corridor TEC 10",
+        "Risque de crédit émetteur",
+        "Risque de perte en capital en cours de vie",
+        "Risque de liquidité",
+        "Risque d'inflation"
+      ],
+      "summary": "Digitale Mémoire sur TEC 10. Coupon 4,60%/an si TEC 10 ≤ 4,40% avec mémoire. Capital garanti 100% à 5 ans."
+    },
+    "sourceFile": "XS3338270427 Digitale Mémoire TEC10 Avril 2031 Brochure.pdf"
+  },
+  "sourceFile": "JSON import",
+  "bankId": "cic",
+  "status": "analyzing",
+  "receivedDate": "2026-04-03",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null
+}
