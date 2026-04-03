@@ -199,56 +199,56 @@
         "score": 67,
         "base": 64,
         "delta": -2,
-        "reasoning": "Rendement: base 64 → -2 = 62 (En stagflation, le TEC10 (taux long) risque de rester élevé >4.4%, réduisant fortement la probabilité de toucher les coupons conditionnels) | Coupon 4.6%, protégé | Barr.coupon 4.4%"
+        "reasoning": "Rendement: base 64 → -2 = 62 (En stagflation avec Brent >$120, le TEC10 (taux long) risque de monter fortement, réduisant la probabilité que la barrière coupon à 4.4% soit franchie) | Coupon 4.6%, protégé | Barr.coupon 4.4%"
       },
       "underlyingQuality": {
         "score": 65,
         "base": 67,
         "delta": -2,
-        "reasoning": "Qualité: base 67 → -2 = 65 (Le TEC10 n'est pas un secteur action mais un indice de taux qui souffre en période de stagflation avec inflation persistante)"
+        "reasoning": "Qualité: base 67 → -2 = 65 (Le TEC10 n'est pas un actif risqué mais un taux d'intérêt, neutre en stagflation mais vulnérable à la pentification de la courbe mentionnée)"
       },
       "portfolioFit": {
         "score": 60,
         "base": 80,
         "delta": 2,
-        "reasoning": "Fit: base 80 → +2 = 82 (Capital garanti offre une protection précieuse en régime stagflationnaire avec risque de récession)"
+        "reasoning": "Fit: base 80 → +2 = 82 (En stagflation, un produit sur taux avec capital garanti offre une protection précieuse contre l'inflation et la volatilité des actions)"
       },
       "riskPremium": {
         "score": 54,
         "base": 48,
-        "delta": -2,
+        "delta": 0,
         "reasoning": "Capital garanti: spread 4.6% - CAT 2.5% - illiq 0.5% = 1.6%"
       }
     },
-    "verdict": "Produit inadapté au contexte actuel de stagflation. Avec le Brent à $121 et le PCE à 2.83%, la Fed maintiendra des taux élevés, rendant peu probable que le TEC10 passe sous 4.4%. Le capital garanti est le seul atout mais ne compense pas un coupon quasi-inaccessible. Score final ajusté: 49/100 (D).",
+    "verdict": "Ce produit sur TEC10 offre une protection capitale bienvenue en régime stagflationniste, mais le coupon de 4.6% annualisé reste vulnérable à la hausse des taux longs. Avec le Brent à $121.88 et une inflation PCE à 2.83%, la BCE pourrait être forcée de maintenir des taux élevés, poussant le TEC10 au-delà de la barrière de 4.4%. Le capital garanti limite le risque à l'opportunité manquée, mais la probabilité de toucher le coupon pendant 5 ans reste incertaine dans ce contexte de pentification.",
     "keyRisks": [
-      "Probabilité très faible de toucher les coupons si les taux restent élevés",
-      "5 ans d'immobilisation pour potentiellement 0% de rendement en stagflation"
+      "Hausse brutale du TEC10 au-delà de 4.4% annulant les coupons",
+      "Opportunité manquée si les taux baissent rapidement après souscription"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 4.6,
         "return_eur": 23000,
-        "probability": 0.15,
+        "probability": 0.2,
         "duration_years": 5
       },
       "base": {
-        "return_pct": 0,
-        "return_eur": 0,
-        "probability": 0.5,
+        "return_pct": 2.3,
+        "return_eur": 11500,
+        "probability": 0.4,
         "duration_years": 5
       },
       "stress": {
-        "return_pct": 0,
-        "return_eur": 0,
+        "return_pct": 0.9,
+        "return_eur": 4600,
         "probability": 0.25,
         "duration_years": 5
       },
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.1,
+        "probability": 0.15,
         "duration_years": 5
       }
     },
@@ -261,8 +261,8 @@
       "label": "B [54-72]"
     },
     "metadata": {
-      "gradedAt": "2026-04-03T12:01:12.648Z",
-      "durationMs": 17908,
+      "gradedAt": "2026-04-03T12:30:52.335Z",
+      "durationMs": 19609,
       "aiUsed": true,
       "version": "7.1",
       "productType": "capital_garanti",
@@ -287,7 +287,7 @@
         "p1": -2,
         "p2": -2,
         "p3": 2,
-        "p4": -2
+        "p4": 0
       },
       "barrier_sigma": null,
       "barrier_sigma_label": null,
@@ -316,19 +316,22 @@
       "current": {
         "score": 58,
         "grade": "C",
-        "label": "Actuel (stagflation)"
+        "label": "Actuel (stagflation)",
+        "desc": "Seuil menacé mais mémoire rattrape les coupons"
       },
       "bull": {
         "score": 63,
         "grade": "B",
         "label": "Bull / Risk-on",
-        "delta": 5
+        "delta": 5,
+        "desc": "Taux baissent sous le seuil → coupons + rattrapage"
       },
       "crash": {
         "score": 52,
         "grade": "C",
         "label": "Crash / Récession",
-        "delta": -6
+        "delta": -6,
+        "desc": "Taux au-dessus du seuil → 0% coupon (mémoire active)"
       }
     }
   }
