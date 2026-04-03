@@ -252,7 +252,7 @@
         "score": 95,
         "base": 70,
         "delta": 0,
-        "reasoning": "Rendement: base 70 → -2 = 68 (Régime stagflation + 6/8 sous-jacents tech cycliques = probabilité coupon très réduite malgré capital garanti) | Coupon 1.3144444444444445%, protégé",
+        "reasoning": "Rendement: base 70 → -2 = 68 (En stagflation avec VIX à 22, la dispersion élevée (vol 23-58%) réduit fortement la probabilité du coupon 'worst-of' avec Tesla ultra-volatile) | Coupon 1.3144444444444445%, protégé",
         "_bsDelta": 25,
         "_bs": {
           "score": 95,
@@ -265,7 +265,7 @@
             25.92,
             25,
             25,
-            31.37,
+            31.42,
             25,
             25,
             25
@@ -278,13 +278,13 @@
         "score": 69,
         "base": 71,
         "delta": -2,
-        "reasoning": "Qualité: base 71 → -2 = 69 (7/8 sous-jacents dans secteurs évités (tech/com-services), betas élevés >1.2, vulnérables au choc pétrolier) | Worst: Tesla B:17"
+        "reasoning": "Qualité: base 71 → -2 = 69 (7/8 sous-jacents dans des secteurs évités (tech/communication), tous avec beta>1 en régime stagflationnaire hostile aux valeurs croissance) | Worst: Tesla B:17"
       },
       "portfolioFit": {
         "score": 65,
         "base": 72,
         "delta": 2,
-        "reasoning": "Fit: base 72 → +2 = 74 (Capital garanti + volatilité élevée = protection idéale en stagflation pour diversifier hors tech)"
+        "reasoning": "Fit: base 72 → +2 = 74 (Capital garanti reste attractif en stagflation, mais exposition 100% tech/croissance mal adaptée au contexte inflationniste)"
       },
       "riskPremium": {
         "score": 52,
@@ -293,35 +293,36 @@
         "reasoning": "Capital garanti: spread 3.0% - CAT 2.5% - illiq 0.3% = 0.2%"
       }
     },
-    "verdict": "Produit défensif adapté au contexte stagflationniste grâce au capital garanti, mais coupon de 1.31% annualisé insuffisant face à l'inflation >2.8%. L'exposition 100% tech/growth (7/8 titres dans secteurs évités, betas moyens >1.3) est toxique avec Brent >$120 et VIX à 22. La dispersion permet de capturer la volatilité (48-58% sur NVDA/TSLA) mais le rendement ne compense pas le coût d'opportunité vs TIPS ou cash.",
+    "verdict": "Produit inadapté au régime stagflationnaire actuel : le panier 100% tech/croissance avec beta moyen 1.32 souffrira dans un contexte de taux élevés et inflation persistante. Le coupon de 1.31% annualisé est dérisoire face à l'inflation, et la structure worst-of avec Tesla (vol 58%, DD -54%) rend ce maigre coupon très incertain. Seul point positif : capital garanti, mais l'opportunité coût est énorme avec des TIPS offrant une protection inflation réelle.",
     "keyRisks": [
-      "Sous-performance garantie vs inflation (1.31% vs PCE 2.83%)",
-      "Exposition massive tech/growth en régime stagflation défavorable"
+      "Exposition 100% à des secteurs évités en stagflation avec beta élevé",
+      "Coupon worst-of quasi-impossible avec Tesla à vol 58% et barrière 17%",
+      "Rendement réel négatif de -1.5% avec inflation à 2.83%"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 3.94,
         "return_eur": 3940,
-        "probability": 0.2,
+        "probability": 0.15,
         "duration_years": 3
       },
       "base": {
-        "return_pct": 1.31,
-        "return_eur": 1310,
-        "probability": 0.5,
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.45,
         "duration_years": 3
       },
       "stress": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.25,
+        "probability": 0.3,
         "duration_years": 3
       },
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.05,
+        "probability": 0.1,
         "duration_years": 3
       }
     },
@@ -334,14 +335,14 @@
       "label": "C [47-61]"
     },
     "metadata": {
-      "gradedAt": "2026-04-02T12:22:01.797Z",
-      "durationMs": 20944,
+      "gradedAt": "2026-04-03T12:25:33.082Z",
+      "durationMs": 21315,
       "aiUsed": true,
       "version": "7.1",
       "productType": "dispersion",
       "marketDataAvailable": true,
-      "catBenchmark": 2.5,
-      "catSource": "fallback-2026",
+      "catBenchmark": 2.8,
+      "catSource": "allocator-confirmed",
       "couponAnnualized": 1.3144444444444445,
       "couponRaw": 0,
       "couponMultiplier": 1,
@@ -384,7 +385,7 @@
         25.92,
         25,
         25,
-        31.37,
+        31.42,
         25,
         25,
         25
@@ -500,19 +501,22 @@
       "current": {
         "score": 68,
         "grade": "B",
-        "label": "Actuel (stagflation)"
+        "label": "Actuel (stagflation)",
+        "desc": "Corrélation 0.43 → dispersion favorable"
       },
       "bull": {
         "score": 71,
         "grade": "B",
         "label": "Bull / Risk-on",
-        "delta": 3
+        "delta": 3,
+        "desc": "Marchés calmes → corrélation baisse → coupon monte"
       },
       "crash": {
         "score": 61,
         "grade": "B",
         "label": "Crash / Récession",
-        "delta": -7
+        "delta": -7,
+        "desc": "Panique → corrélation spike → coupon baisse (cap garanti)"
       }
     }
   }
