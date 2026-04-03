@@ -30,8 +30,6 @@
   "capitalProtection": {
     "protected": true,
     "level": 100,
-    "barrier": null,
-    "barrierCoupon": null,
     "barrierType": "europeenne"
   },
   "earlyRedemption": {
@@ -41,10 +39,10 @@
     "frequency": "annuel",
     "startSemester": null,
     "stepDown": false,
-    "stepDownPct": null
+    "stepDownPct": null,
+    "hasAutocall": false,
+    "enabled": false
   },
-  "decrementPct": null,
-  "actualDividendYield": null,
   "mechanism": "Coupon annuel de 5,20% calculé au prorata du nombre de jours où l'Euribor 3 mois reste entre 1,75% et 3,50% (barrières incluses). Capital garanti à 100% à l'échéance.",
   "risks": [
     "Risque de perte en capital en cours de vie",
@@ -188,5 +186,18 @@
   "conversation": [],
   "conversationSummary": null,
   "decision": null,
-  "decisionReason": null
+  "decisionReason": null,
+  "aiCategory": "capital-protege",
+  "aiCategoryLabel": "🛡️ Capital Protégé",
+  "aiCategoryColor": "#4CAF50",
+  "aiOpinion": "Produit offrant un rendement attractif de 5.2% conditionné par l'évolution de l'Euribor 3 mois avec protection totale du capital. Le principal risque réside dans la condition d'accroissement du coupon qui n'est pas précisée, pouvant limiter significativement les gains potentiels malgré la sécurité du capital.",
+  "aiAnalyzedAt": "2026-04-03T08:00:36.653Z",
+  "envelope": "",
+  "rangeAccrual": {
+    "lowerBound": 1.75,
+    "upperBound": 3,
+    "reference": "Euribor 3 mois",
+    "observation": "daily"
+  },
+  "minInvestment": 10000
 }
