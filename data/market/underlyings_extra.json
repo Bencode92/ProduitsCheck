@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-03T11:23:47.260184",
+  "timestamp": "2026-04-03T17:39:15.627326",
   "version": "1.1",
   "tickers": {
     "ACWI": {
@@ -244,12 +244,12 @@
     },
     "QQQ": {
       "perf_ytd": -4.59,
-      "perf_1y": 22.85,
+      "perf_1y": 22.86,
       "perf_3m": -4.59,
       "vol_3y": 20.88,
       "max_dd_3y": 22.88,
       "beta": 1.16,
-      "last_close": 584.96,
+      "last_close": 584.98,
       "data_points": 519
     },
     "RSP": {
