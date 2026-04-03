@@ -637,6 +637,131 @@ Les structurés ne sont **pas couverts** par le FGDR — risque crédit émetteu
 
 ---
 
+# PARTIE 7 — Précisions Structurelles
+
+## 7.1 Dispersion ≠ Exposition Directionnelle Tech
+
+La Dispersion US Tech (produit #1, B 68) est souvent perçue à tort comme une "exposition tech". C'est fondamentalement différent :
+
+**Un autocall Phoenix sur NVIDIA** = pari directionnel. Si NVIDIA baisse sous la barrière → perte en capital. L'investisseur est long NVIDIA.
+
+**Une Dispersion sur 8 tech US** = pari sur l'écart de performance entre les 8 actions, pas sur leur direction. Le rendement augmente quand les actions performent différemment :
+
+```
+rdtNet = participation × (1 - corrélation_réalisée) × facteur
+
+Si corrélation = 0.30 (titres se dispersent) → rdtNet élevé
+Si corrélation = 0.80 (titres bougent en bloc) → rdtNet faible
+```
+
+**En crise** (2008, 2020, mars 2025), la corrélation intra-secteur baisse temporairement (les leaders résistent, les fragiles chutent) → le coupon de dispersion augmente. C'est **contra-cyclique** à court terme.
+
+**Le capital est garanti 100%.** Le seul risque est un rendement faible (pas une perte). Le risque crédit émetteur (SG) est le seul risque de perte, indépendant du tech.
+
+La corrélation réelle mesurée (Twelve Data, 1 an) = **0.43**, ce qui donne un rdtNet de 9.1-10.4%. En stress extrême (corrélation → 0.70), le rdtNet tomberait à ~5-6% — toujours supérieur au CAT.
+
+## 7.2 Contexte Entités ByCam / Caméléons
+
+**ByCam** : société sans contraintes de trésorerie. Les 177K€ de cash libre sont 100% déployables. Pas de besoin de réserve de liquidité — la société n'a pas de charges opérationnelles qui nécessiteraient un tampon.
+
+**Caméléons** : les CAT existants constituent la réserve de liquidité (sortie avec préavis 32 jours, taux minoré mais capital disponible). Des réserves supplémentaires existent en dehors du périmètre StructBoard. Le cash libre à 0€ est voulu — tout est placé.
+
+L'alerte "réserve de liquidité insuffisante" (8.85% < 10-15% recommandé) ne s'applique pas dans ce contexte spécifique.
+
+## 7.3 Stress Test Liquidité
+
+**Question :** "Si j'ai besoin de X€ sous N jours, que puis-je mobiliser ?"
+
+### Sources de liquidité par délai
+
+| Source | Montant | Délai | Coût de sortie |
+|--------|:-------:|:-----:|:--------------:|
+| Cash libre ByCam | 177K€ | Immédiat | 0% |
+| CAT OPTIPLUS (×4, Cam) | 600K€ | 32 jours préavis | Taux minoré selon barème |
+| CAT Croissance SG (ByCam) | 110K€ | 32 jours préavis | Taux minoré |
+| CAT CATVAIR (Cam) | 50K€ | 32 jours préavis | Pénalité contractuelle |
+| CATIP CIC (Cam) | 200K€ | 32 jours préavis | Taux minoré |
+| OPTIPLUS 5 ANS (×2, Cam) | 500K€ | 32 jours préavis | Taux minoré |
+| Bond 12M Swiss Life | 109K€ | Variable (SL) | Spread rachat |
+| Structurés (portefeuille) | 190K€ | Pas de marché garanti | Décote 2-5% estimée |
+
+### Scénarios de stress
+
+**Besoin 100K€ sous 7 jours :**
+→ Cash ByCam (177K€) couvre. Pas d'impact sur les placements.
+
+**Besoin 300K€ sous 30 jours :**
+→ Cash ByCam 177K€ + 1 OPTIPLUS 150K€ (sortie anticipée, taux minoré) = 327K€.
+Coût : perte du taux progressif restant sur 1 contrat OPTIPLUS (~2-3 mois de coupon).
+
+**Besoin 500K€ sous 30 jours :**
+→ Cash ByCam 177K€ + 2 OPTIPLUS 300K€ + CAT Croissance SG 110K€ = 587K€.
+Coût : perte de taux progressif sur 2 OPTIPLUS + minoration SG.
+
+**Besoin 1M€ sous 60 jours :**
+→ Cash 177K€ + 4 OPTIPLUS 600K€ + CAT SG 110K€ + Bond SL 109K€ = 996K€.
+Quasi-totalité du patrimoine mobilisée. Structurés exclus (pas de marché secondaire fiable).
+
+### Liquidity Coverage Ratio simplifié
+
+```
+LCR_30j = Actifs mobilisables sous 30 jours / Patrimoine total
+        = (177K + 600K + 110K) / 1 936K
+        = 887K / 1 936K = 45.8%
+```
+
+Interprétation : 45.8% du patrimoine est mobilisable sous 30 jours. C'est confortable pour un patrimoine de gestion sans contraintes opérationnelles.
+
+## 7.4 Vue Duration / ALM Timeline
+
+### Échéancier des actifs
+
+```
+2026 ─────────────────────────────────────────────────
+ Avr  │ Aujourd'hui
+ Sep  │ ██████ 4× OPTIPLUS CONQUÊTE 600K€ (Cam) ← échéance
+      │
+2027 ─────────────────────────────────────────────────
+ Jan  │ ██ CATVAIR 50K€ (Cam)
+ Sep  │ ███ 2× CAT Croissance SG 110K€ (ByCam)
+      │
+2028 ─────────────────────────────────────────────────
+ Jan  │
+ Aoû  │ ██ CATIP CIC 200K€ (Cam)
+      │
+2029 ─────────────────────────────────────────────────
+ Mar  │ ██ Structurés portefeuille (échéances diverses)
+ Aoû  │ █████ 2× OPTIPLUS 5 ANS 500K€ (Cam)
+      │
+2030 ─────────────────────────────────────────────────
+      │ (pas d'échéance CAT)
+      │
+2031 ─────────────────────────────────────────────────
+ Avr  │ ██ Range Accrual Euribor 5.20% (CIC) ← si souscrit
+ Avr  │ ██ Digitale Mémoire TEC10 4.60% (CIC) ← si souscrit
+```
+
+### Points d'attention ALM
+
+**Sept 2026 — Pic d'échéance :**
+4× OPTIPLUS CONQUÊTE (600K€) arrivent à terme en même temps. C'est le moment de décision clé : renouveler, arbitrer vers un structuré, ou attendre.
+
+**2028-2029 — Trou de liquidité :**
+Entre l'échéance CATIP (août 2028) et les OPTIPLUS 5 ANS (août 2029), pas d'échéance intermédiaire. Si un besoin survient dans cette fenêtre, il faudra sortir d'un CAT en cours avec pénalité.
+
+**2030 — Année vide :**
+Aucune échéance CAT. Les structurés souscrits en 2026 (Range Accrual, Digitale TEC10) arriveraient en avril 2031. Planifier une échéance CAT en 2030 pour assurer la continuité du flux.
+
+**Duration moyenne pondérée :**
+```
+CAT :       2.4 ans (pondéré par montant)
+Structurés : 5.1 ans (portefeuille existant)
+Nouveaux :  4.2 ans (si Dispersion 3a + Range Accrual 5a)
+Global :    3.1 ans
+```
+
+---
+
 *Document généré le 03/04/2026 — StructBoard v6.2.0*
 *Grading engine : v7.1 (Kendall τ = 1.0) + Range Accrual v1.0*
 *Allocateur : v2.1 (5 règles, per-contract, MI-adjusted)*
