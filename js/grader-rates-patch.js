@@ -297,6 +297,135 @@
         return Math.max(0, Math.min(100, Math.round(s)));
     }
 
+    // ═══ RANGE ACCRUAL — Probability estimation ═══
+    function _estimateRangeProb(current, lower, upper, volBps, matYears) {
+      var volPct = volBps / 100;
+      var distToBorder = Math.min(current - lower, upper - current);
+      var volT = volPct * Math.sqrt(matYears);
+
+      if (distToBorder <= 0) return 0.05; // already out of range
+
+      var zScore = distToBorder / Math.max(0.01, volT);
+      var probStayIn = Math.min(0.95, Math.max(0.05,
+        0.50 + 0.40 * (1 - Math.exp(-zScore * 1.5))
+      ));
+
+      // Maturity decay: longer = more likely to exit
+      probStayIn *= Math.max(0.5, 1 - 0.05 * matYears);
+
+      // Stagflation bias: upper bound threatened if rates rising
+      var regime = _getRegime();
+      if (regime === 'stagflation' || regime === 'recession') {
+        var distToUpper = upper - current;
+        var distToLower = current - lower;
+        if (distToUpper < distToLower) probStayIn *= 0.85; // closer to upper = penalized
+      }
+
+      return Math.max(0.05, Math.min(0.95, probStayIn));
+    }
+
+    function _getEuriborEstimate() {
+      // Proxy: ECB deposit rate + 50bps spread
+      var depo = _getECBDepositRate();
+      return depo > 0 ? depo + 0.5 : 2.5; // fallback 2.5%
+    }
+
+    // ═══ P1 for Range Accrual ═══
+    function _computeP1RangeAccrual(p) {
+      var ra = p.rangeAccrual || {};
+      var couponMax = p.coupon || 0;
+      var mat = p.maturityYears || 5;
+      var current = _getEuriborEstimate();
+      var lower = ra.lowerBound || 1.75;
+      var upper = ra.upperBound || 3.50;
+      var volBps = _getRateVol(Math.min(mat, 2)) || 19.7;
+
+      var prob = _estimateRangeProb(current, lower, upper, volBps, mat);
+
+      // Observation bonus: daily = granular loss (+3), monthly = block loss (-3)
+      var obs = ra.observation || 'daily';
+      var obsAdj = obs === 'daily' ? 3 : obs === 'weekly' ? 0 : -3;
+
+      var rdtEspere = couponMax * prob;
+      var s = Math.round(35 + rdtEspere * 6) + obsAdj;
+
+      console.log('[Rates-Patch] P1 RangeAccrual: couponMax=' + couponMax + '% prob=' +
+        (prob * 100).toFixed(1) + '% rdtEspéré=' + rdtEspere.toFixed(2) + '% obs=' + obs +
+        ' → P1=' + s);
+
+      // Store for optimizer
+      p._isGuaranteedRate = true;
+      p._ratesRendementNet = Math.round(rdtEspere * 100) / 100;
+      p._rangeProb = prob;
+
+      return Math.max(5, Math.min(95, s));
+    }
+
+    // ═══ P2 for Range Accrual ═══
+    function _computeP2RangeAccrual(p) {
+      var ra = p.rangeAccrual || {};
+      var mat = p.maturityYears || 5;
+      var base = 65; // institutional quality reference rate
+
+      // Duration penalty
+      if (mat > 3) base -= Math.round(Math.min(12, (mat - 3) * 2));
+
+      // Vol penalty
+      var volBps = _getRateVol(Math.min(mat, 2)) || 19.7;
+      if (volBps > 30) base -= 10;
+      else if (volBps > 20) base -= 5;
+      else if (volBps < 10) base += 5;
+
+      // Corridor width bonus/penalty
+      var width = (ra.upperBound || 3.5) - (ra.lowerBound || 1.75);
+      if (width >= 2.0) base += 5;
+      else if (width >= 1.5) base += 2;
+      else if (width < 1.0) base -= 10;
+
+      // Capital garanti = quality
+      if (p.capitalProtection) base += 5;
+
+      // Observation: daily = less risky (+3), monthly = more risky (-3)
+      var obs = (ra.observation || 'daily');
+      if (obs === 'daily') base += 3;
+      else if (obs === 'monthly') base -= 3;
+
+      console.log('[Rates-Patch] P2 RangeAccrual: base=' + base + ' width=' + width.toFixed(2) +
+        ' vol=' + volBps + 'bps obs=' + obs);
+      return Math.max(10, Math.min(95, Math.round(base)));
+    }
+
+    // ═══ P4 for Range Accrual ═══
+    function _computeP4RangeAccrual(p, catRate) {
+      var ra = p.rangeAccrual || {};
+      var couponMax = p.coupon || 0;
+      var mat = p.maturityYears || 5;
+      var current = _getEuriborEstimate();
+      var lower = ra.lowerBound || 1.75;
+      var upper = ra.upperBound || 3.50;
+      var volBps = _getRateVol(Math.min(mat, 2)) || 19.7;
+
+      var prob = p._rangeProb || _estimateRangeProb(current, lower, upper, volBps, mat);
+      var rdtEspere = couponMax * prob;
+
+      var rfYield = _getYieldForMaturity(mat);
+      var benchmark = Math.max(catRate || 2.5, rfYield || 0);
+      var illiqPremium = 0.5 + 0.15 * Math.max(0, mat - 2);
+      var effectiveSpread = rdtEspere - benchmark - illiqPremium;
+
+      var s;
+      if (effectiveSpread <= 0) {
+        s = Math.max(5, 30 + Math.round(effectiveSpread * 15));
+      } else {
+        s = Math.min(80, Math.round(30 + effectiveSpread * 12.5));
+      }
+
+      console.log('[Rates-Patch] P4 RangeAccrual: rdtEspéré=' + rdtEspere.toFixed(2) +
+        '% vs bench=' + benchmark.toFixed(2) + '% illiq=' + illiqPremium.toFixed(2) +
+        '% → spread=' + effectiveSpread.toFixed(2) + '% → P4=' + s);
+      return Math.max(0, Math.min(100, Math.round(s)));
+    }
+
     // ═══ BUILD RATE CONTEXT STRING ═══
     function _buildRateContext() {
         if (!_ratesData) return '';
@@ -339,6 +468,8 @@
         var _origComputeP1Rates = _computeP1;
         _computeP1 = function(p) {
             if (_isFixedRateProduct(p) && _ratesData && Object.keys(_ratesData.yields || {}).length > 0) {
+                var st = (p.structureType || '').toLowerCase();
+                if (st === 'range_accrual') return _computeP1RangeAccrual(p);
                 return _computeP1Rate(p);
             }
             return _origComputeP1Rates(p);
@@ -348,6 +479,8 @@
         var _origComputeP2Rates = _computeP2;
         _computeP2 = function(p, market, productType) {
             if ((productType === 'fixed-rate-callable' || _isFixedRateProduct(p)) && _ratesData && Object.keys(_ratesData.yields || {}).length > 0) {
+                var st = (p.structureType || '').toLowerCase();
+                if (st === 'range_accrual') return _computeP2RangeAccrual(p);
                 return _computeP2Rate(p);
             }
             return _origComputeP2Rates(p, market, productType);
@@ -357,6 +490,8 @@
         var _origComputeP4Rates = _computeP4;
         _computeP4 = function(p, catRate) {
             if (_isFixedRateProduct(p) && _ratesData && Object.keys(_ratesData.yields || {}).length > 0) {
+                var st = (p.structureType || '').toLowerCase();
+                if (st === 'range_accrual') return _computeP4RangeAccrual(p, catRate);
                 return _computeP4Rate(p, catRate);
             }
             return _origComputeP4Rates(p, catRate);
@@ -436,7 +571,7 @@
         var name = (p.name || '').toLowerCase();
         var type = (p.type || '').toLowerCase();
         var st = (p.structureType || '').toLowerCase();
-        if (st === 'taux_fixe' || st === 'callable') return true;
+        if (st === 'taux_fixe' || st === 'callable' || st === 'range_accrual') return true;
         if (type.indexOf('taux fixe') >= 0 || type.indexOf('callable') >= 0 || type.indexOf('obligation') >= 0) return true;
         if (name.indexOf('taux fixe') >= 0 || name.indexOf('callable') >= 0 || name.indexOf('fixed rate') >= 0) return true;
         if (name.indexOf('obligation') >= 0 || name.indexOf('bond') >= 0 || name.indexOf('cln') >= 0) return true;

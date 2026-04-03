@@ -234,6 +234,52 @@
       cp.barrier = null;
     }
 
+    // v2: Range Accrual detection
+    var rawText = (data.rawText || data.name || '').toLowerCase();
+    var isRangeAccrual = data.structureType === 'range_accrual' ||
+      /range\s*accrual/i.test(rawText) ||
+      /prorata\s*(du|des)\s*nombre\s*de\s*jours/i.test(rawText) ||
+      /nombre\s*de\s*jours.*cl[oô]ture\s*(entre|dans)/i.test(rawText) ||
+      /borne\s*basse.*borne\s*haute/i.test(rawText);
+
+    if (isRangeAccrual) {
+      data.structureType = 'range_accrual';
+      data.underlyingType = 'rates';
+      c.type = 'conditionnel';
+      cp.protected = true;
+      cp.level = 100;
+      cp.barrier = null;
+      er.possible = false;
+
+      // Extract corridor bounds
+      if (!data.rangeAccrual) data.rangeAccrual = {};
+      var boundsMatch = rawText.match(/entre\s*(\d+[.,]\d+)\s*%\s*et\s*(\d+[.,]\d+)\s*%/i);
+      if (boundsMatch) {
+        data.rangeAccrual.lowerBound = parseFloat(boundsMatch[1].replace(',', '.'));
+        data.rangeAccrual.upperBound = parseFloat(boundsMatch[2].replace(',', '.'));
+      }
+      var lowerMatch = rawText.match(/borne?\s*basse[^0-9]*(\d+[.,]\d+)\s*%/i) || rawText.match(/barri[eè]re\s*basse[^0-9]*(\d+[.,]\d+)\s*%/i);
+      var upperMatch = rawText.match(/borne?\s*haute[^0-9]*(\d+[.,]\d+)\s*%/i) || rawText.match(/barri[eè]re\s*haute[^0-9]*(\d+[.,]\d+)\s*%/i);
+      if (lowerMatch && !data.rangeAccrual.lowerBound) data.rangeAccrual.lowerBound = parseFloat(lowerMatch[1].replace(',', '.'));
+      if (upperMatch && !data.rangeAccrual.upperBound) data.rangeAccrual.upperBound = parseFloat(upperMatch[1].replace(',', '.'));
+
+      // Extract reference rate
+      var euriborMatch = rawText.match(/euribor\s*(\d+)\s*mois/i);
+      var cmsMatch = rawText.match(/cms\s*(\d+)\s*(ans?|y)/i);
+      var tecMatch = rawText.match(/tec\s*(\d+)/i);
+      if (euriborMatch) data.rangeAccrual.reference = 'Euribor ' + euriborMatch[1] + ' mois';
+      else if (cmsMatch) data.rangeAccrual.reference = 'CMS ' + cmsMatch[1] + ' ans';
+      else if (tecMatch) data.rangeAccrual.reference = 'TEC ' + tecMatch[1];
+
+      // Observation type
+      if (/journali[eè]r|daily|chaque\s*jour/i.test(rawText)) data.rangeAccrual.observation = 'daily';
+      else if (/hebdomadaire|weekly/i.test(rawText)) data.rangeAccrual.observation = 'weekly';
+      else if (/mensuel|monthly/i.test(rawText)) data.rangeAccrual.observation = 'monthly';
+      else data.rangeAccrual.observation = 'daily'; // default
+
+      console.log('[Parser v2] Range Accrual detected:', JSON.stringify(data.rangeAccrual));
+    }
+
     return data;
   }
 

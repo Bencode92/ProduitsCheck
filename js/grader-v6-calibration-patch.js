@@ -40,6 +40,8 @@
       else base -= 10;
     } else if (ut === 'single-stock') {
       base -= 10;
+    } else if (st === 'range_accrual') {
+      base += 5; // rates diversifier, but conditional coupon (less than taux_fixe)
     } else if (ut === 'none' || st === 'taux_fixe') {
       base += 5;
     }
@@ -83,7 +85,7 @@
     var st = (product.structureType || '').toLowerCase();
     var ct = (product.couponType || '').toLowerCase();
     var ut = (product.underlyingType || '').toLowerCase();
-    if (st === 'taux_fixe' || st === 'callable') return true;
+    if (st === 'taux_fixe' || st === 'callable' || st === 'range_accrual') return true;
     if ((ct === 'fixe' || ct === 'garanti') && (ut === 'none' || ut === '' || ut === 'rates' || ut === 'credit')) return true;
     return false;
   }

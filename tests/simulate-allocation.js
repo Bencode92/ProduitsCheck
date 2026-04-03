@@ -137,6 +137,60 @@ assert(spreadCourt36 > 1.5, '36M court terme spread ' + spreadCourt36.toFixed(2)
 var dispersionPassesCourt = dispersion.rdtNet - catSourceRate > spreadCourt36;
 assert(dispersionPassesCourt, 'Dispersion 9.1% passe même en "court terme" (exceptionnel)');
 
+// ═══ TEST 8: Range Accrual probability estimation ═══
+console.log('\n🧪 Test 8 — Range Accrual probabilité corridor');
+
+function _estimateRangeProb(current, lower, upper, volBps, matYears, regime) {
+  var volPct = volBps / 100;
+  var distToBorder = Math.min(current - lower, upper - current);
+  var volT = volPct * Math.sqrt(matYears);
+  if (distToBorder <= 0) return 0.05;
+  var zScore = distToBorder / Math.max(0.01, volT);
+  var probStayIn = Math.min(0.95, Math.max(0.05,
+    0.50 + 0.40 * (1 - Math.exp(-zScore * 1.5))
+  ));
+  probStayIn *= Math.max(0.5, 1 - 0.05 * matYears);
+  if (regime === 'stagflation') {
+    var distToUpper = upper - current;
+    var distToLower = current - lower;
+    if (distToUpper < distToLower) probStayIn *= 0.85;
+  }
+  return Math.max(0.05, Math.min(0.95, probStayIn));
+}
+
+// CIC Range Accrual: Euribor 3M ≈ 2.5%, corridor [1.75% — 3.50%], 5Y, vol 19.7bps
+var prob = _estimateRangeProb(2.5, 1.75, 3.50, 19.7, 5, 'stagflation');
+assert(prob > 0.50 && prob < 0.85, 'Prob in range = ' + (prob * 100).toFixed(1) + '% (expected 50-85%)');
+
+var rdtEspere = 5.20 * prob;
+assert(rdtEspere > 2.5, 'rdtEspéré = ' + rdtEspere.toFixed(2) + '% > CAT 2.5%');
+assert(rdtEspere < 5.2, 'rdtEspéré = ' + rdtEspere.toFixed(2) + '% < coupon max 5.2%');
+
+// Stagflation bias: closer to upper bound → penalized
+var probNoBias = _estimateRangeProb(3.2, 1.75, 3.50, 19.7, 5, 'neutral');
+var probBias = _estimateRangeProb(3.2, 1.75, 3.50, 19.7, 5, 'stagflation');
+assert(probBias < probNoBias, 'Stagflation bias: ' + (probBias * 100).toFixed(1) + '% < neutral ' + (probNoBias * 100).toFixed(1) + '%');
+
+// Out of range → prob 5%
+var probOut = _estimateRangeProb(4.0, 1.75, 3.50, 19.7, 5, 'neutral');
+assert(probOut === 0.05, 'Out of range → prob 5%');
+
+// P1 estimate for CIC product
+var obsBonus = 3; // daily
+var p1 = Math.round(35 + rdtEspere * 6) + obsBonus;
+assert(p1 >= 45 && p1 <= 70, 'P1 Range Accrual = ' + p1 + ' (expected 45-70)');
+
+// Full grade estimate (P1×30% + P2×20% + P3×15% + P4×30%)
+var p2 = 73; // institutional quality, wide corridor, capital garanti
+var p3 = 55; // rates diversifier
+var p4 = 45; // spread ~1.5% - illiq 1.1%
+var total = Math.round(p1 * 0.30 + p2 * 0.20 + p3 * 0.15 + p4 * 0.30);
+assert(total >= 45 && total <= 60, 'Total score = ' + total + ' (expected C range 45-60)');
+
+var grade = total >= 70 ? 'A' : total >= 55 ? 'B' : total >= 45 ? 'C' : total >= 25 ? 'D' : 'F';
+console.log('  Grade estimé: ' + grade + ' (' + total + ')');
+assert(grade === 'C' || grade === 'B', 'Grade = ' + grade + ' (expected B or C)');
+
 // ═══ SUMMARY ═══
 console.log('\n' + '═'.repeat(50));
 console.log('📊 Résultats : ' + passed + ' passed, ' + failed + ' failed');

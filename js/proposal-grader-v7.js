@@ -161,7 +161,7 @@
     var st = (product.structureType || '').toLowerCase();
     var ct = (product.couponType || '').toLowerCase();
     var ut = (product.underlyingType || '').toLowerCase();
-    if (st === 'taux_fixe' || st === 'callable') return true;
+    if (st === 'taux_fixe' || st === 'callable' || st === 'range_accrual') return true;
     if ((ct === 'fixe' || ct === 'garanti') && (ut === 'none' || ut === '' || ut === 'rates' || ut === 'credit')) return true;
     return false;
   }
@@ -202,6 +202,13 @@
       norm.couponType = 'fixe';
       norm.worstOf = false;
       norm._structureType = 'taux_fixe';
+    } else if (st === 'range_accrual') {
+      norm.capitalProtection = true;
+      norm.barrier = 0;
+      norm.couponType = 'conditionnel';
+      norm.worstOf = false;
+      norm.autocall = false;
+      norm._structureType = 'range_accrual';
     }
     return norm;
   }

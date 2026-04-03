@@ -18,6 +18,7 @@ var STRUCTURE_TYPES = [
     { id: 'basket', label: 'Panier équipondéré' },
     { id: 'dispersion', label: 'Dispersion / Perf. relative' },
     { id: 'taux_fixe', label: 'Taux fixe / Callable' },
+    { id: 'range_accrual', label: '📊 Range Accrual' },
     { id: 'capital_garanti', label: 'Capital garanti structuré' },
     { id: 'reverse', label: 'Reverse convertible' },
     { id: 'participation', label: 'Participation / Bonus' },
@@ -176,6 +177,25 @@ window.showEditModal = function() {
         (decrementPct && divYield ? '<div class="form-field"><label>Drag annuel</label><div style="padding:8px;background:var(--red-dim);border-radius:var(--radius-sm);color:var(--red);font-size:12px;font-weight:600">' + (decrementPct - divYield).toFixed(2) + '%/an invisible</div></div>' : '') +
         '</div>' +
 
+        // ─── Section 6: Range Accrual (conditional) ───
+        (structureType === 'range_accrual' ? (
+        '<div style="font-size:10px;font-weight:700;color:#A855F7;margin:20px 0 8px;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border);padding-bottom:4px">📊 Range Accrual</div>' +
+        '<div class="form-grid">' +
+        '<div class="form-field"><label>Borne basse (%)</label><input id="fe-ra-lower" type="number" step="0.01" value="' + escapeAttr(((p.rangeAccrual || {}).lowerBound) || '') + '" placeholder="Ex: 1.75"></div>' +
+        '<div class="form-field"><label>Borne haute (%)</label><input id="fe-ra-upper" type="number" step="0.01" value="' + escapeAttr(((p.rangeAccrual || {}).upperBound) || '') + '" placeholder="Ex: 3.50"></div>' +
+        '<div class="form-field"><label>Taux de référence</label><select id="fe-ra-reference">' +
+          [{ id: 'Euribor 3 mois', label: 'Euribor 3 mois' }, { id: 'Euribor 6 mois', label: 'Euribor 6 mois' }, { id: 'Euribor 12 mois', label: 'Euribor 12 mois' }, { id: 'CMS 10 ans', label: 'CMS 10 ans' }, { id: 'CMS 2 ans', label: 'CMS 2 ans' }, { id: 'TEC 10', label: 'TEC 10' }, { id: 'Autre', label: 'Autre' }].map(function(r) {
+            return '<option value="' + r.id + '"' + (((p.rangeAccrual || {}).reference || 'Euribor 3 mois') === r.id ? ' selected' : '') + '>' + r.label + '</option>';
+          }).join('') +
+        '</select></div>' +
+        '<div class="form-field"><label>Observation</label><select id="fe-ra-observation">' +
+          [{ id: 'daily', label: 'Journalière' }, { id: 'weekly', label: 'Hebdomadaire' }, { id: 'monthly', label: 'Mensuelle' }].map(function(o) {
+            return '<option value="' + o.id + '"' + (((p.rangeAccrual || {}).observation || 'daily') === o.id ? ' selected' : '') + '>' + o.label + '</option>';
+          }).join('') +
+        '</select></div>' +
+        '</div>'
+        ) : '') +
+
         _getInfoBanners(structureType, barrierCoupon, strikePrice, decrementPct, divYield) +
         '<div class="modal-actions"><button class="btn" onclick="closeModal()">Annuler</button><button class="btn primary" onclick="handleEditSave()">💾 Enregistrer</button></div>' +
         '</div></div>';
@@ -298,6 +318,9 @@ function _getInfoBanners(structureType, barrierCoupon, strikePrice, decrementPct
     if (structureType === 'taux_fixe') {
         html += '<div style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:12px;font-size:10px;color:var(--accent)">🏛 <strong>Taux fixe</strong> : comparaison au taux sans risque BCE.</div>';
     }
+    if (structureType === 'range_accrual') {
+        html += '<div style="background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:12px;font-size:10px;color:#A855F7">📊 <strong>Range Accrual</strong> : coupon = taux max × (jours dans le corridor / jours total). Capital garanti.</div>';
+    }
     if (!strikePrice) {
         html += '<div style="background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.15);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:12px;font-size:10px;color:var(--text-muted)">💡 <strong>Strike</strong> : renseignez la valeur du SJ à la souscription.</div>';
     }
@@ -397,6 +420,22 @@ window.handleEditSave = async function() {
     var newDivYield = document.getElementById('fe-divyield')?.value;
     if (newDivYield !== '') p.actualDividendYield = parseFloat(newDivYield);
     else delete p.actualDividendYield;
+
+    // ─── Range Accrual ───
+    if (p.structureType === 'range_accrual') {
+      p.rangeAccrual = {
+        lowerBound: parseFloat(document.getElementById('fe-ra-lower')?.value) || 0,
+        upperBound: parseFloat(document.getElementById('fe-ra-upper')?.value) || 0,
+        reference: document.getElementById('fe-ra-reference')?.value || 'Euribor 3 mois',
+        observation: document.getElementById('fe-ra-observation')?.value || 'daily'
+      };
+      // Force correct types for range accrual
+      p.underlyingType = 'rates';
+      if (p.coupon) p.coupon.type = 'conditionnel';
+      if (!p.capitalProtection) p.capitalProtection = {};
+      p.capitalProtection.protected = true;
+      p.capitalProtection.level = 100;
+    }
 
     // ─── Montant minimum ───
     var newMinInvest = document.getElementById('fe-mininvest')?.value;
