@@ -452,6 +452,11 @@ window.handleEditSave = async function() {
     var newUnderlyings = document.getElementById('fe-underlyings')?.value;
     if (newUnderlyings) {
         p.underlyings = newUnderlyings.split(/[,;]/).map(function(s) { return s.trim(); }).filter(Boolean);
+        // Auto-detect rate underlyings → set underlyingType = 'rates'
+        var undText = newUnderlyings.toLowerCase();
+        if (/tec\s*\d|euribor|cms\s*\d|ester|eonia|libor|€str/i.test(undText)) {
+          p.underlyingType = 'rates';
+        }
     }
 
     closeModal();
