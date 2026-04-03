@@ -189,7 +189,7 @@
   "minInvestment": 10000,
   "grading": {
     "grade": "C",
-    "score": 53,
+    "score": 52,
     "killCriteria": {
       "triggered": false,
       "reasons": []
@@ -199,76 +199,76 @@
         "score": 67,
         "base": 64,
         "delta": -2,
-        "reasoning": "Rendement: base 64 → -2 = 62 (En stagflation avec taux TEC10 à 4.4%, la probabilité de coupons est réduite car les taux longs pourraient baisser si récession) | Coupon 4.6%, protégé | Barr.coupon 4.4%"
+        "reasoning": "Rendement: base 64 → -2 = 62 (TEC10 à 4.4% avec barrière à 4.4% en stagflation = probabilité réduite, courbe pentifiée défavorable aux taux longs) | Coupon 4.6%, protégé | Barr.coupon 4.4%"
       },
       "underlyingQuality": {
-        "score": 37,
+        "score": 33,
         "base": 35,
-        "delta": 2,
-        "reasoning": "Qualité: base 35 → +2 = 37 (TEC10 bénéficie du contexte stagflationniste où les taux restent élevés, contrairement aux actions cycliques)"
+        "delta": -2,
+        "reasoning": "Qualité: base 35 → -2 = 33 (Taux longs vulnérables en stagflation avec inflation PCE 2.83%, Fed pourrait surprendre hawkish)"
       },
       "portfolioFit": {
         "score": 60,
         "base": 80,
-        "delta": 0,
-        "reasoning": "Fit: base 80"
+        "delta": 2,
+        "reasoning": "Fit: base 80 → +2 = 82 (Capital garanti très pertinent en stagflation, protection contre volatilité des taux)"
       },
       "riskPremium": {
         "score": 54,
-        "base": 39,
-        "delta": -2,
+        "base": 34,
+        "delta": 0,
         "reasoning": "Capital garanti: spread 4.6% - CAT 2.5% - illiq 0.5% = 1.6%"
       }
     },
-    "verdict": "Produit capital garanti offrant 4.6% annualisé si TEC10 reste ≥4.4%, adapté au régime stagflationniste actuel où les taux devraient rester élevés. Avec le choc pétrolier à $122 et l'inflation PCE à 2.83%, la Fed maintiendra des taux restrictifs. Toutefois, le risque de récession pourrait faire baisser les taux longs sous 4.4%, annulant les coupons malgré le capital garanti.",
+    "verdict": "Produit défensif adapté au régime stagflationniste actuel avec capital garanti et coupon potentiel de 4.6%. La barrière à 4.4% sur le TEC10 actuellement à ce niveau exact rend le coupon incertain, mais sans risque en capital. Score ajusté à 42/100 reflète la faible probabilité de coupons dans un contexte de taux longs sous pression.",
     "keyRisks": [
-      "Baisse du TEC10 sous 4.4% en cas de récession = 0% de coupon",
-      "Coût d'opportunité vs obligations d'État à 4.4% sans condition"
+      "TEC10 pourrait dépasser 4.4% si Fed surprend hawkish face à inflation persistante",
+      "Opportunité manquée si les taux baissent rapidement"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 4.6,
         "return_eur": 23000,
-        "probability": 0.35,
+        "probability": 0.2,
         "duration_years": 5
       },
       "base": {
-        "return_pct": 2.8,
-        "return_eur": 14000,
-        "probability": 0.4,
+        "return_pct": 2.3,
+        "return_eur": 11500,
+        "probability": 0.35,
         "duration_years": 5
       },
       "stress": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.2,
+        "probability": 0.3,
         "duration_years": 5
       },
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.05,
+        "probability": 0.15,
         "duration_years": 5
       }
     },
     "confidenceInterval": {
-      "low": 44,
-      "high": 62,
+      "low": 43,
+      "high": 61,
       "halfWidth": 9,
       "gradeStable": false,
       "gradeRange": "D-B",
-      "label": "C [44-62]"
+      "label": "C [43-61]"
     },
     "metadata": {
-      "gradedAt": "2026-04-03T08:20:23.321Z",
-      "durationMs": 16983,
+      "gradedAt": "2026-04-03T08:46:40.352Z",
+      "durationMs": 14279,
       "aiUsed": true,
       "version": "7.1",
       "productType": "capital_garanti",
       "marketDataAvailable": false,
-      "catBenchmark": 2.5,
-      "catSource": "fallback-2026",
+      "catBenchmark": 2.8,
+      "catSource": "allocator-confirmed",
       "couponAnnualized": 4.6,
       "couponRaw": 4.6,
       "couponMultiplier": 1,
@@ -281,13 +281,13 @@
       "expectedMaturity": 5,
       "maxMaturity": 5,
       "maxBeta": null,
-      "baseScore": 54,
+      "baseScore": 52,
       "baseGrade": "C",
       "adjustments": {
         "p1": -2,
-        "p2": 2,
-        "p3": 0,
-        "p4": -2
+        "p2": -2,
+        "p3": 2,
+        "p4": 0
       },
       "barrier_sigma": null,
       "barrier_sigma_label": null,
@@ -295,9 +295,9 @@
       "liquidity_level": "L4",
       "liquidity_score": 10,
       "liquidity_label": "Illiquide",
-      "ci_low": 44,
-      "ci_high": 62,
-      "ci_label": "C [44-62]",
+      "ci_low": 43,
+      "ci_high": 61,
+      "ci_label": "C [43-61]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
@@ -314,12 +314,12 @@
     },
     "regimeScenarios": {
       "current": {
-        "score": 53,
+        "score": 52,
         "grade": "C",
         "label": "Actuel (stagflation)"
       },
       "bull": {
-        "score": 58,
+        "score": 57,
         "grade": "C",
         "label": "Bull / Risk-on",
         "delta": 5
@@ -328,7 +328,7 @@
         "score": 46,
         "grade": "C",
         "label": "Crash / Récession",
-        "delta": -7
+        "delta": -6
       }
     }
   }
