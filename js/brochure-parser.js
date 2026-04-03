@@ -160,8 +160,18 @@
       var n = (data.underlyings || []).length;
       if (n === 0) data.underlyingType = 'none';
       else if (n === 1) { var nm = (data.underlyings[0] || '').toLowerCase();
-        data.underlyingType = (/indice|index|euro|cac|s&p|solactive|stoxx/.test(nm)) ? 'single-index' : 'single-stock';
+        if (/tec\s*\d|euribor|cms\s*\d|ester|eonia|libor|swap\s*\d|ois|€str/i.test(nm)) data.underlyingType = 'rates';
+        else if (/indice|index|euro|cac|s&p|solactive|stoxx/.test(nm)) data.underlyingType = 'single-index';
+        else data.underlyingType = 'single-stock';
       } else data.underlyingType = 'worst-of';
+    }
+    // Also check mechanism/name for rate references if underlyingType still wrong
+    if (data.underlyingType === 'single-stock') {
+      var allNames = ((data.underlyings || []).join(' ') + ' ' + (data.mechanism || '') + ' ' + (data.name || '')).toLowerCase();
+      if (/tec\s*\d|euribor|cms\s*\d|ester|eonia|libor|€str|taux.*r[eé]f[eé]rence/i.test(allNames)) {
+        data.underlyingType = 'rates';
+        console.log('[Parser v2] Corrected underlyingType to "rates" (detected rate reference in text)');
+      }
     }
 
     if (cp.protected && cp.level >= 100 && !er.possible) {
