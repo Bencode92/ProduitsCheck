@@ -127,6 +127,7 @@ async function renderAnalytics(container) {
       <div class="stat-card purple"><div class="stat-label">Nombre de Placements</div><div class="stat-value">${products.length + catDeposits.length}</div><div class="stat-sub">${products.length} structurés · ${catDeposits.length} CAT/PS</div></div>
     </div>
     ${_renderMaturityTimeline(products, catDeposits)}
+    ${_renderStressTest(products, catDeposits)}
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
       <div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">📊</span><span class="fiche-section-title">Rendement Annuel par Produit</span></div><div class="fiche-section-body"><canvas id="chart-yield" height="160"></canvas></div></div>
       <div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">📈</span><span class="fiche-section-title">Projection Flux de Trésorerie (10 ans)</span></div><div class="fiche-section-body"><canvas id="chart-cashflow" height="160"></canvas></div></div>
@@ -290,6 +291,211 @@ function _renderMaturityTimeline(products, catDeposits) {
   h += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:var(--green);font-weight:700">+' + fmt(totalReturn) + '€/an</td>';
   h += '<td colspan="2"></td>';
   h += '</tr></tfoot></table>';
+  h += '</div></div>';
+  return h;
+}
+
+// ═══ STRESS TEST LIQUIDITÉ ═══════════════════════════════════
+function _computeExitCost(deposit) {
+  var now = new Date();
+  var amount = parseFloat(deposit.amount) || 0;
+  var rate = parseFloat(deposit.rate) || 0;
+  var startDate = deposit.startDate ? new Date(deposit.startDate) : null;
+  var matDate = deposit.maturityDate ? new Date(deposit.maturityDate) : null;
+  var monthsToMaturity = matDate ? Math.max(0, Math.round((matDate - now) / (30.44 * 24 * 60 * 60 * 1000))) : 0;
+
+  // Find current period earlyRate
+  if (deposit.rateSchedule && deposit.rateSchedule.length > 0) {
+    var currentPeriod = null;
+    deposit.rateSchedule.forEach(function(s) {
+      var from = s.from ? new Date(s.from) : null;
+      var to = s.to ? new Date(s.to) : null;
+      if (from && to && now >= from && now <= to) currentPeriod = s;
+      // Also match by fromMonth if no date
+      if (!currentPeriod && s.fromMonth && startDate) {
+        var mElapsed = Math.round((now - startDate) / (30.44 * 24 * 60 * 60 * 1000));
+        if (mElapsed >= (s.fromMonth - 1) && mElapsed < s.toMonth) currentPeriod = s;
+      }
+    });
+
+    if (currentPeriod && currentPeriod.earlyRate != null) {
+      var normalRate = currentPeriod.rate || rate;
+      var earlyRate = currentPeriod.earlyRate;
+      var lostRate = normalRate - earlyRate;
+      var lostAmount = Math.round(amount * lostRate / 100 * (monthsToMaturity / 12));
+      return {
+        earlyRate: earlyRate,
+        normalRate: normalRate,
+        lostRate: lostRate,
+        lostAmount: lostAmount,
+        monthsToMaturity: monthsToMaturity,
+        detail: 'Taux minoré ' + earlyRate.toFixed(2) + '% vs ' + normalRate.toFixed(2) + '% normal'
+      };
+    }
+  }
+
+  // No earlyRate data — estimate from exitPenalty text
+  var penalty = (deposit.exitPenalty || '').toLowerCase();
+  if (penalty.indexOf('aucun') >= 0 || penalty.indexOf('pas de p') >= 0) {
+    // "Aucun intérêt si retrait dans le mois" or "pas de pénalité"
+    // Cost = loss of current period interest only (~1 month)
+    var monthlyInterest = Math.round(amount * rate / 100 / 12);
+    return {
+      earlyRate: rate,
+      normalRate: rate,
+      lostRate: 0,
+      lostAmount: monthlyInterest,
+      monthsToMaturity: monthsToMaturity,
+      detail: 'Perte intérêts période en cours (~1 mois = ' + monthlyInterest + '€)'
+    };
+  }
+
+  // Fallback: estimate 50% of remaining interest
+  var remainingInterest = Math.round(amount * rate / 100 * (monthsToMaturity / 12));
+  var estimatedLoss = Math.round(remainingInterest * 0.5);
+  return {
+    earlyRate: rate * 0.5,
+    normalRate: rate,
+    lostRate: rate * 0.5,
+    lostAmount: estimatedLoss,
+    monthsToMaturity: monthsToMaturity,
+    detail: 'Estimation ~50% des intérêts restants'
+  };
+}
+
+function _renderStressTest(products, catDeposits) {
+  var now = new Date();
+  var fmt = typeof formatNumber === 'function' ? formatNumber : function(n) { return String(Math.round(n)); };
+
+  // Build list of all liquidatable assets, sorted by exit cost (cheapest first)
+  var sources = [];
+
+  // 1. Free cash ByCam
+  try {
+    if (typeof catManager !== 'undefined' && catManager.objectives) {
+      var cashByCam = parseFloat(catManager.objectives.cashByCam) || 0;
+      if (cashByCam > 0) {
+        sources.push({ name: 'Cash libre ByCam', amount: cashByCam, exitCost: 0, delay: 'Immédiat', entity: 'bycam', type: 'cash', detail: 'Disponible immédiatement' });
+      }
+    }
+  } catch(e) {}
+
+  // 2. CAT deposits (sorted by exit cost ascending)
+  catDeposits.forEach(function(d) {
+    if (d.status !== 'active') return;
+    var cost = _computeExitCost(d);
+    sources.push({
+      name: d.productName || 'CAT',
+      amount: parseFloat(d.amount) || 0,
+      exitCost: cost.lostAmount,
+      delay: '32 jours',
+      entity: d.entity || (d.entityName === 'Caméleons' ? 'cameleons' : 'bycam'),
+      type: 'cat',
+      detail: cost.detail,
+      monthsToMaturity: cost.monthsToMaturity,
+      bank: d.bankName || '?'
+    });
+  });
+
+  // 3. Structured products (illiquid — high cost)
+  products.forEach(function(p) {
+    if (p.grading && p.grading.grade === '-') {
+      // Liquidity product (Bond 12M)
+      sources.push({ name: (p.name || 'Fonds').substring(0, 35), amount: parseFloat(p.investedAmount) || 0, exitCost: 0, delay: 'Variable', entity: p.entity || '?', type: 'fund', detail: 'Rachat OPCVM' });
+    } else {
+      var amount = parseFloat(p.investedAmount) || 0;
+      var decote = Math.round(amount * 0.03); // 3% average bid-ask
+      sources.push({ name: (p.name || 'Structuré').substring(0, 35), amount: amount, exitCost: decote, delay: 'Non garanti', entity: p.entity || '?', type: 'structured', detail: 'Décote estimée 3% (pas de marché secondaire)' });
+    }
+  });
+
+  // Sort by cost ratio (cheapest exits first)
+  sources.sort(function(a, b) { var ra = a.amount > 0 ? a.exitCost / a.amount : 999; var rb = b.amount > 0 ? b.exitCost / b.amount : 999; return ra - rb; });
+
+  var totalAvailable = sources.reduce(function(s, src) { return s + src.amount; }, 0);
+
+  // Run scenarios
+  var scenarios = [100000, 300000, 500000, 1000000];
+  var scenarioResults = scenarios.map(function(need) {
+    var remaining = need;
+    var totalCost = 0;
+    var used = [];
+    sources.forEach(function(src) {
+      if (remaining <= 0) return;
+      var take = Math.min(remaining, src.amount);
+      var cost = src.amount > 0 ? Math.round(src.exitCost * (take / src.amount)) : 0;
+      used.push({ name: src.name, amount: take, cost: cost, delay: src.delay, type: src.type, detail: src.detail });
+      remaining -= take;
+      totalCost += cost;
+    });
+    return { need: need, mobilized: need - remaining, shortfall: remaining, totalCost: totalCost, sources: used };
+  });
+
+  // Render
+  var h = '<div class="fiche-section" style="margin-top:16px"><div class="fiche-section-header"><span class="fiche-section-icon">🔥</span><span class="fiche-section-title">Stress Test Liquidité</span></div>';
+  h += '<div class="fiche-section-body">';
+
+  // Scenario cards
+  h += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px">';
+  scenarioResults.forEach(function(sc) {
+    var ok = sc.shortfall <= 0;
+    var borderColor = ok ? 'rgba(6,214,160,0.3)' : 'rgba(239,35,60,0.3)';
+    var bgColor = ok ? 'rgba(6,214,160,0.04)' : 'rgba(239,35,60,0.04)';
+    h += '<div style="padding:10px;border-radius:8px;border:1px solid ' + borderColor + ';background:' + bgColor + ';text-align:center">';
+    h += '<div style="font-size:10px;color:var(--text-dim)">Besoin</div>';
+    h += '<div style="font-size:16px;font-weight:700;color:var(--text-bright)">' + fmt(sc.need) + '€</div>';
+    h += '<div style="font-size:11px;font-weight:600;color:' + (ok ? 'var(--green)' : 'var(--red)') + '">' + (ok ? '✓ Couvert' : '✗ Manque ' + fmt(sc.shortfall) + '€') + '</div>';
+    if (sc.totalCost > 0) {
+      h += '<div style="font-size:10px;color:var(--orange);margin-top:2px">Coût sortie : -' + fmt(sc.totalCost) + '€</div>';
+    }
+    h += '</div>';
+  });
+  h += '</div>';
+
+  // Detailed sources table
+  h += '<div style="font-size:11px;font-weight:600;color:var(--text-muted);margin-bottom:6px">Sources de liquidité (triées par coût croissant)</div>';
+  h += '<table style="width:100%;font-size:11px;border-collapse:collapse">';
+  h += '<thead><tr style="border-bottom:2px solid var(--border)">';
+  h += '<th style="padding:5px 6px;color:var(--text-dim);font-size:10px;text-align:left">Source</th>';
+  h += '<th style="padding:5px 6px;color:var(--text-dim);font-size:10px;text-align:left">Entité</th>';
+  h += '<th style="padding:5px 6px;color:var(--text-dim);font-size:10px;text-align:right">Montant</th>';
+  h += '<th style="padding:5px 6px;color:var(--text-dim);font-size:10px;text-align:right">Coût sortie</th>';
+  h += '<th style="padding:5px 6px;color:var(--text-dim);font-size:10px;text-align:left">Délai</th>';
+  h += '<th style="padding:5px 6px;color:var(--text-dim);font-size:10px;text-align:left">Détail</th>';
+  h += '</tr></thead><tbody>';
+
+  var cumul = 0;
+  sources.forEach(function(src, i) {
+    cumul += src.amount;
+    var bg = i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)';
+    var typeIcon = src.type === 'cash' ? '💰' : src.type === 'cat' ? '🏦' : src.type === 'fund' ? '🔄' : '📦';
+    var costColor = src.exitCost === 0 ? 'var(--green)' : 'var(--orange)';
+    var entColor = src.entity === 'bycam' ? 'var(--cyan)' : '#A855F7';
+    var entLabel = src.entity === 'bycam' ? '🏢 ByCam' : src.entity === 'cameleons' ? '🦎 Cam.' : src.entity;
+    h += '<tr style="background:' + bg + ';border-bottom:1px solid var(--border)">';
+    h += '<td style="padding:5px 6px;color:var(--text-bright)">' + typeIcon + ' ' + src.name + '</td>';
+    h += '<td style="padding:5px 6px;color:' + entColor + ';font-size:10px">' + entLabel + '</td>';
+    h += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono)">' + fmt(src.amount) + '€</td>';
+    h += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:' + costColor + '">' + (src.exitCost > 0 ? '-' + fmt(src.exitCost) + '€' : '0€') + '</td>';
+    h += '<td style="padding:5px 6px;color:var(--text-muted)">' + src.delay + '</td>';
+    h += '<td style="padding:5px 6px;color:var(--text-dim);font-size:10px">' + src.detail + '</td>';
+    h += '</tr>';
+  });
+
+  h += '</tbody><tfoot><tr style="border-top:2px solid var(--border);font-weight:700">';
+  h += '<td style="padding:6px" colspan="2">TOTAL MOBILISABLE</td>';
+  h += '<td style="padding:6px;text-align:right;font-family:var(--mono);color:var(--text-bright)">' + fmt(totalAvailable) + '€</td>';
+  h += '<td style="padding:6px;text-align:right;font-family:var(--mono);color:var(--orange)">-' + fmt(sources.reduce(function(s, src) { return s + src.exitCost; }, 0)) + '€</td>';
+  h += '<td colspan="2"></td>';
+  h += '</tr></tfoot></table>';
+
+  // LCR
+  var lcr30 = totalAvailable > 0 ? Math.round((sources.filter(function(s) { return s.type === 'cash' || s.type === 'cat' || s.type === 'fund'; }).reduce(function(s, src) { return s + src.amount; }, 0)) / totalAvailable * 100) : 0;
+  h += '<div style="margin-top:10px;padding:8px 12px;background:rgba(59,130,246,0.06);border-radius:6px;display:flex;align-items:center;justify-content:space-between">';
+  h += '<span style="font-size:11px;color:var(--text-muted)">LCR simplifié (actifs mobilisables sous 30j / patrimoine)</span>';
+  h += '<span style="font-size:14px;font-weight:700;color:' + (lcr30 >= 50 ? 'var(--green)' : lcr30 >= 30 ? 'var(--orange)' : 'var(--red)') + '">' + lcr30 + '%</span>';
+  h += '</div>';
+
   h += '</div></div>';
   return h;
 }
