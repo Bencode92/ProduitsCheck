@@ -53,7 +53,7 @@
                     gradingHtml += '<div style="font-size:20px;font-weight:800;color:' + c + '">' + sc.grade + '</div>';
                     gradingHtml += '<div style="font-size:11px;color:var(--text-muted)">' + sc.score + '/100</div>';
                     gradingHtml += deltaHtml;
-                    if (sc.desc) gradingHtml += '<div style="font-size:8px;color:var(--text-dim);margin-top:3px;line-height:1.3">' + sc.desc + '</div>';
+                    if (sc.desc) gradingHtml += '<div style="font-size:10px;color:var(--text-muted);margin-top:4px;line-height:1.4">' + sc.desc + '</div>';
                     gradingHtml += '</div>';
                 });
                 gradingHtml += '</div></div>';
