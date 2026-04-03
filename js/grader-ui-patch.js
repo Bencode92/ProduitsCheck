@@ -47,12 +47,14 @@
                 gradingHtml += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">';
                 [rs.current, rs.bull, rs.crash].forEach(function(sc) {
                     var c = _gc(sc.grade);
-                    var deltaHtml = sc.delta ? '<div style="font-size:10px;color:' + (sc.delta > 0 ? '#06D6A0' : '#EF233C') + '">' + (sc.delta > 0 ? '+' : '') + sc.delta + ' pts</div>' : '';
+                    var deltaHtml = sc.delta ? '<div style="font-size:10px;font-weight:600;color:' + (sc.delta > 0 ? '#06D6A0' : '#EF233C') + '">' + (sc.delta > 0 ? '+' : '') + sc.delta + ' pts</div>' : '';
                     gradingHtml += '<div style="text-align:center;padding:8px;border-radius:6px;background:' + c + '08;border:1px solid ' + c + '22">';
                     gradingHtml += '<div style="font-size:9px;color:var(--text-dim)">' + sc.label + '</div>';
                     gradingHtml += '<div style="font-size:20px;font-weight:800;color:' + c + '">' + sc.grade + '</div>';
                     gradingHtml += '<div style="font-size:11px;color:var(--text-muted)">' + sc.score + '/100</div>';
-                    gradingHtml += deltaHtml + '</div>';
+                    gradingHtml += deltaHtml;
+                    if (sc.desc) gradingHtml += '<div style="font-size:8px;color:var(--text-dim);margin-top:3px;line-height:1.3">' + sc.desc + '</div>';
+                    gradingHtml += '</div>';
                 });
                 gradingHtml += '</div></div>';
             }

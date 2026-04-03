@@ -485,10 +485,43 @@
 
     var _g = function(s) { return s >= 75 ? 'A' : s >= 60 ? 'B' : s >= 45 ? 'C' : s >= 25 ? 'D' : 'F'; };
 
+    // Generate context-aware descriptions based on product type
+    var st = (product.structureType || '').toLowerCase();
+    var ut = (product.underlyingType || '').toLowerCase();
+    var isRates = ut === 'rates' || st === 'taux_fixe' || st === 'range_accrual' || st === 'callable';
+    var currentDesc, bullDesc, crashDesc;
+
+    if (isRates) {
+      currentDesc = 'Taux élevés, BCE hawkish → coupon sous pression';
+      bullDesc = 'Taux baissent → coupon plus probable, call risk monte';
+      crashDesc = 'Taux spike puis chutent → volatilité, incertitude coupon';
+      if (st === 'range_accrual') {
+        currentDesc = 'Euribor dans le corridor mais BCE menaçante';
+        bullDesc = 'Taux baissent → Euribor reste dans le corridor';
+        crashDesc = 'Taux volatils → Euribor sort du corridor régulièrement';
+      } else if (st === 'taux_fixe' || st === 'callable') {
+        currentDesc = 'Call unlikely (20%) → coupon garanti sur la durée';
+        bullDesc = 'Taux baissent → call probable → réinvestissement à taux bas';
+        crashDesc = 'Taux montent → pas de call, coupon garanti = atout';
+      } else if (product.coupon && product.coupon.memory) {
+        currentDesc = 'Seuil menacé mais mémoire rattrape les coupons';
+        bullDesc = 'Taux baissent sous le seuil → coupons + rattrapage';
+        crashDesc = 'Taux au-dessus du seuil → 0% coupon (mémoire active)';
+      }
+    } else if (st === 'dispersion') {
+      currentDesc = 'Corrélation 0.43 → dispersion favorable';
+      bullDesc = 'Marchés calmes → corrélation baisse → coupon monte';
+      crashDesc = 'Panique → corrélation spike → coupon baisse (cap garanti)';
+    } else {
+      currentDesc = 'Régime actuel → volatilité modérée';
+      bullDesc = 'Marchés haussiers → prob coupon monte, barrière safe';
+      crashDesc = 'Marchés baissiers → barrière menacée, vol en hausse';
+    }
+
     return {
-      current: { score: currentTotal, grade: _g(currentTotal), label: 'Actuel (' + (_getRegime() || 'neutral') + ')' },
-      bull: { score: bullTotal, grade: _g(bullTotal), label: 'Bull / Risk-on', delta: bullTotal - currentTotal },
-      crash: { score: crashTotal, grade: _g(crashTotal), label: 'Crash / Récession', delta: crashTotal - currentTotal }
+      current: { score: currentTotal, grade: _g(currentTotal), label: 'Actuel (' + (_getRegime() || 'neutral') + ')', desc: currentDesc },
+      bull: { score: bullTotal, grade: _g(bullTotal), label: 'Bull / Risk-on', delta: bullTotal - currentTotal, desc: bullDesc },
+      crash: { score: crashTotal, grade: _g(crashTotal), label: 'Crash / Récession', delta: crashTotal - currentTotal, desc: crashDesc }
     };
   }
 
