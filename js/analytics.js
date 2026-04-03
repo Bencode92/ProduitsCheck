@@ -218,7 +218,9 @@ function _renderMaturityTimeline(products, catDeposits) {
     });
   });
   products.forEach(function(p) {
-    if (!p.maturityDate && !p.maturity) return;
+    var amount = parseFloat(p.investedAmount) || 0;
+    if (amount <= 0) return;
+    var isLiquidity = p.grading && p.grading.grade === '-';
     var matDate = p.maturityDate ? new Date(p.maturityDate) : null;
     if (!matDate && p.maturity) {
       var yMatch = (p.maturity + '').match(/(\d+)/);
@@ -227,24 +229,25 @@ function _renderMaturityTimeline(products, catDeposits) {
         matDate.setFullYear(matDate.getFullYear() + parseInt(yMatch[1]));
       }
     }
-    if (!matDate) return;
-    var amount = parseFloat(p.investedAmount) || 0;
-    var rate = getAnnualizedRate(p);
+    // Liquidity products (Bond 12M etc.) — include with no maturity, rate 0%
+    if (!matDate && !isLiquidity) return;
+    var rate = isLiquidity ? 0 : getAnnualizedRate(p);
     var annualReturn = Math.round(amount * rate / 100);
     var grade = (p.grading && p.grading.grade) || '?';
     assets.push({
       name: (p.name || 'Structuré').substring(0, 40),
-      type: 'Structuré',
-      typeColor: 'var(--cyan)',
-      grade: grade,
+      type: isLiquidity ? 'Liquidité' : 'Structuré',
+      typeColor: isLiquidity ? '#94A3B8' : 'var(--cyan)',
+      grade: isLiquidity ? '$' : grade,
       entity: p.entity || '?',
       bank: p.bankId || '?',
       amount: amount,
       rate: rate,
       annualReturn: annualReturn,
-      maturityDate: matDate,
-      maturityYear: matDate.getFullYear(),
-      maturityLabel: matDate.toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' })
+      maturityDate: matDate || new Date('2099-12-31'),
+      maturityYear: matDate ? matDate.getFullYear() : null,
+      maturityLabel: matDate ? matDate.toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' }) : 'Permanent',
+      isLiquidity: isLiquidity
     });
   });
 
@@ -256,6 +259,7 @@ function _renderMaturityTimeline(products, catDeposits) {
   // Group by year for summary
   var byYear = {};
   assets.forEach(function(a) {
+    if (a.isLiquidity || !a.maturityYear) return; // exclude liquidity from year groups
     var yr = a.maturityYear;
     if (!byYear[yr]) byYear[yr] = { amount: 0, return: 0, count: 0 };
     byYear[yr].amount += a.amount;
