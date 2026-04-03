@@ -933,6 +933,8 @@
     "status": "active",
     "id": "pl_mniyh7gv_61u",
     "createdDate": "2026-04-03",
-    "estimatedInterest": 900
+    "estimatedInterest": 900,
+    "entity": "cameleons",
+    "entityName": "Cam."
   }
 ]
