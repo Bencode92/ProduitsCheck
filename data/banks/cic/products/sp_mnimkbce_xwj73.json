@@ -199,31 +199,31 @@
         "score": 67,
         "base": 64,
         "delta": -2,
-        "reasoning": "Rendement: base 64 → -2 = 62 (TEC10 à 4.4% avec barrière à 4.4% en stagflation = probabilité réduite, courbe pentifiée défavorable aux taux longs) | Coupon 4.6%, protégé | Barr.coupon 4.4%"
+        "reasoning": "Rendement: base 64 → -2 = 62 (En stagflation, le TEC10 (taux long) risque de dépasser 4.4% avec l'inflation persistante et la pentification de la courbe) | Coupon 4.6%, protégé | Barr.coupon 4.4%"
       },
       "underlyingQuality": {
         "score": 33,
         "base": 35,
         "delta": -2,
-        "reasoning": "Qualité: base 35 → -2 = 33 (Taux longs vulnérables en stagflation avec inflation PCE 2.83%, Fed pourrait surprendre hawkish)"
+        "reasoning": "Qualité: base 35 → -2 = 33 (TEC10 très vulnérable en stagflation: hausse des taux longs attendue avec PCE >2.8% et Fed hawkish probable)"
       },
       "portfolioFit": {
         "score": 60,
         "base": 80,
         "delta": 2,
-        "reasoning": "Fit: base 80 → +2 = 82 (Capital garanti très pertinent en stagflation, protection contre volatilité des taux)"
+        "reasoning": "Fit: base 80 → +2 = 82 (Capital garanti offre une protection précieuse en régime stagflationnaire avec VIX à 22)"
       },
       "riskPremium": {
         "score": 54,
         "base": 34,
-        "delta": 0,
+        "delta": -2,
         "reasoning": "Capital garanti: spread 4.6% - CAT 2.5% - illiq 0.5% = 1.6%"
       }
     },
-    "verdict": "Produit défensif adapté au régime stagflationniste actuel avec capital garanti et coupon potentiel de 4.6%. La barrière à 4.4% sur le TEC10 actuellement à ce niveau exact rend le coupon incertain, mais sans risque en capital. Score ajusté à 42/100 reflète la faible probabilité de coupons dans un contexte de taux longs sous pression.",
+    "verdict": "Produit peu attractif en stagflation malgré le capital garanti. Avec le TEC10 à surveiller face à une inflation >2.8% et une pentification de courbe, la probabilité de toucher le coupon de 4.6% est compromise. Le spread de seulement 20bp entre coupon et barrière offre peu de marge dans un contexte où la Fed pourrait surprendre hawkish. Score ajusté: 37/100 (D), inadapté au régime macro actuel.",
     "keyRisks": [
-      "TEC10 pourrait dépasser 4.4% si Fed surprend hawkish face à inflation persistante",
-      "Opportunité manquée si les taux baissent rapidement"
+      "TEC10 peut facilement dépasser 4.4% avec inflation persistante et pentification",
+      "Coupon de 4.6% insuffisant pour compenser l'inflation à 2.83%"
     ],
     "negotiationPoints": [],
     "scenarios": {
@@ -253,16 +253,16 @@
       }
     },
     "confidenceInterval": {
-      "low": 43,
-      "high": 61,
+      "low": 42,
+      "high": 60,
       "halfWidth": 9,
       "gradeStable": false,
       "gradeRange": "D-B",
-      "label": "C [43-61]"
+      "label": "C [42-60]"
     },
     "metadata": {
-      "gradedAt": "2026-04-03T08:46:40.352Z",
-      "durationMs": 14279,
+      "gradedAt": "2026-04-03T11:49:13.719Z",
+      "durationMs": 18206,
       "aiUsed": true,
       "version": "7.1",
       "productType": "capital_garanti",
@@ -287,7 +287,7 @@
         "p1": -2,
         "p2": -2,
         "p3": 2,
-        "p4": 0
+        "p4": -2
       },
       "barrier_sigma": null,
       "barrier_sigma_label": null,
@@ -295,9 +295,9 @@
       "liquidity_level": "L4",
       "liquidity_score": 10,
       "liquidity_label": "Illiquide",
-      "ci_low": 43,
-      "ci_high": 61,
-      "ci_label": "C [43-61]",
+      "ci_low": 42,
+      "ci_high": 60,
+      "ci_label": "C [42-60]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
