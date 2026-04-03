@@ -77,7 +77,8 @@ function _graderNormalize(product){
         autocallThreshold:parseFloat(ar.threshold||ar.trigger||ar.seuil)||100,
         autocallObsPerYear:acObs,startSemester:parseInt(ar.startSemester)||0,
         underlyings:und,worstOf:und.length>1,
-        nominal:parseFloat(p.investedAmount||p.nominal||p.montant)||0};
+        nominal:parseFloat(p.investedAmount||p.nominal||p.montant)||0,
+        underlyingType:(p.underlyingType||ai.underlyingType||'').toLowerCase()};
 
     var st=p.structureType||'';
     if(!st&&typeof _autoDetectStructureType==='function')st=_autoDetectStructureType(p);
