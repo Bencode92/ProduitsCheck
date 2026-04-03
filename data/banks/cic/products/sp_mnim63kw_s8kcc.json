@@ -1,0 +1,192 @@
+{
+  "id": "sp_mnim63kw_s8kcc",
+  "name": "Range Accrual Euribor Avril 2031 B",
+  "type": "range-accrual",
+  "structureType": "range_accrual",
+  "emitter": "Crédit Industriel et Commercial",
+  "guarantor": "Crédit Industriel et Commercial",
+  "guarantorRating": {
+    "moodys": "A1",
+    "sp": "A+"
+  },
+  "underlyings": [
+    "Taux Euribor 3 mois"
+  ],
+  "underlyingType": "rates",
+  "currency": "EUR",
+  "maturity": "5 ans",
+  "maturityYears": 5,
+  "coupon": {
+    "rate": 5.2,
+    "rateIfCalled": null,
+    "rateIfMaturity": null,
+    "type": "conditionnel",
+    "frequency": "annuel",
+    "trigger": null,
+    "memory": false,
+    "paymentTiming": "periodic"
+  },
+  "participationRate": null,
+  "capitalProtection": {
+    "protected": true,
+    "level": 100,
+    "barrier": null,
+    "barrierCoupon": null,
+    "barrierType": "europeenne"
+  },
+  "earlyRedemption": {
+    "possible": false,
+    "type": "none",
+    "trigger": null,
+    "frequency": "annuel",
+    "startSemester": null,
+    "stepDown": false,
+    "stepDownPct": null
+  },
+  "decrementPct": null,
+  "actualDividendYield": null,
+  "mechanism": "Coupon annuel de 5,20% calculé au prorata du nombre de jours où l'Euribor 3 mois reste entre 1,75% et 3,50% (barrières incluses). Capital garanti à 100% à l'échéance.",
+  "risks": [
+    "Risque de perte en capital en cours de vie",
+    "Risque de crédit émetteur",
+    "Risque de liquidité",
+    "Risque de marché",
+    "Risque d'inflation"
+  ],
+  "summary": "Produit à capital garanti offrant un coupon annuel conditionnel de 5,20% basé sur le maintien du taux Euribor 3 mois dans une fourchette de 1,75% à 3,50%. Remboursement intégral du capital à l'échéance après 5 ans.",
+  "aiParsed": {
+    "name": "Range Accrual Euribor Avril 2031 B",
+    "type": "range-accrual",
+    "structureType": "range_accrual",
+    "emitter": "Crédit Industriel et Commercial",
+    "guarantor": "Crédit Industriel et Commercial",
+    "guarantorRating": {
+      "moodys": "A1",
+      "sp": "A+"
+    },
+    "underlyings": [
+      "Taux Euribor 3 mois"
+    ],
+    "underlyingType": "rates",
+    "currency": "EUR",
+    "maturity": "5 ans",
+    "maturityYears": 5,
+    "coupon": {
+      "rate": 5.2,
+      "rateIfCalled": null,
+      "rateIfMaturity": null,
+      "type": "conditionnel",
+      "frequency": "annuel",
+      "trigger": null,
+      "memory": false,
+      "paymentTiming": "periodic"
+    },
+    "participationRate": null,
+    "minInvestment": 10000,
+    "capitalProtection": {
+      "protected": true,
+      "level": 100,
+      "barrier": null,
+      "barrierCoupon": null,
+      "barrierType": "europeenne"
+    },
+    "earlyRedemption": {
+      "possible": false,
+      "type": "none",
+      "trigger": null,
+      "frequency": "annuel",
+      "startSemester": null,
+      "stepDown": false,
+      "stepDownPct": null
+    },
+    "decrementPct": null,
+    "actualDividendYield": null,
+    "mechanism": "Coupon annuel de 5,20% calculé au prorata du nombre de jours où l'Euribor 3 mois reste entre 1,75% et 3,50% (barrières incluses). Capital garanti à 100% à l'échéance.",
+    "risks": [
+      "Risque de perte en capital en cours de vie",
+      "Risque de crédit émetteur",
+      "Risque de liquidité",
+      "Risque de marché",
+      "Risque d'inflation"
+    ],
+    "summary": "Produit à capital garanti offrant un coupon annuel conditionnel de 5,20% basé sur le maintien du taux Euribor 3 mois dans une fourchette de 1,75% à 3,50%. Remboursement intégral du capital à l'échéance après 5 ans.",
+    "aiParsed": {
+      "name": "Range Accrual Euribor Avril 2031 B",
+      "structureType": "range_accrual",
+      "emitter": "Crédit Industriel et Commercial",
+      "guarantor": "Crédit Industriel et Commercial",
+      "guarantorRating": {
+        "moodys": "A1",
+        "sp": "A+"
+      },
+      "underlyings": [
+        "Taux Euribor 3 mois"
+      ],
+      "underlyingType": "rates",
+      "currency": "EUR",
+      "maturity": "21/04/2031",
+      "maturityYears": 5,
+      "coupon": {
+        "rate": 5.2,
+        "rateIfCalled": null,
+        "rateIfMaturity": null,
+        "type": "conditionnel",
+        "frequency": "annuel",
+        "trigger": null,
+        "memory": false,
+        "paymentTiming": "periodic"
+      },
+      "participationRate": null,
+      "capitalProtection": {
+        "protected": true,
+        "level": 100,
+        "barrier": null,
+        "barrierCoupon": null,
+        "barrierType": "europeenne"
+      },
+      "earlyRedemption": {
+        "possible": false,
+        "type": "",
+        "trigger": null,
+        "frequency": "",
+        "startSemester": null,
+        "stepDown": false,
+        "stepDownPct": null
+      },
+      "decrementPct": null,
+      "actualDividendYield": null,
+      "minInvestment": 10000,
+      "mechanism": "Coupon annuel de 5,20% calculé au prorata du nombre de jours où l'Euribor 3 mois reste entre 1,75% et 3,50% (barrières incluses). Capital garanti à 100% à l'échéance.",
+      "risks": [
+        "Risque de perte en capital en cours de vie",
+        "Risque de crédit émetteur",
+        "Risque de liquidité",
+        "Risque de marché",
+        "Risque d'inflation"
+      ],
+      "summary": "Produit à capital garanti offrant un coupon annuel conditionnel de 5,20% basé sur le maintien du taux Euribor 3 mois dans une fourchette de 1,75% à 3,50%. Remboursement intégral du capital à l'échéance après 5 ans.",
+      "type": "range-accrual",
+      "rangeAccrual": {
+        "lowerBound": 1.75,
+        "upperBound": 3.5,
+        "reference": "Euribor 3 mois",
+        "observation": "daily"
+      }
+    },
+    "sourceFile": "XS3337420635 range Accrual Euribor avril 2031 B Brochure.pdf",
+    "rangeAccrual": {
+      "lowerBound": 1.75,
+      "upperBound": 3.5,
+      "reference": "Euribor 3 mois",
+      "observation": "daily"
+    }
+  },
+  "sourceFile": "JSON import",
+  "bankId": "cic",
+  "status": "analyzing",
+  "receivedDate": "2026-04-03",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null
+}
