@@ -183,13 +183,18 @@
 
   // ─── Get best CAT offers from user-entered rates ────────
   // v1.2: integrates MI-CAT macro context for duration filtering
-  function _getCATOffers(amount) {
+  // v2: optional maxMonths to match tranche horizon
+  function _getCATOffers(amount, maxMonths) {
     try {
       if (typeof catManager !== 'undefined' && catManager.rates && catManager.rates.rates) {
         var offers = catManager.rates.rates.filter(function(r) {
           // Only use confirmed rates (user-entered), not web scan
           if (r.source === 'web scan') return false;
-          return r.rate > 0 && (!r.minAmount || amount >= r.minAmount);
+          if (!r.rate || r.rate <= 0) return false;
+          if (r.minAmount && amount > 0 && amount < r.minAmount) return false;
+          // v2: filter by horizon — CAT duration must fit the tranche
+          if (maxMonths && r.durationMonths > maxMonths) return false;
+          return true;
         });
         // Get macro context if available
         var macro = _getMacroContext();
@@ -524,6 +529,16 @@
     // Compute totals
     var totalAllocated = results.reduce(function(s, r) { return s + r.allocated; }, 0);
     var totalReturn = results.reduce(function(s, r) { return s + r.allocations.reduce(function(s2, a) { return s2 + a.annualReturn; }, 0); }, 0);
+    // v2: find the shortest horizon among tranches with unallocated cash
+    // so CAT offers match the user's chosen time horizon
+    var unallocMaxMonths = null;
+    results.forEach(function(r) {
+      if (r.remaining > 0 && r.horizon && r.horizon.maxMonths) {
+        if (unallocMaxMonths === null || r.horizon.maxMonths < unallocMaxMonths) {
+          unallocMaxMonths = r.horizon.maxMonths;
+        }
+      }
+    });
     var catEquivReturn = Math.round(totalCash * bestCatRate / 100);
     var weightedRate = totalAllocated > 0 ? (totalReturn / totalAllocated * 100) : 0;
 
@@ -579,6 +594,7 @@
       totalCash: totalCash,
       totalAllocated: totalAllocated,
       totalUnallocated: totalCash - totalAllocated,
+      unallocMaxMonths: unallocMaxMonths,
       totalReturn: totalReturn,
       catEquivReturn: catEquivReturn,
       excessVsCat: totalReturn - catEquivReturn,
@@ -851,7 +867,7 @@
         html += '</div></div>';
       } else {
         // Free cash → propose best CAT only if it beats source contracts
-        var catOffers = _getCATOffers(result.totalUnallocated);
+        var catOffers = _getCATOffers(result.totalUnallocated, result.unallocMaxMonths);
         html += '<div style="border:1px solid rgba(255,182,39,0.2);border-radius:var(--radius-sm);padding:10px;margin-bottom:8px;background:rgba(255,182,39,0.03)">';
         var macro = _getMacroContext();
         var trendIcon = macro && macro.rateTrend === 'rising' ? '📈' : macro && macro.rateTrend === 'falling' ? '📉' : '➡️';
