@@ -202,42 +202,42 @@
   "minInvestment": 10000,
   "grading": {
     "grade": "C",
-    "score": 51,
+    "score": 50,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 47,
-        "base": 52,
+        "score": 52,
+        "base": 57,
         "delta": -5,
-        "reasoning": "Rendement: base 52 → -5 = 47 (En stagflation avec choc énergétique, la BCE devra maintenir des taux élevés pour combattre l'inflation, réduisant la probabilité que l'Euribor reste dans la fourchette du Range Accrual) | Coupon 5.2%, protégé"
+        "reasoning": "Rendement: base 57 → -5 = 52 (En stagflation avec energy shock, l'Euribor 3M pourrait sortir de la fourchette target, réduisant la probabilité des coupons malgré le capital garanti) | Coupon 5.2%, protégé"
       },
       "underlyingQuality": {
-        "score": 56,
-        "base": 61,
+        "score": 54,
+        "base": 59,
         "delta": -5,
-        "reasoning": "Qualité: base 61 → -5 = 56 (Beta très faible (0.13) mais volatilité élevée (22.46%) dans un contexte stagflationniste où les taux directeurs sont l'outil principal des banques centrales) | Worst: Taux Euribor 3 mois B:35"
+        "reasoning": "Qualité: base 59 → -5 = 54 (Taux directionnels en régime stagflationnaire volatil (VIX 22), le beta faible (0.13) n'offre pas de diversification suffisante) | Worst: Taux Euribor 3 mois B:35"
       },
       "portfolioFit": {
-        "score": 57,
+        "score": 47,
         "base": 62,
-        "delta": 5,
-        "reasoning": "Fit: base 62 → +5 = 67 (Produit taux très pertinent en stagflation où les TIPS sont privilégiés, offre une protection contre l'inflation avec capital garanti)"
+        "delta": -5,
+        "reasoning": "Fit: base 62 → -5 = 57 (Range Accrual peu adapté en stagflation où les taux peuvent être très volatils, risque de nombreux jours hors fourchette)"
       },
       "riskPremium": {
         "score": 56,
-        "base": 38,
-        "delta": -5,
+        "base": 48,
+        "delta": 5,
         "reasoning": "Capital garanti: spread 5.2% - CAT 2.5% - illiq 0.5% = 2.3%"
       }
     },
-    "verdict": "Produit Range Accrual complexe dans un contexte stagflationniste défavorable. Avec l'Euribor 3M actuellement élevé et une BCE contrainte par l'inflation à 2.83%, la probabilité de rester dans la fourchette du Range Accrual est compromise. Le capital garanti offre une protection bienvenue, mais le rendement effectif risque d'être bien inférieur aux 5.2% annoncés. Score final ajusté à 44/100 (D) reflète le risque élevé de sous-performance dans ce régime macro.",
+    "verdict": "Ce Range Accrual offre une protection capitale précieuse en régime stagflationnaire mais le mécanisme de coupon est vulnérable aux mouvements erratiques de l'Euribor 3M. Avec un energy shock identifié et le Brent à $121.88, les banques centrales pourraient adopter des politiques monétaires imprévisibles, rendant difficile le maintien de l'Euribor dans la fourchette cible. Le rendement de 5.2% semble insuffisant pour compenser ce risque en environnement inflationniste.",
     "keyRisks": [
-      "BCE forcée de maintenir des taux élevés durablement avec inflation >2.8% et choc pétrolier à $122",
-      "Mécanisme Range Accrual très sensible à la volatilité des taux (22.46%), réduisant les jours de comptage",
-      "Risque de spirale prix-salaires prolongeant la période de taux élevés au-delà des anticipations"
+      "Euribor 3M hors fourchette prolongée = 0% coupon malgré l'inflation",
+      "Politique BCE imprévisible face au choc énergétique",
+      "Rendement réel négatif si inflation >5.2%"
     ],
     "negotiationPoints": [],
     "scenarios": {
@@ -248,14 +248,14 @@
         "duration_years": 5
       },
       "base": {
-        "return_pct": 2.5,
-        "return_eur": 12500,
+        "return_pct": 2.6,
+        "return_eur": 13000,
         "probability": 0.4,
         "duration_years": 5
       },
       "stress": {
-        "return_pct": 0.5,
-        "return_eur": 2500,
+        "return_pct": 1,
+        "return_eur": 5000,
         "probability": 0.3,
         "duration_years": 5
       },
@@ -267,16 +267,16 @@
       }
     },
     "confidenceInterval": {
-      "low": 42,
-      "high": 58,
+      "low": 46,
+      "high": 62,
       "halfWidth": 8,
       "gradeStable": false,
-      "gradeRange": "D-C",
-      "label": "C [42-58]"
+      "gradeRange": "C-B",
+      "label": "C [46-62]"
     },
     "metadata": {
-      "gradedAt": "2026-04-03T08:46:03.670Z",
-      "durationMs": 21886,
+      "gradedAt": "2026-04-03T12:01:57.679Z",
+      "durationMs": 18767,
       "aiUsed": true,
       "version": "7.1",
       "productType": "rate",
@@ -295,13 +295,13 @@
       "expectedMaturity": 5,
       "maxMaturity": 5,
       "maxBeta": 0.13,
-      "baseScore": 53,
+      "baseScore": 56,
       "baseGrade": "C",
       "adjustments": {
         "p1": -5,
         "p2": -5,
-        "p3": 5,
-        "p4": -5
+        "p3": -5,
+        "p4": 5
       },
       "barrier_sigma": null,
       "barrier_sigma_label": null,
@@ -309,9 +309,9 @@
       "liquidity_level": "L4",
       "liquidity_score": 10,
       "liquidity_label": "Illiquide",
-      "ci_low": 42,
-      "ci_high": 58,
-      "ci_label": "C [42-58]",
+      "ci_low": 46,
+      "ci_high": 62,
+      "ci_label": "C [46-62]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
@@ -330,19 +330,19 @@
           "name": "Taux Euribor 3 mois",
           "ticker": "TAUX EURIBOR 3 MOIS",
           "sector": "Commodity",
-          "volatility_3y": 22.46,
+          "volatility_3y": 22.45,
           "max_drawdown_3y": -19.21
         }
       ]
     },
     "regimeScenarios": {
       "current": {
-        "score": 51,
+        "score": 50,
         "grade": "C",
         "label": "Actuel (stagflation)"
       },
       "bull": {
-        "score": 56,
+        "score": 55,
         "grade": "C",
         "label": "Bull / Risk-on",
         "delta": 5
@@ -351,7 +351,7 @@
         "score": 44,
         "grade": "D",
         "label": "Crash / Récession",
-        "delta": -7
+        "delta": -6
       }
     }
   }
