@@ -199,5 +199,159 @@
     "reference": "Euribor 3 mois",
     "observation": "daily"
   },
-  "minInvestment": 10000
+  "minInvestment": 10000,
+  "grading": {
+    "grade": "C",
+    "score": 51,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 47,
+        "base": 52,
+        "delta": -5,
+        "reasoning": "Rendement: base 52 → -5 = 47 (En stagflation avec choc énergétique, la BCE pourrait maintenir des taux élevés plus longtemps, réduisant la probabilité que l'Euribor reste dans la range favorable au coupon) | Coupon 5.2%, protégé"
+      },
+      "underlyingQuality": {
+        "score": 56,
+        "base": 61,
+        "delta": -5,
+        "reasoning": "Qualité: base 61 → -5 = 56 (Beta faible (0.13) protège partiellement, mais contexte stagflationnaire avec risque hawkish BCE défavorable aux produits de taux) | Worst: Taux Euribor 3 mois B:35"
+      },
+      "portfolioFit": {
+        "score": 57,
+        "base": 62,
+        "delta": 5,
+        "reasoning": "Fit: base 62 → +5 = 67 (Produit à capital garanti très pertinent en stagflation où les actifs risqués souffrent, offre protection et rendement supérieur aux obligations classiques)"
+      },
+      "riskPremium": {
+        "score": 56,
+        "base": 41,
+        "delta": -5,
+        "reasoning": "Capital garanti: spread 5.2% - CAT 2.5% - illiq 0.5% = 2.3%"
+      }
+    },
+    "verdict": "Produit défensif adapté au contexte stagflationnaire actuel avec capital garanti, mais le coupon de 5.2% semble ambitieux. Avec l'Euribor 3M actuellement élevé et une BCE potentiellement hawkish face à l'inflation à 2.83%, la probabilité de percevoir l'intégralité des coupons est réduite. Le choc pétrolier à $122 et les stress flags energy_shock renforcent le risque de taux durablement hauts, mais la garantie du capital offre une protection bienvenue quand les marchés actions et obligations souffrent.",
+    "keyRisks": [
+      "Euribor 3M reste au-dessus de la range favorable si BCE maintient politique restrictive",
+      "Risque de call anticipé par l'émetteur si les taux baissent rapidement"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 5.2,
+        "return_eur": 26000,
+        "probability": 0.2,
+        "duration_years": 5
+      },
+      "base": {
+        "return_pct": 3.1,
+        "return_eur": 15500,
+        "probability": 0.4,
+        "duration_years": 5
+      },
+      "stress": {
+        "return_pct": 1.5,
+        "return_eur": 7500,
+        "probability": 0.3,
+        "duration_years": 5
+      },
+      "worst": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.1,
+        "duration_years": 5
+      }
+    },
+    "confidenceInterval": {
+      "low": 43,
+      "high": 59,
+      "halfWidth": 8,
+      "gradeStable": false,
+      "gradeRange": "D-C",
+      "label": "C [43-59]"
+    },
+    "metadata": {
+      "gradedAt": "2026-04-03T08:04:15.223Z",
+      "durationMs": 21390,
+      "aiUsed": true,
+      "version": "7.1",
+      "productType": "rate",
+      "marketDataAvailable": true,
+      "catBenchmark": 2.5,
+      "catSource": "fallback-2026",
+      "couponAnnualized": 5.2,
+      "couponRaw": 5.2,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": false,
+      "barrierPct": 0,
+      "barrierCouponPct": null,
+      "couponProbability": null,
+      "expectedMaturity": 5,
+      "maxMaturity": 5,
+      "maxBeta": 0.13,
+      "baseScore": 54,
+      "baseGrade": "C",
+      "adjustments": {
+        "p1": -5,
+        "p2": -5,
+        "p3": 5,
+        "p4": -5
+      },
+      "barrier_sigma": null,
+      "barrier_sigma_label": null,
+      "barrier_sigma_danger": null,
+      "liquidity_level": "L4",
+      "liquidity_score": 10,
+      "liquidity_label": "Illiquide",
+      "ci_low": 43,
+      "ci_high": 59,
+      "ci_label": "C [43-59]",
+      "issuer_rating": "A+",
+      "issuer_tier": "IG",
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "range_accrual",
+      "issuerCreditPenalty": 1,
+      "issuerCDS": 55,
+      "v6Weights": {
+        "p1": 0.3,
+        "p2": 0.2,
+        "p3": 0.15,
+        "p4": 0.3
+      },
+      "stockData": [
+        {
+          "name": "Taux Euribor 3 mois",
+          "ticker": "TAUX EURIBOR 3 MOIS",
+          "sector": "Commodity",
+          "volatility_3y": 22.46,
+          "max_drawdown_3y": -19.21
+        }
+      ]
+    },
+    "regimeScenarios": {
+      "current": {
+        "score": 51,
+        "grade": "C",
+        "label": "Actuel (stagflation)"
+      },
+      "bull": {
+        "score": 56,
+        "grade": "C",
+        "label": "Bull / Risk-on",
+        "delta": 5
+      },
+      "crash": {
+        "score": 44,
+        "grade": "D",
+        "label": "Crash / Récession",
+        "delta": -7
+      }
+    }
+  }
 }
