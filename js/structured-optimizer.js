@@ -207,8 +207,7 @@ async function runStructOptimizer() {
             arr.forEach(function(p) { if (p.status !== 'rejected' && p.status !== 'subscribed') allP.push(p); });
         });
         var toGrade = allP.filter(function(p) {
-            return !p.grading || !p.grading.grade || p.grading.grade === '?' ||
-                   !p.grading.metadata || p.grading.metadata.version !== '6.2';
+            return !p.grading || !p.grading.grade || p.grading.grade === '?';
         });
         if (toGrade.length > 0 && typeof ProposalGrader !== 'undefined' && ProposalGrader.grade) {
             results.innerHTML = '<div style="display:flex;align-items:center;gap:10px;padding:20px;color:var(--text-muted)"><div class="spinner"></div>Grading v6.3 de ' + toGrade.length + '/' + allP.length + ' proposition(s)...</div>';
