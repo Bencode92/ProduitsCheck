@@ -259,6 +259,8 @@
       arr.forEach(function(p) {
         if (p.status === 'rejected' || p.status === 'subscribed') return;
         if (!p.grading || !p.grading.grade || p.grading.grade === '?' || p.grading.grade === '-') return;
+        // Quality gate: only grades A and B are eligible for allocation
+        if (p.grading.grade !== 'A' && p.grading.grade !== 'B') return;
         var cp = p.capitalProtection || {};
         var isCapGaranti = cp.protected === true || (p.structureType || '').indexOf('capital_garanti') >= 0 || (p.structureType || '').indexOf('dispersion') >= 0 || (p.structureType || '').indexOf('taux_fixe') >= 0;
         var rdtNet = p._bsRendementNet || (p.grading.metadata && p.grading.metadata.bsRendementNet) || p._ratesRendementNet || null;
