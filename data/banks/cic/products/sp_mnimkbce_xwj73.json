@@ -186,5 +186,150 @@
   "aiOpinion": "Ce produit offre un profil rendement/risque équilibré avec une protection totale du capital et un coupon attractif de 4,6% conditionnel à mémoire sur l'indice TEC 10. Le principal atout est la sécurité du capital combinée à un potentiel de rendement supérieur aux taux sans risque, mais le risque réside dans la conditionnalité du coupon qui dépend de la performance de l'indice belge.",
   "aiAnalyzedAt": "2026-04-03T08:11:39.763Z",
   "envelope": "",
-  "minInvestment": 10000
+  "minInvestment": 10000,
+  "grading": {
+    "grade": "C",
+    "score": 52,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 67,
+        "base": 64,
+        "delta": -2,
+        "reasoning": "Rendement: base 64 → -2 = 62 (En stagflation, le TEC10 (taux long) risque de monter avec l'inflation persistante, réduisant la probabilité de toucher le coupon à 4.4%) | Coupon 4.6%, protégé | Barr.coupon 4.4%"
+      },
+      "underlyingQuality": {
+        "score": 33,
+        "base": 35,
+        "delta": -2,
+        "reasoning": "Qualité: base 35 → -2 = 33 (Le TEC10 est un taux souverain, relativement stable mais défavorable en stagflation où les taux longs montent)"
+      },
+      "portfolioFit": {
+        "score": 60,
+        "base": 80,
+        "delta": 2,
+        "reasoning": "Fit: base 80 → +2 = 82 (Protection capital totale très pertinente en stagflation, permet une exposition taux sans risque de perte)"
+      },
+      "riskPremium": {
+        "score": 54,
+        "base": 39,
+        "delta": 0,
+        "reasoning": "Capital garanti: spread 4.6% - CAT 2.5% - illiq 0.5% = 1.6%"
+      }
+    },
+    "verdict": "En régime stagflationnaire avec Brent à $122 et inflation élevée, ce produit capital garanti sur TEC10 offre une protection bienvenue mais des perspectives de coupon limitées. Avec une barrière à 4.4% alors que les taux longs risquent de monter, la probabilité de toucher le coupon annuel de 4.6% est réduite. Le score ajusté de 54/100 reflète un produit défensif adapté au contexte mais peu rémunérateur, typique des solutions capital garanti en période d'incertitude.",
+    "keyRisks": [
+      "Hausse des taux longs au-delà de 4.4% empêchant le versement des coupons",
+      "Coût d'opportunité élevé si l'inflation reste durablement au-dessus de 2.8%"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 4.6,
+        "return_eur": 4600,
+        "probability": 0.2,
+        "duration_years": 1
+      },
+      "base": {
+        "return_pct": 2.3,
+        "return_eur": 11500,
+        "probability": 0.4,
+        "duration_years": 5
+      },
+      "stress": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.3,
+        "duration_years": 5
+      },
+      "worst": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.1,
+        "duration_years": 5
+      }
+    },
+    "confidenceInterval": {
+      "low": 44,
+      "high": 62,
+      "halfWidth": 9,
+      "gradeStable": false,
+      "gradeRange": "D-B",
+      "label": "C [44-62]"
+    },
+    "metadata": {
+      "gradedAt": "2026-04-03T08:12:49.346Z",
+      "durationMs": 18583,
+      "aiUsed": true,
+      "version": "7.1",
+      "productType": "capital_garanti",
+      "marketDataAvailable": false,
+      "catBenchmark": 2.5,
+      "catSource": "fallback-2026",
+      "couponAnnualized": 4.6,
+      "couponRaw": 4.6,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": false,
+      "barrierPct": 0,
+      "barrierCouponPct": 4.4,
+      "couponProbability": null,
+      "expectedMaturity": 5,
+      "maxMaturity": 5,
+      "maxBeta": null,
+      "baseScore": 54,
+      "baseGrade": "C",
+      "adjustments": {
+        "p1": -2,
+        "p2": -2,
+        "p3": 2,
+        "p4": 0
+      },
+      "barrier_sigma": null,
+      "barrier_sigma_label": null,
+      "barrier_sigma_danger": null,
+      "liquidity_level": "L4",
+      "liquidity_score": 10,
+      "liquidity_label": "Illiquide",
+      "ci_low": 44,
+      "ci_high": 62,
+      "ci_label": "C [44-62]",
+      "issuer_rating": "A+",
+      "issuer_tier": "IG",
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "capital_garanti",
+      "issuerCreditPenalty": 1,
+      "issuerCDS": 55,
+      "v6Weights": {
+        "p1": 0.3,
+        "p2": 0.2,
+        "p3": 0.15,
+        "p4": 0.3
+      }
+    },
+    "regimeScenarios": {
+      "current": {
+        "score": 52,
+        "grade": "C",
+        "label": "Actuel (stagflation)"
+      },
+      "bull": {
+        "score": 57,
+        "grade": "C",
+        "label": "Bull / Risk-on",
+        "delta": 5
+      },
+      "crash": {
+        "score": 46,
+        "grade": "C",
+        "label": "Crash / Récession",
+        "delta": -6
+      }
+    }
+  }
 }
