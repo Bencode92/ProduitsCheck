@@ -226,35 +226,35 @@
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 72,
+        "score": 74,
         "base": 73,
-        "delta": -1,
-        "reasoning": "Rendement: base 73 → -1 = 72 (En stagflation avec stance hawkish_hold, probabilité de call très faible (20%) signifie immobilisation probable sur 10 ans) | Coupon 4.6%, protégé | Mat espérée: ~2.3a (prob mat: 1%)"
+        "delta": 1,
+        "reasoning": "Rendement: base 73 → +1 = 74 (Coupon garanti 4.6% supérieur au taux sans risque 10Y (3.05%) avec spread attractif de 155bps en stagflation) | Coupon 4.6%, protégé | Mat espérée: ~2.3a (prob mat: 1%)"
       },
       "underlyingQuality": {
-        "score": 66,
-        "base": 67,
+        "score": 63,
+        "base": 64,
         "delta": -1,
-        "reasoning": "Qualité: base 67 → -1 = 66 (Produit sans sous-jacent en stagflation avec energy_shock, spread 1.55% insuffisant vs risque crédit émetteur sur 10 ans)"
+        "reasoning": "Qualité: base 64 → -1 = 63 (Produit sans sous-jacent action mais sensibilité élevée DV01~10bps en contexte hawkish avec risque de hausse des taux)"
       },
       "portfolioFit": {
-        "score": 54,
+        "score": 55,
         "base": 70,
-        "delta": -1,
-        "reasoning": "Fit: base 70 → -1 = 69 (Duration 10 ans inadaptée en stagflation avec risque taux, TIPS préférés selon MI)"
+        "delta": 1,
+        "reasoning": "Fit: base 70 → +1 = 71 (Asset défensif pertinent en stagflation avec coupon fixe protégeant contre l'inflation, aligné stratégie TIPS du MI)"
       },
       "riskPremium": {
         "score": 50,
         "base": 41,
-        "delta": 1,
+        "delta": -1,
         "reasoning": "Capital garanti: spread 4.6% - CAT 2.5% - illiq 0.7% = 1.4%"
       }
     },
-    "verdict": "Produit callable 4.6% offrant 155bps de spread vs AAA 10Y dans un contexte stagflationniste défavorable aux obligations longues. Avec probabilité de call faible (20%), l'investisseur risque l'immobilisation sur 10 ans alors que la MI recommande TIPS et évite le HY. Le spread de crédit paraît insuffisant pour compenser le risque émetteur et la duration élevée dans un régime hawkish.",
+    "verdict": "Produit défensif offrant un rendement garanti de 4.6% sur 10 ans, supérieur de 155bps au taux sans risque, particulièrement adapté au régime stagflationniste actuel. La faible probabilité de call (20%) en contexte hawkish garantit quasi-certainement le coupon sur la durée complète, mais immobilise le capital avec une sensibilité DV01 élevée. Le spread de 155bps compense partiellement le risque crédit émetteur et la duration longue, rendant ce produit pertinent pour une allocation défensive de long terme.",
     "keyRisks": [
-      "Risque crédit émetteur sur 10 ans en stagflation",
-      "Duration excessive avec DV01 élevée si taux montent",
-      "Immobilisation probable du capital avec call peu probable"
+      "Risque crédit émetteur sur 10 ans sans protection du capital si défaut",
+      "Risque de duration élevé (DV01~10bps) avec perte latente si hausse des taux",
+      "Risque d'immobilisation avec faible probabilité de call (20%) limitant la flexibilité"
     ],
     "negotiationPoints": [],
     "scenarios": {
@@ -267,20 +267,20 @@
       "base": {
         "return_pct": 46,
         "return_eur": 46000,
-        "probability": 0.35,
+        "probability": 0.5,
         "duration_years": 10
       },
       "stress": {
         "return_pct": 23,
         "return_eur": 23000,
-        "probability": 0.3,
+        "probability": 0.2,
         "duration_years": 5
       },
       "worst": {
-        "return_pct": -50,
-        "return_eur": -50000,
-        "probability": 0.15,
-        "duration_years": 1
+        "return_pct": -15,
+        "return_eur": -15000,
+        "probability": 0.1,
+        "duration_years": 7
       }
     },
     "confidenceInterval": {
@@ -292,8 +292,8 @@
       "label": "B [53-71]"
     },
     "metadata": {
-      "gradedAt": "2026-04-03T12:04:05.279Z",
-      "durationMs": 16152,
+      "gradedAt": "2026-04-03T12:08:51.221Z",
+      "durationMs": 20367,
       "aiUsed": true,
       "version": "7.1",
       "productType": "taux_fixe",
@@ -313,13 +313,13 @@
       "maxMaturity": 10,
       "probReachMaturity": 1,
       "maxBeta": null,
-      "baseScore": 63,
+      "baseScore": 62,
       "baseGrade": "B",
       "adjustments": {
-        "p1": -1,
+        "p1": 1,
         "p2": -1,
-        "p3": -1,
-        "p4": 1
+        "p3": 1,
+        "p4": -1
       },
       "barrier_sigma": null,
       "barrier_sigma_label": null,
