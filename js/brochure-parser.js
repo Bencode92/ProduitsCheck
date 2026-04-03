@@ -88,6 +88,7 @@
   var STRUCT_OPTS = [
     { v: 'autocall', l: 'Autocall / Phoenix' },
     { v: 'taux_fixe', l: 'Taux fixe / Callable' },
+    { v: 'range_accrual', l: '📊 Range Accrual' },
     { v: 'capital_garanti', l: 'Capital garanti' },
     { v: 'dispersion', l: 'Dispersion' },
     { v: 'basket', l: 'Panier équipondéré' },
@@ -95,7 +96,7 @@
     { v: 'phoenix_memoire', l: 'Phoenix à mémoire' }
   ];
 
-  var UND_TYPES = ['single-stock', 'single-index', 'worst-of', 'basket', 'pairs', 'none'];
+  var UND_TYPES = ['single-stock', 'single-index', 'worst-of', 'basket', 'pairs', 'rates', 'none'];
   var FREQ_OPTS = ['annuel', 'semestriel', 'trimestriel', 'à maturité'];
   var COUPON_TYPES = ['conditionnel', 'fixe', 'participation'];
   var ER_TYPES = ['autocall', 'callable', 'none'];
@@ -313,10 +314,12 @@
 
   function _buildProduct() {
     if (!_data) return null;
+    var st = _gv('bp-struct') || 'autocall';
+    var typeMap = { taux_fixe: 'taux-fixe', range_accrual: 'range-accrual' };
     return {
       name: _gv('bp-name') || _data.name || '',
-      type: _gv('bp-struct') === 'taux_fixe' ? 'taux-fixe' : _gv('bp-struct'),
-      structureType: _gv('bp-struct') || 'autocall',
+      type: typeMap[st] || st,
+      structureType: st,
       emitter: _gv('bp-emitter') || '', guarantor: _data.guarantor || '', guarantorRating: _data.guarantorRating || null,
       underlyings: (_gv('bp-underlyings') || '').split(',').map(function(s) { return s.trim(); }).filter(Boolean),
       underlyingType: _gv('bp-undtype') || 'single-index', currency: _gv('bp-currency') || 'EUR',
@@ -336,7 +339,13 @@
       decrementPct: _gv('bp-decrement'), actualDividendYield: _gv('bp-divyield'),
       mechanism: _gv('bp-mechanism') || '',
       risks: (_gv('bp-risks') || '').split('·').map(function(s) { return s.trim(); }).filter(Boolean),
-      summary: _data.summary || '', aiParsed: _data, sourceFile: _fileName
+      summary: _data.summary || '', aiParsed: _data, sourceFile: _fileName,
+      rangeAccrual: st === 'range_accrual' ? {
+        lowerBound: parseFloat(_gv('bp-ra-lower')) || (_data.rangeAccrual && _data.rangeAccrual.lowerBound) || null,
+        upperBound: parseFloat(_gv('bp-ra-upper')) || (_data.rangeAccrual && _data.rangeAccrual.upperBound) || null,
+        reference: _gv('bp-ra-ref') || (_data.rangeAccrual && _data.rangeAccrual.reference) || 'Euribor 3 mois',
+        observation: _gv('bp-ra-obs') || (_data.rangeAccrual && _data.rangeAccrual.observation) || 'daily'
+      } : undefined
     };
   }
 
@@ -459,6 +468,17 @@
       _field('Niveau (%)', _inp('bp-caplevel', cp.level, 'number', '100')) +
       _field('Barrière capital (%)', _inp('bp-barrier', cp.barrier, 'number', '50')) +
       _field('Barrière coupon (%)', _inp('bp-barriercoupon', cp.barrierCoupon, 'number', '—'), 'Seuil versement gain à maturité'));
+    // Range Accrual section (conditional)
+    if (d.structureType === 'range_accrual') {
+      var ra = d.rangeAccrual || {};
+      var raRefOpts = ['Euribor 3 mois', 'Euribor 6 mois', 'Euribor 12 mois', 'CMS 10 ans', 'CMS 2 ans', 'TEC 10', 'Autre'];
+      var raObsOpts = [{ v: 'daily', l: 'Journalière' }, { v: 'weekly', l: 'Hebdomadaire' }, { v: 'monthly', l: 'Mensuelle' }];
+      html += _section('RANGE ACCRUAL', '📊', '#A855F7',
+        _field('Borne basse (%)', _inp('bp-ra-lower', ra.lowerBound, 'number', '1.75')) +
+        _field('Borne haute (%)', _inp('bp-ra-upper', ra.upperBound, 'number', '3.50')) +
+        _field('Taux de référence', _sel('bp-ra-ref', ra.reference || 'Euribor 3 mois', raRefOpts)) +
+        _field('Observation', _sel('bp-ra-obs', ra.observation || 'daily', raObsOpts)));
+    }
     html += _section('RAPPEL ANTICIPÉ', '⏰', 'var(--red)',
       '<div class="bp-field">' + _tog('bp-erpossible', er.possible, 'Rappel possible') + '</div>' +
       _field('Type', _sel('bp-ertype', er.type || 'none', ER_TYPES)) +
