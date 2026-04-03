@@ -196,52 +196,71 @@
         return Math.max(0, Math.min(100, Math.round(s)));
     }
 
-    // ═══ ENHANCED P2 FOR RATE PRODUCTS ═══
-    function _computeP2Rate(p) {
+    // ═══ ENHANCED P2 FOR ALL RATE PRODUCTS (v2) ═══
+    // Base 65 justified by: émetteurs taux dans notre univers = A+/Aa3 (CIC, SG)
+    // CDS spread ~55bps → prob défaut 5Y ~0.5% → qualité institutionnelle
+    // Capital garanti → +5, émetteur AA- → +3, A+ → +5
+    function _computeP2Rates(p) {
         var mat = p.maturityYears || 5;
-        var base = p.capitalProtection ? 70 : 55;
+        var base = 65; // institutional quality anchor (A+/Aa3 = CDS ~55bps)
 
+        // Capital garanti bonus
+        if (p.capitalProtection) base += 5;
+
+        // Duration penalty — use EFFECTIVE duration for callables
+        var effectiveMat = mat;
+        if (p.callable || p.autocall) {
+            var callProb = _estimateCallProb(mat);
+            // Effective duration = weighted average of call date and maturity
+            var avgCallYear = Math.min(mat, Math.max(2, mat * 0.4));
+            effectiveMat = callProb * avgCallYear + (1 - callProb) * mat;
+        }
         var durationPenalty = 0;
-        if (mat > 3) {
-            durationPenalty = Math.round(Math.min(15, (mat - 3) * 2.5));
+        if (effectiveMat > 3) {
+            durationPenalty = Math.round(Math.min(15, (effectiveMat - 3) * 2));
         }
         base -= durationPenalty;
 
-        var rateVol = _getRateVol(mat);
-        if (rateVol > 25) base -= 8;
+        // Rate vol penalty
+        var rateVol = _getRateVol(Math.min(mat, 5));
+        if (rateVol > 30) base -= 10;
+        else if (rateVol > 25) base -= 8;
         else if (rateVol > 15) base -= 4;
+        else if (rateVol < 10) base += 3;
 
+        // Yield curve shape
         if (_ratesData && _ratesData.yield_curve) {
             var curve = _ratesData.yield_curve;
-            if (curve.shape === 'inverted') {
-                base -= 10;
-            } else if (curve.shape === 'normal' && curve.spread_2_10 > 0.5) {
-                base += 5;
-            }
+            if (curve.shape === 'inverted') base -= 8;
+            else if (curve.shape === 'normal' && curve.spread_2_10 > 0.5) base += 5;
         }
 
-        // v1.2: Use regime-aware callable logic instead of simple direction
-        if (p.autocall || p.callable) {
-            var callProb = _estimateCallProb(mat);
-            // Low call prob = quality (investor gets what was promised)
-            if (callProb < 0.30) base += 8;
-            else if (callProb < 0.50) base += 5;
+        // Callable quality bonus (low call prob = investor keeps coupon)
+        if (p.callable || p.autocall) {
+            var cp2 = _estimateCallProb(mat);
+            if (cp2 < 0.30) base += 8;
+            else if (cp2 < 0.50) base += 5;
             else base += 3;
         } else {
-            var direction = _getRateDirection(mat);
-            if (direction === 'rising') base -= 5;
+            // Non-callable: rate direction impact
+            var direction = _getRateDirection(Math.min(mat, 5));
+            if (direction === 'rising') base -= 3;
             else if (direction === 'falling') base += 3;
         }
 
-        // v1.2: Guaranteed coupon = no equity risk = quality bonus
-        if (p.couponType === 'garanti' || p.couponType === 'fixe') {
-            base += 5;
-        }
+        // Guaranteed coupon = certainty premium
+        if (p.couponType === 'garanti' || p.couponType === 'fixe') base += 5;
 
-        console.log('[Rates-Patch] P2 rate: dur=-' + durationPenalty + ' vol=' + rateVol +
-            'bps callProb=' + (p.callable ? (_estimateCallProb(mat) * 100).toFixed(0) + '%' : 'n/a') +
-            ' regime=' + _getRegime() + ' → P2=' + base);
-        return Math.max(0, Math.min(100, Math.round(base)));
+        // Conditional coupon on taux (Digitale, capital_garanti) = slight penalty
+        if (p.couponType === 'conditionnel') base -= 3;
+
+        console.log('[Rates-Patch] P2 rates(v2): base=65 cap=' + (p.capitalProtection ? '+5' : '') +
+            ' dur=-' + durationPenalty + ' (eff=' + effectiveMat.toFixed(1) + 'Y)' +
+            ' vol=' + rateVol + 'bps' +
+            ' callable=' + (p.callable || p.autocall ? 'yes' : 'no') +
+            ' coupon=' + (p.couponType || '?') +
+            ' → P2=' + base);
+        return Math.max(10, Math.min(95, Math.round(base)));
     }
 
     // ═══ ENHANCED P4 FOR RATE PRODUCTS v1.2 ═══
@@ -467,7 +486,8 @@
         // ═══ OVERRIDE P1 for rate products ═══
         var _origComputeP1Rates = _computeP1;
         _computeP1 = function(p) {
-            if (_isFixedRateProduct(p) && _ratesData && Object.keys(_ratesData.yields || {}).length > 0) {
+            var ut = (p.underlyingType || '').toLowerCase();
+            if ((ut === 'rates' || _isFixedRateProduct(p)) && _ratesData && Object.keys(_ratesData.yields || {}).length > 0) {
                 var st = (p.structureType || '').toLowerCase();
                 if (st === 'range_accrual') return _computeP1RangeAccrual(p);
                 return _computeP1Rate(p);
@@ -478,10 +498,12 @@
         // ═══ OVERRIDE P2 for rate products ═══
         var _origComputeP2Rates = _computeP2;
         _computeP2 = function(p, market, productType) {
-            if ((productType === 'fixed-rate-callable' || _isFixedRateProduct(p)) && _ratesData && Object.keys(_ratesData.yields || {}).length > 0) {
-                var st = (p.structureType || '').toLowerCase();
+            var ut = (p.underlyingType || '').toLowerCase();
+            var st = (p.structureType || '').toLowerCase();
+            // Route ALL rate products to quantitative P2 (not just taux_fixe/callable)
+            if ((ut === 'rates' || productType === 'fixed-rate-callable' || _isFixedRateProduct(p)) && _ratesData && Object.keys(_ratesData.yields || {}).length > 0) {
                 if (st === 'range_accrual') return _computeP2RangeAccrual(p);
-                return _computeP2Rate(p);
+                return _computeP2Rates(p);
             }
             return _origComputeP2Rates(p, market, productType);
         };
@@ -489,7 +511,8 @@
         // ═══ OVERRIDE P4 for rate products ═══
         var _origComputeP4Rates = _computeP4;
         _computeP4 = function(p, catRate) {
-            if (_isFixedRateProduct(p) && _ratesData && Object.keys(_ratesData.yields || {}).length > 0) {
+            var ut = (p.underlyingType || '').toLowerCase();
+            if ((ut === 'rates' || _isFixedRateProduct(p)) && _ratesData && Object.keys(_ratesData.yields || {}).length > 0) {
                 var st = (p.structureType || '').toLowerCase();
                 if (st === 'range_accrual') return _computeP4RangeAccrual(p, catRate);
                 return _computeP4Rate(p, catRate);
