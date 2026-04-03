@@ -199,50 +199,50 @@
         "score": 67,
         "base": 64,
         "delta": -2,
-        "reasoning": "Rendement: base 64 → -2 = 62 (En stagflation, le TEC10 (taux long) risque de dépasser 4.4% avec l'inflation persistante et la pentification de la courbe) | Coupon 4.6%, protégé | Barr.coupon 4.4%"
+        "reasoning": "Rendement: base 64 → -2 = 62 (En stagflation, le TEC10 (taux long) risque de subir la pentification de la courbe, réduisant la probabilité d'atteindre 4.4%) | Coupon 4.6%, protégé | Barr.coupon 4.4%"
       },
       "underlyingQuality": {
         "score": 33,
         "base": 35,
         "delta": -2,
-        "reasoning": "Qualité: base 35 → -2 = 33 (TEC10 très vulnérable en stagflation: hausse des taux longs attendue avec PCE >2.8% et Fed hawkish probable)"
+        "reasoning": "Qualité: base 35 → -2 = 33 (Contexte stagflationnaire très défavorable aux taux longs avec risque de hausse brutale des taux courts par la Fed)"
       },
       "portfolioFit": {
         "score": 60,
         "base": 80,
         "delta": 2,
-        "reasoning": "Fit: base 80 → +2 = 82 (Capital garanti offre une protection précieuse en régime stagflationnaire avec VIX à 22)"
+        "reasoning": "Fit: base 80 → +2 = 82 (Produit à capital garanti particulièrement pertinent en période de forte incertitude macro)"
       },
       "riskPremium": {
         "score": 54,
         "base": 34,
-        "delta": -2,
+        "delta": 0,
         "reasoning": "Capital garanti: spread 4.6% - CAT 2.5% - illiq 0.5% = 1.6%"
       }
     },
-    "verdict": "Produit peu attractif en stagflation malgré le capital garanti. Avec le TEC10 à surveiller face à une inflation >2.8% et une pentification de courbe, la probabilité de toucher le coupon de 4.6% est compromise. Le spread de seulement 20bp entre coupon et barrière offre peu de marge dans un contexte où la Fed pourrait surprendre hawkish. Score ajusté: 37/100 (D), inadapté au régime macro actuel.",
+    "verdict": "Dans un contexte de stagflation avec Brent à $122 et inflation persistante, ce produit indexé sur le TEC10 présente des risques significatifs. La pentification de la courbe des taux et le risque hawkish de la Fed menacent directement la probabilité de toucher le coupon de 4.6% (barrière à 4.4%). Cependant, la garantie du capital offre une protection bienvenue dans cet environnement volatil, justifiant une note finale de 42/100.",
     "keyRisks": [
-      "TEC10 peut facilement dépasser 4.4% avec inflation persistante et pentification",
-      "Coupon de 4.6% insuffisant pour compenser l'inflation à 2.83%"
+      "Hausse brutale des taux courts forçant le TEC10 au-dessus de 4.4%",
+      "Pentification extrême de la courbe en cas d'escalade du choc énergétique"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 4.6,
-        "return_eur": 23000,
-        "probability": 0.2,
-        "duration_years": 5
+        "return_eur": 4600,
+        "probability": 0.15,
+        "duration_years": 1
       },
       "base": {
         "return_pct": 2.3,
         "return_eur": 11500,
-        "probability": 0.35,
+        "probability": 0.3,
         "duration_years": 5
       },
       "stress": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.3,
+        "probability": 0.4,
         "duration_years": 5
       },
       "worst": {
@@ -253,16 +253,16 @@
       }
     },
     "confidenceInterval": {
-      "low": 42,
-      "high": 60,
+      "low": 43,
+      "high": 61,
       "halfWidth": 9,
       "gradeStable": false,
       "gradeRange": "D-B",
-      "label": "C [42-60]"
+      "label": "C [43-61]"
     },
     "metadata": {
-      "gradedAt": "2026-04-03T11:49:13.719Z",
-      "durationMs": 18206,
+      "gradedAt": "2026-04-03T11:55:42.073Z",
+      "durationMs": 17754,
       "aiUsed": true,
       "version": "7.1",
       "productType": "capital_garanti",
@@ -287,7 +287,7 @@
         "p1": -2,
         "p2": -2,
         "p3": 2,
-        "p4": -2
+        "p4": 0
       },
       "barrier_sigma": null,
       "barrier_sigma_label": null,
@@ -295,9 +295,9 @@
       "liquidity_level": "L4",
       "liquidity_score": 10,
       "liquidity_label": "Illiquide",
-      "ci_low": 42,
-      "ci_high": 60,
-      "ci_label": "C [42-60]",
+      "ci_low": 43,
+      "ci_high": 61,
+      "ci_label": "C [43-61]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
