@@ -19,16 +19,13 @@
   "maturityYears": 8,
   "coupon": {
     "rate": 4,
-    "rateAnnualized": 8,
+    "frequency": "semestriel",
+    "annualized": true,
+    "type": "conditionnel",
+    "paymentTiming": "atRedemption",
     "rateIfCalled": 4,
     "rateIfMaturity": 4,
-    "type": "conditionnel",
-    "frequency": "semestriel",
-    "observationFrequency": "semestriel",
-    "trigger": null,
-    "memory": false,
-    "paymentTiming": "atRedemption",
-    "comment": "Gain capitalisé, versé en une seule fois à l'autocall ou à la maturité si Action ≥ 71,30% du Cours Initial. Aucun versement périodique en cours de vie."
+    "memory": false
   },
   "participationRate": null,
   "capitalProtection": {
@@ -64,10 +61,10 @@
       "2032-11-29",
       "2033-05-30",
       "2033-11-29"
-    ]
+    ],
+    "hasAutocall": true,
+    "enabled": true
   },
-  "decrementPct": null,
-  "actualDividendYield": null,
   "mechanism": "Athena autocall semestriel sur action Saint-Gobain. Du S2 au S15, si l'Action clôture ≥ Barrière d'autocall dégressive (100% en S2, -2,05 pp/semestre, jusqu'à 73,35% en S15), remboursement anticipé = capital + 4% × nombre de semestres écoulés. À l'échéance (S16) : si Action ≥ 71,30% → capital + 64% (8 ans × 8%) ; si 60% ≤ Action < 71,30% → capital seul, 0 coupon ; si Action < 60% → perte en capital égale à la baisse intégrale de l'Action (jusqu'à -100%). Dividendes non réinvestis. Gains capitalisés, jamais versés périodiquement.",
   "risks": [
     "Risque de perte en capital partielle ou totale (barrière 60% européenne)",
@@ -211,5 +208,13 @@
   "conversation": [],
   "conversationSummary": null,
   "decision": null,
-  "decisionReason": null
+  "decisionReason": null,
+  "_freqFixApplied": true,
+  "aiCategory": "autocall-mono",
+  "aiCategoryLabel": "⚡ Autocall Mono-actif",
+  "aiCategoryColor": "#06D6A0",
+  "aiOpinion": "Produit offrant un rendement attractif de 8% avec possibilité de sortie anticipée dès que Saint-Gobain retrouve son niveau initial, mais sans protection du capital en cas de chute importante. Le risque principal réside dans l'exposition à un seul titre et l'absence de barrière de protection, rendant l'investisseur vulnérable aux fortes baisses du secteur de la construction.",
+  "aiAnalyzedAt": "2026-04-08T07:42:44.611Z",
+  "envelope": "",
+  "minInvestment": 100000
 }
