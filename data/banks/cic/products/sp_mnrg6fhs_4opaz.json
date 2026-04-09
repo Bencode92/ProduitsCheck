@@ -167,5 +167,154 @@
     "reference": "Euribor 3 mois",
     "observation": "daily"
   },
-  "minInvestment": 100000
+  "minInvestment": 100000,
+  "grading": {
+    "grade": "B",
+    "score": 63,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 79,
+        "base": 80,
+        "delta": 2,
+        "reasoning": "Rendement: base 80 → +2 = 82 (Produit taux fixe callable sur TEC 10 avec coupon garanti à 6.7% - probabilité de perception très élevée dans un contexte de taux élevés et inflation persistante) | Coupon 6.7%, protégé | Barr.coupon 4.6% | Mat espérée: ~2.3a (prob mat: 1%)"
+      },
+      "underlyingQuality": {
+        "score": 60,
+        "base": 58,
+        "delta": 2,
+        "reasoning": "Qualité: base 58 → +2 = 60 (Sous-jacent TEC 10 (taux d'État) bénéficie du régime RISK_OFF actuel où les obligations souveraines sont recherchées comme actifs refuges)"
+      },
+      "portfolioFit": {
+        "score": 47,
+        "base": 60,
+        "delta": 2,
+        "reasoning": "Fit: base 60 → +2 = 62 (Excellente diversification en environnement risk-off avec inflation élevée - produit taux fixe offrant 6.7% garanti vs obligations classiques à ~3-4%)"
+      },
+      "riskPremium": {
+        "score": 68,
+        "base": 54,
+        "delta": -2,
+        "reasoning": "Capital garanti: spread 6.7% - CAT 2.5% - illiq 0.7% = 3.5%"
+      }
+    },
+    "verdict": "Produit défensif très adapté au contexte RISK_OFF actuel avec un coupon garanti de 6.7% sur le TEC 10, significativement supérieur aux obligations d'État classiques (~3-4%). La structure callable limite certes le potentiel haussier mais offre une protection capitale totale avec un rendement fixe attractif dans un environnement d'inflation à 2.83% et de volatilité élevée (VIX 22). Avec une durée espérée de 2.3 ans et une probabilité de remboursement anticipé élevée, ce produit capture efficacement la prime de taux actuelle tout en protégeant contre les scénarios adverses.",
+    "keyRisks": [
+      "Risque de call anticipé si baisse brutale des taux, limitant les gains à ~15.4k€ sur 2.3 ans",
+      "Opportunité manquée si les taux montent encore et que le produit est callé prématurément"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 15.4,
+        "return_eur": 15400,
+        "probability": 0.4,
+        "duration_years": 2.3
+      },
+      "base": {
+        "return_pct": 15.4,
+        "return_eur": 15400,
+        "probability": 0.35,
+        "duration_years": 2.3
+      },
+      "stress": {
+        "return_pct": 6.7,
+        "return_eur": 6700,
+        "probability": 0.2,
+        "duration_years": 1
+      },
+      "worst": {
+        "return_pct": 67,
+        "return_eur": 67000,
+        "probability": 0.05,
+        "duration_years": 10
+      }
+    },
+    "confidenceInterval": {
+      "low": 56,
+      "high": 74,
+      "halfWidth": 9,
+      "gradeStable": false,
+      "gradeRange": "C-B",
+      "label": "B [56-74]"
+    },
+    "metadata": {
+      "gradedAt": "2026-04-09T12:28:35.468Z",
+      "durationMs": 21859,
+      "aiUsed": true,
+      "version": "7.1",
+      "productType": "rate",
+      "marketDataAvailable": false,
+      "catBenchmark": 2.9,
+      "catSource": "allocator-confirmed",
+      "couponAnnualized": 6.7,
+      "couponRaw": 6.7,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": false,
+      "barrierPct": 0,
+      "barrierCouponPct": 4.6,
+      "couponProbability": null,
+      "expectedMaturity": 2.3,
+      "maxMaturity": 10,
+      "probReachMaturity": 1,
+      "maxBeta": null,
+      "baseScore": 64,
+      "baseGrade": "B",
+      "adjustments": {
+        "p1": 2,
+        "p2": 2,
+        "p3": 2,
+        "p4": -2
+      },
+      "barrier_sigma": null,
+      "barrier_sigma_label": null,
+      "barrier_sigma_danger": null,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Rappelable 12M",
+      "ci_low": 56,
+      "ci_high": 74,
+      "ci_label": "B [56-74]",
+      "issuer_rating": "A+",
+      "issuer_tier": "IG",
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "range_accrual",
+      "issuerCreditPenalty": 1,
+      "issuerCDS": 55,
+      "v6Weights": {
+        "p1": 0.3,
+        "p2": 0.2,
+        "p3": 0.15,
+        "p4": 0.3
+      }
+    },
+    "regimeScenarios": {
+      "current": {
+        "score": 63,
+        "grade": "B",
+        "label": "Actuel (risk_off)",
+        "desc": "Euribor dans le corridor mais BCE menaçante"
+      },
+      "bull": {
+        "score": 68,
+        "grade": "B",
+        "label": "Bull / Risk-on",
+        "delta": 5,
+        "desc": "Taux baissent → Euribor reste dans le corridor"
+      },
+      "crash": {
+        "score": 57,
+        "grade": "C",
+        "label": "Crash / Récession",
+        "delta": -6,
+        "desc": "Taux volatils → Euribor sort du corridor régulièrement"
+      }
+    }
+  }
 }
