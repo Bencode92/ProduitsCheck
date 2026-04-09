@@ -30,8 +30,6 @@
     "protected": true,
     "level": 100,
     "atMaturityOnly": true,
-    "barrier": null,
-    "barrierCoupon": null,
     "barrierType": null
   },
   "earlyRedemption": {
@@ -76,10 +74,10 @@
     ],
     "maturityRedemptionLevel": 146.6,
     "stepDown": false,
-    "stepDownPct": null
+    "stepDownPct": null,
+    "hasAutocall": true,
+    "enabled": true
   },
-  "decrementPct": null,
-  "actualDividendYield": null,
   "mechanism": "EMTN senior CIC 10 ans non-call 4 ans à coupon capitalisé. Aucun coupon périodique. Si l'émetteur rappelle le produit à partir du 23/04/2030, versement du capital + 4,66% brut par année écoulée (intérêts simples, non composés). Si non rappelé, remboursement à 146,60% le 21/04/2036. TRI actuariel max à échéance ≈ 3,90% (intérêts non composés sur 10 ans).",
   "risks": [
     "Risque de crédit de l'émetteur (CIC)",
@@ -217,5 +215,12 @@
   "conversation": [],
   "conversationSummary": null,
   "decision": null,
-  "decisionReason": null
+  "decisionReason": null,
+  "aiCategory": "capital-protege",
+  "aiCategoryLabel": "🛡️ Capital Protégé",
+  "aiCategoryColor": "#4CAF50",
+  "aiOpinion": "Produit de capital garanti offrant un coupon fixe de 4.66% capitalisé sur 10 ans avec possibilité de remboursement anticipé, ce qui est attractif dans un environnement de taux. Le risque principal réside dans l'option d'appel de l'émetteur qui peut limiter le potentiel de gains si les conditions de marché deviennent favorables.",
+  "aiAnalyzedAt": "2026-04-09T12:06:08.045Z",
+  "envelope": "",
+  "minInvestment": 100000
 }
