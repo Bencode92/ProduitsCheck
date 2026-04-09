@@ -279,7 +279,7 @@
 
     var unds = (product.underlyings || []).map(function(u) { return typeof u === 'string' ? u : (u.name || u.ticker || ''); }).filter(Boolean);
     var isDispersion = st === 'dispersion' || undType === 'pairs';
-    var isRate = st === 'taux_fixe' || undType === 'rates' || undType === 'credit';
+    var isRate = st === 'taux_fixe' || st === 'taux_fixe_in_fine' || undType === 'rates' || undType === 'credit';
     var isWorstOf = undType === 'worst-of' || undType === 'worst_of';
     var isBasket = _isBasketProduct(product);
     if (isBasket && isWorstOf) isWorstOf = false;
