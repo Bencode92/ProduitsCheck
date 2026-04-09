@@ -1,0 +1,221 @@
+{
+  "id": "sp_mnreoq1s_yy8at",
+  "name": "Callable In Fine 10YNC4&1 Avril 2036",
+  "type": "taux_fixe_in_fine",
+  "structureType": "taux_fixe_in_fine",
+  "emitter": "Crédit Industriel et Commercial",
+  "guarantor": "",
+  "guarantorRating": null,
+  "underlyings": [],
+  "underlyingType": "none",
+  "currency": "EUR",
+  "maturity": "10 ans",
+  "maturityYears": 10,
+  "coupon": {
+    "rate": 4.66,
+    "annualizedRate": 4.66,
+    "rateIfCalled": 4.66,
+    "rateIfMaturity": 46.6,
+    "type": "fixe_capitalise",
+    "frequency": "in_fine",
+    "dayCount": "30/360",
+    "trigger": null,
+    "memory": false,
+    "paymentTiming": "at_redemption",
+    "guaranteed": true,
+    "simpleInterest": true
+  },
+  "participationRate": null,
+  "capitalProtection": {
+    "protected": true,
+    "level": 100,
+    "atMaturityOnly": true,
+    "barrier": null,
+    "barrierCoupon": null,
+    "barrierType": null
+  },
+  "earlyRedemption": {
+    "possible": true,
+    "type": "callable",
+    "discretionary": true,
+    "trigger": null,
+    "frequency": "annuel",
+    "startSemester": 8,
+    "firstCallDate": "2030-04-23",
+    "callSchedule": [
+      {
+        "notificationDate": "2030-04-12",
+        "redemptionDate": "2030-04-23",
+        "redemptionLevel": 118.64
+      },
+      {
+        "notificationDate": "2031-04-10",
+        "redemptionDate": "2031-04-21",
+        "redemptionLevel": 123.3
+      },
+      {
+        "notificationDate": "2032-04-13",
+        "redemptionDate": "2032-04-20",
+        "redemptionLevel": 127.96
+      },
+      {
+        "notificationDate": "2033-04-11",
+        "redemptionDate": "2033-04-20",
+        "redemptionLevel": 132.62
+      },
+      {
+        "notificationDate": "2034-04-13",
+        "redemptionDate": "2034-04-20",
+        "redemptionLevel": 137.28
+      },
+      {
+        "notificationDate": "2035-04-13",
+        "redemptionDate": "2035-04-20",
+        "redemptionLevel": 141.94
+      }
+    ],
+    "maturityRedemptionLevel": 146.6,
+    "stepDown": false,
+    "stepDownPct": null
+  },
+  "decrementPct": null,
+  "actualDividendYield": null,
+  "mechanism": "EMTN senior CIC 10 ans non-call 4 ans à coupon capitalisé. Aucun coupon périodique. Si l'émetteur rappelle le produit à partir du 23/04/2030, versement du capital + 4,66% brut par année écoulée (intérêts simples, non composés). Si non rappelé, remboursement à 146,60% le 21/04/2036. TRI actuariel max à échéance ≈ 3,90% (intérêts non composés sur 10 ans).",
+  "risks": [
+    "Risque de crédit de l'émetteur (CIC)",
+    "Risque de bail-in / résolution : conversion en actions ou extension de maturité possible",
+    "Risque de perte en capital en cours de vie si revente avant échéance",
+    "Risque de liquidité sur le marché secondaire",
+    "Risque de marché (taux, spread de crédit, volatilité)",
+    "Risque de réinvestissement en cas de rappel anticipé discrétionnaire",
+    "Asymétrie callable : l'émetteur rappelle quand les taux baissent, laisse courir quand ils montent",
+    "Absence de coupon périodique : pas de cash-flow intermédiaire, TRI plus faible qu'un coupon composé",
+    "Risque d'inflation : rendement réel potentiellement négatif sur 10 ans sans cash-flow intermédiaire",
+    "Conflit d'intérêts : émetteur = agent de calcul = placeur",
+    "Frais de distribution jusqu'à 1,30% TTC inclus dans le prix d'émission"
+  ],
+  "summary": "EMTN senior CIC 10 ans non-call 4 ans, à coupon capitalisé in fine. Aucun versement périodique : en cas de rappel (à partir d'avril 2030, discrétion émetteur), capital + 4,66% brut par année écoulée ; sinon remboursement à 146,60% en avril 2036. Garantie capital à échéance hors défaut/bail-in.",
+  "aiParsed": {
+    "name": "Callable In Fine 10YNC4&1 Avril 2036",
+    "isin": "XS3340531998",
+    "type": "taux_fixe_in_fine",
+    "structureType": "taux_fixe_in_fine",
+    "emitter": "Crédit Industriel et Commercial",
+    "guarantor": null,
+    "emitterRating": {
+      "moodys": "A1",
+      "moodysDate": "2025-12-18",
+      "sp": "A+",
+      "spDate": "2025-12-08",
+      "fitch": "AA-",
+      "fitchDate": "2025-12-22"
+    },
+    "seniority": "senior_preferred",
+    "law": "English law",
+    "listing": "Euronext Paris",
+    "underlyings": [],
+    "underlyingType": "none",
+    "currency": "EUR",
+    "issueDate": "2026-04-20",
+    "maturityDate": "2036-04-21",
+    "maturity": "10 ans",
+    "maturityYears": 10,
+    "issuePrice": 100,
+    "distributionFee": 0.013,
+    "bidAskSpread": 0.005,
+    "coupon": {
+      "rate": 4.66,
+      "annualizedRate": 4.66,
+      "rateIfCalled": 4.66,
+      "rateIfMaturity": 46.6,
+      "type": "fixe_capitalise",
+      "frequency": "in_fine",
+      "dayCount": "30/360",
+      "trigger": null,
+      "memory": false,
+      "paymentTiming": "at_redemption",
+      "guaranteed": true,
+      "simpleInterest": true
+    },
+    "participationRate": null,
+    "minInvestment": 100000,
+    "capitalProtection": {
+      "protected": true,
+      "level": 100,
+      "atMaturityOnly": true,
+      "barrier": null,
+      "barrierCoupon": null,
+      "barrierType": null
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "callable",
+      "discretionary": true,
+      "trigger": null,
+      "frequency": "annuel",
+      "startSemester": 8,
+      "firstCallDate": "2030-04-23",
+      "callSchedule": [
+        {
+          "notificationDate": "2030-04-12",
+          "redemptionDate": "2030-04-23",
+          "redemptionLevel": 118.64
+        },
+        {
+          "notificationDate": "2031-04-10",
+          "redemptionDate": "2031-04-21",
+          "redemptionLevel": 123.3
+        },
+        {
+          "notificationDate": "2032-04-13",
+          "redemptionDate": "2032-04-20",
+          "redemptionLevel": 127.96
+        },
+        {
+          "notificationDate": "2033-04-11",
+          "redemptionDate": "2033-04-20",
+          "redemptionLevel": 132.62
+        },
+        {
+          "notificationDate": "2034-04-13",
+          "redemptionDate": "2034-04-20",
+          "redemptionLevel": 137.28
+        },
+        {
+          "notificationDate": "2035-04-13",
+          "redemptionDate": "2035-04-20",
+          "redemptionLevel": 141.94
+        }
+      ],
+      "maturityRedemptionLevel": 146.6,
+      "stepDown": false,
+      "stepDownPct": null
+    },
+    "decrementPct": null,
+    "actualDividendYield": null,
+    "mechanism": "EMTN senior CIC 10 ans non-call 4 ans à coupon capitalisé. Aucun coupon périodique. Si l'émetteur rappelle le produit à partir du 23/04/2030, versement du capital + 4,66% brut par année écoulée (intérêts simples, non composés). Si non rappelé, remboursement à 146,60% le 21/04/2036. TRI actuariel max à échéance ≈ 3,90% (intérêts non composés sur 10 ans).",
+    "risks": [
+      "Risque de crédit de l'émetteur (CIC)",
+      "Risque de bail-in / résolution : conversion en actions ou extension de maturité possible",
+      "Risque de perte en capital en cours de vie si revente avant échéance",
+      "Risque de liquidité sur le marché secondaire",
+      "Risque de marché (taux, spread de crédit, volatilité)",
+      "Risque de réinvestissement en cas de rappel anticipé discrétionnaire",
+      "Asymétrie callable : l'émetteur rappelle quand les taux baissent, laisse courir quand ils montent",
+      "Absence de coupon périodique : pas de cash-flow intermédiaire, TRI plus faible qu'un coupon composé",
+      "Risque d'inflation : rendement réel potentiellement négatif sur 10 ans sans cash-flow intermédiaire",
+      "Conflit d'intérêts : émetteur = agent de calcul = placeur",
+      "Frais de distribution jusqu'à 1,30% TTC inclus dans le prix d'émission"
+    ],
+    "summary": "EMTN senior CIC 10 ans non-call 4 ans, à coupon capitalisé in fine. Aucun versement périodique : en cas de rappel (à partir d'avril 2030, discrétion émetteur), capital + 4,66% brut par année écoulée ; sinon remboursement à 146,60% en avril 2036. Garantie capital à échéance hors défaut/bail-in.",
+    "sourceFile": "Brochure XS3340531998 Callable In Fine 10YNC4&1 Avril 2036.pdf"
+  },
+  "sourceFile": "JSON import",
+  "bankId": "cic",
+  "status": "analyzing",
+  "receivedDate": "2026-04-09",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null
+}
