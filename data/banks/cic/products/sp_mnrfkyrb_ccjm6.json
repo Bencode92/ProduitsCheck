@@ -222,5 +222,154 @@
   "aiOpinion": "Produit de capital garanti offrant un coupon fixe de 4.66% capitalisé sur 10 ans avec possibilité de remboursement anticipé, ce qui est attractif dans un environnement de taux. Le risque principal réside dans l'option d'appel de l'émetteur qui peut limiter le potentiel de gains si les conditions de marché deviennent favorables.",
   "aiAnalyzedAt": "2026-04-09T12:06:08.045Z",
   "envelope": "",
-  "minInvestment": 100000
+  "minInvestment": 100000,
+  "grading": {
+    "grade": "C",
+    "score": 50,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 48,
+        "base": 50,
+        "delta": -2,
+        "reasoning": "Rendement: base 50 → -2 = 48 (En régime risk-off avec hawkish hold, la probabilité de call est réduite à 35% vs espérance initiale, limitant le potentiel de sortie anticipée) | Coupon 4.66%, protégé | Mat espérée: ~2.3a (prob mat: 1%)"
+      },
+      "underlyingQuality": {
+        "score": 59,
+        "base": 61,
+        "delta": -2,
+        "reasoning": "Qualité: base 61 → -2 = 59 (Environnement risk-off avec VIX à 22 défavorable aux produits longs 10 ans, malgré le capital garanti qui limite la casse)"
+      },
+      "portfolioFit": {
+        "score": 55,
+        "base": 70,
+        "delta": 2,
+        "reasoning": "Fit: base 70 → +2 = 72 (Produit défensif avec capital garanti et coupon fixe 4.66% attractif en contexte d'incertitude macro, adapté pour la poche sécuritaire)"
+      },
+      "riskPremium": {
+        "score": 51,
+        "base": 28,
+        "delta": -2,
+        "reasoning": "Capital garanti: spread 4.7% - CAT 2.5% - illiq 0.7% = 1.5%"
+      }
+    },
+    "verdict": "Produit défensif offrant 4.66% annuel avec capital garanti, mais fortement pénalisé par sa maturité 10 ans en régime risk-off et la faible probabilité de call (35%). Le spread de 155bps vs AAA 10Y est insuffisant pour compenser le risque de duration et crédit émetteur sur cette maturité. Score final ajusté à 36/100, recommandation négative malgré les caractéristiques défensives.",
+    "keyRisks": [
+      "Duration longue de 10 ans avec DV01 élevé en cas de hausse des taux",
+      "Risque crédit émetteur concentré sur 10 ans sans diversification"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 14,
+        "return_eur": 14000,
+        "probability": 0.35,
+        "duration_years": 3
+      },
+      "base": {
+        "return_pct": 46.6,
+        "return_eur": 46600,
+        "probability": 0.4,
+        "duration_years": 10
+      },
+      "stress": {
+        "return_pct": 23.3,
+        "return_eur": 23300,
+        "probability": 0.2,
+        "duration_years": 5
+      },
+      "worst": {
+        "return_pct": -80,
+        "return_eur": -80000,
+        "probability": 0.05,
+        "duration_years": 2
+      }
+    },
+    "confidenceInterval": {
+      "low": 41,
+      "high": 59,
+      "halfWidth": 9,
+      "gradeStable": false,
+      "gradeRange": "D-C",
+      "label": "C [41-59]"
+    },
+    "metadata": {
+      "gradedAt": "2026-04-09T12:14:53.123Z",
+      "durationMs": 19333,
+      "aiUsed": true,
+      "version": "7.1",
+      "productType": "taux_fixe",
+      "marketDataAvailable": false,
+      "catBenchmark": 2.9,
+      "catSource": "allocator-confirmed",
+      "couponAnnualized": 4.66,
+      "couponRaw": 4.66,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": false,
+      "barrierPct": 0,
+      "barrierCouponPct": null,
+      "couponProbability": null,
+      "expectedMaturity": 2.3,
+      "maxMaturity": 10,
+      "probReachMaturity": 1,
+      "maxBeta": null,
+      "baseScore": 51,
+      "baseGrade": "C",
+      "adjustments": {
+        "p1": -2,
+        "p2": -2,
+        "p3": 2,
+        "p4": -2
+      },
+      "barrier_sigma": null,
+      "barrier_sigma_label": null,
+      "barrier_sigma_danger": null,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Callable LT",
+      "ci_low": 41,
+      "ci_high": 59,
+      "ci_label": "C [41-59]",
+      "issuer_rating": "A+",
+      "issuer_tier": "IG",
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "taux_fixe_in_fine",
+      "issuerCreditPenalty": 1,
+      "issuerCDS": 55,
+      "v6Weights": {
+        "p1": 0.3,
+        "p2": 0.2,
+        "p3": 0.15,
+        "p4": 0.3
+      }
+    },
+    "regimeScenarios": {
+      "current": {
+        "score": 50,
+        "grade": "C",
+        "label": "Actuel (risk_off)",
+        "desc": "In fine: pas de cash-flow intermédiaire, TRI ~3.9% si go-to-maturity"
+      },
+      "bull": {
+        "score": 55,
+        "grade": "C",
+        "label": "Bull / Risk-on",
+        "delta": 5,
+        "desc": "Taux baissent → call probable → coupon capitalisé versé en une fois"
+      },
+      "crash": {
+        "score": 43,
+        "grade": "D",
+        "label": "Crash / Récession",
+        "delta": -7,
+        "desc": "Taux montent → pas de call, intérêts simples sur 10 ans = rendement moindre"
+      }
+    }
+  }
 }
