@@ -161,7 +161,7 @@
     var st = (product.structureType || '').toLowerCase();
     var ct = (product.couponType || '').toLowerCase();
     var ut = (product.underlyingType || '').toLowerCase();
-    if (st === 'taux_fixe' || st === 'callable' || st === 'range_accrual') return true;
+    if (st === 'taux_fixe' || st === 'taux_fixe_in_fine' || st === 'callable' || st === 'range_accrual') return true;
     if ((ct === 'fixe' || ct === 'garanti') && (ut === 'none' || ut === '' || ut === 'rates' || ut === 'credit')) return true;
     return false;
   }
@@ -196,12 +196,18 @@
       norm.barrier = 0;
       if (norm.couponType !== 'fixe') norm.couponType = 'garanti';
       norm._structureType = 'capital_garanti';
-    } else if (st === 'taux_fixe') {
+    } else if (st === 'taux_fixe' || st === 'taux_fixe_in_fine') {
       norm.capitalProtection = true;
       norm.barrier = 0;
       norm.couponType = 'fixe';
       norm.worstOf = false;
-      norm._structureType = 'taux_fixe';
+      norm._structureType = st === 'taux_fixe_in_fine' ? 'taux_fixe_in_fine' : 'taux_fixe';
+      // In-fine: coupon is capitalized, use annualized rate for scoring
+      if (st === 'taux_fixe_in_fine') {
+        var annRate = (product.coupon && product.coupon.annualizedRate) || norm.coupon;
+        norm.coupon = annRate;
+        norm._inFine = true;
+      }
     } else if (st === 'range_accrual') {
       norm.capitalProtection = true;
       norm.barrier = 0;
@@ -360,7 +366,7 @@
     else if (ut === 'single-index') base += 8;
     else if (ut === 'worst-of' || ut === 'worst_of') { if (n <= 2) base += 0; else if (n <= 3) base -= 5; else base -= 10; }
     else if (ut === 'single-stock') base -= 10;
-    else if (ut === 'none' || st === 'taux_fixe') base += 5;
+    else if (ut === 'none' || st === 'taux_fixe' || st === 'taux_fixe_in_fine') base += 5;
     var my = parseFloat(product.maturityYears) || 5;
     if (my <= 2) base += 5; else if (my > 7) base -= 5;
     var overlapDelta = oldP3 - 70;
@@ -402,7 +408,7 @@
   function _applyIlliquidityPenalty(result) {
     if (!result || !result.pillars || !result.pillars.riskPremium || !result.metadata) return;
     var type = result.metadata.productType || '';
-    if (type === 'liquidity' || type === 'taux_fixe') return;
+    if (type === 'liquidity' || type === 'taux_fixe' || type === 'taux_fixe_in_fine') return;
     if (result.metadata.barrierPct === 0 && type === 'capital_garanti') return;
     var T = result.metadata.maxMaturity || result.metadata.expectedMaturity || 5;
     if (T <= 1) return;
@@ -488,7 +494,7 @@
     // Generate context-aware descriptions based on product type
     var st = (product.structureType || '').toLowerCase();
     var ut = (product.underlyingType || '').toLowerCase();
-    var isRates = ut === 'rates' || st === 'taux_fixe' || st === 'range_accrual' || st === 'callable';
+    var isRates = ut === 'rates' || st === 'taux_fixe' || st === 'taux_fixe_in_fine' || st === 'range_accrual' || st === 'callable';
     var currentDesc, bullDesc, crashDesc;
 
     if (isRates) {
@@ -499,10 +505,15 @@
         currentDesc = 'Euribor dans le corridor mais BCE menaçante';
         bullDesc = 'Taux baissent → Euribor reste dans le corridor';
         crashDesc = 'Taux volatils → Euribor sort du corridor régulièrement';
-      } else if (st === 'taux_fixe' || st === 'callable') {
+      } else if (st === 'taux_fixe' || st === 'taux_fixe_in_fine' || st === 'callable') {
         currentDesc = 'Call unlikely (20%) → coupon garanti sur la durée';
         bullDesc = 'Taux baissent → call probable → réinvestissement à taux bas';
         crashDesc = 'Taux montent → pas de call, coupon garanti = atout';
+        if (st === 'taux_fixe_in_fine') {
+          currentDesc = 'In fine: pas de cash-flow intermédiaire, TRI ~3.9% si go-to-maturity';
+          bullDesc = 'Taux baissent → call probable → coupon capitalisé versé en une fois';
+          crashDesc = 'Taux montent → pas de call, intérêts simples sur 10 ans = rendement moindre';
+        }
       } else if (product.coupon && product.coupon.memory) {
         currentDesc = 'Seuil menacé mais mémoire rattrape les coupons';
         bullDesc = 'Taux baissent sous le seuil → coupons + rattrapage';

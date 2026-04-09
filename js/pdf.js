@@ -170,6 +170,17 @@ class AIParser {
           parsed.coupon.type = 'fixe';
         }
         console.log('[parseBrochure V7.9] Callable (au gré émetteur) detected — NOT autocall');
+
+        // V7.9.1: Detect "In Fine" callable — coupon capitalisé, pas de versement périodique
+        if (/in\s*fine/i.test(txtLower) || /coupon\s*capitalis/i.test(txtLower) || /par\s*ann[eé]e\s*[eé]coul[eé]e/i.test(txtLower)) {
+          parsed.structureType = 'taux_fixe_in_fine';
+          if (parsed.coupon && typeof parsed.coupon === 'object') {
+            parsed.coupon.frequency = 'in_fine';
+            parsed.coupon.paymentTiming = 'at_redemption';
+            parsed.coupon.type = 'fixe_capitalise';
+          }
+          console.log('[parseBrochure V7.9.1] In Fine callable detected — coupon capitalisé');
+        }
       }
 
       // V7.9: Fix cumulative coupon — AI often multiplies per-period rate by N

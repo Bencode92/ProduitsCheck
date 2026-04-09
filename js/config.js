@@ -53,6 +53,7 @@ const PRODUCT_TYPES = [
   { id: 'worst-of', name: 'Worst-of Basket', category: 'conditionnel' },
   { id: 'cln', name: 'CLN (Credit Linked Note)', category: 'credit' },
   { id: 'emtn', name: 'EMTN', category: 'emtn' },
+  { id: 'taux_fixe_in_fine', name: 'Taux Fixe Callable In Fine', category: 'emtn' },
   { id: 'bonus', name: 'Certificat Bonus', category: 'conditionnel' },
   { id: 'discount', name: 'Certificat Discount', category: 'conditionnel' },
   { id: 'autre', name: 'Autre', category: 'autre' },

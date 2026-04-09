@@ -18,6 +18,7 @@ var STRUCTURE_TYPES = [
     { id: 'basket', label: 'Panier équipondéré' },
     { id: 'dispersion', label: 'Dispersion / Perf. relative' },
     { id: 'taux_fixe', label: 'Taux fixe / Callable' },
+    { id: 'taux_fixe_in_fine', label: 'Taux fixe / Callable In Fine' },
     { id: 'range_accrual', label: '📊 Range Accrual' },
     { id: 'capital_garanti', label: 'Capital garanti structuré' },
     { id: 'reverse', label: 'Reverse convertible' },

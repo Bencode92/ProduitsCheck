@@ -62,6 +62,33 @@ function renderBankSections(state) {
   }).join('');
 }
 
+// ═══ Call Schedule Table (for callable in fine / callable with redemption levels) ═══
+function _renderCallSchedule(p) {
+  const schedule = p.earlyRedemption?.callSchedule;
+  if (!schedule || !Array.isArray(schedule) || schedule.length === 0) return '';
+  const matLevel = p.earlyRedemption?.maturityRedemptionLevel;
+  return `<div class="fiche-call-schedule" style="margin-top:12px">
+    <table style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead><tr style="border-bottom:2px solid var(--border);text-align:left">
+        <th style="padding:6px 8px">Date notification</th>
+        <th style="padding:6px 8px">Date remboursement</th>
+        <th style="padding:6px 8px;text-align:right">Niveau remb.</th>
+      </tr></thead>
+      <tbody>
+        ${schedule.map(s => `<tr style="border-bottom:1px solid var(--border-dim)">
+          <td style="padding:5px 8px">${formatDate(s.notificationDate)}</td>
+          <td style="padding:5px 8px">${formatDate(s.redemptionDate)}</td>
+          <td style="padding:5px 8px;text-align:right;font-weight:600;color:var(--green)">${s.redemptionLevel}%</td>
+        </tr>`).join('')}
+        ${matLevel ? `<tr style="border-top:2px solid var(--accent)">
+          <td colspan="2" style="padding:5px 8px;font-weight:600">Remboursement final</td>
+          <td style="padding:5px 8px;text-align:right;font-weight:700;color:var(--accent)">${matLevel}%</td>
+        </tr>` : ''}
+      </tbody>
+    </table>
+  </div>`;
+}
+
 // ═══════════════════════════════════════════════════════════════
 // FICHE PRODUIT — Style StudyForge
 // ═══════════════════════════════════════════════════════════════
@@ -105,11 +132,11 @@ function renderProductSheet(container, state) {
     </div>
 
     <div class="fiche-metrics">
-      <div class="fiche-metric green"><div class="fiche-metric-label">Coupon</div><div class="fiche-metric-value">${couponRate ? formatPct(couponRate) : '—'}</div><div class="fiche-metric-sub">${p.coupon?.type || 'conditionnel'}${hasMem ? ' · mémoire' : ''}</div></div>
+      <div class="fiche-metric green"><div class="fiche-metric-label">Coupon</div><div class="fiche-metric-value">${couponRate ? formatPct(couponRate) : '—'}${p.coupon?.frequency === 'in_fine' ? '/an cap.' : ''}</div><div class="fiche-metric-sub">${p.coupon?.type || 'conditionnel'}${p.coupon?.frequency === 'in_fine' ? ' · in fine' : ''}${hasMem ? ' · mémoire' : ''}</div></div>
       <div class="fiche-metric ${barrier && barrier < 65 ? 'red' : 'orange'}"><div class="fiche-metric-label">Barrière Capital</div><div class="fiche-metric-value">${barrier ? barrier + '%' : '—'}</div><div class="fiche-metric-sub">${p.capitalProtection?.barrierType || '—'}</div></div>
       <div class="fiche-metric blue"><div class="fiche-metric-label">Maturité</div><div class="fiche-metric-value">${p.maturity || '—'}</div><div class="fiche-metric-sub">${p.maturityDate ? formatDate(p.maturityDate) : ''}</div></div>
       <div class="fiche-metric ${isProtected ? 'green' : 'red'}"><div class="fiche-metric-label">Capital</div><div class="fiche-metric-value">${isProtected ? '✓ Protégé' : '✕ Non protégé'}</div><div class="fiche-metric-sub">${p.capitalProtection?.level ? p.capitalProtection.level + '%' : '—'}</div></div>
-      <div class="fiche-metric ${hasAutocall ? 'purple' : 'blue'}"><div class="fiche-metric-label">Autocall</div><div class="fiche-metric-value">${hasAutocall ? '✓ Oui' : '✕ Non'}</div><div class="fiche-metric-sub">${p.earlyRedemption?.trigger ? 'Seuil ' + p.earlyRedemption.trigger + '%' : '—'}</div></div>
+      <div class="fiche-metric ${hasAutocall ? 'purple' : 'blue'}"><div class="fiche-metric-label">${p.earlyRedemption?.type === 'callable' ? 'Callable' : 'Autocall'}</div><div class="fiche-metric-value">${hasAutocall ? '✓ Oui' : '✕ Non'}</div><div class="fiche-metric-sub">${p.earlyRedemption?.type === 'callable' ? (p.earlyRedemption?.firstCallDate ? formatDate(p.earlyRedemption.firstCallDate) : 'Au gre emetteur') : (p.earlyRedemption?.trigger ? 'Seuil ' + p.earlyRedemption.trigger + '%' : '—')}</div></div>
       ${p.investedAmount ? `<div class="fiche-metric blue"><div class="fiche-metric-label">Montant Investi</div><div class="fiche-metric-value">${formatNumber(p.investedAmount)}€</div></div>` : ''}
     </div>
 
@@ -122,7 +149,7 @@ function renderProductSheet(container, state) {
           <div class="fiche-info-box ${isProtected ? 'green' : 'orange'}"><div class="fiche-info-box-title">${isProtected ? '✓ Capital protégé' : '⚠️ Capital non protégé'} ${p.capitalProtection?.level ? '— ' + p.capitalProtection.level + '%' : ''}</div><div class="fiche-info-box-text">${p.capitalProtection?.type ? `<strong>Type:</strong> ${p.capitalProtection.type}` : ''}${barrier ? ` · <strong>Barrière:</strong> ${barrier}% (${p.capitalProtection?.barrierType || 'européenne'})` : ''}${p.capitalProtection?.barrierObservation ? `<br><strong>Observation:</strong> ${p.capitalProtection.barrierObservation}` : ''}</div></div>
           ${barrier && barrier < 70 ? `<div class="fiche-alert warn">⚠️ Barrière basse (${barrier}%)</div>` : ''}</div></div>
         <div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">⏩</span><span class="fiche-section-title">Remboursement Anticipé</span></div><div class="fiche-section-body">
-          <div class="fiche-info-box ${hasAutocall ? 'purple' : 'neutral'}"><div class="fiche-info-box-title">${hasAutocall ? '✓ Rappel anticipé possible' : '✕ Pas de remboursement anticipé'}</div><div class="fiche-info-box-text">${p.earlyRedemption?.type ? `<strong>Type:</strong> ${p.earlyRedemption.type}` : ''}${p.earlyRedemption?.trigger ? ` · <strong>Seuil:</strong> ${p.earlyRedemption.trigger}%` : ''}${p.earlyRedemption?.frequency ? ` · <strong>Fréquence:</strong> ${p.earlyRedemption.frequency}` : ''}${p.earlyRedemption?.stepDown === true || p.earlyRedemption?.stepDown === 'true' ? `<br><strong>Step-down:</strong> Oui — ${p.earlyRedemption.stepDownDetail || 'seuil dégressif'}` : ''}</div></div></div></div>
+          <div class="fiche-info-box ${hasAutocall ? 'purple' : 'neutral'}"><div class="fiche-info-box-title">${hasAutocall ? '✓ Rappel anticipé possible' : '✕ Pas de remboursement anticipé'}</div><div class="fiche-info-box-text">${p.earlyRedemption?.type ? `<strong>Type:</strong> ${p.earlyRedemption.type}` : ''}${p.earlyRedemption?.trigger ? ` · <strong>Seuil:</strong> ${p.earlyRedemption.trigger}%` : ''}${p.earlyRedemption?.frequency ? ` · <strong>Fréquence:</strong> ${p.earlyRedemption.frequency}` : ''}${p.earlyRedemption?.stepDown === true || p.earlyRedemption?.stepDown === 'true' ? `<br><strong>Step-down:</strong> Oui — ${p.earlyRedemption.stepDownDetail || 'seuil dégressif'}` : ''}</div></div>${_renderCallSchedule(p)}</div></div>
         <div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">📊</span><span class="fiche-section-title">Caractéristiques</span></div><div class="fiche-section-body"><div class="fiche-kv-grid">
           <div class="fiche-kv"><span class="fiche-kv-label">Sous-jacent(s)</span><span class="fiche-kv-value">${(p.underlyings||[]).join(', ') || '—'}</span></div>
           <div class="fiche-kv"><span class="fiche-kv-label">Type</span><span class="fiche-kv-value">${typeName}</span></div>
