@@ -170,5 +170,154 @@
   "aiOpinion": "Produit à capital protégé offrant un coupon fixe attractif de 4% annuel avec possibilité de remboursement anticipé, adapté aux profils prudents. Le rendement est correct mais limité, et l'absence d'informations sur le seuil d'autocall et le sous-jacent empêche une évaluation complète du risque de remboursement anticipé.",
   "aiAnalyzedAt": "2026-04-09T11:37:28.937Z",
   "envelope": "",
-  "minInvestment": 100000
+  "minInvestment": 100000,
+  "grading": {
+    "grade": "C",
+    "score": 52,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 62,
+        "base": 61,
+        "delta": 1,
+        "reasoning": "Rendement: base 61 → +1 = 62 (Coupon garanti 4% sans condition de marché dans un contexte risk-off avec probabilité de call faible (20%) = visibilité maximale sur les revenus) | Coupon 4%, protégé | Mat espérée: ~2.3a (prob mat: 1%)"
+      },
+      "underlyingQuality": {
+        "score": 66,
+        "base": 67,
+        "delta": -1,
+        "reasoning": "Qualité: base 67 → -1 = 66 (Produit sans sous-jacent mais sensibilité duration élevée (10 ans) en régime stagflationniste avec risque de hausse des taux persistante)"
+      },
+      "portfolioFit": {
+        "score": 55,
+        "base": 70,
+        "delta": 1,
+        "reasoning": "Fit: base 70 → +1 = 71 (Asset défensif pertinent en risk-off offrant 92bps de spread vs AAA 10Y, mais manque de flexibilité vs TIPS recommandés par MI)"
+      },
+      "riskPremium": {
+        "score": 41,
+        "base": 29,
+        "delta": -1,
+        "reasoning": "Capital garanti: spread 4.0% - CAT 2.5% - illiq 0.7% = 0.8%"
+      }
+    },
+    "verdict": "Produit défensif offrant un coupon garanti de 4% attractif en contexte risk-off, avec probabilité de call faible (20%) maximisant les chances de percevoir le coupon sur la durée. Le spread de 92bps vs AAA 10Y est maigre pour une duration de 10 ans en régime stagflationniste où la BCE maintient une stance hawkish. La sensibilité aux taux (DV01 ~10bps) expose significativement le capital en cas de poursuite de la hausse des taux.",
+    "keyRisks": [
+      "Duration 10 ans = perte latente de -10% si taux +100bps en stagflation persistante",
+      "Risque crédit émetteur avec HY spreads en élargissement (312bps) pouvant contaminer IG"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 4,
+        "return_eur": 12000,
+        "probability": 0.2,
+        "duration_years": 3
+      },
+      "base": {
+        "return_pct": 4,
+        "return_eur": 40000,
+        "probability": 0.5,
+        "duration_years": 10
+      },
+      "stress": {
+        "return_pct": -6,
+        "return_eur": -6000,
+        "probability": 0.25,
+        "duration_years": 2
+      },
+      "worst": {
+        "return_pct": -15,
+        "return_eur": -15000,
+        "probability": 0.05,
+        "duration_years": 1
+      }
+    },
+    "confidenceInterval": {
+      "low": 47,
+      "high": 65,
+      "halfWidth": 9,
+      "gradeStable": false,
+      "gradeRange": "C-B",
+      "label": "C [47-65]"
+    },
+    "metadata": {
+      "gradedAt": "2026-04-09T11:38:11.931Z",
+      "durationMs": 20996,
+      "aiUsed": true,
+      "version": "7.1",
+      "productType": "taux_fixe",
+      "marketDataAvailable": false,
+      "catBenchmark": 2.8,
+      "catSource": "allocator-confirmed",
+      "couponAnnualized": 4,
+      "couponRaw": 4,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": false,
+      "barrierPct": 0,
+      "barrierCouponPct": null,
+      "couponProbability": null,
+      "expectedMaturity": 2.3,
+      "maxMaturity": 10,
+      "probReachMaturity": 1,
+      "maxBeta": null,
+      "baseScore": 56,
+      "baseGrade": "C",
+      "adjustments": {
+        "p1": 1,
+        "p2": -1,
+        "p3": 1,
+        "p4": -1
+      },
+      "barrier_sigma": null,
+      "barrier_sigma_label": null,
+      "barrier_sigma_danger": null,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Callable LT",
+      "ci_low": 47,
+      "ci_high": 65,
+      "ci_label": "C [47-65]",
+      "issuer_rating": "A+",
+      "issuer_tier": "IG",
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "taux_fixe",
+      "issuerCreditPenalty": 1,
+      "issuerCDS": 55,
+      "v6Weights": {
+        "p1": 0.3,
+        "p2": 0.2,
+        "p3": 0.15,
+        "p4": 0.3
+      }
+    },
+    "regimeScenarios": {
+      "current": {
+        "score": 52,
+        "grade": "C",
+        "label": "Actuel (risk_off)",
+        "desc": "Call unlikely (20%) → coupon garanti sur la durée"
+      },
+      "bull": {
+        "score": 57,
+        "grade": "C",
+        "label": "Bull / Risk-on",
+        "delta": 5,
+        "desc": "Taux baissent → call probable → réinvestissement à taux bas"
+      },
+      "crash": {
+        "score": 46,
+        "grade": "C",
+        "label": "Crash / Récession",
+        "delta": -6,
+        "desc": "Taux montent → pas de call, coupon garanti = atout"
+      }
+    }
+  }
 }
