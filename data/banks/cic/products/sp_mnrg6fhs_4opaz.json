@@ -1,0 +1,159 @@
+{
+  "id": "sp_mnrg6fhs_4opaz",
+  "name": "TARN TEC 10 Avril 2036 B",
+  "type": "range_accrual",
+  "structureType": "range_accrual",
+  "emitter": "Crédit Industriel et Commercial",
+  "guarantor": "",
+  "guarantorRating": {
+    "moodys": "A1",
+    "sp": "A+"
+  },
+  "underlyings": [
+    "Indice TEC 10"
+  ],
+  "underlyingType": "rates",
+  "currency": "EUR",
+  "maturity": "10 ans",
+  "maturityYears": 10,
+  "coupon": {
+    "rate": 6.7,
+    "rateIfCalled": null,
+    "rateIfMaturity": 6.7,
+    "type": "conditionnel",
+    "frequency": "annuel",
+    "trigger": null,
+    "memory": false,
+    "paymentTiming": "periodic",
+    "guaranteed": false,
+    "guaranteedYears": 2,
+    "guaranteedRate": 6.7,
+    "barrierCoupon": 4.6,
+    "barrierCouponType": "TEC10 <= 4.60%"
+  },
+  "participationRate": null,
+  "capitalProtection": {
+    "protected": true,
+    "level": 100,
+    "atMaturityOnly": true,
+    "barrier": null,
+    "barrierCoupon": 4.6,
+    "barrierType": null
+  },
+  "earlyRedemption": {
+    "possible": true,
+    "type": "target",
+    "discretionary": false,
+    "trigger": null,
+    "targetCouponLevel": 26.8,
+    "frequency": "annuel",
+    "startSemester": null,
+    "stepDown": false,
+    "stepDownPct": null
+  },
+  "decrementPct": null,
+  "actualDividendYield": null,
+  "mechanism": "TARN sur indice TEC 10. Coupon garanti 6,70% les 2 premieres annees (Y1-Y2). A partir de Y3, coupon conditionnel de 6,70% si TEC10 <= 4,60% a la date de constatation. Remboursement automatique anticipe des que la somme des coupons cumules >= 26,80% (soit 4 coupons pleins = Y4 au plus tot). Capital garanti a 100% a l'echeance. TRA brut max 6,69%.",
+  "risks": [
+    "Risque de credit de l'emetteur (CIC)",
+    "Risque de bail-in / resolution",
+    "Risque de perte en capital en cours de vie si revente avant echeance",
+    "Risque de liquidite sur le marche secondaire (spread 1%)",
+    "Risque de taux : si TEC10 > 4.60%, pas de coupon a partir de Y3",
+    "Risque de reinvestissement en cas de remboursement anticipe (TARN trigger)",
+    "Conflit d'interets : emetteur = agent de calcul = placeur",
+    "Frais de distribution jusqu'a 1,30% TTC inclus dans le prix d'emission",
+    "Risque d'inflation sur 10 ans"
+  ],
+  "summary": "EMTN TARN sur TEC 10, 10 ans. Coupon garanti 6,70% Y1-Y2, puis conditionnel 6,70% si TEC10 <= 4,60%. Remboursement auto si coupons cumules >= 26,80%. Capital garanti a echeance.",
+  "aiParsed": {
+    "name": "TARN TEC 10 Avril 2036 B",
+    "isin": "XS3340532707",
+    "type": "range_accrual",
+    "structureType": "range_accrual",
+    "emitter": "Crédit Industriel et Commercial",
+    "guarantor": null,
+    "emitterRating": {
+      "moodys": "A1",
+      "moodysDate": "2025-12-18",
+      "sp": "A+",
+      "spDate": "2025-12-08",
+      "fitch": "AA-",
+      "fitchDate": "2025-12-22"
+    },
+    "guarantorRating": {
+      "moodys": "A1",
+      "sp": "A+"
+    },
+    "underlyings": [
+      "Indice TEC 10"
+    ],
+    "underlyingType": "rates",
+    "currency": "EUR",
+    "issueDate": "2026-04-27",
+    "maturityDate": "2036-04-28",
+    "maturity": "10 ans",
+    "maturityYears": 10,
+    "issuePrice": 100,
+    "distributionFee": 0.013,
+    "bidAskSpread": 0.01,
+    "minInvestment": 100000,
+    "coupon": {
+      "rate": 6.7,
+      "rateIfCalled": null,
+      "rateIfMaturity": 6.7,
+      "type": "conditionnel",
+      "frequency": "annuel",
+      "trigger": null,
+      "memory": false,
+      "paymentTiming": "periodic",
+      "guaranteed": false,
+      "guaranteedYears": 2,
+      "guaranteedRate": 6.7,
+      "barrierCoupon": 4.6,
+      "barrierCouponType": "TEC10 <= 4.60%"
+    },
+    "participationRate": null,
+    "capitalProtection": {
+      "protected": true,
+      "level": 100,
+      "atMaturityOnly": true,
+      "barrier": null,
+      "barrierCoupon": 4.6,
+      "barrierType": null
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "target",
+      "discretionary": false,
+      "trigger": null,
+      "targetCouponLevel": 26.8,
+      "frequency": "annuel",
+      "startSemester": null,
+      "stepDown": false,
+      "stepDownPct": null
+    },
+    "mechanism": "TARN sur indice TEC 10. Coupon garanti 6,70% les 2 premieres annees (Y1-Y2). A partir de Y3, coupon conditionnel de 6,70% si TEC10 <= 4,60% a la date de constatation. Remboursement automatique anticipe des que la somme des coupons cumules >= 26,80% (soit 4 coupons pleins = Y4 au plus tot). Capital garanti a 100% a l'echeance. TRA brut max 6,69%.",
+    "risks": [
+      "Risque de credit de l'emetteur (CIC)",
+      "Risque de bail-in / resolution",
+      "Risque de perte en capital en cours de vie si revente avant echeance",
+      "Risque de liquidite sur le marche secondaire (spread 1%)",
+      "Risque de taux : si TEC10 > 4.60%, pas de coupon a partir de Y3",
+      "Risque de reinvestissement en cas de remboursement anticipe (TARN trigger)",
+      "Conflit d'interets : emetteur = agent de calcul = placeur",
+      "Frais de distribution jusqu'a 1,30% TTC inclus dans le prix d'emission",
+      "Risque d'inflation sur 10 ans"
+    ],
+    "summary": "EMTN TARN sur TEC 10, 10 ans. Coupon garanti 6,70% Y1-Y2, puis conditionnel 6,70% si TEC10 <= 4,60%. Remboursement auto si coupons cumules >= 26,80%. Capital garanti a echeance.",
+    "sourceFile": "Brochure XS3340532707 TARN TEC 10 Avril 2036 B.pdf"
+  },
+  "sourceFile": "JSON import",
+  "bankId": "cic",
+  "status": "analyzing",
+  "receivedDate": "2026-04-09",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null
+}
