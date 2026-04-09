@@ -28,8 +28,6 @@
     "protected": true,
     "level": 100,
     "atMaturityOnly": true,
-    "barrier": null,
-    "barrierCoupon": null,
     "barrierType": null
   },
   "earlyRedemption": {
@@ -51,10 +49,10 @@
     ],
     "redemptionLevel": 100,
     "stepDown": false,
-    "stepDownPct": null
+    "stepDownPct": null,
+    "hasAutocall": true,
+    "enabled": true
   },
-  "decrementPct": null,
-  "actualDividendYield": null,
   "mechanism": "Coupon fixe annuel de 4,00% garanti inconditionnellement. L'émetteur peut rappeler le titre à 100% à sa seule discrétion chaque année à partir du 20/04/2029. Garantie du capital à 100% à l'échéance du 21/04/2036, hors défaut/bail-in de l'émetteur.",
   "risks": [
     "Risque de crédit de l'émetteur (CIC)",
@@ -165,5 +163,12 @@
   "conversation": [],
   "conversationSummary": null,
   "decision": null,
-  "decisionReason": null
+  "decisionReason": null,
+  "aiCategory": "capital-protege",
+  "aiCategoryLabel": "🛡️ Capital Protégé",
+  "aiCategoryColor": "#4CAF50",
+  "aiOpinion": "Produit à capital protégé offrant un coupon fixe attractif de 4% annuel avec possibilité de remboursement anticipé, adapté aux profils prudents. Le rendement est correct mais limité, et l'absence d'informations sur le seuil d'autocall et le sous-jacent empêche une évaluation complète du risque de remboursement anticipé.",
+  "aiAnalyzedAt": "2026-04-09T11:37:28.937Z",
+  "envelope": "",
+  "minInvestment": 100000
 }
