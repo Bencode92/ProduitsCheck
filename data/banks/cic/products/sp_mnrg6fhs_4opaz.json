@@ -41,7 +41,7 @@
   },
   "earlyRedemption": {
     "possible": true,
-    "type": "target",
+    "type": "autocall",
     "discretionary": false,
     "trigger": null,
     "targetCouponLevel": 26.8,
