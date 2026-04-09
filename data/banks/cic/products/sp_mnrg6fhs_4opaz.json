@@ -36,7 +36,6 @@
     "protected": true,
     "level": 100,
     "atMaturityOnly": true,
-    "barrier": null,
     "barrierCoupon": 4.6,
     "barrierType": null
   },
@@ -49,10 +48,10 @@
     "frequency": "annuel",
     "startSemester": null,
     "stepDown": false,
-    "stepDownPct": null
+    "stepDownPct": null,
+    "hasAutocall": true,
+    "enabled": true
   },
-  "decrementPct": null,
-  "actualDividendYield": null,
   "mechanism": "TARN sur indice TEC 10. Coupon garanti 6,70% les 2 premieres annees (Y1-Y2). A partir de Y3, coupon conditionnel de 6,70% si TEC10 <= 4,60% a la date de constatation. Remboursement automatique anticipe des que la somme des coupons cumules >= 26,80% (soit 4 coupons pleins = Y4 au plus tot). Capital garanti a 100% a l'echeance. TRA brut max 6,69%.",
   "risks": [
     "Risque de credit de l'emetteur (CIC)",
@@ -155,5 +154,18 @@
   "conversation": [],
   "conversationSummary": null,
   "decision": null,
-  "decisionReason": null
+  "decisionReason": null,
+  "aiCategory": "capital-protege",
+  "aiCategoryLabel": "🛡️ Capital Protégé",
+  "aiCategoryColor": "#4CAF50",
+  "aiOpinion": "Produit défensif intéressant avec protection du capital et coupon attractif de 6.7% sur obligations françaises 10 ans, mais la structure range accrual rend le versement du coupon conditionnel aux mouvements de taux. La maturité longue de 10 ans expose à un risque de taux significatif malgré la protection du capital.",
+  "aiAnalyzedAt": "2026-04-09T12:22:50.202Z",
+  "envelope": "",
+  "rangeAccrual": {
+    "lowerBound": 0,
+    "upperBound": 0,
+    "reference": "Euribor 3 mois",
+    "observation": "daily"
+  },
+  "minInvestment": 100000
 }
