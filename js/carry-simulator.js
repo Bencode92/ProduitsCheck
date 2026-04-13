@@ -68,7 +68,7 @@
         duration: 10,
         capitalGaranti: true,
         condition: 'TEC10 ≤ 4.40%',
-        conditionProb: 0.80, // 80% based on current TEC10 at 3.10%
+        conditionProb: 0.68, // 68% — vol réaliste 80bps, mean-reverting, marge 130bps
         description: 'Coupon 6% si TEC10 reste sous 4.40%. Autocall si cumul ≥ 24%.',
         risk: 'medium',
         riskLabel: 'Coupon 0% si TEC10 > 4.40% (actuellement 3.10%, marge 130bps)',
@@ -82,7 +82,7 @@
         duration: 5,
         capitalGaranti: true,
         condition: 'TEC10 ≤ 4.40% + mémoire',
-        conditionProb: 0.85, // higher due to memory effect
+        conditionProb: 0.75, // mémoire rattrape → prob effective plus haute que TARN
         description: 'Coupon 4.6% si TEC10 ≤ 4.40%. Mémoire: coupons rattrapés.',
         risk: 'medium',
         riskLabel: 'Coupon conditionnel mais mémoire rattrape les années manquées',
@@ -98,7 +98,7 @@
         duration: 5,
         capitalGaranti: true,
         condition: 'Plancher 3% garanti + 2.5% si TEC10 ≤ 4.40%',
-        conditionProb: 0.80,
+        conditionProb: 0.68, // même prob que TARN pour le bonus
         description: 'Plancher 3% garanti (couvre l\'emprunt). Bonus 2.5% conditionnel.',
         risk: 'very_low',
         riskLabel: 'Marge minimum garantie (plancher 3% > emprunt 2.9%)',
@@ -112,7 +112,7 @@
         duration: 5,
         capitalGaranti: true,
         condition: 'Euribor 3M dans [1.75%-3.50%]',
-        conditionProb: 0.65,
+        conditionProb: 0.55, // vol Euribor élevée en stagflation
         description: 'Coupon proportionnel au nombre de jours dans le corridor.',
         risk: 'medium_high',
         riskLabel: 'Euribor volatile en stagflation, prob corridor ~65%',
@@ -228,13 +228,19 @@
         var placedAmount = basePlaced + reinvestShare;
 
         var couponPeriod = 0;
-        if (p.type === 'fixe') {
+        // Bug fix: no coupon after product maturity
+        if (p.duration && yearNum > p.duration) {
+          // Product has matured — capital returned, no more coupon
+          // Assume reinvested in CAT at benchmark rate as fallback
+          var catFallback = (typeof window._getCATBenchmark === 'function') ? window._getCATBenchmark() : 2.80;
+          couponPeriod = Math.round(placedAmount * catFallback / 100 / ppY);
+        } else if (p.type === 'fixe') {
           couponPeriod = Math.round(placedAmount * p.coupon / 100 / ppY);
         } else if (p.type === 'hybride') {
           couponPeriod = Math.round(placedAmount * p.couponPlancher / 100 / ppY);
-          couponPeriod += Math.round(placedAmount * p.couponBonus / 100 / ppY * (p.conditionProb || 0.8));
+          couponPeriod += Math.round(placedAmount * p.couponBonus / 100 / ppY * (p.conditionProb || 0.68));
         } else if (p.type === 'conditionnel') {
-          couponPeriod = Math.round(placedAmount * p.coupon / 100 / ppY * (p.conditionProb || 0.75));
+          couponPeriod = Math.round(placedAmount * p.coupon / 100 / ppY * (p.conditionProb || 0.68));
         }
         revenue += couponPeriod;
         totalPlaced += placedAmount;
@@ -277,15 +283,25 @@
     var optimistRevenue = 0, stressRevenue = 0;
     config.products.forEach(function(slot) {
       var p = slot.product;
+      // Use min(product duration, loan years) for revenue projection
+      var effectiveYears = p.duration ? Math.min(p.duration, years) : years;
+      var remainingYears = years - effectiveYears;
+      var catFb = 2.80; // fallback after product matures
       if (p.type === 'fixe') {
-        optimistRevenue += slot.amount * p.coupon / 100 * years;
-        stressRevenue += slot.amount * p.coupon / 100 * years;
+        optimistRevenue += slot.amount * p.coupon / 100 * effectiveYears;
+        optimistRevenue += slot.amount * catFb / 100 * remainingYears;
+        stressRevenue += slot.amount * p.coupon / 100 * effectiveYears; // garanti
+        stressRevenue += slot.amount * catFb / 100 * remainingYears;
       } else if (p.type === 'hybride') {
-        optimistRevenue += slot.amount * (p.couponPlancher + p.couponBonus) / 100 * years;
-        stressRevenue += slot.amount * p.couponPlancher / 100 * years; // only floor
+        optimistRevenue += slot.amount * (p.couponPlancher + p.couponBonus) / 100 * effectiveYears;
+        optimistRevenue += slot.amount * catFb / 100 * remainingYears;
+        stressRevenue += slot.amount * p.couponPlancher / 100 * effectiveYears; // plancher garanti
+        stressRevenue += slot.amount * catFb / 100 * remainingYears;
       } else {
-        optimistRevenue += slot.amount * p.coupon / 100 * years;
-        stressRevenue += slot.amount * p.coupon / 100 * years * 0.30; // 30% of periods
+        optimistRevenue += slot.amount * p.coupon / 100 * effectiveYears;
+        optimistRevenue += slot.amount * catFb / 100 * remainingYears;
+        stressRevenue += 0; // vrai pire cas = 0% coupon toute la durée
+        stressRevenue += slot.amount * catFb / 100 * remainingYears;
       }
     });
 

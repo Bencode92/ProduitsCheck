@@ -86,8 +86,9 @@ Le TEC10 (Taux de l'Échéance Constante 10 ans) est le rendement de l'OAT fran�
 | **Seuil du produit** | 4.40% |
 | **Marge de sécurité** | 130 bps (1.30%) |
 | **Dernière fois > 4.40%** | Début des années 2000 (>20 ans) |
-| **Vol annualisée OAT 10Y** | ~14-15 bps |
-| **Probabilité de rester ≤ 4.40%** | ~80% par année |
+| **Vol annualisée OAT 10Y** | ~70-90 bps (historique réaliste) |
+| **Vol annualisée OAT 10Y réaliste** | ~70-90 bps (historique 2022-2025) |
+| **Probabilité de rester ≤ 4.40%** | ~65-70% par année (vol réaliste, mean-reverting) |
 
 **Historiquement, le TEC10 n'a pas dépassé 4.40% depuis plus de 20 ans.** Pour que le seuil soit franchi, il faudrait :
 - Une crise de confiance sur la dette française (type crise souveraine)
@@ -268,10 +269,14 @@ Si le CIC ne peut pas faire l'hybride, demander les alternatives :
 | **Pire cas 10 ans** | +7 500€ (toujours positif) |
 | **Capital à risque** | 0€ (capital garanti + emprunt = match) |
 | **Risque maximum** | Défaut CIC (<0.5% sur 10 ans) |
-| **TRI de l'opération** | ∞ (pas d'apport de fonds propres) |
+| **Apport fonds propres** | 0€ (100% financé par emprunt) |
 | **Effet composé** | +29 419€ de bonus sur 10 ans |
 
-**L'opération génère ~187 000€ de marge nette sur 10 ans sans apport de fonds propres, avec un pire cas toujours positif grâce au plancher garanti. Le TRI est théoriquement infini car il n'y a aucun investissement en capital.**
+**L'opération génère ~120-150K€ de marge nette sur 10 ans sans apport de fonds propres, avec un pire cas toujours positif grâce au plancher garanti. Les chiffres dépendent de la probabilité conditionnelle du bonus (~65-70%) et du taux d'emprunt effectif.**
+
+**Prérequis absolus avant signature :**
+1. Offre de financement écrite ferme (taux ≤ 3.5%)
+2. Term sheet complète du produit structuré (plancher, call, émetteur exact)
 
 ---
 
