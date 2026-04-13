@@ -188,13 +188,14 @@
   }
 
   // ─── Compute cash flows for a config ────────────────
-  function _computeCashFlow(config, loanAmount, loanRate, years, taxRate, loanType) {
+  function _computeCashFlow(config, loanAmount, loanRate, years, taxRate, loanType, reinvest) {
     var ppY = _periodsPerYear(_state.frequency);
     var totalPeriods = years * ppY;
     var periodRate = loanRate / 100 / ppY;
 
     var flows = [];
     var capitalRemaining = loanAmount;
+    var reinvestedCapital = 0; // cumul of reinvested net profits
     var totalRevenue = 0, totalInterest = 0, totalCapital = 0;
 
     for (var i = 1; i <= totalPeriods; i++) {
@@ -203,37 +204,40 @@
       var capitalPayment = 0;
 
       if (loanType === 'amortissable') {
-        // Annuité constante
         var annuity = Math.round(loanAmount * periodRate / (1 - Math.pow(1 + periodRate, -totalPeriods)));
         capitalPayment = annuity - interest;
-        if (i === totalPeriods) capitalPayment = capitalRemaining; // dernier versement
+        if (i === totalPeriods) capitalPayment = capitalRemaining;
       } else {
-        // In fine: capital remboursé en une fois à la fin
         if (i === totalPeriods) capitalPayment = loanAmount;
       }
 
       // Revenue from structured products
+      // Base = original allocation + reinvested profits (compound effect)
       var revenue = 0;
       var revenueDetail = [];
+      var totalPlaced = 0;
       config.products.forEach(function(slot) {
         var p = slot.product;
-        // For amortissable, the placed amount decreases proportionally
-        var placedAmount = loanType === 'amortissable'
+        var basePlaced = loanType === 'amortissable'
           ? Math.round(slot.amount * (capitalRemaining / loanAmount))
           : slot.amount;
+        // Add proportional share of reinvested capital
+        var reinvestShare = reinvest && loanAmount > 0
+          ? Math.round(reinvestedCapital * (slot.amount / loanAmount))
+          : 0;
+        var placedAmount = basePlaced + reinvestShare;
 
         var couponPeriod = 0;
         if (p.type === 'fixe') {
           couponPeriod = Math.round(placedAmount * p.coupon / 100 / ppY);
         } else if (p.type === 'hybride') {
-          // Plancher always, bonus with probability
           couponPeriod = Math.round(placedAmount * p.couponPlancher / 100 / ppY);
-          // For base scenario, add bonus × prob
           couponPeriod += Math.round(placedAmount * p.couponBonus / 100 / ppY * (p.conditionProb || 0.8));
         } else if (p.type === 'conditionnel') {
           couponPeriod = Math.round(placedAmount * p.coupon / 100 / ppY * (p.conditionProb || 0.75));
         }
         revenue += couponPeriod;
+        totalPlaced += placedAmount;
         revenueDetail.push({ name: p.name, amount: couponPeriod, placed: placedAmount });
       });
 
@@ -241,12 +245,17 @@
       var tax = netBeforeTax > 0 ? Math.round(netBeforeTax * taxRate / 100) : 0;
       var netAfterTax = netBeforeTax - tax;
 
+      // Reinvest net profits into the placed capital for next period
+      if (reinvest && netAfterTax > 0) {
+        reinvestedCapital += netAfterTax;
+      }
+
       capitalRemaining = Math.max(0, capitalRemaining - capitalPayment);
 
       flows.push({
         period: i,
         year: yearNum,
-        capitalRemaining: capitalRemaining + capitalPayment, // before payment
+        capitalRemaining: capitalRemaining + capitalPayment,
         interest: interest,
         capitalPayment: capitalPayment,
         payment: interest + capitalPayment,
@@ -254,7 +263,9 @@
         revenueDetail: revenueDetail,
         netBeforeTax: netBeforeTax,
         tax: tax,
-        netAfterTax: netAfterTax
+        netAfterTax: netAfterTax,
+        reinvestedCapital: reinvestedCapital,
+        totalPlaced: totalPlaced
       });
 
       totalRevenue += revenue;
@@ -337,7 +348,9 @@
     r.configs.forEach(function(c) { if (c.bestNet > best.bestNet) best = c; });
     html += '<div style="background:rgba(6,214,160,0.06);border:2px solid rgba(6,214,160,0.3);border-radius:var(--radius-sm);padding:14px;margin-bottom:16px">';
     html += '<div style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:4px">⭐ RECOMMANDATION : ' + best.config.icon + ' ' + best.config.name + '</div>';
-    html += '<div style="font-size:11px;color:var(--text-muted)">Marge nette ' + (best.bestType === 'inFine' ? 'in fine' : 'amortissable') + ' : <span style="color:var(--green);font-weight:700;font-family:var(--mono)">+' + _fmt(best.bestNet) + '€</span> sur ' + _state.years + ' ans soit <span style="font-weight:700">+' + _fmt(Math.round(best.bestNet / _state.years)) + '€/an</span></div>';
+    html += '<div style="font-size:11px;color:var(--text-muted)">Marge nette ' + (best.bestType === 'inFine' ? 'in fine' : 'amortissable') + ' (composée) : <span style="color:var(--green);font-weight:700;font-family:var(--mono)">+' + _fmt(best.bestNet) + '€</span> sur ' + _state.years + ' ans soit <span style="font-weight:700">+' + _fmt(Math.round(best.bestNet / _state.years)) + '€/an</span>';
+    if (best.compoundBonus > 0) html += ' · <span style="color:var(--cyan)">dont +' + _fmt(best.compoundBonus) + '€ d\'effet composé</span>';
+    html += '</div>';
     html += '</div>';
 
     // Config comparison table
@@ -349,7 +362,8 @@
     html += '<th style="padding:8px 6px;text-align:center;color:var(--text-muted);font-size:10px">Risque</th>';
     html += '<th style="padding:8px 6px;text-align:right;color:var(--cyan);font-size:10px">In Fine /an</th>';
     html += '<th style="padding:8px 6px;text-align:right;color:var(--purple);font-size:10px">Amort. /an</th>';
-    html += '<th style="padding:8px 6px;text-align:right;color:var(--green);font-size:10px">Meilleur net total</th>';
+    html += '<th style="padding:8px 6px;text-align:right;color:var(--green);font-size:10px">Net total (composé)</th>';
+    html += '<th style="padding:8px 6px;text-align:right;color:var(--cyan);font-size:10px">Bonus composé</th>';
     html += '<th style="padding:8px 6px;text-align:right;color:var(--orange);font-size:10px">Pire cas /an</th>';
     html += '</tr></thead><tbody>';
 
@@ -374,6 +388,7 @@
       html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:var(--cyan)">+' + _fmt(c.inFine.avgMarginPerYear) + '€</td>';
       html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:var(--purple)">+' + _fmt(c.amortissable.avgMarginPerYear) + '€</td>';
       html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);font-weight:700;color:var(--green)">+' + _fmt(c.bestNet) + '€</td>';
+      html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:var(--cyan)">' + (c.compoundBonus > 0 ? '+' + _fmt(c.compoundBonus) + '€' : '—') + '</td>';
       html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:' + (worstPerYear >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (worstPerYear >= 0 ? '+' : '') + _fmt(worstPerYear) + '€</td>';
       html += '</tr>';
     });
@@ -387,13 +402,13 @@
     // In fine
     html += '<div style="border:1px solid var(--cyan)33;border-radius:var(--radius-sm);overflow:hidden">';
     html += '<div style="padding:10px;background:rgba(78,205,196,0.06);font-weight:700;color:var(--cyan);font-size:11px">IN FINE — Capital remboursé à la fin</div>';
-    html += _renderFlowTable(best.inFine, 'inFine');
+    html += _renderFlowTable(best.inFineCompound, 'inFine');
     html += '</div>';
 
     // Amortissable
     html += '<div style="border:1px solid #A855F733;border-radius:var(--radius-sm);overflow:hidden">';
     html += '<div style="padding:10px;background:rgba(168,85,247,0.06);font-weight:700;color:#A855F7;font-size:11px">AMORTISSABLE — Capital remboursé progressivement</div>';
-    html += _renderFlowTable(best.amortissable, 'amort');
+    html += _renderFlowTable(best.amortCompound, 'amort');
     html += '</div>';
 
     html += '</div>';
@@ -428,16 +443,18 @@
     h += '<th style="padding:4px 6px;text-align:right;color:var(--text-dim)">Intérêts</th>';
     h += '<th style="padding:4px 6px;text-align:right;color:var(--text-dim)">Marge brute</th>';
     h += '<th style="padding:4px 6px;text-align:right;color:var(--text-dim)">Net IS</th>';
+    h += '<th style="padding:4px 6px;text-align:right;color:var(--text-dim)">Capital placé</th>';
     h += '</tr></thead><tbody>';
 
     // Aggregate by year
     var byYear = {};
     cf.flows.forEach(function(f) {
-      if (!byYear[f.year]) byYear[f.year] = { revenue: 0, interest: 0, net: 0, netAfterTax: 0 };
+      if (!byYear[f.year]) byYear[f.year] = { revenue: 0, interest: 0, net: 0, netAfterTax: 0, totalPlaced: 0 };
       byYear[f.year].revenue += f.revenue;
       byYear[f.year].interest += f.interest;
       byYear[f.year].net += f.netBeforeTax;
       byYear[f.year].netAfterTax += f.netAfterTax;
+      byYear[f.year].totalPlaced = f.totalPlaced; // last period of the year
     });
 
     Object.keys(byYear).forEach(function(yr, i) {
@@ -450,6 +467,7 @@
       h += '<td style="padding:4px 6px;text-align:right;font-family:var(--mono);color:var(--red)">-' + _fmt(y.interest) + '€</td>';
       h += '<td style="padding:4px 6px;text-align:right;font-family:var(--mono)">' + (y.net >= 0 ? '+' : '') + _fmt(y.net) + '€</td>';
       h += '<td style="padding:4px 6px;text-align:right;font-family:var(--mono);font-weight:600;color:' + nc + '">' + (y.netAfterTax >= 0 ? '+' : '') + _fmt(y.netAfterTax) + '€</td>';
+      h += '<td style="padding:4px 6px;text-align:right;font-family:var(--mono);color:var(--cyan);font-size:10px">' + _fmt(y.totalPlaced) + '€</td>';
       h += '</tr>';
     });
 
@@ -475,11 +493,19 @@
     var results = [];
 
     configs.forEach(function(config) {
-      var inFine = _computeCashFlow(config, _state.amount, _state.rate, _state.years, _state.taxRate, 'inFine');
-      var amort = _computeCashFlow(config, _state.amount, _state.rate, _state.years, _state.taxRate, 'amortissable');
-      var bestNet = Math.max(inFine.totalNetAfterTax, amort.totalNetAfterTax);
-      var bestType = inFine.totalNetAfterTax >= amort.totalNetAfterTax ? 'inFine' : 'amortissable';
-      results.push({ config: config, inFine: inFine, amortissable: amort, bestNet: bestNet, bestType: bestType });
+      var inFine = _computeCashFlow(config, _state.amount, _state.rate, _state.years, _state.taxRate, 'inFine', false);
+      var amort = _computeCashFlow(config, _state.amount, _state.rate, _state.years, _state.taxRate, 'amortissable', false);
+      var inFineCompound = _computeCashFlow(config, _state.amount, _state.rate, _state.years, _state.taxRate, 'inFine', true);
+      var amortCompound = _computeCashFlow(config, _state.amount, _state.rate, _state.years, _state.taxRate, 'amortissable', true);
+      var bestNet = Math.max(inFineCompound.totalNetAfterTax, amortCompound.totalNetAfterTax);
+      var bestType = inFineCompound.totalNetAfterTax >= amortCompound.totalNetAfterTax ? 'inFine' : 'amortissable';
+      var compoundBonus = bestNet - Math.max(inFine.totalNetAfterTax, amort.totalNetAfterTax);
+      results.push({
+        config: config,
+        inFine: inFine, amortissable: amort,
+        inFineCompound: inFineCompound, amortCompound: amortCompound,
+        bestNet: bestNet, bestType: bestType, compoundBonus: compoundBonus
+      });
     });
 
     // Sort by best net descending
