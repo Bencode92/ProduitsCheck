@@ -154,6 +154,14 @@
     html += '<button class="btn" onclick="_carryImportJSON()" style="margin-top:8px;font-size:11px;padding:6px 14px;background:rgba(59,130,246,0.1);border-color:rgba(59,130,246,0.3);color:var(--accent)">📥 Importer et ajouter au comparateur</button>';
     html += '</div>';
 
+    // AI generation
+    html += '<div style="background:var(--bg-elevated);border:1px solid rgba(168,85,247,0.3);border-radius:var(--radius-sm);padding:16px;margin-bottom:16px">';
+    html += '<div style="font-size:12px;font-weight:700;color:#A855F7;margin-bottom:8px">🤖 GÉNÉRER DES PRODUITS AVEC CLAUDE</div>';
+    html += '<div style="font-size:10px;color:var(--text-dim);margin-bottom:10px">Claude analyse les conditions de marché (TEC10 3.10%, BCE 2.15%, stagflation) et propose des produits sur-mesure réalistes que vous pourriez négocier avec votre banquier.</div>';
+    html += '<div id="carry-ai-status"></div>';
+    html += '<button class="btn" id="carry-ai-btn" onclick="_carryGenerateAI()" style="font-size:11px;padding:8px 16px;background:rgba(168,85,247,0.1);border-color:rgba(168,85,247,0.3);color:#A855F7">🤖 Générer 3-4 produits sur-mesure</button>';
+    html += '</div>';
+
     // Manual product add
     html += '<div style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;margin-bottom:16px">';
     html += '<div style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:8px">✏️ AJOUTER UN PRODUIT MANUELLEMENT</div>';
@@ -329,6 +337,63 @@
   }
 
   // ═══ ACTIONS ═══════════════════════════════════════════════
+
+  window._carryGenerateAI = async function() {
+    var btn = document.getElementById('carry-ai-btn');
+    var status = document.getElementById('carry-ai-status');
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ Claude analyse le marché...'; }
+    if (status) status.innerHTML = '<div style="display:flex;align-items:center;gap:8px;padding:8px;color:var(--text-muted);font-size:11px"><div class="spinner" style="width:16px;height:16px;border-width:2px"></div>Génération en cours (10-20s)...</div>';
+
+    var prompt = 'Tu es un structureur de produits financiers. Un client entreprise emprunte ' + _fmt(_state.amount) + ' EUR a ' + _state.rate + '% fixe sur ' + _state.years + ' ans (in fine). Il veut placer en produits structures capital garanti pour generer une marge.\n\n';
+    prompt += 'Conditions marche actuelles :\n- TEC10 (OAT 10 ans) : 3.10%\n- BCE depot : 2.00%\n- BCE main : 2.15%\n- Regime : stagflation (Brent $122, PCE 2.83%)\n- Vol OAT 10Y : ~80 bps/an\n- Euribor 3M : ~2.50%\n\n';
+    prompt += 'Genere 3-4 produits structures sur-mesure REALISTES qu\'une banque CIC/SG pourrait proposer. Chaque produit doit :\n- Etre capital garanti 100%\n- Avoir un coupon > ' + _state.rate + '% (sinon pas de marge)\n- Etre realisable (pas de coupon fantaisiste)\n\n';
+    prompt += 'Reponds UNIQUEMENT en JSON, un tableau de produits :\n```json\n[\n  {\n    "name": "Nom du produit",\n    "type": "fixe" ou "conditionnel" ou "hybride",\n    "coupon": 5.0,\n    "couponPlancher": 3.0,\n    "couponBonus": 2.0,\n    "duration": 5,\n    "condition": "TEC10 <= 4.40%" ou null,\n    "conditionProb": 0.68,\n    "risk": "Description courte du risque",\n    "rationale": "Pourquoi ce produit est realiste"\n  }\n]\n```\nPas de texte avant ou apres le JSON.';
+
+    try {
+      var resp = await fetch(CONFIG.AI_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: CONFIG.AI_MODEL || 'claude-sonnet-4-20250514',
+          max_tokens: 2000,
+          messages: [{ role: 'user', content: prompt }]
+        })
+      });
+      var data = await resp.json();
+      var text = data.content ? data.content[0].text : (data.choices ? data.choices[0].message.content : '');
+
+      // Extract JSON from response
+      var jsonMatch = text.match(/\[[\s\S]*\]/);
+      if (!jsonMatch) throw new Error('Pas de JSON dans la réponse');
+      var products = JSON.parse(jsonMatch[0]);
+
+      products.forEach(function(p) {
+        _state.products.push({
+          id: 'ai_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+          name: p.name || 'Produit IA',
+          type: p.type || 'conditionnel',
+          coupon: parseFloat(p.coupon) || 5,
+          couponPlancher: p.type === 'hybride' ? (parseFloat(p.couponPlancher) || 3) : undefined,
+          couponBonus: p.type === 'hybride' ? (parseFloat(p.couponBonus) || 2) : undefined,
+          duration: parseInt(p.duration) || 5,
+          capitalGaranti: true,
+          condition: p.condition || null,
+          conditionProb: parseFloat(p.conditionProb) || (p.type === 'fixe' ? 1.0 : 0.68),
+          color: p.type === 'fixe' ? '#06D6A0' : p.type === 'hybride' ? '#4ECDC4' : '#FFB627',
+          risk: p.risk || '?',
+          rationale: p.rationale || '',
+          source: 'Claude IA'
+        });
+      });
+
+      if (status) status.innerHTML = '<div style="padding:8px;color:var(--green);font-size:11px">✅ ' + products.length + ' produits générés avec succès</div>';
+      setTimeout(function() { renderCarrySimulator(document.getElementById('main-content')); }, 1000);
+    } catch(e) {
+      console.error('[CarryAI] Error:', e);
+      if (status) status.innerHTML = '<div style="padding:8px;color:var(--red);font-size:11px">❌ Erreur : ' + e.message + '</div>';
+      if (btn) { btn.disabled = false; btn.textContent = '🤖 Réessayer'; }
+    }
+  };
 
   window._carryRemoveProduct = function(idx) {
     _state.products.splice(idx, 1);
