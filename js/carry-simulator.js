@@ -11,7 +11,7 @@
     amount: 1000000,
     rate: 2.90,
     years: 10,
-    frequency: 'trimestriel', // mensuel, trimestriel, annuel
+    frequency: 'annuel', // fixé annuel pour lisibilité
     taxRate: 25, // IS
     result: null
   };
@@ -301,19 +301,16 @@
 
     html += '<div style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;margin-bottom:16px">';
     html += '<div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:12px">PARAMÈTRES EMPRUNT</div>';
-    html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px">';
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">';
     html += '<div><label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:4px">Montant (€)</label>';
-    html += '<input type="number" id="carry-amount" value="' + _state.amount + '" step="100000" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text-bright);font-family:var(--mono);font-size:13px"></div>';
+    html += '<input type="number" id="carry-amount" value="' + _state.amount + '" step="100000" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text-bright);font-family:var(--mono);font-size:15px"></div>';
     html += '<div><label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:4px">Taux fixe (%)</label>';
-    html += '<input type="number" id="carry-rate" value="' + _state.rate + '" step="0.1" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text-bright);font-family:var(--mono);font-size:13px"></div>';
+    html += '<input type="number" id="carry-rate" value="' + _state.rate + '" step="0.1" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text-bright);font-family:var(--mono);font-size:15px"></div>';
     html += '<div><label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:4px">Durée (ans)</label>';
-    html += '<input type="number" id="carry-years" value="' + _state.years + '" min="1" max="30" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text-bright);font-family:var(--mono);font-size:13px"></div>';
-    html += '<div><label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:4px">Fréquence</label>';
-    html += '<select id="carry-freq" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text-bright);font-size:13px">';
-    ['trimestriel', 'mensuel', 'annuel'].forEach(function(f) {
-      html += '<option value="' + f + '"' + (f === _state.frequency ? ' selected' : '') + '>' + f.charAt(0).toUpperCase() + f.slice(1) + '</option>';
-    });
-    html += '</select></div></div></div>';
+    html += '<input type="number" id="carry-years" value="' + _state.years + '" min="1" max="30" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text-bright);font-family:var(--mono);font-size:15px"></div>';
+    html += '</div>';
+    html += '<div style="font-size:10px;color:var(--text-dim);margin-top:8px">Le système compare automatiquement In Fine vs Amortissable et propose les meilleurs produits structurés.</div>';
+    html += '</div>';
 
     html += '<button class="btn primary ai-glow" style="width:100%;padding:14px;font-size:14px" onclick="_carrySimulate()">⚡ Optimiser le carry trade</button>';
     html += '</div>';
@@ -472,7 +469,7 @@
     _state.amount = parseFloat(document.getElementById('carry-amount')?.value) || 1000000;
     _state.rate = parseFloat(document.getElementById('carry-rate')?.value) || 2.90;
     _state.years = parseInt(document.getElementById('carry-years')?.value) || 10;
-    _state.frequency = document.getElementById('carry-freq')?.value || 'trimestriel';
+    _state.frequency = 'annuel';
 
     var configs = _generateConfigs(_state.amount, _state.rate, _state.years);
     var results = [];
