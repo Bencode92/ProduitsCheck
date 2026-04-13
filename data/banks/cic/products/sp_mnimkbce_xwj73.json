@@ -189,7 +189,7 @@
   "minInvestment": 10000,
   "grading": {
     "grade": "C",
-    "score": 58,
+    "score": 59,
     "killCriteria": {
       "triggered": false,
       "reasons": []
@@ -199,31 +199,31 @@
         "score": 67,
         "base": 64,
         "delta": -2,
-        "reasoning": "Rendement: base 64 → -2 = 62 (En stagflation avec Brent >$120, le TEC10 (taux long) risque de monter fortement, réduisant la probabilité que la barrière coupon à 4.4% soit franchie) | Coupon 4.6%, protégé | Barr.coupon 4.4%"
+        "reasoning": "Rendement: base 64 → -2 = 62 (En stagflation avec taux longs volatils, la probabilité que le TEC10 dépasse 4.4% est réduite malgré l'inflation persistante) | Coupon 4.6%, protégé | Barr.coupon 4.4%"
       },
       "underlyingQuality": {
-        "score": 65,
-        "base": 67,
+        "score": 70,
+        "base": 72,
         "delta": -2,
-        "reasoning": "Qualité: base 67 → -2 = 65 (Le TEC10 n'est pas un actif risqué mais un taux d'intérêt, neutre en stagflation mais vulnérable à la pentification de la courbe mentionnée)"
+        "reasoning": "Qualité: base 72 → -2 = 70 (Le TEC10 est vulnérable en stagflation car la BCE pourrait maintenir des taux bas malgré l'inflation pour éviter la récession)"
       },
       "portfolioFit": {
         "score": 60,
         "base": 80,
         "delta": 2,
-        "reasoning": "Fit: base 80 → +2 = 82 (En stagflation, un produit sur taux avec capital garanti offre une protection précieuse contre l'inflation et la volatilité des actions)"
+        "reasoning": "Fit: base 80 → +2 = 82 (Capital garanti très pertinent en régime stagflationnaire instable avec VIX à 22 et breadth collapse)"
       },
       "riskPremium": {
         "score": 54,
         "base": 48,
-        "delta": 0,
+        "delta": -2,
         "reasoning": "Capital garanti: spread 4.6% - CAT 2.5% - illiq 0.5% = 1.6%"
       }
     },
-    "verdict": "Ce produit sur TEC10 offre une protection capitale bienvenue en régime stagflationniste, mais le coupon de 4.6% annualisé reste vulnérable à la hausse des taux longs. Avec le Brent à $121.88 et une inflation PCE à 2.83%, la BCE pourrait être forcée de maintenir des taux élevés, poussant le TEC10 au-delà de la barrière de 4.4%. Le capital garanti limite le risque à l'opportunité manquée, mais la probabilité de toucher le coupon pendant 5 ans reste incertaine dans ce contexte de pentification.",
+    "verdict": "En régime stagflationnaire avec Brent proche de 100$ et PCE à 2.8%, ce produit capital garanti sur TEC10 offre une protection bienvenue mais un rendement décevant. La barrière coupon à 4.4% pourrait être difficile à franchir si la BCE maintient sa politique accommodante malgré l'inflation. Avec seulement 220bps de spread sur 5 ans et un scoring final de 59/100, le couple risque/rendement est insuffisant dans ce contexte de forte incertitude macro.",
     "keyRisks": [
-      "Hausse brutale du TEC10 au-delà de 4.4% annulant les coupons",
-      "Opportunité manquée si les taux baissent rapidement après souscription"
+      "TEC10 pourrait rester sous 4.4% si BCE privilégie croissance vs inflation",
+      "Coût d'opportunité élevé avec seulement 4.6% sur 5 ans en stagflation"
     ],
     "negotiationPoints": [],
     "scenarios": {
@@ -240,29 +240,29 @@
         "duration_years": 5
       },
       "stress": {
-        "return_pct": 0.9,
-        "return_eur": 4600,
-        "probability": 0.25,
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.3,
         "duration_years": 5
       },
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.15,
+        "probability": 0.1,
         "duration_years": 5
       }
     },
     "confidenceInterval": {
-      "low": 54,
-      "high": 72,
+      "low": 55,
+      "high": 73,
       "halfWidth": 9,
       "gradeStable": false,
       "gradeRange": "C-B",
-      "label": "B [54-72]"
+      "label": "B [55-73]"
     },
     "metadata": {
-      "gradedAt": "2026-04-03T12:30:52.335Z",
-      "durationMs": 19609,
+      "gradedAt": "2026-04-13T07:59:02.117Z",
+      "durationMs": 18713,
       "aiUsed": true,
       "version": "7.1",
       "productType": "capital_garanti",
@@ -281,13 +281,13 @@
       "expectedMaturity": 5,
       "maxMaturity": 5,
       "maxBeta": null,
-      "baseScore": 64,
+      "baseScore": 65,
       "baseGrade": "B",
       "adjustments": {
         "p1": -2,
         "p2": -2,
         "p3": 2,
-        "p4": 0
+        "p4": -2
       },
       "barrier_sigma": null,
       "barrier_sigma_label": null,
@@ -295,9 +295,9 @@
       "liquidity_level": "L4",
       "liquidity_score": 10,
       "liquidity_label": "Illiquide",
-      "ci_low": 54,
-      "ci_high": 72,
-      "ci_label": "B [54-72]",
+      "ci_low": 55,
+      "ci_high": 73,
+      "ci_label": "B [55-73]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
@@ -314,20 +314,20 @@
     },
     "regimeScenarios": {
       "current": {
-        "score": 58,
+        "score": 59,
         "grade": "C",
         "label": "Actuel (stagflation)",
         "desc": "Seuil menacé mais mémoire rattrape les coupons"
       },
       "bull": {
-        "score": 63,
+        "score": 64,
         "grade": "B",
         "label": "Bull / Risk-on",
         "delta": 5,
         "desc": "Taux baissent sous le seuil → coupons + rattrapage"
       },
       "crash": {
-        "score": 52,
+        "score": 53,
         "grade": "C",
         "label": "Crash / Récession",
         "delta": -6,
