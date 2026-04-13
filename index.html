@@ -23,6 +23,7 @@
       <button class="nav-tab" data-view="parser" onclick="switchMainView('parser')">📄 Analyseur</button>
       <button class="nav-tab" data-view="allocator" onclick="switchMainView('allocator')">⚡ Allocateur</button>
       <button class="nav-tab" data-view="analytics" onclick="switchMainView('analytics')">📊 Analytique</button>
+      <button class="nav-tab" data-view="carry" onclick="switchMainView('carry')">🏦 Carry Trade</button>
     </div>
     <div class="topbar-actions">
       <div class="topbar-status"><span class="dot-live"></span><span>Connecté</span></div>
@@ -91,6 +92,7 @@
   <!-- CAT maturity optimizer + Unified allocator -->
   <script src="js/cat-maturity-optimizer.js?v=20260402v2"></script>
   <script src="js/unified-allocator.js?v=20260402v2"></script>
+  <script src="js/carry-simulator.js?v=20260413"></script>
   <!-- Barrier distance + comparison view (post-grading features) -->
   <script src="js/barrier-distance-patch.js?v=20260402ak"></script>
   <script src="js/comparison-view.js?v=20260402ak"></script>
@@ -102,6 +104,7 @@
       else if (view === 'analytics') { app.setState({ view: 'analytics' }); renderAnalytics(document.getElementById('main-content')); }
       else if (view === 'parser') { app.setState({ view: 'parser' }); renderBrochureParser(document.getElementById('main-content')); }
       else if (view === 'allocator') { app.setState({ view: 'allocator' }); renderUnifiedAllocator(document.getElementById('main-content')); }
+      else if (view === 'carry') { app.setState({ view: 'carry' }); renderCarrySimulator(document.getElementById('main-content')); }
       else { app.goToDashboard(); }
     }
     document.addEventListener('DOMContentLoaded', async () => {
