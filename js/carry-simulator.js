@@ -168,23 +168,34 @@
     html += '</div>';
 
     // Products in comparator
-    var allProducts = _defaultProducts().concat(_state.products);
+    var allProducts = _state.products.slice(); // only user-created products
     html += '<div style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;margin-bottom:16px">';
-    html += '<div style="font-size:12px;font-weight:700;color:var(--text-bright);margin-bottom:10px">📦 PRODUITS DANS LE COMPARATEUR (' + allProducts.length + ')</div>';
-    html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">';
-    allProducts.forEach(function(p) {
-      var typeLabel = p.type === 'fixe' ? '🛡️ Fixe' : p.type === 'hybride' ? '⚖️ Hybride' : '🎯 Conditionnel';
-      html += '<div style="padding:10px;border-radius:6px;border:1px solid ' + (p.color || '#888') + '33;background:' + (p.color || '#888') + '08">';
-      html += '<div style="font-size:11px;font-weight:600;color:' + (p.color || '#888') + '">' + p.name + '</div>';
-      html += '<div style="font-size:10px;color:var(--text-muted);margin-top:2px">' + typeLabel + ' · ' + p.coupon + '% · ' + p.duration + ' ans</div>';
-      if (p.condition) html += '<div style="font-size:9px;color:var(--text-dim);margin-top:2px">' + p.condition + '</div>';
-      if (p.source) html += '<div style="font-size:9px;color:var(--accent);margin-top:2px">📥 ' + p.source + '</div>';
+    html += '<div style="font-size:12px;font-weight:700;color:var(--text-bright);margin-bottom:10px">📦 MES PRODUITS SUR-MESURE (' + allProducts.length + ')</div>';
+    if (allProducts.length === 0) {
+      html += '<div style="text-align:center;padding:20px;color:var(--text-dim);font-size:11px">Aucun produit ajouté. Utilisez le JSON ou le formulaire ci-dessus pour créer vos produits sur-mesure.</div>';
+    } else {
+      html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">';
+      allProducts.forEach(function(p, idx) {
+        var typeLabel = p.type === 'fixe' ? '🛡️ Fixe' : p.type === 'hybride' ? '⚖️ Hybride' : '🎯 Conditionnel';
+        html += '<div style="padding:10px;border-radius:6px;border:1px solid ' + (p.color || '#888') + '33;background:' + (p.color || '#888') + '08;position:relative">';
+        html += '<button onclick="_carryRemoveProduct(' + idx + ')" style="position:absolute;top:4px;right:6px;background:none;border:none;color:var(--red);cursor:pointer;font-size:12px" title="Supprimer">✕</button>';
+        html += '<div style="font-size:11px;font-weight:600;color:' + (p.color || '#888') + '">' + p.name + '</div>';
+        html += '<div style="font-size:10px;color:var(--text-muted);margin-top:2px">' + typeLabel + ' · ' + p.coupon + '% · ' + p.duration + ' ans</div>';
+        if (p.type === 'hybride' && p.couponPlancher) html += '<div style="font-size:9px;color:var(--green);margin-top:2px">Plancher ' + p.couponPlancher + '% garanti + bonus ' + p.couponBonus + '%</div>';
+        if (p.condition) html += '<div style="font-size:9px;color:var(--text-dim);margin-top:2px">' + p.condition + '</div>';
+        if (p.source) html += '<div style="font-size:9px;color:var(--accent);margin-top:2px">📥 ' + p.source + '</div>';
+        html += '</div>';
+      });
       html += '</div>';
-    });
-    html += '</div></div>';
+    }
+    html += '</div>';
 
     // Simulate button
-    html += '<button class="btn primary ai-glow" style="width:100%;padding:14px;font-size:14px" onclick="_carrySimulate()">⚡ Comparer tous les produits (in fine vs amortissable)</button>';
+    if (allProducts.length > 0) {
+      html += '<button class="btn primary ai-glow" style="width:100%;padding:14px;font-size:14px" onclick="_carrySimulate()">⚡ Simuler le carry trade (' + allProducts.length + ' produit' + (allProducts.length > 1 ? 's' : '') + ' — in fine vs amortissable)</button>';
+    } else {
+      html += '<div style="width:100%;padding:14px;font-size:13px;text-align:center;color:var(--text-dim);background:var(--bg-elevated);border:1px dashed var(--border);border-radius:var(--radius-sm)">Ajoutez au moins 1 produit sur-mesure pour lancer la simulation</div>';
+    }
 
     // Mail template
     html += '<div style="background:var(--bg-elevated);border:1px solid rgba(168,85,247,0.3);border-radius:var(--radius-sm);padding:16px;margin-top:16px">';
@@ -319,6 +330,11 @@
 
   // ═══ ACTIONS ═══════════════════════════════════════════════
 
+  window._carryRemoveProduct = function(idx) {
+    _state.products.splice(idx, 1);
+    renderCarrySimulator(document.getElementById('main-content'));
+  };
+
   window._carryImportJSON = function() {
     var textarea = document.getElementById('carry-json');
     if (!textarea || !textarea.value.trim()) return;
@@ -365,7 +381,7 @@
     _state.rate = parseFloat(document.getElementById('carry-rate')?.value) || 2.90;
     _state.years = parseInt(document.getElementById('carry-years')?.value) || 10;
 
-    var allProducts = _defaultProducts().concat(_state.products);
+    var allProducts = _state.products.slice(); // only user-created products
     var results = [];
 
     allProducts.forEach(function(p) {
