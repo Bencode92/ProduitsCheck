@@ -170,85 +170,85 @@
   "minInvestment": 100000,
   "grading": {
     "grade": "B",
-    "score": 63,
+    "score": 66,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 79,
-        "base": 80,
+        "score": 85,
+        "base": 86,
         "delta": 2,
-        "reasoning": "Rendement: base 80 → +2 = 82 (Produit taux fixe callable sur TEC 10 avec coupon garanti à 6.7% - probabilité de perception très élevée dans un contexte de taux élevés et inflation persistante) | Coupon 6.7%, protégé | Barr.coupon 4.6% | Mat espérée: ~2.3a (prob mat: 1%)"
+        "reasoning": "Rendement: base 86 → +2 = 88 (Taux fixe insensible à la volatilité court terme, coupon garanti de 6.7% très attractif en stagflation) | Coupon 6.7%, protégé | Barr.coupon 4.6% | Mat espérée: ~2.3a (prob mat: 1%)"
       },
       "underlyingQuality": {
-        "score": 60,
-        "base": 58,
+        "score": 66,
+        "base": 64,
         "delta": 2,
-        "reasoning": "Qualité: base 58 → +2 = 60 (Sous-jacent TEC 10 (taux d'État) bénéficie du régime RISK_OFF actuel où les obligations souveraines sont recherchées comme actifs refuges)"
+        "reasoning": "Qualité: base 64 → +2 = 66 (TEC 10 bénéficie du contexte stagflation avec taux longs élevés, Fed on hold et stratégie TIPS favorisant les produits taux)"
       },
       "portfolioFit": {
         "score": 47,
         "base": 60,
         "delta": 2,
-        "reasoning": "Fit: base 60 → +2 = 62 (Excellente diversification en environnement risk-off avec inflation élevée - produit taux fixe offrant 6.7% garanti vs obligations classiques à ~3-4%)"
+        "reasoning": "Fit: base 60 → +2 = 62 (Excellente diversification en régime stagflation, taux fixe 6.7% surperforme actions et protège contre l'inflation)"
       },
       "riskPremium": {
         "score": 68,
-        "base": 54,
+        "base": 60,
         "delta": -2,
         "reasoning": "Capital garanti: spread 6.7% - CAT 2.5% - illiq 0.7% = 3.5%"
       }
     },
-    "verdict": "Produit défensif très adapté au contexte RISK_OFF actuel avec un coupon garanti de 6.7% sur le TEC 10, significativement supérieur aux obligations d'État classiques (~3-4%). La structure callable limite certes le potentiel haussier mais offre une protection capitale totale avec un rendement fixe attractif dans un environnement d'inflation à 2.83% et de volatilité élevée (VIX 22). Avec une durée espérée de 2.3 ans et une probabilité de remboursement anticipé élevée, ce produit capture efficacement la prime de taux actuelle tout en protégeant contre les scénarios adverses.",
+    "verdict": "Produit très adapté au régime STAGFLATION actuel avec taux fixe garanti de 6.7% surperformant largement l'inflation PCE à 2.8%. Le TEC 10 profite du maintien des taux élevés (Fed on hold à 3.64%) et de la pentification de la courbe (2s10s +50bps). Capital garanti et rendement fixe offrent une protection idéale contre la volatilité (VIX 22) et l'instabilité sectorielle (5 secteurs en correction). Score ajusté de 69 à 77 points justifié par l'adéquation parfaite au contexte macro.",
     "keyRisks": [
-      "Risque de call anticipé si baisse brutale des taux, limitant les gains à ~15.4k€ sur 2.3 ans",
-      "Opportunité manquée si les taux montent encore et que le produit est callé prématurément"
+      "Risque TARN: plafond de gains cumulés peut limiter la performance totale",
+      "Risque de rappel anticipé si baisse brutale des taux, privant de coupons futurs"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 15.4,
-        "return_eur": 15400,
-        "probability": 0.4,
+        "return_eur": 15410,
+        "probability": 0.25,
         "duration_years": 2.3
       },
       "base": {
-        "return_pct": 15.4,
-        "return_eur": 15400,
-        "probability": 0.35,
-        "duration_years": 2.3
+        "return_pct": 33.5,
+        "return_eur": 33500,
+        "probability": 0.45,
+        "duration_years": 5
       },
       "stress": {
-        "return_pct": 6.7,
-        "return_eur": 6700,
+        "return_pct": 20.1,
+        "return_eur": 20100,
         "probability": 0.2,
-        "duration_years": 1
+        "duration_years": 3
       },
       "worst": {
         "return_pct": 67,
         "return_eur": 67000,
-        "probability": 0.05,
+        "probability": 0.1,
         "duration_years": 10
       }
     },
     "confidenceInterval": {
-      "low": 56,
-      "high": 74,
+      "low": 61,
+      "high": 79,
       "halfWidth": 9,
       "gradeStable": false,
-      "gradeRange": "C-B",
-      "label": "B [56-74]"
+      "gradeRange": "B-A",
+      "label": "B [61-79]"
     },
     "metadata": {
-      "gradedAt": "2026-04-09T12:28:35.468Z",
-      "durationMs": 21859,
+      "gradedAt": "2026-04-13T07:58:27.989Z",
+      "durationMs": 22670,
       "aiUsed": true,
       "version": "7.1",
       "productType": "rate",
       "marketDataAvailable": false,
-      "catBenchmark": 2.9,
+      "catBenchmark": 2.8,
       "catSource": "allocator-confirmed",
       "couponAnnualized": 6.7,
       "couponRaw": 6.7,
@@ -263,7 +263,7 @@
       "maxMaturity": 10,
       "probReachMaturity": 1,
       "maxBeta": null,
-      "baseScore": 64,
+      "baseScore": 69,
       "baseGrade": "B",
       "adjustments": {
         "p1": 2,
@@ -277,9 +277,9 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 56,
-      "ci_high": 74,
-      "ci_label": "B [56-74]",
+      "ci_low": 61,
+      "ci_high": 79,
+      "ci_label": "B [61-79]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
@@ -296,21 +296,21 @@
     },
     "regimeScenarios": {
       "current": {
-        "score": 63,
+        "score": 66,
         "grade": "B",
-        "label": "Actuel (risk_off)",
+        "label": "Actuel (stagflation)",
         "desc": "Euribor dans le corridor mais BCE menaçante"
       },
       "bull": {
-        "score": 68,
+        "score": 71,
         "grade": "B",
         "label": "Bull / Risk-on",
         "delta": 5,
         "desc": "Taux baissent → Euribor reste dans le corridor"
       },
       "crash": {
-        "score": 57,
-        "grade": "C",
+        "score": 60,
+        "grade": "B",
         "label": "Crash / Récession",
         "delta": -6,
         "desc": "Taux volatils → Euribor sort du corridor régulièrement"
