@@ -1,23 +1,19 @@
 {
   "source": "ECB + Twelve Data",
-  "fetched_at": "2026-04-13T18:06:02.086837+00:00",
+  "fetched_at": "2026-04-14T18:07:23.686966+00:00",
   "yields": {
     "oat_fr_10y": {
-      "current": 3.1,
-      "date": "2026-04-10",
+      "current": 3.123,
+      "date": "2026-04-13",
       "high_1y": 3.15,
       "low_1y": 2.979,
-      "avg_1y": 3.072,
+      "avg_1y": 3.077,
       "observations": 24,
-      "vol_annualized_bps": 17.9,
+      "vol_annualized_bps": 18.0,
       "vol_annualized_pct": 5.8,
       "direction": "stable",
-      "change_3m_bps": -2.6,
+      "change_3m_bps": 4.5,
       "history": [
-        {
-          "date": "2026-03-24",
-          "value": 3.062
-        },
         {
           "date": "2026-03-25",
           "value": 3.012
@@ -61,6 +57,10 @@
         {
           "date": "2026-04-10",
           "value": 3.1
+        },
+        {
+          "date": "2026-04-13",
+          "value": 3.123
         }
       ],
       "name": "Euro Area AAA 10Y Yield",
@@ -68,21 +68,17 @@
       "tec_equivalent": "TEC 10"
     },
     "bund_de_10y": {
-      "current": 3.1,
-      "date": "2026-04-10",
+      "current": 3.123,
+      "date": "2026-04-13",
       "high_1y": 3.15,
       "low_1y": 2.979,
-      "avg_1y": 3.072,
+      "avg_1y": 3.077,
       "observations": 24,
-      "vol_annualized_bps": 17.9,
+      "vol_annualized_bps": 18.0,
       "vol_annualized_pct": 5.8,
       "direction": "stable",
-      "change_3m_bps": -2.6,
+      "change_3m_bps": 4.5,
       "history": [
-        {
-          "date": "2026-03-24",
-          "value": 3.062
-        },
         {
           "date": "2026-03-25",
           "value": 3.012
@@ -126,27 +122,27 @@
         {
           "date": "2026-04-10",
           "value": 3.1
+        },
+        {
+          "date": "2026-04-13",
+          "value": 3.123
         }
       ],
       "name": "Euro Area AAA 10Y Yield",
       "description": "Rendement zone euro AAA 10 ans"
     },
     "oat_fr_2y": {
-      "current": 2.531,
-      "date": "2026-04-10",
+      "current": 2.586,
+      "date": "2026-04-13",
       "high_1y": 2.659,
       "low_1y": 2.441,
       "avg_1y": 2.575,
       "observations": 24,
-      "vol_annualized_bps": 26.3,
-      "vol_annualized_pct": 10.4,
+      "vol_annualized_bps": 26.4,
+      "vol_annualized_pct": 10.2,
       "direction": "stable",
-      "change_3m_bps": -10.2,
+      "change_3m_bps": -1.8,
       "history": [
-        {
-          "date": "2026-03-24",
-          "value": 2.589
-        },
         {
           "date": "2026-03-25",
           "value": 2.557
@@ -190,27 +186,27 @@
         {
           "date": "2026-04-10",
           "value": 2.531
+        },
+        {
+          "date": "2026-04-13",
+          "value": 2.586
         }
       ],
       "name": "Euro Area AAA 2Y Yield",
       "description": "Rendement zone euro AAA 2 ans"
     },
     "oat_fr_5y": {
-      "current": 2.697,
-      "date": "2026-04-10",
+      "current": 2.722,
+      "date": "2026-04-13",
       "high_1y": 2.783,
       "low_1y": 2.587,
-      "avg_1y": 2.699,
+      "avg_1y": 2.7,
       "observations": 24,
       "vol_annualized_bps": 22.0,
       "vol_annualized_pct": 8.1,
       "direction": "stable",
-      "change_3m_bps": -5.7,
+      "change_3m_bps": 1.6,
       "history": [
-        {
-          "date": "2026-03-24",
-          "value": 2.704
-        },
         {
           "date": "2026-03-25",
           "value": 2.662
@@ -254,6 +250,10 @@
         {
           "date": "2026-04-10",
           "value": 2.697
+        },
+        {
+          "date": "2026-04-13",
+          "value": 2.722
         }
       ],
       "name": "Euro Area AAA 5Y Yield",
@@ -265,31 +265,31 @@
       "name": "ECB Main Refinancing Rate",
       "description": "Taux directeur BCE",
       "current": 2.15,
-      "date": "2026-04-13"
+      "date": "2026-04-14"
     },
     "ecb_deposit_rate": {
       "name": "ECB Deposit Facility Rate",
       "description": "Taux de dépôt BCE",
       "current": 2.0,
-      "date": "2026-04-13"
+      "date": "2026-04-14"
     }
   },
   "yield_curve": {
     "points": [
       {
         "maturity": 2,
-        "yield": 2.531
+        "yield": 2.586
       },
       {
         "maturity": 5,
-        "yield": 2.697
+        "yield": 2.722
       },
       {
         "maturity": 10,
-        "yield": 3.1
+        "yield": 3.123
       }
     ],
-    "spread_2_10": 0.569,
+    "spread_2_10": 0.537,
     "shape": "normal"
   }
 }
