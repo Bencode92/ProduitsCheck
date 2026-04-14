@@ -9,7 +9,7 @@
   var _state = {
     amount: 1000000,
     rate: 2.90,
-    years: 10,
+    years: 5,
     taxRate: 25,
     loanType: 'both', // 'inFine', 'amortissable', 'both'
     products: [],
@@ -23,26 +23,26 @@
   function _recommendedProducts() {
     return [
       {
-        id: 'rec_fixe', name: 'Taux Fixe Callable 10Y', type: 'fixe',
-        coupon: 4.35, duration: 10, capitalGaranti: true,
+        id: 'rec_fixe', name: 'Taux Fixe Callable 5Y', type: 'fixe',
+        coupon: 5.10, duration: 5, capitalGaranti: true,
         condition: null, conditionProb: 1.0,
-        color: '#06D6A0', risk: 'Aucun — coupon 100% garanti, callable émetteur an 2',
+        color: '#06D6A0', risk: 'Aucun — coupon 100% garanti, callable émetteur an 1',
         amount: 0
       },
       {
-        id: 'rec_hybride', name: 'Hybride Plancher + Bonus TEC10', type: 'hybride',
-        coupon: 5.80, couponPlancher: 3.10, couponBonus: 2.70,
-        duration: 10, capitalGaranti: true,
-        condition: 'TEC10 ≤ 4.00%', conditionProb: 0.82,
-        color: '#4ECDC4', risk: 'Très faible — plancher 3.10% couvre l\'emprunt',
+        id: 'rec_hybride', name: 'Hybride Plancher + Bonus TEC10 5Y', type: 'hybride',
+        coupon: 7.00, couponPlancher: 3.50, couponBonus: 3.50,
+        duration: 5, capitalGaranti: true,
+        condition: 'TEC10 ≤ 4.00%', conditionProb: 0.85,
+        color: '#4ECDC4', risk: 'Très faible — plancher 3.50% couvre l\'emprunt à 2.90%',
         amount: 0
       },
       {
-        id: 'rec_tarn', name: 'TARN TEC10 6%', type: 'conditionnel',
-        coupon: 6.00, duration: 10, capitalGaranti: true,
-        condition: 'TEC10 ≤ 4.40% (garanti An 1-2)', conditionProb: 0.70,
-        guaranteedYears: 2,
-        color: '#FFB627', risk: 'Modéré — 0% si TEC10 > 4.40% après An 2',
+        id: 'rec_tarn', name: 'TARN TEC10 7.5% 5Y', type: 'conditionnel',
+        coupon: 7.50, duration: 5, capitalGaranti: true,
+        condition: 'TEC10 ≤ 4.40% (garanti An 1)', conditionProb: 0.80,
+        guaranteedYears: 1,
+        color: '#FFB627', risk: 'Modéré — 0% si TEC10 > 4.40% après An 1',
         amount: 0
       }
     ];
@@ -293,7 +293,7 @@
     html += '<div><label style="font-size:9px;color:var(--text-dim)">Nom</label><input id="carry-pname" placeholder="Ex: Hybride CIC" style="width:100%;padding:6px;border:1px solid ' + BG.border + ';border-radius:4px;background:' + BG.input + ';color:var(--text-bright);font-size:11px"></div>';
     html += '<div><label style="font-size:9px;color:var(--text-dim)">Type</label><select id="carry-ptype" style="width:100%;padding:6px;border:1px solid ' + BG.border + ';border-radius:4px;background:' + BG.input + ';color:var(--text-bright);font-size:11px"><option value="fixe">Fixe garanti</option><option value="conditionnel">Conditionnel</option><option value="hybride">Hybride</option></select></div>';
     html += '<div><label style="font-size:9px;color:var(--text-dim)">Coupon (%)</label><input id="carry-pcoupon" type="number" step="0.1" placeholder="5.0" style="width:100%;padding:6px;border:1px solid ' + BG.border + ';border-radius:4px;background:' + BG.input + ';color:var(--text-bright);font-size:11px;font-family:var(--mono)"></div>';
-    html += '<div><label style="font-size:9px;color:var(--text-dim)">Durée (ans)</label><input id="carry-pduration" type="number" value="10" min="1" max="30" style="width:100%;padding:6px;border:1px solid ' + BG.border + ';border-radius:4px;background:' + BG.input + ';color:var(--text-bright);font-size:11px;font-family:var(--mono)"></div>';
+    html += '<div><label style="font-size:9px;color:var(--text-dim)">Durée (ans)</label><input id="carry-pduration" type="number" value="5" min="1" max="30" style="width:100%;padding:6px;border:1px solid ' + BG.border + ';border-radius:4px;background:' + BG.input + ';color:var(--text-bright);font-size:11px;font-family:var(--mono)"></div>';
     html += '<div><label style="font-size:9px;color:var(--text-dim)">Plancher (hybride)</label><input id="carry-pfloor" type="number" step="0.1" placeholder="3.0" style="width:100%;padding:6px;border:1px solid ' + BG.border + ';border-radius:4px;background:' + BG.input + ';color:var(--text-bright);font-size:11px;font-family:var(--mono)"></div>';
     html += '</div>';
     html += '<button class="btn" onclick="_carryAddManual()" style="font-size:11px;padding:6px 14px;background:rgba(6,214,160,0.1);border-color:rgba(6,214,160,0.3);color:var(--green)">+ Ajouter</button>';
@@ -699,7 +699,7 @@
     var name = document.getElementById('carry-pname')?.value || 'Produit manuel';
     var type = document.getElementById('carry-ptype')?.value || 'conditionnel';
     var coupon = parseFloat(document.getElementById('carry-pcoupon')?.value) || 5;
-    var duration = parseInt(document.getElementById('carry-pduration')?.value) || 10;
+    var duration = parseInt(document.getElementById('carry-pduration')?.value) || 5;
     var floor = parseFloat(document.getElementById('carry-pfloor')?.value) || 0;
 
     var product = {
@@ -728,7 +728,8 @@
     var prompt = 'Tu es un structureur de produits financiers. Un client entreprise emprunte ' + _fmt(_state.amount) + ' EUR a ' + _state.rate + '% fixe sur ' + _state.years + ' ans (in fine). Il veut placer en produits structures capital garanti pour generer une marge.\n\n';
     prompt += 'Conditions marche actuelles :\n- TEC10 (OAT 10 ans) : 3.10%\n- BCE depot : 2.00%\n- BCE main : 2.15%\n- Regime : stagflation (Brent $103, PCE 2.8%)\n- Vol OAT 10Y : ~18 bps/an\n- Euribor 3M : ~2.50%\n\n';
     prompt += 'Genere 3 produits structures REALISTES (1 fixe, 1 hybride, 1 conditionnel). Chaque produit doit avoir coupon > ' + _state.rate + '%.\n\n';
-    prompt += 'Reponds UNIQUEMENT en JSON :\n```json\n[\n  {"name":"...","type":"fixe"|"conditionnel"|"hybride","coupon":5.0,"couponPlancher":3.0,"couponBonus":2.0,"duration":10,"condition":"TEC10 <= 4.40%" ou null,"conditionProb":0.68,"guaranteedYears":0,"risk":"..."}\n]\n```';
+    prompt += 'IMPORTANT: duree 5 ans, les coupons doivent etre ambitieux (fixe 5%+, hybride 7%+, conditionnel 7-8%). Sur 5 ans le risque est plus faible donc les banques peuvent offrir plus.\n\n';
+    prompt += 'Reponds UNIQUEMENT en JSON :\n```json\n[\n  {"name":"...","type":"fixe"|"conditionnel"|"hybride","coupon":7.0,"couponPlancher":3.5,"couponBonus":3.5,"duration":5,"condition":"TEC10 <= 4.40%" ou null,"conditionProb":0.80,"guaranteedYears":0,"risk":"..."}\n]\n```';
 
     try {
       var resp = await fetch(CONFIG.AI_ENDPOINT, {
@@ -748,7 +749,7 @@
           coupon: parseFloat(p.coupon) || 5,
           couponPlancher: p.type === 'hybride' ? (parseFloat(p.couponPlancher) || 3) : undefined,
           couponBonus: p.type === 'hybride' ? (parseFloat(p.couponBonus) || 2) : undefined,
-          duration: parseInt(p.duration) || 10, capitalGaranti: true,
+          duration: parseInt(p.duration) || 5, capitalGaranti: true,
           condition: p.condition || null,
           conditionProb: parseFloat(p.conditionProb) || (p.type === 'fixe' ? 1.0 : 0.68),
           guaranteedYears: parseInt(p.guaranteedYears) || 0,
