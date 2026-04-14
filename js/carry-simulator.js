@@ -22,33 +22,76 @@
   function _fmt(n) { return typeof formatNumber === 'function' ? formatNumber(n) : String(Math.round(n)); }
   function _pct(n) { return (Math.round(n * 100) / 100).toFixed(2); }
 
-  // ─── Produits recommandés (conditions marché avril 2026) ──────
-  function _recommendedProducts() {
-    return [
+  // ─── Catalogue produits (conditions marché avril 2026) ──────
+  // TEC10 = 3.10% | OAT 5Y = 2.70% | BCE = 2.15% | Euribor 3M ~2.50%
+  // Courbe 2s10s = +57bp (normale) | Vol TEC10 = 18bp/an
+  var CATALOG = {
+    conservative: [
       {
-        id: 'rec_fixe', name: 'Taux Fixe Callable 5Y', type: 'fixe',
+        id: 'cat_floater', name: 'Floater TEC10 Plancher 3%', type: 'hybride',
+        coupon: 3.80, couponPlancher: 3.00, couponBonus: 0.80,
+        duration: 5, capitalGaranti: true,
+        condition: 'Coupon = 3% + max(0, TEC10 − 2.20%)', conditionProb: 0.95,
+        color: '#0D9488',
+        risk: 'Très faible — plancher 3% garanti, variable capte la hausse des taux',
+        detail: 'Si TEC10 monte à 4% → coupon 4.80%. Si TEC10 baisse à 2% → coupon 3%. Aujourd\'hui TEC10=3.10% → coupon ~3.90%.',
+        category: 'conservative', amount: 0
+      },
+      {
+        id: 'cat_hybride', name: 'Hybride Plancher 3% + Digital TEC10', type: 'hybride',
+        coupon: 6.50, couponPlancher: 3.00, couponBonus: 3.50,
+        duration: 5, capitalGaranti: true,
+        condition: 'Plancher 3% + bonus 3.50% si TEC10 ≤ 4.50%', conditionProb: 0.90,
+        color: '#0891B2',
+        risk: 'Faible — plancher couvre l\'emprunt, trigger large (TEC10 < 4.50% = 140bp de marge)',
+        detail: 'Combinaison sécurité + rendement. Le plancher 3% couvre le 2.90% de l\'emprunt. Le bonus 3.50% se déclenche si TEC10 reste sous 4.50% (très probable sur 5 ans).',
+        category: 'conservative', amount: 0
+      },
+      {
+        id: 'cat_fixe', name: 'Taux Fixe Callable 5Y', type: 'fixe',
         coupon: 5.10, duration: 5, capitalGaranti: true,
         condition: null, conditionProb: 1.0,
-        color: '#06D6A0', risk: 'Aucun — coupon 100% garanti, callable émetteur an 1',
-        amount: 0
-      },
-      {
-        id: 'rec_hybride', name: 'Hybride Plancher + Bonus TEC10 5Y', type: 'hybride',
-        coupon: 7.00, couponPlancher: 3.50, couponBonus: 3.50,
-        duration: 5, capitalGaranti: true,
-        condition: 'TEC10 ≤ 4.00%', conditionProb: 0.85,
-        color: '#4ECDC4', risk: 'Très faible — plancher 3.50% couvre l\'emprunt à 2.90%',
-        amount: 0
-      },
-      {
-        id: 'rec_tarn', name: 'TARN TEC10 7.5% 5Y', type: 'conditionnel',
-        coupon: 7.50, duration: 5, capitalGaranti: true,
-        condition: 'TEC10 ≤ 4.40% (garanti An 1)', conditionProb: 0.80,
-        guaranteedYears: 1,
-        color: '#FFB627', risk: 'Modéré — 0% si TEC10 > 4.40% après An 1',
-        amount: 0
+        color: '#059669',
+        risk: 'Aucun — coupon 100% garanti. Callable émetteur an 1',
+        detail: 'Le coffre-fort. Coupon garanti chaque année. La banque peut rappeler le produit si les taux baissent (vous récupérez le capital + dernier coupon).',
+        category: 'conservative', amount: 0
       }
-    ];
+    ],
+    aggressive: [
+      {
+        id: 'cat_tarn', name: 'TARN TEC10 8%', type: 'conditionnel',
+        coupon: 8.00, duration: 5, capitalGaranti: true,
+        condition: 'TEC10 ≤ 4.40% (An 1 garanti)', conditionProb: 0.78,
+        guaranteedYears: 1,
+        color: '#D97706',
+        risk: 'Modéré — coupon 0% si TEC10 > 4.40%. An 1 garanti. Autocall si cumul ≥ 24%',
+        detail: 'Rendement max du catalogue. An 1 garanti = 8%. Ensuite conditionnel. Si TEC10 reste stable (~3.10%), vous touchez 8%/an. Risque : TEC10 dépasse 4.40% = 0%.',
+        category: 'aggressive', amount: 0
+      },
+      {
+        id: 'cat_range', name: 'Range Accrual Euribor 7.5%', type: 'conditionnel',
+        coupon: 7.50, duration: 5, capitalGaranti: true,
+        condition: 'Euribor 3M dans [1.50% – 3.80%]', conditionProb: 0.85,
+        color: '#DC2626',
+        risk: 'Modéré — coupon accrues par jour dans le corridor. Euribor actuel 2.50% = bien centré',
+        detail: 'Coupon = 7.50% × (nb jours Euribor dans le corridor / nb jours total). Euribor à 2.50% = bien centré dans [1.50%-3.80%]. Risque si BCE monte fortement (>3.80%) ou baisse (<1.50%).',
+        category: 'aggressive', amount: 0
+      },
+      {
+        id: 'cat_digital', name: 'Digital Mémoire TEC10 7%', type: 'conditionnel',
+        coupon: 7.00, duration: 5, capitalGaranti: true,
+        condition: 'TEC10 ≤ 4.50% + effet mémoire', conditionProb: 0.88,
+        guaranteedYears: 0,
+        color: '#7C3AED',
+        risk: 'Modéré-faible — mémoire rattrape les coupons manqués. Trigger 4.50% = large',
+        detail: 'Si TEC10 ≤ 4.50% → coupon 7%. Si TEC10 > 4.50% un an → coupon stocké en mémoire et versé l\'année suivante si condition remplie. Filet de sécurité vs le TARN.',
+        category: 'aggressive', amount: 0
+      }
+    ]
+  };
+
+  function _recommendedProducts() {
+    return CATALOG.conservative.concat(CATALOG.aggressive);
   }
 
   // ─── Revenue calculations ──────────────────────────────────
@@ -314,24 +357,39 @@
     html += '<div style="margin-top:8px;padding:6px 10px;background:#DBEAFE;border-radius:4px;font-size:10px;color:#1E40AF">💡 <strong>In fine = intérêts ×2 mais capital investi constant → revenus ×2 → gain net supérieur.</strong> Économie d\'intérêts de l\'amortissable ne compense pas la perte de revenus.</div>';
     html += '</div>';
 
-    // ─── Recommended products quick-add ──────
-    html += '<div style="background:' + BG.section + ';border:1px solid #86EFAC;border-radius:8px;padding:16px;margin-bottom:16px">';
-    html += '<div style="font-size:12px;font-weight:700;color:#059669;margin-bottom:8px">⚡ PRODUITS RECOMMANDÉS (marché avril 2026)</div>';
-    html += '<div style="font-size:10px;color:' + BG.textDim + ';margin-bottom:10px">Structures réalistes basées sur OAT 10Y = 3.10%, BCE = 2.15%, régime stagflation. Cliquez pour ajouter.</div>';
-    html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">';
-    _recommendedProducts().forEach(function(p) {
-      var exists = _state.products.some(function(ep) { return ep.id === p.id; });
-      var typeLabel = p.type === 'fixe' ? '🛡️ Fixe' : p.type === 'hybride' ? '⚖️ Hybride' : '🎯 Conditionnel';
-      var opacity = exists ? '0.4' : '1';
-      html += '<button onclick="' + (exists ? '' : '_carryAddRecommended(\'' + p.id + '\')') + '" style="padding:12px;border-radius:8px;border:1px solid ' + p.color + '44;background:' + p.color + '0A;cursor:' + (exists ? 'default' : 'pointer') + ';text-align:left;opacity:' + opacity + '">';
-      html += '<div style="font-size:11px;font-weight:700;color:' + p.color + '">' + p.name + '</div>';
-      html += '<div style="font-size:10px;color:' + BG.textMuted + ';margin-top:2px">' + typeLabel + ' · ' + p.coupon + '%</div>';
-      if (p.type === 'hybride') html += '<div style="font-size:9px;color:#059669;margin-top:2px">Plancher ' + p.couponPlancher + '% + bonus ' + p.couponBonus + '%</div>';
-      html += '<div style="font-size:9px;color:' + BG.textDim + ';margin-top:2px">' + p.risk + '</div>';
-      if (exists) html += '<div style="font-size:9px;color:#2563EB;margin-top:2px">✓ Déjà ajouté</div>';
-      html += '</button>';
-    });
-    html += '</div></div>';
+    // ─── Product catalog ──────
+    function _renderCatalogSection(title, icon, borderColor, products) {
+      html += '<div style="background:' + BG.section + ';border:1px solid ' + borderColor + ';border-radius:8px;padding:16px;margin-bottom:12px">';
+      html += '<div style="font-size:12px;font-weight:700;color:' + BG.text + ';margin-bottom:10px">' + icon + ' ' + title + '</div>';
+      html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">';
+      products.forEach(function(p) {
+        var exists = _state.products.some(function(ep) { return ep.id === p.id; });
+        var typeLabel = p.type === 'fixe' ? '🛡️ Fixe garanti' : p.type === 'hybride' ? '⚖️ Plancher + variable' : '🎯 Conditionnel';
+        var expectedRate = p.type === 'fixe' ? p.coupon : p.type === 'hybride' ? (p.couponPlancher + p.couponBonus * (p.conditionProb || 0.68)) : (p.coupon * (p.conditionProb || 0.68));
+        var spread = expectedRate - _state.rate;
+        html += '<button onclick="' + (exists ? '' : '_carryAddRecommended(\'' + p.id + '\')') + '" style="padding:14px;border-radius:8px;border:2px solid ' + (exists ? p.color : p.color + '44') + ';background:' + (exists ? p.color + '12' : BG.row1) + ';cursor:' + (exists ? 'default' : 'pointer') + ';text-align:left;transition:all 0.2s">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:center">';
+        html += '<div style="font-size:12px;font-weight:700;color:' + p.color + '">' + p.name + '</div>';
+        html += '<div style="font-family:var(--mono);font-size:16px;font-weight:800;color:' + p.color + '">' + p.coupon + '%</div>';
+        html += '</div>';
+        html += '<div style="font-size:10px;color:' + BG.textMuted + ';margin-top:4px">' + typeLabel + ' · ' + p.duration + ' ans · Capital garanti 100%</div>';
+        if (p.type === 'hybride') html += '<div style="font-size:10px;color:#059669;margin-top:3px;font-weight:600">Plancher ' + p.couponPlancher + '% garanti + bonus ' + p.couponBonus + '%</div>';
+        if (p.condition) html += '<div style="font-size:9px;color:#D97706;margin-top:3px">' + p.condition + '</div>';
+        html += '<div style="font-size:9px;color:' + BG.textDim + ';margin-top:4px;line-height:1.4">' + (p.detail || p.risk) + '</div>';
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;padding-top:6px;border-top:1px solid ' + BG.border + '">';
+        html += '<span style="font-size:9px;color:' + BG.textDim + '">Spread net espéré</span>';
+        html += '<span style="font-family:var(--mono);font-size:11px;font-weight:700;color:' + (spread > 0 ? '#059669' : '#DC2626') + '">+' + _pct(spread) + '%</span>';
+        html += '</div>';
+        if (exists) html += '<div style="font-size:10px;color:' + p.color + ';margin-top:4px;font-weight:600">✓ Ajouté au comparateur</div>';
+        html += '</button>';
+      });
+      html += '</div></div>';
+    }
+
+    html += '<div style="font-size:13px;font-weight:700;color:' + BG.text + ';margin-bottom:8px">📦 CATALOGUE PRODUITS — Marché avril 2026</div>';
+    html += '<div style="font-size:10px;color:' + BG.textMuted + ';margin-bottom:12px">TEC10 = 3.10% · OAT 5Y = 2.70% · BCE = 2.15% · Euribor 3M ≈ 2.50% · Courbe normale. Cliquez pour ajouter au comparateur.</div>';
+    _renderCatalogSection('SÉCURISÉS — Plancher garanti, carry couvert', '🛡️', '#86EFAC', CATALOG.conservative);
+    _renderCatalogSection('DYNAMIQUES — Rendement élevé, plus de volatilité', '🚀', '#FDE68A', CATALOG.aggressive);
 
     // ─── Import JSON ──────
     html += '<div style="background:' + BG.section + ';border:1px solid rgba(59,130,246,0.3);border-radius:var(--radius-sm);padding:16px;margin-bottom:16px">';
