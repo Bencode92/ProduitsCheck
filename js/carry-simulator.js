@@ -425,10 +425,44 @@
     html += '<div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--red)">-' + _fmt(Math.round(_state.amount * _state.rate / 100)) + '€/an (in fine)</div>';
     html += '</div>';
 
-    // ─── SCENARIO COMPARISON TABLE ──────
-    html += '<div style="font-size:13px;font-weight:700;color:var(--text-bright);margin-bottom:10px">📊 COMPARAISON DES SCÉNARIOS</div>';
-
+    // ─── DAF KPI DASHBOARD ──────
     var loanTypes = _state.loanType === 'both' ? ['inFine', 'amortissable'] : [_state.loanType];
+    var userSc = r.scenarios.find(function(s) { return s.isUser; });
+
+    // Compute user scenario for KPI cards
+    if (userSc) {
+      var kpiLt = loanTypes[0];
+      var kpiExp = _computePortfolio(userSc.products, _state.amount, _state.rate, _state.years, _state.taxRate, kpiLt, 'expected');
+      var kpiWorst = _computePortfolio(userSc.products, _state.amount, _state.rate, _state.years, _state.taxRate, kpiLt, 'worst');
+      var kpiBest = _computePortfolio(userSc.products, _state.amount, _state.rate, _state.years, _state.taxRate, kpiLt, 'best');
+
+      var roiTotal = kpiExp.totalNetAfterTax / _state.amount * 100;
+      var roiAnnual = roiTotal / _state.years;
+      var roiWorst = kpiWorst.totalNetAfterTax / _state.amount * 100 / _state.years;
+      var roiBest = kpiBest.totalNetAfterTax / _state.amount * 100 / _state.years;
+      var spreadBrut = kpiExp.totalRevenue / _state.amount / _state.years * 100 - _state.rate;
+
+      html += '<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:20px">';
+      [
+        ['RENDEMENT NET/AN', _pct(roiAnnual) + '%', roiAnnual >= 0 ? 'var(--green)' : 'var(--red)', 'Après IS 25%'],
+        ['ROI TOTAL ' + _state.years + 'A', _pct(roiTotal) + '%', roiTotal >= 0 ? 'var(--green)' : 'var(--red)', _fmt(kpiExp.totalNetAfterTax) + '€ net'],
+        ['NET ESPÉRÉ/AN', _fmt(kpiExp.avgPerYear) + '€', kpiExp.avgPerYear >= 0 ? 'var(--green)' : 'var(--red)', 'Après intérêts + IS'],
+        ['SPREAD NET', '+' + _pct(spreadBrut) + '%', 'var(--cyan)', 'Coupon moyen - taux emprunt'],
+        ['PIRE CAS/AN', _pct(roiWorst) + '%', roiWorst >= 0 ? 'var(--green)' : 'var(--red)', _fmt(kpiWorst.avgPerYear) + '€/an'],
+        ['BEST CASE/AN', '+' + _pct(roiBest) + '%', 'var(--cyan)', _fmt(kpiBest.avgPerYear) + '€/an']
+      ].forEach(function(kpi) {
+        html += '<div style="background:' + BG.section + ';border:1px solid ' + BG.border + ';border-radius:var(--radius-sm);padding:12px;text-align:center">';
+        html += '<div style="font-size:9px;font-weight:700;color:var(--text-dim);letter-spacing:0.8px;margin-bottom:6px">' + kpi[0] + '</div>';
+        html += '<div style="font-family:var(--mono);font-size:18px;font-weight:700;color:' + kpi[2] + '">' + kpi[1] + '</div>';
+        html += '<div style="font-size:9px;color:var(--text-dim);margin-top:4px">' + kpi[3] + '</div>';
+        html += '</div>';
+      });
+      html += '</div>';
+    }
+
+    // ─── SCENARIO COMPARISON TABLE ──────
+    html += '<div style="font-size:13px;font-weight:700;color:var(--text-bright);margin-bottom:10px">📊 COMPARAISON DES SCÉNARIOS — Quel split est optimal ?</div>';
+
     loanTypes.forEach(function(lt) {
       var ltLabel = lt === 'inFine' ? 'IN FINE' : 'AMORTISSABLE';
       var ltColor = lt === 'inFine' ? 'var(--cyan)' : '#A855F7';
@@ -440,11 +474,12 @@
       html += '<thead><tr style="border-bottom:2px solid var(--border)">';
       html += '<th style="padding:8px 6px;text-align:left;color:var(--text-muted);font-size:10px">Scénario</th>';
       html += '<th style="padding:8px 6px;text-align:right;color:var(--text-muted);font-size:10px">Allocation</th>';
-      html += '<th style="padding:8px 6px;text-align:right;color:var(--green);font-size:10px">Net espéré/an</th>';
-      html += '<th style="padding:8px 6px;text-align:right;color:var(--green);font-size:10px">Total 10 ans</th>';
-      html += '<th style="padding:8px 6px;text-align:right;color:var(--orange);font-size:10px">Pire cas/an</th>';
-      html += '<th style="padding:8px 6px;text-align:right;color:var(--cyan);font-size:10px">Best case/an</th>';
-      html += '<th style="padding:8px 6px;text-align:right;color:var(--text-muted);font-size:10px">Spread net</th>';
+      html += '<th style="padding:8px 6px;text-align:right;color:var(--green);font-size:10px">Rdt net/an</th>';
+      html += '<th style="padding:8px 6px;text-align:right;color:var(--green);font-size:10px">ROI total</th>';
+      html += '<th style="padding:8px 6px;text-align:right;color:var(--green);font-size:10px">Net/an €</th>';
+      html += '<th style="padding:8px 6px;text-align:right;color:var(--green);font-size:10px">Total € net</th>';
+      html += '<th style="padding:8px 6px;text-align:right;color:var(--orange);font-size:10px">Pire cas %</th>';
+      html += '<th style="padding:8px 6px;text-align:right;color:var(--cyan);font-size:10px">Best case %</th>';
       html += '</tr></thead><tbody>';
 
       var scenarioResults = r.scenarios.map(function(sc) {
@@ -460,17 +495,28 @@
         var isBest = i === 0;
         var isUser = sc.isUser;
         var bg = isUser ? BG.highlight : isBest ? '#1A2E2A' : (i % 2 === 0 ? BG.row0 : BG.row1);
-        var allocDesc = sc.products.map(function(p) { return Math.round(p.amount/1000) + 'K'; }).join(' + ');
-        var spreadNet = sr.expected.avgPerYear / _state.amount * 100;
+        var allocDesc = sc.products.map(function(p) { return Math.round(p.amount/1000) + 'K'; }).join('+');
+
+        var rdtAnnual = sr.expected.totalNetAfterTax / _state.amount * 100 / _state.years;
+        var roiTot = sr.expected.totalNetAfterTax / _state.amount * 100;
+        var worstPct = sr.worst.totalNetAfterTax / _state.amount * 100 / _state.years;
+        var bestPct = sr.best.totalNetAfterTax / _state.amount * 100 / _state.years;
 
         html += '<tr style="background:' + bg + ';border-bottom:1px solid var(--border)">';
-        html += '<td style="padding:8px 6px;font-weight:' + (isUser || isBest ? '700' : '400') + ';color:var(--text-bright)">' + sc.name + (isBest ? ' <span style="color:var(--green);font-size:9px">🏆 BEST</span>' : '') + '</td>';
+        html += '<td style="padding:8px 6px;font-weight:' + (isUser || isBest ? '700' : '400') + ';color:var(--text-bright);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + sc.name + (isBest ? ' 🏆' : '') + '</td>';
         html += '<td style="padding:8px 6px;text-align:right;font-size:10px;color:var(--text-dim)">' + allocDesc + '</td>';
-        html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);font-weight:700;color:' + (sr.expected.avgPerYear >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (sr.expected.avgPerYear >= 0 ? '+' : '') + _fmt(sr.expected.avgPerYear) + '€</td>';
-        html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);font-weight:700;color:' + (sr.expected.totalNetAfterTax >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (sr.expected.totalNetAfterTax >= 0 ? '+' : '') + _fmt(sr.expected.totalNetAfterTax) + '€</td>';
-        html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:' + (sr.worst.avgPerYear >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (sr.worst.avgPerYear >= 0 ? '+' : '') + _fmt(sr.worst.avgPerYear) + '€</td>';
-        html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:var(--cyan)">' + (sr.best.avgPerYear >= 0 ? '+' : '') + _fmt(sr.best.avgPerYear) + '€</td>';
-        html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);font-size:10px;color:' + (spreadNet >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (spreadNet >= 0 ? '+' : '') + _pct(spreadNet) + '%</td>';
+        // Rdt net/an %
+        html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);font-weight:700;font-size:12px;color:' + (rdtAnnual >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (rdtAnnual >= 0 ? '+' : '') + _pct(rdtAnnual) + '%</td>';
+        // ROI total %
+        html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);font-weight:700;color:' + (roiTot >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (roiTot >= 0 ? '+' : '') + _pct(roiTot) + '%</td>';
+        // Net/an €
+        html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:' + (sr.expected.avgPerYear >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (sr.expected.avgPerYear >= 0 ? '+' : '') + _fmt(sr.expected.avgPerYear) + '€</td>';
+        // Total € net
+        html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:' + (sr.expected.totalNetAfterTax >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (sr.expected.totalNetAfterTax >= 0 ? '+' : '') + _fmt(sr.expected.totalNetAfterTax) + '€</td>';
+        // Pire cas %
+        html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:' + (worstPct >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (worstPct >= 0 ? '+' : '') + _pct(worstPct) + '%</td>';
+        // Best %
+        html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:var(--cyan)">' + (bestPct >= 0 ? '+' : '') + _pct(bestPct) + '%</td>';
         html += '</tr>';
       });
       html += '</tbody></table></div>';
@@ -494,17 +540,22 @@
       html += '<span style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--green)">Net total : ' + (expected.totalNetAfterTax >= 0 ? '+' : '') + _fmt(expected.totalNetAfterTax) + '€ (' + (expected.avgPerYear >= 0 ? '+' : '') + _fmt(expected.avgPerYear) + '€/an)</span>';
       html += '</div>';
 
-      // Summary cards
-      html += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-bottom:1px solid var(--border)">';
+      // Summary cards with % metrics
+      var pnlRoiAn = expected.totalNetAfterTax / _state.amount * 100 / _state.years;
+      var pnlRoiTot = expected.totalNetAfterTax / _state.amount * 100;
+      html += '<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:0;border-bottom:1px solid var(--border)">';
       [
-        ['Revenus totaux', '+' + _fmt(expected.totalRevenue) + '€', 'var(--green)'],
-        ['Intérêts emprunt', '-' + _fmt(expected.totalInterest) + '€', 'var(--red)'],
-        ['IS 25%', '-' + _fmt(expected.totalTax) + '€', 'var(--orange)'],
-        ['NET APRÈS IS', (expected.totalNetAfterTax >= 0 ? '+' : '') + _fmt(expected.totalNetAfterTax) + '€', expected.totalNetAfterTax >= 0 ? 'var(--green)' : 'var(--red)']
+        ['Revenus totaux', '+' + _fmt(expected.totalRevenue) + '€', 'var(--green)', _pct(expected.totalRevenue / _state.amount * 100) + '% du capital'],
+        ['Intérêts emprunt', '-' + _fmt(expected.totalInterest) + '€', 'var(--red)', _pct(expected.totalInterest / _state.amount * 100) + '% du capital'],
+        ['IS 25%', '-' + _fmt(expected.totalTax) + '€', 'var(--orange)', ''],
+        ['NET APRÈS IS', (expected.totalNetAfterTax >= 0 ? '+' : '') + _fmt(expected.totalNetAfterTax) + '€', expected.totalNetAfterTax >= 0 ? 'var(--green)' : 'var(--red)', ''],
+        ['RDT NET/AN', (pnlRoiAn >= 0 ? '+' : '') + _pct(pnlRoiAn) + '%', pnlRoiAn >= 0 ? 'var(--green)' : 'var(--red)', _fmt(expected.avgPerYear) + '€/an'],
+        ['ROI TOTAL', (pnlRoiTot >= 0 ? '+' : '') + _pct(pnlRoiTot) + '%', pnlRoiTot >= 0 ? 'var(--green)' : 'var(--red)', 'Sur ' + _state.years + ' ans']
       ].forEach(function(card) {
-        html += '<div style="padding:10px 12px;border-right:1px solid var(--border)">';
-        html += '<div style="font-size:9px;color:var(--text-dim)">' + card[0] + '</div>';
-        html += '<div style="font-family:var(--mono);font-size:14px;font-weight:700;color:' + card[2] + ';margin-top:2px">' + card[1] + '</div>';
+        html += '<div style="padding:10px 8px;border-right:1px solid var(--border);text-align:center">';
+        html += '<div style="font-size:8px;font-weight:700;color:var(--text-dim);letter-spacing:0.5px">' + card[0] + '</div>';
+        html += '<div style="font-family:var(--mono);font-size:13px;font-weight:700;color:' + card[2] + ';margin-top:3px">' + card[1] + '</div>';
+        if (card[3]) html += '<div style="font-size:8px;color:var(--text-dim);margin-top:2px">' + card[3] + '</div>';
         html += '</div>';
       });
       html += '</div>';
@@ -520,11 +571,13 @@
       html += '<th style="padding:6px;text-align:right;color:var(--red)">Intérêts</th>';
       html += '<th style="padding:6px;text-align:right;color:var(--orange)">IS</th>';
       html += '<th style="padding:6px;text-align:right;color:var(--text-bright);font-weight:700">Net</th>';
-      html += '<th style="padding:6px;text-align:right;color:var(--cyan)">Cumul</th>';
+      html += '<th style="padding:6px;text-align:right;color:var(--cyan)">Cumul €</th>';
+      html += '<th style="padding:6px;text-align:right;color:var(--purple)">ROI cumul %</th>';
       html += '</tr></thead><tbody>';
 
       expected.flows.forEach(function(f, fi) {
         var bg = fi % 2 === 0 ? BG.row0 : BG.row1;
+        var roiCumul = f.cumulNet / _state.amount * 100;
         html += '<tr style="background:' + bg + ';border-bottom:1px solid var(--border)">';
         html += '<td style="padding:5px 6px;font-weight:600">An ' + f.year + '</td>';
         f.revenueByProduct.forEach(function(rp) {
@@ -536,6 +589,7 @@
         var nc = f.netAfterTax >= 0 ? 'var(--green)' : 'var(--red)';
         html += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);font-weight:700;color:' + nc + '">' + (f.netAfterTax >= 0 ? '+' : '') + _fmt(f.netAfterTax) + '€</td>';
         html += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:var(--cyan);font-weight:600">' + (f.cumulNet >= 0 ? '+' : '') + _fmt(f.cumulNet) + '€</td>';
+        html += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);font-weight:700;color:var(--purple)">' + (roiCumul >= 0 ? '+' : '') + _pct(roiCumul) + '%</td>';
         html += '</tr>';
       });
 
@@ -549,16 +603,20 @@
       html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:var(--green)">+' + _fmt(expected.totalRevenue) + '€</td>';
       html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:var(--red)">-' + _fmt(expected.totalInterest) + '€</td>';
       html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:var(--orange)">-' + _fmt(expected.totalTax) + '€</td>';
+      var totalRoiPct = expected.totalNetAfterTax / _state.amount * 100;
       html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:' + (expected.totalNetAfterTax >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (expected.totalNetAfterTax >= 0 ? '+' : '') + _fmt(expected.totalNetAfterTax) + '€</td>';
       html += '<td style="padding:8px 6px;text-align:right"></td>';
+      html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);font-weight:700;color:var(--purple)">' + (totalRoiPct >= 0 ? '+' : '') + _pct(totalRoiPct) + '%</td>';
       html += '</tr>';
       html += '</tbody></table>';
 
-      // Worst case summary
-      html += '<div style="padding:10px 12px;background:rgba(239,68,68,0.04);border-top:1px solid var(--border);font-size:11px">';
-      html += '<strong style="color:var(--red)">⚠️ Pire cas :</strong> ';
+      // Worst case summary with %
+      var worstRoiAn = worst.totalNetAfterTax / _state.amount * 100 / _state.years;
+      html += '<div style="padding:10px 12px;background:rgba(239,68,68,0.06);border-top:1px solid var(--border);font-size:11px;display:flex;justify-content:space-between">';
+      html += '<div><strong style="color:var(--red)">⚠️ Pire cas :</strong> ';
       html += '<span style="color:var(--text-muted)">Net total = <strong style="color:' + (worst.totalNetAfterTax >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (worst.totalNetAfterTax >= 0 ? '+' : '') + _fmt(worst.totalNetAfterTax) + '€</strong>';
-      html += ' (' + (worst.avgPerYear >= 0 ? '+' : '') + _fmt(worst.avgPerYear) + '€/an)</span>';
+      html += ' (' + (worst.avgPerYear >= 0 ? '+' : '') + _fmt(worst.avgPerYear) + '€/an)</span></div>';
+      html += '<div style="font-family:var(--mono);font-weight:700;color:' + (worstRoiAn >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (worstRoiAn >= 0 ? '+' : '') + _pct(worstRoiAn) + '%/an</div>';
       html += '</div>';
 
       html += '</div>';
