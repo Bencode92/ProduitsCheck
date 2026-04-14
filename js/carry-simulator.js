@@ -225,35 +225,41 @@
     return _state.products.reduce(function(s, p) { return s + (p.amount || 0); }, 0);
   }
 
-  // ─── Theme: lighter backgrounds for readability ─────────
+  // ─── Theme: LIGHT mode for carry trade page ─────────
   var BG = {
-    wrap: '#141B2A',       // wrapper — lighter than page bg
-    section: '#1C2536',    // section cards
-    input: '#111827',      // input fields
-    row0: '#1C2536',       // table even rows
-    row1: '#212B3D',       // table odd rows
-    header: '#252F43',     // table headers
-    border: '#2A3550',     // borders
-    highlight: '#263045'   // highlighted rows
+    wrap: '#F8F9FB',       // wrapper — near white
+    section: '#FFFFFF',    // section cards — pure white
+    input: '#F1F3F7',      // input fields — light grey
+    row0: '#FFFFFF',       // table even rows — white
+    row1: '#F4F6F9',       // table odd rows — light grey
+    header: '#E8ECF2',     // table headers — medium grey
+    border: '#D1D9E6',     // borders — visible grey
+    highlight: '#E8F0FE',  // highlighted rows — light blue
+    text: '#1A202C',       // dark text
+    textMuted: '#64748B',  // muted text
+    textDim: '#94A3B8'     // dim text
   };
+
+  // ─── Light wrapper style override ─────────
+  var WRAP_STYLE = 'background:' + BG.wrap + ';border-radius:12px;padding:20px;color:' + BG.text + ';--text-bright:' + BG.text + ';--text:' + BG.text + ';--text-muted:' + BG.textMuted + ';--text-dim:' + BG.textDim + ';--border:' + BG.border + ';--bg:' + BG.input + ';--bg-elevated:' + BG.section + ';--bg-card:' + BG.section;
 
   // ═══ RENDER — FORM ═════════════════════════════════════════
   function _renderForm(container) {
-    var html = '<div class="section" style="background:' + BG.wrap + ';border-radius:var(--radius-lg);padding:20px">';
-    html += '<div class="section-header"><div class="section-title"><span class="dot" style="background:var(--accent)"></span>🏦 Simulateur Carry Trade v3 — Multi-Produit & P&L</div></div>';
+    var html = '<div class="section" style="' + WRAP_STYLE + '">';
+    html += '<div class="section-header" style="border-color:' + BG.border + '"><div class="section-title" style="color:' + BG.text + '"><span class="dot" style="background:#2563EB"></span>🏦 Simulateur Carry Trade — Prêt SG Equipéa</div></div>';
 
     // ─── Loan params ──────
     html += '<div style="background:' + BG.section + ';border:1px solid ' + BG.border + ';border-radius:var(--radius-sm);padding:16px;margin-bottom:16px">';
-    html += '<div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:12px">💰 EMPRUNT DE TRÉSORERIE</div>';
+    html += '<div style="font-size:12px;font-weight:700;color:#2563EB;margin-bottom:12px">💰 EMPRUNT DE TRÉSORERIE</div>';
     html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px">';
-    html += '<div><label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:4px">Montant (€)</label>';
-    html += '<input type="number" id="carry-amount" value="' + _state.amount + '" step="100000" style="width:100%;padding:10px;border:1px solid ' + BG.border + ';border-radius:6px;background:' + BG.input + ';color:var(--text-bright);font-family:var(--mono);font-size:15px"></div>';
-    html += '<div><label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:4px">Taux fixe (%)</label>';
-    html += '<input type="number" id="carry-rate" value="' + _state.rate + '" step="0.1" style="width:100%;padding:10px;border:1px solid ' + BG.border + ';border-radius:6px;background:' + BG.input + ';color:var(--text-bright);font-family:var(--mono);font-size:15px"></div>';
-    html += '<div><label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:4px">Durée (ans)</label>';
-    html += '<input type="number" id="carry-years" value="' + _state.years + '" min="1" max="30" style="width:100%;padding:10px;border:1px solid ' + BG.border + ';border-radius:6px;background:' + BG.input + ';color:var(--text-bright);font-family:var(--mono);font-size:15px"></div>';
-    html += '<div><label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:4px">Type emprunt</label>';
-    html += '<select id="carry-loantype" style="width:100%;padding:10px;border:1px solid ' + BG.border + ';border-radius:6px;background:' + BG.input + ';color:var(--text-bright);font-size:13px">';
+    html += '<div><label style="font-size:10px;color:' + BG.textMuted + ';display:block;margin-bottom:4px">Montant (€)</label>';
+    html += '<input type="number" id="carry-amount" value="' + _state.amount + '" step="100000" style="width:100%;padding:10px;border:1px solid ' + BG.border + ';border-radius:6px;background:' + BG.input + ';color:' + BG.text + ';font-family:var(--mono);font-size:15px"></div>';
+    html += '<div><label style="font-size:10px;color:' + BG.textMuted + ';display:block;margin-bottom:4px">Taux fixe (%)</label>';
+    html += '<input type="number" id="carry-rate" value="' + _state.rate + '" step="0.1" style="width:100%;padding:10px;border:1px solid ' + BG.border + ';border-radius:6px;background:' + BG.input + ';color:' + BG.text + ';font-family:var(--mono);font-size:15px"></div>';
+    html += '<div><label style="font-size:10px;color:' + BG.textMuted + ';display:block;margin-bottom:4px">Durée (ans)</label>';
+    html += '<input type="number" id="carry-years" value="' + _state.years + '" min="1" max="30" style="width:100%;padding:10px;border:1px solid ' + BG.border + ';border-radius:6px;background:' + BG.input + ';color:' + BG.text + ';font-family:var(--mono);font-size:15px"></div>';
+    html += '<div><label style="font-size:10px;color:' + BG.textMuted + ';display:block;margin-bottom:4px">Type emprunt</label>';
+    html += '<select id="carry-loantype" style="width:100%;padding:10px;border:1px solid ' + BG.border + ';border-radius:6px;background:' + BG.input + ';color:' + BG.text + ';font-size:13px">';
     html += '<option value="both"' + (_state.loanType === 'both' ? ' selected' : '') + '>In Fine + Amort. (comparer)</option>';
     html += '<option value="inFine"' + (_state.loanType === 'inFine' ? ' selected' : '') + '>In Fine uniquement</option>';
     html += '<option value="amortissable"' + (_state.loanType === 'amortissable' ? ' selected' : '') + '>Amortissable uniquement</option>';
@@ -263,18 +269,55 @@
     var totalCostIF = annualCostIF * _state.years;
     var totalCostAmort = _state.totalInterestAmort;
     html += '<div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px">';
-    html += '<div style="padding:8px 12px;background:rgba(34,211,238,0.12);border:2px solid rgba(34,211,238,0.3);border-radius:6px;font-size:11px;color:var(--cyan)">';
+    html += '<div style="padding:8px 12px;background:rgba(34,211,238,0.12);border:2px solid rgba(34,211,238,0.3);border-radius:6px;font-size:11px;color:#0891B2">';
     html += '✅ <strong>IN FINE (RECOMMANDÉ)</strong> : -' + _fmt(annualCostIF) + '€/an intérêts seuls · Total : <strong>-' + _fmt(totalCostIF) + '€</strong> · Capital 1M€ constant → carry max</div>';
     html += '<div style="padding:8px 12px;background:rgba(168,85,247,0.06);border:1px solid rgba(168,85,247,0.15);border-radius:6px;font-size:11px;color:#A855F7">';
     html += 'AMORTISSABLE : -' + _fmt(_state.monthlyPayment) + '€/mois · Total intérêts : <strong>-' + _fmt(totalCostAmort) + '€</strong> · Capital décroissant → carry ÷2</div>';
     html += '</div>';
-    html += '<div style="margin-top:6px;padding:8px 12px;background:rgba(6,214,160,0.08);border:1px solid rgba(6,214,160,0.2);border-radius:6px;font-size:10px;color:var(--green)">✅ Prêt Equipéa SG — <strong>In fine ou amortissable au choix</strong> · 2,90% fixe de 2 à 5 ans · Jusqu\'à 1M€ · Frais : ' + _fmt(_state.loanFees) + '€ · <strong>Aucune garantie</strong> (crédit en blanc) · Entité : Caméleons Com Mark · Valide jusqu\'au 14/05/2026</div>';
+    html += '<div style="margin-top:6px;padding:8px 12px;background:rgba(6,214,160,0.08);border:1px solid rgba(6,214,160,0.2);border-radius:6px;font-size:10px;color:#059669">✅ Prêt Equipéa SG — <strong>In fine ou amortissable au choix</strong> · 2,90% fixe de 2 à 5 ans · Jusqu\'à 1M€ · Frais : ' + _fmt(_state.loanFees) + '€ · <strong>Aucune garantie</strong> (crédit en blanc) · Entité : Caméleons Com Mark · Valide jusqu\'au 14/05/2026</div>';
+    html += '</div>';
+
+    // ─── Costs breakdown ──────
+    var costIF = Math.round(_state.amount * _state.rate / 100) * _state.years;
+    var costAmort = _state.totalInterestAmort;
+    html += '<div style="background:' + BG.section + ';border:1px solid ' + BG.border + ';border-radius:8px;padding:16px;margin-bottom:16px">';
+    html += '<div style="font-size:12px;font-weight:700;color:#DC2626;margin-bottom:10px">💰 COÛTS DE L\'OPÉRATION</div>';
+    html += '<table style="width:100%;border-collapse:collapse;font-size:12px;color:' + BG.text + '">';
+    html += '<thead><tr style="border-bottom:2px solid ' + BG.border + '">';
+    html += '<th style="padding:8px;text-align:left;color:' + BG.textMuted + ';font-size:10px">Poste</th>';
+    html += '<th style="padding:8px;text-align:right;color:#0891B2;font-size:10px">In Fine</th>';
+    html += '<th style="padding:8px;text-align:right;color:#7C3AED;font-size:10px">Amortissable</th>';
+    html += '</tr></thead><tbody>';
+    // Rows
+    [
+      ['Intérêts totaux sur ' + _state.years + ' ans', '-' + _fmt(costIF) + '€', '-' + _fmt(costAmort) + '€'],
+      ['Frais de dossier', '-' + _fmt(_state.loanFees) + '€', '-' + _fmt(_state.loanFees) + '€'],
+      ['Échéance mensuelle', '-' + _fmt(Math.round(_state.amount * _state.rate / 100 / 12)) + '€ (intérêts)', '-' + _fmt(_state.monthlyPayment) + '€ (capital+intérêts)'],
+      ['Capital investi moyen', _fmt(_state.amount) + '€ (constant)', '~' + _fmt(Math.round(_state.amount / 2)) + '€ (décroissant)'],
+      ['Remboursement anticipé', 'Soulte swap (coûteuse)', 'Soulte swap ou 3% CRD après 30 mois'],
+      ['Garanties', 'Aucune (crédit en blanc)', 'Aucune (crédit en blanc)']
+    ].forEach(function(row, i) {
+      var bg = i % 2 === 0 ? BG.row0 : BG.row1;
+      html += '<tr style="background:' + bg + ';border-bottom:1px solid ' + BG.border + '">';
+      html += '<td style="padding:6px 8px;font-weight:600;color:' + BG.text + '">' + row[0] + '</td>';
+      html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:#0891B2">' + row[1] + '</td>';
+      html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:#7C3AED">' + row[2] + '</td>';
+      html += '</tr>';
+    });
+    // Total row
+    html += '<tr style="border-top:2px solid ' + BG.border + ';background:' + BG.header + ';font-weight:700">';
+    html += '<td style="padding:8px">COÛT TOTAL</td>';
+    html += '<td style="padding:8px;text-align:right;font-family:var(--mono);color:#DC2626;font-size:13px">-' + _fmt(costIF + _state.loanFees) + '€</td>';
+    html += '<td style="padding:8px;text-align:right;font-family:var(--mono);color:#DC2626;font-size:13px">-' + _fmt(costAmort + _state.loanFees) + '€</td>';
+    html += '</tr>';
+    html += '</tbody></table>';
+    html += '<div style="margin-top:8px;padding:6px 10px;background:#DBEAFE;border-radius:4px;font-size:10px;color:#1E40AF">💡 <strong>In fine = intérêts ×2 mais capital investi constant → revenus ×2 → gain net supérieur.</strong> Économie d\'intérêts de l\'amortissable ne compense pas la perte de revenus.</div>';
     html += '</div>';
 
     // ─── Recommended products quick-add ──────
-    html += '<div style="background:' + BG.section + ';border:1px solid rgba(6,214,160,0.3);border-radius:var(--radius-sm);padding:16px;margin-bottom:16px">';
-    html += '<div style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:8px">⚡ PRODUITS RECOMMANDÉS (marché avril 2026)</div>';
-    html += '<div style="font-size:10px;color:var(--text-dim);margin-bottom:10px">Structures réalistes basées sur OAT 10Y = 3.10%, BCE = 2.15%, régime stagflation. Cliquez pour ajouter.</div>';
+    html += '<div style="background:' + BG.section + ';border:1px solid #86EFAC;border-radius:8px;padding:16px;margin-bottom:16px">';
+    html += '<div style="font-size:12px;font-weight:700;color:#059669;margin-bottom:8px">⚡ PRODUITS RECOMMANDÉS (marché avril 2026)</div>';
+    html += '<div style="font-size:10px;color:' + BG.textDim + ';margin-bottom:10px">Structures réalistes basées sur OAT 10Y = 3.10%, BCE = 2.15%, régime stagflation. Cliquez pour ajouter.</div>';
     html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">';
     _recommendedProducts().forEach(function(p) {
       var exists = _state.products.some(function(ep) { return ep.id === p.id; });
@@ -282,32 +325,32 @@
       var opacity = exists ? '0.4' : '1';
       html += '<button onclick="' + (exists ? '' : '_carryAddRecommended(\'' + p.id + '\')') + '" style="padding:12px;border-radius:8px;border:1px solid ' + p.color + '44;background:' + p.color + '0A;cursor:' + (exists ? 'default' : 'pointer') + ';text-align:left;opacity:' + opacity + '">';
       html += '<div style="font-size:11px;font-weight:700;color:' + p.color + '">' + p.name + '</div>';
-      html += '<div style="font-size:10px;color:var(--text-muted);margin-top:2px">' + typeLabel + ' · ' + p.coupon + '%</div>';
-      if (p.type === 'hybride') html += '<div style="font-size:9px;color:var(--green);margin-top:2px">Plancher ' + p.couponPlancher + '% + bonus ' + p.couponBonus + '%</div>';
-      html += '<div style="font-size:9px;color:var(--text-dim);margin-top:2px">' + p.risk + '</div>';
-      if (exists) html += '<div style="font-size:9px;color:var(--accent);margin-top:2px">✓ Déjà ajouté</div>';
+      html += '<div style="font-size:10px;color:' + BG.textMuted + ';margin-top:2px">' + typeLabel + ' · ' + p.coupon + '%</div>';
+      if (p.type === 'hybride') html += '<div style="font-size:9px;color:#059669;margin-top:2px">Plancher ' + p.couponPlancher + '% + bonus ' + p.couponBonus + '%</div>';
+      html += '<div style="font-size:9px;color:' + BG.textDim + ';margin-top:2px">' + p.risk + '</div>';
+      if (exists) html += '<div style="font-size:9px;color:#2563EB;margin-top:2px">✓ Déjà ajouté</div>';
       html += '</button>';
     });
     html += '</div></div>';
 
     // ─── Import JSON ──────
     html += '<div style="background:' + BG.section + ';border:1px solid rgba(59,130,246,0.3);border-radius:var(--radius-sm);padding:16px;margin-bottom:16px">';
-    html += '<div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:8px">📋 IMPORTER UN PRODUIT (JSON)</div>';
-    html += '<textarea id="carry-json" placeholder=\'{"name":"Hybride TEC10","coupon":{"rate":5.5,"type":"conditionnel"},"maturityYears":5,"capitalProtection":{"protected":true}}\' style="width:100%;height:60px;padding:8px;border:1px solid ' + BG.border + ';border-radius:6px;background:' + BG.input + ';color:var(--text-bright);font-family:monospace;font-size:11px;resize:vertical;box-sizing:border-box"></textarea>';
-    html += '<button class="btn" onclick="_carryImportJSON()" style="margin-top:8px;font-size:11px;padding:6px 14px;background:rgba(59,130,246,0.1);border-color:rgba(59,130,246,0.3);color:var(--accent)">📥 Importer</button>';
+    html += '<div style="font-size:12px;font-weight:700;color:#2563EB;margin-bottom:8px">📋 IMPORTER UN PRODUIT (JSON)</div>';
+    html += '<textarea id="carry-json" placeholder=\'{"name":"Hybride TEC10","coupon":{"rate":5.5,"type":"conditionnel"},"maturityYears":5,"capitalProtection":{"protected":true}}\' style="width:100%;height:60px;padding:8px;border:1px solid ' + BG.border + ';border-radius:6px;background:' + BG.input + ';color:' + BG.text + ';font-family:monospace;font-size:11px;resize:vertical;box-sizing:border-box"></textarea>';
+    html += '<button class="btn" onclick="_carryImportJSON()" style="margin-top:8px;font-size:11px;padding:6px 14px;background:rgba(59,130,246,0.1);border-color:rgba(59,130,246,0.3);color:#2563EB">📥 Importer</button>';
     html += '</div>';
 
     // ─── Manual add ──────
     html += '<div style="background:' + BG.section + ';border:1px solid ' + BG.border + ';border-radius:var(--radius-sm);padding:16px;margin-bottom:16px">';
-    html += '<div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:8px">✏️ AJOUTER MANUELLEMENT</div>';
+    html += '<div style="font-size:12px;font-weight:700;color:' + BG.textMuted + ';margin-bottom:8px">✏️ AJOUTER MANUELLEMENT</div>';
     html += '<div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:10px;margin-bottom:10px">';
-    html += '<div><label style="font-size:9px;color:var(--text-dim)">Nom</label><input id="carry-pname" placeholder="Ex: Hybride CIC" style="width:100%;padding:6px;border:1px solid ' + BG.border + ';border-radius:4px;background:' + BG.input + ';color:var(--text-bright);font-size:11px"></div>';
-    html += '<div><label style="font-size:9px;color:var(--text-dim)">Type</label><select id="carry-ptype" style="width:100%;padding:6px;border:1px solid ' + BG.border + ';border-radius:4px;background:' + BG.input + ';color:var(--text-bright);font-size:11px"><option value="fixe">Fixe garanti</option><option value="conditionnel">Conditionnel</option><option value="hybride">Hybride</option></select></div>';
-    html += '<div><label style="font-size:9px;color:var(--text-dim)">Coupon (%)</label><input id="carry-pcoupon" type="number" step="0.1" placeholder="5.0" style="width:100%;padding:6px;border:1px solid ' + BG.border + ';border-radius:4px;background:' + BG.input + ';color:var(--text-bright);font-size:11px;font-family:var(--mono)"></div>';
-    html += '<div><label style="font-size:9px;color:var(--text-dim)">Durée (ans)</label><input id="carry-pduration" type="number" value="5" min="1" max="30" style="width:100%;padding:6px;border:1px solid ' + BG.border + ';border-radius:4px;background:' + BG.input + ';color:var(--text-bright);font-size:11px;font-family:var(--mono)"></div>';
-    html += '<div><label style="font-size:9px;color:var(--text-dim)">Plancher (hybride)</label><input id="carry-pfloor" type="number" step="0.1" placeholder="3.0" style="width:100%;padding:6px;border:1px solid ' + BG.border + ';border-radius:4px;background:' + BG.input + ';color:var(--text-bright);font-size:11px;font-family:var(--mono)"></div>';
+    html += '<div><label style="font-size:9px;color:' + BG.textDim + '">Nom</label><input id="carry-pname" placeholder="Ex: Hybride CIC" style="width:100%;padding:6px;border:1px solid ' + BG.border + ';border-radius:4px;background:' + BG.input + ';color:' + BG.text + ';font-size:11px"></div>';
+    html += '<div><label style="font-size:9px;color:' + BG.textDim + '">Type</label><select id="carry-ptype" style="width:100%;padding:6px;border:1px solid ' + BG.border + ';border-radius:4px;background:' + BG.input + ';color:' + BG.text + ';font-size:11px"><option value="fixe">Fixe garanti</option><option value="conditionnel">Conditionnel</option><option value="hybride">Hybride</option></select></div>';
+    html += '<div><label style="font-size:9px;color:' + BG.textDim + '">Coupon (%)</label><input id="carry-pcoupon" type="number" step="0.1" placeholder="5.0" style="width:100%;padding:6px;border:1px solid ' + BG.border + ';border-radius:4px;background:' + BG.input + ';color:' + BG.text + ';font-size:11px;font-family:var(--mono)"></div>';
+    html += '<div><label style="font-size:9px;color:' + BG.textDim + '">Durée (ans)</label><input id="carry-pduration" type="number" value="5" min="1" max="30" style="width:100%;padding:6px;border:1px solid ' + BG.border + ';border-radius:4px;background:' + BG.input + ';color:' + BG.text + ';font-size:11px;font-family:var(--mono)"></div>';
+    html += '<div><label style="font-size:9px;color:' + BG.textDim + '">Plancher (hybride)</label><input id="carry-pfloor" type="number" step="0.1" placeholder="3.0" style="width:100%;padding:6px;border:1px solid ' + BG.border + ';border-radius:4px;background:' + BG.input + ';color:' + BG.text + ';font-size:11px;font-family:var(--mono)"></div>';
     html += '</div>';
-    html += '<button class="btn" onclick="_carryAddManual()" style="font-size:11px;padding:6px 14px;background:rgba(6,214,160,0.1);border-color:rgba(6,214,160,0.3);color:var(--green)">+ Ajouter</button>';
+    html += '<button class="btn" onclick="_carryAddManual()" style="font-size:11px;padding:6px 14px;background:rgba(6,214,160,0.1);border-color:rgba(6,214,160,0.3);color:#059669">+ Ajouter</button>';
     html += '</div>';
 
     // ─── Products + Allocation ──────
@@ -316,9 +359,9 @@
     var remaining = _state.amount - totalAlloc;
     var allocOK = Math.abs(remaining) < 1;
 
-    html += '<div style="background:' + BG.section + ';border:1px solid ' + (allocOK ? 'var(--green)' : 'var(--orange)') + '44;border-radius:var(--radius-sm);padding:16px;margin-bottom:16px">';
+    html += '<div style="background:' + BG.section + ';border:1px solid ' + (allocOK ? '#059669' : '#D97706') + '44;border-radius:var(--radius-sm);padding:16px;margin-bottom:16px">';
     html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">';
-    html += '<div style="font-size:12px;font-weight:700;color:var(--text-bright)">📦 MES PRODUITS & ALLOCATION (' + allProducts.length + ')</div>';
+    html += '<div style="font-size:12px;font-weight:700;color:' + BG.text + '">📦 MES PRODUITS & ALLOCATION (' + allProducts.length + ')</div>';
     if (allProducts.length > 1) html += '<button class="btn sm" onclick="_carryEqualize()" style="font-size:10px;padding:4px 10px">⚖️ Répartir également</button>';
     html += '</div>';
 
@@ -333,26 +376,26 @@
       if (remaining > 0) html += '<div style="width:' + (remaining / _state.amount * 100) + '%;background:var(--border)" title="Non alloué: ' + _fmt(remaining) + '€"></div>';
       html += '</div>';
       html += '<div style="display:flex;justify-content:space-between;margin-top:4px;font-size:10px">';
-      html += '<span style="color:var(--text-dim)">Alloué : <strong style="color:var(--text-bright)">' + _fmt(totalAlloc) + '€</strong> / ' + _fmt(_state.amount) + '€</span>';
-      if (!allocOK) html += '<span style="color:var(--orange)">Restant : ' + _fmt(remaining) + '€</span>';
-      else html += '<span style="color:var(--green)">✓ 100% alloué</span>';
+      html += '<span style="color:' + BG.textDim + '">Alloué : <strong style="color:' + BG.text + '">' + _fmt(totalAlloc) + '€</strong> / ' + _fmt(_state.amount) + '€</span>';
+      if (!allocOK) html += '<span style="color:#D97706">Restant : ' + _fmt(remaining) + '€</span>';
+      else html += '<span style="color:#059669">✓ 100% alloué</span>';
       html += '</div></div>';
     }
 
     if (allProducts.length === 0) {
-      html += '<div style="text-align:center;padding:20px;color:var(--text-dim);font-size:11px">Aucun produit. Ajoutez des produits recommandés ci-dessus ou créez les vôtres.</div>';
+      html += '<div style="text-align:center;padding:20px;color:' + BG.textDim + ';font-size:11px">Aucun produit. Ajoutez des produits recommandés ci-dessus ou créez les vôtres.</div>';
     } else {
       allProducts.forEach(function(p, idx) {
         var typeLabel = p.type === 'fixe' ? '🛡️ Fixe' : p.type === 'hybride' ? '⚖️ Hybride' : '🎯 Conditionnel';
         var pctAlloc = _state.amount > 0 ? Math.round(p.amount / _state.amount * 100) : 0;
         html += '<div style="padding:12px;border-radius:8px;border:1px solid ' + (p.color || '#888') + '33;background:' + (p.color || '#888') + '06;margin-bottom:8px;position:relative">';
-        html += '<button onclick="_carryRemoveProduct(' + idx + ')" style="position:absolute;top:6px;right:8px;background:none;border:none;color:var(--red);cursor:pointer;font-size:14px" title="Supprimer">✕</button>';
+        html += '<button onclick="_carryRemoveProduct(' + idx + ')" style="position:absolute;top:6px;right:8px;background:none;border:none;color:#DC2626;cursor:pointer;font-size:14px" title="Supprimer">✕</button>';
         html += '<div style="display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center">';
 
         // Left: product info
         html += '<div>';
         html += '<div style="font-size:13px;font-weight:700;color:' + (p.color || '#888') + '">' + p.name + '</div>';
-        html += '<div style="font-size:10px;color:var(--text-muted);margin-top:2px">' + typeLabel + ' · ' + p.coupon + '% · ' + p.duration + ' ans';
+        html += '<div style="font-size:10px;color:' + BG.textMuted + ';margin-top:2px">' + typeLabel + ' · ' + p.coupon + '% · ' + p.duration + ' ans';
         if (p.type === 'hybride') html += ' · plancher ' + p.couponPlancher + '% + bonus ' + p.couponBonus + '%';
         if (p.condition) html += ' · ' + p.condition;
         html += '</div>';
@@ -360,14 +403,14 @@
         // Spread info
         var expectedRate = p.type === 'fixe' ? p.coupon : p.type === 'hybride' ? (p.couponPlancher + p.couponBonus * (p.conditionProb || 0.68)) : (p.coupon * (p.conditionProb || 0.68));
         var spread = expectedRate - _state.rate;
-        html += '<div style="font-size:10px;margin-top:4px;color:' + (spread >= 0 ? 'var(--green)' : 'var(--red)') + '">Spread espéré vs emprunt : <strong>' + (spread >= 0 ? '+' : '') + _pct(spread) + '%</strong></div>';
+        html += '<div style="font-size:10px;margin-top:4px;color:' + (spread >= 0 ? '#059669' : '#DC2626') + '">Spread espéré vs emprunt : <strong>' + (spread >= 0 ? '+' : '') + _pct(spread) + '%</strong></div>';
         html += '</div>';
 
         // Right: amount input
         html += '<div style="text-align:right">';
-        html += '<label style="font-size:9px;color:var(--text-dim);display:block;margin-bottom:2px">Montant alloué</label>';
-        html += '<input type="number" value="' + p.amount + '" step="50000" min="0" max="' + _state.amount + '" onchange="_carrySetAmount(' + idx + ',this.value)" style="width:140px;padding:8px;border:1px solid ' + (p.color || '#888') + '44;border-radius:6px;background:' + BG.input + ';color:var(--text-bright);font-family:var(--mono);font-size:14px;text-align:right">';
-        html += '<div style="font-size:10px;color:var(--text-dim);margin-top:2px">' + pctAlloc + '% du total</div>';
+        html += '<label style="font-size:9px;color:' + BG.textDim + ';display:block;margin-bottom:2px">Montant alloué</label>';
+        html += '<input type="number" value="' + p.amount + '" step="50000" min="0" max="' + _state.amount + '" onchange="_carrySetAmount(' + idx + ',this.value)" style="width:140px;padding:8px;border:1px solid ' + (p.color || '#888') + '44;border-radius:6px;background:' + BG.input + ';color:' + BG.text + ';font-family:var(--mono);font-size:14px;text-align:right">';
+        html += '<div style="font-size:10px;color:' + BG.textDim + ';margin-top:2px">' + pctAlloc + '% du total</div>';
         html += '</div>';
 
         html += '</div></div>';
@@ -379,9 +422,9 @@
     if (allProducts.length > 0 && allocOK) {
       html += '<button class="btn primary ai-glow" style="width:100%;padding:14px;font-size:14px" onclick="_carrySimulate()">⚡ Simuler — ' + allProducts.length + ' produit' + (allProducts.length > 1 ? 's' : '') + ' · Scénarios & P&L détaillé</button>';
     } else if (allProducts.length > 0) {
-      html += '<div style="width:100%;padding:14px;font-size:12px;text-align:center;color:var(--orange);background:rgba(255,182,39,0.08);border:1px dashed var(--orange);border-radius:var(--radius-sm)">⚠️ Ajustez les montants — allocation totale doit = ' + _fmt(_state.amount) + '€ (actuellement ' + _fmt(totalAlloc) + '€)</div>';
+      html += '<div style="width:100%;padding:14px;font-size:12px;text-align:center;color:#D97706;background:rgba(255,182,39,0.08);border:1px dashed #D97706;border-radius:var(--radius-sm)">⚠️ Ajustez les montants — allocation totale doit = ' + _fmt(_state.amount) + '€ (actuellement ' + _fmt(totalAlloc) + '€)</div>';
     } else {
-      html += '<div style="width:100%;padding:14px;font-size:12px;text-align:center;color:var(--text-dim);background:' + BG.section + ';border:1px dashed var(--border);border-radius:var(--radius-sm)">Ajoutez au moins 1 produit pour lancer la simulation</div>';
+      html += '<div style="width:100%;padding:14px;font-size:12px;text-align:center;color:' + BG.textDim + ';background:' + BG.section + ';border:1px dashed var(--border);border-radius:var(--radius-sm)">Ajoutez au moins 1 produit pour lancer la simulation</div>';
     }
 
     // ─── Mail template ──────
@@ -415,7 +458,7 @@
     mailLines.push('Merci de nous transmettre les term sheets et pricing indicatif.');
     mailLines.push('');
     mailLines.push('Cordialement');
-    html += '<textarea id="carry-mail" style="width:100%;height:220px;padding:10px;border:1px solid ' + BG.border + ';border-radius:6px;background:' + BG.input + ';color:var(--text-bright);font-size:11px;line-height:1.5;resize:vertical;box-sizing:border-box;white-space:pre-wrap">' + mailLines.join('\n') + '</textarea>';
+    html += '<textarea id="carry-mail" style="width:100%;height:220px;padding:10px;border:1px solid ' + BG.border + ';border-radius:6px;background:' + BG.input + ';color:' + BG.text + ';font-size:11px;line-height:1.5;resize:vertical;box-sizing:border-box;white-space:pre-wrap">' + mailLines.join('\n') + '</textarea>';
     html += '<button class="btn" onclick="navigator.clipboard.writeText(document.getElementById(\'carry-mail\').value);this.textContent=\'✓ Copié\';setTimeout(()=>this.textContent=\'📋 Copier le mail\',2000)" style="margin-top:8px;font-size:11px;padding:6px 14px">📋 Copier le mail</button>';
     html += '</div>';
 
@@ -426,19 +469,19 @@
   // ═══ RENDER — RESULTS ══════════════════════════════════════
   function _renderResult(container) {
     var r = _state.result;
-    var html = '<div class="section" style="background:' + BG.wrap + ';border-radius:var(--radius-lg);padding:20px">';
-    html += '<div class="section-header"><div class="section-title"><span class="dot" style="background:var(--accent)"></span>🏦 Carry Trade — P&L & Scénarios</div>';
-    html += '<button class="btn sm" onclick="_carryReset()">← Modifier</button></div>';
+    var html = '<div class="section" style="' + WRAP_STYLE + '">';
+    html += '<div class="section-header" style="border-color:' + BG.border + '"><div class="section-title" style="color:' + BG.text + '"><span class="dot" style="background:#2563EB"></span>🏦 Carry Trade — P&L & Scénarios</div>';
+    html += '<button class="btn sm" style="background:' + BG.section + ';border-color:' + BG.border + ';color:' + BG.text + '" onclick="_carryReset()">← Modifier</button></div>';
 
     // ─── Loan summary ──────
     var annIF = Math.round(_state.amount * _state.rate / 100);
     html += '<div style="background:' + BG.section + ';border:1px solid rgba(6,214,160,0.3);border-radius:var(--radius-sm);padding:14px;margin-bottom:14px">';
     html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">';
-    html += '<span style="font-size:13px;font-weight:700;color:var(--green)">✅ Prêt Equipéa SG — ' + _fmt(_state.amount) + '€ à ' + _state.rate + '% fixe sur ' + _state.years + ' ans</span>';
-    html += '<span style="font-size:10px;color:var(--text-dim)">Caméleons Com Mark · Crédit en blanc · Frais ' + _fmt(_state.loanFees) + '€</span>';
+    html += '<span style="font-size:13px;font-weight:700;color:#059669">✅ Prêt Equipéa SG — ' + _fmt(_state.amount) + '€ à ' + _state.rate + '% fixe sur ' + _state.years + ' ans</span>';
+    html += '<span style="font-size:10px;color:' + BG.textDim + '">Caméleons Com Mark · Crédit en blanc · Frais ' + _fmt(_state.loanFees) + '€</span>';
     html += '</div>';
     html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:11px">';
-    html += '<div style="padding:6px 10px;background:rgba(34,211,238,0.08);border-radius:4px;color:var(--cyan)">✅ In fine : <strong>-' + _fmt(annIF) + '€/an</strong> · total intérêts -' + _fmt(annIF * _state.years) + '€ · capital constant</div>';
+    html += '<div style="padding:6px 10px;background:rgba(34,211,238,0.08);border-radius:4px;color:#0891B2">✅ In fine : <strong>-' + _fmt(annIF) + '€/an</strong> · total intérêts -' + _fmt(annIF * _state.years) + '€ · capital constant</div>';
     html += '<div style="padding:6px 10px;background:rgba(168,85,247,0.04);border-radius:4px;color:#A855F7">Amort. : -' + _fmt(_state.monthlyPayment) + '€/mois · total intérêts -' + _fmt(_state.totalInterestAmort) + '€ · capital décroissant</div>';
     html += '</div></div>';
 
@@ -461,42 +504,42 @@
 
       html += '<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:20px">';
       [
-        ['RENDEMENT NET/AN', _pct(roiAnnual) + '%', roiAnnual >= 0 ? 'var(--green)' : 'var(--red)', 'Après IS 25%'],
-        ['ROI TOTAL ' + _state.years + 'A', _pct(roiTotal) + '%', roiTotal >= 0 ? 'var(--green)' : 'var(--red)', _fmt(kpiExp.totalNetAfterTax) + '€ net'],
-        ['NET ESPÉRÉ/AN', _fmt(kpiExp.avgPerYear) + '€', kpiExp.avgPerYear >= 0 ? 'var(--green)' : 'var(--red)', 'Après intérêts + IS'],
-        ['SPREAD NET', '+' + _pct(spreadBrut) + '%', 'var(--cyan)', 'Coupon moyen - taux emprunt'],
-        ['PIRE CAS/AN', _pct(roiWorst) + '%', roiWorst >= 0 ? 'var(--green)' : 'var(--red)', _fmt(kpiWorst.avgPerYear) + '€/an'],
-        ['BEST CASE/AN', '+' + _pct(roiBest) + '%', 'var(--cyan)', _fmt(kpiBest.avgPerYear) + '€/an']
+        ['RENDEMENT NET/AN', _pct(roiAnnual) + '%', roiAnnual >= 0 ? '#059669' : '#DC2626', 'Après IS 25%'],
+        ['ROI TOTAL ' + _state.years + 'A', _pct(roiTotal) + '%', roiTotal >= 0 ? '#059669' : '#DC2626', _fmt(kpiExp.totalNetAfterTax) + '€ net'],
+        ['NET ESPÉRÉ/AN', _fmt(kpiExp.avgPerYear) + '€', kpiExp.avgPerYear >= 0 ? '#059669' : '#DC2626', 'Après intérêts + IS'],
+        ['SPREAD NET', '+' + _pct(spreadBrut) + '%', '#0891B2', 'Coupon moyen - taux emprunt'],
+        ['PIRE CAS/AN', _pct(roiWorst) + '%', roiWorst >= 0 ? '#059669' : '#DC2626', _fmt(kpiWorst.avgPerYear) + '€/an'],
+        ['BEST CASE/AN', '+' + _pct(roiBest) + '%', '#0891B2', _fmt(kpiBest.avgPerYear) + '€/an']
       ].forEach(function(kpi) {
         html += '<div style="background:' + BG.section + ';border:1px solid ' + BG.border + ';border-radius:var(--radius-sm);padding:12px;text-align:center">';
-        html += '<div style="font-size:9px;font-weight:700;color:var(--text-dim);letter-spacing:0.8px;margin-bottom:6px">' + kpi[0] + '</div>';
+        html += '<div style="font-size:9px;font-weight:700;color:' + BG.textDim + ';letter-spacing:0.8px;margin-bottom:6px">' + kpi[0] + '</div>';
         html += '<div style="font-family:var(--mono);font-size:18px;font-weight:700;color:' + kpi[2] + '">' + kpi[1] + '</div>';
-        html += '<div style="font-size:9px;color:var(--text-dim);margin-top:4px">' + kpi[3] + '</div>';
+        html += '<div style="font-size:9px;color:' + BG.textDim + ';margin-top:4px">' + kpi[3] + '</div>';
         html += '</div>';
       });
       html += '</div>';
     }
 
     // ─── SCENARIO COMPARISON TABLE ──────
-    html += '<div style="font-size:13px;font-weight:700;color:var(--text-bright);margin-bottom:10px">📊 COMPARAISON DES SCÉNARIOS — Quel split est optimal ?</div>';
+    html += '<div style="font-size:13px;font-weight:700;color:' + BG.text + ';margin-bottom:10px">📊 COMPARAISON DES SCÉNARIOS — Quel split est optimal ?</div>';
 
     loanTypes.forEach(function(lt) {
       var ltLabel = lt === 'inFine' ? 'IN FINE' : 'AMORTISSABLE';
-      var ltColor = lt === 'inFine' ? 'var(--cyan)' : '#A855F7';
+      var ltColor = lt === 'inFine' ? '#0891B2' : '#A855F7';
 
       html += '<div style="border:1px solid ' + ltColor + '33;border-radius:var(--radius-sm);overflow:hidden;margin-bottom:16px">';
       html += '<div style="padding:8px 12px;background:' + ltColor + '0A;font-weight:700;color:' + ltColor + ';font-size:12px">' + ltLabel + '</div>';
 
       html += '<table style="width:100%;border-collapse:collapse;font-size:11px">';
       html += '<thead><tr style="border-bottom:2px solid var(--border)">';
-      html += '<th style="padding:8px 6px;text-align:left;color:var(--text-muted);font-size:10px">Scénario</th>';
-      html += '<th style="padding:8px 6px;text-align:right;color:var(--text-muted);font-size:10px">Allocation</th>';
-      html += '<th style="padding:8px 6px;text-align:right;color:var(--green);font-size:10px">Rdt net/an</th>';
-      html += '<th style="padding:8px 6px;text-align:right;color:var(--green);font-size:10px">ROI total</th>';
-      html += '<th style="padding:8px 6px;text-align:right;color:var(--green);font-size:10px">Net/an €</th>';
-      html += '<th style="padding:8px 6px;text-align:right;color:var(--green);font-size:10px">Total € net</th>';
-      html += '<th style="padding:8px 6px;text-align:right;color:var(--orange);font-size:10px">Pire cas %</th>';
-      html += '<th style="padding:8px 6px;text-align:right;color:var(--cyan);font-size:10px">Best case %</th>';
+      html += '<th style="padding:8px 6px;text-align:left;color:' + BG.textMuted + ';font-size:10px">Scénario</th>';
+      html += '<th style="padding:8px 6px;text-align:right;color:' + BG.textMuted + ';font-size:10px">Allocation</th>';
+      html += '<th style="padding:8px 6px;text-align:right;color:#059669;font-size:10px">Rdt net/an</th>';
+      html += '<th style="padding:8px 6px;text-align:right;color:#059669;font-size:10px">ROI total</th>';
+      html += '<th style="padding:8px 6px;text-align:right;color:#059669;font-size:10px">Net/an €</th>';
+      html += '<th style="padding:8px 6px;text-align:right;color:#059669;font-size:10px">Total € net</th>';
+      html += '<th style="padding:8px 6px;text-align:right;color:#D97706;font-size:10px">Pire cas %</th>';
+      html += '<th style="padding:8px 6px;text-align:right;color:#0891B2;font-size:10px">Best case %</th>';
       html += '</tr></thead><tbody>';
 
       var scenarioResults = r.scenarios.map(function(sc) {
@@ -520,31 +563,31 @@
         var bestPct = sr.best.totalNetAfterTax / _state.amount * 100 / _state.years;
 
         html += '<tr style="background:' + bg + ';border-bottom:1px solid var(--border)">';
-        html += '<td style="padding:8px 6px;font-weight:' + (isUser || isBest ? '700' : '400') + ';color:var(--text-bright);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + sc.name + (isBest ? ' 🏆' : '') + '</td>';
-        html += '<td style="padding:8px 6px;text-align:right;font-size:10px;color:var(--text-dim)">' + allocDesc + '</td>';
+        html += '<td style="padding:8px 6px;font-weight:' + (isUser || isBest ? '700' : '400') + ';color:' + BG.text + ';max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + sc.name + (isBest ? ' 🏆' : '') + '</td>';
+        html += '<td style="padding:8px 6px;text-align:right;font-size:10px;color:' + BG.textDim + '">' + allocDesc + '</td>';
         // Rdt net/an %
-        html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);font-weight:700;font-size:12px;color:' + (rdtAnnual >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (rdtAnnual >= 0 ? '+' : '') + _pct(rdtAnnual) + '%</td>';
+        html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);font-weight:700;font-size:12px;color:' + (rdtAnnual >= 0 ? '#059669' : '#DC2626') + '">' + (rdtAnnual >= 0 ? '+' : '') + _pct(rdtAnnual) + '%</td>';
         // ROI total %
-        html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);font-weight:700;color:' + (roiTot >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (roiTot >= 0 ? '+' : '') + _pct(roiTot) + '%</td>';
+        html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);font-weight:700;color:' + (roiTot >= 0 ? '#059669' : '#DC2626') + '">' + (roiTot >= 0 ? '+' : '') + _pct(roiTot) + '%</td>';
         // Net/an €
-        html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:' + (sr.expected.avgPerYear >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (sr.expected.avgPerYear >= 0 ? '+' : '') + _fmt(sr.expected.avgPerYear) + '€</td>';
+        html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:' + (sr.expected.avgPerYear >= 0 ? '#059669' : '#DC2626') + '">' + (sr.expected.avgPerYear >= 0 ? '+' : '') + _fmt(sr.expected.avgPerYear) + '€</td>';
         // Total € net
-        html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:' + (sr.expected.totalNetAfterTax >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (sr.expected.totalNetAfterTax >= 0 ? '+' : '') + _fmt(sr.expected.totalNetAfterTax) + '€</td>';
+        html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:' + (sr.expected.totalNetAfterTax >= 0 ? '#059669' : '#DC2626') + '">' + (sr.expected.totalNetAfterTax >= 0 ? '+' : '') + _fmt(sr.expected.totalNetAfterTax) + '€</td>';
         // Pire cas %
-        html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:' + (worstPct >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (worstPct >= 0 ? '+' : '') + _pct(worstPct) + '%</td>';
+        html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:' + (worstPct >= 0 ? '#059669' : '#DC2626') + '">' + (worstPct >= 0 ? '+' : '') + _pct(worstPct) + '%</td>';
         // Best %
-        html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:var(--cyan)">' + (bestPct >= 0 ? '+' : '') + _pct(bestPct) + '%</td>';
+        html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:#0891B2">' + (bestPct >= 0 ? '+' : '') + _pct(bestPct) + '%</td>';
         html += '</tr>';
       });
       html += '</tbody></table></div>';
     });
 
     // ─── DETAILED P&L — User allocation ──────
-    html += '<div style="font-size:13px;font-weight:700;color:var(--text-bright);margin:20px 0 10px">📋 P&L DÉTAILLÉ — Mon allocation</div>';
+    html += '<div style="font-size:13px;font-weight:700;color:' + BG.text + ';margin:20px 0 10px">📋 P&L DÉTAILLÉ — Mon allocation</div>';
 
     loanTypes.forEach(function(lt) {
       var ltLabel = lt === 'inFine' ? 'IN FINE' : 'AMORTISSABLE';
-      var ltColor = lt === 'inFine' ? 'var(--cyan)' : '#A855F7';
+      var ltColor = lt === 'inFine' ? '#0891B2' : '#A855F7';
       var userScenario = r.scenarios.find(function(s) { return s.isUser; });
       if (!userScenario) return;
 
@@ -554,7 +597,7 @@
       html += '<div style="border:1px solid ' + ltColor + '33;border-radius:var(--radius-sm);overflow:hidden;margin-bottom:16px">';
       html += '<div style="padding:8px 12px;background:' + ltColor + '0A;display:flex;justify-content:space-between;align-items:center">';
       html += '<span style="font-weight:700;color:' + ltColor + ';font-size:12px">' + ltLabel + '</span>';
-      html += '<span style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--green)">Net total : ' + (expected.totalNetAfterTax >= 0 ? '+' : '') + _fmt(expected.totalNetAfterTax) + '€ (' + (expected.avgPerYear >= 0 ? '+' : '') + _fmt(expected.avgPerYear) + '€/an)</span>';
+      html += '<span style="font-family:var(--mono);font-size:13px;font-weight:700;color:#059669">Net total : ' + (expected.totalNetAfterTax >= 0 ? '+' : '') + _fmt(expected.totalNetAfterTax) + '€ (' + (expected.avgPerYear >= 0 ? '+' : '') + _fmt(expected.avgPerYear) + '€/an)</span>';
       html += '</div>';
 
       // Summary cards with % metrics
@@ -562,17 +605,17 @@
       var pnlRoiTot = expected.totalNetAfterTax / _state.amount * 100;
       html += '<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:0;border-bottom:1px solid var(--border)">';
       [
-        ['Revenus totaux', '+' + _fmt(expected.totalRevenue) + '€', 'var(--green)', _pct(expected.totalRevenue / _state.amount * 100) + '% du capital'],
-        ['Intérêts emprunt', '-' + _fmt(expected.totalInterest) + '€', 'var(--red)', _pct(expected.totalInterest / _state.amount * 100) + '% du capital'],
-        ['IS 25%', '-' + _fmt(expected.totalTax) + '€', 'var(--orange)', ''],
-        ['NET APRÈS IS', (expected.totalNetAfterTax >= 0 ? '+' : '') + _fmt(expected.totalNetAfterTax) + '€', expected.totalNetAfterTax >= 0 ? 'var(--green)' : 'var(--red)', ''],
-        ['RDT NET/AN', (pnlRoiAn >= 0 ? '+' : '') + _pct(pnlRoiAn) + '%', pnlRoiAn >= 0 ? 'var(--green)' : 'var(--red)', _fmt(expected.avgPerYear) + '€/an'],
-        ['ROI TOTAL', (pnlRoiTot >= 0 ? '+' : '') + _pct(pnlRoiTot) + '%', pnlRoiTot >= 0 ? 'var(--green)' : 'var(--red)', 'Sur ' + _state.years + ' ans']
+        ['Revenus totaux', '+' + _fmt(expected.totalRevenue) + '€', '#059669', _pct(expected.totalRevenue / _state.amount * 100) + '% du capital'],
+        ['Intérêts emprunt', '-' + _fmt(expected.totalInterest) + '€', '#DC2626', _pct(expected.totalInterest / _state.amount * 100) + '% du capital'],
+        ['IS 25%', '-' + _fmt(expected.totalTax) + '€', '#D97706', ''],
+        ['NET APRÈS IS', (expected.totalNetAfterTax >= 0 ? '+' : '') + _fmt(expected.totalNetAfterTax) + '€', expected.totalNetAfterTax >= 0 ? '#059669' : '#DC2626', ''],
+        ['RDT NET/AN', (pnlRoiAn >= 0 ? '+' : '') + _pct(pnlRoiAn) + '%', pnlRoiAn >= 0 ? '#059669' : '#DC2626', _fmt(expected.avgPerYear) + '€/an'],
+        ['ROI TOTAL', (pnlRoiTot >= 0 ? '+' : '') + _pct(pnlRoiTot) + '%', pnlRoiTot >= 0 ? '#059669' : '#DC2626', 'Sur ' + _state.years + ' ans']
       ].forEach(function(card) {
         html += '<div style="padding:10px 8px;border-right:1px solid var(--border);text-align:center">';
-        html += '<div style="font-size:8px;font-weight:700;color:var(--text-dim);letter-spacing:0.5px">' + card[0] + '</div>';
+        html += '<div style="font-size:8px;font-weight:700;color:' + BG.textDim + ';letter-spacing:0.5px">' + card[0] + '</div>';
         html += '<div style="font-family:var(--mono);font-size:13px;font-weight:700;color:' + card[2] + ';margin-top:3px">' + card[1] + '</div>';
-        if (card[3]) html += '<div style="font-size:8px;color:var(--text-dim);margin-top:2px">' + card[3] + '</div>';
+        if (card[3]) html += '<div style="font-size:8px;color:' + BG.textDim + ';margin-top:2px">' + card[3] + '</div>';
         html += '</div>';
       });
       html += '</div>';
@@ -580,16 +623,16 @@
       // Year by year table
       html += '<table style="width:100%;border-collapse:collapse;font-size:10px">';
       html += '<thead><tr style="background:' + BG.header + ';border-bottom:1px solid var(--border)">';
-      html += '<th style="padding:6px;text-align:left;color:var(--text-dim)">An</th>';
+      html += '<th style="padding:6px;text-align:left;color:' + BG.textDim + '">An</th>';
       userScenario.products.forEach(function(p) {
         html += '<th style="padding:6px;text-align:right;color:' + (p.color || 'var(--text-dim)') + '">' + p.name.substring(0, 18) + '</th>';
       });
-      html += '<th style="padding:6px;text-align:right;color:var(--green)">Total Rev.</th>';
-      html += '<th style="padding:6px;text-align:right;color:var(--red)">Intérêts</th>';
-      html += '<th style="padding:6px;text-align:right;color:var(--orange)">IS</th>';
-      html += '<th style="padding:6px;text-align:right;color:var(--text-bright);font-weight:700">Net</th>';
-      html += '<th style="padding:6px;text-align:right;color:var(--cyan)">Cumul €</th>';
-      html += '<th style="padding:6px;text-align:right;color:var(--purple)">ROI cumul %</th>';
+      html += '<th style="padding:6px;text-align:right;color:#059669">Total Rev.</th>';
+      html += '<th style="padding:6px;text-align:right;color:#DC2626">Intérêts</th>';
+      html += '<th style="padding:6px;text-align:right;color:#D97706">IS</th>';
+      html += '<th style="padding:6px;text-align:right;color:' + BG.text + ';font-weight:700">Net</th>';
+      html += '<th style="padding:6px;text-align:right;color:#0891B2">Cumul €</th>';
+      html += '<th style="padding:6px;text-align:right;color:#7C3AED">ROI cumul %</th>';
       html += '</tr></thead><tbody>';
 
       expected.flows.forEach(function(f, fi) {
@@ -598,15 +641,15 @@
         html += '<tr style="background:' + bg + ';border-bottom:1px solid var(--border)">';
         html += '<td style="padding:5px 6px;font-weight:600">An ' + f.year + '</td>';
         f.revenueByProduct.forEach(function(rp) {
-          html += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:' + (rp.color || 'var(--green)') + '">+' + _fmt(rp.revenue) + '€</td>';
+          html += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:' + (rp.color || '#059669') + '">+' + _fmt(rp.revenue) + '€</td>';
         });
-        html += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:var(--green)">+' + _fmt(f.totalRevenue) + '€</td>';
-        html += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:var(--red)">-' + _fmt(f.interest) + '€</td>';
-        html += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:var(--orange)">-' + _fmt(f.tax) + '€</td>';
-        var nc = f.netAfterTax >= 0 ? 'var(--green)' : 'var(--red)';
+        html += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:#059669">+' + _fmt(f.totalRevenue) + '€</td>';
+        html += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:#DC2626">-' + _fmt(f.interest) + '€</td>';
+        html += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:#D97706">-' + _fmt(f.tax) + '€</td>';
+        var nc = f.netAfterTax >= 0 ? '#059669' : '#DC2626';
         html += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);font-weight:700;color:' + nc + '">' + (f.netAfterTax >= 0 ? '+' : '') + _fmt(f.netAfterTax) + '€</td>';
-        html += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:var(--cyan);font-weight:600">' + (f.cumulNet >= 0 ? '+' : '') + _fmt(f.cumulNet) + '€</td>';
-        html += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);font-weight:700;color:var(--purple)">' + (roiCumul >= 0 ? '+' : '') + _pct(roiCumul) + '%</td>';
+        html += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:#0891B2;font-weight:600">' + (f.cumulNet >= 0 ? '+' : '') + _fmt(f.cumulNet) + '€</td>';
+        html += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);font-weight:700;color:#7C3AED">' + (roiCumul >= 0 ? '+' : '') + _pct(roiCumul) + '%</td>';
         html += '</tr>';
       });
 
@@ -615,32 +658,32 @@
       html += '<td style="padding:8px 6px">TOTAL</td>';
       userScenario.products.forEach(function(p, pi) {
         var productTotal = expected.flows.reduce(function(s, f) { return s + f.revenueByProduct[pi].revenue; }, 0);
-        html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:' + (p.color || 'var(--green)') + '">+' + _fmt(productTotal) + '€</td>';
+        html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:' + (p.color || '#059669') + '">+' + _fmt(productTotal) + '€</td>';
       });
-      html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:var(--green)">+' + _fmt(expected.totalRevenue) + '€</td>';
-      html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:var(--red)">-' + _fmt(expected.totalInterest) + '€</td>';
-      html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:var(--orange)">-' + _fmt(expected.totalTax) + '€</td>';
+      html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:#059669">+' + _fmt(expected.totalRevenue) + '€</td>';
+      html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:#DC2626">-' + _fmt(expected.totalInterest) + '€</td>';
+      html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:#D97706">-' + _fmt(expected.totalTax) + '€</td>';
       var totalRoiPct = expected.totalNetAfterTax / _state.amount * 100;
-      html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:' + (expected.totalNetAfterTax >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (expected.totalNetAfterTax >= 0 ? '+' : '') + _fmt(expected.totalNetAfterTax) + '€</td>';
+      html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:' + (expected.totalNetAfterTax >= 0 ? '#059669' : '#DC2626') + '">' + (expected.totalNetAfterTax >= 0 ? '+' : '') + _fmt(expected.totalNetAfterTax) + '€</td>';
       html += '<td style="padding:8px 6px;text-align:right"></td>';
-      html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);font-weight:700;color:var(--purple)">' + (totalRoiPct >= 0 ? '+' : '') + _pct(totalRoiPct) + '%</td>';
+      html += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);font-weight:700;color:#7C3AED">' + (totalRoiPct >= 0 ? '+' : '') + _pct(totalRoiPct) + '%</td>';
       html += '</tr>';
       html += '</tbody></table>';
 
       // Worst case summary with %
       var worstRoiAn = worst.totalNetAfterTax / _state.amount * 100 / _state.years;
       html += '<div style="padding:10px 12px;background:rgba(239,68,68,0.06);border-top:1px solid var(--border);font-size:11px;display:flex;justify-content:space-between">';
-      html += '<div><strong style="color:var(--red)">⚠️ Pire cas :</strong> ';
-      html += '<span style="color:var(--text-muted)">Net total = <strong style="color:' + (worst.totalNetAfterTax >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (worst.totalNetAfterTax >= 0 ? '+' : '') + _fmt(worst.totalNetAfterTax) + '€</strong>';
+      html += '<div><strong style="color:#DC2626">⚠️ Pire cas :</strong> ';
+      html += '<span style="color:' + BG.textMuted + '">Net total = <strong style="color:' + (worst.totalNetAfterTax >= 0 ? '#059669' : '#DC2626') + '">' + (worst.totalNetAfterTax >= 0 ? '+' : '') + _fmt(worst.totalNetAfterTax) + '€</strong>';
       html += ' (' + (worst.avgPerYear >= 0 ? '+' : '') + _fmt(worst.avgPerYear) + '€/an)</span></div>';
-      html += '<div style="font-family:var(--mono);font-weight:700;color:' + (worstRoiAn >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (worstRoiAn >= 0 ? '+' : '') + _pct(worstRoiAn) + '%/an</div>';
+      html += '<div style="font-family:var(--mono);font-weight:700;color:' + (worstRoiAn >= 0 ? '#059669' : '#DC2626') + '">' + (worstRoiAn >= 0 ? '+' : '') + _pct(worstRoiAn) + '%/an</div>';
       html += '</div>';
 
       html += '</div>';
     });
 
     // ─── Product details cards ──────
-    html += '<div style="font-size:13px;font-weight:700;color:var(--text-bright);margin:20px 0 10px">📦 DÉTAIL DES PRODUITS</div>';
+    html += '<div style="font-size:13px;font-weight:700;color:' + BG.text + ';margin:20px 0 10px">📦 DÉTAIL DES PRODUITS</div>';
     html += '<div style="display:grid;grid-template-columns:repeat(' + Math.min(_state.products.length, 3) + ',1fr);gap:10px;margin-bottom:16px">';
     _state.products.forEach(function(p) {
       var expectedRate = p.type === 'fixe' ? p.coupon : p.type === 'hybride' ? (p.couponPlancher + p.couponBonus * (p.conditionProb || 0.68)) : (p.coupon * (p.conditionProb || 0.68));
@@ -649,20 +692,20 @@
 
       html += '<div style="border:1px solid ' + (p.color || '#888') + '33;border-radius:var(--radius-sm);padding:14px;background:' + (p.color || '#888') + '06">';
       html += '<div style="font-size:13px;font-weight:700;color:' + (p.color || '#888') + '">' + p.name + '</div>';
-      html += '<div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--text-bright);margin:6px 0">' + _fmt(p.amount) + '€</div>';
-      html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:10px;color:var(--text-muted)">';
+      html += '<div style="font-family:var(--mono);font-size:18px;font-weight:700;color:' + BG.text + ';margin:6px 0">' + _fmt(p.amount) + '€</div>';
+      html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:10px;color:' + BG.textMuted + '">';
       html += '<div>Coupon : <strong>' + p.coupon + '%</strong></div>';
       html += '<div>Durée : <strong>' + p.duration + ' ans</strong></div>';
       html += '<div>Type : <strong>' + p.type + '</strong></div>';
       html += '<div>Capital : <strong>' + (p.capitalGaranti ? '✓ Garanti' : '✗ Non') + '</strong></div>';
       html += '</div>';
-      if (p.type === 'hybride') html += '<div style="font-size:10px;color:var(--green);margin-top:6px">Plancher ' + p.couponPlancher + '% garanti + bonus ' + p.couponBonus + '%</div>';
-      if (p.condition) html += '<div style="font-size:10px;color:var(--orange);margin-top:4px">' + p.condition + '</div>';
+      if (p.type === 'hybride') html += '<div style="font-size:10px;color:#059669;margin-top:6px">Plancher ' + p.couponPlancher + '% garanti + bonus ' + p.couponBonus + '%</div>';
+      if (p.condition) html += '<div style="font-size:10px;color:#D97706;margin-top:4px">' + p.condition + '</div>';
       html += '<div style="margin-top:8px;padding:6px 8px;border-radius:4px;background:' + (spread >= 0 ? 'rgba(6,214,160,0.08)' : 'rgba(239,68,68,0.08)') + '">';
-      html += '<div style="font-size:10px;color:var(--text-dim)">Contribution P&L espérée</div>';
-      html += '<div style="font-family:var(--mono);font-size:13px;font-weight:700;color:' + (annualNet >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (annualNet >= 0 ? '+' : '') + _fmt(annualNet) + '€/an</div>';
+      html += '<div style="font-size:10px;color:' + BG.textDim + '">Contribution P&L espérée</div>';
+      html += '<div style="font-family:var(--mono);font-size:13px;font-weight:700;color:' + (annualNet >= 0 ? '#059669' : '#DC2626') + '">' + (annualNet >= 0 ? '+' : '') + _fmt(annualNet) + '€/an</div>';
       html += '</div>';
-      html += '<div style="font-size:9px;color:var(--text-dim);margin-top:6px">Risque : ' + (p.risk || '?') + '</div>';
+      html += '<div style="font-size:9px;color:' + BG.textDim + ';margin-top:6px">Risque : ' + (p.risk || '?') + '</div>';
       html += '</div>';
     });
     html += '</div>';
@@ -740,7 +783,7 @@
     var btn = document.getElementById('carry-ai-btn');
     var status = document.getElementById('carry-ai-status');
     if (btn) { btn.disabled = true; btn.textContent = '⏳ Claude analyse le marché...'; }
-    if (status) status.innerHTML = '<div style="display:flex;align-items:center;gap:8px;padding:8px;color:var(--text-muted);font-size:11px"><div class="spinner" style="width:16px;height:16px;border-width:2px"></div>Génération en cours...</div>';
+    if (status) status.innerHTML = '<div style="display:flex;align-items:center;gap:8px;padding:8px;color:' + BG.textMuted + ';font-size:11px"><div class="spinner" style="width:16px;height:16px;border-width:2px"></div>Génération en cours...</div>';
 
     var prompt = 'Tu es un structureur de produits financiers. Un client entreprise emprunte ' + _fmt(_state.amount) + ' EUR a ' + _state.rate + '% fixe sur ' + _state.years + ' ans (in fine). Il veut placer en produits structures capital garanti pour generer une marge.\n\n';
     prompt += 'Conditions marche actuelles :\n- TEC10 (OAT 10 ans) : 3.10%\n- BCE depot : 2.00%\n- BCE main : 2.15%\n- Regime : stagflation (Brent $103, PCE 2.8%)\n- Vol OAT 10Y : ~18 bps/an\n- Euribor 3M : ~2.50%\n\n';
@@ -775,11 +818,11 @@
         });
       });
       _equalizeAmounts();
-      if (status) status.innerHTML = '<div style="padding:8px;color:var(--green);font-size:11px">✅ ' + products.length + ' produits générés</div>';
+      if (status) status.innerHTML = '<div style="padding:8px;color:#059669;font-size:11px">✅ ' + products.length + ' produits générés</div>';
       setTimeout(function() { renderCarrySimulator(document.getElementById('main-content')); }, 800);
     } catch(e) {
       console.error('[CarryAI]', e);
-      if (status) status.innerHTML = '<div style="padding:8px;color:var(--red);font-size:11px">❌ ' + e.message + '</div>';
+      if (status) status.innerHTML = '<div style="padding:8px;color:#DC2626;font-size:11px">❌ ' + e.message + '</div>';
       if (btn) { btn.disabled = false; btn.textContent = '🤖 Réessayer'; }
     }
   };
