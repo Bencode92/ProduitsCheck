@@ -263,12 +263,12 @@
     var totalCostIF = annualCostIF * _state.years;
     var totalCostAmort = _state.totalInterestAmort;
     html += '<div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px">';
-    html += '<div style="padding:8px 12px;background:rgba(34,211,238,0.08);border:1px solid rgba(34,211,238,0.2);border-radius:6px;font-size:11px;color:var(--cyan)">';
-    html += '<strong>IN FINE</strong> : -' + _fmt(annualCostIF) + '€/an · Total intérêts : <strong>-' + _fmt(totalCostIF) + '€</strong> · Capital constant 5 ans</div>';
-    html += '<div style="padding:8px 12px;background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.2);border-radius:6px;font-size:11px;color:#A855F7">';
-    html += '<strong>AMORTISSABLE (SG)</strong> : -' + _fmt(_state.monthlyPayment) + '€/mois · Total intérêts : <strong>-' + _fmt(totalCostAmort) + '€</strong> · Capital décroissant</div>';
+    html += '<div style="padding:8px 12px;background:rgba(34,211,238,0.12);border:2px solid rgba(34,211,238,0.3);border-radius:6px;font-size:11px;color:var(--cyan)">';
+    html += '✅ <strong>IN FINE (RECOMMANDÉ)</strong> : -' + _fmt(annualCostIF) + '€/an intérêts seuls · Total : <strong>-' + _fmt(totalCostIF) + '€</strong> · Capital 1M€ constant → carry max</div>';
+    html += '<div style="padding:8px 12px;background:rgba(168,85,247,0.06);border:1px solid rgba(168,85,247,0.15);border-radius:6px;font-size:11px;color:#A855F7">';
+    html += 'AMORTISSABLE : -' + _fmt(_state.monthlyPayment) + '€/mois · Total intérêts : <strong>-' + _fmt(totalCostAmort) + '€</strong> · Capital décroissant → carry ÷2</div>';
     html += '</div>';
-    html += '<div style="margin-top:6px;padding:6px 12px;background:rgba(251,191,36,0.08);border-radius:6px;font-size:10px;color:var(--orange)">⚠️ Proposition SG : amortissable uniquement. <strong>Demander la version in fine pour maximiser le carry trade</strong> (gain ×2). Frais : ' + _fmt(_state.loanFees) + '€ · Garanties : aucune (crédit en blanc) · Entité : Caméleons Com Mark · Valide jusqu\'au 14/05/2026</div>';
+    html += '<div style="margin-top:6px;padding:8px 12px;background:rgba(6,214,160,0.08);border:1px solid rgba(6,214,160,0.2);border-radius:6px;font-size:10px;color:var(--green)">✅ Prêt Equipéa SG — <strong>In fine ou amortissable au choix</strong> · 2,90% fixe de 2 à 5 ans · Jusqu\'à 1M€ · Frais : ' + _fmt(_state.loanFees) + '€ · <strong>Aucune garantie</strong> (crédit en blanc) · Entité : Caméleons Com Mark · Valide jusqu\'au 14/05/2026</div>';
     html += '</div>';
 
     // ─── Recommended products quick-add ──────
@@ -432,14 +432,14 @@
 
     // ─── Loan summary ──────
     var annIF = Math.round(_state.amount * _state.rate / 100);
-    html += '<div style="background:' + BG.section + ';border:1px solid ' + BG.border + ';border-radius:var(--radius-sm);padding:12px;margin-bottom:14px">';
-    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">';
-    html += '<span style="font-size:13px;font-weight:700;color:var(--accent)">Prêt Equipéa SG — ' + _fmt(_state.amount) + '€ à ' + _state.rate + '% fixe sur ' + _state.years + ' ans</span>';
+    html += '<div style="background:' + BG.section + ';border:1px solid rgba(6,214,160,0.3);border-radius:var(--radius-sm);padding:14px;margin-bottom:14px">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">';
+    html += '<span style="font-size:13px;font-weight:700;color:var(--green)">✅ Prêt Equipéa SG — ' + _fmt(_state.amount) + '€ à ' + _state.rate + '% fixe sur ' + _state.years + ' ans</span>';
     html += '<span style="font-size:10px;color:var(--text-dim)">Caméleons Com Mark · Crédit en blanc · Frais ' + _fmt(_state.loanFees) + '€</span>';
     html += '</div>';
     html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:11px">';
-    html += '<div style="padding:6px 10px;background:rgba(34,211,238,0.06);border-radius:4px;color:var(--cyan)">In fine : <strong>-' + _fmt(annIF) + '€/an</strong> · total -' + _fmt(annIF * _state.years) + '€</div>';
-    html += '<div style="padding:6px 10px;background:rgba(168,85,247,0.06);border-radius:4px;color:#A855F7">Amort. : <strong>-' + _fmt(_state.monthlyPayment) + '€/mois</strong> · total -' + _fmt(_state.totalInterestAmort) + '€</div>';
+    html += '<div style="padding:6px 10px;background:rgba(34,211,238,0.08);border-radius:4px;color:var(--cyan)">✅ In fine : <strong>-' + _fmt(annIF) + '€/an</strong> · total intérêts -' + _fmt(annIF * _state.years) + '€ · capital constant</div>';
+    html += '<div style="padding:6px 10px;background:rgba(168,85,247,0.04);border-radius:4px;color:#A855F7">Amort. : -' + _fmt(_state.monthlyPayment) + '€/mois · total intérêts -' + _fmt(_state.totalInterestAmort) + '€ · capital décroissant</div>';
     html += '</div></div>';
 
     // ─── DAF KPI DASHBOARD ──────
