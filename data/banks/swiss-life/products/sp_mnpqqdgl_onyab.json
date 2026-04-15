@@ -217,6 +217,8 @@
   "aiAnalyzedAt": "2026-04-08T07:42:44.611Z",
   "envelope": "",
   "minInvestment": 100000,
+  "_couponProbability": 49.4,
+  "_bsRendementNet": -1.55,
   "grading": {
     "grade": "D",
     "score": 36,
@@ -229,66 +231,66 @@
         "score": 18,
         "base": 21,
         "delta": 0,
-        "reasoning": "Rendement: base 21 → -7 = 14 (En stagflation avec beta 1.14, la probabilité d'atteindre les coupons est fortement réduite malgré la barrière à 71.3%) | Coupon 4%, barrière 60% | Barr.coupon 71.3% | Mat espérée: ~1.6a (prob mat: 0%)",
+        "reasoning": "Rendement: base 21 → -7 = 14 (En stagflation avec VIX à 22, la probabilité de franchir le seuil autocall 100% diminue fortement pour un titre cyclique comme Saint-Gobain (materials, beta 1.14)) | Coupon 4%, barrière 60% | Barr.coupon 71.3% | Mat espérée: ~1.6a (prob mat: 0%)",
         "_bsDelta": 5,
         "_bs": {
           "score": 26,
           "probCoupon": 49.4,
-          "rendementNet": -1.52,
-          "perteEsperee": 3.49,
+          "rendementNet": -1.55,
+          "perteEsperee": 3.53,
           "couponEffectif": 4,
           "vols": [
-            24.9
+            24.97
           ],
           "matEsperee": 1.6,
           "isBasket": false
         }
       },
       "underlyingQuality": {
-        "score": 75,
-        "base": 80,
+        "score": 74,
+        "base": 79,
         "delta": -5,
-        "reasoning": "Qualité: base 80 → -5 = 75 (Saint-Gobain (materials) en territoire neutre mais sensible au choc énergétique avec beta élevé de 1.14) | Worst: Compagnie de Saint-Gobain S.A. B:67"
+        "reasoning": "Qualité: base 79 → -5 = 74 (Saint-Gobain (materials) en territoire neutre mais vulnérable en stagflation ; son beta élevé (1.14) et sa nature cyclique pénalisent dans ce régime macro) | Worst: Compagnie de Saint-Gobain S.A. B:67"
       },
       "portfolioFit": {
         "score": 35,
         "base": 80,
-        "delta": -5,
-        "reasoning": "Fit: base 80 → -5 = 75 (Produit cyclique peu adapté en stagflation, corrélation élevée avec l'économie réelle)"
+        "delta": 0,
+        "reasoning": "Fit: base 80"
       },
       "riskPremium": {
         "score": 34,
         "base": 0,
-        "delta": 0,
+        "delta": -7,
         "reasoning": "Capital garanti: spread 4.0% - CAT 2.5% - illiq 0.6% = 0.9%"
       }
     },
-    "verdict": "Produit inadapté au contexte de stagflation actuel. Avec un Brent à $121.88 et le secteur materials sous pression énergétique, Saint-Gobain (beta 1.14, DD -35.71%) présente un profil risqué. Le coupon de 4% annualisé ne compense pas le risque de perte en capital (barrière 60%) dans un environnement où le VIX à 22 et les pressions inflationnistes menacent les marges industrielles.",
+    "verdict": "Produit TRÈS RISQUÉ en contexte stagflationnaire. Saint-Gobain (DD -35.71%, vol 27.97%) souffre du ralentissement construction/immobilier typique de la stagflation. La barrière coupon à 71.3% semble atteignable mais l'autocall à 100% est quasi-impossible (0% de probabilité à maturité). Avec un score ajusté de 17/100, ce produit offre un mauvais rapport risque/rendement : 4% annualisé ne compense pas le risque de perte en capital dans un environnement où le Brent à 98$ érode les marges et où les taux élevés pénalisent le secteur construction.",
     "keyRisks": [
-      "Choc énergétique prolongé impactant directement les coûts de Saint-Gobain",
-      "Beta élevé (1.14) amplifiant la correction en cas de récession",
-      "Barrière capitale à 60% insuffisante si stagflation persiste 3+ mois",
-      "Barrière à 0.65σ (Danger) — vol 27.6%"
+      "Risque sectoriel élevé : materials/construction vulnérable si stagflation persiste avec Brent >100$",
+      "Spread HY à 294bps sous-évalue le risque de défaut en stagflation selon MI",
+      "Autocall improbable (0% prob mat) = capital immobilisé longtemps dans contexte défavorable",
+      "Barrière à 0.65σ (Danger) — vol 27.97%"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 8,
-        "return_eur": 8000,
+        "return_pct": 4,
+        "return_eur": 6400,
         "probability": 0.15,
-        "duration_years": 1
+        "duration_years": 1.6
       },
       "base": {
         "return_pct": 4,
-        "return_eur": 6400,
-        "probability": 0.3,
-        "duration_years": 1.6
-      },
-      "stress": {
-        "return_pct": -15,
-        "return_eur": -15000,
+        "return_eur": 16000,
         "probability": 0.35,
         "duration_years": 4
+      },
+      "stress": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.3,
+        "duration_years": 8
       },
       "worst": {
         "return_pct": -40,
@@ -298,16 +300,16 @@
       }
     },
     "confidenceInterval": {
-      "low": 30,
-      "high": 46,
+      "low": 31,
+      "high": 47,
       "halfWidth": 8,
       "gradeStable": false,
       "gradeRange": "D-C",
-      "label": "D [30-46]"
+      "label": "D [31-47]"
     },
     "metadata": {
-      "gradedAt": "2026-04-08T07:43:28.539Z",
-      "durationMs": 18784,
+      "gradedAt": "2026-04-15T12:59:07.516Z",
+      "durationMs": 25742,
       "aiUsed": true,
       "version": "7.1",
       "productType": "autocall",
@@ -332,8 +334,8 @@
       "adjustments": {
         "p1": -7,
         "p2": -5,
-        "p3": -5,
-        "p4": 0
+        "p3": 0,
+        "p4": -7
       },
       "barrier_sigma": 0.65,
       "barrier_sigma_label": "Danger",
@@ -341,19 +343,19 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 30,
-      "ci_high": 46,
-      "ci_label": "D [30-46]",
+      "ci_low": 31,
+      "ci_high": 47,
+      "ci_label": "D [31-47]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
       "decrementDrag": 0,
       "structureType": "autocall",
-      "bsRendementNet": -1.52,
+      "bsRendementNet": -1.55,
       "bsProbCoupon": 49.4,
-      "bsPerteEsperee": 3.49,
+      "bsPerteEsperee": 3.53,
       "bsVols": [
-        24.9
+        24.97
       ],
       "bsMatEsperee": 1.6,
       "isBasket": false,
@@ -370,12 +372,12 @@
           "name": "Compagnie de Saint-Gobain S.A.",
           "ticker": "SGO",
           "sector": "Industries",
-          "perf_ytd": -18.47,
-          "perf_1y": -11.99,
-          "volatility_3y": 27.6,
+          "perf_ytd": -10.6,
+          "perf_1y": -13.79,
+          "volatility_3y": 27.97,
           "max_drawdown_3y": 35.71,
           "buffett_score": 67,
-          "quality_score": 73,
+          "quality_score": 72,
           "buffett_grade": "B"
         }
       ]
@@ -395,14 +397,12 @@
         "desc": "Marchés haussiers → prob coupon monte, barrière safe"
       },
       "crash": {
-        "score": 27,
+        "score": 26,
         "grade": "D",
         "label": "Crash / Récession",
-        "delta": -9,
+        "delta": -10,
         "desc": "Marchés baissiers → barrière menacée, vol en hausse"
       }
     }
-  },
-  "_couponProbability": 49.4,
-  "_bsRendementNet": -1.52
+  }
 }
