@@ -59,13 +59,23 @@
     ],
     aggressive: [
       {
-        id: 'cat_tarn', name: 'TARN TEC10 8%', type: 'conditionnel',
+        id: 'cat_tarn5', name: 'TARN TEC10 8% (5Y)', type: 'conditionnel',
         coupon: 8.00, duration: 5, capitalGaranti: true,
         condition: 'TEC10 ≤ 4.40% (An 1 garanti)', conditionProb: 0.78,
         guaranteedYears: 1,
         color: '#D97706',
-        risk: 'Modéré — coupon 0% si TEC10 > 4.40%. An 1 garanti. Autocall si cumul ≥ 24%',
-        detail: 'Rendement max du catalogue. An 1 garanti = 8%. Ensuite conditionnel. Si TEC10 reste stable (~3.10%), vous touchez 8%/an. Risque : TEC10 dépasse 4.40% = 0%.',
+        risk: 'Modéré — 0% si TEC10 > 4.40% après An 1. Autocall cumul ≥ 24%',
+        detail: 'Maturité 5 ans = matche l\'emprunt. An 1 garanti. Budget option plus petit que le 10Y → coupon légèrement inférieur.',
+        category: 'aggressive', amount: 0
+      },
+      {
+        id: 'cat_tarn10', name: 'TARN TEC10 9% (10Y + PUT 5Y)', type: 'conditionnel',
+        coupon: 9.00, duration: 10, capitalGaranti: true,
+        condition: 'TEC10 ≤ 4.40% (An 1-2 garantis) + PUT sortie An 5', conditionProb: 0.78,
+        guaranteedYears: 2,
+        color: '#B45309',
+        risk: 'Modéré — Budget 10Y = coupon max. PUT An 5 = sortie garantie. Autocall ≥ 25.5%',
+        detail: 'LE MEILLEUR COUPON. Maturité 10 ans = budget option ×2 (264K vs 126K). 2 ans garantis. Autocall probable An 3. PUT à 5 ans si pas d\'autocall → matche l\'emprunt.',
         category: 'aggressive', amount: 0
       },
       {
@@ -73,8 +83,8 @@
         coupon: 7.50, duration: 5, capitalGaranti: true,
         condition: 'Euribor 3M dans [1.50% – 3.80%]', conditionProb: 0.85,
         color: '#DC2626',
-        risk: 'Modéré — coupon accrues par jour dans le corridor. Euribor actuel 2.50% = bien centré',
-        detail: 'Coupon = 7.50% × (nb jours Euribor dans le corridor / nb jours total). Euribor à 2.50% = bien centré dans [1.50%-3.80%]. Risque si BCE monte fortement (>3.80%) ou baisse (<1.50%).',
+        risk: 'Modéré — coupon ×(jours dans corridor/365). Euribor 2.50% = bien centré',
+        detail: 'Sous-jacent DIFFÉRENT du TEC10 = diversification. Euribor piloté par BCE. Corridor large [1.50-3.80%]. Risque si BCE monte >3.80% ou baisse <1.50%.',
         category: 'aggressive', amount: 0
       },
       {
@@ -83,8 +93,18 @@
         condition: 'TEC10 ≤ 4.50% + effet mémoire', conditionProb: 0.88,
         guaranteedYears: 0,
         color: '#7C3AED',
-        risk: 'Modéré-faible — mémoire rattrape les coupons manqués. Trigger 4.50% = large',
-        detail: 'Si TEC10 ≤ 4.50% → coupon 7%. Si TEC10 > 4.50% un an → coupon stocké en mémoire et versé l\'année suivante si condition remplie. Filet de sécurité vs le TARN.',
+        risk: 'Modéré-faible — mémoire rattrape les coupons manqués. Trigger 4.50% = 140bp marge',
+        detail: 'Si TEC10 > 4.50% un an → coupon stocké et versé quand condition remplie. Plus sûr que le TARN car la mémoire compense les mauvaises années.',
+        category: 'aggressive', amount: 0
+      },
+      {
+        id: 'cat_steepener', name: 'CMS Steepener 5×(10Y-2Y)', type: 'conditionnel',
+        coupon: 5.70, duration: 5, capitalGaranti: true,
+        condition: 'Coupon = 5 × max(0, CMS10-CMS2). Spread actuel +57bp', conditionProb: 0.80,
+        guaranteedYears: 0,
+        color: '#6366F1',
+        risk: 'Modéré — parie sur la pentification de la courbe. Risque si courbe s\'inverse (récession)',
+        detail: 'Coupon = 5 × (taux 10 ans - taux 2 ans). Aujourd\'hui = 5 × 0.57% = 2.85%. Si courbe se pentifie à 1% = 5.00%. Produit de niche, diversifiant vs TEC10 pur.',
         category: 'aggressive', amount: 0
       }
     ]
@@ -356,6 +376,98 @@
     html += '</tbody></table>';
     html += '<div style="margin-top:8px;padding:6px 10px;background:#DBEAFE;border-radius:4px;font-size:10px;color:#1E40AF">💡 <strong>In fine = intérêts ×2 mais capital investi constant → revenus ×2 → gain net supérieur.</strong> Économie d\'intérêts de l\'amortissable ne compense pas la perte de revenus.</div>';
     html += '</div>';
+
+    // ─── Market dashboard ──────
+    html += '<div style="background:' + BG.section + ';border:1px solid ' + BG.border + ';border-radius:8px;padding:16px;margin-bottom:16px">';
+    html += '<div style="font-size:13px;font-weight:700;color:' + BG.text + ';margin-bottom:12px">📊 DONNÉES MARCHÉ — Avril 2026</div>';
+    html += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px">';
+    // KPI cards
+    [
+      ['TEC10 (OAT 10Y)', '3.10%', '#0891B2', 'Stable · Vol 18bp · Range 2.98-3.15%'],
+      ['OAT 5 ans', '2.70%', '#2563EB', 'Spread 5Y-10Y = +40bp'],
+      ['OAT 2 ans', '2.53%', '#7C3AED', 'Spread 2Y-10Y = +57bp'],
+      ['BCE Dépôt', '2.00%', '#059669', 'Main 2.15% · Pause depuis 6 mois']
+    ].forEach(function(k) {
+      html += '<div style="padding:10px;border:1px solid ' + BG.border + ';border-radius:6px;border-left:3px solid ' + k[2] + '">';
+      html += '<div style="font-size:9px;font-weight:700;color:' + BG.textDim + ';letter-spacing:0.5px">' + k[0] + '</div>';
+      html += '<div style="font-family:var(--mono);font-size:20px;font-weight:800;color:' + k[2] + ';margin:4px 0">' + k[1] + '</div>';
+      html += '<div style="font-size:8px;color:' + BG.textDim + '">' + k[3] + '</div></div>';
+    });
+    html += '</div>';
+    html += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px">';
+    [
+      ['Euribor 3M', '~2.50%', '#D97706', 'Taux court piloté BCE'],
+      ['Inflation PCE', '2.80%', '#DC2626', 'Au-dessus du target 2%'],
+      ['Courbe des taux', 'Normale', '#059669', 'Pentue +57bp (favorable)'],
+      ['Régime', 'Stagflation', '#DC2626', 'Brent $103 · VIX 22']
+    ].forEach(function(k) {
+      html += '<div style="padding:10px;border:1px solid ' + BG.border + ';border-radius:6px;border-left:3px solid ' + k[2] + '">';
+      html += '<div style="font-size:9px;font-weight:700;color:' + BG.textDim + ';letter-spacing:0.5px">' + k[0] + '</div>';
+      html += '<div style="font-family:var(--mono);font-size:20px;font-weight:800;color:' + k[2] + ';margin:4px 0">' + k[1] + '</div>';
+      html += '<div style="font-size:8px;color:' + BG.textDim + '">' + k[3] + '</div></div>';
+    });
+    html += '</div>';
+    // Yield curve visual
+    html += '<div style="padding:10px;background:' + BG.row1 + ';border-radius:6px;font-size:11px;color:' + BG.text + '">';
+    html += '<div style="font-weight:700;margin-bottom:6px">Courbe des taux EUR — Budget option structuré</div>';
+    html += '<div style="display:flex;align-items:flex-end;gap:4px;height:80px;margin-bottom:6px">';
+    [
+      ['BCE', 2.00, '#059669'], ['2Y', 2.53, '#7C3AED'], ['5Y', 2.70, '#2563EB'],
+      ['Emprunt', 2.90, '#DC2626'], ['10Y', 3.10, '#0891B2']
+    ].forEach(function(pt) {
+      var h = Math.round((pt[1] / 4.0) * 70);
+      html += '<div style="flex:1;text-align:center">';
+      html += '<div style="background:' + pt[2] + ';height:' + h + 'px;border-radius:4px 4px 0 0;margin:0 2px;display:flex;align-items:flex-start;justify-content:center;padding-top:4px">';
+      html += '<span style="font-family:var(--mono);font-size:11px;font-weight:700;color:#fff">' + pt[1].toFixed(2) + '%</span></div>';
+      html += '<div style="font-size:9px;color:' + BG.textMuted + ';margin-top:3px">' + pt[0] + '</div></div>';
+    });
+    html += '</div>';
+    html += '<div style="font-size:9px;color:' + BG.textDim + '">Budget option 5Y = ~12.5% du nominal · Budget option 10Y = ~26.4% du nominal · <strong>Les taux élevés = plus de budget = meilleurs coupons</strong></div>';
+    html += '</div></div>';
+
+    // ─── Cahier des charges ──────
+    html += '<div style="background:' + BG.section + ';border:2px solid #2563EB;border-radius:8px;padding:16px;margin-bottom:16px">';
+    html += '<div style="font-size:13px;font-weight:700;color:#2563EB;margin-bottom:10px">📋 CAHIER DES CHARGES — À présenter aux banquiers</div>';
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">';
+    // Config 1M
+    html += '<div style="padding:12px;border:1px solid ' + BG.border + ';border-radius:6px;background:' + BG.row1 + '">';
+    html += '<div style="font-size:11px;font-weight:700;color:#0891B2;margin-bottom:8px">CONFIGURATION A — 1 × 1 000 000€</div>';
+    html += '<div style="font-size:10px;color:' + BG.text + ';line-height:1.6">';
+    html += '• TARN TEC10, maturité <strong>10 ans</strong>, coupon cible <strong>≥ 8.50%</strong><br>';
+    html += '• Condition : TEC10 ≤ 4.40%<br>';
+    html += '• Coupons An 1 + An 2 <strong>garantis</strong><br>';
+    html += '• Autocall si cumul ≥ 25%<br>';
+    html += '• <strong>PUT investisseur à 100% à An 5</strong> (obligatoire)<br>';
+    html += '• Capital garanti 100% à échéance<br>';
+    html += '• Émetteur IG (A- minimum)<br>';
+    html += '<div style="margin-top:6px;padding:4px 8px;background:#DBEAFE;border-radius:3px;font-size:9px;color:#1E40AF">Gain espéré : ~150K€ / 5 ans · Pire cas : +19K€</div>';
+    html += '</div></div>';
+    // Config 2×500K
+    html += '<div style="padding:12px;border:2px solid #059669;border-radius:6px;background:#F0FDF4">';
+    html += '<div style="font-size:11px;font-weight:700;color:#059669;margin-bottom:8px">CONFIGURATION B — 2 × 500 000€ ⭐ RECOMMANDÉ</div>';
+    html += '<div style="font-size:10px;color:' + BG.text + ';line-height:1.6">';
+    html += '<strong style="color:#0891B2">Produit 1 : TARN TEC10 (500K)</strong><br>';
+    html += '• Maturité 10 ans · Coupon ≥ 8% si TEC10 ≤ 4.40%<br>';
+    html += '• Garanti An 1-2 · Autocall ≥ 24% · PUT An 5<br>';
+    html += '<strong style="color:#059669">Produit 2 : Floater TEC10 Plancher (500K)</strong><br>';
+    html += '• Maturité 5 ans · Coupon = TEC10 + spread (≥ 0.20%)<br>';
+    html += '• Plancher ≥ 2.80% · Capital garanti 100%<br>';
+    html += '<div style="margin-top:6px;padding:4px 8px;background:#DCFCE7;border-radius:3px;font-size:9px;color:#166534">Gain espéré : ~114K€ / 5 ans · Pire cas : +10K€ · Couverture naturelle TEC10 ↑↓</div>';
+    html += '</div></div>';
+    html += '</div>';
+    // Specs communes
+    html += '<div style="margin-top:10px;padding:10px;background:' + BG.row1 + ';border-radius:6px;font-size:10px;color:' + BG.text + '">';
+    html += '<strong>Contraintes communes :</strong> Capital garanti 100% inconditionnelle · Sous-jacent taux uniquement (pas d\'actions) · ';
+    html += 'Émetteur IG A- minimum · Coupon annuel ou trimestriel · Devise EUR · ';
+    html += 'Entité : Caméleons Com Mark · Adossé à emprunt SG 2.90% in fine 5 ans';
+    html += '</div>';
+    // Other structures to ask about
+    html += '<div style="margin-top:10px;padding:10px;background:#FEF3C7;border:1px solid #F59E0B;border-radius:6px;font-size:10px;color:#92400E">';
+    html += '<strong>Structures alternatives à demander :</strong> Range Accrual Euribor 3M corridor [1.50%-3.80%] · ';
+    html += 'CMS Steepener 5×(CMS10-CMS2) · Hybride Plancher 3% + Digital TEC10 ≤ 4.50% · ';
+    html += 'Digital Mémoire TEC10 · Taux Fixe Callable 5Y · ';
+    html += 'Toute structure taux capital garanti > 5% — demander le meilleur pricing';
+    html += '</div></div>';
 
     // ─── Product catalog ──────
     function _renderCatalogSection(title, icon, borderColor, products) {
