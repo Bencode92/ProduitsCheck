@@ -507,6 +507,134 @@
     }
   };
 
+  // ═══ Unified chart + stats update ═══
+  window._mktUpdateChart = function(periodObs) {
+    var rd = window._mktRateData;
+    if (!rd) return;
+    var chartEl = document.getElementById('mkt-chart-container');
+    var statsEl = document.getElementById('mkt-stats-container');
+    if (!chartEl) return;
+
+    // Period
+    var obs = periodObs || 9999;
+    var data = obs >= 9999 ? rd.history : rd.history.slice(-obs);
+
+    // Update period button styles
+    var btns = document.getElementById('mkt-period-btns');
+    if (btns) btns.querySelectorAll('button').forEach(function(b) {
+      var bObs = b.textContent === '12M' ? 12 : b.textContent === '2A' ? 24 : b.textContent === '5A' ? 60 : b.textContent === '10A' ? 120 : 9999;
+      var active = bObs === obs;
+      b.style.background = active ? '#2563EB' : '#fff';
+      b.style.color = active ? '#fff' : '#64748B';
+      b.style.borderColor = active ? '#2563EB' : '#D1D9E6';
+    });
+
+    // Build thresholds from custom input + defaults
+    var thresholds = [];
+    var customVal = parseFloat(document.getElementById('mkt-custom-threshold')?.value);
+    var customMode = document.getElementById('mkt-custom-mode')?.value || 'above';
+    var customRange2 = parseFloat(document.getElementById('mkt-custom-range2')?.value);
+
+    if (customVal && !isNaN(customVal)) {
+      if (customMode === 'range' && customRange2 && !isNaN(customRange2)) {
+        var lo = Math.min(customVal, customRange2), hi = Math.max(customVal, customRange2);
+        thresholds.push({ val: lo, label: 'Borne basse ' + lo.toFixed(2) + '%', color: '#DC2626', dash: '6,3' });
+        thresholds.push({ val: hi, label: 'Borne haute ' + hi.toFixed(2) + '%', color: '#DC2626', dash: '6,3' });
+      } else {
+        thresholds.push({ val: customVal, label: (customMode === 'above' ? 'Seuil ≥ ' : 'Seuil ≤ ') + customVal.toFixed(2) + '%', color: '#DC2626', dash: '6,3' });
+      }
+    }
+
+    // Default emprunt line
+    thresholds.push({ val: 2.90, label: 'Emprunt 2.90%', color: '#7C3AED', dash: '3,3' });
+
+    // Render chart
+    chartEl.innerHTML = _buildSVGChart(data, thresholds, rd.current, data.length);
+
+    // Compute stats
+    if (!statsEl) return;
+    if (!customVal || isNaN(customVal)) {
+      // Default stats — basic info
+      var vals = data.map(function(d) { return d.value; });
+      statsEl.innerHTML = '<div style="padding:8px 12px;background:#F1F3F7;border-radius:6px;font-size:10px;color:#64748B">' +
+        'Période : ' + data[0].date + ' → ' + data[data.length-1].date + ' · ' + data.length + ' obs · ' +
+        'Min <strong style="color:#059669">' + Math.min.apply(null,vals).toFixed(3) + '%</strong> · ' +
+        'Max <strong style="color:#DC2626">' + Math.max.apply(null,vals).toFixed(3) + '%</strong> · ' +
+        'Moy <strong style="color:#7C3AED">' + (vals.reduce(function(a,b){return a+b;},0)/vals.length).toFixed(3) + '%</strong>' +
+        ' — Entrez un seuil et cliquez Analyser pour voir les stats de franchissement</div>';
+      return;
+    }
+
+    // Custom threshold stats
+    var shtml = '';
+    if (customMode === 'range' && customRange2 && !isNaN(customRange2)) {
+      var lo = Math.min(customVal, customRange2), hi = Math.max(customVal, customRange2);
+      var inside = 0, outside = 0, breaches = 0, prevIn = null, lastOut = null, maxConsecOut = 0, consecOut = 0;
+      data.forEach(function(h) {
+        var isIn = h.value >= lo && h.value <= hi;
+        if (isIn) { inside++; consecOut = 0; } else { outside++; lastOut = h.date; consecOut++; maxConsecOut = Math.max(maxConsecOut, consecOut); }
+        if (prevIn !== null && prevIn !== isIn) breaches++;
+        prevIn = isIn;
+      });
+      var pctIn = Math.round(inside / data.length * 100);
+      shtml += '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px">';
+      shtml += '<div style="padding:10px;background:' + (data[data.length-1].value >= lo && data[data.length-1].value <= hi ? '#ECFDF5' : '#FEF2F2') + ';border-radius:6px;text-align:center;border:2px solid ' + (data[data.length-1].value >= lo && data[data.length-1].value <= hi ? '#059669' : '#DC2626') + '">';
+      shtml += '<div style="font-size:8px;color:#64748B">ACTUEL</div>';
+      shtml += '<div style="font-family:var(--mono);font-size:16px;font-weight:800;color:' + (data[data.length-1].value >= lo && data[data.length-1].value <= hi ? '#059669' : '#DC2626') + '">' + (data[data.length-1].value >= lo && data[data.length-1].value <= hi ? '✅ DANS' : '❌ HORS') + '</div></div>';
+      shtml += '<div style="padding:10px;background:#F1F3F7;border-radius:6px;text-align:center"><div style="font-size:8px;color:#64748B">TEMPS DANS [' + lo.toFixed(2) + '-' + hi.toFixed(2) + ']</div>';
+      shtml += '<div style="font-family:var(--mono);font-size:16px;font-weight:800;color:' + (pctIn >= 80 ? '#059669' : pctIn >= 50 ? '#D97706' : '#DC2626') + '">' + pctIn + '%</div>';
+      shtml += '<div style="font-size:8px;color:#64748B">' + inside + '/' + data.length + ' obs</div></div>';
+      shtml += '<div style="padding:10px;background:#F1F3F7;border-radius:6px;text-align:center"><div style="font-size:8px;color:#64748B">FRANCHISSEMENTS</div>';
+      shtml += '<div style="font-family:var(--mono);font-size:16px;font-weight:800;color:#7C3AED">' + breaches + '</div></div>';
+      shtml += '<div style="padding:10px;background:#F1F3F7;border-radius:6px;text-align:center"><div style="font-size:8px;color:#64748B">MAX CONSEC. HORS</div>';
+      shtml += '<div style="font-family:var(--mono);font-size:16px;font-weight:800;color:#DC2626">' + maxConsecOut + ' obs</div></div>';
+      shtml += '<div style="padding:10px;background:#F1F3F7;border-radius:6px;text-align:center"><div style="font-size:8px;color:#64748B">DERNIÈRE SORTIE</div>';
+      shtml += '<div style="font-family:var(--mono);font-size:11px;font-weight:700;color:#DC2626">' + (lastOut || 'Jamais') + '</div></div>';
+      shtml += '</div>';
+    } else {
+      // Single threshold
+      var above = 0, below = 0, breaches = 0, prevAbove = null, lastAbove = null, lastBelow = null;
+      var maxConsecAbove = 0, consecAbove = 0, maxConsecBelow = 0, consecBelow = 0;
+      data.forEach(function(h) {
+        var isAbove = h.value >= customVal;
+        if (isAbove) { above++; lastAbove = h.date; consecAbove++; maxConsecAbove = Math.max(maxConsecAbove, consecAbove); consecBelow = 0; }
+        else { below++; lastBelow = h.date; consecBelow++; maxConsecBelow = Math.max(maxConsecBelow, consecBelow); consecAbove = 0; }
+        if (prevAbove !== null && prevAbove !== isAbove) breaches++;
+        prevAbove = isAbove;
+      });
+      var pctAbove = Math.round(above / data.length * 100);
+      var isCurrentAbove = rd.current >= customVal;
+      var relevant = customMode === 'above' ? above : below;
+      var relevantPct = customMode === 'above' ? pctAbove : (100 - pctAbove);
+      var relevantColor = relevantPct >= 80 ? '#059669' : relevantPct >= 50 ? '#D97706' : '#DC2626';
+      var conditionMet = customMode === 'above' ? isCurrentAbove : !isCurrentAbove;
+
+      shtml += '<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px">';
+      shtml += '<div style="padding:10px;background:' + (conditionMet ? '#ECFDF5' : '#FEF2F2') + ';border-radius:6px;text-align:center;border:2px solid ' + (conditionMet ? '#059669' : '#DC2626') + '">';
+      shtml += '<div style="font-size:8px;color:#64748B">ACTUEL vs ' + customVal.toFixed(2) + '%</div>';
+      shtml += '<div style="font-family:var(--mono);font-size:14px;font-weight:800;color:' + (conditionMet ? '#059669' : '#DC2626') + '">' + (conditionMet ? '✅ OUI' : '❌ NON') + '</div></div>';
+
+      shtml += '<div style="padding:10px;background:#F1F3F7;border-radius:6px;text-align:center"><div style="font-size:8px;color:#64748B">TEMPS AU-DESSUS</div>';
+      shtml += '<div style="font-family:var(--mono);font-size:16px;font-weight:800;color:#DC2626">' + pctAbove + '%</div>';
+      shtml += '<div style="font-size:8px;color:#64748B">' + above + '/' + data.length + '</div></div>';
+
+      shtml += '<div style="padding:10px;background:#F1F3F7;border-radius:6px;text-align:center"><div style="font-size:8px;color:#64748B">TEMPS EN-DESSOUS</div>';
+      shtml += '<div style="font-family:var(--mono);font-size:16px;font-weight:800;color:#059669">' + (100-pctAbove) + '%</div>';
+      shtml += '<div style="font-size:8px;color:#64748B">' + below + '/' + data.length + '</div></div>';
+
+      shtml += '<div style="padding:10px;background:#F1F3F7;border-radius:6px;text-align:center"><div style="font-size:8px;color:#64748B">FRANCHISSEMENTS</div>';
+      shtml += '<div style="font-family:var(--mono);font-size:16px;font-weight:800;color:#7C3AED">' + breaches + '</div></div>';
+
+      shtml += '<div style="padding:10px;background:#F1F3F7;border-radius:6px;text-align:center"><div style="font-size:8px;color:#64748B">DERNIER AU-DESSUS</div>';
+      shtml += '<div style="font-family:var(--mono);font-size:10px;font-weight:700;color:#DC2626">' + (lastAbove || 'Jamais') + '</div></div>';
+
+      shtml += '<div style="padding:10px;background:#F1F3F7;border-radius:6px;text-align:center"><div style="font-size:8px;color:#64748B">MAX CONSEC. ≥</div>';
+      shtml += '<div style="font-family:var(--mono);font-size:16px;font-weight:800;color:#DC2626">' + maxConsecAbove + ' obs</div></div>';
+      shtml += '</div>';
+    }
+    statsEl.innerHTML = shtml;
+  };
+
   // ═══ INTERACTIVE: Rate detail panel (click on a card) ═══
 
   window._mktOpenRate = function(rateId) {
@@ -627,77 +755,38 @@
     });
     html += '</tbody></table>';
 
-    // ═══ SVG CHART — Professional line chart with thresholds ═══
-    var thresholds = [];
-    if (rateId === 'oat_fr_10y') {
-      thresholds = [
-        { val: 4.40, label: 'TARN 4.40%', color: '#DC2626', dash: '6,3' },
-        { val: 4.50, label: 'Digital 4.50%', color: '#D97706', dash: '4,4' },
-        { val: 4.00, label: 'Hybride 4.00%', color: '#F59E0B', dash: '8,3' },
-        { val: 2.90, label: 'Emprunt 2.90%', color: '#7C3AED', dash: '3,3' }
-      ];
-    } else if (rateId === 'oat_fr_5y' || rateId === 'oat_fr_2y') {
-      thresholds = [{ val: 2.90, label: 'Emprunt 2.90%', color: '#7C3AED', dash: '3,3' }];
-    }
+    // Store data globally for interactive updates
+    window._mktRateData = { id: rateId, history: history, current: current, label: label };
 
-    // Period selector
-    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">';
-    html += '<div style="font-size:11px;font-weight:700;color:#1A202C">Historique (' + nbObs + ' obs. mensuelles)</div>';
+    // ═══ TOOLBAR: Period + Custom threshold ═══
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px">';
+    // Period buttons
     html += '<div style="display:flex;gap:4px" id="mkt-period-btns">';
-    [['12M', 12], ['2A', 24], ['5A', 60], ['MAX', 999]].forEach(function(p) {
-      var active = p[1] >= nbObs || p[1] === 999;
-      html += '<button onclick="_mktChartPeriod(\'' + rateId + '\',' + p[1] + ')" style="padding:3px 10px;border-radius:4px;border:1px solid ' + (active ? '#2563EB' : '#D1D9E6') + ';background:' + (active ? '#2563EB' : '#fff') + ';color:' + (active ? '#fff' : '#64748B') + ';font-size:10px;font-weight:600;cursor:pointer">' + p[0] + '</button>';
+    [['12M',12],['2A',24],['5A',60],['10A',120],['MAX',9999]].forEach(function(p) {
+      html += '<button onclick="_mktUpdateChart(' + p[1] + ')" style="padding:4px 12px;border-radius:4px;border:1px solid #D1D9E6;background:#fff;color:#64748B;font-size:10px;font-weight:600;cursor:pointer">' + p[0] + '</button>';
     });
+    html += '</div>';
+    // Custom threshold input
+    html += '<div style="display:flex;gap:6px;align-items:center">';
+    html += '<input type="number" id="mkt-custom-threshold" placeholder="Ex: 4.60" step="0.05" style="width:80px;padding:5px 8px;border:1px solid #D1D9E6;border-radius:4px;font-family:var(--mono);font-size:11px;color:#1A202C;background:#fff">';
+    html += '<select id="mkt-custom-mode" style="padding:5px;border:1px solid #D1D9E6;border-radius:4px;font-size:10px;color:#1A202C;background:#fff">';
+    html += '<option value="above">Au-dessus ≥</option><option value="below">En-dessous ≤</option><option value="range">Range ±</option></select>';
+    html += '<input type="number" id="mkt-custom-range2" placeholder="Borne haute" step="0.05" style="width:80px;padding:5px 8px;border:1px solid #D1D9E6;border-radius:4px;font-family:var(--mono);font-size:11px;color:#1A202C;background:#fff;display:none">';
+    html += '<button onclick="_mktUpdateChart()" style="padding:5px 12px;border-radius:4px;border:none;background:#7C3AED;color:#fff;font-size:10px;font-weight:700;cursor:pointer">Analyser</button>';
     html += '</div></div>';
 
-    // SVG chart container
-    html += '<div id="mkt-chart-container" style="background:#FAFBFC;border:1px solid #E2E8F0;border-radius:8px;padding:8px">';
-    html += _buildSVGChart(history, thresholds, current, nbObs);
-    html += '</div>';
+    // Mode change handler inline
+    html += '<script>document.getElementById("mkt-custom-mode").onchange=function(){document.getElementById("mkt-custom-range2").style.display=this.value==="range"?"":"none"}<\/script>';
 
-    // Legend
-    html += '<div style="display:flex;gap:12px;margin-top:6px;flex-wrap:wrap">';
-    html += '<span style="font-size:9px;color:#2563EB">━━ ' + label + '</span>';
-    html += '<span style="font-size:9px;color:#93C5FD">░░ Zone min-max</span>';
-    thresholds.forEach(function(t) {
-      html += '<span style="font-size:9px;color:' + t.color + '">┄┄ ' + t.label + '</span>';
-    });
-    html += '</div>';
-    html += '</div>';
-
-    // Threshold breach analysis
-    if (thresholds.length > 0) {
-      html += '<div style="margin-top:12px;font-size:11px;font-weight:700;color:#1A202C;margin-bottom:6px">Analyse de franchissement des seuils :</div>';
-      html += '<div style="display:grid;grid-template-columns:repeat(' + Math.min(thresholds.length, 3) + ',1fr);gap:8px">';
-      thresholds.forEach(function(t) {
-        var above = 0, below = 0, lastBreach = null, breachCount = 0, prevAbove = null;
-        history.forEach(function(h) {
-          var isAbove = h.value > t.val;
-          if (isAbove) { above++; if (!lastBreach || !prevAbove) lastBreach = h.date; }
-          else below++;
-          if (prevAbove !== null && prevAbove !== isAbove) breachCount++;
-          prevAbove = isAbove;
-        });
-        var pctAbove = Math.round(above / history.length * 100);
-        var pctBelow = 100 - pctAbove;
-        var currentAbove = current > t.val;
-
-        html += '<div style="padding:10px;background:#F1F3F7;border-radius:6px;border-left:3px solid ' + t.color + '">';
-        html += '<div style="font-size:9px;font-weight:700;color:' + t.color + '">' + t.label + '</div>';
-        html += '<div style="margin-top:6px;font-size:10px;color:#1A202C">';
-        html += 'Temps au-dessus : <strong>' + pctAbove + '%</strong> (' + above + '/' + history.length + ')<br>';
-        html += 'Temps en dessous : <strong>' + pctBelow + '%</strong> (' + below + '/' + history.length + ')<br>';
-        html += 'Franchissements : <strong>' + breachCount + '</strong><br>';
-        if (lastBreach) html += 'Dernier au-dessus : <strong>' + lastBreach + '</strong><br>';
-        else html += 'Jamais au-dessus sur la période<br>';
-        html += 'Actuel : <strong style="color:' + (currentAbove ? '#DC2626' : '#059669') + '">' + (currentAbove ? 'AU-DESSUS ⚠️' : 'EN DESSOUS ✅') + '</strong>';
-        html += '</div></div>';
-      });
-      html += '</div>';
-    }
+    // Chart + stats container
+    html += '<div id="mkt-chart-container" style="background:#FAFBFC;border:1px solid #E2E8F0;border-radius:8px;padding:8px"></div>';
+    html += '<div id="mkt-stats-container" style="margin-top:8px"></div>';
 
     html += '</div>';
     panel.innerHTML = html;
+
+    // Initial render
+    _mktUpdateChart(9999);
     panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   };
 
