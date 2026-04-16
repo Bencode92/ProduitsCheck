@@ -23,7 +23,7 @@
   function _pct(n) { return (Math.round(n * 100) / 100).toFixed(2); }
 
   // ─── Taux de marché dynamiques (depuis rates.json) ──────
-  var MARKET_RATES = { tec10: 3.10, oat5y: 2.70, oat2y: 2.53, bce: 2.00, euribor3m: 2.50, lastUpdate: null };
+  var MARKET_RATES = { tec10: 3.10, oat5y: 2.70, oat2y: 2.53, bce: 2.00, euribor3m: 2.50, spread2s10s: 0.57, curveShape: 'normal', lastUpdate: null, fetchedAt: null };
   (function _loadRates() {
     fetch('data/market/rates.json').then(function(r) { return r.json(); }).then(function(data) {
       if (data.yields) {
@@ -33,8 +33,14 @@
       }
       if (data.policy_rates) {
         if (data.policy_rates.ecb_deposit_rate) MARKET_RATES.bce = data.policy_rates.ecb_deposit_rate.current;
+        if (data.policy_rates.euribor_3m) MARKET_RATES.euribor3m = data.policy_rates.euribor_3m.current;
+      }
+      if (data.yield_curve) {
+        if (data.yield_curve.spread_2_10) MARKET_RATES.spread2s10s = data.yield_curve.spread_2_10;
+        if (data.yield_curve.shape) MARKET_RATES.curveShape = data.yield_curve.shape;
       }
       MARKET_RATES.lastUpdate = (data.yields && data.yields.oat_fr_10y && data.yields.oat_fr_10y.date) || null;
+      MARKET_RATES.fetchedAt = data.fetched_at || null;
       console.log('[CarrySimulator] Taux chargés depuis rates.json:', MARKET_RATES);
     }).catch(function() { console.log('[CarrySimulator] rates.json non disponible, taux par défaut'); });
   })();
@@ -432,14 +438,18 @@
 
     // ─── Market dashboard ──────
     html += '<div style="background:' + BG.section + ';border:1px solid ' + BG.border + ';border-radius:8px;padding:16px;margin-bottom:16px">';
-    html += '<div style="font-size:13px;font-weight:700;color:' + BG.text + ';margin-bottom:12px">📊 DONNÉES MARCHÉ — Avril 2026</div>';
+    var mr = MARKET_RATES;
+    var updateLabel = mr.lastUpdate ? ('Données du ' + mr.lastUpdate) : 'Données statiques';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">';
+    html += '<div style="font-size:13px;font-weight:700;color:' + BG.text + '">📊 DONNÉES MARCHÉ — Temps réel</div>';
+    html += '<div style="font-size:9px;color:' + BG.textDim + ';padding:3px 8px;background:' + BG.row1 + ';border-radius:4px">' + updateLabel + ' · Source ECB + Twelve Data</div>';
+    html += '</div>';
     html += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px">';
-    // KPI cards
     [
-      ['TEC10 (OAT 10Y)', '3.10%', '#0891B2', 'Stable · Vol 18bp · Range 2.98-3.15%'],
-      ['OAT 5 ans', '2.70%', '#2563EB', 'Spread 5Y-10Y = +40bp'],
-      ['OAT 2 ans', '2.53%', '#7C3AED', 'Spread 2Y-10Y = +57bp'],
-      ['BCE Dépôt', '2.00%', '#059669', 'Main 2.15% · Pause depuis 6 mois']
+      ['TEC10 (OAT 10Y)', _pct(mr.tec10) + '%', '#0891B2', 'Référence TARN · Spread vs emprunt +' + _pct(mr.tec10 - _state.rate) + '%'],
+      ['OAT 5 ans', _pct(mr.oat5y) + '%', '#2563EB', 'Spread 5Y-10Y = +' + Math.round((mr.tec10 - mr.oat5y) * 100) + 'bp'],
+      ['OAT 2 ans', _pct(mr.oat2y) + '%', '#7C3AED', 'Spread 2Y-10Y = +' + Math.round((mr.tec10 - mr.oat2y) * 100) + 'bp'],
+      ['BCE Dépôt', _pct(mr.bce) + '%', '#059669', 'Main ' + _pct(mr.bce + 0.15) + '%']
     ].forEach(function(k) {
       html += '<div style="padding:10px;border:1px solid ' + BG.border + ';border-radius:6px;border-left:3px solid ' + k[2] + '">';
       html += '<div style="font-size:9px;font-weight:700;color:' + BG.textDim + ';letter-spacing:0.5px">' + k[0] + '</div>';
@@ -449,10 +459,10 @@
     html += '</div>';
     html += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px">';
     [
-      ['Euribor 3M', '~2.50%', '#D97706', 'Taux court piloté BCE'],
-      ['Inflation PCE', '2.80%', '#DC2626', 'Au-dessus du target 2%'],
-      ['Courbe des taux', 'Normale', '#059669', 'Pentue +57bp (favorable)'],
-      ['Régime', 'Stagflation', '#DC2626', 'Brent $103 · VIX 22']
+      ['Euribor 3M', _pct(mr.euribor3m) + '%', '#D97706', 'Réf Range Accrual · Corridor [1.50-3.80%]'],
+      ['Spread 2s10s', '+' + Math.round(mr.spread2s10s * 100) + 'bp', mr.curveShape === 'normal' ? '#059669' : '#DC2626', 'Courbe ' + mr.curveShape],
+      ['Coût emprunt', _pct(_state.rate) + '%', '#DC2626', 'Seuil carry : tout > ' + _pct(_state.rate) + '% rapporte'],
+      ['Régime', 'Stagflation', '#DC2626', 'Inflation sticky + croissance molle']
     ].forEach(function(k) {
       html += '<div style="padding:10px;border:1px solid ' + BG.border + ';border-radius:6px;border-left:3px solid ' + k[2] + '">';
       html += '<div style="font-size:9px;font-weight:700;color:' + BG.textDim + ';letter-spacing:0.5px">' + k[0] + '</div>';
@@ -465,8 +475,8 @@
     html += '<div style="font-weight:700;margin-bottom:6px">Courbe des taux EUR — Budget option structuré</div>';
     html += '<div style="display:flex;align-items:flex-end;gap:4px;height:80px;margin-bottom:6px">';
     [
-      ['BCE', 2.00, '#059669'], ['2Y', 2.53, '#7C3AED'], ['5Y', 2.70, '#2563EB'],
-      ['Emprunt', 2.90, '#DC2626'], ['10Y', 3.10, '#0891B2']
+      ['BCE', mr.bce, '#059669'], ['2Y', mr.oat2y, '#7C3AED'], ['5Y', mr.oat5y, '#2563EB'],
+      ['Emprunt', _state.rate, '#DC2626'], ['10Y', mr.tec10, '#0891B2']
     ].forEach(function(pt) {
       var h = Math.round((pt[1] / 4.0) * 70);
       html += '<div style="flex:1;text-align:center">';
