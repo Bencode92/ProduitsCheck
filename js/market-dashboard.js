@@ -121,7 +121,42 @@
     html += 'Sur 500K€ = <strong>' + _fmt(Math.round(500000 * budget10y / 100)) + '€</strong> pour financer les coupons</div>';
     html += '</div></div>';
 
-    // ═══ SECTION 4: ZONES & TRIGGERS PRODUITS ═══
+    // ═══ SECTION 4: SIMULATEUR SEUILS CUSTOM ═══
+    html += '<div style="background:' + BG.section + ';border:2px solid #7C3AED;border-radius:8px;padding:16px;margin-bottom:20px">';
+    html += '<div style="font-size:14px;font-weight:700;color:#7C3AED;margin-bottom:12px">🔧 SIMULATEUR DE SEUILS — Testez vos propres corridors & triggers</div>';
+    html += '<div style="font-size:10px;color:' + BG.textDim + ';margin-bottom:12px">Entrez un seuil ou un corridor et visualisez sur l\'historique quand le taux l\'a franchi.</div>';
+
+    // Controls
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:10px;align-items:end;margin-bottom:14px">';
+    // Rate selector
+    html += '<div><label style="font-size:9px;font-weight:700;color:' + BG.textDim + ';display:block;margin-bottom:4px">TAUX</label>';
+    html += '<select id="mkt-sim-rate" style="width:100%;padding:8px;border:1px solid ' + BG.border + ';border-radius:6px;background:' + BG.input + ';color:' + BG.text + ';font-size:12px">';
+    html += '<option value="tec10" selected>TEC10 (OAT 10Y)</option>';
+    html += '<option value="oat5y">OAT 5 ans</option>';
+    html += '<option value="oat2y">OAT 2 ans</option>';
+    html += '<option value="euribor3m">Euribor 3M</option>';
+    html += '</select></div>';
+    // Mode selector
+    html += '<div><label style="font-size:9px;font-weight:700;color:' + BG.textDim + ';display:block;margin-bottom:4px">MODE</label>';
+    html += '<select id="mkt-sim-mode" style="width:100%;padding:8px;border:1px solid ' + BG.border + ';border-radius:6px;background:' + BG.input + ';color:' + BG.text + ';font-size:12px" onchange="_mktSimModeChange()">';
+    html += '<option value="below">Seuil ≤ (coupon si en dessous)</option>';
+    html += '<option value="above">Seuil ≥ (coupon si au dessus)</option>';
+    html += '<option value="corridor">Corridor [min — max]</option>';
+    html += '</select></div>';
+    // Value 1
+    html += '<div><label style="font-size:9px;font-weight:700;color:' + BG.textDim + ';display:block;margin-bottom:4px" id="mkt-sim-label1">SEUIL (%)</label>';
+    html += '<input type="number" id="mkt-sim-val1" value="4.40" step="0.05" style="width:100%;padding:8px;border:1px solid ' + BG.border + ';border-radius:6px;background:' + BG.input + ';color:' + BG.text + ';font-family:var(--mono);font-size:13px"></div>';
+    // Value 2 (corridor only)
+    html += '<div id="mkt-sim-val2-wrap"><label style="font-size:9px;font-weight:700;color:' + BG.textDim + ';display:block;margin-bottom:4px">BORNE HAUTE (%)</label>';
+    html += '<input type="number" id="mkt-sim-val2" value="3.80" step="0.05" style="width:100%;padding:8px;border:1px solid ' + BG.border + ';border-radius:6px;background:' + BG.input + ';color:' + BG.text + ';font-family:var(--mono);font-size:13px"></div>';
+    // Button
+    html += '<div><button onclick="_mktSimAnalyze()" style="padding:8px 16px;background:#7C3AED;color:#fff;border:none;border-radius:6px;font-weight:700;font-size:12px;cursor:pointer;white-space:nowrap">Analyser</button></div>';
+    html += '</div>';
+    // Results zone
+    html += '<div id="mkt-sim-result" style="min-height:40px"></div>';
+    html += '</div>';
+
+    // ═══ SECTION 5: ZONES & TRIGGERS PRODUITS ═══
     var tec10Val = tec10.current || 3.10;
     var eur3mVal = eur3m.current || 2.50;
 
@@ -324,10 +359,189 @@
     container.innerHTML = html;
   }
 
+  // ═══ INTERACTIVE: Custom threshold analyzer ═══
+
+  window._mktSimModeChange = function() {
+    var mode = document.getElementById('mkt-sim-mode').value;
+    var wrap2 = document.getElementById('mkt-sim-val2-wrap');
+    var label1 = document.getElementById('mkt-sim-label1');
+    if (mode === 'corridor') {
+      wrap2.style.display = '';
+      label1.textContent = 'BORNE BASSE (%)';
+    } else {
+      wrap2.style.display = 'none';
+      label1.textContent = 'SEUIL (%)';
+    }
+  };
+
+  window._mktSimAnalyze = function() {
+    var rateSel = document.getElementById('mkt-sim-rate').value;
+    var mode = document.getElementById('mkt-sim-mode').value;
+    var val1 = parseFloat(document.getElementById('mkt-sim-val1').value);
+    var val2 = parseFloat(document.getElementById('mkt-sim-val2').value);
+    var resultDiv = document.getElementById('mkt-sim-result');
+    if (!_data.rates || !resultDiv) return;
+
+    // Get history
+    var rateMap = {
+      tec10: { key: 'oat_fr_10y', label: 'TEC10', section: 'yields' },
+      oat5y: { key: 'oat_fr_5y', label: 'OAT 5Y', section: 'yields' },
+      oat2y: { key: 'oat_fr_2y', label: 'OAT 2Y', section: 'yields' },
+      euribor3m: { key: 'euribor_3m', label: 'Euribor 3M', section: 'policy_rates' }
+    };
+    var rm = rateMap[rateSel];
+    var history = [];
+    var current = 0;
+    if (rm.section === 'yields' && _data.rates.yields && _data.rates.yields[rm.key]) {
+      history = _data.rates.yields[rm.key].history || [];
+      current = _data.rates.yields[rm.key].current || 0;
+    } else if (rm.section === 'policy_rates' && _data.rates.policy_rates && _data.rates.policy_rates[rm.key]) {
+      current = _data.rates.policy_rates[rm.key].current || 0;
+      // Policy rates don't have history array, use single point
+      history = [{ date: _data.rates.policy_rates[rm.key].date, value: current }];
+    }
+
+    if (history.length === 0) {
+      resultDiv.innerHTML = '<div style="padding:12px;color:#DC2626;font-size:12px">Pas de données historiques pour ' + rm.label + '</div>';
+      return;
+    }
+
+    // Analyze
+    var inZone = 0, outZone = 0, breaches = [];
+    var lastState = null;
+    history.forEach(function(h) {
+      var v = h.value;
+      var isIn = false;
+      if (mode === 'below') isIn = v <= val1;
+      else if (mode === 'above') isIn = v >= val1;
+      else isIn = v >= val1 && v <= val2;
+
+      if (isIn) inZone++; else outZone++;
+      if (lastState !== null && lastState !== isIn) {
+        breaches.push({ date: h.date, value: v, entered: isIn });
+      }
+      lastState = isIn;
+    });
+
+    var total = inZone + outZone;
+    var pctIn = total > 0 ? Math.round(inZone / total * 100) : 0;
+    var currentIn = false;
+    if (mode === 'below') currentIn = current <= val1;
+    else if (mode === 'above') currentIn = current >= val1;
+    else currentIn = current >= val1 && current <= val2;
+
+    // Build result HTML
+    var html = '';
+
+    // KPI row
+    html += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px">';
+    html += '<div style="padding:10px;background:' + (currentIn ? '#ECFDF5' : '#FEF2F2') + ';border-radius:6px;text-align:center;border:1px solid ' + (currentIn ? '#059669' : '#DC2626') + '">';
+    html += '<div style="font-size:9px;color:#64748B">STATUT ACTUEL</div>';
+    html += '<div style="font-family:var(--mono);font-size:18px;font-weight:800;color:' + (currentIn ? '#059669' : '#DC2626') + '">' + (currentIn ? '✅ DANS' : '❌ HORS') + '</div>';
+    html += '<div style="font-size:9px;color:#64748B">' + rm.label + ' = ' + current.toFixed(2) + '%</div></div>';
+
+    html += '<div style="padding:10px;background:#F1F3F7;border-radius:6px;text-align:center">';
+    html += '<div style="font-size:9px;color:#64748B">TEMPS DANS LA ZONE</div>';
+    html += '<div style="font-family:var(--mono);font-size:18px;font-weight:800;color:' + (pctIn >= 80 ? '#059669' : pctIn >= 50 ? '#D97706' : '#DC2626') + '">' + pctIn + '%</div>';
+    html += '<div style="font-size:9px;color:#64748B">' + inZone + '/' + total + ' observations</div></div>';
+
+    html += '<div style="padding:10px;background:#F1F3F7;border-radius:6px;text-align:center">';
+    html += '<div style="font-size:9px;color:#64748B">FRANCHISSEMENTS</div>';
+    html += '<div style="font-family:var(--mono);font-size:18px;font-weight:800;color:#7C3AED">' + breaches.length + '</div>';
+    html += '<div style="font-size:9px;color:#64748B">croisements de seuil</div></div>';
+
+    var distBp = 0;
+    if (mode === 'below') distBp = Math.round((val1 - current) * 100);
+    else if (mode === 'above') distBp = Math.round((current - val1) * 100);
+    else distBp = Math.round(Math.min(current - val1, val2 - current) * 100);
+    html += '<div style="padding:10px;background:#F1F3F7;border-radius:6px;text-align:center">';
+    html += '<div style="font-size:9px;color:#64748B">MARGE AU SEUIL</div>';
+    html += '<div style="font-family:var(--mono);font-size:18px;font-weight:800;color:' + (distBp > 0 ? '#059669' : '#DC2626') + '">' + (distBp > 0 ? '+' : '') + distBp + 'bp</div>';
+    html += '<div style="font-size:9px;color:#64748B">distance au plus proche</div></div>';
+    html += '</div>';
+
+    // Visual chart with zone overlay
+    html += '<div style="position:relative;background:#F8F9FB;border:1px solid #D1D9E6;border-radius:6px;padding:12px;margin-bottom:8px">';
+    html += '<div style="font-size:10px;font-weight:700;color:#1A202C;margin-bottom:8px">' + rm.label + ' — Historique vs ';
+    if (mode === 'corridor') html += 'corridor [' + val1.toFixed(2) + '% — ' + val2.toFixed(2) + '%]';
+    else html += 'seuil ' + (mode === 'below' ? '≤' : '≥') + ' ' + val1.toFixed(2) + '%';
+    html += '</div>';
+
+    // Compute chart bounds
+    var allVals = history.map(function(h) { return h.value; });
+    var chartMin = Math.min.apply(null, allVals.concat([val1, mode === 'corridor' ? val2 : val1])) - 0.15;
+    var chartMax = Math.max.apply(null, allVals.concat([val1, mode === 'corridor' ? val2 : val1])) + 0.15;
+    var chartRange = chartMax - chartMin || 0.3;
+    var chartH = 100;
+
+    html += '<div style="position:relative;height:' + chartH + 'px">';
+    // Zone overlay
+    if (mode === 'corridor') {
+      var zoneBottom = ((val1 - chartMin) / chartRange) * chartH;
+      var zoneTop = ((val2 - chartMin) / chartRange) * chartH;
+      html += '<div style="position:absolute;left:0;right:0;bottom:' + zoneBottom + 'px;height:' + (zoneTop - zoneBottom) + 'px;background:#059669;opacity:0.12;border-radius:3px"></div>';
+      // Lines for corridor
+      html += '<div style="position:absolute;left:0;right:0;bottom:' + zoneBottom + 'px;height:1px;background:#059669;opacity:0.6"></div>';
+      html += '<div style="position:absolute;left:0;right:0;bottom:' + zoneTop + 'px;height:1px;background:#059669;opacity:0.6"></div>';
+      html += '<div style="position:absolute;right:4px;bottom:' + (zoneBottom + 2) + 'px;font-size:8px;color:#059669;font-weight:700">' + val1.toFixed(2) + '%</div>';
+      html += '<div style="position:absolute;right:4px;bottom:' + (zoneTop + 2) + 'px;font-size:8px;color:#059669;font-weight:700">' + val2.toFixed(2) + '%</div>';
+    } else {
+      var lineY = ((val1 - chartMin) / chartRange) * chartH;
+      html += '<div style="position:absolute;left:0;right:0;bottom:' + lineY + 'px;height:2px;background:#DC2626;opacity:0.6"></div>';
+      html += '<div style="position:absolute;right:4px;bottom:' + (lineY + 3) + 'px;font-size:8px;color:#DC2626;font-weight:700">Seuil ' + val1.toFixed(2) + '%</div>';
+      // Zone overlay
+      if (mode === 'below') {
+        html += '<div style="position:absolute;left:0;right:0;bottom:0;height:' + lineY + 'px;background:#059669;opacity:0.08"></div>';
+      } else {
+        html += '<div style="position:absolute;left:0;right:0;bottom:' + lineY + 'px;top:0;background:#059669;opacity:0.08"></div>';
+      }
+    }
+
+    // Data bars
+    var barW = Math.max(4, Math.floor(100 / history.length) - 1);
+    html += '<div style="display:flex;align-items:flex-end;height:100%;gap:1px">';
+    history.forEach(function(h) {
+      var barBottom = ((h.value - chartMin) / chartRange) * chartH;
+      var isIn = false;
+      if (mode === 'below') isIn = h.value <= val1;
+      else if (mode === 'above') isIn = h.value >= val1;
+      else isIn = h.value >= val1 && h.value <= val2;
+      var color = isIn ? '#059669' : '#DC2626';
+      html += '<div style="flex:1;position:relative;height:100%">';
+      html += '<div style="position:absolute;bottom:0;left:0;right:0;height:' + barBottom + 'px;background:' + color + ';opacity:0.7;border-radius:2px 2px 0 0" title="' + h.date + ' : ' + h.value + '% — ' + (isIn ? 'DANS' : 'HORS') + '"></div>';
+      html += '</div>';
+    });
+    html += '</div>';
+    html += '</div>';
+
+    // Date labels
+    html += '<div style="display:flex;justify-content:space-between;font-size:8px;color:#94A3B8;margin-top:3px">';
+    html += '<span>' + history[0].date + '</span>';
+    html += '<span style="color:#059669">■ Dans la zone</span><span style="color:#DC2626">■ Hors zone</span>';
+    html += '<span>' + history[history.length - 1].date + '</span>';
+    html += '</div>';
+    html += '</div>';
+
+    // Breach list
+    if (breaches.length > 0) {
+      html += '<div style="font-size:10px;font-weight:700;color:#1A202C;margin-bottom:4px">Franchissements :</div>';
+      html += '<div style="display:flex;flex-wrap:wrap;gap:4px">';
+      breaches.forEach(function(b) {
+        html += '<span style="padding:2px 8px;border-radius:3px;font-size:9px;font-family:var(--mono);background:' + (b.entered ? '#ECFDF5' : '#FEF2F2') + ';color:' + (b.entered ? '#059669' : '#DC2626') + '">';
+        html += b.date + ' ' + b.value.toFixed(3) + '% ' + (b.entered ? '→ ENTRE' : '→ SORTI') + '</span>';
+      });
+      html += '</div>';
+    }
+
+    resultDiv.innerHTML = html;
+  };
+
   window.renderMarketDashboard = async function(container) {
     container.innerHTML = '<div style="text-align:center;padding:40px;color:#64748B">Chargement des données marché...</div>';
     if (!_data.loaded) await _loadData();
     _render(container);
+    // Init mode visibility
+    setTimeout(function() { if (window._mktSimModeChange) _mktSimModeChange(); }, 50);
   };
 
   console.log('[StructBoard] Market Dashboard v1.0 loaded');
