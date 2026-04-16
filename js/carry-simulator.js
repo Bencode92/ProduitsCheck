@@ -91,7 +91,7 @@
         id: 'cat_digital', name: 'Digital Mémoire TEC10 7%', type: 'conditionnel',
         coupon: 7.00, duration: 5, capitalGaranti: true,
         condition: 'TEC10 ≤ 4.50% + effet mémoire', conditionProb: 0.88,
-        guaranteedYears: 0,
+        guaranteedYears: 0, memory: true,
         color: '#7C3AED',
         risk: 'Modéré-faible — mémoire rattrape les coupons manqués. Trigger 4.50% = 140bp marge',
         detail: 'Si TEC10 > 4.50% un an → coupon stocké et versé quand condition remplie. Plus sûr que le TARN car la mémoire compense les mauvaises années.',
@@ -160,6 +160,10 @@
     var totalRevenue = 0, totalInterest = 0, totalTax = 0;
     var cumulNet = 0;
 
+    // Memory accumulation tracker per product
+    var accumulatedCoupons = {};
+    products.forEach(function(p) { accumulatedCoupons[p.id || p.name] = 0; });
+
     for (var yr = 1; yr <= years; yr++) {
       var interest = Math.round(capitalRemaining * annualRate);
       var capitalPayment = 0;
@@ -174,7 +178,20 @@
       var revenueByProduct = [];
       var totalYearRevenue = 0;
       products.forEach(function(p) {
+        var key = p.id || p.name;
         var rev = _productRevenue(p, yr, scenario);
+        var hasMemory = p.memory === true || (p.condition && /m[ée]moire/i.test(p.condition));
+
+        // Memory accumulation logic
+        if (hasMemory && rev === 0 && yr > (p.guaranteedYears || 0)) {
+          // Condition not met — accumulate the missed coupon
+          accumulatedCoupons[key] += Math.round((p.amount || 0) * (p.coupon || 0) / 100);
+        } else if (hasMemory && rev > 0 && accumulatedCoupons[key] > 0) {
+          // Condition met — pay accumulated + current
+          rev += accumulatedCoupons[key];
+          accumulatedCoupons[key] = 0;
+        }
+
         if (loanType === 'amortissable' && capitalRemaining < loanAmount) {
           rev = Math.round(rev * (capitalRemaining / loanAmount));
         }

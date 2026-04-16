@@ -44,13 +44,20 @@
     '- paymentTiming="maturity" UNIQUEMENT si le coupon est versé SEULEMENT à maturité (pas à chaque rappel)',
     '- Pour un autocall classique avec coupon versé à chaque rappel → paymentTiming="periodic"',
     '',
-    'BARRIÈRE COUPON (capitalProtection.barrierCoupon):',
-    '- C\'est le seuil à partir duquel le coupon/gain est versé À MATURITÉ',
-    '- Pour un autocall: souvent identique au trigger autocall OU à la "barrière de versement du gain à l\'échéance"',
+    'BARRIÈRE COUPON (capitalProtection.barrierCoupon) — CRITIQUE, NE JAMAIS LAISSER NULL SI COUPON CONDITIONNEL:',
+    '- barrierCoupon = seuil pour RECEVOIR le coupon (DIFFÉRENT de barrier qui est le seuil de perte capital)',
+    '- AUTOCALL/PHOENIX: "coupon si SJ ≥ 77%" → barrierCoupon=77 ET coupon.trigger=77',
+    '- TARN (taux): "coupon si TEC10 ≤ 4.40%" → barrierCoupon=4.40 ET coupon.trigger=4.40',
+    '- DIGITALE: "coupon si indice ≤ X%" → barrierCoupon=X ET coupon.trigger=X',
+    '- RANGE ACCRUAL: barrierCoupon = borne haute du corridor',
+    '- RÈGLE: Si coupon.trigger est rempli, barrierCoupon DOIT aussi être rempli (même valeur)',
     '- "gain versé si baisse ≤ 20%" → barrierCoupon = 80 (= 100 - 20)',
-    '- "gain versé si sous-jacent ≥ 91% à maturité" → barrierCoupon = 91',
-    '- NE PAS confondre avec barrier (capital) qui est le seuil de PERTE en capital',
-    '- Si la brochure mentionne un seuil de versement du gain à maturité DIFFÉRENT du trigger autocall, utiliser ce seuil',
+    '',
+    'ANNÉES GARANTIES (guaranteedYears):',
+    '- Nombre d\'années où le coupon est versé SANS CONDITION (0 si tous conditionnels)',
+    '- "coupon garanti les 2 premières années" ou "An 1-2 garantis" → guaranteedYears=2',
+    '- "An 1 garanti" ou "première année inconditionnelle" → guaranteedYears=1',
+    '- Si aucune mention de coupon garanti → guaranteedYears=0',
     '',
     'CAPITAL:',
     '- "Protection du capital : Non" → protected=false',
@@ -79,7 +86,7 @@
     '{"name":"","structureType":"","emitter":"","guarantor":"","guarantorRating":{"moodys":"","sp":""},',
     '"underlyings":[],"underlyingType":"","currency":"EUR","maturity":"","maturityYears":0,',
     '"coupon":{"rate":0,"rateIfCalled":null,"rateIfMaturity":null,"type":"","frequency":"","trigger":null,"memory":false,"paymentTiming":""},',
-    '"participationRate":null,',
+    '"participationRate":null,"guaranteedYears":0,',
     '"capitalProtection":{"protected":false,"level":null,"barrier":null,"barrierCoupon":null,"barrierType":"europeenne"},',
     '"earlyRedemption":{"possible":false,"type":"","trigger":null,"frequency":"","startSemester":null,"stepDown":false,"stepDownPct":null},',
     '"decrementPct":null,"actualDividendYield":null,"minInvestment":null,"mechanism":"","risks":[],"summary":""}'
@@ -190,6 +197,32 @@
         cp.barrierCoupon = inferredBarrier;
         console.log('[BrochureParser] Inferred barrierCoupon=' + inferredBarrier + '% from ' +
           (c.trigger ? 'coupon.trigger' : 'earlyRedemption.trigger'));
+      }
+    }
+
+    // Broader barrierCoupon inference for non-autocall products (Phoenix, TARN, Digitale)
+    if (!cp.barrierCoupon && c.trigger && c.trigger > 0) {
+      cp.barrierCoupon = c.trigger;
+      console.log('[BrochureParser] Inferred barrierCoupon=' + c.trigger + ' from coupon.trigger (non-autocall)');
+    }
+
+    // Infer guaranteedYears from mechanism/scenarios text
+    if (!data.guaranteedYears || data.guaranteedYears === 0) {
+      var mechLower = (data.mechanism || '').toLowerCase();
+      var scenText = ((data.scenarios && typeof data.scenarios === 'object' && data.scenarios.favorable) || '').toLowerCase();
+      var allGuarText = mechLower + ' ' + scenText + ' ' + (data.summary || '').toLowerCase();
+      var guarMatch = allGuarText.match(/garanti(?:s|es?)?\s*(?:les\s*)?(\d+)\s*(?:premi[eè]res?)?\s*ann/i) ||
+        allGuarText.match(/ann[ée]es?\s*(\d+)\s*(?:à|a)\s*(\d+).*garanti/i) ||
+        allGuarText.match(/an\s*1\s*(?:et|[-–]|à)\s*(\d+).*garanti/i);
+      if (guarMatch) {
+        data.guaranteedYears = parseInt(guarMatch[2] || guarMatch[1]) || 1;
+        console.log('[BrochureParser] Inferred guaranteedYears=' + data.guaranteedYears);
+      } else if (/an\s*1.*garanti|premi[eè]re\s*ann[ée]e.*garanti|coupon.*garanti.*an\s*1/i.test(allGuarText)) {
+        data.guaranteedYears = 1;
+        console.log('[BrochureParser] Inferred guaranteedYears=1 (An 1 garanti)');
+      } else if (/ann[ée]es?\s*1\s*(?:et|[-–]|à)\s*2.*garanti|garanti.*ann[ée]es?\s*1.*2/i.test(allGuarText)) {
+        data.guaranteedYears = 2;
+        console.log('[BrochureParser] Inferred guaranteedYears=2 (An 1-2 garantis)');
       }
     }
 
@@ -339,6 +372,7 @@
         trigger: _gv('bp-barriercoupon') || _gv('bp-coupontrigger'),
         memory: _gv('bp-memory') || false, paymentTiming: _gv('bp-timing') || 'periodic' },
       participationRate: _gv('bp-participation'),
+      guaranteedYears: _gv('bp-guaranteedyears') || (_data.guaranteedYears || 0),
       minInvestment: _gv('bp-mininvest'),
       capitalProtection: { protected: _gv('bp-capprotected') || false,
         level: _gv('bp-capprotected') ? (_gv('bp-caplevel') || 100) : null,
@@ -351,8 +385,8 @@
       risks: (_gv('bp-risks') || '').split('·').map(function(s) { return s.trim(); }).filter(Boolean),
       summary: _data.summary || '', aiParsed: _data, sourceFile: _fileName,
       rangeAccrual: st === 'range_accrual' ? {
-        lowerBound: parseFloat(_gv('bp-ra-lower')) || (_data.rangeAccrual && _data.rangeAccrual.lowerBound) || null,
-        upperBound: parseFloat(_gv('bp-ra-upper')) || (_data.rangeAccrual && _data.rangeAccrual.upperBound) || null,
+        lowerBound: parseFloat(String(_gv('bp-ra-lower')).replace(',', '.')) || (_data.rangeAccrual && _data.rangeAccrual.lowerBound) || null,
+        upperBound: parseFloat(String(_gv('bp-ra-upper')).replace(',', '.')) || (_data.rangeAccrual && _data.rangeAccrual.upperBound) || null,
         reference: _gv('bp-ra-ref') || (_data.rangeAccrual && _data.rangeAccrual.reference) || 'Euribor 3 mois',
         observation: _gv('bp-ra-obs') || (_data.rangeAccrual && _data.rangeAccrual.observation) || 'daily'
       } : undefined

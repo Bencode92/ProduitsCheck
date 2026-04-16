@@ -55,7 +55,7 @@
                     norm._dispersionMedian = histSim.median;
                 } else {
                     // Use participation × estimated dispersion
-                    var participation = product.participationRate || norm.coupon || 7;
+                    var participation = product.participationRate || (product.aiParsed && product.aiParsed.participationRate) || norm.coupon || 7;
                     // Conservative dispersion estimate: 130% for tech pairs over 3Y
                     norm.coupon = (participation * 1.3) / matYears;
                     norm._dispersionMedian = participation * 1.3;

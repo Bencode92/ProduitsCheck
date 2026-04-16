@@ -89,7 +89,7 @@ function _graderNormalize(product){
         if(isAC.indexOf('autocall')>=0||isAC.indexOf('phoenix')>=0){norm._barrierUnparsed=true;norm.barrier=60;}
     }
 
-    if(st==='dispersion'){norm.worstOf=false;norm.capitalProtection=true;norm.barrier=0;norm.couponType='garanti';norm.autocall=false;var hs=p.historicalSimulations||(ai.historicalSimulations);var my=norm.maturityYears||3;if(hs&&hs.median){norm.coupon=hs.median/my;norm._dispersionMedian=hs.median;}else{var part=p.participationRate||norm.coupon||7;norm.coupon=(part*1.3)/my;norm._dispersionMedian=part*1.3;}norm._originalCoupon=p.participationRate||raw;
+    if(st==='dispersion'){norm.worstOf=false;norm.capitalProtection=true;norm.barrier=0;norm.couponType='garanti';norm.autocall=false;var hs=p.historicalSimulations||(ai.historicalSimulations);var my=norm.maturityYears||3;if(hs&&hs.median){norm.coupon=hs.median/my;norm._dispersionMedian=hs.median;}else{var part=p.participationRate||(p.aiParsed&&p.aiParsed.participationRate)||norm.coupon||7;norm.coupon=(part*1.3)/my;norm._dispersionMedian=part*1.3;}norm._originalCoupon=p.participationRate||raw;
     } else if(st==='capital_garanti'){norm.capitalProtection=true;norm.barrier=0;if(norm.couponType!=='fixe'&&!norm.barrierCoupon)norm.couponType='garanti';
     } else if(st==='taux_fixe'){norm.capitalProtection=true;norm.barrier=0;norm.couponType='fixe';norm.worstOf=false;}
 

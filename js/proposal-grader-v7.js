@@ -184,7 +184,7 @@
         norm.coupon = histSim.median / matY;
         norm._dispersionMedian = histSim.median;
       } else {
-        var participation = product.participationRate || norm.coupon || 7;
+        var participation = product.participationRate || (product.aiParsed && product.aiParsed.participationRate) || norm.coupon || 7;
         norm.coupon = (participation * 1.3) / matY;
         norm._dispersionMedian = participation * 1.3;
       }
@@ -380,6 +380,10 @@
     var ut = (product.underlyingType || '').toLowerCase();
     var hasMemory = (product.coupon && product.coupon.memory === true) || (product.structureType || '').toLowerCase() === 'phoenix_memoire';
     if (hasMemory) adj += 5;
+    // Guaranteed years reduce uncertainty
+    var guaranteedYears = product.guaranteedYears || (product.aiParsed && product.aiParsed.guaranteedYears) || 0;
+    if (guaranteedYears >= 2) adj += 5;
+    else if (guaranteedYears >= 1) adj += 3;
     if (ut === 'single-stock') adj -= 5;
     if (ut === 'single-stock' && product.capitalProtection && parseFloat(product.capitalProtection.barrier) > 0 && parseFloat(product.capitalProtection.barrier) < 65) adj -= 3;
     return Math.max(5, Math.min(95, oldP1 + adj));
