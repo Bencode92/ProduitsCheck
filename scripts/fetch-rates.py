@@ -16,7 +16,7 @@ TD_API_KEY = os.environ.get("TWELVE_DATA_API_KEY", "")
 # ECB SDW changed series keys — using confirmed working ones
 RATE_SERIES = {
     "oat_fr_10y": {
-        "ecb_url": f"{BASE_ECB}/YC/B.U2.EUR.4F.G_N_A.SV_C_YM.SR_10Y?format=csvdata&lastNObservations=24",
+        "ecb_url": f"{BASE_ECB}/YC/B.U2.EUR.4F.G_N_A.SV_C_YM.SR_10Y?format=csvdata&lastNObservations=120",
         "td_symbol": None,  # No direct OAT on TD
         "name": "Euro Area AAA 10Y Yield",
         "tec_equivalent": "TEC 10",
@@ -24,21 +24,21 @@ RATE_SERIES = {
         "freq": "monthly"
     },
     "bund_de_10y": {
-        "ecb_url": f"{BASE_ECB}/YC/B.U2.EUR.4F.G_N_A.SV_C_YM.SR_10Y?format=csvdata&lastNObservations=24",
+        "ecb_url": f"{BASE_ECB}/YC/B.U2.EUR.4F.G_N_A.SV_C_YM.SR_10Y?format=csvdata&lastNObservations=120",
         "td_symbol": None,
         "name": "Euro Area AAA 10Y Yield",
         "description": "Rendement zone euro AAA 10 ans",
         "freq": "monthly"
     },
     "oat_fr_2y": {
-        "ecb_url": f"{BASE_ECB}/YC/B.U2.EUR.4F.G_N_A.SV_C_YM.SR_2Y?format=csvdata&lastNObservations=24",
+        "ecb_url": f"{BASE_ECB}/YC/B.U2.EUR.4F.G_N_A.SV_C_YM.SR_2Y?format=csvdata&lastNObservations=120",
         "td_symbol": None,
         "name": "Euro Area AAA 2Y Yield",
         "description": "Rendement zone euro AAA 2 ans",
         "freq": "monthly"
     },
     "oat_fr_5y": {
-        "ecb_url": f"{BASE_ECB}/YC/B.U2.EUR.4F.G_N_A.SV_C_YM.SR_5Y?format=csvdata&lastNObservations=24",
+        "ecb_url": f"{BASE_ECB}/YC/B.U2.EUR.4F.G_N_A.SV_C_YM.SR_5Y?format=csvdata&lastNObservations=120",
         "td_symbol": None,
         "name": "Euro Area AAA 5Y Yield",
         "description": "Rendement zone euro AAA 5 ans",
@@ -147,7 +147,7 @@ def compute_stats(observations):
         stats["change_3m_bps"] = round(diff * 100, 1)
     else:
         stats["direction"] = "unknown"
-    stats["history"] = [{"date": d, "value": round(v, 3)} for d, v in observations[-12:]]
+    stats["history"] = [{"date": d, "value": round(v, 3)} for d, v in observations]
     return stats
 
 

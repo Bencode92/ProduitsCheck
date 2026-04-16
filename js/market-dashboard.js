@@ -67,18 +67,39 @@
     html += '<div style="font-size:10px;color:' + BG.textDim + ';padding:4px 10px;background:' + BG.row1 + ';border-radius:4px">Dernière MAJ : ' + fetchDate + ' · Source : ECB + Twelve Data + IA</div>';
     html += '</div>';
 
-    // ═══ SECTION 1: TAUX SOUVERAINS ═══
-    html += '<div style="font-size:14px;font-weight:700;color:' + BG.text + ';margin-bottom:12px">🏛️ Taux souverains EUR (zone euro AAA)</div>';
-    html += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px">';
-    html += _renderKPI('TEC10 (OAT 10 ans)', (tec10.current || 3.10).toFixed(2) + '%', '#0891B2',
-      'Vol ' + (tec10.vol_annualized_bps || 18) + 'bp/an · ' + (tec10.direction || 'stable') + ' · Range 12M : ' + (tec10.low_1y || '?') + '-' + (tec10.high_1y || '?') + '%');
-    html += _renderKPI('OAT 5 ans', (oat5y.current || 2.70).toFixed(2) + '%', '#2563EB',
-      'Vol ' + (oat5y.vol_annualized_bps || 22) + 'bp/an · ' + (oat5y.direction || 'stable') + ' · Spread 5Y-10Y : +' + Math.round(((tec10.current||3.10) - (oat5y.current||2.70)) * 100) + 'bp');
-    html += _renderKPI('OAT 2 ans', (oat2y.current || 2.53).toFixed(2) + '%', '#7C3AED',
-      'Vol ' + (oat2y.vol_annualized_bps || 26) + 'bp/an · ' + (oat2y.direction || 'stable') + ' · Spread 2Y-10Y : +' + Math.round(((tec10.current||3.10) - (oat2y.current||2.53)) * 100) + 'bp');
-    html += _renderKPI('Courbe des taux', (curve.shape === 'normal' ? 'Normale ↗' : 'Inversée ↘'), curve.shape === 'normal' ? '#059669' : '#DC2626',
-      'Spread 2s10s : +' + Math.round((curve.spread_2_10 || 0.57) * 100) + 'bp · ' + (curve.shape === 'normal' ? 'Favorable aux structurés' : 'Défavorable'));
+    // ═══ SECTION 1: TAUX SOUVERAINS (cliquables) ═══
+    html += '<div style="font-size:14px;font-weight:700;color:' + BG.text + ';margin-bottom:4px">🏛️ Taux souverains EUR (zone euro AAA)</div>';
+    html += '<div style="font-size:9px;color:' + BG.textDim + ';margin-bottom:10px">Cliquez sur un taux pour voir l\'analyse détaillée et l\'historique</div>';
+
+    // Clickable rate cards
+    var rateCards = [
+      { id: 'oat_fr_10y', label: 'TEC10 (OAT 10 ans)', data: tec10, color: '#0891B2', sub: 'Vol ' + (tec10.vol_annualized_bps || 18) + 'bp · ' + (tec10.direction || 'stable') + ' · Range ' + (tec10.low_1y || '?') + '-' + (tec10.high_1y || '?') },
+      { id: 'oat_fr_5y', label: 'OAT 5 ans', data: oat5y, color: '#2563EB', sub: 'Vol ' + (oat5y.vol_annualized_bps || 22) + 'bp · ' + (oat5y.direction || 'stable') + ' · Spread 5-10Y +' + Math.round(((tec10.current||3.10) - (oat5y.current||2.70)) * 100) + 'bp' },
+      { id: 'oat_fr_2y', label: 'OAT 2 ans', data: oat2y, color: '#7C3AED', sub: 'Vol ' + (oat2y.vol_annualized_bps || 26) + 'bp · ' + (oat2y.direction || 'stable') + ' · Spread 2-10Y +' + Math.round(((tec10.current||3.10) - (oat2y.current||2.53)) * 100) + 'bp' },
+      { id: '_euribor3m', label: 'Euribor 3M', data: eur3m, color: '#D97706', sub: 'Réf Range Accrual · piloté par BCE' }
+    ];
+
+    html += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:8px">';
+    rateCards.forEach(function(rc) {
+      var val = rc.data.current || 0;
+      html += '<div onclick="_mktOpenRate(\'' + rc.id + '\')" style="padding:14px;border:1px solid ' + BG.border + ';border-radius:8px;border-left:4px solid ' + rc.color + ';background:' + BG.section + ';cursor:pointer;transition:all 0.2s" onmouseover="this.style.boxShadow=\'0 2px 8px rgba(0,0,0,0.1)\'" onmouseout="this.style.boxShadow=\'none\'">';
+      html += '<div style="font-size:9px;font-weight:700;color:' + BG.textDim + ';letter-spacing:0.8px;text-transform:uppercase">' + rc.label + ' <span style="color:' + rc.color + '">▼ clic</span></div>';
+      html += '<div style="font-family:var(--mono);font-size:22px;font-weight:800;color:' + rc.color + ';margin:6px 0">' + val.toFixed(2) + '%</div>';
+      html += '<div style="font-size:9px;color:' + BG.textDim + ';line-height:1.4">' + rc.sub + '</div>';
+      html += '</div>';
+    });
     html += '</div>';
+
+    // Rate detail panel (hidden by default)
+    html += '<div id="mkt-rate-detail" style="margin-bottom:20px"></div>';
+
+    // Courbe shape card
+    html += '<div style="display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:20px">';
+    html += '<div style="padding:10px 14px;border:1px solid ' + BG.border + ';border-radius:8px;background:' + BG.section + ';display:flex;justify-content:space-between;align-items:center">';
+    html += '<div><span style="font-size:12px;font-weight:700;color:' + BG.text + '">Courbe des taux : </span>';
+    html += '<span style="font-family:var(--mono);font-size:14px;font-weight:800;color:' + (curve.shape === 'normal' ? '#059669' : '#DC2626') + '">' + (curve.shape === 'normal' ? 'Normale ↗' : 'Inversée ↘') + '</span></div>';
+    html += '<div style="font-size:10px;color:' + BG.textDim + '">Spread 2s10s : +' + Math.round((curve.spread_2_10 || 0.57) * 100) + 'bp · ' + (curve.shape === 'normal' ? 'Favorable aux structurés' : 'Défavorable') + '</div>';
+    html += '</div></div>';
 
     // ═══ SECTION 2: TAUX DIRECTEURS + MONÉTAIRE ═══
     html += '<div style="font-size:14px;font-weight:700;color:' + BG.text + ';margin-bottom:12px">🏦 Taux directeurs BCE & marché monétaire</div>';
@@ -358,6 +379,217 @@
     html += '</div>';
     container.innerHTML = html;
   }
+
+  // ═══ INTERACTIVE: Rate detail panel (click on a card) ═══
+
+  window._mktOpenRate = function(rateId) {
+    var panel = document.getElementById('mkt-rate-detail');
+    if (!panel || !_data.rates) return;
+
+    var yields = _data.rates.yields || {};
+    var policy = _data.rates.policy_rates || {};
+    var rateObj = yields[rateId] || policy[rateId.replace('_', '')] || null;
+
+    // Euribor special case
+    if (rateId === '_euribor3m' && policy.euribor_3m) rateObj = policy.euribor_3m;
+
+    if (!rateObj) { panel.innerHTML = '<div style="padding:12px;color:#DC2626;font-size:12px">Pas de données pour ce taux</div>'; return; }
+
+    var history = rateObj.history || [];
+    var current = rateObj.current || 0;
+    var label = rateObj.name || rateId;
+
+    var html = '<div style="background:#FFFFFF;border:2px solid #2563EB;border-radius:8px;padding:16px;animation:fadeIn 0.2s">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">';
+    html += '<div style="font-size:14px;font-weight:700;color:#2563EB">📊 ' + label + ' — Analyse détaillée</div>';
+    html += '<button onclick="document.getElementById(\'mkt-rate-detail\').innerHTML=\'\'" style="background:none;border:1px solid #D1D9E6;border-radius:4px;padding:4px 10px;cursor:pointer;font-size:11px;color:#64748B">✕ Fermer</button>';
+    html += '</div>';
+
+    if (history.length < 2) {
+      // Taux sans historique (Euribor, BCE) — affichage simple
+      html += '<div style="padding:16px;text-align:center">';
+      html += '<div style="font-family:var(--mono);font-size:32px;font-weight:800;color:#2563EB">' + current.toFixed(2) + '%</div>';
+      html += '<div style="font-size:11px;color:#64748B;margin-top:4px">' + (rateObj.description || '') + '</div>';
+      html += '<div style="font-size:10px;color:#94A3B8;margin-top:4px">Date : ' + (rateObj.date || '—') + ' · Historique détaillé non disponible (taux quotidien sans série)</div>';
+      html += '</div>';
+
+      // Thresholds
+      html += '<div style="margin-top:12px;font-size:11px;color:#1A202C">';
+      html += '<strong>Seuils produits liés :</strong>';
+      if (rateId === '_euribor3m') {
+        html += '<div style="margin-top:6px">Range Accrual corridor [1.50% — 3.80%] : ';
+        var dist1 = Math.round((current - 1.50) * 100);
+        var dist2 = Math.round((3.80 - current) * 100);
+        html += '<span style="color:#059669;font-weight:700">+' + dist1 + 'bp</span> au-dessus de la borne basse · ';
+        html += '<span style="color:#059669;font-weight:700">+' + dist2 + 'bp</span> en dessous de la borne haute</div>';
+      }
+      html += '</div>';
+      html += '</div>';
+      panel.innerHTML = html;
+      return;
+    }
+
+    var allVals = history.map(function(h) { return h.value; });
+    var minAll = Math.min.apply(null, allVals);
+    var maxAll = Math.max.apply(null, allVals);
+    var avgAll = allVals.reduce(function(a,b){return a+b;}, 0) / allVals.length;
+    var nbObs = history.length;
+
+    // Compute stats by period
+    function _periodStats(hist, label, nObs) {
+      var slice = hist.slice(-nObs);
+      if (slice.length < 2) return null;
+      var vals = slice.map(function(h){return h.value;});
+      return {
+        label: label, count: vals.length,
+        min: Math.min.apply(null, vals), max: Math.max.apply(null, vals),
+        avg: vals.reduce(function(a,b){return a+b;},0) / vals.length,
+        first: vals[0], last: vals[vals.length-1],
+        change: vals[vals.length-1] - vals[0],
+        startDate: slice[0].date, endDate: slice[slice.length-1].date
+      };
+    }
+
+    var periods = [
+      _periodStats(history, '12 mois', 12),
+      _periodStats(history, '2 ans', 24),
+      _periodStats(history, '5 ans', 60),
+      _periodStats(history, '10 ans', 120)
+    ].filter(Boolean);
+
+    // KPI cards
+    html += '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px">';
+    html += '<div style="padding:8px;background:#F1F3F7;border-radius:6px;text-align:center">';
+    html += '<div style="font-size:8px;color:#94A3B8">ACTUEL</div>';
+    html += '<div style="font-family:var(--mono);font-size:18px;font-weight:800;color:#2563EB">' + current.toFixed(2) + '%</div></div>';
+    html += '<div style="padding:8px;background:#F1F3F7;border-radius:6px;text-align:center">';
+    html += '<div style="font-size:8px;color:#94A3B8">MIN (' + nbObs + ' obs)</div>';
+    html += '<div style="font-family:var(--mono);font-size:18px;font-weight:800;color:#059669">' + minAll.toFixed(3) + '%</div></div>';
+    html += '<div style="padding:8px;background:#F1F3F7;border-radius:6px;text-align:center">';
+    html += '<div style="font-size:8px;color:#94A3B8">MAX</div>';
+    html += '<div style="font-family:var(--mono);font-size:18px;font-weight:800;color:#DC2626">' + maxAll.toFixed(3) + '%</div></div>';
+    html += '<div style="padding:8px;background:#F1F3F7;border-radius:6px;text-align:center">';
+    html += '<div style="font-size:8px;color:#94A3B8">MOYENNE</div>';
+    html += '<div style="font-family:var(--mono);font-size:18px;font-weight:800;color:#7C3AED">' + avgAll.toFixed(3) + '%</div></div>';
+    html += '<div style="padding:8px;background:#F1F3F7;border-radius:6px;text-align:center">';
+    html += '<div style="font-size:8px;color:#94A3B8">OBSERVATIONS</div>';
+    html += '<div style="font-family:var(--mono);font-size:18px;font-weight:800;color:#1A202C">' + nbObs + '</div></div>';
+    html += '</div>';
+
+    // Period stats table
+    html += '<table style="width:100%;border-collapse:collapse;font-size:11px;margin-bottom:14px">';
+    html += '<thead><tr style="border-bottom:2px solid #D1D9E6">';
+    html += '<th style="padding:6px;text-align:left;color:#64748B;font-size:9px">PÉRIODE</th>';
+    html += '<th style="padding:6px;text-align:right;color:#64748B;font-size:9px">MIN</th>';
+    html += '<th style="padding:6px;text-align:right;color:#64748B;font-size:9px">MAX</th>';
+    html += '<th style="padding:6px;text-align:right;color:#64748B;font-size:9px">MOYENNE</th>';
+    html += '<th style="padding:6px;text-align:right;color:#64748B;font-size:9px">VARIATION</th>';
+    html += '<th style="padding:6px;text-align:right;color:#64748B;font-size:9px">OBS</th>';
+    html += '</tr></thead><tbody>';
+    periods.forEach(function(p, i) {
+      var bg = i % 2 === 0 ? '#FFFFFF' : '#F4F6F9';
+      var chgColor = p.change >= 0 ? '#DC2626' : '#059669';
+      html += '<tr style="background:' + bg + ';border-bottom:1px solid #D1D9E6">';
+      html += '<td style="padding:6px;font-weight:700">' + p.label + ' <span style="font-size:8px;color:#94A3B8">(' + p.startDate + '→' + p.endDate + ')</span></td>';
+      html += '<td style="padding:6px;text-align:right;font-family:var(--mono);color:#059669">' + p.min.toFixed(3) + '%</td>';
+      html += '<td style="padding:6px;text-align:right;font-family:var(--mono);color:#DC2626">' + p.max.toFixed(3) + '%</td>';
+      html += '<td style="padding:6px;text-align:right;font-family:var(--mono);color:#7C3AED">' + p.avg.toFixed(3) + '%</td>';
+      html += '<td style="padding:6px;text-align:right;font-family:var(--mono);font-weight:700;color:' + chgColor + '">' + (p.change >= 0 ? '+' : '') + (p.change * 100).toFixed(0) + 'bp</td>';
+      html += '<td style="padding:6px;text-align:right;color:#94A3B8">' + p.count + '</td>';
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+
+    // Full history chart
+    var chartH = 120;
+    var chartRange = maxAll - minAll || 0.1;
+    var chartPad = chartRange * 0.1;
+    var cMin = minAll - chartPad;
+    var cMax = maxAll + chartPad;
+    var cRange = cMax - cMin;
+
+    html += '<div style="font-size:11px;font-weight:700;color:#1A202C;margin-bottom:6px">Historique complet (' + nbObs + ' observations mensuelles)</div>';
+    html += '<div style="position:relative;height:' + chartH + 'px;background:#F8F9FB;border:1px solid #D1D9E6;border-radius:6px;padding:0 4px">';
+
+    // Key threshold lines
+    var thresholds = [];
+    if (rateId === 'oat_fr_10y') {
+      thresholds = [
+        { val: 4.40, label: 'TARN trigger 4.40%', color: '#DC2626' },
+        { val: 4.50, label: 'Digital trigger 4.50%', color: '#D97706' },
+        { val: 4.00, label: 'Hybride bonus 4.00%', color: '#F59E0B' },
+        { val: 2.90, label: 'Coût emprunt 2.90%', color: '#7C3AED' }
+      ];
+    } else if (rateId === 'oat_fr_5y') {
+      thresholds = [{ val: 2.90, label: 'Coût emprunt 2.90%', color: '#7C3AED' }];
+    } else if (rateId === '_euribor3m' || rateId === 'euribor_3m') {
+      thresholds = [
+        { val: 1.50, label: 'Borne basse corridor 1.50%', color: '#DC2626' },
+        { val: 3.80, label: 'Borne haute corridor 3.80%', color: '#DC2626' }
+      ];
+    }
+    thresholds.forEach(function(t) {
+      if (t.val >= cMin && t.val <= cMax) {
+        var y = ((t.val - cMin) / cRange) * chartH;
+        html += '<div style="position:absolute;left:0;right:0;bottom:' + y + 'px;height:1px;background:' + t.color + ';opacity:0.5;z-index:1"></div>';
+        html += '<div style="position:absolute;right:4px;bottom:' + (y + 2) + 'px;font-size:7px;color:' + t.color + ';font-weight:700;z-index:2">' + t.label + '</div>';
+      }
+    });
+
+    // Bars
+    html += '<div style="display:flex;align-items:flex-end;height:100%;gap:1px;position:relative;z-index:3">';
+    history.forEach(function(h) {
+      var barH = ((h.value - cMin) / cRange) * chartH;
+      var isAboveThreshold = false;
+      if (rateId === 'oat_fr_10y' && h.value > 4.40) isAboveThreshold = true;
+      var color = isAboveThreshold ? '#DC2626' : '#93C5FD';
+      if (h.date === history[history.length-1].date) color = '#2563EB';
+      html += '<div style="flex:1;background:' + color + ';height:' + Math.max(2, barH) + 'px;border-radius:1px 1px 0 0;min-width:2px" title="' + h.date + ' : ' + h.value.toFixed(3) + '%"></div>';
+    });
+    html += '</div></div>';
+
+    // Date labels
+    html += '<div style="display:flex;justify-content:space-between;font-size:7px;color:#94A3B8;margin-top:2px">';
+    html += '<span>' + history[0].date + '</span>';
+    if (history.length > 24) html += '<span>' + history[Math.floor(history.length/2)].date + '</span>';
+    html += '<span>' + history[history.length-1].date + '</span>';
+    html += '</div>';
+
+    // Threshold breach analysis
+    if (thresholds.length > 0) {
+      html += '<div style="margin-top:12px;font-size:11px;font-weight:700;color:#1A202C;margin-bottom:6px">Analyse de franchissement des seuils :</div>';
+      html += '<div style="display:grid;grid-template-columns:repeat(' + Math.min(thresholds.length, 3) + ',1fr);gap:8px">';
+      thresholds.forEach(function(t) {
+        var above = 0, below = 0, lastBreach = null, breachCount = 0, prevAbove = null;
+        history.forEach(function(h) {
+          var isAbove = h.value > t.val;
+          if (isAbove) { above++; if (!lastBreach || !prevAbove) lastBreach = h.date; }
+          else below++;
+          if (prevAbove !== null && prevAbove !== isAbove) breachCount++;
+          prevAbove = isAbove;
+        });
+        var pctAbove = Math.round(above / history.length * 100);
+        var pctBelow = 100 - pctAbove;
+        var currentAbove = current > t.val;
+
+        html += '<div style="padding:10px;background:#F1F3F7;border-radius:6px;border-left:3px solid ' + t.color + '">';
+        html += '<div style="font-size:9px;font-weight:700;color:' + t.color + '">' + t.label + '</div>';
+        html += '<div style="margin-top:6px;font-size:10px;color:#1A202C">';
+        html += 'Temps au-dessus : <strong>' + pctAbove + '%</strong> (' + above + '/' + history.length + ')<br>';
+        html += 'Temps en dessous : <strong>' + pctBelow + '%</strong> (' + below + '/' + history.length + ')<br>';
+        html += 'Franchissements : <strong>' + breachCount + '</strong><br>';
+        if (lastBreach) html += 'Dernier au-dessus : <strong>' + lastBreach + '</strong><br>';
+        else html += 'Jamais au-dessus sur la période<br>';
+        html += 'Actuel : <strong style="color:' + (currentAbove ? '#DC2626' : '#059669') + '">' + (currentAbove ? 'AU-DESSUS ⚠️' : 'EN DESSOUS ✅') + '</strong>';
+        html += '</div></div>';
+      });
+      html += '</div>';
+    }
+
+    html += '</div>';
+    panel.innerHTML = html;
+    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  };
 
   // ═══ INTERACTIVE: Custom threshold analyzer ═══
 
