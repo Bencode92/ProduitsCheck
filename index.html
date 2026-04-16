@@ -23,6 +23,7 @@
       <button class="nav-tab" data-view="parser" onclick="switchMainView('parser')">📄 Analyseur</button>
       <button class="nav-tab" data-view="allocator" onclick="switchMainView('allocator')">⚡ Allocateur</button>
       <button class="nav-tab" data-view="analytics" onclick="switchMainView('analytics')">📊 Analytique</button>
+      <button class="nav-tab" data-view="market" onclick="switchMainView('market')">📈 Marché</button>
       <button class="nav-tab" data-view="carry" onclick="switchMainView('carry')">🏦 Carry Trade</button>
     </div>
     <div class="topbar-actions">
@@ -92,6 +93,7 @@
   <!-- CAT maturity optimizer + Unified allocator -->
   <script src="js/cat-maturity-optimizer.js?v=20260402v2"></script>
   <script src="js/unified-allocator.js?v=20260402v2"></script>
+  <script src="js/market-dashboard.js?v=20260416"></script>
   <script src="js/carry-simulator.js?v=20260416v10"></script>
   <!-- Carry calibration patches v1.0 (2026-04-16) — see docs/CARRY_CALIBRATION_PATCHES.md -->
   <script src="js/carry-simulator-conditionprob-patch.js?v=20260416"></script>
@@ -108,6 +110,7 @@
       else if (view === 'analytics') { app.setState({ view: 'analytics' }); renderAnalytics(document.getElementById('main-content')); }
       else if (view === 'parser') { app.setState({ view: 'parser' }); renderBrochureParser(document.getElementById('main-content')); }
       else if (view === 'allocator') { app.setState({ view: 'allocator' }); renderUnifiedAllocator(document.getElementById('main-content')); }
+      else if (view === 'market') { app.setState({ view: 'market' }); renderMarketDashboard(document.getElementById('main-content')); }
       else if (view === 'carry') { app.setState({ view: 'carry' }); renderCarrySimulator(document.getElementById('main-content')); }
       else { app.goToDashboard(); }
     }
