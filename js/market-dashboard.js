@@ -121,7 +121,112 @@
     html += 'Sur 500K€ = <strong>' + _fmt(Math.round(500000 * budget10y / 100)) + '€</strong> pour financer les coupons</div>';
     html += '</div></div>';
 
-    // ═══ SECTION 4: HISTORIQUE TEC10 ═══
+    // ═══ SECTION 4: ZONES & TRIGGERS PRODUITS ═══
+    var tec10Val = tec10.current || 3.10;
+    var eur3mVal = eur3m.current || 2.50;
+
+    html += '<div style="background:' + BG.section + ';border:2px solid #2563EB;border-radius:8px;padding:16px;margin-bottom:20px">';
+    html += '<div style="font-size:14px;font-weight:700;color:#2563EB;margin-bottom:14px">🎯 ZONES & SEUILS — Position actuelle vs triggers produits</div>';
+
+    // Helper: render a gauge bar
+    function _gauge(label, currentVal, min, max, zones, unit) {
+      unit = unit || '%';
+      var totalRange = max - min;
+      var currentPct = Math.max(0, Math.min(100, ((currentVal - min) / totalRange) * 100));
+      var g = '<div style="margin-bottom:16px">';
+      g += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">';
+      g += '<div style="font-size:12px;font-weight:700;color:' + BG.text + '">' + label + '</div>';
+      g += '<div style="font-family:var(--mono);font-size:14px;font-weight:800;color:#2563EB">Actuel : ' + currentVal.toFixed(2) + unit + '</div>';
+      g += '</div>';
+      // Gauge bar
+      g += '<div style="position:relative;height:32px;background:' + BG.input + ';border-radius:6px;overflow:hidden;border:1px solid ' + BG.border + '">';
+      // Render zones
+      zones.forEach(function(z) {
+        var leftPct = Math.max(0, ((z.from - min) / totalRange) * 100);
+        var widthPct = Math.min(100 - leftPct, ((z.to - z.from) / totalRange) * 100);
+        g += '<div style="position:absolute;left:' + leftPct + '%;width:' + widthPct + '%;height:100%;background:' + z.color + ';opacity:0.25" title="' + z.label + '"></div>';
+        // Zone label
+        g += '<div style="position:absolute;left:' + leftPct + '%;width:' + widthPct + '%;height:100%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:600;color:' + z.color + ';pointer-events:none">' + z.label + '</div>';
+      });
+      // Current position marker
+      g += '<div style="position:absolute;left:' + currentPct + '%;top:0;width:3px;height:100%;background:#2563EB;border-radius:2px;z-index:2"></div>';
+      g += '<div style="position:absolute;left:' + Math.max(0, currentPct - 3) + '%;top:-2px;z-index:3">';
+      g += '<div style="background:#2563EB;color:#fff;padding:1px 5px;border-radius:3px;font-family:var(--mono);font-size:9px;font-weight:700">' + currentVal.toFixed(2) + '</div></div>';
+      g += '</div>';
+      // Scale labels
+      g += '<div style="display:flex;justify-content:space-between;margin-top:3px;font-size:8px;color:' + BG.textDim + '">';
+      g += '<span>' + min.toFixed(1) + unit + '</span>';
+      zones.forEach(function(z) {
+        if (z.from > min && z.from < max) g += '<span style="color:' + z.color + '">│ ' + z.from.toFixed(2) + '</span>';
+      });
+      g += '<span>' + max.toFixed(1) + unit + '</span>';
+      g += '</div>';
+      // Distance info
+      zones.forEach(function(z) {
+        if (z.trigger !== undefined) {
+          var dist = z.trigger - currentVal;
+          var distBp = Math.round(Math.abs(dist) * 100);
+          var safe = z.direction === 'below' ? (currentVal < z.trigger) : (currentVal > z.trigger);
+          g += '<div style="display:inline-block;margin-right:12px;margin-top:4px;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:600;' +
+            'background:' + (safe ? '#ECFDF5' : '#FEF2F2') + ';color:' + (safe ? '#059669' : '#DC2626') + '">';
+          g += (safe ? '✅' : '⚠️') + ' ' + z.triggerLabel + ' : ' + (safe ? distBp + 'bp de marge' : 'DÉPASSÉ de ' + distBp + 'bp') + '</div>';
+        }
+      });
+      g += '</div>';
+      return g;
+    }
+
+    // TARN TEC10 — trigger 4.40%
+    html += _gauge('TARN TEC10 — Seuil coupon ≤ 4.40%', tec10Val, 1.5, 5.5, [
+      { from: 1.5, to: 3.50, color: '#059669', label: 'ZONE CONFORT' },
+      { from: 3.50, to: 4.00, color: '#D97706', label: 'ZONE OK' },
+      { from: 4.00, to: 4.40, color: '#F59E0B', label: 'ATTENTION' },
+      { from: 4.40, to: 5.50, color: '#DC2626', label: 'HORS COUPON', trigger: 4.40, direction: 'below', triggerLabel: 'Trigger 4.40%' }
+    ]);
+
+    // Digital Mémoire TEC10 — trigger 4.50%
+    html += _gauge('Digital Mémoire TEC10 — Seuil coupon ≤ 4.50%', tec10Val, 1.5, 5.5, [
+      { from: 1.5, to: 3.50, color: '#059669', label: 'ZONE CONFORT' },
+      { from: 3.50, to: 4.10, color: '#D97706', label: 'ZONE OK' },
+      { from: 4.10, to: 4.50, color: '#F59E0B', label: 'ATTENTION' },
+      { from: 4.50, to: 5.50, color: '#DC2626', label: 'HORS COUPON', trigger: 4.50, direction: 'below', triggerLabel: 'Trigger 4.50%' }
+    ]);
+
+    // Range Accrual Euribor — corridor [1.50% - 3.80%]
+    html += _gauge('Range Accrual Euribor 3M — Corridor [1.50% - 3.80%]', eur3mVal, 0.0, 5.0, [
+      { from: 0.0, to: 1.50, color: '#DC2626', label: 'HORS CORRIDOR BAS', trigger: 1.50, direction: 'above', triggerLabel: 'Borne basse 1.50%' },
+      { from: 1.50, to: 2.00, color: '#F59E0B', label: 'PROCHE BORNE' },
+      { from: 2.00, to: 3.30, color: '#059669', label: 'ZONE CONFORT' },
+      { from: 3.30, to: 3.80, color: '#F59E0B', label: 'PROCHE BORNE' },
+      { from: 3.80, to: 5.00, color: '#DC2626', label: 'HORS CORRIDOR HAUT', trigger: 3.80, direction: 'below', triggerLabel: 'Borne haute 3.80%' }
+    ]);
+
+    // Hybride Plancher — TEC10 vs seuil bonus 4.00%
+    html += _gauge('Hybride Plancher + Digital — Bonus si TEC10 ≤ 4.00%', tec10Val, 1.5, 5.5, [
+      { from: 1.5, to: 3.50, color: '#059669', label: 'ZONE CONFORT — Plancher + Bonus' },
+      { from: 3.50, to: 4.00, color: '#D97706', label: 'ATTENTION' },
+      { from: 4.00, to: 5.50, color: '#DC2626', label: 'PLANCHER SEUL (3%)', trigger: 4.00, direction: 'below', triggerLabel: 'Trigger bonus 4.00%' }
+    ]);
+
+    // CMS Steepener — spread 2s10s
+    var spread2s10s = (curve.spread_2_10 || 0.57) * 100; // en bp
+    html += _gauge('CMS Steepener — Spread 2Y-10Y (coupon = 5 × spread)', spread2s10s / 100, -0.50, 2.00, [
+      { from: -0.50, to: 0.0, color: '#DC2626', label: 'INVERSÉE — coupon 0%', trigger: 0.0, direction: 'above', triggerLabel: 'Seuil > 0%' },
+      { from: 0.0, to: 0.30, color: '#F59E0B', label: 'FAIBLE' },
+      { from: 0.30, to: 0.80, color: '#059669', label: 'ZONE FAVORABLE' },
+      { from: 0.80, to: 2.00, color: '#0891B2', label: 'TRÈS PENTUE' }
+    ]);
+
+    // Floater TEC10 — plancher à 2.80%, variable au-dessus de 2.20%
+    html += _gauge('Floater TEC10 — Plancher 2.80% + variable au-dessus de 2.20%', tec10Val, 1.0, 5.0, [
+      { from: 1.0, to: 2.20, color: '#D97706', label: 'PLANCHER SEUL (2.80%)', trigger: 2.20, direction: 'above', triggerLabel: 'Seuil variable 2.20%' },
+      { from: 2.20, to: 3.50, color: '#059669', label: 'PLANCHER + VARIABLE ✅' },
+      { from: 3.50, to: 5.00, color: '#0891B2', label: 'VARIABLE ÉLEVÉ ↑↑' }
+    ]);
+
+    html += '</div>';
+
+    // ═══ SECTION 5: HISTORIQUE TEC10 ═══
     if (tec10.history && tec10.history.length > 0) {
       html += '<div style="background:' + BG.section + ';border:1px solid ' + BG.border + ';border-radius:8px;padding:16px;margin-bottom:20px">';
       html += '<div style="font-size:13px;font-weight:700;color:' + BG.text + ';margin-bottom:10px">📉 Historique TEC10 — 12 derniers mois</div>';
