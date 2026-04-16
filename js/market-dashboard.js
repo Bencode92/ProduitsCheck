@@ -380,6 +380,133 @@
     container.innerHTML = html;
   }
 
+  // ═══ SVG Chart builder ═══
+  function _buildSVGChart(history, thresholds, current, maxObs) {
+    var data = history.slice(-Math.min(maxObs, history.length));
+    if (data.length < 2) return '<div style="padding:20px;text-align:center;color:#94A3B8">Pas assez de données</div>';
+
+    var W = 700, H = 180, padL = 50, padR = 10, padT = 10, padB = 24;
+    var cW = W - padL - padR, cH = H - padT - padB;
+    var vals = data.map(function(d) { return d.value; });
+    var allValsForRange = vals.concat(thresholds.map(function(t) { return t.val; }));
+    var yMin = Math.min.apply(null, allValsForRange) - 0.15;
+    var yMax = Math.max.apply(null, allValsForRange) + 0.15;
+    var yRange = yMax - yMin || 0.3;
+
+    function x(i) { return padL + (i / (data.length - 1)) * cW; }
+    function y(v) { return padT + cH - ((v - yMin) / yRange) * cH; }
+
+    var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;height:auto;font-family:var(--mono)">';
+
+    // Background
+    svg += '<rect x="' + padL + '" y="' + padT + '" width="' + cW + '" height="' + cH + '" fill="#FAFBFC" rx="4"/>';
+
+    // Grid lines (horizontal)
+    var nGrid = 5;
+    for (var gi = 0; gi <= nGrid; gi++) {
+      var gVal = yMin + (yRange * gi / nGrid);
+      var gY = y(gVal);
+      svg += '<line x1="' + padL + '" y1="' + gY + '" x2="' + (W - padR) + '" y2="' + gY + '" stroke="#E2E8F0" stroke-width="0.5"/>';
+      svg += '<text x="' + (padL - 4) + '" y="' + (gY + 3) + '" text-anchor="end" fill="#94A3B8" font-size="8">' + gVal.toFixed(2) + '%</text>';
+    }
+
+    // Min-max band (rolling 3-period)
+    if (data.length > 3) {
+      var bandPath = 'M';
+      var bandPathBottom = '';
+      for (var bi = 1; bi < data.length - 1; bi++) {
+        var bMin = Math.min(vals[bi-1], vals[bi], vals[bi+1]);
+        var bMax = Math.max(vals[bi-1], vals[bi], vals[bi+1]);
+        bandPath += (bi === 1 ? '' : 'L') + x(bi).toFixed(1) + ',' + y(bMax).toFixed(1);
+        bandPathBottom = x(bi).toFixed(1) + ',' + y(bMin).toFixed(1) + (bandPathBottom ? 'L' : '') + bandPathBottom;
+      }
+      svg += '<path d="' + bandPath + 'L' + bandPathBottom + 'Z" fill="#93C5FD" opacity="0.15"/>';
+    }
+
+    // Threshold lines
+    thresholds.forEach(function(t) {
+      if (t.val >= yMin && t.val <= yMax) {
+        var tY = y(t.val);
+        svg += '<line x1="' + padL + '" y1="' + tY + '" x2="' + (W - padR) + '" y2="' + tY + '" stroke="' + t.color + '" stroke-width="1.5" stroke-dasharray="' + (t.dash || '6,3') + '" opacity="0.7"/>';
+        svg += '<rect x="' + (W - padR - 4) + '" y="' + (tY - 8) + '" width="' + (t.label.length * 5.5 + 8) + '" height="14" rx="3" fill="' + t.color + '" opacity="0.9" transform="translate(-' + (t.label.length * 5.5 + 4) + ',0)"/>';
+        svg += '<text x="' + (W - padR - 8) + '" y="' + (tY + 2) + '" text-anchor="end" fill="#fff" font-size="7.5" font-weight="700">' + t.label + '</text>';
+      }
+    });
+
+    // Main line
+    var linePath = '';
+    data.forEach(function(d, i) {
+      linePath += (i === 0 ? 'M' : 'L') + x(i).toFixed(1) + ',' + y(d.value).toFixed(1);
+    });
+    // Area fill
+    var areaPath = linePath + 'L' + x(data.length - 1).toFixed(1) + ',' + y(yMin).toFixed(1) + 'L' + x(0).toFixed(1) + ',' + y(yMin).toFixed(1) + 'Z';
+    svg += '<path d="' + areaPath + '" fill="#3B82F6" opacity="0.08"/>';
+    svg += '<path d="' + linePath + '" fill="none" stroke="#2563EB" stroke-width="2" stroke-linejoin="round"/>';
+
+    // Data points (show every N)
+    var showEvery = Math.max(1, Math.floor(data.length / 20));
+    data.forEach(function(d, i) {
+      if (i % showEvery === 0 || i === data.length - 1) {
+        svg += '<circle cx="' + x(i).toFixed(1) + '" cy="' + y(d.value).toFixed(1) + '" r="2.5" fill="#2563EB" stroke="#fff" stroke-width="1"/>';
+      }
+    });
+
+    // Current value marker (last point, bigger)
+    var lastI = data.length - 1;
+    svg += '<circle cx="' + x(lastI).toFixed(1) + '" cy="' + y(current).toFixed(1) + '" r="5" fill="#2563EB" stroke="#fff" stroke-width="2"/>';
+    svg += '<text x="' + (x(lastI) - 2).toFixed(1) + '" y="' + (y(current) - 10).toFixed(1) + '" text-anchor="end" fill="#2563EB" font-size="10" font-weight="700">' + current.toFixed(2) + '%</text>';
+
+    // X-axis dates
+    var dateEvery = Math.max(1, Math.floor(data.length / 6));
+    data.forEach(function(d, i) {
+      if (i % dateEvery === 0 || i === lastI) {
+        var dateShort = d.date.substring(0, 7); // YYYY-MM
+        svg += '<text x="' + x(i).toFixed(1) + '" y="' + (H - 2) + '" text-anchor="middle" fill="#94A3B8" font-size="7">' + dateShort + '</text>';
+      }
+    });
+
+    svg += '</svg>';
+    return svg;
+  }
+
+  // Period selector for chart
+  window._mktChartPeriod = function(rateId, nObs) {
+    var yields = _data.rates.yields || {};
+    var rateObj = yields[rateId];
+    if (rateId === '_euribor3m' && _data.rates.policy_rates) rateObj = _data.rates.policy_rates.euribor_3m;
+    if (!rateObj || !rateObj.history) return;
+
+    var container = document.getElementById('mkt-chart-container');
+    if (!container) return;
+
+    var thresholds = [];
+    if (rateId === 'oat_fr_10y') {
+      thresholds = [
+        { val: 4.40, label: 'TARN 4.40%', color: '#DC2626', dash: '6,3' },
+        { val: 4.50, label: 'Digital 4.50%', color: '#D97706', dash: '4,4' },
+        { val: 4.00, label: 'Hybride 4.00%', color: '#F59E0B', dash: '8,3' },
+        { val: 2.90, label: 'Emprunt 2.90%', color: '#7C3AED', dash: '3,3' }
+      ];
+    } else if (rateId === 'oat_fr_5y' || rateId === 'oat_fr_2y') {
+      thresholds = [{ val: 2.90, label: 'Emprunt 2.90%', color: '#7C3AED', dash: '3,3' }];
+    }
+
+    var history = rateObj.history;
+    var sliced = nObs >= 999 ? history : history.slice(-nObs);
+    container.innerHTML = _buildSVGChart(sliced, thresholds, rateObj.current, nObs);
+
+    // Update period buttons
+    var btns = document.getElementById('mkt-period-btns');
+    if (btns) {
+      btns.querySelectorAll('button').forEach(function(btn) {
+        var isActive = btn.textContent === (nObs === 12 ? '12M' : nObs === 24 ? '2A' : nObs === 60 ? '5A' : 'MAX');
+        btn.style.background = isActive ? '#2563EB' : '#fff';
+        btn.style.color = isActive ? '#fff' : '#64748B';
+        btn.style.borderColor = isActive ? '#2563EB' : '#D1D9E6';
+      });
+    }
+  };
+
   // ═══ INTERACTIVE: Rate detail panel (click on a card) ═══
 
   window._mktOpenRate = function(rateId) {
@@ -500,59 +627,42 @@
     });
     html += '</tbody></table>';
 
-    // Full history chart
-    var chartH = 120;
-    var chartRange = maxAll - minAll || 0.1;
-    var chartPad = chartRange * 0.1;
-    var cMin = minAll - chartPad;
-    var cMax = maxAll + chartPad;
-    var cRange = cMax - cMin;
-
-    html += '<div style="font-size:11px;font-weight:700;color:#1A202C;margin-bottom:6px">Historique complet (' + nbObs + ' observations mensuelles)</div>';
-    html += '<div style="position:relative;height:' + chartH + 'px;background:#F8F9FB;border:1px solid #D1D9E6;border-radius:6px;padding:0 4px">';
-
-    // Key threshold lines
+    // ═══ SVG CHART — Professional line chart with thresholds ═══
     var thresholds = [];
     if (rateId === 'oat_fr_10y') {
       thresholds = [
-        { val: 4.40, label: 'TARN trigger 4.40%', color: '#DC2626' },
-        { val: 4.50, label: 'Digital trigger 4.50%', color: '#D97706' },
-        { val: 4.00, label: 'Hybride bonus 4.00%', color: '#F59E0B' },
-        { val: 2.90, label: 'Coût emprunt 2.90%', color: '#7C3AED' }
+        { val: 4.40, label: 'TARN 4.40%', color: '#DC2626', dash: '6,3' },
+        { val: 4.50, label: 'Digital 4.50%', color: '#D97706', dash: '4,4' },
+        { val: 4.00, label: 'Hybride 4.00%', color: '#F59E0B', dash: '8,3' },
+        { val: 2.90, label: 'Emprunt 2.90%', color: '#7C3AED', dash: '3,3' }
       ];
-    } else if (rateId === 'oat_fr_5y') {
-      thresholds = [{ val: 2.90, label: 'Coût emprunt 2.90%', color: '#7C3AED' }];
-    } else if (rateId === '_euribor3m' || rateId === 'euribor_3m') {
-      thresholds = [
-        { val: 1.50, label: 'Borne basse corridor 1.50%', color: '#DC2626' },
-        { val: 3.80, label: 'Borne haute corridor 3.80%', color: '#DC2626' }
-      ];
+    } else if (rateId === 'oat_fr_5y' || rateId === 'oat_fr_2y') {
+      thresholds = [{ val: 2.90, label: 'Emprunt 2.90%', color: '#7C3AED', dash: '3,3' }];
     }
-    thresholds.forEach(function(t) {
-      if (t.val >= cMin && t.val <= cMax) {
-        var y = ((t.val - cMin) / cRange) * chartH;
-        html += '<div style="position:absolute;left:0;right:0;bottom:' + y + 'px;height:1px;background:' + t.color + ';opacity:0.5;z-index:1"></div>';
-        html += '<div style="position:absolute;right:4px;bottom:' + (y + 2) + 'px;font-size:7px;color:' + t.color + ';font-weight:700;z-index:2">' + t.label + '</div>';
-      }
-    });
 
-    // Bars
-    html += '<div style="display:flex;align-items:flex-end;height:100%;gap:1px;position:relative;z-index:3">';
-    history.forEach(function(h) {
-      var barH = ((h.value - cMin) / cRange) * chartH;
-      var isAboveThreshold = false;
-      if (rateId === 'oat_fr_10y' && h.value > 4.40) isAboveThreshold = true;
-      var color = isAboveThreshold ? '#DC2626' : '#93C5FD';
-      if (h.date === history[history.length-1].date) color = '#2563EB';
-      html += '<div style="flex:1;background:' + color + ';height:' + Math.max(2, barH) + 'px;border-radius:1px 1px 0 0;min-width:2px" title="' + h.date + ' : ' + h.value.toFixed(3) + '%"></div>';
+    // Period selector
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">';
+    html += '<div style="font-size:11px;font-weight:700;color:#1A202C">Historique (' + nbObs + ' obs. mensuelles)</div>';
+    html += '<div style="display:flex;gap:4px" id="mkt-period-btns">';
+    [['12M', 12], ['2A', 24], ['5A', 60], ['MAX', 999]].forEach(function(p) {
+      var active = p[1] >= nbObs || p[1] === 999;
+      html += '<button onclick="_mktChartPeriod(\'' + rateId + '\',' + p[1] + ')" style="padding:3px 10px;border-radius:4px;border:1px solid ' + (active ? '#2563EB' : '#D1D9E6') + ';background:' + (active ? '#2563EB' : '#fff') + ';color:' + (active ? '#fff' : '#64748B') + ';font-size:10px;font-weight:600;cursor:pointer">' + p[0] + '</button>';
     });
     html += '</div></div>';
 
-    // Date labels
-    html += '<div style="display:flex;justify-content:space-between;font-size:7px;color:#94A3B8;margin-top:2px">';
-    html += '<span>' + history[0].date + '</span>';
-    if (history.length > 24) html += '<span>' + history[Math.floor(history.length/2)].date + '</span>';
-    html += '<span>' + history[history.length-1].date + '</span>';
+    // SVG chart container
+    html += '<div id="mkt-chart-container" style="background:#FAFBFC;border:1px solid #E2E8F0;border-radius:8px;padding:8px">';
+    html += _buildSVGChart(history, thresholds, current, nbObs);
+    html += '</div>';
+
+    // Legend
+    html += '<div style="display:flex;gap:12px;margin-top:6px;flex-wrap:wrap">';
+    html += '<span style="font-size:9px;color:#2563EB">━━ ' + label + '</span>';
+    html += '<span style="font-size:9px;color:#93C5FD">░░ Zone min-max</span>';
+    thresholds.forEach(function(t) {
+      html += '<span style="font-size:9px;color:' + t.color + '">┄┄ ' + t.label + '</span>';
+    });
+    html += '</div>';
     html += '</div>';
 
     // Threshold breach analysis
