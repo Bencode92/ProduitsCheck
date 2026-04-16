@@ -332,12 +332,12 @@
     var totalCostIF = annualCostIF * _state.years;
     var totalCostAmort = _state.totalInterestAmort;
     html += '<div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px">';
-    html += '<div style="padding:8px 12px;background:rgba(34,211,238,0.12);border:2px solid rgba(34,211,238,0.3);border-radius:6px;font-size:11px;color:#0891B2">';
+    html += '<div style="padding:8px 12px;background:#E0F7FA;border:2px solid #80DEEA;border-radius:6px;font-size:11px;color:#0891B2">';
     html += '✅ <strong>IN FINE (RECOMMANDÉ)</strong> : -' + _fmt(annualCostIF) + '€/an intérêts seuls · Total : <strong>-' + _fmt(totalCostIF) + '€</strong> · Capital 1M€ constant → carry max</div>';
-    html += '<div style="padding:8px 12px;background:rgba(168,85,247,0.06);border:1px solid rgba(168,85,247,0.15);border-radius:6px;font-size:11px;color:#A855F7">';
+    html += '<div style="padding:8px 12px;background:#F3E8FF;border:1px solid #D8B4FE;border-radius:6px;font-size:11px;color:#A855F7">';
     html += 'AMORTISSABLE : -' + _fmt(_state.monthlyPayment) + '€/mois · Total intérêts : <strong>-' + _fmt(totalCostAmort) + '€</strong> · Capital décroissant → carry ÷2</div>';
     html += '</div>';
-    html += '<div style="margin-top:6px;padding:8px 12px;background:rgba(6,214,160,0.08);border:1px solid rgba(6,214,160,0.2);border-radius:6px;font-size:10px;color:#059669">✅ Prêt Equipéa SG — <strong>In fine ou amortissable au choix</strong> · 2,90% fixe de 2 à 5 ans · Jusqu\'à 1M€ · Frais : ' + _fmt(_state.loanFees) + '€ · <strong>Aucune garantie</strong> (crédit en blanc) · Entité : Caméleons Com Mark · Valide jusqu\'au 14/05/2026</div>';
+    html += '<div style="margin-top:6px;padding:8px 12px;background:#ECFDF5;border:1px solid #A7F3D0;border-radius:6px;font-size:10px;color:#059669">✅ Prêt Equipéa SG — <strong>In fine ou amortissable au choix</strong> · 2,90% fixe de 2 à 5 ans · Jusqu\'à 1M€ · Frais : ' + _fmt(_state.loanFees) + '€ · <strong>Aucune garantie</strong> (crédit en blanc) · Entité : Caméleons Com Mark · Valide jusqu\'au 14/05/2026</div>';
     html += '</div>';
 
     // ─── Costs breakdown ──────
@@ -504,10 +504,10 @@
     _renderCatalogSection('DYNAMIQUES — Rendement élevé, plus de volatilité', '🚀', '#FDE68A', CATALOG.aggressive);
 
     // ─── Import JSON ──────
-    html += '<div style="background:' + BG.section + ';border:1px solid rgba(59,130,246,0.3);border-radius:var(--radius-sm);padding:16px;margin-bottom:16px">';
+    html += '<div style="background:' + BG.section + ';border:1px solid #93C5FD;border-radius:var(--radius-sm);padding:16px;margin-bottom:16px">';
     html += '<div style="font-size:12px;font-weight:700;color:#2563EB;margin-bottom:8px">📋 IMPORTER UN PRODUIT (JSON)</div>';
     html += '<textarea id="carry-json" placeholder=\'{"name":"Hybride TEC10","coupon":{"rate":5.5,"type":"conditionnel"},"maturityYears":5,"capitalProtection":{"protected":true}}\' style="width:100%;height:60px;padding:8px;border:1px solid ' + BG.border + ';border-radius:6px;background:' + BG.input + ';color:' + BG.text + ';font-family:monospace;font-size:11px;resize:vertical;box-sizing:border-box"></textarea>';
-    html += '<button class="btn" onclick="_carryImportJSON()" style="margin-top:8px;font-size:11px;padding:6px 14px;background:rgba(59,130,246,0.1);border-color:rgba(59,130,246,0.3);color:#2563EB">📥 Importer</button>';
+    html += '<button class="btn" onclick="_carryImportJSON()" style="margin-top:8px;font-size:11px;padding:6px 14px;background:#EFF6FF;border-color:#93C5FD;color:#2563EB">📥 Importer</button>';
     html += '</div>';
 
     // ─── Manual add ──────
@@ -520,7 +520,7 @@
     html += '<div><label style="font-size:9px;color:' + BG.textDim + '">Durée (ans)</label><input id="carry-pduration" type="number" value="5" min="1" max="30" style="width:100%;padding:6px;border:1px solid ' + BG.border + ';border-radius:4px;background:' + BG.input + ';color:' + BG.text + ';font-size:11px;font-family:var(--mono)"></div>';
     html += '<div><label style="font-size:9px;color:' + BG.textDim + '">Plancher (hybride)</label><input id="carry-pfloor" type="number" step="0.1" placeholder="3.0" style="width:100%;padding:6px;border:1px solid ' + BG.border + ';border-radius:4px;background:' + BG.input + ';color:' + BG.text + ';font-size:11px;font-family:var(--mono)"></div>';
     html += '</div>';
-    html += '<button class="btn" onclick="_carryAddManual()" style="font-size:11px;padding:6px 14px;background:rgba(6,214,160,0.1);border-color:rgba(6,214,160,0.3);color:#059669">+ Ajouter</button>';
+    html += '<button class="btn" onclick="_carryAddManual()" style="font-size:11px;padding:6px 14px;background:#ECFDF5;border-color:#6EE7B7;color:#059669">+ Ajouter</button>';
     html += '</div>';
 
     // ─── Products + Allocation ──────
@@ -592,13 +592,13 @@
     if (allProducts.length > 0 && allocOK) {
       html += '<button class="btn primary ai-glow" style="width:100%;padding:14px;font-size:14px" onclick="_carrySimulate()">⚡ Simuler — ' + allProducts.length + ' produit' + (allProducts.length > 1 ? 's' : '') + ' · Scénarios & P&L détaillé</button>';
     } else if (allProducts.length > 0) {
-      html += '<div style="width:100%;padding:14px;font-size:12px;text-align:center;color:#D97706;background:rgba(255,182,39,0.08);border:1px dashed #D97706;border-radius:var(--radius-sm)">⚠️ Ajustez les montants — allocation totale doit = ' + _fmt(_state.amount) + '€ (actuellement ' + _fmt(totalAlloc) + '€)</div>';
+      html += '<div style="width:100%;padding:14px;font-size:12px;text-align:center;color:#D97706;background:#FFFBEB;border:1px dashed #D97706;border-radius:var(--radius-sm)">⚠️ Ajustez les montants — allocation totale doit = ' + _fmt(_state.amount) + '€ (actuellement ' + _fmt(totalAlloc) + '€)</div>';
     } else {
       html += '<div style="width:100%;padding:14px;font-size:12px;text-align:center;color:' + BG.textDim + ';background:' + BG.section + ';border:1px dashed var(--border);border-radius:var(--radius-sm)">Ajoutez au moins 1 produit pour lancer la simulation</div>';
     }
 
     // ─── Mail template ──────
-    html += '<div style="background:' + BG.section + ';border:1px solid rgba(168,85,247,0.3);border-radius:var(--radius-sm);padding:16px;margin-top:16px">';
+    html += '<div style="background:' + BG.section + ';border:1px solid #C4B5FD;border-radius:var(--radius-sm);padding:16px;margin-top:16px">';
     html += '<div style="font-size:12px;font-weight:700;color:#A855F7;margin-bottom:8px">📧 MAIL TYPE POUR LE STRUCTUREUR</div>';
     var mailProducts = allProducts.length > 0 ? allProducts : _recommendedProducts();
     var mailLines = [
@@ -645,14 +645,14 @@
 
     // ─── Loan summary ──────
     var annIF = Math.round(_state.amount * _state.rate / 100);
-    html += '<div style="background:' + BG.section + ';border:1px solid rgba(6,214,160,0.3);border-radius:var(--radius-sm);padding:14px;margin-bottom:14px">';
+    html += '<div style="background:' + BG.section + ';border:1px solid #6EE7B7;border-radius:var(--radius-sm);padding:14px;margin-bottom:14px">';
     html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">';
     html += '<span style="font-size:13px;font-weight:700;color:#059669">✅ Prêt Equipéa SG — ' + _fmt(_state.amount) + '€ à ' + _state.rate + '% fixe sur ' + _state.years + ' ans</span>';
     html += '<span style="font-size:10px;color:' + BG.textDim + '">Caméleons Com Mark · Crédit en blanc · Frais ' + _fmt(_state.loanFees) + '€</span>';
     html += '</div>';
     html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:11px">';
-    html += '<div style="padding:6px 10px;background:rgba(34,211,238,0.08);border-radius:4px;color:#0891B2">✅ In fine : <strong>-' + _fmt(annIF) + '€/an</strong> · total intérêts -' + _fmt(annIF * _state.years) + '€ · capital constant</div>';
-    html += '<div style="padding:6px 10px;background:rgba(168,85,247,0.04);border-radius:4px;color:#A855F7">Amort. : -' + _fmt(_state.monthlyPayment) + '€/mois · total intérêts -' + _fmt(_state.totalInterestAmort) + '€ · capital décroissant</div>';
+    html += '<div style="padding:6px 10px;background:#E0F7FA;border-radius:4px;color:#0891B2">✅ In fine : <strong>-' + _fmt(annIF) + '€/an</strong> · total intérêts -' + _fmt(annIF * _state.years) + '€ · capital constant</div>';
+    html += '<div style="padding:6px 10px;background:#F5F3FF;border-radius:4px;color:#A855F7">Amort. : -' + _fmt(_state.monthlyPayment) + '€/mois · total intérêts -' + _fmt(_state.totalInterestAmort) + '€ · capital décroissant</div>';
     html += '</div></div>';
 
     // ─── DAF KPI DASHBOARD ──────
@@ -698,10 +698,10 @@
       var ltColor = lt === 'inFine' ? '#0891B2' : '#A855F7';
 
       html += '<div style="border:1px solid ' + ltColor + '33;border-radius:var(--radius-sm);overflow:hidden;margin-bottom:16px">';
-      html += '<div style="padding:8px 12px;background:' + ltColor + '0A;font-weight:700;color:' + ltColor + ';font-size:12px">' + ltLabel + '</div>';
+      html += '<div style="padding:10px 12px;background:' + ltColor + '15;font-weight:700;color:' + ltColor + ';font-size:13px">' + ltLabel + '</div>';
 
       html += '<table style="width:100%;border-collapse:collapse;font-size:11px">';
-      html += '<thead><tr style="border-bottom:2px solid var(--border)">';
+      html += '<thead><tr style="border-bottom:2px solid ' + BG.border + '">';
       html += '<th style="padding:8px 6px;text-align:left;color:' + BG.textMuted + ';font-size:10px">Scénario</th>';
       html += '<th style="padding:8px 6px;text-align:right;color:' + BG.textMuted + ';font-size:10px">Allocation</th>';
       html += '<th style="padding:8px 6px;text-align:right;color:#059669;font-size:10px">Rdt net/an</th>';
@@ -724,7 +724,7 @@
         var sc = sr.scenario;
         var isBest = i === 0;
         var isUser = sc.isUser;
-        var bg = isUser ? BG.highlight : isBest ? '#1A2E2A' : (i % 2 === 0 ? BG.row0 : BG.row1);
+        var bg = isUser ? BG.highlight : isBest ? '#DCFCE7' : (i % 2 === 0 ? BG.row0 : BG.row1);
         var allocDesc = sc.products.map(function(p) { return Math.round(p.amount/1000) + 'K'; }).join('+');
 
         var rdtAnnual = sr.expected.totalNetAfterTax / _state.amount * 100 / _state.years;
@@ -732,7 +732,7 @@
         var worstPct = sr.worst.totalNetAfterTax / _state.amount * 100 / _state.years;
         var bestPct = sr.best.totalNetAfterTax / _state.amount * 100 / _state.years;
 
-        html += '<tr style="background:' + bg + ';border-bottom:1px solid var(--border)">';
+        html += '<tr style="background:' + bg + ';border-bottom:1px solid ' + BG.border + '">';
         html += '<td style="padding:8px 6px;font-weight:' + (isUser || isBest ? '700' : '400') + ';color:' + BG.text + ';max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + sc.name + (isBest ? ' 🏆' : '') + '</td>';
         html += '<td style="padding:8px 6px;text-align:right;font-size:10px;color:' + BG.textDim + '">' + allocDesc + '</td>';
         // Rdt net/an %
@@ -765,7 +765,7 @@
       var worst = _computePortfolio(userScenario.products, _state.amount, _state.rate, _state.years, _state.taxRate, lt, 'worst');
 
       html += '<div style="border:1px solid ' + ltColor + '33;border-radius:var(--radius-sm);overflow:hidden;margin-bottom:16px">';
-      html += '<div style="padding:8px 12px;background:' + ltColor + '0A;display:flex;justify-content:space-between;align-items:center">';
+      html += '<div style="padding:10px 12px;background:' + ltColor + '15;display:flex;justify-content:space-between;align-items:center">';
       html += '<span style="font-weight:700;color:' + ltColor + ';font-size:12px">' + ltLabel + '</span>';
       html += '<span style="font-family:var(--mono);font-size:13px;font-weight:700;color:#059669">Net total : ' + (expected.totalNetAfterTax >= 0 ? '+' : '') + _fmt(expected.totalNetAfterTax) + '€ (' + (expected.avgPerYear >= 0 ? '+' : '') + _fmt(expected.avgPerYear) + '€/an)</span>';
       html += '</div>';
@@ -773,7 +773,7 @@
       // Summary cards with % metrics
       var pnlRoiAn = expected.totalNetAfterTax / _state.amount * 100 / _state.years;
       var pnlRoiTot = expected.totalNetAfterTax / _state.amount * 100;
-      html += '<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:0;border-bottom:1px solid var(--border)">';
+      html += '<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:0;border-bottom:1px solid ' + BG.border + '">';
       [
         ['Revenus totaux', '+' + _fmt(expected.totalRevenue) + '€', '#059669', _pct(expected.totalRevenue / _state.amount * 100) + '% du capital'],
         ['Intérêts emprunt', '-' + _fmt(expected.totalInterest) + '€', '#DC2626', _pct(expected.totalInterest / _state.amount * 100) + '% du capital'],
@@ -782,7 +782,7 @@
         ['RDT NET/AN', (pnlRoiAn >= 0 ? '+' : '') + _pct(pnlRoiAn) + '%', pnlRoiAn >= 0 ? '#059669' : '#DC2626', _fmt(expected.avgPerYear) + '€/an'],
         ['ROI TOTAL', (pnlRoiTot >= 0 ? '+' : '') + _pct(pnlRoiTot) + '%', pnlRoiTot >= 0 ? '#059669' : '#DC2626', 'Sur ' + _state.years + ' ans']
       ].forEach(function(card) {
-        html += '<div style="padding:10px 8px;border-right:1px solid var(--border);text-align:center">';
+        html += '<div style="padding:10px 8px;border-right:1px solid ' + BG.border + ';text-align:center">';
         html += '<div style="font-size:8px;font-weight:700;color:' + BG.textDim + ';letter-spacing:0.5px">' + card[0] + '</div>';
         html += '<div style="font-family:var(--mono);font-size:13px;font-weight:700;color:' + card[2] + ';margin-top:3px">' + card[1] + '</div>';
         if (card[3]) html += '<div style="font-size:8px;color:' + BG.textDim + ';margin-top:2px">' + card[3] + '</div>';
@@ -792,7 +792,7 @@
 
       // Year by year table
       html += '<table style="width:100%;border-collapse:collapse;font-size:10px">';
-      html += '<thead><tr style="background:' + BG.header + ';border-bottom:1px solid var(--border)">';
+      html += '<thead><tr style="background:' + BG.header + ';border-bottom:1px solid ' + BG.border + '">';
       html += '<th style="padding:6px;text-align:left;color:' + BG.textDim + '">An</th>';
       userScenario.products.forEach(function(p) {
         html += '<th style="padding:6px;text-align:right;color:' + (p.color || 'var(--text-dim)') + '">' + p.name.substring(0, 18) + '</th>';
@@ -808,7 +808,7 @@
       expected.flows.forEach(function(f, fi) {
         var bg = fi % 2 === 0 ? BG.row0 : BG.row1;
         var roiCumul = f.cumulNet / _state.amount * 100;
-        html += '<tr style="background:' + bg + ';border-bottom:1px solid var(--border)">';
+        html += '<tr style="background:' + bg + ';border-bottom:1px solid ' + BG.border + '">';
         html += '<td style="padding:5px 6px;font-weight:600">An ' + f.year + '</td>';
         f.revenueByProduct.forEach(function(rp) {
           html += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:' + (rp.color || '#059669') + '">+' + _fmt(rp.revenue) + '€</td>';
@@ -824,7 +824,7 @@
       });
 
       // Total row
-      html += '<tr style="border-top:2px solid var(--border);background:' + BG.header + ';font-weight:700">';
+      html += '<tr style="border-top:2px solid ' + BG.border + ';background:' + BG.header + ';font-weight:700">';
       html += '<td style="padding:8px 6px">TOTAL</td>';
       userScenario.products.forEach(function(p, pi) {
         var productTotal = expected.flows.reduce(function(s, f) { return s + f.revenueByProduct[pi].revenue; }, 0);
@@ -842,7 +842,7 @@
 
       // Worst case summary with %
       var worstRoiAn = worst.totalNetAfterTax / _state.amount * 100 / _state.years;
-      html += '<div style="padding:10px 12px;background:rgba(239,68,68,0.06);border-top:1px solid var(--border);font-size:11px;display:flex;justify-content:space-between">';
+      html += '<div style="padding:10px 12px;background:#FEF2F2;border-top:1px solid ' + BG.border + ';font-size:11px;display:flex;justify-content:space-between">';
       html += '<div><strong style="color:#DC2626">⚠️ Pire cas :</strong> ';
       html += '<span style="color:' + BG.textMuted + '">Net total = <strong style="color:' + (worst.totalNetAfterTax >= 0 ? '#059669' : '#DC2626') + '">' + (worst.totalNetAfterTax >= 0 ? '+' : '') + _fmt(worst.totalNetAfterTax) + '€</strong>';
       html += ' (' + (worst.avgPerYear >= 0 ? '+' : '') + _fmt(worst.avgPerYear) + '€/an)</span></div>';
@@ -871,7 +871,7 @@
       html += '</div>';
       if (p.type === 'hybride') html += '<div style="font-size:10px;color:#059669;margin-top:6px">Plancher ' + p.couponPlancher + '% garanti + bonus ' + p.couponBonus + '%</div>';
       if (p.condition) html += '<div style="font-size:10px;color:#D97706;margin-top:4px">' + p.condition + '</div>';
-      html += '<div style="margin-top:8px;padding:6px 8px;border-radius:4px;background:' + (spread >= 0 ? 'rgba(6,214,160,0.08)' : 'rgba(239,68,68,0.08)') + '">';
+      html += '<div style="margin-top:8px;padding:6px 8px;border-radius:4px;background:' + (spread >= 0 ? '#ECFDF5' : '#FEF2F2') + '">';
       html += '<div style="font-size:10px;color:' + BG.textDim + '">Contribution P&L espérée</div>';
       html += '<div style="font-family:var(--mono);font-size:13px;font-weight:700;color:' + (annualNet >= 0 ? '#059669' : '#DC2626') + '">' + (annualNet >= 0 ? '+' : '') + _fmt(annualNet) + '€/an</div>';
       html += '</div>';
