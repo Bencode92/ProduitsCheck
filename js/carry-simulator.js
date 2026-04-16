@@ -22,6 +22,42 @@
   function _fmt(n) { return typeof formatNumber === 'function' ? formatNumber(n) : String(Math.round(n)); }
   function _pct(n) { return (Math.round(n * 100) / 100).toFixed(2); }
 
+  // ─── Taux de marché dynamiques (depuis rates.json) ──────
+  var MARKET_RATES = { tec10: 3.10, oat5y: 2.70, oat2y: 2.53, bce: 2.00, euribor3m: 2.50, lastUpdate: null };
+  (function _loadRates() {
+    fetch('data/market/rates.json').then(function(r) { return r.json(); }).then(function(data) {
+      if (data.yields) {
+        if (data.yields.oat_fr_10y) MARKET_RATES.tec10 = data.yields.oat_fr_10y.current;
+        if (data.yields.oat_fr_5y) MARKET_RATES.oat5y = data.yields.oat_fr_5y.current;
+        if (data.yields.oat_fr_2y) MARKET_RATES.oat2y = data.yields.oat_fr_2y.current;
+      }
+      if (data.policy_rates) {
+        if (data.policy_rates.ecb_deposit_rate) MARKET_RATES.bce = data.policy_rates.ecb_deposit_rate.current;
+      }
+      MARKET_RATES.lastUpdate = (data.yields && data.yields.oat_fr_10y && data.yields.oat_fr_10y.date) || null;
+      console.log('[CarrySimulator] Taux chargés depuis rates.json:', MARKET_RATES);
+    }).catch(function() { console.log('[CarrySimulator] rates.json non disponible, taux par défaut'); });
+  })();
+
+  // ─── Consensus conditionProb (Claude + OpenAI review, avril 2026) ──────
+  // Source: triangulation Vasicek (borne haute ~1.00) + valeurs conservatrices (borne basse ~0.68-0.78)
+  // Incorpore: marge au trigger, vol TEC10 18bp, régime stagflation, fat tails
+  // À revoir tous les 6 mois ou si régime change
+  var CONSENSUS_PROBS = {
+    cat_floater: 0.97, cat_hybride: 0.93, cat_fixe: 1.00,
+    cat_tarn5: 0.90, cat_tarn10: 0.88, cat_range: 0.82,
+    cat_digital: 0.93, cat_steepener: 0.75
+  };
+
+  // ─── Risque émetteur (PD cumulées S&P/Moody's, recovery senior unsecured 40%) ──────
+  var ISSUER_PD = { 'AAA': 0.003, 'AA+': 0.005, 'AA': 0.008, 'AA-': 0.010, 'A+': 0.012, 'A': 0.020, 'A-': 0.030, 'BBB+': 0.050 };
+  var ISSUER_RECOVERY = 0.40;
+  function _issuerExpectedLoss(rating, nominal, years) {
+    var pd5 = ISSUER_PD[rating] || ISSUER_PD['A'];
+    var pd = pd5 * years / 5; // extrapolation linéaire
+    return Math.round(pd * (1 - ISSUER_RECOVERY) * nominal);
+  }
+
   // ─── Catalogue produits (conditions marché avril 2026) ──────
   // TEC10 = 3.10% | OAT 5Y = 2.70% | BCE = 2.15% | Euribor 3M ~2.50%
   // Courbe 2s10s = +57bp (normale) | Vol TEC10 = 18bp/an
@@ -31,7 +67,7 @@
         id: 'cat_floater', name: 'Floater TEC10 Plancher 3%', type: 'hybride',
         coupon: 3.80, couponPlancher: 3.00, couponBonus: 0.80,
         duration: 5, capitalGaranti: true,
-        condition: 'Coupon = 3% + max(0, TEC10 − 2.20%)', conditionProb: 0.95,
+        condition: 'Coupon = 3% + max(0, TEC10 − 2.20%)', conditionProb: CONSENSUS_PROBS.cat_floater,
         color: '#0D9488',
         risk: 'Très faible — plancher 3% garanti, variable capte la hausse des taux',
         detail: 'Si TEC10 monte à 4% → coupon 4.80%. Si TEC10 baisse à 2% → coupon 3%. Aujourd\'hui TEC10=3.10% → coupon ~3.90%.',
@@ -41,7 +77,7 @@
         id: 'cat_hybride', name: 'Hybride Plancher 3% + Digital TEC10', type: 'hybride',
         coupon: 6.50, couponPlancher: 3.00, couponBonus: 3.50,
         duration: 5, capitalGaranti: true,
-        condition: 'Plancher 3% + bonus 3.50% si TEC10 ≤ 4.50%', conditionProb: 0.90,
+        condition: 'Plancher 3% + bonus 3.50% si TEC10 ≤ 4.50%', conditionProb: CONSENSUS_PROBS.cat_hybride,
         color: '#0891B2',
         risk: 'Faible — plancher couvre l\'emprunt, trigger large (TEC10 < 4.50% = 140bp de marge)',
         detail: 'Combinaison sécurité + rendement. Le plancher 3% couvre le 2.90% de l\'emprunt. Le bonus 3.50% se déclenche si TEC10 reste sous 4.50% (très probable sur 5 ans).',
@@ -50,7 +86,7 @@
       {
         id: 'cat_fixe', name: 'Taux Fixe Callable 5Y', type: 'fixe',
         coupon: 5.10, duration: 5, capitalGaranti: true,
-        condition: null, conditionProb: 1.0,
+        condition: null, conditionProb: CONSENSUS_PROBS.cat_fixe,
         color: '#059669',
         risk: 'Aucun — coupon 100% garanti. Callable émetteur an 1',
         detail: 'Le coffre-fort. Coupon garanti chaque année. La banque peut rappeler le produit si les taux baissent (vous récupérez le capital + dernier coupon).',
@@ -61,7 +97,7 @@
       {
         id: 'cat_tarn5', name: 'TARN TEC10 8% (5Y)', type: 'conditionnel',
         coupon: 8.00, duration: 5, capitalGaranti: true,
-        condition: 'TEC10 ≤ 4.40% (An 1 garanti)', conditionProb: 0.78,
+        condition: 'TEC10 ≤ 4.40% (An 1 garanti)', conditionProb: CONSENSUS_PROBS.cat_tarn5,
         guaranteedYears: 1,
         color: '#D97706',
         risk: 'Modéré — 0% si TEC10 > 4.40% après An 1. Autocall cumul ≥ 24%',
@@ -71,7 +107,7 @@
       {
         id: 'cat_tarn10', name: 'TARN TEC10 9% (10Y + PUT 5Y)', type: 'conditionnel',
         coupon: 9.00, duration: 10, capitalGaranti: true,
-        condition: 'TEC10 ≤ 4.40% (An 1-2 garantis) + PUT sortie An 5', conditionProb: 0.78,
+        condition: 'TEC10 ≤ 4.40% (An 1-2 garantis) + PUT sortie An 5', conditionProb: CONSENSUS_PROBS.cat_tarn10,
         guaranteedYears: 2,
         color: '#B45309',
         risk: 'Modéré — Budget 10Y = coupon max. PUT An 5 = sortie garantie. Autocall ≥ 25.5%',
@@ -81,7 +117,7 @@
       {
         id: 'cat_range', name: 'Range Accrual Euribor 7.5%', type: 'conditionnel',
         coupon: 7.50, duration: 5, capitalGaranti: true,
-        condition: 'Euribor 3M dans [1.50% – 3.80%]', conditionProb: 0.85,
+        condition: 'Euribor 3M dans [1.50% – 3.80%]', conditionProb: CONSENSUS_PROBS.cat_range,
         color: '#DC2626',
         risk: 'Modéré — coupon ×(jours dans corridor/365). Euribor 2.50% = bien centré',
         detail: 'Sous-jacent DIFFÉRENT du TEC10 = diversification. Euribor piloté par BCE. Corridor large [1.50-3.80%]. Risque si BCE monte >3.80% ou baisse <1.50%.',
@@ -90,7 +126,7 @@
       {
         id: 'cat_digital', name: 'Digital Mémoire TEC10 7%', type: 'conditionnel',
         coupon: 7.00, duration: 5, capitalGaranti: true,
-        condition: 'TEC10 ≤ 4.50% + effet mémoire', conditionProb: 0.88,
+        condition: 'TEC10 ≤ 4.50% + effet mémoire', conditionProb: CONSENSUS_PROBS.cat_digital,
         guaranteedYears: 0, memory: true,
         color: '#7C3AED',
         risk: 'Modéré-faible — mémoire rattrape les coupons manqués. Trigger 4.50% = 140bp marge',
@@ -100,7 +136,7 @@
       {
         id: 'cat_steepener', name: 'CMS Steepener 5×(10Y-2Y)', type: 'conditionnel',
         coupon: 5.70, duration: 5, capitalGaranti: true,
-        condition: 'Coupon = 5 × max(0, CMS10-CMS2). Spread actuel +57bp', conditionProb: 0.80,
+        condition: 'Coupon = 5 × max(0, CMS10-CMS2). Spread actuel +57bp', conditionProb: CONSENSUS_PROBS.cat_steepener,
         guaranteedYears: 0,
         color: '#6366F1',
         risk: 'Modéré — parie sur la pentification de la courbe. Risque si courbe s\'inverse (récession)',
@@ -683,7 +719,9 @@
       var kpiWorst = _computePortfolio(userSc.products, _state.amount, _state.rate, _state.years, _state.taxRate, kpiLt, 'worst');
       var kpiBest = _computePortfolio(userSc.products, _state.amount, _state.rate, _state.years, _state.taxRate, kpiLt, 'best');
 
-      var roiTotal = kpiExp.totalNetAfterTax / _state.amount * 100;
+      // Issuer risk: expected loss based on A+ rating (CIC/SG)
+      var issuerLoss = _issuerExpectedLoss('A+', _state.amount, _state.years);
+      var roiTotal = (kpiExp.totalNetAfterTax - issuerLoss) / _state.amount * 100;
       var roiAnnual = roiTotal / _state.years;
       var roiWorst = kpiWorst.totalNetAfterTax / _state.amount * 100 / _state.years;
       var roiBest = kpiBest.totalNetAfterTax / _state.amount * 100 / _state.years;
@@ -696,7 +734,7 @@
         ['NET ESPÉRÉ/AN', _fmt(kpiExp.avgPerYear) + '€', kpiExp.avgPerYear >= 0 ? '#059669' : '#DC2626', 'Après intérêts + IS'],
         ['SPREAD NET', '+' + _pct(spreadBrut) + '%', '#0891B2', 'Coupon moyen - taux emprunt'],
         ['PIRE CAS/AN', _pct(roiWorst) + '%', roiWorst >= 0 ? '#059669' : '#DC2626', _fmt(kpiWorst.avgPerYear) + '€/an'],
-        ['BEST CASE/AN', '+' + _pct(roiBest) + '%', '#0891B2', _fmt(kpiBest.avgPerYear) + '€/an']
+        ['RISQUE ÉMETTEUR', '-' + _fmt(issuerLoss) + '€', '#DC2626', 'PD ' + (_state.years) + 'Y A+ · Recovery 40%']
       ].forEach(function(kpi) {
         html += '<div style="background:' + BG.section + ';border:1px solid ' + BG.border + ';border-radius:var(--radius-sm);padding:12px;text-align:center">';
         html += '<div style="font-size:9px;font-weight:700;color:' + BG.textDim + ';letter-spacing:0.8px;margin-bottom:6px">' + kpi[0] + '</div>';
