@@ -71,12 +71,12 @@
 
     return {
       tarn: {
-        name: 'TARN TEC10 ' + tarnCoupon + '% ' + duration + 'Y' + (duration >= 8 ? ' + PUT 5Y' : ''),
+        name: 'TARN TEC10 ' + tarnCoupon + '% ' + duration + 'Y',
         type: 'conditionnel', coupon: tarnCoupon, prob: 0.97,
         duration: duration, guaranteedYears: tarnGuaranteed,
         autocallTarget: tarnAutocall, autocallYears: Math.ceil(tarnAutocall / tarnCoupon),
         risk: 'Faible',
-        detail: 'Coupon ' + tarnCoupon + '%/an · Garanti An 1-2 · Conditionnel si TEC10 ≤ 4.40% (proba 97% sur 20 ans) · Autocall si cumul ≥ ' + tarnAutocall + '% (~' + Math.ceil(tarnAutocall / tarnCoupon) + ' ans) · Capital garanti 100%' + (duration >= 8 ? ' · PUT sortie a 100% a 5 ans' : ''),
+        detail: 'Coupon ' + tarnCoupon + '%/an · Garanti An 1-2 · Conditionnel si TEC10 ≤ 4.40% (proba 97% sur 20 ans) · Autocall si cumul ≥ ' + tarnAutocall + '% (~' + Math.ceil(tarnAutocall / tarnCoupon) + ' ans) · Capital garanti 100% à échéance',
         color: '#D97706'
       },
       fixe: {
@@ -218,7 +218,7 @@
     var configs = [
       {
         id: 'A', name: '1M × 10Y', emoji: '🏆',
-        desc: '1 produit de 1M€ sur 10 ans — max coupon avec PUT sortie à 5 ans',
+        desc: '1 produit de 1M€ sur 10 ans — max coupon, autocall ~4 ans, capital garanti à échéance',
         products: [Object.assign({}, p10.tarn, { amount: L.amount })],
         highlight: true
       },
@@ -237,7 +237,7 @@
       },
       {
         id: 'D', name: '1M × 10Y Hybride', emoji: '🚀',
-        desc: '1 produit de 1M€ Hybride 10 ans — plancher garanti + bonus conditionnel + PUT 5Y',
+        desc: '1 produit de 1M€ Hybride 10 ans — plancher 3% garanti + bonus conditionnel, capital garanti',
         products: [Object.assign({}, p10.hybride, { amount: L.amount })]
       },
       {
