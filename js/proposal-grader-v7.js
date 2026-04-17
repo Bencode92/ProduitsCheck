@@ -249,6 +249,142 @@
     return null;
   }
 
+  // ═══ SECTION 5a: RATE P1 — Historical probability from rates.json ═══
+  // Uses 20-year historical data to compute real probabilities for rate products
+  // (TARN, Range Accrual, Digital, Callable, Hybride taux)
+
+  var _ratesCache = null;
+  function _loadRatesForGrading() {
+    if (_ratesCache) return _ratesCache;
+    try {
+      // Synchronous read from cache if MarketAnalyzer loaded the data
+      if (window._mktRateDataCache) { _ratesCache = window._mktRateDataCache; return _ratesCache; }
+      // Try fetch (will be async on first call, cached after)
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', 'data/market/rates.json', false); // sync for grading
+      xhr.send();
+      if (xhr.status === 200) { _ratesCache = JSON.parse(xhr.responseText); return _ratesCache; }
+    } catch(e) { /* silent */ }
+    return null;
+  }
+
+  function _computeRateP1Historical(product, norm, annRate, triggerCoupon, matMax, hasMemory, isProtected) {
+    var rates = _loadRatesForGrading();
+    if (!rates || !rates.yields) return null;
+
+    var st = (product.structureType || product.type || '').toLowerCase();
+    var coupon = product.coupon || {};
+    var trigger = parseFloat(coupon.trigger) || parseFloat((product.capitalProtection || {}).barrierCoupon) || 0;
+    if (!trigger || trigger <= 0) return null; // can't compute without trigger
+
+    // Guess which rate this product tracks
+    var rateAlias = null;
+    var productText = [product.name, (coupon.triggerDetail || ''), (product.mechanism || '')].join(' ').toLowerCase();
+    if (/tec\s*10|oat\s*10/i.test(productText)) rateAlias = 'oat_fr_10y';
+    else if (/euribor\s*3/i.test(productText)) rateAlias = 'euribor_3m';
+    else if (/oat\s*5/i.test(productText)) rateAlias = 'oat_fr_5y';
+    else if (/oat\s*2/i.test(productText)) rateAlias = 'oat_fr_2y';
+    else if (st.indexOf('taux') >= 0 || st === 'capital_garanti') rateAlias = 'oat_fr_10y'; // default to TEC10
+
+    var rateData = rates.yields[rateAlias];
+    if (!rateData || !rateData.history || rateData.history.length < 10) return null;
+
+    var history = rateData.history;
+    var current = rateData.current || 0;
+
+    // ─── Compute probCoupon from historical data ──────
+    var probCoupon = 0;
+    var isRange = st === 'range_accrual' || st === 'range-accrual';
+    var ra = product.rangeAccrual || {};
+
+    if (isRange && ra.lowerBound && ra.upperBound) {
+      // Range Accrual: % time in corridor
+      var inCorridor = 0;
+      history.forEach(function(h) {
+        if (h.value >= ra.lowerBound && h.value <= ra.upperBound) inCorridor++;
+      });
+      probCoupon = inCorridor / history.length;
+    } else if (trigger > 0 && trigger < 10) {
+      // TARN / Digital: trigger is a rate level (e.g., 4.40%)
+      // "coupon paid if rate ≤ trigger"
+      var below = 0;
+      history.forEach(function(h) {
+        if (h.value <= trigger) below++;
+      });
+      probCoupon = below / history.length;
+    } else {
+      // Trigger > 10 means it's a percentage trigger for actions (100%, 77%)
+      // Not applicable for rate historical — skip
+      return null;
+    }
+
+    // Adjust for regime: if recent values (last 12 months) are higher than historical
+    // the probability is somewhat lower going forward
+    var recent = history.slice(-12);
+    var recentAvg = recent.reduce(function(s, h) { return s + h.value; }, 0) / recent.length;
+    var fullAvg = history.reduce(function(s, h) { return s + h.value; }, 0) / history.length;
+    if (recentAvg > fullAvg * 1.1) {
+      // Recent rates above historical average → slightly reduce probability
+      probCoupon = probCoupon * 0.95;
+    }
+
+    // Memory boost
+    if (hasMemory) probCoupon = Math.min(0.99, probCoupon * 1.05);
+    probCoupon = Math.max(0.01, Math.min(0.99, probCoupon));
+
+    // ─── Compute probExit (how easy to exit / autocall) ──────
+    var er = product.earlyRedemption || {};
+    var probExit = 0;
+    var guaranteedYears = product.guaranteedYears || 0;
+
+    if (er.possible && er.type === 'autocall' && er.trigger) {
+      // TARN autocall: cumulative coupon target
+      // If probCoupon is high, autocall happens quickly
+      var targetCumul = parseFloat(er.trigger) || 24;
+      var couponPerYear = annRate || 0;
+      if (couponPerYear > 0 && targetCumul > 0) {
+        var yearsToTarget = targetCumul / couponPerYear;
+        // Adjust for probability of receiving coupon each year
+        var adjustedYears = yearsToTarget / probCoupon;
+        probExit = Math.min(0.95, adjustedYears <= matMax ? (matMax - adjustedYears) / matMax : 0.05);
+      }
+    } else if (er.possible && er.type === 'callable') {
+      // Callable: emitter decides, typically calls when rates drop
+      // Higher current rate vs historical → less likely to be called
+      if (current > fullAvg) probExit = 0.3; // rates above average → low call probability
+      else probExit = 0.6; // rates below average → higher call probability
+    }
+
+    // ─── Score ──────
+    var couponEffectif = annRate * probCoupon;
+    var rendementNet = couponEffectif; // no capital loss for rate products (capital guaranteed)
+    var score = Math.round(35 + rendementNet * 6);
+    score = Math.max(5, Math.min(95, score));
+
+    // Boost for guaranteed years
+    if (guaranteedYears >= 2) score = Math.min(95, score + 5);
+    else if (guaranteedYears >= 1) score = Math.min(95, score + 3);
+
+    // Boost for capital guaranteed
+    if (isProtected) score = Math.min(95, score + 5);
+
+    return {
+      score: score,
+      probCoupon: Math.round(probCoupon * 1000) / 10,
+      probExit: Math.round(probExit * 100),
+      rendementNet: Math.round(rendementNet * 100) / 100,
+      couponEffectif: Math.round(couponEffectif * 100) / 100,
+      perteEsperee: 0,
+      vols: [],
+      matEsperee: matMax,
+      isRate: true,
+      historicalBasis: history.length + ' obs (' + history[0].date + '→' + history[history.length-1].date + ')',
+      rateAlias: rateAlias,
+      currentRate: current,
+      trigger: trigger
+    };
+  }
+
   // ═══ SECTION 5: BS P1 CALCULATION ═══
   function _computeBSP1(product, norm, rfRate) {
     var coupon = product.coupon || {};
@@ -285,7 +421,12 @@
     if (isBasket && isWorstOf) isWorstOf = false;
     var hasMemory = (coupon.memory === true) || st === 'phoenix_memoire';
 
-    if (isRate) return null; // rates use heuristic P1, not BS
+    // ─── RATE PRODUCTS: use historical data instead of BS ──────
+    if (isRate) {
+      var rateResult = _computeRateP1Historical(product, norm, annRate, triggerCoupon, matMax, hasMemory, isProtected);
+      if (rateResult) return rateResult;
+      return null; // fallback to heuristic if no historical data
+    }
 
     var vols = _resolveVols(unds, undType);
     var r = rfRate || 2.5;
@@ -611,6 +752,15 @@
           result.metadata.bsMatEsperee = bs.matEsperee;
           result.metadata.couponProbability = bs.probCoupon;
           result.metadata.isBasket = bs.isBasket;
+          // Rate product historical data
+          if (bs.isRate) {
+            result.metadata.isRateHistorical = true;
+            result.metadata.historicalBasis = bs.historicalBasis;
+            result.metadata.rateAlias = bs.rateAlias;
+            result.metadata.currentRate = bs.currentRate;
+            result.metadata.rateTrigger = bs.trigger;
+            result.metadata.probExit = bs.probExit;
+          }
         }
       }
 
