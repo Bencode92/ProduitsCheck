@@ -74,6 +74,13 @@ RATE_SERIES["euribor_6m"] = {
     "description": "Taux interbancaire euro 6 mois (moyenne mensuelle)",
     "freq": "monthly"
 }
+RATE_SERIES["euribor_12m"] = {
+    "ecb_url": f"{BASE_ECB}/FM/M.U2.EUR.RT.MM.EURIBOR1YD_.HSTA?format=csvdata&startPeriod=2000-01",
+    "td_symbol": None,
+    "name": "Euribor 12M",
+    "description": "Taux interbancaire euro 12 mois (moyenne mensuelle)",
+    "freq": "monthly"
+}
 
 # Twelve Data fallback tickers for yields
 TD_YIELD_PROXIES = {

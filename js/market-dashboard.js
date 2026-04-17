@@ -72,20 +72,34 @@
     html += '<div style="font-size:9px;color:' + BG.textDim + ';margin-bottom:10px">Cliquez sur un taux pour voir l\'analyse détaillée et l\'historique</div>';
 
     // Clickable rate cards
+    var eur12m = yields.euribor_12m || {};
+
     var rateCards = [
-      { id: 'oat_fr_10y', label: 'TEC10 (OAT 10 ans)', data: tec10, color: '#0891B2', sub: 'Vol ' + (tec10.vol_annualized_bps || 18) + 'bp · ' + (tec10.direction || 'stable') + ' · Range ' + (tec10.low_1y || '?') + '-' + (tec10.high_1y || '?') },
-      { id: 'oat_fr_5y', label: 'OAT 5 ans', data: oat5y, color: '#2563EB', sub: 'Vol ' + (oat5y.vol_annualized_bps || 22) + 'bp · ' + (oat5y.direction || 'stable') + ' · Spread 5-10Y +' + Math.round(((tec10.current||3.10) - (oat5y.current||2.70)) * 100) + 'bp' },
-      { id: 'oat_fr_2y', label: 'OAT 2 ans', data: oat2y, color: '#7C3AED', sub: 'Vol ' + (oat2y.vol_annualized_bps || 26) + 'bp · ' + (oat2y.direction || 'stable') + ' · Spread 2-10Y +' + Math.round(((tec10.current||3.10) - (oat2y.current||2.53)) * 100) + 'bp' },
-      { id: 'euribor_3m', label: 'Euribor 3M', data: eur3m, color: '#D97706', sub: 'Réf Range Accrual · piloté par BCE' }
+      { id: 'oat_fr_10y', label: 'TEC10 (OAT 10 ans)', data: tec10, color: '#0891B2',
+        desc: 'Taux auquel l\'État français emprunte sur 10 ans. Référence pour les TARN et produits structurés taux longs.',
+        sub: 'Vol ' + (tec10.vol_annualized_bps || 18) + 'bp · ' + (tec10.direction || 'stable') + ' · Range ' + (tec10.low_1y || '?') + '-' + (tec10.high_1y || '?') },
+      { id: 'oat_fr_5y', label: 'OAT 5 ans', data: oat5y, color: '#2563EB',
+        desc: 'Taux souverain à 5 ans. Sert au calcul du budget option des produits structurés 5 ans.',
+        sub: 'Vol ' + (oat5y.vol_annualized_bps || 22) + 'bp · ' + (oat5y.direction || 'stable') + ' · Spread 5-10Y +' + Math.round(((tec10.current||3.10) - (oat5y.current||2.70)) * 100) + 'bp' },
+      { id: 'oat_fr_2y', label: 'OAT 2 ans', data: oat2y, color: '#7C3AED',
+        desc: 'Taux souverain à 2 ans. Reflète les anticipations de politique monétaire BCE à court terme.',
+        sub: 'Vol ' + (oat2y.vol_annualized_bps || 26) + 'bp · ' + (oat2y.direction || 'stable') + ' · Spread 2-10Y +' + Math.round(((tec10.current||3.10) - (oat2y.current||2.53)) * 100) + 'bp' },
+      { id: 'euribor_3m', label: 'Euribor 3M', data: eur3m, color: '#D97706',
+        desc: 'Taux interbancaire euro à 3 mois. Piloté par la BCE. Référence pour les Range Accrual.',
+        sub: 'Réf Range Accrual · piloté par BCE' },
+      { id: 'euribor_12m', label: 'Euribor 12M', data: eur12m, color: '#EA580C',
+        desc: 'Taux interbancaire euro à 12 mois. Reflète les anticipations de taux BCE à 1 an. Utilisé pour les prêts immobiliers et certains structurés.',
+        sub: 'Anticipe la politique BCE à 1 an' }
     ];
 
-    html += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:8px">';
+    html += '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:8px">';
     rateCards.forEach(function(rc) {
       var val = rc.data.current || 0;
       html += '<div onclick="_mktOpenRate(\'' + rc.id + '\')" style="padding:14px;border:1px solid ' + BG.border + ';border-radius:8px;border-left:4px solid ' + rc.color + ';background:' + BG.section + ';cursor:pointer;transition:all 0.2s" onmouseover="this.style.boxShadow=\'0 2px 8px rgba(0,0,0,0.1)\'" onmouseout="this.style.boxShadow=\'none\'">';
       html += '<div style="font-size:9px;font-weight:700;color:' + BG.textDim + ';letter-spacing:0.8px;text-transform:uppercase">' + rc.label + ' <span style="color:' + rc.color + '">▼ clic</span></div>';
-      html += '<div style="font-family:var(--mono);font-size:22px;font-weight:800;color:' + rc.color + ';margin:6px 0">' + val.toFixed(2) + '%</div>';
-      html += '<div style="font-size:9px;color:' + BG.textDim + ';line-height:1.4">' + rc.sub + '</div>';
+      html += '<div style="font-family:var(--mono);font-size:20px;font-weight:800;color:' + rc.color + ';margin:4px 0">' + val.toFixed(2) + '%</div>';
+      if (rc.desc) html += '<div style="font-size:8px;color:' + BG.text + ';line-height:1.3;margin-bottom:3px">' + rc.desc + '</div>';
+      html += '<div style="font-size:8px;color:' + BG.textDim + ';line-height:1.3">' + rc.sub + '</div>';
       html += '</div>';
     });
     html += '</div>';
@@ -902,7 +916,8 @@
       tec10: { key: 'oat_fr_10y', label: 'TEC10', section: 'yields' },
       oat5y: { key: 'oat_fr_5y', label: 'OAT 5Y', section: 'yields' },
       oat2y: { key: 'oat_fr_2y', label: 'OAT 2Y', section: 'yields' },
-      euribor3m: { key: 'euribor_3m', label: 'Euribor 3M', section: 'yields' }
+      euribor3m: { key: 'euribor_3m', label: 'Euribor 3M', section: 'yields' },
+      euribor12m: { key: 'euribor_12m', label: 'Euribor 12M', section: 'yields' }
     };
     var rm = rateMap[rateSel];
     var history = [];
