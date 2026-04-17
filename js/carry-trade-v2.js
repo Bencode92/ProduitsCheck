@@ -367,11 +367,11 @@
 
     // ═══ CAHIER DES CHARGES (accordéon) ═══
     function _acc(id, title, content) {
-      return '<div style="border:1px solid ' + B.border + ';border-radius:6px;margin-bottom:4px;overflow:hidden">' +
-        '<div onclick="var c=document.getElementById(\'' + id + '\');c.style.display=c.style.display===\'none\'?\'\':\'none\';this.querySelector(\'span\').textContent=c.style.display===\'none\'?\'▶\':\'▼\'" style="padding:10px 14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;background:' + B.row1 + '">' +
-        '<div style="font-size:11px;font-weight:700;color:' + B.text + '">' + title + '</div>' +
-        '<span style="font-size:10px;color:' + B.dim + '">▶</span></div>' +
-        '<div id="' + id + '" style="display:none;padding:12px 14px;font-size:10px;color:' + B.text + ';line-height:1.6">' + content + '</div></div>';
+      return '<div style="border:1px solid ' + B.border + ';border-radius:8px;margin-bottom:6px;overflow:hidden">' +
+        '<div onclick="var c=document.getElementById(\'' + id + '\');c.style.display=c.style.display===\'none\'?\'\':\'none\';this.querySelector(\'span\').textContent=c.style.display===\'none\'?\'▶\':\'▼\'" style="padding:14px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;background:' + B.row1 + '">' +
+        '<div style="font-size:13px;font-weight:700;color:' + B.text + '">' + title + '</div>' +
+        '<span style="font-size:12px;color:' + B.dim + '">▶</span></div>' +
+        '<div id="' + id + '" style="display:none;padding:16px 18px;font-size:13px;color:' + B.text + ';line-height:1.8">' + content + '</div></div>';
     }
 
     html += '<div style="background:' + B.card + ';border:1px solid #2563EB;border-radius:8px;padding:14px;margin-bottom:16px">';
