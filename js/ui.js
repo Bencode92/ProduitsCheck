@@ -278,29 +278,100 @@ function _renderInvestorMetrics(p) {
 
   html += '</div>';
 
-  // ─── Proba historique de coupon (pour produits taux) ──────
+  // ─── Proba historique de coupon (pour produits taux) — avec données réelles ──────
   if (isRate && trigger && trigger < 10) {
-    html += '<div style="padding:12px;background:#EFF6FF;border:1px solid #93C5FD;border-radius:8px;margin-bottom:8px">';
-    html += '<div style="font-size:12px;font-weight:700;color:#1E40AF;margin-bottom:6px">📊 Probabilité historique de coupon (TEC10 ≤ ' + trigger + '%)</div>';
-
-    // On va chercher les probas dans le grading metadata si disponible
-    var probHist = '—';
-    var prob5y = '—';
-    if (p.grading && p.grading.metadata && p.grading.metadata.couponProbability) {
-      probHist = p.grading.metadata.couponProbability + '%';
+    // Charger les données depuis le cache global si disponible
+    var ratesData = window._ficheRatesCache;
+    if (!ratesData && typeof fetch !== 'undefined') {
+      // Fetch synchrone via XMLHttpRequest pour la fiche
+      try {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', 'data/market/rates.json', false);
+        xhr.send();
+        if (xhr.status === 200) {
+          ratesData = JSON.parse(xhr.responseText);
+          window._ficheRatesCache = ratesData;
+        }
+      } catch(e) { /* silent */ }
     }
-    // Estimation rapide basée sur le trigger
-    if (trigger >= 4.6) { probHist = '99.7%'; prob5y = '100%'; }
-    else if (trigger >= 4.4) { probHist = '98.3%'; prob5y = '100%'; }
-    else if (trigger >= 4.0) { probHist = '92.8%'; prob5y = '100%'; }
 
-    html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">';
-    html += '<div style="padding:8px;background:white;border-radius:6px;text-align:center"><div style="font-size:11px;color:#475569">Historique 20 ans</div><div style="font-family:var(--mono);font-size:16px;font-weight:800;color:#059669">' + probHist + '</div></div>';
-    html += '<div style="padding:8px;background:white;border-radius:6px;text-align:center"><div style="font-size:11px;color:#475569">5 dernières années</div><div style="font-family:var(--mono);font-size:16px;font-weight:800;color:#059669">' + prob5y + '</div></div>';
-    html += '<div style="padding:8px;background:white;border-radius:6px;text-align:center"><div style="font-size:11px;color:#475569">Forward estimée</div><div style="font-family:var(--mono);font-size:16px;font-weight:800;color:#D97706">85-92%</div></div>';
-    html += '</div>';
-    html += '<div style="font-size:11px;color:#475569;margin-top:6px">⚠️ L\'historique 20 ans inclut 10 ans de taux négatifs (2012-2022) — la probabilité forward en régime normalisé est plus conservatrice.</div>';
-    html += '</div>';
+    // Deviner quel taux ce produit suit
+    var productText = ((p.name || '') + ' ' + (p.mechanism || '') + ' ' + ((p.coupon || {}).triggerDetail || '')).toLowerCase();
+    var rateKey = /euribor/i.test(productText) ? 'euribor_3m' : 'oat_fr_10y';
+    var rateLabel = rateKey === 'euribor_3m' ? 'Euribor 3M' : 'TEC10';
+
+    var history = (ratesData && ratesData.yields && ratesData.yields[rateKey] && ratesData.yields[rateKey].history) || [];
+    var totalObs = history.length;
+
+    // Calculer les stats si on a les données
+    if (totalObs > 10) {
+      var below = 0, above = 0, lastAbove = null, maxConsecAbove = 0, consecAbove = 0;
+      var below5y = 0, total5y = 0;
+      var fiveYearsAgo = new Date(); fiveYearsAgo.setFullYear(fiveYearsAgo.getFullYear() - 5);
+      var fiveYStr = fiveYearsAgo.toISOString().substring(0, 10);
+
+      history.forEach(function(h) {
+        if (h.value <= trigger) { below++; consecAbove = 0; }
+        else { above++; lastAbove = h.date; consecAbove++; maxConsecAbove = Math.max(maxConsecAbove, consecAbove); }
+        if (h.date >= fiveYStr) { total5y++; if (h.value <= trigger) below5y++; }
+      });
+
+      var pctBelow20y = Math.round(below / totalObs * 1000) / 10;
+      var pctBelow5y = total5y > 0 ? Math.round(below5y / total5y * 1000) / 10 : 0;
+
+      html += '<div style="padding:14px;background:#EFF6FF;border:1px solid #93C5FD;border-radius:8px;margin-bottom:8px">';
+      html += '<div style="font-size:12px;font-weight:700;color:#1E40AF;margin-bottom:8px">📊 Probabilité historique de coupon (' + rateLabel + ' ≤ ' + trigger + '%)</div>';
+
+      // 5 KPIs en ligne
+      html += '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:8px">';
+
+      // 20 ans
+      html += '<div style="padding:10px;background:white;border-radius:6px;text-align:center;border:1px solid #E2E8F0">';
+      html += '<div style="font-size:11px;color:#475569;margin-bottom:4px">20 ans</div>';
+      html += '<div style="font-family:var(--mono);font-size:18px;font-weight:800;color:#059669">' + pctBelow20y + '%</div>';
+      html += '<div style="font-size:11px;color:#475569">' + below + '/' + totalObs + ' obs</div>';
+      html += '</div>';
+
+      // 5 ans
+      html += '<div style="padding:10px;background:white;border-radius:6px;text-align:center;border:1px solid #E2E8F0">';
+      html += '<div style="font-size:11px;color:#475569;margin-bottom:4px">5 ans</div>';
+      html += '<div style="font-family:var(--mono);font-size:18px;font-weight:800;color:#059669">' + pctBelow5y + '%</div>';
+      html += '<div style="font-size:11px;color:#475569">' + below5y + '/' + total5y + ' obs</div>';
+      html += '</div>';
+
+      // Nb jours au-dessus
+      html += '<div style="padding:10px;background:white;border-radius:6px;text-align:center;border:1px solid #E2E8F0">';
+      html += '<div style="font-size:11px;color:#475569;margin-bottom:4px">Nb obs au-dessus</div>';
+      html += '<div style="font-family:var(--mono);font-size:18px;font-weight:800;color:' + (above === 0 ? '#059669' : '#DC2626') + '">' + above + '</div>';
+      html += '<div style="font-size:11px;color:#475569">sur ' + totalObs + ' total</div>';
+      html += '</div>';
+
+      // Dernière fois au-dessus
+      html += '<div style="padding:10px;background:white;border-radius:6px;text-align:center;border:1px solid #E2E8F0">';
+      html += '<div style="font-size:11px;color:#475569;margin-bottom:4px">Dernier dépassement</div>';
+      html += '<div style="font-family:var(--mono);font-size:14px;font-weight:800;color:' + (lastAbove ? '#DC2626' : '#059669') + '">' + (lastAbove || 'Jamais') + '</div>';
+      html += '<div style="font-size:11px;color:#475569">' + (lastAbove ? 'il y a ' + Math.round((Date.now() - new Date(lastAbove).getTime()) / 86400000 / 365) + ' ans' : 'sur 20 ans') + '</div>';
+      html += '</div>';
+
+      // Max consécutif au-dessus
+      html += '<div style="padding:10px;background:white;border-radius:6px;text-align:center;border:1px solid #E2E8F0">';
+      html += '<div style="font-size:11px;color:#475569;margin-bottom:4px">Max consécutif ≥</div>';
+      html += '<div style="font-family:var(--mono);font-size:18px;font-weight:800;color:' + (maxConsecAbove <= 2 ? '#059669' : '#DC2626') + '">' + maxConsecAbove + ' obs</div>';
+      html += '<div style="font-size:11px;color:#475569">pire épisode continu</div>';
+      html += '</div>';
+
+      html += '</div>';
+
+      // Forward estimée
+      html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+      html += '<div style="padding:8px 12px;background:#ECFDF5;border:1px solid #6EE7B7;border-radius:6px;font-size:11px;color:#065F46">';
+      html += '<strong>Forward estimée : 85-92%</strong> — en régime de taux normalisés (post-ZIRP), avec haircut stagflation.</div>';
+      html += '<div style="padding:8px 12px;background:#FEF3C7;border:1px solid #F59E0B;border-radius:6px;font-size:11px;color:#92400E">';
+      html += '⚠️ L\'historique 20 ans inclut 10 ans de taux zéro/négatifs (2012-2022) qui gonflent la probabilité. La forward est plus conservatrice.</div>';
+      html += '</div>';
+
+      html += '</div>';
+    }
   }
 
   // ─── Stress test 3 scénarios (pour produits actions) ──────
