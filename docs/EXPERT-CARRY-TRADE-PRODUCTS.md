@@ -81,7 +81,7 @@ C'est le montant que la banque peut utiliser pour financer les coupons (= valeur
 - **3.50%** : avril 2011 (crise dette euro) — **17 ans sans dépasser 4.40%**
 - Depuis 2009, le TEC10 n'a **jamais** dépassé 4.00%
 
-**Conclusion TARN trigger 4.40%** : Probabilité historique de coupon = **98.3%** sur 20 ans.
+**Conclusion TARN trigger 4.40%** : Probabilité historique brute = 98.3% sur 20 ans. Fourchette forward retenue : **85-92%** compte tenu du biais ZIRP et du régime actuel (détails section 3.1.1).
 
 ### ⚠️ 3.1.1 Note de robustesse statistique
 
@@ -246,30 +246,50 @@ ROI espéré : +9.93% / 5 ans ≈ +1.99%/an
 - L'emprunt SG court 5 ans quelle que soit la date d'autocall — les intérêts An 5 sont toujours dus
 - Pénalité de remboursement anticipé emprunt : soulte swap (potentiellement coûteux), donc on garde l'emprunt et on place en CAT
 
-### 5.2 Analyse risque/rendement
+### 5.2 Prime de complexité vs alternatives simples
+
+L'argument contrariant : **est-ce que la prime de complexité du TARN justifie le risque vs un simple CAT ou un Fixe Callable ?**
+
+| Placement | Rdt net/an espéré | Rdt garanti minimum | Prime vs CAT 3.20% | Prime vs Fixe Callable | Pire cas 5 ans |
+|-----------|------------------|-------------------|-------------------|----------------------|----------------|
+| **CAT simple 5Y 3.20%** | +0.23%/an | +0.23%/an | — | — | +11 250€ |
+| **Config B — Fixe Callable 4%** | +0.83%/an | +0.83%/an | +0.60%/an | — | +41 250€ |
+| **Config E — Fixe + TARN** | +1.50%/an | +0.32%/an | +1.27%/an | +0.67%/an | +15 750€ |
+| **Config A — TARN 6.6%** | +1.99%/an | -0.26%/an | +1.76%/an | +1.16%/an | -13 000€ |
+
+**Lecture** :
+- Config A offre **+1.16%/an de prime de complexité** vs le Fixe Callable pour accepter le risque conditionnel. Sur 1M€ = ~11 600€/an de gain supplémentaire espéré.
+- Config E offre **+0.67%/an de prime** avec un pire cas qui reste positif — ratio risque/rendement meilleur.
+- Un CAT simple à 3.20% rapporte ~11K€ sur 5 ans — Config A rapporte 9× plus en espérance, mais avec un risque de perte.
+
+> **QUESTION EXPERT** : La prime de complexité de +1.16%/an (Config A vs B) ou +0.67%/an (Config E vs B) est-elle suffisante pour justifier le risque conditionnel pour un corporate en trésorerie ? Quelle config recommandez-vous ?
+
+### 5.3 Analyse risque/rendement par config
 
 **Config A (TARN 1M × 10Y)** — Rendement max, risque modéré
-- Pire cas : TEC10 > 4.40% pendant 3 ans → 0% coupon → perte -13K€ sur 5 ans
-- Mais la dernière fois que TEC10 > 4.40% = **septembre 2008** (18 ans sans)
-- Autocall probable en ~4 ans → capital récupéré, puis réinvesti à 3% An 5
+- Espérance : +99K€ net (+1.99%/an)
+- Pire cas : -13K€ (TEC10 > 4.40% pendant 3 ans — persistant si déclenché, cf. 2007-2008)
+- ⚠️ Si le TEC10 casse 4.40%, il y reste probablement 2-3 ans (forte autocorrélation des taux)
 
 **Config B (Fixe 1M × 5Y)** — Rendement min, risque ZÉRO
 - Gain garanti +41K€ quoi qu'il arrive
-- Aucune condition, aucun risque de coupon
-- Pire cas = meilleur cas
+- Pire cas = meilleur cas = +41K€
 
 **Config E (500K Fixe + 500K TARN)** — Meilleur ratio rendement/risque
-- Le Fixe garantit +15K€ minimum (couvre le pire cas du TARN)
-- Le TARN booste le rendement à +75K€ espéré
+- Le Fixe garantit un socle positif même si le TARN ne paye rien
 - **Pire cas toujours positif (+15 750€)** grâce au Fixe qui compense
+- Espérance +75K€ = 73% du potentiel Config A avec 100% de protection du capital garanti
 
-### 5.3 Ce que je demande à l'expert
+> **Note sur le pricing** : le coupon 6.5-7.0% suppose un pricing compétitif. CIC propose 6.00% sur son TARN existant. La prime de taille (500K→1M) est typiquement de 10-25bp, pas 50-100bp. **Si le pricing réel est 6.00-6.25%**, l'espérance Config A baisse à ~+1.70%/an — mais reste supérieure au Fixe Callable.
+
+### 5.4 Ce que je demande à l'expert
 
 Pour chaque config, est-ce que les **coupons sont réalistes** compte tenu :
 1. Du budget option calculé (section 2.3)
 2. De la marge banque standard (~12-18% du budget)
-3. Du nominal (1M€ vs 500K€ — meilleur pricing ?)
+3. Du nominal (1M€ vs 500K€ — prime de taille réelle ?)
 4. Des conditions de marché actuelles (stagflation, BCE en pause)
+5. De la prime de complexité vs alternatives simples (section 5.2)
 
 ---
 
