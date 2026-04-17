@@ -62,15 +62,16 @@
           'Version 5Y budget plus limité · Garanti An 1 · TEC10 ≤ 4.40% · Capital garanti 100%',
         color: '#D97706'
       },
-      // ─── Digital Plancher + Bonus (sur-mesure, le meilleur combo) ──────
+      // ─── Digital Plancher + Bonus + AUTOCALL (sur-mesure) ──────
       digital: {
-        name: 'Digital Plancher 3% + Bonus 3.5% ' + duration + 'Y',
+        name: 'Digital Plancher 3% + Bonus 3.2% ' + duration + 'Y',
         type: 'hybride',
-        coupon: 6.50, couponPlancher: floor, couponBonus: 3.50,
-        prob: 0.95, // TEC10 ≤ 4.50% = 99% historique, haircut
+        coupon: 6.20, couponPlancher: floor, couponBonus: 3.20,
+        prob: 0.95,
         duration: duration, guaranteedYears: 0,
+        autocallTarget: 25, autocallYears: 4, // ~4 ans à 6.20%
         risk: 'Tres faible',
-        detail: 'SUR-MESURE à négocier (RFQ SG/BNPP/Natixis) · Plancher 3% GARANTI couvre emprunt 2.90% · Bonus +3.50% si TEC10 ≤ 4.50% · Pire cas = +0.10%/an · Capital garanti 100%',
+        detail: 'SUR-MESURE à négocier · Plancher 3% GARANTI (couvre emprunt 2.90%) · Bonus +3.20% si TEC10 ≤ 4.50% · Autocall si cumul ≥ 25% (~4 ans) · Sortie An 4 = capital récupéré pour rembourser emprunt · Pire cas = 3%/an garanti · Capital garanti 100%',
         color: '#0891B2'
       },
       // ─── Fixe Callable (CIC propose 4% en série) ──────
@@ -218,7 +219,7 @@
       },
       {
         id: 'B', name: '500K TARN + 500K Digital', emoji: '🎯',
-        desc: 'OPTIMAL — TARN 7% + Digital Plancher 3%+Bonus. Pire cas quasi nul.',
+        desc: 'OPTIMAL — TARN 7% + Digital Plancher 3%+Bonus+Autocall. Les 2 sortent en ~4 ans. Pire cas quasi nul.',
         products: [
           Object.assign({}, p10.tarn, { amount: 500000 }),
           Object.assign({}, p10.digital, { amount: 500000 })
@@ -397,25 +398,27 @@
       '</table>' +
       '<div style="margin-top:8px;font-size:11px;color:#1A202C"><strong>Argument de négo :</strong> Le CIC affiche 6,70% en retail (100K unitaire). Sur 500K-1M en sur-mesure, la marge banque passe de ~20% à ~15% du budget option → au moins +0,30% de coupon redistribuable.</div>');
 
-    html += _acc('cdc-produit2', '💎 PRODUIT 2 — Digital Plancher 3% + Bonus TEC10 (500K€, SUR-MESURE)',
+    html += _acc('cdc-produit2', '💎 PRODUIT 2 — Digital Plancher 3% + Bonus + Autocall (500K€, SUR-MESURE)',
       '<div style="padding:10px;background:#DBEAFE;border:1px solid #93C5FD;border-radius:6px;margin-bottom:10px;font-size:12px;color:#1E40AF">' +
-      '<strong>Ce produit n\'existe pas en série.</strong> Le CIC propose une Digitale Mémoire TEC10 à 4,60% (trigger 4,40%) mais sans plancher garanti. Nous voulons combiner un plancher garanti + un bonus conditionnel.</div>' +
+      '<strong>Ce produit n\'existe pas en série — à structurer sur-mesure.</strong> On combine : plancher garanti (comme un Fixe) + bonus conditionnel (comme une Digitale) + autocall (comme un TARN) pour récupérer le capital et rembourser l\'emprunt.</div>' +
       '<table style="width:100%;border-collapse:collapse;font-size:12px">' +
       '<tr style="border-bottom:1px solid ' + B.border + '"><td style="padding:6px;color:#64748B;width:35%">Plancher garanti</td><td style="padding:6px;font-weight:700;color:#059669">3,00%/an INCONDITIONNEL (couvre emprunt 2,90%)</td></tr>' +
-      '<tr style="border-bottom:1px solid ' + B.border + ';background:' + B.row1 + '"><td style="padding:6px;color:#64748B">Bonus conditionnel</td><td style="padding:6px;font-weight:700;color:#0891B2">+3,50% si TEC10 ≤ 4,50%</td></tr>' +
-      '<tr style="border-bottom:1px solid ' + B.border + '"><td style="padding:6px;color:#64748B">Coupon total espéré</td><td style="padding:6px;font-weight:700;color:#D97706">6,50% (plancher 3% + bonus 3,5%)</td></tr>' +
-      '<tr style="border-bottom:1px solid ' + B.border + ';background:' + B.row1 + '"><td style="padding:6px;color:#64748B">Pire cas</td><td style="padding:6px;font-weight:700;color:#059669">3,00% GARANTI → carry toujours positif (+0,10% vs emprunt)</td></tr>' +
-      '<tr style="border-bottom:1px solid ' + B.border + '"><td style="padding:6px;color:#64748B">Maturité</td><td style="padding:6px"><strong>5 ou 10 ans</strong> · Capital garanti 100%</td></tr>' +
+      '<tr style="border-bottom:1px solid ' + B.border + ';background:' + B.row1 + '"><td style="padding:6px;color:#64748B">Bonus conditionnel</td><td style="padding:6px;font-weight:700;color:#0891B2">+3,20% si TEC10 ≤ 4,50% (bonus réduit de 0,30% pour financer l\'autocall)</td></tr>' +
+      '<tr style="border-bottom:1px solid ' + B.border + '"><td style="padding:6px;color:#64748B">Coupon total espéré</td><td style="padding:6px;font-weight:700;color:#D97706">6,20% (plancher 3% + bonus 3,2%)</td></tr>' +
+      '<tr style="border-bottom:1px solid ' + B.border + ';background:' + B.row1 + '"><td style="padding:6px;color:#64748B">Autocall</td><td style="padding:6px;font-weight:700;color:#D97706">Si cumul coupons ≥ 25% (~4 ans à 6,20%) → capital récupéré pour rembourser emprunt SG</td></tr>' +
+      '<tr style="border-bottom:1px solid ' + B.border + '"><td style="padding:6px;color:#64748B">Pire cas</td><td style="padding:6px;font-weight:700;color:#059669">3,00% GARANTI → carry positif (+0,10% vs emprunt) même si bonus = 0%</td></tr>' +
+      '<tr style="border-bottom:1px solid ' + B.border + ';background:' + B.row1 + '"><td style="padding:6px;color:#64748B">Maturité</td><td style="padding:6px"><strong>10 ans</strong> (sortie probable An 4 via autocall) · Capital garanti 100%</td></tr>' +
       '<tr><td style="padding:6px;color:#64748B">Nominal</td><td style="padding:6px"><strong>500 000€</strong></td></tr>' +
       '</table>' +
-      '<div style="margin-top:8px;font-size:11px;color:#1A202C"><strong>Argument de négo :</strong> Le plancher 3% + bonus 3,5% est équivalent en budget à une Digitale classique ~5,5% sans plancher. Le plancher nous coûte ~1% de coupon en moins mais élimine 100% du risque de portage négatif. C\'est le prix de l\'assurance.</div>' +
-      '<div style="margin-top:6px;font-size:11px;color:#64748B"><strong>À demander chez :</strong> SG (Pierre Meunier, salle de marché) · CIC (structuration) · BNPP · Natixis (via Banque Populaire)</div>');
+      '<div style="margin-top:8px;font-size:11px;color:#1A202C"><strong>Pourquoi l\'autocall est essentiel :</strong> L\'emprunt SG dure 5 ans. Sans autocall, le capital du Digital est bloqué 10 ans → impossible de rembourser la SG. Avec autocall à ~25%, le capital est récupéré en An 4, pile à temps.</div>' +
+      '<div style="margin-top:6px;font-size:11px;color:#1A202C"><strong>Argument de négo :</strong> Le plancher 3% + bonus 3,2% + autocall ≈ budget d\'une Digitale classique ~5% sans plancher. L\'autocall coûte ~0,30% de bonus en moins. Le plancher coûte ~1% de bonus. Total = le client accepte un coupon espéré de 6,20% au lieu de ~7,50% sans protection, en échange de la sécurité du plancher + la sortie autocall.</div>' +
+      '<div style="margin-top:6px;font-size:11px;color:#64748B"><strong>À demander chez :</strong> SG (Pierre Meunier) · CIC · BNPP · Natixis (via BP)</div>');
 
     html += _acc('cdc-configs', '📦 Les 5 configurations comparées',
       '<table style="width:100%;border-collapse:collapse;font-size:12px">' +
       '<tr style="background:' + B.header + ';font-weight:700"><td style="padding:8px">CONFIG</td><td style="padding:8px">PRODUIT(S)</td><td style="padding:8px">COUPON</td></tr>' +
       '<tr style="border-bottom:1px solid ' + B.border + '"><td style="padding:8px;font-weight:700">🏆 A</td><td style="padding:8px">1M€ TARN TEC10 10Y</td><td style="padding:8px;font-weight:700;color:#D97706">7,00% conditionnel</td></tr>' +
-      '<tr style="background:#E8F0FE;border-bottom:1px solid ' + B.border + '"><td style="padding:8px;font-weight:700">🎯 B</td><td style="padding:8px"><strong>500K TARN + 500K Digital Plancher</strong></td><td style="padding:8px;font-weight:700;color:#2563EB">7,00% + 6,50% ← RECOMMANDÉ</td></tr>' +
+      '<tr style="background:#E8F0FE;border-bottom:1px solid ' + B.border + '"><td style="padding:8px;font-weight:700">🎯 B</td><td style="padding:8px"><strong>500K TARN + 500K Digital Plancher+Autocall</strong></td><td style="padding:8px;font-weight:700;color:#2563EB">7,00% + 6,20% ← RECOMMANDÉ</td></tr>' +
       '<tr style="border-bottom:1px solid ' + B.border + '"><td style="padding:8px;font-weight:700">🛡️ C</td><td style="padding:8px">500K TARN + 500K Fixe Callable</td><td style="padding:8px;font-weight:700;color:#059669">7,00% + 4,40%</td></tr>' +
       '<tr style="border-bottom:1px solid ' + B.border + ';background:' + B.row1 + '"><td style="padding:8px;font-weight:700">🔒 D</td><td style="padding:8px">1M€ Fixe Callable 10YNC3</td><td style="padding:8px;font-weight:700;color:#059669">4,40% garanti</td></tr>' +
       '<tr><td style="padding:8px;font-weight:700">📈 E</td><td style="padding:8px">500K TARN + 500K Step-Up</td><td style="padding:8px;font-weight:700;color:#059669">7,00% + 3,50→6%</td></tr>' +
@@ -552,7 +555,7 @@
         } else if (p.type === 'fixe') {
           explain = 'La banque vous verse ' + p.coupon + '% par an garanti, sans aucune condition. C\'est le placement le plus sûr : coupon fixe chaque année + capital remboursé à 100% à l\'échéance. La banque peut rappeler le produit si les taux baissent.';
         } else if (p.type === 'hybride' && p.couponPlancher) {
-          explain = 'La banque vous verse au minimum ' + p.couponPlancher + '% par an garanti (ce qui couvre votre emprunt à 2,90%). En plus, vous recevez un bonus de ' + p.couponBonus + '% si le TEC10 reste en dessous de 4,50%. Le minimum garanti protège votre carry trade : même dans le pire cas, vous ne perdez pas d\'argent.';
+          explain = 'La banque vous verse au minimum ' + p.couponPlancher + '% par an garanti (ce qui couvre votre emprunt à 2,90%). En plus, vous recevez un bonus de ' + p.couponBonus + '% si le TEC10 reste en dessous de 4,50%. ' + (p.autocallTarget ? 'Quand le total des coupons atteint ' + p.autocallTarget + '% (~' + p.autocallYears + ' ans), le produit s\'arrête et vous récupérez votre capital pour rembourser l\'emprunt. ' : '') + 'Le minimum garanti protège votre carry trade : même dans le pire cas, vous ne perdez pas d\'argent.';
         }
         if (explain) {
           h += '<div style="margin:6px 0 8px;padding:8px 10px;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:6px;font-size:11px;color:#1E40AF;line-height:1.6">' + explain + '</div>';
