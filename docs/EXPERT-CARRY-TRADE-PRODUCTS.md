@@ -85,20 +85,31 @@ C'est le montant que la banque peut utiliser pour financer les coupons (= valeur
 
 ### ⚠️ 3.1.1 Note de robustesse statistique
 
-**Le 98.3% est biaisé par la période ZIRP/NIRP (2012-2021)**. Cette période de taux négatifs/zéro représente ~45% de l'historique et gonfle artificiellement la probabilité de rester sous 4.40%.
+**Le 98.3% est biaisé par la période ZIRP/NIRP (2012-2021)** qui représente ~45% de l'historique.
 
-**Analyse conditionnelle au régime actuel** (taux normalisés 2.5-3%) :
-- Si on ne regarde que 2004-2008 + 2022-2026 (périodes de taux "normaux") : TEC10 > 4.40% pendant **~8% du temps**
-- La seule période de dépassement = 2007-2008 (crise financière, pic à 4.75%)
-- Depuis 2009, jamais au-dessus de 4.00%
+**Analyse sur sous-échantillon "régimes normaux" (2004-2008 + 2022-2026)** :
+- 363 observations, moyenne TEC10 = 2.99% (proche de l'actuel 3.09%)
+- TEC10 > 4.40% : **3.3% du temps** (12/363 obs)
+- TEC10 > 4.00% : **13.2% du temps** (48/363 obs)
+- Détail période 2004-2008 seule (111 obs) : > 4.40% = **10.8% du temps**
+- Détail période 2022-2026 (252 obs) : > 4.40% = **0% du temps** (max = 3.15%)
 
-**Estimation forward recommandée** :
-- Probabilité brute historique : 98.3%
-- Probabilité conditionnelle au régime actuel : **85-92%**
-- Fourchette consensus (Claude + OpenAI après review) : **~90%**
-- Pour un TARN 10Y, appliquer un léger haircut supplémentaire : **85-90%**
+**Probabilité cumulée sur la durée du produit** (observation annuelle TARN) :
 
-> **QUESTION EXPERT** : La probabilité de 98.3% est basée sur l'historique brut 20 ans. En conditionnant au régime actuel (BCE normalisée, stagflation, PCE 2.8%), nous estimons 85-92%. Quelle probabilité forward recommandez-vous pour un TARN 5Y et un TARN 10Y ?
+| Prob annuelle sous 4.40% | P(5 ans sans miss) | P(10 ans sans miss) |
+|--------------------------|-------------------|-------------------|
+| 98% (historique brut) | 90.4% | 81.7% |
+| 97% | 85.9% | 73.7% |
+| 95% | 77.4% | 59.9% |
+| 92% | 65.9% | 43.4% |
+
+**IMPORTANT** : ces probas cumulées supposent qu'il faut un coupon CHAQUE année. Or le TARN a un mécanisme de **cumul** (autocall à 26%). Si un coupon est manqué An 3 mais versé An 4-5, le cumul peut quand même être atteint. La probabilité effective est donc **supérieure** aux chiffres ci-dessus.
+
+**Notre estimation forward** :
+- Probabilité marginale annuelle TEC10 ≤ 4.40% : **95-97%** (sous-échantillon taux normaux = 96.7%, haircut stagflation)
+- Probabilité d'atteindre l'autocall sur 5 ans : **85-92%**
+
+> **QUESTION EXPERT** : Sur les 363 observations en régime de taux normalisés, TEC10 > 4.40% = 3.3%. Mais la période 2004-2008 montre 10.8%. Quelle probabilité annuelle forward recommandez-vous ? Et la mécanique de cumul du TARN (vs coupon chaque année) change-t-elle significativement la proba effective ?
 
 ### 3.2 Euribor 3M — Probabilité de franchissement
 
@@ -183,29 +194,57 @@ C'est le montant que la banque peut utiliser pour financer les coupons (= valeur
 
 ### 5.1.1 Vérification arithmétique — Config A (TARN 1M × 10Y)
 
-Le rendement +2.18%/an peut sembler faible pour un coupon de 6.6%. Voici le détail :
+**Scénario central : autocall An 4 (probabilité estimée ~85-90%)**
 
 ```
-An 1 : 6.60% GARANTI → +66 000€     (cumul coupon 6.6%)
-An 2 : 6.60% GARANTI → +66 000€     (cumul 13.2%)
-An 3 : 6.40% espéré (6.6%×97%) → +64 020€  (cumul 19.6%)
-An 4 : 6.40% espéré → +64 020€      (cumul 26.0% → AUTOCALL)
-An 5 : 3.00% CAT réinvesti → +30 000€  (post-autocall)
-───────────────────────────────────────
-Total revenus :           +290 040€
-Intérêts emprunt 5 ans :  -145 000€
-Spread brut :             +145 040€
-IS 25% :                   -36 260€
+An 1 : 6.60% GARANTI  → +66 000€  (cumul 6.6%)
+An 2 : 6.60% GARANTI  → +66 000€  (cumul 13.2%)
+An 3 : 6.60% si TEC10 ≤ 4.40% → +66 000€  (cumul 19.8%)
+An 4 : 6.60% si TEC10 ≤ 4.40% → +66 000€  (cumul 26.4% ≥ 26% → AUTOCALL)
+       Capital 1M€ récupéré, placé en CAT
+An 5 : 3.00% CAT       → +30 000€  (réinvestissement post-autocall)
+       Intérêts emprunt SG : -29 000€ (l'emprunt court toujours)
+────────────────────────────────────────
+Total revenus :           +294 000€
+Intérêts emprunt 5 × 29K : -145 000€
+Spread brut :             +149 000€
+IS 25% (Caméleons IS) :   -37 250€
 ═══════════════════════════════════════
-NET APRÈS IS :            +108 780€
-ROI total :               +10.88%
-ROI/an :                  +2.18%
+NET APRÈS IS :            +111 750€
+ROI total :               +11.18%
+ROI/an :                  +2.24%
 ```
 
-**Pourquoi "seulement" 2.18% et pas 3.7% (6.6% - 2.90%)** :
-1. Probabilité 97% sur An 3-4 réduit le coupon effectif à 6.40%
-2. L'autocall en An 4 force le réinvestissement à 3% pour An 5 (net quasi nul)
-3. L'IS 25% s'applique sur tout le spread net
+**Scénario dégradé : TEC10 > 4.40% à partir de An 3 (probabilité ~10-15%)**
+
+```
+An 1 : 6.60% GARANTI  → +66 000€
+An 2 : 6.60% GARANTI  → +66 000€
+An 3 : 0% (TEC10 > 4.40%)  → 0€
+An 4 : 0%                   → 0€
+An 5 : 0%                   → 0€
+────────────────────────────────────────
+Total revenus :           +132 000€
+Intérêts emprunt :        -145 000€
+Net brut :                 -13 000€
+IS : 0 (pas de bénéfice)
+═══════════════════════════════════════
+NET :                      -13 000€ (perte)
+ROI :                      -1.30% sur 5 ans
+```
+
+**Espérance pondérée** (90% central / 10% dégradé) :
+
+```
+E[net] = 0.90 × 111 750 + 0.10 × (-13 000) = +99 275€
+ROI espéré : +9.93% / 5 ans ≈ +1.99%/an
+```
+
+**Notes** :
+- Entité fiscale : Caméleons Com Mark (société IS 25%, pas PFU 30%)
+- Trigger TARN : TEC10 constaté à la date d'observation annuelle (fixing), pas en continu
+- L'emprunt SG court 5 ans quelle que soit la date d'autocall — les intérêts An 5 sont toujours dus
+- Pénalité de remboursement anticipé emprunt : soulte swap (potentiellement coûteux), donc on garde l'emprunt et on place en CAT
 
 ### 5.2 Analyse risque/rendement
 
