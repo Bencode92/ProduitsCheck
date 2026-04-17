@@ -37,96 +37,163 @@
     } catch(e) { /* fallback values */ }
   }
 
-  // ─── Product generator: compute optimal coupon from real rates ──────
+  // ─── Product generator: realistic products from real market curves ──────
   function _budgetOption(rate, years) {
     return 1 - 1 / Math.pow(1 + rate / 100, years);
   }
 
   function _generateProducts(amount, duration) {
-    var rate = duration >= 8 ? MR.tec10 : MR.oat5y;
-    var budget = _budgetOption(rate, duration);
-    var margin = 0.15; // bank margin ~15% of budget
+    var swapRate = duration >= 8 ? MR.tec10 : MR.oat5y;
+    var budget = _budgetOption(swapRate, duration);
+    var margin = 0.15;
+    var net = budget * (1 - margin);
 
-    // Fixe Callable: budget + swaption premium (~40% extra)
-    var fixeBudget = budget * (1 - margin) + budget * 0.40 * (1 - margin);
-    var fixeCoupon = Math.round((fixeBudget / duration * 100 + rate) * 100) / 100;
-    fixeCoupon = Math.min(fixeCoupon, rate + 2.5); // cap realiste
+    // ─── TARN TEC10: le produit phare ──────
+    // Coupon = swap + spread (3-4% sur les taux longs grace au budget option)
+    // Realiste: CIC propose TARN a ~6-7% sur TEC10, confirme par les RDV banquiers
+    var tarnCoupon = Math.round((swapRate + 3.5) * 10) / 10; // swap + 3.5% de prime
+    tarnCoupon = Math.max(5.5, Math.min(tarnCoupon, 7.5));
+    var tarnAutocall = Math.round(tarnCoupon * 4); // autocall en ~4 ans
+    var tarnGuaranteed = 2; // 2 premieres annees garanties (standard CIC/SG)
 
-    // TARN conditionnel: higher coupon because not always paid
-    var probCoupon = 0.92; // consensus historique
-    var tarnBudget = budget * (1 - margin);
-    var tarnCoupon = Math.round((tarnBudget / (duration * probCoupon) * 100 + rate * 0.5) * 100) / 100;
-    tarnCoupon = Math.min(tarnCoupon, 9.5); // cap realiste
+    // ─── Fixe Callable: coupon garanti, callable emetteur ──────
+    // Realiste: swap + 1-1.5% (swaption premium)
+    var fixeCoupon = Math.round((swapRate + 1.3) * 10) / 10;
+    fixeCoupon = Math.max(3.5, Math.min(fixeCoupon, 5.5));
 
-    // Hybride: floor 3% + bonus conditionnel
+    // ─── Hybride: plancher 3% + bonus digital si TEC10 ≤ 4.00% ──────
     var floor = 3.00;
-    var bonusBudget = budget * (1 - margin) - (floor / 100 * duration - budget * 0.5);
-    var bonus = Math.max(1.0, Math.round(bonusBudget / duration * 100 * 100) / 100);
-    bonus = Math.min(bonus, 4.0);
+    var bonusBudget = (net * 100 / duration) - (floor * 0.3);
+    var bonus = Math.round(Math.max(1.5, Math.min(bonusBudget, 4.0)) * 10) / 10;
 
-    // Floater: floor + variable TEC10
-    var floaterSpread = Math.round((budget * (1 - margin) / duration * 100 - 0.3) * 100) / 100;
-    floaterSpread = Math.max(0.10, Math.min(floaterSpread, 1.0));
-    var floaterCurrent = Math.round((floor + Math.max(0, MR.tec10 - 2.20 + floaterSpread)) * 100) / 100;
+    // ─── Floater: plancher 3% + variable indexe TEC10 ──────
+    var floaterCurrent = Math.round((floor + Math.max(0, MR.tec10 - 2.00)) * 100) / 100;
 
     return {
-      fixe: {
-        name: 'Fixe Callable ' + duration + 'Y', type: 'fixe',
-        coupon: fixeCoupon, prob: 1.00, duration: duration,
-        risk: 'Zero', detail: 'Coupon garanti, capital garanti, callable emetteur',
-        color: '#059669'
-      },
       tarn: {
-        name: 'TARN TEC10 ' + duration + 'Y' + (duration >= 8 ? ' + PUT 5Y' : ''),
-        type: 'conditionnel', coupon: tarnCoupon, prob: probCoupon,
-        duration: duration, guaranteedYears: duration >= 8 ? 2 : 1,
-        risk: 'Faible', detail: 'TEC10 ≤ 4.40%, proba historique 97%, capital garanti',
+        name: 'TARN TEC10 ' + tarnCoupon + '% ' + duration + 'Y' + (duration >= 8 ? ' + PUT 5Y' : ''),
+        type: 'conditionnel', coupon: tarnCoupon, prob: 0.97,
+        duration: duration, guaranteedYears: tarnGuaranteed,
+        autocallTarget: tarnAutocall, autocallYears: Math.ceil(tarnAutocall / tarnCoupon),
+        risk: 'Faible',
+        detail: 'Coupon ' + tarnCoupon + '%/an · Garanti An 1-2 · Conditionnel si TEC10 ≤ 4.40% (proba 97% sur 20 ans) · Autocall si cumul ≥ ' + tarnAutocall + '% (~' + Math.ceil(tarnAutocall / tarnCoupon) + ' ans) · Capital garanti 100%' + (duration >= 8 ? ' · PUT sortie a 100% a 5 ans' : ''),
         color: '#D97706'
       },
+      fixe: {
+        name: 'Fixe Callable ' + fixeCoupon + '% ' + duration + 'Y',
+        type: 'fixe', coupon: fixeCoupon, prob: 1.00,
+        duration: duration, guaranteedYears: duration,
+        risk: 'Zero',
+        detail: 'Coupon ' + fixeCoupon + '% GARANTI chaque annee · Capital garanti 100% · Callable emetteur des An ' + (duration >= 8 ? 3 : 1) + ' (rappel si taux baissent)',
+        color: '#059669'
+      },
       hybride: {
-        name: 'Hybride Plancher ' + floor + '% + Bonus ' + duration + 'Y',
+        name: 'Hybride ' + floor + '% + ' + bonus + '% ' + duration + 'Y',
         type: 'hybride', coupon: floor + bonus, couponPlancher: floor, couponBonus: bonus,
-        prob: 0.93, duration: duration,
-        risk: 'Tres faible', detail: 'Plancher ' + floor + '% couvre emprunt, bonus si TEC10 ≤ 4.00%',
+        prob: 0.93, duration: duration, guaranteedYears: 0,
+        risk: 'Tres faible',
+        detail: 'Plancher ' + floor + '% GARANTI (couvre le 2.90% emprunt) + Bonus ' + bonus + '% si TEC10 ≤ 4.00% (proba ~93%) · Capital garanti 100%',
         color: '#0891B2'
       },
       floater: {
-        name: 'Floater TEC10 Plancher ' + floor + '% ' + duration + 'Y',
+        name: 'Floater Plancher ' + floor + '% + TEC10 ' + duration + 'Y',
         type: 'hybride', coupon: floaterCurrent, couponPlancher: floor,
-        couponBonus: floaterCurrent - floor, prob: 0.97, duration: duration,
-        risk: 'Tres faible', detail: 'Plancher ' + floor + '% + variable TEC10, monte si taux montent',
+        couponBonus: Math.round((floaterCurrent - floor) * 100) / 100, prob: 0.97,
+        duration: duration, guaranteedYears: 0,
+        risk: 'Tres faible',
+        detail: 'Plancher ' + floor + '% GARANTI + variable = max(' + floor + '%, TEC10 - 2.00%) · Auj ' + floaterCurrent + '% · Si TEC10 monte a 4% → ' + (floor + 2.0).toFixed(1) + '% · Capital garanti 100%',
         color: '#7C3AED'
       }
     };
   }
 
-  // ─── P&L calculation ──────
+  // ─── P&L calculation with autocall + reinvestment ──────
+  var CAT_REINVEST_RATE = 3.00; // taux de reinvestissement post-autocall (CAT ou nouveau produit)
+
   function _computePnL(products, loanAmount, loanRate, years, taxRate) {
     var totalRevenue = 0, totalInterest = 0;
+    var flows = []; // year by year detail
+    var autocalled = {}; // track which products have autocalled
+
     for (var yr = 1; yr <= years; yr++) {
       var interest = Math.round(loanAmount * loanRate / 100);
       var revenue = 0;
-      products.forEach(function(p) {
-        var couponEff = p.type === 'fixe' ? p.coupon :
-          p.type === 'hybride' ? (p.couponPlancher + p.couponBonus * (p.prob || 0.9)) :
-          p.coupon * (p.prob || 0.9);
-        revenue += Math.round(p.amount * couponEff / 100);
+      var flowDetail = { year: yr, products: [], totalRev: 0, interest: interest };
+
+      products.forEach(function(p, pi) {
+        var key = pi;
+        if (!autocalled[key]) autocalled[key] = { called: false, calledYear: 0, cumul: 0 };
+        var ac = autocalled[key];
+
+        if (ac.called) {
+          // Post-autocall: reinvest at CAT rate
+          var reinvRev = Math.round(p.amount * CAT_REINVEST_RATE / 100);
+          revenue += reinvRev;
+          flowDetail.products.push({ name: p.name + ' (réinvesti CAT ' + CAT_REINVEST_RATE + '%)', rev: reinvRev, color: '#94A3B8' });
+          return;
+        }
+
+        var couponEff = 0;
+        if (p.type === 'fixe') {
+          couponEff = p.coupon;
+        } else if (p.type === 'hybride') {
+          couponEff = p.couponPlancher + p.couponBonus * (p.prob || 0.9);
+        } else {
+          // Conditionnel (TARN)
+          if (yr <= (p.guaranteedYears || 0)) {
+            couponEff = p.coupon; // garanti
+          } else {
+            couponEff = p.coupon * (p.prob || 0.9); // conditionnel × proba
+          }
+        }
+        var rev = Math.round(p.amount * couponEff / 100);
+        revenue += rev;
+        flowDetail.products.push({ name: p.name, rev: rev, color: p.color });
+
+        // Check autocall
+        if (p.autocallTarget && p.type === 'conditionnel') {
+          ac.cumul += couponEff;
+          if (ac.cumul >= p.autocallTarget) {
+            ac.called = true;
+            ac.calledYear = yr;
+          }
+        }
       });
+
+      flowDetail.totalRev = revenue;
+      var netBefore = revenue - interest;
+      var tax = netBefore > 0 ? Math.round(netBefore * taxRate / 100) : 0;
+      flowDetail.tax = tax;
+      flowDetail.net = netBefore - tax;
       totalRevenue += revenue;
       totalInterest += interest;
+      flows.push(flowDetail);
     }
+
     var net = totalRevenue - totalInterest;
     var tax = net > 0 ? Math.round(net * taxRate / 100) : 0;
     var netAfterTax = net - tax;
 
-    // Worst case
+    // Worst case: guaranteed coupons only, post-autocall at CAT rate
     var worstRevenue = 0;
+    var worstAC = {};
     for (var yr2 = 1; yr2 <= years; yr2++) {
-      products.forEach(function(p) {
+      products.forEach(function(p, pi) {
+        if (!worstAC[pi]) worstAC[pi] = { called: false, cumul: 0 };
+        var wac = worstAC[pi];
+        if (wac.called) {
+          worstRevenue += Math.round(p.amount * CAT_REINVEST_RATE / 100);
+          return;
+        }
         var worst = p.type === 'fixe' ? p.coupon :
           p.type === 'hybride' ? p.couponPlancher :
           (yr2 <= (p.guaranteedYears || 0) ? p.coupon : 0);
         worstRevenue += Math.round(p.amount * worst / 100);
+        // Worst case autocall: only guaranteed coupons count
+        if (p.autocallTarget && yr2 <= (p.guaranteedYears || 0)) {
+          wac.cumul += p.coupon;
+          if (wac.cumul >= p.autocallTarget) wac.called = true;
+        }
       });
     }
     var worstNet = worstRevenue - totalInterest;
@@ -137,7 +204,8 @@
       netAfterTax: netAfterTax, perYear: Math.round(netAfterTax / years),
       roiPct: Math.round(netAfterTax / loanAmount * 100 * 100) / 100,
       roiAnnual: Math.round(netAfterTax / loanAmount / years * 100 * 100) / 100,
-      worstNet: worstNet - worstTax, worstPerYear: Math.round((worstNet - worstTax) / years)
+      worstNet: worstNet - worstTax, worstPerYear: Math.round((worstNet - worstTax) / years),
+      flows: flows
     };
   }
 
@@ -281,50 +349,44 @@
       html += '</div></div>';
     });
 
-    // ─── P&L year by year for best config ──────
+    // ─── P&L year by year for best config (with autocall tracking) ──────
     html += '<div style="background:' + B.card + ';border:2px solid #059669;border-radius:8px;padding:14px;margin-top:16px">';
     html += '<div style="font-size:13px;font-weight:700;color:#059669;margin-bottom:10px">📋 P&L année par année — ' + best.emoji + ' ' + best.name + ' (meilleur rendement)</div>';
 
-    html += '<table style="width:100%;border-collapse:collapse;font-size:11px">';
-    html += '<thead><tr style="background:' + B.header + '">';
-    html += '<th style="padding:8px;text-align:left;color:' + B.muted + '">AN</th>';
-    best.products.forEach(function(p) {
-      html += '<th style="padding:8px;text-align:right;color:' + p.color + '">' + p.name.substring(0, 20) + '</th>';
-    });
-    html += '<th style="padding:8px;text-align:right;color:#059669">TOTAL REV.</th>';
-    html += '<th style="padding:8px;text-align:right;color:#DC2626">INTÉRÊTS</th>';
-    html += '<th style="padding:8px;text-align:right;color:#D97706">IS 25%</th>';
-    html += '<th style="padding:8px;text-align:right;color:' + B.text + ';font-weight:700">NET</th>';
-    html += '<th style="padding:8px;text-align:right;color:#7C3AED">CUMUL</th>';
-    html += '</tr></thead><tbody>';
+    if (best.pnl.flows && best.pnl.flows.length > 0) {
+      html += '<table style="width:100%;border-collapse:collapse;font-size:11px">';
+      html += '<thead><tr style="background:' + B.header + '">';
+      html += '<th style="padding:8px;text-align:left;color:' + B.muted + '">AN</th>';
+      html += '<th style="padding:8px;text-align:left;color:' + B.muted + '">PRODUITS & COUPONS</th>';
+      html += '<th style="padding:8px;text-align:right;color:#059669">REVENUS</th>';
+      html += '<th style="padding:8px;text-align:right;color:#DC2626">INTÉRÊTS</th>';
+      html += '<th style="padding:8px;text-align:right;color:#D97706">IS 25%</th>';
+      html += '<th style="padding:8px;text-align:right;color:' + B.text + ';font-weight:700">NET</th>';
+      html += '<th style="padding:8px;text-align:right;color:#7C3AED">CUMUL</th>';
+      html += '</tr></thead><tbody>';
 
-    var cumul = 0;
-    var annualInterest = Math.round(LOAN.amount * LOAN.rate / 100);
-    for (var yr = 1; yr <= LOAN.years; yr++) {
-      var bg = yr % 2 === 0 ? B.row0 : B.row1;
-      var totalRev = 0;
-      html += '<tr style="background:' + bg + ';border-bottom:1px solid ' + B.border + '">';
-      html += '<td style="padding:6px 8px;font-weight:600">An ' + yr + '</td>';
-      best.products.forEach(function(p) {
-        var couponEff = p.type === 'fixe' ? p.coupon :
-          p.type === 'hybride' ? (p.couponPlancher + p.couponBonus * (p.prob || 0.9)) :
-          (yr <= (p.guaranteedYears || 0) ? p.coupon : p.coupon * (p.prob || 0.9));
-        var rev = Math.round(p.amount * couponEff / 100);
-        totalRev += rev;
-        html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:' + p.color + '">+' + _f(rev) + '€</td>';
+      var cumul = 0;
+      best.pnl.flows.forEach(function(f, fi) {
+        cumul += f.net;
+        var bg = fi % 2 === 0 ? B.row0 : B.row1;
+        html += '<tr style="background:' + bg + ';border-bottom:1px solid ' + B.border + '">';
+        html += '<td style="padding:6px 8px;font-weight:700">An ' + f.year + '</td>';
+        // Product details
+        html += '<td style="padding:6px 8px">';
+        f.products.forEach(function(fp) {
+          var isReinvest = fp.color === '#94A3B8';
+          html += '<div style="font-size:9px;color:' + (isReinvest ? '#94A3B8' : fp.color) + ';' + (isReinvest ? 'font-style:italic' : '') + '">' + fp.name.substring(0, 35) + ' → <strong>+' + _f(fp.rev) + '€</strong></div>';
+        });
+        html += '</td>';
+        html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:#059669;font-weight:700">+' + _f(f.totalRev) + '€</td>';
+        html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:#DC2626">-' + _f(f.interest) + '€</td>';
+        html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:#D97706">-' + _f(f.tax) + '€</td>';
+        html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);font-weight:700;color:' + (f.net >= 0 ? '#059669' : '#DC2626') + '">' + (f.net >= 0 ? '+' : '') + _f(f.net) + '€</td>';
+        html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);font-weight:700;color:#7C3AED">' + (cumul >= 0 ? '+' : '') + _f(cumul) + '€</td>';
+        html += '</tr>';
       });
-      var netBefore = totalRev - annualInterest;
-      var tax = netBefore > 0 ? Math.round(netBefore * LOAN.taxRate / 100) : 0;
-      var net = netBefore - tax;
-      cumul += net;
-      html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:#059669">+' + _f(totalRev) + '€</td>';
-      html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:#DC2626">-' + _f(annualInterest) + '€</td>';
-      html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:#D97706">-' + _f(tax) + '€</td>';
-      html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);font-weight:700;color:' + (net >= 0 ? '#059669' : '#DC2626') + '">' + (net >= 0 ? '+' : '') + _f(net) + '€</td>';
-      html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);font-weight:700;color:#7C3AED">' + (cumul >= 0 ? '+' : '') + _f(cumul) + '€</td>';
-      html += '</tr>';
+      html += '</tbody></table>';
     }
-    html += '</tbody></table>';
     html += '</div>';
 
     html += '</div>';
