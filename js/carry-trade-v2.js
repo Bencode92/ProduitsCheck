@@ -44,66 +44,66 @@
 
   function _generateProducts(amount, duration) {
     var swapRate = duration >= 8 ? MR.tec10 : MR.oat5y;
-    var budget = _budgetOption(swapRate, duration);
-    var margin = 0.15;
-    var net = budget * (1 - margin);
-
-    // ─── TARN TEC10: le produit phare ──────
-    // Coupon = swap + spread (3-4% sur les taux longs grace au budget option)
-    // Realiste: CIC propose TARN a ~6-7% sur TEC10, confirme par les RDV banquiers
-    var tarnCoupon = Math.round((swapRate + 3.5) * 10) / 10; // swap + 3.5% de prime
-    tarnCoupon = Math.max(5.5, Math.min(tarnCoupon, 7.5));
-    var tarnAutocall = Math.round(tarnCoupon * 4); // autocall en ~4 ans
-    var tarnGuaranteed = 2; // 2 premieres annees garanties (standard CIC/SG)
-
-    // ─── Fixe Callable: coupon garanti, callable emetteur ──────
-    // Realiste: swap + 1-1.5% (swaption premium)
-    var fixeCoupon = Math.round((swapRate + 1.3) * 10) / 10;
-    fixeCoupon = Math.max(3.5, Math.min(fixeCoupon, 5.5));
-
-    // ─── Hybride: plancher 3% + bonus digital si TEC10 ≤ 4.00% ──────
     var floor = 3.00;
-    var bonusBudget = (net * 100 / duration) - (floor * 0.3);
-    var bonus = Math.round(Math.max(1.5, Math.min(bonusBudget, 4.0)) * 10) / 10;
-
-    // ─── Floater: plancher 3% + variable indexe TEC10 ──────
-    var floaterCurrent = Math.round((floor + Math.max(0, MR.tec10 - 2.00)) * 100) / 100;
 
     return {
+      // ─── TARN CIC RÉEL (XS3340532707) + version sur-mesure ──────
       tarn: {
-        name: 'TARN TEC10 ' + tarnCoupon + '% ' + duration + 'Y',
-        type: 'conditionnel', coupon: tarnCoupon, prob: 0.90,
-        probStress: 0.10, // proba scénario dégradé (TEC10 > 4.40% après An 2)
-        duration: duration, guaranteedYears: tarnGuaranteed,
-        autocallTarget: tarnAutocall, autocallYears: Math.ceil(tarnAutocall / tarnCoupon),
+        name: duration >= 8 ? 'TARN TEC10 7.00% Sur-Mesure ' + duration + 'Y' : 'TARN TEC10 5Y',
+        type: 'conditionnel',
+        coupon: duration >= 8 ? 7.00 : 5.80, // sur-mesure 1M = +0.30% vs retail 6.70%
+        prob: 0.92, // TEC10 > 4.60% = 0.3% historique, haircut forward
+        duration: duration, guaranteedYears: 2,
+        autocallTarget: duration >= 8 ? 28 : 23.2, // 4 × coupon
+        autocallYears: 4,
         risk: 'Faible',
-        detail: 'Coupon ' + tarnCoupon + '%/an · Garanti An 1-2 · Conditionnel si TEC10 ≤ 4.40% · Proba forward 85-92% (historique brut 98%, haircut stagflation) · Autocall cumul ≥ ' + tarnAutocall + '% (~' + Math.ceil(tarnAutocall / tarnCoupon) + ' ans) · Capital garanti 100%',
+        detail: duration >= 8 ?
+          'Sur-mesure 1M€ (+0.30% vs retail CIC 6.70%) · Garanti An 1-2 · TEC10 ≤ 4.60% (jamais dépassé depuis 2008) · Autocall cumul ≥ 28% (~4 ans) · Capital garanti 100%' :
+          'Version 5Y budget plus limité · Garanti An 1 · TEC10 ≤ 4.40% · Capital garanti 100%',
         color: '#D97706'
       },
-      fixe: {
-        name: 'Fixe Callable ' + fixeCoupon + '% ' + duration + 'Y',
-        type: 'fixe', coupon: fixeCoupon, prob: 1.00,
-        duration: duration, guaranteedYears: duration,
-        risk: 'Zero',
-        detail: 'Coupon ' + fixeCoupon + '% GARANTI chaque annee · Capital garanti 100% · Callable emetteur des An ' + (duration >= 8 ? 3 : 1) + ' (rappel si taux baissent)',
-        color: '#059669'
+      // ─── TARN CIC RETAIL (le vrai produit disponible) ──────
+      tarnRetail: {
+        name: 'TARN CIC 6.70% (XS3340532707)',
+        type: 'conditionnel',
+        coupon: 6.70, prob: 0.92,
+        duration: 10, guaranteedYears: 2,
+        autocallTarget: 26.80, autocallYears: 4,
+        risk: 'Faible',
+        detail: 'PRODUIT RÉEL CIC · ISIN XS3340532707 · Souscription avant 24/04/2026 · Coupon 6.70% · TEC10 ≤ 4.60% · Garanti An 1-2 · Autocall ≥ 26.80% · Nominal 100K€ · Capital garanti 100%',
+        color: '#B45309'
       },
-      hybride: {
-        name: 'Hybride ' + floor + '% + ' + bonus + '% ' + duration + 'Y',
-        type: 'hybride', coupon: floor + bonus, couponPlancher: floor, couponBonus: bonus,
-        prob: 0.90, duration: duration, guaranteedYears: 0,
-        risk: 'Tres faible',
-        detail: 'Plancher ' + floor + '% GARANTI (couvre le 2.90% emprunt) + Bonus ' + bonus + '% si TEC10 ≤ 4.00% (proba forward ~90%) · Capital garanti 100%',
-        color: '#0891B2'
-      },
-      floater: {
-        name: 'Floater Plancher ' + floor + '% + TEC10 ' + duration + 'Y',
-        type: 'hybride', coupon: floaterCurrent, couponPlancher: floor,
-        couponBonus: Math.round((floaterCurrent - floor) * 100) / 100, prob: 0.97,
+      // ─── Digital Plancher + Bonus (sur-mesure, le meilleur combo) ──────
+      digital: {
+        name: 'Digital Plancher 3% + Bonus 3.5% ' + duration + 'Y',
+        type: 'hybride',
+        coupon: 6.50, couponPlancher: floor, couponBonus: 3.50,
+        prob: 0.95, // TEC10 ≤ 4.50% = 99% historique, haircut
         duration: duration, guaranteedYears: 0,
         risk: 'Tres faible',
-        detail: 'Plancher ' + floor + '% GARANTI + variable = max(' + floor + '%, TEC10 - 2.00%) · Auj ' + floaterCurrent + '% · Si TEC10 monte a 4% → ' + (floor + 2.0).toFixed(1) + '% · Capital garanti 100%',
-        color: '#7C3AED'
+        detail: 'SUR-MESURE à négocier (RFQ SG/BNPP/Natixis) · Plancher 3% GARANTI couvre emprunt 2.90% · Bonus +3.50% si TEC10 ≤ 4.50% · Pire cas = +0.10%/an · Capital garanti 100%',
+        color: '#0891B2'
+      },
+      // ─── Fixe Callable (CIC propose 4% en série) ──────
+      fixe: {
+        name: 'Fixe Callable ' + (duration >= 8 ? '4.40' : '4.00') + '% ' + duration + 'Y',
+        type: 'fixe',
+        coupon: duration >= 8 ? 4.40 : 4.00, prob: 1.00,
+        duration: duration, guaranteedYears: duration,
+        risk: 'Zero',
+        detail: 'Coupon GARANTI · CIC propose 4.00% sur 10YNC3 en série · Sur-mesure 1M = potentiel 4.20-4.40% · Callable émetteur · Capital garanti 100%',
+        color: '#059669'
+      },
+      // ─── Step-Up Callable (sur-mesure) ──────
+      stepUp: {
+        name: 'Step-Up Callable 7Y NC3',
+        type: 'fixe',
+        coupon: 4.60, // moyenne pondérée 3.50→6.00%
+        prob: 1.00,
+        duration: 7, guaranteedYears: 7,
+        risk: 'Zero',
+        detail: 'SUR-MESURE · Coupon garanti croissant (3.50% → 4.00% → 4.50% → 5.00% → 5.50% → 6.00%) · Callable An 3+ · Spread vs emprunt qui s\'élargit chaque année · Capital garanti 100%',
+        color: '#059669'
       }
     };
   }
@@ -222,38 +222,43 @@
 
     var configs = [
       {
-        id: 'A', name: '1M × 10Y', emoji: '🏆',
-        desc: '1 produit de 1M€ sur 10 ans — max coupon, autocall ~4 ans, capital garanti à échéance',
+        id: 'A', name: '1M TARN 7% Sur-Mesure', emoji: '🏆',
+        desc: '1 produit de 1M€ TARN sur-mesure 10Y — coupon négocié 7.00% (+0.30% vs retail CIC 6.70%)',
         products: [Object.assign({}, p10.tarn, { amount: L.amount })],
         highlight: true
       },
       {
-        id: 'B', name: '1M × 5Y', emoji: '🛡️',
-        desc: '1 produit de 1M€ sur 5 ans — matche l\'emprunt, coupon garanti ou hybride',
-        products: [Object.assign({}, p5.fixe, { amount: L.amount })]
+        id: 'A2', name: '1M TARN CIC Retail 6.70%', emoji: '📌',
+        desc: 'PRODUIT RÉEL — TARN CIC XS3340532707, souscription avant 24/04/2026, 6.70%',
+        products: [Object.assign({}, p10.tarnRetail, { amount: L.amount })]
       },
       {
-        id: 'C', name: '2 × 500K × 5Y', emoji: '⚖️',
-        desc: '2 produits 500K sur 5 ans — 1 rendement + 1 sécurisé, diversification',
+        id: 'B', name: '500K TARN + 500K Digital', emoji: '🎯',
+        desc: 'OPTIMAL — TARN CIC 6.70% + Digital Plancher 3%+Bonus (sur-mesure). Pire cas quasi nul.',
         products: [
-          Object.assign({}, p5.hybride, { amount: 500000 }),
-          Object.assign({}, p5.floater, { amount: 500000 })
+          Object.assign({}, p10.tarnRetail, { amount: 500000 }),
+          Object.assign({}, p10.digital, { amount: 500000 })
         ]
       },
       {
-        id: 'D', name: '2 × 500K × 10Y', emoji: '🚀',
-        desc: '2 produits de 500K€ sur 10 ans — max coupons 10Y, TARN + Hybride',
+        id: 'C', name: '500K TARN + 500K Fixe', emoji: '🛡️',
+        desc: 'SAFE — TARN CIC 6.70% + Fixe Callable 4.40%. Pire cas toujours positif.',
         products: [
-          Object.assign({}, p10.tarn, { amount: 500000 }),
-          Object.assign({}, p10.hybride, { amount: 500000 })
+          Object.assign({}, p10.tarnRetail, { amount: 500000 }),
+          Object.assign({}, p10.fixe, { amount: 500000 })
         ]
       },
       {
-        id: 'E', name: '500K 5Y + 500K 10Y', emoji: '🎯',
-        desc: 'Mix durées — 1 produit 5 ans sécurisé + 1 produit 10 ans rendement',
+        id: 'D', name: '1M Fixe Callable 4.40%', emoji: '🔒',
+        desc: 'ZÉRO RISQUE — 1 produit garanti 4.40%. Coupon + bas mais aucune condition.',
+        products: [Object.assign({}, p10.fixe, { amount: L.amount })]
+      },
+      {
+        id: 'E', name: '500K TARN + 500K Step-Up', emoji: '📈',
+        desc: 'MIX — TARN CIC 6.70% + Step-Up Callable garanti croissant (3.50%→6.00%)',
         products: [
-          Object.assign({}, p5.fixe, { amount: 500000 }),
-          Object.assign({}, p10.tarn, { amount: 500000 })
+          Object.assign({}, p10.tarnRetail, { amount: 500000 }),
+          Object.assign({}, p10.stepUp, { amount: 500000 })
         ]
       }
     ];
@@ -394,17 +399,18 @@
       '• Coupon > 2,90% (sinon pas de portage positif)<br>' +
       '• Devise EUR · Éligible compte-titres ordinaire');
 
-    html += _acc('cdc-configs', '📦 Les 5 configurations à pricer',
+    html += _acc('cdc-configs', '📦 Les 6 configurations (produits réels + sur-mesure)',
       '<table style="width:100%;border-collapse:collapse;font-size:12px">' +
-      '<tr style="background:' + B.header + ';font-weight:700"><td style="padding:8px">CONFIG</td><td style="padding:8px">PRODUIT(S)</td><td style="padding:8px">DURÉE</td><td style="padding:8px">COUPON CIBLE</td></tr>' +
-      '<tr style="border-bottom:1px solid ' + B.border + '"><td style="padding:8px;font-weight:700">🏆 A</td><td style="padding:8px"><strong>1 produit de 1M€</strong> — TARN TEC10</td><td style="padding:8px"><strong>10 ans</strong></td><td style="padding:8px;color:#D97706;font-weight:700">6,50 – 7,00% conditionnel</td></tr>' +
-      '<tr style="border-bottom:1px solid ' + B.border + ';background:' + B.row1 + '"><td style="padding:8px;font-weight:700">🛡️ B</td><td style="padding:8px"><strong>1 produit de 1M€</strong> — Fixe Callable</td><td style="padding:8px"><strong>5 ans</strong></td><td style="padding:8px;color:#059669;font-weight:700">4,00 – 4,50% garanti</td></tr>' +
-      '<tr style="border-bottom:1px solid ' + B.border + '"><td style="padding:8px;font-weight:700">⚖️ C</td><td style="padding:8px"><strong>2 produits de 500K€</strong> — Hybride + Floater</td><td style="padding:8px"><strong>5 ans</strong></td><td style="padding:8px;color:#0891B2;font-weight:700">4,50% + 4,10% (plancher 3%)</td></tr>' +
-      '<tr style="border-bottom:1px solid ' + B.border + ';background:' + B.row1 + '"><td style="padding:8px;font-weight:700">🚀 D</td><td style="padding:8px"><strong>2 produits de 500K€</strong> — 2× TARN ou TARN + Hybride</td><td style="padding:8px"><strong>10 ans</strong></td><td style="padding:8px;color:#D97706;font-weight:700">6,50% + 4,50% conditionnel</td></tr>' +
-      '<tr style="background:#E8F0FE"><td style="padding:8px;font-weight:700">🎯 E</td><td style="padding:8px"><strong>500K 5 ans + 500K 10 ans</strong> — Fixe Callable + TARN TEC10</td><td style="padding:8px"><strong>5Y + 10Y</strong></td><td style="padding:8px;color:#2563EB;font-weight:700">4,00% garanti + 6,50% cond.</td></tr>' +
+      '<tr style="background:' + B.header + ';font-weight:700"><td style="padding:8px">CONFIG</td><td style="padding:8px">PRODUIT(S)</td><td style="padding:8px">COUPON</td><td style="padding:8px">TYPE</td></tr>' +
+      '<tr style="border-bottom:1px solid ' + B.border + '"><td style="padding:8px;font-weight:700">🏆 A</td><td style="padding:8px"><strong>1M€ TARN Sur-Mesure</strong> 10Y</td><td style="padding:8px;color:#D97706;font-weight:700">7.00%</td><td style="padding:8px;font-size:10px">Négocié (+0.30% vs retail CIC)</td></tr>' +
+      '<tr style="border-bottom:1px solid ' + B.border + ';background:#FEF3C7"><td style="padding:8px;font-weight:700">📌 A2</td><td style="padding:8px"><strong>1M€ TARN CIC Retail</strong> (XS3340532707)</td><td style="padding:8px;color:#B45309;font-weight:700">6.70%</td><td style="padding:8px;font-size:10px;color:#DC2626"><strong>DISPO — souscrire avant 24/04</strong></td></tr>' +
+      '<tr style="background:#E8F0FE;border-bottom:1px solid ' + B.border + '"><td style="padding:8px;font-weight:700">🎯 B</td><td style="padding:8px"><strong>500K TARN CIC + 500K Digital Plancher 3%+Bonus</strong></td><td style="padding:8px;color:#0891B2;font-weight:700">6.70% + 6.50%</td><td style="padding:8px;font-size:10px;color:#2563EB"><strong>RECOMMANDÉ — pire cas ~0</strong></td></tr>' +
+      '<tr style="border-bottom:1px solid ' + B.border + '"><td style="padding:8px;font-weight:700">🛡️ C</td><td style="padding:8px"><strong>500K TARN CIC + 500K Fixe Callable</strong></td><td style="padding:8px;color:#059669;font-weight:700">6.70% + 4.40%</td><td style="padding:8px;font-size:10px">Pire cas toujours positif</td></tr>' +
+      '<tr style="border-bottom:1px solid ' + B.border + ';background:' + B.row1 + '"><td style="padding:8px;font-weight:700">🔒 D</td><td style="padding:8px"><strong>1M€ Fixe Callable</strong> 10YNC3</td><td style="padding:8px;color:#059669;font-weight:700">4.40% garanti</td><td style="padding:8px;font-size:10px">Zéro risque, zéro condition</td></tr>' +
+      '<tr style="border-bottom:1px solid ' + B.border + '"><td style="padding:8px;font-weight:700">📈 E</td><td style="padding:8px"><strong>500K TARN CIC + 500K Step-Up Callable</strong></td><td style="padding:8px;color:#059669;font-weight:700">6.70% + 3.50→6%</td><td style="padding:8px;font-size:10px">TARN + garanti croissant</td></tr>' +
       '</table>' +
       '<div style="margin-top:8px;padding:6px 10px;background:#ECFDF5;border-radius:4px;font-size:11px;color:#065F46">' +
-      '✅ <strong>Config E recommandée</strong> : mix durées (5Y sécurisé + 10Y rendement), pire cas toujours positif, capte les coupons 10Y élevés.' +
+      '✅ <strong>Config B (TARN + Digital Plancher)</strong> = rendement max avec pire cas quasi nul. Le plancher 3% du Digital couvre l\'emprunt 2.90% quoi qu\'il arrive.' +
       '</div>');
 
     html += _acc('cdc-alternatives', '💡 Structures alternatives à demander',
