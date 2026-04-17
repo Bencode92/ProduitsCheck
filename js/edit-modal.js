@@ -135,7 +135,7 @@ window.showEditModal = function() {
         '<div class="form-field"><label>Type de structure</label><select id="fe-structure-type">' + structTypeOptions + '</select></div>' +
         '<div class="form-field"><label>Enveloppe</label><select id="fe-envelope">' + envelopeOptions + '</select></div>' +
         '<div class="form-field"><label>Montant investi (€)</label><input id="fe-invested" type="number" value="' + amount + '"></div>' +
-        '<div class="form-field"><label>Montant min (€)</label><input id="fe-mininvest" type="number" value="' + minInvestment + '" placeholder="Ex: 100000"></div>' +
+        '<div class="form-field"><label>Nominal unitaire (€)</label><input id="fe-mininvest" type="number" value="' + minInvestment + '" placeholder="Ex: 100000"></div>' +
         '<div class="form-field"><label>Maturité</label><input id="fe-maturity" value="' + escapeAttr(p.maturity || '') + '"></div>' +
         '<div class="form-field"><label>Niveau initial (strike)</label><input id="fe-strike-price" type="number" step="0.01" value="' + strikePrice + '" placeholder="Ex: 4950"></div>' +
         '<div class="form-field full"><label>Sous-jacents (séparés par virgule)</label><input id="fe-underlyings" value="' + escapeAttr(underlyings) + '"></div>' +
@@ -148,6 +148,8 @@ window.showEditModal = function() {
         '<div class="form-field"><label>Type coupon</label><select id="fe-coupon-type">' + couponTypeOptions + '</select></div>' +
         '<div class="form-field"><label>Fréquence paiement</label><select id="fe-coupon-freq">' + freqOptions + '</select></div>' +
         '<div class="form-field"><label>Coupon mémoire</label><select id="fe-coupon-memory"><option value="false"' + (!couponMemory ? ' selected' : '') + '>Non</option><option value="true"' + (couponMemory ? ' selected' : '') + '>Oui — rattrapage</option></select></div>' +
+        '<div class="form-field"><label>Années garanties</label><input id="fe-guaranteed-years" type="number" value="' + (p.guaranteedYears || 0) + '" placeholder="Ex: 2 (An 1-2 sans condition)"></div>' +
+        '<div class="form-field"><label>Commissions (%)</label><input id="fe-commissions" type="number" step="0.01" value="' + ((p.commissions || '') + '') + '" placeholder="Ex: 1.30"></div>' +
         '</div>' +
 
         // ─── Section 3: Protection Capital ───
@@ -163,7 +165,8 @@ window.showEditModal = function() {
         '<div class="form-grid">' +
         '<div class="form-field"><label>Rappel possible</label><select id="fe-autocall"><option value="true"' + (autocall === 'true' ? ' selected' : '') + '>Oui</option><option value="false"' + (autocall === 'false' ? ' selected' : '') + '>Non</option></select></div>' +
         '<div class="form-field"><label>Type</label><select id="fe-er-type">' + erTypeOptions + '</select></div>' +
-        '<div class="form-field"><label>Seuil autocall (%)</label><input id="fe-autocall-trigger" type="number" step="1" value="' + autocallTrigger + '"></div>' +
+        '<div class="form-field"><label>Seuil autocall (%) <span style="font-size:11px;color:var(--text-dim)">ou trigger action</span></label><input id="fe-autocall-trigger" type="number" step="1" value="' + autocallTrigger + '"></div>' +
+        '<div class="form-field"><label>Autocall cumul target (%) <span style="font-size:11px;color:var(--text-dim)">TARN</span></label><input id="fe-autocall-cumul" type="number" step="0.1" value="' + (p.autocallCumulTarget || (p.earlyRedemption && p.earlyRedemption.trigger > 20 ? p.earlyRedemption.trigger : '') || '') + '" placeholder="Ex: 26.80"></div>' +
         '<div class="form-field"><label>Fréquence observation</label><select id="fe-er-freq">' + erFreqOptions + '</select></div>' +
         '<div class="form-field"><label>Début (semestre n°)</label><input id="fe-er-start" type="number" step="1" value="' + erStart + '" placeholder="Ex: 4"></div>' +
         '<div class="form-field"><label>Step-down</label><select id="fe-stepdown"><option value="false"' + (!erStepDown ? ' selected' : '') + '>Non</option><option value="true"' + (erStepDown ? ' selected' : '') + '>Oui — dégressif</option></select></div>' +
@@ -359,6 +362,12 @@ window.handleEditSave = async function() {
     p.coupon.frequency = document.getElementById('fe-coupon-freq')?.value || p.coupon.frequency;
     p.coupon.memory = document.getElementById('fe-coupon-memory')?.value === 'true';
 
+    // Guaranteed years + commissions
+    var gYears = document.getElementById('fe-guaranteed-years')?.value;
+    if (gYears !== '' && gYears !== null) p.guaranteedYears = parseInt(gYears);
+    var commVal = document.getElementById('fe-commissions')?.value;
+    if (commVal !== '' && commVal !== null) p.commissions = parseFloat(commVal);
+
     if (p.coupon.type === 'participation' && newCoupon !== '') {
         p.participationRate = parseFloat(newCoupon);
     }
@@ -400,6 +409,10 @@ window.handleEditSave = async function() {
 
     var newTrigger = document.getElementById('fe-autocall-trigger')?.value;
     if (newTrigger !== '') p.earlyRedemption.trigger = parseFloat(newTrigger);
+
+    // Autocall cumul target (TARN)
+    var cumulTarget = document.getElementById('fe-autocall-cumul')?.value;
+    if (cumulTarget !== '' && cumulTarget !== null) p.autocallCumulTarget = parseFloat(cumulTarget);
 
     var newErType = document.getElementById('fe-er-type')?.value;
     if (newErType) p.earlyRedemption.type = newErType;
