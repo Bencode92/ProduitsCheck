@@ -236,12 +236,9 @@
         ]
       },
       {
-        id: 'D', name: '2 × 500K × 10Y', emoji: '🚀',
-        desc: '2 produits 500K sur 10 ans — max coupon ×2 avec PUT à 5 ans',
-        products: [
-          Object.assign({}, p10.tarn, { amount: 500000 }),
-          Object.assign({}, p10.hybride, { amount: 500000 })
-        ]
+        id: 'D', name: '1M × 10Y Hybride', emoji: '🚀',
+        desc: '1 produit de 1M€ Hybride 10 ans — plancher garanti + bonus conditionnel + PUT 5Y',
+        products: [Object.assign({}, p10.hybride, { amount: L.amount })]
       },
       {
         id: 'E', name: '500K 5Y + 500K 10Y', emoji: '🎯',
