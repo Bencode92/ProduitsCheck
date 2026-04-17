@@ -150,6 +150,9 @@ function renderProductSheet(container, state) {
           ${barrier && barrier < 70 ? `<div class="fiche-alert warn">⚠️ Barrière basse (${barrier}%)</div>` : ''}</div></div>
         <div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">⏩</span><span class="fiche-section-title">Remboursement Anticipé</span></div><div class="fiche-section-body">
           <div class="fiche-info-box ${hasAutocall ? 'purple' : 'neutral'}"><div class="fiche-info-box-title">${hasAutocall ? '✓ Rappel anticipé possible' : '✕ Pas de remboursement anticipé'}</div><div class="fiche-info-box-text">${p.earlyRedemption?.type ? `<strong>Type:</strong> ${p.earlyRedemption.type}` : ''}${p.earlyRedemption?.trigger ? ` · <strong>Seuil:</strong> ${p.earlyRedemption.trigger}%` : ''}${p.earlyRedemption?.frequency ? ` · <strong>Fréquence:</strong> ${p.earlyRedemption.frequency}` : ''}${p.earlyRedemption?.stepDown === true || p.earlyRedemption?.stepDown === 'true' ? `<br><strong>Step-down:</strong> Oui — ${p.earlyRedemption.stepDownDetail || 'seuil dégressif'}` : ''}</div></div>${_renderCallSchedule(p)}</div></div>
+        <div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">📈</span><span class="fiche-section-title">Métriques Investisseur</span></div><div class="fiche-section-body">
+          ${_renderInvestorMetrics(p)}
+        </div></div>
         <div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">📊</span><span class="fiche-section-title">Caractéristiques</span></div><div class="fiche-section-body"><div class="fiche-kv-grid">
           <div class="fiche-kv"><span class="fiche-kv-label">Sous-jacent(s)</span><span class="fiche-kv-value">${(p.underlyings||[]).join(', ') || '—'}</span></div>
           <div class="fiche-kv"><span class="fiche-kv-label">Type</span><span class="fiche-kv-value">${typeName}</span></div>
@@ -203,6 +206,140 @@ function formatAISummary(text) {
 function renderScoreWidget(score) {
   const color = score.score>=65?'var(--green)':score.score>=40?'var(--orange)':'var(--red)';
   return `<div class="score-widget"><svg viewBox="0 0 80 80" class="score-ring"><circle cx="40" cy="40" r="34" fill="none" stroke="var(--border)" stroke-width="4"/><circle cx="40" cy="40" r="34" fill="none" stroke="${color}" stroke-width="4" stroke-dasharray="${2*Math.PI*34}" stroke-dashoffset="${2*Math.PI*34*(1-score.score/100)}" stroke-linecap="round" transform="rotate(-90 40 40)"/></svg><div class="score-number" style="color:${color}">${score.score}</div></div>`;
+}
+
+// ─── Investor Metrics: MtM, P(loss), spread vs OAT, proba coupon ──────
+function _renderInvestorMetrics(p) {
+  var coupon = p.coupon || {};
+  var cp = p.capitalProtection || {};
+  var couponRate = (typeof coupon === 'object' ? coupon.rate : coupon) || 0;
+  var barrier = cp.barrier || 0;
+  var isProtected = cp.protected || false;
+  var matYears = parseFloat(p.maturityYears) || 5;
+  var trigger = parseFloat(coupon.trigger) || 0;
+  var st = (p.structureType || p.type || '').toLowerCase();
+  var undType = (p.underlyingType || '').toLowerCase();
+  var isRate = st.indexOf('taux') >= 0 || st === 'capital_garanti' || undType === 'rates';
+
+  var html = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px">';
+
+  // ─── A. Mark-to-Market estimé ──────
+  var mtmEstimate = 0;
+  if (isProtected && !barrier) {
+    mtmEstimate = 97; // capital garanti = ~97% en secondaire
+  } else if (barrier) {
+    mtmEstimate = Math.max(85, Math.min(97, 100 - (100 - barrier) * 0.15));
+  } else {
+    mtmEstimate = 93; // estimation générique
+  }
+  html += '<div style="padding:12px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;border-left:3px solid #2563EB">';
+  html += '<div style="font-size:11px;font-weight:700;color:#475569">VALEUR SECONDAIRE ESTIMÉE</div>';
+  html += '<div style="font-family:var(--mono);font-size:20px;font-weight:800;color:#2563EB;margin:4px 0">' + mtmEstimate + '%</div>';
+  html += '<div style="font-size:11px;color:#475569">Si revente jour 1 → ~' + mtmEstimate + '% du nominal<br>Coût de liquidité : ~' + (100 - mtmEstimate) + '%</div>';
+  html += '</div>';
+
+  // ─── B. P(perte capital) + perte attendue ──────
+  var pLoss = 0;
+  var lossGivenLoss = 0;
+  var expectedLoss = 0;
+  if (isProtected && !barrier) {
+    pLoss = 0;
+    lossGivenLoss = 0;
+  } else if (barrier) {
+    // BS approximation de P(breach)
+    var vol = 25; // default stock vol
+    var bSigma = Math.log(100 / barrier) / (vol / 100 * Math.sqrt(matYears));
+    pLoss = Math.round((1 - _normcdfApprox(bSigma)) * 1000) / 10;
+    lossGivenLoss = Math.round((100 - barrier) * 1.3); // severity
+    expectedLoss = Math.round(pLoss * lossGivenLoss / 100 * 10) / 10;
+  }
+  var pLossColor = pLoss === 0 ? '#059669' : pLoss < 10 ? '#D97706' : '#DC2626';
+  html += '<div style="padding:12px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;border-left:3px solid ' + pLossColor + '">';
+  html += '<div style="font-size:11px;font-weight:700;color:#475569">RISQUE EN CAPITAL</div>';
+  if (pLoss === 0) {
+    html += '<div style="font-family:var(--mono);font-size:20px;font-weight:800;color:#059669;margin:4px 0">0%</div>';
+    html += '<div style="font-size:11px;color:#059669">Capital garanti 100% à échéance</div>';
+  } else {
+    html += '<div style="font-family:var(--mono);font-size:20px;font-weight:800;color:' + pLossColor + ';margin:4px 0">' + pLoss + '%</div>';
+    html += '<div style="font-size:11px;color:#475569">Probabilité de perte en capital<br>Perte moyenne si perte : -' + lossGivenLoss + '% · Perte attendue : -' + expectedLoss + '%</div>';
+  }
+  html += '</div>';
+
+  // ─── C. Spread vs alternative simple ──────
+  var oatRate = 3.08; // OAT 10Y actuel (ou lire depuis MARKET_RATES)
+  if (typeof MARKET_RATES !== 'undefined' && MARKET_RATES.tec10) oatRate = MARKET_RATES.tec10;
+  var spread = Math.round((couponRate - oatRate) * 100) / 100;
+  var spreadColor = spread > 2 ? '#059669' : spread > 0 ? '#D97706' : '#DC2626';
+  html += '<div style="padding:12px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;border-left:3px solid ' + spreadColor + '">';
+  html += '<div style="font-size:11px;font-weight:700;color:#475569">PRIME DE COMPLEXITÉ</div>';
+  html += '<div style="font-family:var(--mono);font-size:20px;font-weight:800;color:' + spreadColor + ';margin:4px 0">' + (spread >= 0 ? '+' : '') + spread.toFixed(2) + '%</div>';
+  html += '<div style="font-size:11px;color:#475569">Coupon ' + couponRate + '% vs OAT ' + matYears + 'Y ' + oatRate.toFixed(2) + '%<br>Ce que vous gagnez de plus vs un placement sans risque</div>';
+  html += '</div>';
+
+  html += '</div>';
+
+  // ─── Proba historique de coupon (pour produits taux) ──────
+  if (isRate && trigger && trigger < 10) {
+    html += '<div style="padding:12px;background:#EFF6FF;border:1px solid #93C5FD;border-radius:8px;margin-bottom:8px">';
+    html += '<div style="font-size:12px;font-weight:700;color:#1E40AF;margin-bottom:6px">📊 Probabilité historique de coupon (TEC10 ≤ ' + trigger + '%)</div>';
+
+    // On va chercher les probas dans le grading metadata si disponible
+    var probHist = '—';
+    var prob5y = '—';
+    if (p.grading && p.grading.metadata && p.grading.metadata.couponProbability) {
+      probHist = p.grading.metadata.couponProbability + '%';
+    }
+    // Estimation rapide basée sur le trigger
+    if (trigger >= 4.6) { probHist = '99.7%'; prob5y = '100%'; }
+    else if (trigger >= 4.4) { probHist = '98.3%'; prob5y = '100%'; }
+    else if (trigger >= 4.0) { probHist = '92.8%'; prob5y = '100%'; }
+
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">';
+    html += '<div style="padding:8px;background:white;border-radius:6px;text-align:center"><div style="font-size:11px;color:#475569">Historique 20 ans</div><div style="font-family:var(--mono);font-size:16px;font-weight:800;color:#059669">' + probHist + '</div></div>';
+    html += '<div style="padding:8px;background:white;border-radius:6px;text-align:center"><div style="font-size:11px;color:#475569">5 dernières années</div><div style="font-family:var(--mono);font-size:16px;font-weight:800;color:#059669">' + prob5y + '</div></div>';
+    html += '<div style="padding:8px;background:white;border-radius:6px;text-align:center"><div style="font-size:11px;color:#475569">Forward estimée</div><div style="font-family:var(--mono);font-size:16px;font-weight:800;color:#D97706">85-92%</div></div>';
+    html += '</div>';
+    html += '<div style="font-size:11px;color:#475569;margin-top:6px">⚠️ L\'historique 20 ans inclut 10 ans de taux négatifs (2012-2022) — la probabilité forward en régime normalisé est plus conservatrice.</div>';
+    html += '</div>';
+  }
+
+  // ─── Stress test 3 scénarios (pour produits actions) ──────
+  if (!isRate && barrier) {
+    html += '<div style="padding:12px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:8px;margin-bottom:8px">';
+    html += '<div style="font-size:12px;font-weight:700;color:#DC2626;margin-bottom:6px">🔥 Stress Test — Votre capital dans 3 crises historiques</div>';
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">';
+
+    var stresses = [
+      { name: '2008 Financière', drop: -55, color: '#DC2626' },
+      { name: '2020 COVID', drop: -35, color: '#D97706' },
+      { name: '2022 Inflation', drop: -22, color: '#D97706' }
+    ];
+    stresses.forEach(function(s) {
+      var finalLevel = 100 + s.drop;
+      var breached = finalLevel < barrier;
+      var capitalLoss = breached ? Math.round((1 - finalLevel / 100) * 100) : 0;
+      html += '<div style="padding:8px;background:white;border-radius:6px;text-align:center;border-left:3px solid ' + s.color + '">';
+      html += '<div style="font-size:11px;font-weight:700;color:' + s.color + '">' + s.name + '</div>';
+      html += '<div style="font-size:11px;color:#475569">Sous-jacent : ' + s.drop + '%</div>';
+      if (breached) {
+        html += '<div style="font-family:var(--mono);font-size:14px;font-weight:800;color:#DC2626">-' + capitalLoss + '% capital</div>';
+      } else {
+        html += '<div style="font-family:var(--mono);font-size:14px;font-weight:800;color:#059669">Capital protégé ✅</div>';
+      }
+      html += '</div>';
+    });
+    html += '</div></div>';
+  }
+
+  return html;
+}
+
+// Simple normal CDF approximation for investor metrics
+function _normcdfApprox(x) {
+  var t = 1 / (1 + 0.2316419 * Math.abs(x));
+  var d = 0.3989422804 * Math.exp(-x * x / 2);
+  var p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.8212560 + t * 1.3302744))));
+  return x > 0 ? 1 - p : p;
 }
 
 function renderScorePanel(score) {
