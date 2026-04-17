@@ -496,6 +496,21 @@
 
     html += '</div>';
 
+    // ═══ IMPORT PROPOSITIONS BANQUIERS ═══
+    html += '<div style="background:' + B.card + ';border:2px dashed #7C3AED;border-radius:8px;padding:14px;margin-bottom:16px">';
+    html += '<div style="font-size:13px;font-weight:700;color:#7C3AED;margin-bottom:8px">📥 IMPORTER UNE PROPOSITION BANQUIER</div>';
+    html += '<div style="font-size:11px;color:' + B.dim + ';margin-bottom:10px">Collez le JSON d\'une proposition reçue pour la comparer avec nos configurations.</div>';
+    html += '<div style="display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:8px">';
+    html += '<textarea id="carry-import-json" placeholder=\'{"name":"TARN TEC10 CIC","coupon":6.70,"type":"conditionnel","trigger":4.60,"guaranteedYears":2,"autocallTarget":26.80,"duration":10,"amount":500000,"emetteur":"CIC","capitalGaranti":true}\' style="width:100%;height:70px;padding:8px;border:1px solid ' + B.border + ';border-radius:6px;background:' + B.input + ';color:' + B.text + ';font-family:var(--mono);font-size:10px;resize:vertical"></textarea>';
+    html += '<div style="display:flex;flex-direction:column;gap:4px">';
+    html += '<button onclick="__carryImport()" style="padding:8px 16px;background:#7C3AED;color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">Importer</button>';
+    html += '<button onclick="__carryImportExample()" style="padding:6px 12px;background:' + B.input + ';color:' + B.muted + ';border:1px solid ' + B.border + ';border-radius:6px;font-size:9px;cursor:pointer">Exemple</button>';
+    html += '</div></div>';
+    html += '<div id="carry-import-result"></div>';
+    // Liste des propositions importées
+    html += '<div id="carry-import-list"></div>';
+    html += '</div>';
+
     // ═══ BLOC 2 : DISCUSSION — Détail de la config sélectionnée ═══
     html += '<div id="carry-v2-discussion" style="background:' + B.card + ';border:1px solid ' + B.border + ';border-radius:8px;padding:16px;margin-bottom:16px">';
     html += '<div style="text-align:center;padding:20px;color:' + B.dim + ';font-size:12px">👆 Cliquez "Analyser" sur une configuration pour voir le détail des produits</div>';
@@ -689,5 +704,76 @@
     _render(container);
   };
 
-  console.log('[StructBoard] Carry Trade v2 loaded — 5 configurations');
+  // ─── Import propositions banquiers ──────
+  var _importedProducts = [];
+
+  window.__carryImportExample = function() {
+    var example = '{\n  "name": "TARN TEC10 CIC Avril 2036",\n  "coupon": 6.70,\n  "type": "conditionnel",\n  "trigger": 4.60,\n  "guaranteedYears": 2,\n  "autocallTarget": 26.80,\n  "duration": 10,\n  "amount": 500000,\n  "emetteur": "CIC (A+)",\n  "capitalGaranti": true\n}';
+    var ta = document.getElementById('carry-import-json');
+    if (ta) ta.value = example;
+  };
+
+  window.__carryImport = function() {
+    var ta = document.getElementById('carry-import-json');
+    var result = document.getElementById('carry-import-result');
+    var list = document.getElementById('carry-import-list');
+    if (!ta || !result) return;
+
+    try {
+      var d = JSON.parse(ta.value);
+      var product = {
+        name: d.name || 'Proposition banquier',
+        type: d.type || 'conditionnel',
+        coupon: parseFloat(d.coupon) || 0,
+        prob: d.type === 'fixe' ? 1.0 : 0.92,
+        duration: parseInt(d.duration) || 10,
+        guaranteedYears: parseInt(d.guaranteedYears) || 0,
+        autocallTarget: parseFloat(d.autocallTarget) || 0,
+        autocallYears: d.autocallTarget ? Math.ceil(d.autocallTarget / (d.coupon || 6)) : 0,
+        amount: parseInt(d.amount) || 500000,
+        risk: d.capitalGaranti ? 'Faible' : 'Modéré',
+        detail: (d.emetteur || '') + ' · Trigger ' + (d.trigger || '?') + '% · ' + (d.capitalGaranti ? 'Capital garanti 100%' : 'Capital non garanti'),
+        color: '#7C3AED',
+        source: 'import',
+        emetteur: d.emetteur || '?',
+        trigger: d.trigger || null
+      };
+      if (d.couponPlancher) {
+        product.type = 'hybride';
+        product.couponPlancher = parseFloat(d.couponPlancher);
+        product.couponBonus = product.coupon - product.couponPlancher;
+      }
+      _importedProducts.push(product);
+
+      // Compute PnL for this product alone
+      var pnl = _computePnL([product], LOAN.amount, LOAN.rate, LOAN.years, LOAN.taxRate);
+
+      result.innerHTML = '<div style="padding:8px;background:#ECFDF5;border:1px solid #6EE7B7;border-radius:6px;font-size:11px;color:#065F46;margin-bottom:8px">✅ <strong>' + product.name + '</strong> importé — coupon ' + product.coupon + '% · Net espéré <strong>+' + _f(pnl.esperance) + '€</strong> sur 5 ans</div>';
+      ta.value = '';
+
+      // Render list
+      if (list) {
+        var h = '<div style="font-size:11px;font-weight:700;color:#7C3AED;margin:8px 0 6px">Propositions importées (' + _importedProducts.length + ') :</div>';
+        h += '<table style="width:100%;border-collapse:collapse;font-size:11px">';
+        h += '<tr style="background:#E8ECF2"><th style="padding:6px;text-align:left">Produit</th><th style="padding:6px">Emetteur</th><th style="padding:6px">Coupon</th><th style="padding:6px">Trigger</th><th style="padding:6px">Montant</th><th style="padding:6px">Net espéré 5A</th></tr>';
+        _importedProducts.forEach(function(p) {
+          var ppnl = _computePnL([p], LOAN.amount, LOAN.rate, LOAN.years, LOAN.taxRate);
+          h += '<tr style="border-bottom:1px solid #D1D9E6">';
+          h += '<td style="padding:6px;font-weight:600">' + p.name + '</td>';
+          h += '<td style="padding:6px;color:#64748B">' + p.emetteur + '</td>';
+          h += '<td style="padding:6px;font-family:var(--mono);font-weight:700;color:#D97706">' + p.coupon + '%</td>';
+          h += '<td style="padding:6px;font-family:var(--mono)">' + (p.trigger || '—') + '%</td>';
+          h += '<td style="padding:6px;font-family:var(--mono)">' + _f(p.amount) + '€</td>';
+          h += '<td style="padding:6px;font-family:var(--mono);font-weight:700;color:#059669">+' + _f(ppnl.esperance) + '€</td>';
+          h += '</tr>';
+        });
+        h += '</table>';
+        list.innerHTML = h;
+      }
+    } catch(e) {
+      result.innerHTML = '<div style="padding:8px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:6px;font-size:11px;color:#DC2626">❌ JSON invalide : ' + e.message + '</div>';
+    }
+  };
+
+  console.log('[StructBoard] Carry Trade v2 loaded — 3 configurations');
 })();
