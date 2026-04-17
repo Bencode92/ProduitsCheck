@@ -218,7 +218,7 @@
   "envelope": "",
   "minInvestment": 100000,
   "_couponProbability": 49.4,
-  "_bsRendementNet": -1.55,
+  "_bsRendementNet": -1.52,
   "grading": {
     "grade": "D",
     "score": 36,
@@ -231,26 +231,26 @@
         "score": 18,
         "base": 21,
         "delta": 0,
-        "reasoning": "Rendement: base 21 → -7 = 14 (En stagflation avec VIX à 22, la probabilité de franchir le seuil autocall 100% diminue fortement pour un titre cyclique comme Saint-Gobain (materials, beta 1.14)) | Coupon 4%, barrière 60% | Barr.coupon 71.3% | Mat espérée: ~1.6a (prob mat: 0%)",
+        "reasoning": "Rendement: base 21 → -7 = 14 (Barrière coupon à 71.3% très exigeante en stagflation avec VIX 22 et volatilité SGO à 27.95%, réduisant drastiquement la probabilité de toucher les coupons) | Coupon 4%, barrière 60% | Barr.coupon 71.3% | Mat espérée: ~1.6a (prob mat: 0%)",
         "_bsDelta": 5,
         "_bs": {
           "score": 26,
           "probCoupon": 49.4,
-          "rendementNet": -1.55,
-          "perteEsperee": 3.53,
+          "rendementNet": -1.52,
+          "perteEsperee": 3.5,
           "couponEffectif": 4,
           "vols": [
-            24.97
+            24.91
           ],
           "matEsperee": 1.6,
           "isBasket": false
         }
       },
       "underlyingQuality": {
-        "score": 74,
-        "base": 79,
+        "score": 75,
+        "base": 80,
         "delta": -5,
-        "reasoning": "Qualité: base 79 → -5 = 74 (Saint-Gobain (materials) en territoire neutre mais vulnérable en stagflation ; son beta élevé (1.14) et sa nature cyclique pénalisent dans ce régime macro) | Worst: Compagnie de Saint-Gobain S.A. B:67"
+        "reasoning": "Qualité: base 80 → -5 = 75 (Saint-Gobain (materials) en zone neutre mais beta 1.14 vulnérable en stagflation, avec drawdown historique de -35.71% préoccupant) | Worst: Compagnie de Saint-Gobain S.A. B:67"
       },
       "portfolioFit": {
         "score": 35,
@@ -261,41 +261,41 @@
       "riskPremium": {
         "score": 34,
         "base": 0,
-        "delta": -7,
+        "delta": 0,
         "reasoning": "Capital garanti: spread 4.0% - CAT 2.5% - illiq 0.6% = 0.9%"
       }
     },
-    "verdict": "Produit TRÈS RISQUÉ en contexte stagflationnaire. Saint-Gobain (DD -35.71%, vol 27.97%) souffre du ralentissement construction/immobilier typique de la stagflation. La barrière coupon à 71.3% semble atteignable mais l'autocall à 100% est quasi-impossible (0% de probabilité à maturité). Avec un score ajusté de 17/100, ce produit offre un mauvais rapport risque/rendement : 4% annualisé ne compense pas le risque de perte en capital dans un environnement où le Brent à 98$ érode les marges et où les taux élevés pénalisent le secteur construction.",
+    "verdict": "Produit très risqué en contexte stagflationniste avec un score ajusté de 32/100. La barrière coupon à 71.3% combinée à la volatilité élevée (27.95%) et au beta de 1.14 de Saint-Gobain rend improbable le versement régulier du coupon de 4% annualisé. L'autocall à 100% nécessite un rebond de +48.6% depuis le niveau actuel (B=67), quasi-impossible dans un régime de stagflation avec VIX à 22. La protection capital à 60% offre un coussin limité face au drawdown historique de -35.71% du sous-jacent.",
     "keyRisks": [
-      "Risque sectoriel élevé : materials/construction vulnérable si stagflation persiste avec Brent >100$",
-      "Spread HY à 294bps sous-évalue le risque de défaut en stagflation selon MI",
-      "Autocall improbable (0% prob mat) = capital immobilisé longtemps dans contexte défavorable",
-      "Barrière à 0.65σ (Danger) — vol 27.97%"
+      "Barrière coupon à 71.3% irréaliste avec volatilité 27.95% en stagflation",
+      "Beta 1.14 amplifie les corrections dans un marché sous pression inflationniste",
+      "Probabilité maturité anticipée 0% = capital bloqué 8 ans avec rendement négatif probable",
+      "Barrière à 0.65σ (Danger) — vol 27.95%"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 4,
-        "return_eur": 6400,
+        "return_eur": 4000,
         "probability": 0.15,
-        "duration_years": 1.6
+        "duration_years": 1
       },
       "base": {
-        "return_pct": 4,
-        "return_eur": 16000,
-        "probability": 0.35,
-        "duration_years": 4
-      },
-      "stress": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.3,
+        "probability": 0.35,
+        "duration_years": 8
+      },
+      "stress": {
+        "return_pct": -2,
+        "return_eur": -16000,
+        "probability": 0.35,
         "duration_years": 8
       },
       "worst": {
-        "return_pct": -40,
+        "return_pct": -5,
         "return_eur": -40000,
-        "probability": 0.2,
+        "probability": 0.15,
         "duration_years": 8
       }
     },
@@ -308,8 +308,8 @@
       "label": "D [31-47]"
     },
     "metadata": {
-      "gradedAt": "2026-04-15T12:59:07.516Z",
-      "durationMs": 25742,
+      "gradedAt": "2026-04-17T12:26:31.759Z",
+      "durationMs": 23345,
       "aiUsed": true,
       "version": "7.1",
       "productType": "autocall",
@@ -335,7 +335,7 @@
         "p1": -7,
         "p2": -5,
         "p3": 0,
-        "p4": -7
+        "p4": 0
       },
       "barrier_sigma": 0.65,
       "barrier_sigma_label": "Danger",
@@ -351,11 +351,11 @@
       "hasDecrement": false,
       "decrementDrag": 0,
       "structureType": "autocall",
-      "bsRendementNet": -1.55,
+      "bsRendementNet": -1.52,
       "bsProbCoupon": 49.4,
-      "bsPerteEsperee": 3.53,
+      "bsPerteEsperee": 3.5,
       "bsVols": [
-        24.97
+        24.91
       ],
       "bsMatEsperee": 1.6,
       "isBasket": false,
@@ -372,12 +372,12 @@
           "name": "Compagnie de Saint-Gobain S.A.",
           "ticker": "SGO",
           "sector": "Industries",
-          "perf_ytd": -10.6,
-          "perf_1y": -13.79,
-          "volatility_3y": 27.97,
+          "perf_ytd": -10.44,
+          "perf_1y": -10.05,
+          "volatility_3y": 27.95,
           "max_drawdown_3y": 35.71,
           "buffett_score": 67,
-          "quality_score": 72,
+          "quality_score": 73,
           "buffett_grade": "B"
         }
       ]
@@ -397,10 +397,10 @@
         "desc": "Marchés haussiers → prob coupon monte, barrière safe"
       },
       "crash": {
-        "score": 26,
+        "score": 27,
         "grade": "D",
         "label": "Crash / Récession",
-        "delta": -10,
+        "delta": -9,
         "desc": "Marchés baissiers → barrière menacée, vol en hausse"
       }
     }
