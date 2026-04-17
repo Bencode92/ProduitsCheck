@@ -236,6 +236,15 @@
 
     html += '</div></div>';
 
+    // ═══ SECTION 4b: PRODUITS TAUX BROCHURE (scan auto) ═══
+    html += '<div style="background:' + BG.section + ';border:1px solid ' + BG.border + ';border-radius:8px;margin-bottom:20px">';
+    html += '<div onclick="var c=document.getElementById(\'mkt-brochure-body\');c.style.display=c.style.display===\'none\'?\'\':\'none\';this.querySelector(\'span\').textContent=c.style.display===\'none\'?\'▶ Afficher\':\'▼ Masquer\'" style="padding:14px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center">';
+    html += '<div style="font-size:13px;font-weight:700;color:#7C3AED">📄 Produits taux en brochure — détection auto des seuils</div>';
+    html += '<span style="font-size:10px;color:#64748B">▶ Afficher</span></div>';
+    html += '<div id="mkt-brochure-body" style="display:none;padding:0 16px 16px">';
+    html += '<div id="mkt-brochure-content" style="text-align:center;padding:12px;color:#94A3B8;font-size:11px">Chargement des brochures...</div>';
+    html += '</div></div>';
+
     // ═══ SECTION 5: MACRO & RÉGIME ═══
     html += '<div style="font-size:14px;font-weight:700;color:' + BG.text + ';margin-bottom:12px">🌍 Contexte macro & régime de marché</div>';
     var regime = ai.regime || 'unknown';
@@ -902,12 +911,94 @@
     resultDiv.innerHTML = html;
   };
 
+  // ═══ Brochure products loading (uses MarketProductsScanner if available) ═══
+  async function _loadBrochureProducts() {
+    var contentEl = document.getElementById('mkt-brochure-content');
+    if (!contentEl) return;
+    if (!window.MarketProductsScanner) {
+      contentEl.innerHTML = '<div style="color:#94A3B8;font-size:10px">Module MarketProductsScanner non chargé</div>';
+      return;
+    }
+
+    try {
+      var products = await window.MarketProductsScanner.scan();
+      if (!products || products.length === 0) {
+        contentEl.innerHTML = '<div style="color:#94A3B8;font-size:10px">Aucun produit taux détecté dans les brochures</div>';
+        return;
+      }
+
+      // Enrich with rate stats
+      if (_data.rates && window.MarketAnalyzer) {
+        products = products.map(function(p) {
+          return window.MarketProductsScanner.enrich(p, _data.rates, 'MAX');
+        });
+      }
+
+      // Sort: exploitable first, then by coupon desc
+      products.sort(function(a, b) {
+        if (a.hasExploitableSeuil && !b.hasExploitableSeuil) return -1;
+        if (!a.hasExploitableSeuil && b.hasExploitableSeuil) return 1;
+        return (b.couponRate || 0) - (a.couponRate || 0);
+      });
+
+      // Render table
+      var html = '<div style="font-size:10px;color:#64748B;margin-bottom:8px">' + products.length + ' produits taux détectés dans les brochures. Clic sur "Analyser" pour charger le seuil dans le chart.</div>';
+      html += '<table style="width:100%;border-collapse:collapse;font-size:10px">';
+      html += '<thead><tr style="border-bottom:2px solid #D1D9E6">';
+      html += '<th style="padding:6px;text-align:left;color:#64748B">Produit</th>';
+      html += '<th style="padding:6px;text-align:left;color:#64748B">Émetteur</th>';
+      html += '<th style="padding:6px;text-align:center;color:#64748B">Sous-jacent</th>';
+      html += '<th style="padding:6px;text-align:center;color:#64748B">Seuil</th>';
+      html += '<th style="padding:6px;text-align:center;color:#64748B">Coupon</th>';
+      html += '<th style="padding:6px;text-align:center;color:#64748B">Maturité</th>';
+      html += '<th style="padding:6px;text-align:center;color:#64748B">Statut</th>';
+      html += '<th style="padding:6px;text-align:center;color:#64748B">% OK</th>';
+      html += '<th style="padding:6px;text-align:center;color:#64748B">Marge</th>';
+      html += '<th style="padding:6px;text-align:center;color:#64748B"></th>';
+      html += '</tr></thead><tbody>';
+
+      products.forEach(function(p, idx) {
+        var bg = idx % 2 === 0 ? '#FFFFFF' : '#F4F6F9';
+        var hasStats = p.stats && p.hasExploitableSeuil;
+        var pctOK = hasStats ? (p.stats.pctInZone != null ? p.stats.pctInZone : p.stats.pctBelow != null ? p.stats.pctBelow : '—') : '—';
+        var marge = hasStats && p.stats.marginBps != null ? (p.stats.marginBps >= 0 ? '+' : '') + p.stats.marginBps + 'bp' : '—';
+        var statusOK = hasStats ? (p.stats.currentInZone || p.stats.currentBelow) : null;
+        var seuilLabel = p.threshold ? (p.thresholdMode === 'below' ? '≤' : '≥') + ' ' + p.threshold + '%' :
+                         p.corridorLow ? '[' + p.corridorLow + '-' + p.corridorHigh + '%]' : '—';
+
+        html += '<tr style="background:' + bg + ';border-bottom:1px solid #E2E8F0">';
+        html += '<td style="padding:6px;font-weight:600;color:#1A202C;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + (p.name || '') + '">' + (p.name || '?').substring(0, 35) + '</td>';
+        html += '<td style="padding:6px;color:#64748B">' + (p.emitter || '?').substring(0, 20) + '</td>';
+        html += '<td style="padding:6px;text-align:center"><span style="padding:2px 6px;border-radius:3px;background:#E0F7FA;color:#0891B2;font-size:9px;font-weight:600">' + (p.rateAlias || '—') + '</span></td>';
+        html += '<td style="padding:6px;text-align:center;font-family:var(--mono);font-weight:700;color:#7C3AED">' + seuilLabel + '</td>';
+        html += '<td style="padding:6px;text-align:center;font-family:var(--mono);font-weight:700;color:#059669">' + (p.couponRate ? p.couponRate + '%' : '—') + '</td>';
+        html += '<td style="padding:6px;text-align:center;color:#64748B">' + (p.maturityYears ? p.maturityYears + 'Y' : '—') + '</td>';
+        html += '<td style="padding:6px;text-align:center">' + (statusOK === true ? '<span style="color:#059669;font-weight:700">✅</span>' : statusOK === false ? '<span style="color:#DC2626;font-weight:700">❌</span>' : '—') + '</td>';
+        html += '<td style="padding:6px;text-align:center;font-family:var(--mono);font-weight:700;color:' + (typeof pctOK === 'number' && pctOK >= 80 ? '#059669' : '#D97706') + '">' + (typeof pctOK === 'number' ? pctOK + '%' : pctOK) + '</td>';
+        html += '<td style="padding:6px;text-align:center;font-family:var(--mono);font-size:9px;color:' + (typeof marge === 'string' && marge.indexOf('+') === 0 ? '#059669' : '#DC2626') + '">' + marge + '</td>';
+        // Analyser button — loads threshold into the chart above
+        if (p.hasExploitableSeuil && p.rateAlias) {
+          var clickAction = '_mktOpenRate(\'' + (p.rateAlias === 'tec10' ? 'oat_fr_10y' : p.rateAlias === 'oat5y' ? 'oat_fr_5y' : p.rateAlias === 'oat2y' ? 'oat_fr_2y' : '_euribor3m') + '\')';
+          html += '<td style="padding:6px;text-align:center"><button onclick="' + clickAction + ';setTimeout(function(){var e=document.getElementById(\'mkt-custom-threshold\');if(e){e.value=\'' + (p.threshold || p.corridorLow || '') + '\';var m=document.getElementById(\'mkt-custom-mode\');if(m)m.value=\'' + (p.thresholdMode || 'below') + '\';_mktUpdateChart()}},200)" style="padding:3px 8px;border-radius:3px;border:1px solid #7C3AED;background:#F5F3FF;color:#7C3AED;font-size:9px;font-weight:600;cursor:pointer">Analyser</button></td>';
+        } else {
+          html += '<td style="padding:6px;text-align:center;color:#94A3B8;font-size:9px">—</td>';
+        }
+        html += '</tr>';
+      });
+      html += '</tbody></table>';
+      contentEl.innerHTML = html;
+    } catch(e) {
+      console.error('[MarketDashboard] Erreur scan brochures:', e);
+      contentEl.innerHTML = '<div style="color:#DC2626;font-size:10px">Erreur: ' + e.message + '</div>';
+    }
+  }
+
   window.renderMarketDashboard = async function(container) {
     container.innerHTML = '<div style="text-align:center;padding:40px;color:#64748B">Chargement des données marché...</div>';
     if (!_data.loaded) await _loadData();
     _render(container);
-    // Init mode visibility
-    setTimeout(function() { if (window._mktSimModeChange) _mktSimModeChange(); }, 50);
+    // Load brochure products in background
+    setTimeout(_loadBrochureProducts, 100);
   };
 
   console.log('[StructBoard] Market Dashboard v1.0 loaded');
