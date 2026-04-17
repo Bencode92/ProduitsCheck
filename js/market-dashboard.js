@@ -349,6 +349,99 @@
     html += 'Source : Swiss Life Gestion Privée, Forces Spéciales Opération n°5, données au 13/04/2026. Performances Forces : -1.2% (F4) à -1.7% (F6) sur le trimestre, surperformant les catégories Morningstar de +0.2 à +0.8%.';
     html += '</div></div></div>';
 
+    // ═══ GUIDE PRODUITS STRUCTURÉS ═══
+    html += '<div style="background:' + BG.section + ';border:1px solid ' + BG.border + ';border-radius:8px;margin-bottom:20px">';
+    html += '<div onclick="var c=document.getElementById(\'mkt-guide\');c.style.display=c.style.display===\'none\'?\'\':\'none\';this.querySelector(\'span\').textContent=c.style.display===\'none\'?\'▶\':\'▼\'" style="padding:14px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center">';
+    html += '<div style="font-size:13px;font-weight:700;color:#7C3AED">📚 Guide des produits structurés — Tous les types expliqués</div>';
+    html += '<span style="font-size:10px;color:#64748B">▶</span></div>';
+    html += '<div id="mkt-guide" style="display:none;padding:0 16px 16px">';
+
+    function _guideCard(emoji, name, coupon, capital, mecanism, forWho, risk, riskColor) {
+      return '<div style="padding:12px;border:1px solid ' + BG.border + ';border-radius:8px;margin-bottom:8px;border-left:4px solid ' + riskColor + '">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">' +
+        '<div style="font-size:13px;font-weight:700;color:' + BG.text + '">' + emoji + ' ' + name + '</div>' +
+        '<div style="display:flex;gap:6px">' +
+        '<span style="padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700;background:#ECFDF5;color:#059669">' + coupon + '</span>' +
+        '<span style="padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700;background:' + (capital === 'Garanti' ? '#ECFDF5' : '#FEF2F2') + ';color:' + (capital === 'Garanti' ? '#059669' : '#DC2626') + '">Capital ' + capital + '</span>' +
+        '</div></div>' +
+        '<div style="font-size:11px;color:' + BG.text + ';line-height:1.6;margin-bottom:6px">' + mecanism + '</div>' +
+        '<div style="display:flex;gap:12px;font-size:10px">' +
+        '<span style="color:#2563EB"><strong>Pour :</strong> ' + forWho + '</span>' +
+        '<span style="color:' + riskColor + '"><strong>Risque :</strong> ' + risk + '</span>' +
+        '</div></div>';
+    }
+
+    // TAUX (carry trade)
+    html += '<div style="font-size:12px;font-weight:700;color:#059669;margin:12px 0 8px;padding:6px 10px;background:#ECFDF5;border-radius:4px">🛡️ PRODUITS TAUX — Capital garanti (pour le carry trade)</div>';
+
+    html += _guideCard('🎯', 'TARN (Target Accrual)', 'Coupon 6-7%', 'Garanti',
+      'Coupon élevé conditionnel (ex: si TEC10 ≤ 4.60%). An 1-2 garantis. Autocall quand cumul coupons atteint la cible (~27%). Le produit s\'arrête, tu récupères le capital.',
+      'Max rendement carry trade', 'Faible — 0% coupon si taux montent', '#D97706');
+
+    html += _guideCard('🔒', 'Taux Fixe Callable', 'Coupon 4-4.5% garanti', 'Garanti',
+      'Coupon fixe GARANTI chaque année. La banque peut rappeler (si taux baissent). NC3 = pas de rappel avant An 3. Tu vends une option de rappel → la banque te paye un surcoupon.',
+      'Zéro risque, carry sûr', 'Zéro', '#059669');
+
+    html += _guideCard('💰', 'Callable In Fine', 'Coupon 4.6-5% capitalisé', 'Garanti',
+      'Aucun flux annuel. Tout capitalisé et versé d\'un coup au call/échéance. Ex CIC: 4.66%, si call An 5 → remboursement 123% du nominal. Surcoupon vs Callable classique car pas de gestion de flux.',
+      'Investisseur patient, pas besoin de flux', 'Zéro', '#059669');
+
+    html += _guideCard('📊', 'Range Accrual', 'Coupon 5-6.5% proportionnel', 'Garanti',
+      'Coupon proportionnel au nombre de jours où le taux (TEC10 ou Euribor) reste dans un corridor [min — max]. Pas binaire : si le taux sort 30 jours → tu perds 30/365 du coupon, pas tout.',
+      'Investisseur qui veut du progressif (pas binaire)', 'Faible — coupon réduit si hors corridor', '#D97706');
+
+    html += _guideCard('📈', 'Step-Up Callable', 'Coupon 3.5→6% croissant', 'Garanti',
+      'Coupon garanti qui AUGMENTE chaque année (ex: 3.50% → 4.00% → 4.50% → 5.00%). La banque rappelle quand ça coûte trop cher. Le spread vs emprunt s\'élargit avec le temps.',
+      'Carry trade patient, coupon garanti croissant', 'Zéro', '#059669');
+
+    html += _guideCard('🔄', 'Fixed-to-Floater', 'Coupon 4% fixe puis variable', 'Garanti',
+      'Phase fixe (An 1-3) : coupon garanti ~4%. Phase variable (An 4+) : indexé Euribor + spread, avec floor et cap. S\'adapte au marché.',
+      'Investisseur qui veut sécuriser le début', 'Faible — phase variable peut être basse', '#D97706');
+
+    html += _guideCard('🛟', 'Floater avec Plancher', 'Coupon 3-4.5% variable', 'Garanti',
+      'Coupon = max(plancher 3%, TEC10 - spread). Le plancher couvre l\'emprunt. Si taux montent → coupon monte. Si taux baissent → plancher protège.',
+      'Carry trade qui veut profiter de la hausse des taux', 'Très faible — plancher garanti', '#0891B2');
+
+    html += _guideCard('🧠', 'Digital Mémoire Taux', 'Coupon 4.6-7% conditionnel', 'Garanti',
+      'Coupon conditionnel (ex: si TEC10 ≤ 4.40%). Si condition non remplie → coupon stocké en mémoire et versé quand condition revient. Filet de sécurité vs TARN sans mémoire.',
+      'Carry trade avec filet de sécurité', 'Faible — mémoire rattrape', '#0891B2');
+
+    html += _guideCard('📐', 'CMS Steepener', 'Coupon = N × pente courbe', 'Garanti',
+      'Coupon = multiplicateur × (taux 10Y - taux 2Y). Aujourd\'hui: 5 × 0.59% = 2.95%. Gagne si courbe pentue. Avec le spread actuel de 59bp, le coupon est modeste.',
+      'Investisseur qui parie sur la pente de courbe', 'Modéré — 0% si courbe inversée', '#D97706');
+
+    // ACTIONS
+    html += '<div style="font-size:12px;font-weight:700;color:#DC2626;margin:16px 0 8px;padding:6px 10px;background:#FEF2F2;border-radius:4px">⚠️ PRODUITS ACTIONS — Risque en capital (PAS pour le carry trade)</div>';
+
+    html += _guideCard('⚡', 'Autocall / Athena', 'Coupon 5-10% conditionnel', 'Risque',
+      'Rappel automatique si action ≥ 100% du strike à une date d\'observation. Coupon × nb années écoulées. Si pas de rappel et action < barrière à échéance → PERTE EN CAPITAL. Version "Privilège" = capital garanti.',
+      'Investisseur qui pense que l\'action remonte', 'Élevé — perte si action < barrière', '#DC2626');
+
+    html += _guideCard('🔥', 'Phoenix / Phoenix Mémoire', 'Coupon 7-9% trimestriel', 'Risque',
+      'Coupons versés chaque trimestre si action ≥ trigger coupon (ex: 77%). Effet mémoire : coupons manqués sont stockés et rattrapés. Autocall si action ≥ 100%. Barrière capital à 60%.',
+      'Investisseur qui veut des revenus réguliers', 'Élevé — perte si action < barrière', '#DC2626');
+
+    html += _guideCard('🎲', 'Worst-of Basket', 'Coupon 7-12% conditionnel', 'Risque',
+      'Comme Autocall/Phoenix mais sur un PANIER d\'actions. Le résultat dépend de la PIRE action. Coupon élevé car risque élevé — il suffit d\'une action qui plonge pour tout perdre.',
+      'Investisseur convaincu sur TOUTES les actions du panier', 'Très élevé', '#DC2626');
+
+    html += _guideCard('🎯', 'Dispersion / Paires', 'Rendement 5-15% variable', 'Garanti',
+      'Parie sur l\'ÉCART entre actions (pas la direction). 16 paires de tech US. Gagne quand les actions divergent. Capital garanti 100%. Le seul produit action à capital garanti.',
+      'Investisseur qui pense que les techs vont diverger', 'Faible (capital garanti)', '#0891B2');
+
+    html += _guideCard('💎', 'Reverse Convertible', 'Coupon 8-12% GARANTI', 'Risque',
+      'Coupon élevé GARANTI. MAIS à échéance si action < barrière → tu reçois les ACTIONS (pas le cash). Tu deviens actionnaire à perte. Coupon garanti = le prix du risque que tu portes.',
+      'Investisseur qui accepte de devenir actionnaire', 'Élevé — conversion en actions', '#DC2626');
+
+    // Résumé
+    html += '<div style="margin-top:12px;padding:10px;background:#DBEAFE;border-radius:6px;font-size:11px;color:#1E40AF;line-height:1.6">';
+    html += '<strong>Pour le carry trade (emprunt 2.90%, capital garanti obligatoire) :</strong><br>';
+    html += '✅ TARN · Fixe Callable · Callable In Fine · Range Accrual · Step-Up · Floater · Digital Mémoire<br>';
+    html += '❌ Autocall · Phoenix · Worst-of · Reverse Convertible (risque capital = incompatible avec carry trade adossé à un emprunt)';
+    html += '</div>';
+
+    html += '</div></div>';
+
     html += '<div style="font-size:14px;font-weight:700;color:#059669;margin-bottom:10px">💡 Impact sur le carry trade</div>';
     var tec10Val = tec10.current || 3.10;
     var spreadVsEmprunt = tec10Val - 2.90;
