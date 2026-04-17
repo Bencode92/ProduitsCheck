@@ -82,12 +82,20 @@
     'UNDERLYING TYPE: "single-index", "single-stock", "worst-of", "basket", "pairs", "none"',
     'UNDERLYINGS: tableau de STRINGS simples uniquement.',
     '',
+    '',
+    'CHAMPS SPÉCIFIQUES PAR TYPE:',
+    '- TARN: guaranteedYears (nb années coupon garanti), autocallCumulTarget (% cumul pour autocall), commissions (%)',
+    '- CALLABLE: commissions, earlyRedemption.firstCallDate',
+    '- RANGE ACCRUAL: rangeAccrual.lowerBound, rangeAccrual.upperBound, rangeAccrual.reference',
+    '- DISPERSION: participationRate, nombre de paires',
+    '- TOUS: isin (code ISIN si trouvé), commissions (% TTC si mentionné)',
+    '',
     'Réponds UNIQUEMENT avec le JSON. AUCUN texte. AUCUN markdown.',
     '',
-    '{"name":"","structureType":"","emitter":"","guarantor":"","guarantorRating":{"moodys":"","sp":""},',
+    '{"name":"","isin":"","structureType":"","emitter":"","guarantor":"","guarantorRating":{"moodys":"","sp":""},',
     '"underlyings":[],"underlyingType":"","currency":"EUR","maturity":"","maturityYears":0,',
     '"coupon":{"rate":0,"rateIfCalled":null,"rateIfMaturity":null,"type":"","frequency":"","trigger":null,"memory":false,"paymentTiming":""},',
-    '"participationRate":null,"guaranteedYears":0,',
+    '"participationRate":null,"guaranteedYears":0,"autocallCumulTarget":null,"commissions":null,',
     '"capitalProtection":{"protected":false,"level":null,"barrier":null,"barrierCoupon":null,"barrierType":"europeenne"},',
     '"earlyRedemption":{"possible":false,"type":"","trigger":null,"frequency":"","startSemester":null,"stepDown":false,"stepDownPct":null},',
     '"decrementPct":null,"actualDividendYield":null,"minInvestment":null,"mechanism":"","risks":[],"summary":""}'
@@ -353,6 +361,46 @@
       console.log('[Parser v2] Range Accrual detected:', JSON.stringify(data.rangeAccrual));
     }
 
+    // ─── Validation post-parsing: alertes pour champs manquants ──────
+    var alerts = [];
+    var st = (data.structureType || '').toLowerCase();
+
+    // Validation commune
+    if (!data.name) alerts.push('Nom du produit non détecté');
+    if (!data.emitter) alerts.push('Émetteur non détecté');
+    if (!c.rate && c.rate !== 0) alerts.push('Coupon non détecté');
+    if (!data.maturityYears) alerts.push('Maturité non détectée');
+
+    // Validation par type
+    if (st === 'capital_garanti' || st === 'tarn') {
+      if (!data.guaranteedYears) alerts.push('⚠️ TARN : Années garanties non détectées (combien d\'années sans condition ?)');
+      if (!data.autocallCumulTarget && er.possible) alerts.push('⚠️ TARN : Autocall cumul target non détecté (seuil de cumul pour remboursement)');
+      if (!cp.barrierCoupon && c.type === 'conditionnel') alerts.push('⚠️ Barrière coupon non détectée (seuil pour recevoir le coupon)');
+    }
+    if (st === 'autocall' || st === 'phoenix_memoire') {
+      if (!cp.barrier && !cp.protected) alerts.push('⚠️ Barrière capital non détectée');
+      if (!cp.barrierCoupon && !c.trigger) alerts.push('⚠️ Trigger coupon non détecté');
+    }
+    if (st === 'range_accrual') {
+      if (!data.rangeAccrual || !data.rangeAccrual.lowerBound) alerts.push('⚠️ Range Accrual : borne basse non détectée');
+      if (!data.rangeAccrual || !data.rangeAccrual.upperBound) alerts.push('⚠️ Range Accrual : borne haute non détectée');
+    }
+    if (st === 'dispersion') {
+      if (!data.participationRate) alerts.push('⚠️ Dispersion : taux de participation non détecté');
+    }
+    if (!data.commissions) alerts.push('Commissions non détectées (vérifier dans la brochure)');
+    if (!data.isin) alerts.push('Code ISIN non détecté');
+
+    // Type inconnu
+    if (!st || st === 'other' || st === 'autre') {
+      alerts.push('🔴 TYPE DE PRODUIT NON RECONNU — vérifiez manuellement le type de structure');
+    }
+
+    data._parsingAlerts = alerts;
+    if (alerts.length > 0) {
+      console.warn('[Parser] Alertes de validation (' + alerts.length + '):', alerts);
+    }
+
     return data;
   }
 
@@ -374,6 +422,9 @@
         memory: _gv('bp-memory') || false, paymentTiming: _gv('bp-timing') || 'periodic' },
       participationRate: _gv('bp-participation'),
       guaranteedYears: _gv('bp-guaranteedyears') || (_data.guaranteedYears || 0),
+      autocallCumulTarget: _gv('bp-autocallcumul') || (_data.autocallCumulTarget || null),
+      commissions: _gv('bp-commissions') || (_data.commissions || null),
+      isin: _gv('bp-isin') || (_data.isin || ''),
       minInvestment: _gv('bp-mininvest'),
       capitalProtection: { protected: _gv('bp-capprotected') || false,
         level: _gv('bp-capprotected') ? (_gv('bp-caplevel') || 100) : null,
@@ -478,6 +529,21 @@
     if (er.type === 'callable') badges += _badge('Callable', 'var(--purple)');
     if (c.memory) badges += _badge('Mémoire', 'var(--cyan)');
     if (cp.barrierCoupon) badges += _badge('Digitale ' + cp.barrierCoupon + '%', 'var(--orange)');
+
+    // Alertes de validation
+    var alerts = d._parsingAlerts || [];
+    if (alerts.length > 0) {
+      badges += '<div style="width:100%;margin-top:8px">';
+      alerts.forEach(function(a) {
+        var isError = a.indexOf('🔴') >= 0;
+        var isWarn = a.indexOf('⚠️') >= 0;
+        var bg = isError ? '#FEF2F2' : isWarn ? '#FEF3C7' : '#EFF6FF';
+        var border = isError ? '#FCA5A5' : isWarn ? '#F59E0B' : '#93C5FD';
+        var color = isError ? '#DC2626' : isWarn ? '#92400E' : '#1E40AF';
+        badges += '<div style="padding:6px 10px;background:' + bg + ';border:1px solid ' + border + ';border-radius:4px;margin-bottom:4px;font-size:11px;color:' + color + '">' + a + '</div>';
+      });
+      badges += '</div>';
+    }
 
     var html = '<div class="bp-review"><div class="bp-review-header">' +
       '<div style="flex:1;min-width:0"><div style="font-size:10px;color:var(--text-dim);margin-bottom:4px">' + esc(_fileName) + '</div>' +
