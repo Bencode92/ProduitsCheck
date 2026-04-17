@@ -23,7 +23,8 @@
 .btn{padding:8px 16px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg-card);color:var(--text);font-family:var(--font);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s ease;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 .btn:hover{background:var(--bg-card-hover);border-color:var(--border-light)}.btn:disabled{opacity:.4;cursor:not-allowed}.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}.btn.primary:hover{background:#2563EB;box-shadow:0 0 20px rgba(59,130,246,.25)}
 .btn.danger{color:var(--red)}.btn.danger:hover{background:var(--red-dim);border-color:var(--red)}.btn.success{color:var(--green)}.btn.success:hover{background:var(--green-dim);border-color:var(--green)}
-.btn.ghost{border-color:transparent;background:transparent;color:rgba(255,255,255,0.7)}.btn.ghost:hover{background:rgba(255,255,255,0.1)}.btn.sm{padding:5px 10px;font-size:11px}.btn.lg{padding:10px 24px;font-size:13px}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--text-muted)}.btn.ghost:hover{background:var(--bg-card-hover)}
+.topbar .btn.ghost{color:rgba(255,255,255,0.7)}.topbar .btn.ghost:hover{background:rgba(255,255,255,0.1)}.btn.sm{padding:5px 10px;font-size:11px}.btn.lg{padding:10px 24px;font-size:13px}
 .btn.ai-glow{background:linear-gradient(135deg,#3B82F6,#8B5CF6);border:none;color:#fff}.btn.ai-glow:hover{box-shadow:0 0 24px rgba(139,92,246,.35);transform:translateY(-1px)}
 
 .main{padding:24px;max-width:1400px;margin:0 auto}
