@@ -170,66 +170,82 @@
   "minInvestment": 100000,
   "grading": {
     "grade": "B",
-    "score": 66,
+    "score": 64,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 85,
+        "score": 78,
         "base": 86,
-        "delta": 2,
-        "reasoning": "Rendement: base 86 → +2 = 88 (Taux fixe insensible à la volatilité court terme, coupon garanti de 6.7% très attractif en stagflation) | Coupon 6.7%, protégé | Barr.coupon 4.6% | Mat espérée: ~2.3a (prob mat: 1%)"
+        "delta": 0,
+        "reasoning": "Rendement: base 86 → +2 = 88 (TEC 10 à 4.6% vs barrière 4.6%, probabilité élevée de coupons dans un contexte de taux durablement hauts (Fed pause à 3.64%)) | Coupon 6.7%, protégé | Barr.coupon 4.6% | Mat espérée: ~2.3a (prob mat: 1%)",
+        "_bsDelta": -8,
+        "_bs": {
+          "score": 78,
+          "probCoupon": 94.7,
+          "probExit": 0,
+          "rendementNet": 6.35,
+          "couponEffectif": 6.35,
+          "perteEsperee": 0,
+          "vols": [],
+          "matEsperee": 10,
+          "isRate": true,
+          "historicalBasis": "695 obs (2004-09-06→2026-04-16)",
+          "rateAlias": "oat_fr_10y",
+          "currentRate": 3.075,
+          "trigger": 4.6
+        }
       },
       "underlyingQuality": {
         "score": 66,
-        "base": 64,
-        "delta": 2,
-        "reasoning": "Qualité: base 64 → +2 = 66 (TEC 10 bénéficie du contexte stagflation avec taux longs élevés, Fed on hold et stratégie TIPS favorisant les produits taux)"
+        "base": 68,
+        "delta": -2,
+        "reasoning": "Qualité: base 68 → -2 = 66 (Produit taux fixe callable adapté à la stagflation mais sensible à une hausse brutale des taux si inflation réaccélère avec Brent à $96)"
       },
       "portfolioFit": {
         "score": 47,
         "base": 60,
         "delta": 2,
-        "reasoning": "Fit: base 60 → +2 = 62 (Excellente diversification en régime stagflation, taux fixe 6.7% surperforme actions et protège contre l'inflation)"
+        "reasoning": "Fit: base 60 → +2 = 62 (Excellent diversifiant en stagflation: capital garanti + coupon 6.7% supérieur à l'inflation PCE 2.8%, protection contre l'érosion monétaire)"
       },
       "riskPremium": {
         "score": 68,
         "base": 60,
-        "delta": -2,
+        "delta": 0,
         "reasoning": "Capital garanti: spread 6.7% - CAT 2.5% - illiq 0.7% = 3.5%"
       }
     },
-    "verdict": "Produit très adapté au régime STAGFLATION actuel avec taux fixe garanti de 6.7% surperformant largement l'inflation PCE à 2.8%. Le TEC 10 profite du maintien des taux élevés (Fed on hold à 3.64%) et de la pentification de la courbe (2s10s +50bps). Capital garanti et rendement fixe offrent une protection idéale contre la volatilité (VIX 22) et l'instabilité sectorielle (5 secteurs en correction). Score ajusté de 69 à 77 points justifié par l'adéquation parfaite au contexte macro.",
+    "verdict": "Produit défensif optimal en régime stagflationniste avec capital garanti et coupon 6.7% > inflation 2.8%. La barrière à 4.6% est actuellement touchée (TEC 10 = 4.6%), garantissant les coupons tant que les taux restent élevés. Maturité espérée 2.3 ans idéale pour capturer les taux hauts actuels avant normalisation. Score ajusté à 81/100 grâce à l'excellente pertinence portefeuille en stagflation.",
     "keyRisks": [
-      "Risque TARN: plafond de gains cumulés peut limiter la performance totale",
-      "Risque de rappel anticipé si baisse brutale des taux, privant de coupons futurs"
+      "Risque de call précoce si les taux baissent brutalement, limitant le rendement total",
+      "Exposition aux variations du TEC 10 qui pourrait chuter sous 4.6% si récession sévère"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 15.4,
-        "return_eur": 15410,
-        "probability": 0.25,
+        "return_eur": 15400,
+        "probability": 0.3,
         "duration_years": 2.3
       },
       "base": {
-        "return_pct": 33.5,
-        "return_eur": 33500,
-        "probability": 0.45,
-        "duration_years": 5
-      },
-      "stress": {
         "return_pct": 20.1,
         "return_eur": 20100,
-        "probability": 0.2,
+        "probability": 0.45,
         "duration_years": 3
       },
+      "stress": {
+        "return_pct": 6.7,
+        "return_eur": 6700,
+        "probability": 0.2,
+        "duration_years": 1
+      },
       "worst": {
-        "return_pct": 67,
-        "return_eur": 67000,
-        "probability": 0.1,
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.05,
         "duration_years": 10
       }
     },
@@ -242,8 +258,8 @@
       "label": "B [61-79]"
     },
     "metadata": {
-      "gradedAt": "2026-04-13T07:58:27.989Z",
-      "durationMs": 22670,
+      "gradedAt": "2026-04-17T15:16:20.817Z",
+      "durationMs": 21805,
       "aiUsed": true,
       "version": "7.1",
       "productType": "rate",
@@ -258,18 +274,18 @@
       "hasBarrier": false,
       "barrierPct": 0,
       "barrierCouponPct": 4.6,
-      "couponProbability": null,
+      "couponProbability": 94.7,
       "expectedMaturity": 2.3,
       "maxMaturity": 10,
       "probReachMaturity": 1,
       "maxBeta": null,
-      "baseScore": 69,
+      "baseScore": 70,
       "baseGrade": "B",
       "adjustments": {
         "p1": 2,
-        "p2": 2,
+        "p2": -2,
         "p3": 2,
-        "p4": -2
+        "p4": 0
       },
       "barrier_sigma": null,
       "barrier_sigma_label": null,
@@ -285,6 +301,17 @@
       "hasDecrement": false,
       "decrementDrag": 0,
       "structureType": "range_accrual",
+      "bsRendementNet": 6.35,
+      "bsProbCoupon": 94.7,
+      "bsPerteEsperee": 0,
+      "bsVols": [],
+      "bsMatEsperee": 10,
+      "isRateHistorical": true,
+      "historicalBasis": "695 obs (2004-09-06→2026-04-16)",
+      "rateAlias": "oat_fr_10y",
+      "currentRate": 3.075,
+      "rateTrigger": 4.6,
+      "probExit": 0,
       "issuerCreditPenalty": 1,
       "issuerCDS": 55,
       "v6Weights": {
@@ -296,25 +323,27 @@
     },
     "regimeScenarios": {
       "current": {
-        "score": 66,
+        "score": 64,
         "grade": "B",
         "label": "Actuel (stagflation)",
         "desc": "Euribor dans le corridor mais BCE menaçante"
       },
       "bull": {
-        "score": 71,
+        "score": 70,
         "grade": "B",
         "label": "Bull / Risk-on",
-        "delta": 5,
+        "delta": 6,
         "desc": "Taux baissent → Euribor reste dans le corridor"
       },
       "crash": {
-        "score": 60,
-        "grade": "B",
+        "score": 58,
+        "grade": "C",
         "label": "Crash / Récession",
         "delta": -6,
         "desc": "Taux volatils → Euribor sort du corridor régulièrement"
       }
     }
-  }
+  },
+  "_couponProbability": 94.7,
+  "_bsRendementNet": 6.35
 }
