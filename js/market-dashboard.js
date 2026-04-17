@@ -142,47 +142,15 @@
     html += 'Sur 500K€ = <strong>' + _fmt(Math.round(500000 * budget10y / 100)) + '€</strong> pour financer les coupons</div>';
     html += '</div></div>';
 
-    // ═══ SECTION 4: SIMULATEUR SEUILS CUSTOM ═══
-    html += '<div style="background:' + BG.section + ';border:2px solid #7C3AED;border-radius:8px;padding:16px;margin-bottom:20px">';
-    html += '<div style="font-size:14px;font-weight:700;color:#7C3AED;margin-bottom:12px">🔧 SIMULATEUR DE SEUILS — Testez vos propres corridors & triggers</div>';
-    html += '<div style="font-size:10px;color:' + BG.textDim + ';margin-bottom:12px">Entrez un seuil ou un corridor et visualisez sur l\'historique quand le taux l\'a franchi.</div>';
-
-    // Controls
-    html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:10px;align-items:end;margin-bottom:14px">';
-    // Rate selector
-    html += '<div><label style="font-size:9px;font-weight:700;color:' + BG.textDim + ';display:block;margin-bottom:4px">TAUX</label>';
-    html += '<select id="mkt-sim-rate" style="width:100%;padding:8px;border:1px solid ' + BG.border + ';border-radius:6px;background:' + BG.input + ';color:' + BG.text + ';font-size:12px">';
-    html += '<option value="tec10" selected>TEC10 (OAT 10Y)</option>';
-    html += '<option value="oat5y">OAT 5 ans</option>';
-    html += '<option value="oat2y">OAT 2 ans</option>';
-    html += '<option value="euribor3m">Euribor 3M</option>';
-    html += '</select></div>';
-    // Mode selector
-    html += '<div><label style="font-size:9px;font-weight:700;color:' + BG.textDim + ';display:block;margin-bottom:4px">MODE</label>';
-    html += '<select id="mkt-sim-mode" style="width:100%;padding:8px;border:1px solid ' + BG.border + ';border-radius:6px;background:' + BG.input + ';color:' + BG.text + ';font-size:12px" onchange="_mktSimModeChange()">';
-    html += '<option value="below">Seuil ≤ (coupon si en dessous)</option>';
-    html += '<option value="above">Seuil ≥ (coupon si au dessus)</option>';
-    html += '<option value="corridor">Corridor [min — max]</option>';
-    html += '</select></div>';
-    // Value 1
-    html += '<div><label style="font-size:9px;font-weight:700;color:' + BG.textDim + ';display:block;margin-bottom:4px" id="mkt-sim-label1">SEUIL (%)</label>';
-    html += '<input type="number" id="mkt-sim-val1" value="4.40" step="0.05" style="width:100%;padding:8px;border:1px solid ' + BG.border + ';border-radius:6px;background:' + BG.input + ';color:' + BG.text + ';font-family:var(--mono);font-size:13px"></div>';
-    // Value 2 (corridor only)
-    html += '<div id="mkt-sim-val2-wrap"><label style="font-size:9px;font-weight:700;color:' + BG.textDim + ';display:block;margin-bottom:4px">BORNE HAUTE (%)</label>';
-    html += '<input type="number" id="mkt-sim-val2" value="3.80" step="0.05" style="width:100%;padding:8px;border:1px solid ' + BG.border + ';border-radius:6px;background:' + BG.input + ';color:' + BG.text + ';font-family:var(--mono);font-size:13px"></div>';
-    // Button
-    html += '<div><button onclick="_mktSimAnalyze()" style="padding:8px 16px;background:#7C3AED;color:#fff;border:none;border-radius:6px;font-weight:700;font-size:12px;cursor:pointer;white-space:nowrap">Analyser</button></div>';
-    html += '</div>';
-    // Results zone
-    html += '<div id="mkt-sim-result" style="min-height:40px"></div>';
-    html += '</div>';
-
-    // ═══ SECTION 5: ZONES & TRIGGERS PRODUITS ═══
+    // ═══ SECTION 4: JAUGES PRODUITS (collapsible, connectées au portfolio) ═══
     var tec10Val = tec10.current || 3.10;
     var eur3mVal = eur3m.current || 2.50;
 
-    html += '<div style="background:' + BG.section + ';border:2px solid #2563EB;border-radius:8px;padding:16px;margin-bottom:20px">';
-    html += '<div style="font-size:14px;font-weight:700;color:#2563EB;margin-bottom:14px">🎯 ZONES & SEUILS — Position actuelle vs triggers produits</div>';
+    html += '<div style="background:' + BG.section + ';border:1px solid ' + BG.border + ';border-radius:8px;margin-bottom:20px">';
+    html += '<div onclick="var c=document.getElementById(\'mkt-gauges-body\');c.style.display=c.style.display===\'none\'?\'\':\'none\';this.querySelector(\'span\').textContent=c.style.display===\'none\'?\'▶ Afficher\':\'▼ Masquer\'" style="padding:14px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center">';
+    html += '<div style="font-size:13px;font-weight:700;color:#2563EB">🎯 Jauges produits — Position vs triggers du portefeuille</div>';
+    html += '<span style="font-size:10px;color:#64748B">▶ Afficher</span></div>';
+    html += '<div id="mkt-gauges-body" style="display:none;padding:0 16px 16px">';
 
     // Helper: render a gauge bar
     function _gauge(label, currentVal, min, max, zones, unit) {
@@ -232,77 +200,41 @@
       return g;
     }
 
-    // TARN TEC10 — trigger 4.40%
-    html += _gauge('TARN TEC10 — Seuil coupon ≤ 4.40%', tec10Val, 1.5, 5.5, [
-      { from: 1.5, to: 3.50, color: '#059669', label: 'ZONE CONFORT' },
-      { from: 3.50, to: 4.00, color: '#D97706', label: 'ZONE OK' },
+    // Dynamic gauges from portfolio
+    html += '<div style="font-size:10px;color:#64748B;margin-bottom:10px">Produits de votre portefeuille avec triggers sur les taux actuels :</div>';
+
+    // TARN TEC10 (from portfolio: sp_mmxjeznm — trigger 4.40%)
+    html += _gauge('📌 TARN TEC 10 Décembre 2035 B — coupon 6% si TEC10 ≤ 4.40%', tec10Val, 0, 5.5, [
+      { from: 0, to: 3.50, color: '#059669', label: 'CONFORT' },
+      { from: 3.50, to: 4.00, color: '#D97706', label: 'OK' },
       { from: 4.00, to: 4.40, color: '#F59E0B', label: 'ATTENTION' },
-      { from: 4.40, to: 5.50, color: '#DC2626', label: 'HORS COUPON', trigger: 4.40, direction: 'below', triggerLabel: 'Trigger 4.40%' }
+      { from: 4.40, to: 5.50, color: '#DC2626', label: 'HORS COUPON', trigger: 4.40, direction: 'below', triggerLabel: 'Trigger TARN 4.40%' }
     ]);
 
-    // Digital Mémoire TEC10 — trigger 4.50%
-    html += _gauge('Digital Mémoire TEC10 — Seuil coupon ≤ 4.50%', tec10Val, 1.5, 5.5, [
-      { from: 1.5, to: 3.50, color: '#059669', label: 'ZONE CONFORT' },
-      { from: 3.50, to: 4.10, color: '#D97706', label: 'ZONE OK' },
-      { from: 4.10, to: 4.50, color: '#F59E0B', label: 'ATTENTION' },
-      { from: 4.50, to: 5.50, color: '#DC2626', label: 'HORS COUPON', trigger: 4.50, direction: 'below', triggerLabel: 'Trigger 4.50%' }
-    ]);
+    // Phoenix BNP (from portfolio: sp_mmxib83f — trigger coupon 77%, barrier 60%)
+    // This is a stock trigger, show vs 100% reference
+    html += _gauge('📌 Phoenix Mémoire BNP — coupon 7.5% si BNP ≥ 77% du strike', 100, 40, 120, [
+      { from: 40, to: 60, color: '#DC2626', label: 'PERTE CAPITAL', trigger: 60, direction: 'above', triggerLabel: 'Barrière capital 60%' },
+      { from: 60, to: 77, color: '#F59E0B', label: 'PAS DE COUPON' },
+      { from: 77, to: 100, color: '#059669', label: 'COUPON VERSÉ', trigger: 77, direction: 'above', triggerLabel: 'Trigger coupon 77%' },
+      { from: 100, to: 120, color: '#0891B2', label: 'AUTOCALL' }
+    ], '%');
 
-    // Range Accrual Euribor — corridor [1.50% - 3.80%]
-    html += _gauge('Range Accrual Euribor 3M — Corridor [1.50% - 3.80%]', eur3mVal, 0.0, 5.0, [
-      { from: 0.0, to: 1.50, color: '#DC2626', label: 'HORS CORRIDOR BAS', trigger: 1.50, direction: 'above', triggerLabel: 'Borne basse 1.50%' },
-      { from: 1.50, to: 2.00, color: '#F59E0B', label: 'PROCHE BORNE' },
-      { from: 2.00, to: 3.30, color: '#059669', label: 'ZONE CONFORT' },
-      { from: 3.30, to: 3.80, color: '#F59E0B', label: 'PROCHE BORNE' },
-      { from: 3.80, to: 5.00, color: '#DC2626', label: 'HORS CORRIDOR HAUT', trigger: 3.80, direction: 'below', triggerLabel: 'Borne haute 3.80%' }
-    ]);
+    // Oxygène (from portfolio: sp_mmxhg4us — trigger coupon 68%, barrier 60%)
+    html += _gauge('📌 Oxygène Mars 2026 — coupon 7% si panier ≥ 68% du strike', 100, 40, 120, [
+      { from: 40, to: 60, color: '#DC2626', label: 'PERTE CAPITAL', trigger: 60, direction: 'above', triggerLabel: 'Barrière capital 60%' },
+      { from: 60, to: 68, color: '#F59E0B', label: 'CAPITAL OK / PAS DE COUPON' },
+      { from: 68, to: 100, color: '#059669', label: 'COUPON VERSÉ', trigger: 68, direction: 'above', triggerLabel: 'Trigger coupon 68%' },
+      { from: 100, to: 120, color: '#0891B2', label: 'AUTOCALL' }
+    ], '%');
 
-    // Hybride Plancher — TEC10 vs seuil bonus 4.00%
-    html += _gauge('Hybride Plancher + Digital — Bonus si TEC10 ≤ 4.00%', tec10Val, 1.5, 5.5, [
-      { from: 1.5, to: 3.50, color: '#059669', label: 'ZONE CONFORT — Plancher + Bonus' },
-      { from: 3.50, to: 4.00, color: '#D97706', label: 'ATTENTION' },
-      { from: 4.00, to: 5.50, color: '#DC2626', label: 'PLANCHER SEUL (3%)', trigger: 4.00, direction: 'below', triggerLabel: 'Trigger bonus 4.00%' }
-    ]);
+    // Athena ENI (from portfolio: sp_mmxgwg72 — trigger 100%, capital garanti)
+    html += _gauge('📌 Athena Privilège ENI — coupon 5.7% si ENI ≥ 100% du strike', 100, 50, 130, [
+      { from: 50, to: 100, color: '#F59E0B', label: 'PAS DE COUPON (capital garanti)' },
+      { from: 100, to: 130, color: '#059669', label: 'COUPON + AUTOCALL', trigger: 100, direction: 'above', triggerLabel: 'Trigger 100%' }
+    ], '%');
 
-    // CMS Steepener — spread 2s10s
-    var spread2s10s = (curve.spread_2_10 || 0.57) * 100; // en bp
-    html += _gauge('CMS Steepener — Spread 2Y-10Y (coupon = 5 × spread)', spread2s10s / 100, -0.50, 2.00, [
-      { from: -0.50, to: 0.0, color: '#DC2626', label: 'INVERSÉE — coupon 0%', trigger: 0.0, direction: 'above', triggerLabel: 'Seuil > 0%' },
-      { from: 0.0, to: 0.30, color: '#F59E0B', label: 'FAIBLE' },
-      { from: 0.30, to: 0.80, color: '#059669', label: 'ZONE FAVORABLE' },
-      { from: 0.80, to: 2.00, color: '#0891B2', label: 'TRÈS PENTUE' }
-    ]);
-
-    // Floater TEC10 — plancher à 2.80%, variable au-dessus de 2.20%
-    html += _gauge('Floater TEC10 — Plancher 2.80% + variable au-dessus de 2.20%', tec10Val, 1.0, 5.0, [
-      { from: 1.0, to: 2.20, color: '#D97706', label: 'PLANCHER SEUL (2.80%)', trigger: 2.20, direction: 'above', triggerLabel: 'Seuil variable 2.20%' },
-      { from: 2.20, to: 3.50, color: '#059669', label: 'PLANCHER + VARIABLE ✅' },
-      { from: 3.50, to: 5.00, color: '#0891B2', label: 'VARIABLE ÉLEVÉ ↑↑' }
-    ]);
-
-    html += '</div>';
-
-    // ═══ SECTION 5: HISTORIQUE TEC10 ═══
-    if (tec10.history && tec10.history.length > 0) {
-      html += '<div style="background:' + BG.section + ';border:1px solid ' + BG.border + ';border-radius:8px;padding:16px;margin-bottom:20px">';
-      html += '<div style="font-size:13px;font-weight:700;color:' + BG.text + ';margin-bottom:10px">📉 Historique TEC10 — 12 derniers mois</div>';
-      html += '<div style="display:flex;align-items:flex-end;gap:2px;height:80px;margin-bottom:6px">';
-      var minR = Math.min.apply(null, tec10.history.map(function(h) { return h.value; }));
-      var maxR = Math.max.apply(null, tec10.history.map(function(h) { return h.value; }));
-      var range = maxR - minR || 0.1;
-      tec10.history.forEach(function(h) {
-        var pct = ((h.value - minR) / range);
-        var barH = Math.round(20 + pct * 55);
-        var color = h.value >= (tec10.current || 3.10) ? '#0891B2' : '#93C5FD';
-        html += '<div style="flex:1;background:' + color + ';height:' + barH + 'px;border-radius:2px 2px 0 0" title="' + h.date + ' : ' + h.value + '%"></div>';
-      });
-      html += '</div>';
-      html += '<div style="display:flex;justify-content:space-between;font-size:8px;color:' + BG.textDim + '">';
-      html += '<span>' + tec10.history[0].date + '</span>';
-      html += '<span>Min ' + minR.toFixed(3) + '% · Max ' + maxR.toFixed(3) + '% · Avg ' + (tec10.avg_1y || 0).toFixed(3) + '%</span>';
-      html += '<span>' + tec10.history[tec10.history.length - 1].date + '</span>';
-      html += '</div></div>';
-    }
+    html += '</div></div>';
 
     // ═══ SECTION 5: MACRO & RÉGIME ═══
     html += '<div style="font-size:14px;font-weight:700;color:' + BG.text + ';margin-bottom:12px">🌍 Contexte macro & régime de marché</div>';
@@ -508,6 +440,7 @@
   };
 
   // ═══ Unified chart + stats update ═══
+  var _currentPeriod = 9999;
   window._mktUpdateChart = function(periodObs) {
     var rd = window._mktRateData;
     if (!rd) return;
@@ -515,8 +448,9 @@
     var statsEl = document.getElementById('mkt-stats-container');
     if (!chartEl) return;
 
-    // Period
-    var obs = periodObs || 9999;
+    // Period — keep current if not specified
+    if (periodObs !== undefined) _currentPeriod = periodObs;
+    var obs = _currentPeriod;
     var data = obs >= 9999 ? rd.history : rd.history.slice(-obs);
 
     // Update period button styles
@@ -545,7 +479,11 @@
       }
     }
 
-    // Default emprunt line
+    // Default product thresholds for TEC10
+    if (rd.id === 'oat_fr_10y') {
+      thresholds.push({ val: 4.40, label: 'TARN 4.40%', color: '#F97316', dash: '8,4' });
+      thresholds.push({ val: 4.00, label: 'Hybride 4.00%', color: '#EAB308', dash: '6,4' });
+    }
     thresholds.push({ val: 2.90, label: 'Emprunt 2.90%', color: '#7C3AED', dash: '3,3' });
 
     // Render chart
@@ -769,14 +707,11 @@
     // Custom threshold input
     html += '<div style="display:flex;gap:6px;align-items:center">';
     html += '<input type="number" id="mkt-custom-threshold" placeholder="Ex: 4.60" step="0.05" style="width:80px;padding:5px 8px;border:1px solid #D1D9E6;border-radius:4px;font-family:var(--mono);font-size:11px;color:#1A202C;background:#fff">';
-    html += '<select id="mkt-custom-mode" style="padding:5px;border:1px solid #D1D9E6;border-radius:4px;font-size:10px;color:#1A202C;background:#fff">';
-    html += '<option value="above">Au-dessus ≥</option><option value="below">En-dessous ≤</option><option value="range">Range ±</option></select>';
+    html += '<select id="mkt-custom-mode" onchange="document.getElementById(\'mkt-custom-range2\').style.display=this.value===\'range\'?\'\':\'none\'" style="padding:5px;border:1px solid #D1D9E6;border-radius:4px;font-size:10px;color:#1A202C;background:#fff">';
+    html += '<option value="above">Au-dessus ≥</option><option value="below">En-dessous ≤</option><option value="range">Range [min — max]</option></select>';
     html += '<input type="number" id="mkt-custom-range2" placeholder="Borne haute" step="0.05" style="width:80px;padding:5px 8px;border:1px solid #D1D9E6;border-radius:4px;font-family:var(--mono);font-size:11px;color:#1A202C;background:#fff;display:none">';
     html += '<button onclick="_mktUpdateChart()" style="padding:5px 12px;border-radius:4px;border:none;background:#7C3AED;color:#fff;font-size:10px;font-weight:700;cursor:pointer">Analyser</button>';
     html += '</div></div>';
-
-    // Mode change handler inline
-    html += '<script>document.getElementById("mkt-custom-mode").onchange=function(){document.getElementById("mkt-custom-range2").style.display=this.value==="range"?"":"none"}<\/script>';
 
     // Chart + stats container
     html += '<div id="mkt-chart-container" style="background:#FAFBFC;border:1px solid #E2E8F0;border-radius:8px;padding:8px"></div>';
