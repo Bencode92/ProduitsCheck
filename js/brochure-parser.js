@@ -115,8 +115,9 @@
   var STRUCT_OPTS = [
     { v: 'autocall', l: 'Autocall / Phoenix' },
     { v: 'taux_fixe', l: 'Taux fixe / Callable' },
+    { v: 'taux_fixe_in_fine', l: 'Callable In Fine' },
     { v: 'range_accrual', l: '📊 Range Accrual' },
-    { v: 'capital_garanti', l: 'Capital garanti' },
+    { v: 'capital_garanti', l: 'Capital garanti / TARN' },
     { v: 'dispersion', l: 'Dispersion' },
     { v: 'basket', l: 'Panier équipondéré' },
     { v: 'reverse', l: 'Reverse convertible' },
@@ -124,9 +125,25 @@
   ];
 
   var UND_TYPES = ['single-stock', 'single-index', 'worst-of', 'basket', 'pairs', 'rates', 'none'];
-  var FREQ_OPTS = ['annuel', 'semestriel', 'trimestriel', 'à maturité'];
-  var COUPON_TYPES = ['conditionnel', 'fixe', 'participation'];
-  var ER_TYPES = ['autocall', 'callable', 'none'];
+  var FREQ_OPTS = [
+    { v: 'annuel', l: 'Annuel' },
+    { v: 'semestriel', l: 'Semestriel' },
+    { v: 'trimestriel', l: 'Trimestriel' },
+    { v: 'in_fine', l: 'In Fine (à maturité)' },
+    { v: 'à maturité', l: 'À maturité' }
+  ];
+  var COUPON_TYPES = [
+    { v: 'conditionnel', l: 'Conditionnel' },
+    { v: 'fixe', l: 'Fixe' },
+    { v: 'fixe_capitalise', l: 'Fixe capitalisé (In Fine)' },
+    { v: 'participation', l: 'Participation' }
+  ];
+  var ER_TYPES = [
+    { v: 'autocall', l: 'Autocall' },
+    { v: 'callable', l: 'Callable (émetteur)' },
+    { v: 'tarn', l: 'TARN (cumul coupons)' },
+    { v: 'none', l: 'Aucun' }
+  ];
 
   var _phase = 'upload', _data = null, _fileName = '', _error = '', _selectedBank = '', _investedAmount = '';
 
@@ -499,9 +516,13 @@
       }
       if (!product.guaranteedYears) product.guaranteedYears = product.maturityYears || 10;
       // Copy callSchedule from aiParsed if available
-      if (_data.earlyRedemption && _data.earlyRedemption.callSchedule && product.earlyRedemption) {
-        product.earlyRedemption.callSchedule = _data.earlyRedemption.callSchedule;
-        product.earlyRedemption.firstCallDate = _data.earlyRedemption.firstCallDate;
+      var cs = (_data.callSchedule) || (_data.earlyRedemption && _data.earlyRedemption.callSchedule) || [];
+      if (cs.length && product.earlyRedemption) {
+        product.callSchedule = cs;
+        product.earlyRedemption.callSchedule = cs;
+        product.earlyRedemption.type = 'callable';
+        product.earlyRedemption.possible = true;
+        product.earlyRedemption.firstCallDate = _data.earlyRedemption && _data.earlyRedemption.firstCallDate || cs[0].date;
       }
       console.log('[BrochureParser] Post-build: Callable In Fine corrected');
     }
@@ -591,6 +612,7 @@
     if (d.decrementPct) badges += _badge('Décrément ' + d.decrementPct + '%', 'var(--red)');
     if (er.stepDown) badges += _badge('Step-down', 'var(--orange)');
     if (er.type === 'callable') badges += _badge('Callable', 'var(--purple)');
+    if (d.structureType === 'taux_fixe_in_fine') badges += _badge('Callable In Fine', '#7C3AED');
     if (c.memory) badges += _badge('Mémoire', 'var(--cyan)');
     if (cp.barrierCoupon) badges += _badge('Digitale ' + cp.barrierCoupon + '%', 'var(--orange)');
 
@@ -631,13 +653,33 @@
       _field('Taux (%)', _inp('bp-rate', c.rate, 'number'), 'PAR PÉRIODE') +
       _field('Type', _sel('bp-coupontype', c.type || 'conditionnel', COUPON_TYPES)) +
       _field('Fréquence', _sel('bp-freq', c.frequency || 'annuel', FREQ_OPTS)) +
-      _field('Paiement', _sel('bp-timing', c.paymentTiming || 'periodic', ['periodic', 'maturity'])) +
+      _field('Paiement', _sel('bp-timing', c.paymentTiming || 'periodic', [
+        { v: 'periodic', l: 'Périodique' },
+        { v: 'at_redemption', l: 'Au remboursement (In Fine)' },
+        { v: 'maturity', l: 'À maturité' }
+      ])) +
       _field('Si rappelé (%)', _inp('bp-rateIfCalled', c.rateIfCalled, 'number', '—')) +
       _field('Si maturité (%)', _inp('bp-rateIfMaturity', c.rateIfMaturity, 'number', '—')) +
       _field('Participation (%)', _inp('bp-participation', d.participationRate, 'number', '—')) +
       _field('Montant min (€)', _inp('bp-mininvest', d.minInvestment, 'number', '—')) +
       _field('Trigger coupon (%)', _inp('bp-coupontrigger', c.trigger, 'number', '—')) +
-      '<div class="bp-field">' + _tog('bp-memory', c.memory, 'Coupon à mémoire') + '</div>');
+      '<div class="bp-field">' + _tog('bp-memory', c.memory, 'Coupon à mémoire') + '</div>' +
+      _field('Années garanties', _inp('bp-guaranteedyears', d.guaranteedYears, 'number', '0')) +
+      _field('Commissions (%)', _inp('bp-commissions', d.commissions, 'number', '—')) +
+      _field('ISIN', _inp('bp-isin', d.isin || (d.aiParsed && d.aiParsed.isin) || '', 'text', 'XS...')) +
+      _field('Cumul autocall (%)', _inp('bp-autocallcumul', d.autocallCumulTarget, 'number', '—'), 'TARN: seuil cumul coupons'));
+    // Call schedule for Callable In Fine
+    var callSched = d.callSchedule || (er && er.callSchedule) || [];
+    if (d.structureType === 'taux_fixe_in_fine' && callSched.length) {
+      var csHtml = '<div class="bp-field bp-span-full"><div class="bp-label">Dates de rappel</div>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:11px;color:var(--text)">';
+      callSched.forEach(function(cs) {
+        csHtml += '<div style="padding:4px 8px;background:var(--bg-input);border-radius:4px;border:1px solid var(--border)">' +
+          esc(cs.date) + ' → <b>' + cs.amount + '%</b></div>';
+      });
+      csHtml += '</div></div>';
+      html += _section('CALL SCHEDULE', '📅', '#7C3AED', csHtml);
+    }
     html += _section('PROTECTION', '🛡️', 'var(--orange)',
       '<div class="bp-field">' + _tog('bp-capprotected', cp.protected, cp.protected ? 'Capital garanti ✓' : 'Non protégé ✗') + '</div>' +
       _field('Niveau (%)', _inp('bp-caplevel', cp.level, 'number', '100')) +
