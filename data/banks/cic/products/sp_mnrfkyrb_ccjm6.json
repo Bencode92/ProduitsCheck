@@ -225,85 +225,85 @@
   "minInvestment": 100000,
   "grading": {
     "grade": "C",
-    "score": 50,
+    "score": 56,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 48,
-        "base": 50,
-        "delta": -2,
-        "reasoning": "Rendement: base 50 → -2 = 48 (En régime risk-off avec hawkish hold, la probabilité de call est réduite à 35% vs espérance initiale, limitant le potentiel de sortie anticipée) | Coupon 4.66%, protégé | Mat espérée: ~2.3a (prob mat: 1%)"
+        "score": 58,
+        "base": 56,
+        "delta": 2,
+        "reasoning": "Rendement: base 56 → +2 = 58 (Coupon garanti 4.66% sans condition, spread attractif 158bps vs AAA 10Y dans un contexte stagflationniste favorable aux taux fixes) | Coupon 4.66%, protégé | Mat espérée: ~2.3a (prob mat: 1%)"
       },
       "underlyingQuality": {
-        "score": 59,
-        "base": 61,
-        "delta": -2,
-        "reasoning": "Qualité: base 61 → -2 = 59 (Environnement risk-off avec VIX à 22 défavorable aux produits longs 10 ans, malgré le capital garanti qui limite la casse)"
+        "score": 73,
+        "base": 71,
+        "delta": 2,
+        "reasoning": "Qualité: base 71 → +2 = 73 (Protection contre l'inflation avec taux fixe 4.66% > PCE 2.8%, produit sans sous-jacent action donc immunisé contre les rotations sectorielles négatives)"
       },
       "portfolioFit": {
         "score": 55,
         "base": 70,
         "delta": 2,
-        "reasoning": "Fit: base 70 → +2 = 72 (Produit défensif avec capital garanti et coupon fixe 4.66% attractif en contexte d'incertitude macro, adapté pour la poche sécuritaire)"
+        "reasoning": "Fit: base 70 → +2 = 72 (Allocation défensive idéale en stagflation, diversification vs actions et protection nominale du capital alignée avec la stratégie TIPS recommandée)"
       },
       "riskPremium": {
         "score": 51,
-        "base": 28,
+        "base": 34,
         "delta": -2,
         "reasoning": "Capital garanti: spread 4.7% - CAT 2.5% - illiq 0.7% = 1.5%"
       }
     },
-    "verdict": "Produit défensif offrant 4.66% annuel avec capital garanti, mais fortement pénalisé par sa maturité 10 ans en régime risk-off et la faible probabilité de call (35%). Le spread de 155bps vs AAA 10Y est insuffisant pour compenser le risque de duration et crédit émetteur sur cette maturité. Score final ajusté à 36/100, recommandation négative malgré les caractéristiques défensives.",
+    "verdict": "Produit défensif attractif en stagflation avec coupon garanti 4.66% offrant 158bps de spread vs AAA 10Y (3.08%). La probabilité de call faible (20%) en environnement hawkish permet de sécuriser ce rendement sur longue durée. Principal risque: qualité crédit de l'émetteur non spécifiée et sensibilité duration élevée (DV01 ~10bps) sur 10 ans.",
     "keyRisks": [
-      "Duration longue de 10 ans avec DV01 élevé en cas de hausse des taux",
-      "Risque crédit émetteur concentré sur 10 ans sans diversification"
+      "Défaut émetteur: capital garanti uniquement si émetteur solvable sur 10 ans",
+      "Duration élevée: perte latente de -10% si taux +100bps, liquidité secondaire limitée"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 14,
-        "return_eur": 14000,
-        "probability": 0.35,
-        "duration_years": 3
+        "return_pct": 4.66,
+        "return_eur": 4660,
+        "probability": 0.2,
+        "duration_years": 1
       },
       "base": {
-        "return_pct": 46.6,
+        "return_pct": 4.66,
         "return_eur": 46600,
-        "probability": 0.4,
+        "probability": 0.6,
         "duration_years": 10
       },
       "stress": {
-        "return_pct": 23.3,
-        "return_eur": 23300,
-        "probability": 0.2,
-        "duration_years": 5
+        "return_pct": 2.5,
+        "return_eur": 25000,
+        "probability": 0.15,
+        "duration_years": 10
       },
       "worst": {
-        "return_pct": -80,
-        "return_eur": -80000,
+        "return_pct": -50,
+        "return_eur": -50000,
         "probability": 0.05,
-        "duration_years": 2
+        "duration_years": 5
       }
     },
     "confidenceInterval": {
-      "low": 41,
-      "high": 59,
+      "low": 49,
+      "high": 67,
       "halfWidth": 9,
       "gradeStable": false,
-      "gradeRange": "D-C",
-      "label": "C [41-59]"
+      "gradeRange": "C-B",
+      "label": "C [49-67]"
     },
     "metadata": {
-      "gradedAt": "2026-04-09T12:14:53.123Z",
-      "durationMs": 19333,
+      "gradedAt": "2026-04-17T15:43:28.085Z",
+      "durationMs": 19811,
       "aiUsed": true,
       "version": "7.1",
       "productType": "taux_fixe",
       "marketDataAvailable": false,
-      "catBenchmark": 2.9,
+      "catBenchmark": 2.8,
       "catSource": "allocator-confirmed",
       "couponAnnualized": 4.66,
       "couponRaw": 4.66,
@@ -318,11 +318,11 @@
       "maxMaturity": 10,
       "probReachMaturity": 1,
       "maxBeta": null,
-      "baseScore": 51,
+      "baseScore": 57,
       "baseGrade": "C",
       "adjustments": {
-        "p1": -2,
-        "p2": -2,
+        "p1": 2,
+        "p2": 2,
         "p3": 2,
         "p4": -2
       },
@@ -332,9 +332,9 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Callable LT",
-      "ci_low": 41,
-      "ci_high": 59,
-      "ci_label": "C [41-59]",
+      "ci_low": 49,
+      "ci_high": 67,
+      "ci_label": "C [49-67]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
@@ -351,21 +351,21 @@
     },
     "regimeScenarios": {
       "current": {
-        "score": 50,
+        "score": 56,
         "grade": "C",
-        "label": "Actuel (risk_off)",
+        "label": "Actuel (stagflation)",
         "desc": "In fine: pas de cash-flow intermédiaire, TRI ~3.9% si go-to-maturity"
       },
       "bull": {
-        "score": 55,
-        "grade": "C",
+        "score": 61,
+        "grade": "B",
         "label": "Bull / Risk-on",
         "delta": 5,
         "desc": "Taux baissent → call probable → coupon capitalisé versé en une fois"
       },
       "crash": {
-        "score": 43,
-        "grade": "D",
+        "score": 49,
+        "grade": "C",
         "label": "Crash / Récession",
         "delta": -7,
         "desc": "Taux montent → pas de call, intérêts simples sur 10 ans = rendement moindre"
