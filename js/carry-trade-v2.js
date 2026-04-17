@@ -365,6 +365,92 @@
     html += 'Config E (Fixe + TARN) = meilleur compromis : pire cas positif, ratio ∞, +' + _f((_configs.find(function(c){return c.id==='E';}) || {pnl:{esperance:0}}).pnl.esperance - fixeNet) + '€ de prime vs Fixe seul.';
     html += '</div></div>';
 
+    // ═══ CAHIER DES CHARGES (accordéon) ═══
+    function _acc(id, title, content) {
+      return '<div style="border:1px solid ' + B.border + ';border-radius:6px;margin-bottom:4px;overflow:hidden">' +
+        '<div onclick="var c=document.getElementById(\'' + id + '\');c.style.display=c.style.display===\'none\'?\'\':\'none\';this.querySelector(\'span\').textContent=c.style.display===\'none\'?\'▶\':\'▼\'" style="padding:10px 14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;background:' + B.row1 + '">' +
+        '<div style="font-size:11px;font-weight:700;color:' + B.text + '">' + title + '</div>' +
+        '<span style="font-size:10px;color:' + B.dim + '">▶</span></div>' +
+        '<div id="' + id + '" style="display:none;padding:12px 14px;font-size:10px;color:' + B.text + ';line-height:1.6">' + content + '</div></div>';
+    }
+
+    html += '<div style="background:' + B.card + ';border:1px solid #2563EB;border-radius:8px;padding:14px;margin-bottom:16px">';
+    html += '<div style="font-size:13px;font-weight:700;color:#2563EB;margin-bottom:10px">📋 CAHIER DES CHARGES — RDV Banquier</div>';
+
+    html += _acc('cdc-situation', '🏦 Notre situation',
+      '<strong>Emprunt SG Equipéa</strong> : ' + _f(L.amount) + '€ à ' + L.rate + '% fixe in fine ' + L.years + ' ans<br>' +
+      'Crédit en blanc (aucune garantie) · Entité : ' + L.entity + '<br>' +
+      'Coût total intérêts : ' + _f(Math.round(L.amount * L.rate / 100 * L.years)) + '€ + frais ' + _f(L.fees) + '€<br>' +
+      'Validité offre SG : 14/05/2026');
+
+    html += _acc('cdc-contraintes', '🔒 Contraintes non négociables',
+      '• Capital garanti <strong>100% à échéance</strong> (inconditionnelle)<br>' +
+      '• Sous-jacent <strong>taux uniquement</strong> (TEC10, Euribor, CMS) — pas d\'actions<br>' +
+      '• Nominal minimum <strong>500 000€</strong> par produit<br>' +
+      '• Émetteur <strong>Investment Grade A-</strong> minimum<br>' +
+      '• Coupon > 2,90% (sinon pas de portage positif)<br>' +
+      '• Devise EUR · Éligible compte-titres ordinaire');
+
+    html += _acc('cdc-option-a', '🏆 Option A — 1 produit de 1M€ (TARN TEC10)',
+      '<strong>TARN TEC10 10 ans</strong><br>' +
+      '• Coupon cible : <strong>6,50 – 7,00%</strong><br>' +
+      '• Conditionnel : TEC10 ≤ 4,40% (fixing annuel Banque de France)<br>' +
+      '• Coupons <strong>garantis An 1-2</strong> (inconditionnels)<br>' +
+      '• Autocall : si cumul coupons versés ≥ 26-28%<br>' +
+      '• Capital garanti 100% à l\'échéance 10 ans<br>' +
+      '• Espérance : +' + _f((_configs.find(function(c){return c.id==='A';}) || {pnl:{esperance:0}}).pnl.esperance) + '€ sur 5 ans');
+
+    html += _acc('cdc-option-b', '🎯 Option B — 2 produits de 500K€ (Fixe + TARN)',
+      '<strong>Produit 1 (500K) — Fixe Callable</strong><br>' +
+      '• Coupon cible : <strong>4,00 – 4,50%</strong> garanti<br>' +
+      '• Callable émetteur à partir An 1 ou An 3<br>' +
+      '• Maturité 5Y ou 10Y NC3<br><br>' +
+      '<strong>Produit 2 (500K) — TARN TEC10</strong><br>' +
+      '• Mêmes specs que Option A (coupon 6,50-7,00%, trigger 4,40%)<br>' +
+      '• Espérance combinée : +' + _f((_configs.find(function(c){return c.id==='E';}) || {pnl:{esperance:0}}).pnl.esperance) + '€ · Pire cas positif');
+
+    html += _acc('cdc-alternatives', '💡 Structures alternatives à demander',
+      '• <strong>Callable In Fine</strong> 10YNC4 : coupon capitalisé ~4,70%, tout versé au call (CIC en propose)<br>' +
+      '• <strong>Range Accrual TEC10</strong> [2,00%-4,00%] : corridor centré, moins binaire que le TARN<br>' +
+      '• <strong>Step-Up Callable</strong> : coupon garanti croissant (3,50% → 5,50%)<br>' +
+      '• <strong>TARN avec Mémoire</strong> : coupons rattrapés si condition remplie plus tard<br>' +
+      '• Toute structure taux capital garanti > 5%');
+
+    html += _acc('cdc-marche', '📊 Nos hypothèses de marché',
+      'TEC10 = ' + _p(MR.tec10) + '% · OAT 5Y = ' + _p(MR.oat5y) + '% · Euribor 3M = ' + _p(MR.euribor3m) + '%<br>' +
+      'BCE dépôt = ' + _p(MR.bce) + '% · Courbe normale +59bp<br>' +
+      'Régime : stagflation modérée (Brent $103, PCE 2,8%)<br><br>' +
+      '<strong>Analyse trigger 4,40%</strong> (20 ans historique) :<br>' +
+      '• TEC10 > 4,40% = 1,7% du temps (12/695 obs)<br>' +
+      '• Dernière fois : sept 2008 (18 ans sans)<br>' +
+      '• Proba forward retenue : 85-92%');
+
+    html += _acc('cdc-questions', '❓ Questions pour le banquier (11)',
+      '<strong>Pricing :</strong><br>' +
+      '1. Quel coupon TARN TEC10 sur 1M€ / 10Y / trigger 4,40% / 2 ans garantis ?<br>' +
+      '2. Quel coupon Fixe Callable sur 500K / 5Y ou 10YNC3 ?<br>' +
+      '3. Prime de taille 1M vs 500K — combien de bp ?<br>' +
+      '4. Autres structures taux capital garanti à proposer ?<br><br>' +
+      '<strong>Mécanique :</strong><br>' +
+      '5. Autocall = cumul coupons versés ou cumul théorique ?<br>' +
+      '6. Fixing TEC10 : quelle source, quelle date ?<br>' +
+      '7. Délai de mise en place ?<br>' +
+      '8. Éligible compte-titres ordinaire ?<br><br>' +
+      '<strong>Risque :</strong><br>' +
+      '9. Émetteur exact et notation ?<br>' +
+      '10. Rang de séniorité et recovery en cas de défaut ?<br>' +
+      '11. Marché secondaire disponible ?');
+
+    html += _acc('cdc-calendrier', '📅 Calendrier',
+      '• Proposition emprunt SG validée : 14/04/2026<br>' +
+      '• <strong>RDV structureur : avril 2026</strong><br>' +
+      '• Réception term sheets : fin avril<br>' +
+      '• Décision : mi-mai<br>' +
+      '• Validité offre SG : <strong>14/05/2026</strong><br>' +
+      '• Mise en place souhaitée : fin mai 2026');
+
+    html += '</div>';
+
     // ═══ BLOC 2 : DISCUSSION — Détail de la config sélectionnée ═══
     html += '<div id="carry-v2-discussion" style="background:' + B.card + ';border:1px solid ' + B.border + ';border-radius:8px;padding:16px;margin-bottom:16px">';
     html += '<div style="text-align:center;padding:20px;color:' + B.dim + ';font-size:12px">👆 Cliquez "Analyser" sur une configuration pour voir le détail des produits</div>';
