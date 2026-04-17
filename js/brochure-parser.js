@@ -27,9 +27,20 @@
     '  NE PAS confondre observations annuelles de coupon avec autocall.',
     '',
     'COUPON TYPE:',
-    '- type="fixe" UNIQUEMENT si coupon versé SANS AUCUNE CONDITION',
+    '- type="fixe" si coupon versé SANS AUCUNE CONDITION (garanti)',
+    '- type="fixe_capitalise" si coupon GARANTI mais versé IN FINE (pas annuellement) — ex: "Callable In Fine"',
     '- type="conditionnel" si coupon dépend d\'une condition (trigger/barrière)',
     '- type="participation" si rendement = participation à la performance',
+    '',
+    'CALLABLE IN FINE (règle critique):',
+    '- "Callable In Fine" ou "coupon de X% par année écoulée" versé au rappel/échéance = structureType "taux_fixe_in_fine"',
+    '- Le coupon est GARANTI et FIXE — type="fixe_capitalise", PAS "conditionnel"',
+    '- frequency="in_fine" (tout versé d\'un bloc au call ou à maturité, pas annuellement)',
+    '- paymentTiming="at_redemption" (versement au rappel ou à échéance seulement)',
+    '- guaranteedYears = maturité totale (ex: 10 si 10 ans) car TOUTES les années sont garanties',
+    '- "remboursement à 118,64%" = capital 100% + coupon 18,64% = 4 années × 4,66%',
+    '- earlyRedemption.type="callable" (pas "autocall" — c\'est l\'émetteur qui décide, pas le marché)',
+    '- Lister le callSchedule avec les montants de remboursement par date',
     '',
     'COUPON:',
     '- "coupon de X% par semestre écoulé" → rate=X, frequency="semestriel". Ne JAMAIS multiplier.',
@@ -97,7 +108,7 @@
     '"coupon":{"rate":0,"rateIfCalled":null,"rateIfMaturity":null,"type":"","frequency":"","trigger":null,"memory":false,"paymentTiming":""},',
     '"participationRate":null,"guaranteedYears":0,"autocallCumulTarget":null,"commissions":null,',
     '"capitalProtection":{"protected":false,"level":null,"barrier":null,"barrierCoupon":null,"barrierType":"europeenne"},',
-    '"earlyRedemption":{"possible":false,"type":"","trigger":null,"frequency":"","startSemester":null,"stepDown":false,"stepDownPct":null},',
+    '"earlyRedemption":{"possible":false,"type":"","trigger":null,"frequency":"","startSemester":null,"stepDown":false,"stepDownPct":null,"firstCallDate":null,"callSchedule":[]},',
     '"decrementPct":null,"actualDividendYield":null,"minInvestment":null,"mechanism":"","risks":[],"summary":""}'
   ].join('\n');
 
@@ -240,6 +251,16 @@
       console.log('[BrochureParser] Autocall -> paymentTiming forced to "periodic"');
     }
 
+    // Callable In Fine auto-correction
+    var st = (data.structureType || '').toLowerCase();
+    if (st === 'taux_fixe_in_fine' || (er.type === 'callable' && c.paymentTiming === 'at_redemption') || (er.type === 'callable' && c.frequency === 'in_fine')) {
+      data.structureType = 'taux_fixe_in_fine';
+      if (c.type === 'conditionnel') { c.type = 'fixe_capitalise'; console.log('[BrochureParser] Callable In Fine: coupon type forced to fixe_capitalise'); }
+      if (!c.frequency || c.frequency === 'annuel') { c.frequency = 'in_fine'; }
+      if (!c.paymentTiming || c.paymentTiming === 'periodic') { c.paymentTiming = 'at_redemption'; }
+      if (!data.guaranteedYears) { data.guaranteedYears = data.maturityYears || 10; console.log('[BrochureParser] Callable In Fine: guaranteedYears set to ' + data.guaranteedYears); }
+    }
+
     if (c.rate && c.rate > 12) {
       if (c.frequency === 'semestriel' && c.rate > 15) {
         var p = c.rate / 2; if (p >= 2 && p <= 12) c.rate = p;
@@ -380,6 +401,12 @@
     if (st === 'autocall' || st === 'phoenix_memoire') {
       if (!cp.barrier && !cp.protected) alerts.push('⚠️ Barrière capital non détectée');
       if (!cp.barrierCoupon && !c.trigger) alerts.push('⚠️ Trigger coupon non détecté');
+    }
+    if (st === 'taux_fixe_in_fine') {
+      if (c.type === 'conditionnel') alerts.push('⚠️ Callable In Fine : le coupon devrait être "fixe" ou "fixe_capitalise", pas "conditionnel"');
+      if (c.frequency !== 'in_fine' && c.paymentTiming !== 'at_redemption') alerts.push('⚠️ Callable In Fine : fréquence devrait être "in_fine" (pas annuel)');
+      if (!er.callSchedule || !er.callSchedule.length) alerts.push('⚠️ Callable In Fine : callSchedule non détecté (tableau des montants de remboursement par date)');
+      if (!c.rateIfMaturity) alerts.push('⚠️ Callable In Fine : rateIfMaturity non détecté (coupon total si pas de call)');
     }
     if (st === 'range_accrual') {
       if (!data.rangeAccrual || !data.rangeAccrual.lowerBound) alerts.push('⚠️ Range Accrual : borne basse non détectée');
