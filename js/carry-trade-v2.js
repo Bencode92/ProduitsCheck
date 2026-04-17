@@ -370,6 +370,47 @@
     html += '<div style="text-align:center;padding:20px;color:' + B.dim + ';font-size:12px">👆 Cliquez "Analyser" sur une configuration pour voir le détail des produits</div>';
     html += '</div>';
 
+    // ═══ TABLEAU EMPRUNT SG (in fine) ═══
+    var annualInt = Math.round(L.amount * L.rate / 100);
+    html += '<div style="background:' + B.card + ';border:1px solid #DC2626;border-radius:8px;padding:14px;margin-bottom:16px">';
+    html += '<div style="font-size:13px;font-weight:700;color:#DC2626;margin-bottom:10px">🏦 EMPRUNT SG — Tableau d\'amortissement in fine</div>';
+    html += '<table style="width:100%;border-collapse:collapse;font-size:11px">';
+    html += '<thead><tr style="background:' + B.header + '">';
+    html += '<th style="padding:8px;text-align:left;color:' + B.muted + '">ANNÉE</th>';
+    html += '<th style="padding:8px;text-align:right;color:' + B.muted + '">CAPITAL RESTANT DÛ</th>';
+    html += '<th style="padding:8px;text-align:right;color:#DC2626">INTÉRÊTS</th>';
+    html += '<th style="padding:8px;text-align:right;color:' + B.muted + '">AMORTISSEMENT</th>';
+    html += '<th style="padding:8px;text-align:right;color:#DC2626">ÉCHÉANCE TOTALE</th>';
+    html += '<th style="padding:8px;text-align:right;color:' + B.muted + '">INTÉRÊTS CUMULÉS</th>';
+    html += '</tr></thead><tbody>';
+    var cumulInt = 0;
+    for (var y = 1; y <= L.years; y++) {
+      var bg = y % 2 === 0 ? B.row0 : B.row1;
+      var amort = y === L.years ? L.amount : 0; // in fine: tout à la fin
+      var echeance = annualInt + amort;
+      cumulInt += annualInt;
+      html += '<tr style="background:' + bg + ';border-bottom:1px solid ' + B.border + '">';
+      html += '<td style="padding:6px 8px;font-weight:700">An ' + y + '</td>';
+      html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono)">' + _f(L.amount) + '€</td>';
+      html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:#DC2626">-' + _f(annualInt) + '€</td>';
+      html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:' + (amort > 0 ? '#DC2626' : B.dim) + '">' + (amort > 0 ? '-' + _f(amort) + '€' : '—') + '</td>';
+      html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);font-weight:700;color:#DC2626">-' + _f(echeance) + '€</td>';
+      html += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:' + B.muted + '">-' + _f(cumulInt) + '€</td>';
+      html += '</tr>';
+    }
+    // Total row
+    html += '<tr style="background:' + B.header + ';border-top:2px solid ' + B.border + ';font-weight:700">';
+    html += '<td style="padding:8px">TOTAL</td>';
+    html += '<td style="padding:8px"></td>';
+    html += '<td style="padding:8px;text-align:right;font-family:var(--mono);color:#DC2626">-' + _f(annualInt * L.years) + '€</td>';
+    html += '<td style="padding:8px;text-align:right;font-family:var(--mono);color:#DC2626">-' + _f(L.amount) + '€</td>';
+    html += '<td style="padding:8px;text-align:right;font-family:var(--mono);font-weight:800;color:#DC2626">-' + _f(annualInt * L.years + L.amount) + '€</td>';
+    html += '<td style="padding:8px"></td>';
+    html += '</tr>';
+    html += '</tbody></table>';
+    html += '<div style="margin-top:6px;font-size:9px;color:' + B.dim + '">In fine : intérêts seuls pendant 5 ans (' + _f(annualInt) + '€/an) + remboursement capital 1M€ à échéance. Coût total intérêts : ' + _f(annualInt * L.years) + '€ + frais ' + _f(L.fees) + '€ = ' + _f(annualInt * L.years + L.fees) + '€</div>';
+    html += '</div>';
+
     // ═══ BLOC 3 : ANALYSER — P&L année par année ═══
     html += '<div id="carry-v2-pnl" style="background:' + B.card + ';border:1px solid ' + B.border + ';border-radius:8px;padding:16px">';
     html += '<div style="text-align:center;padding:20px;color:' + B.dim + ';font-size:12px">Le P&L détaillé s\'affiche quand vous sélectionnez une configuration</div>';
