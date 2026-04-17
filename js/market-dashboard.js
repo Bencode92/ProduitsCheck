@@ -295,6 +295,60 @@
 
     // ═══ SECTION 7: IMPACT CARRY TRADE ═══
     html += '<div style="background:#ECFDF5;border:2px solid #059669;border-radius:8px;padding:16px;margin-bottom:20px">';
+    // ═══ SYNTHÈSE SWISS LIFE GESTION PRIVÉE (avril 2026) ═══
+    html += '<div style="background:' + BG.section + ';border:1px solid ' + BG.border + ';border-radius:8px;margin-bottom:20px">';
+    html += '<div onclick="var c=document.getElementById(\'mkt-swisslife\');c.style.display=c.style.display===\'none\'?\'\':\'none\';this.querySelector(\'span\').textContent=c.style.display===\'none\'?\'▶\':\'▼\'" style="padding:14px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center">';
+    html += '<div style="font-size:13px;font-weight:700;color:#1E40AF">📄 Synthèse Swiss Life Gestion Privée — Forces Spéciales Op. n°5 (Avril 2026)</div>';
+    html += '<span style="font-size:10px;color:#64748B">▶</span></div>';
+    html += '<div id="mkt-swisslife" style="display:none;padding:0 16px 16px">';
+
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">';
+
+    // Vision macro
+    html += '<div style="padding:12px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:6px">';
+    html += '<div style="font-size:11px;font-weight:700;color:#DC2626;margin-bottom:6px">⚠️ Contexte macro — Choc géopolitique</div>';
+    html += '<div style="font-size:11px;color:#1A202C;line-height:1.6">';
+    html += '• Conflit Iran / Moyen-Orient → cessez-le-feu temporaire (15j)<br>';
+    html += '• Hausse prix énergie → <strong>inflation au cœur des préoccupations</strong><br>';
+    html += '• BCE + Fed : <strong>marges de manœuvre limitées</strong>, baisses de taux repoussées<br>';
+    html += '• <strong>Remontée des taux longs</strong> depuis le début du conflit<br>';
+    html += '• Détroit d\'Ormuz = canal de transmission clé aux marchés</div></div>';
+
+    // Impact taux
+    html += '<div style="padding:12px;background:#DBEAFE;border:1px solid #93C5FD;border-radius:6px">';
+    html += '<div style="font-size:11px;font-weight:700;color:#1E40AF;margin-bottom:6px">📈 Impact sur les taux (carry trade)</div>';
+    html += '<div style="font-size:11px;color:#1A202C;line-height:1.6">';
+    html += '• Taux longs en <strong>hausse</strong> → budget option structurés <strong>en augmentation</strong> (favorable)<br>';
+    html += '• BCE en pause → Euribor <strong>stable</strong> autour de 2% (favorable Range Accrual)<br>';
+    html += '• Baisses de taux <strong>repoussées</strong> → les produits taux gardent leur attractivité<br>';
+    html += '• Spreads crédit élargis → <strong>prudence sur le risque émetteur</strong><br>';
+    html += '• Positionnement SLGP : <strong>attente de réexposition progressive sur taux longs</strong></div></div>';
+    html += '</div>';
+
+    // Stratégie SLGP
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">';
+
+    html += '<div style="padding:10px;background:#ECFDF5;border-radius:6px;border-left:3px solid #059669">';
+    html += '<div style="font-size:10px;font-weight:700;color:#059669">CE QU\'ILS PRIVILÉGIENT</div>';
+    html += '<div style="font-size:10px;color:#1A202C;margin-top:4px;line-height:1.5">';
+    html += '• Actifs "anti-fragiles" (mines d\'or)<br>• Crédit HY européen (spreads attractifs)<br>• Actions émergentes + défense EU</div></div>';
+
+    html += '<div style="padding:10px;background:#FEF3C7;border-radius:6px;border-left:3px solid #D97706">';
+    html += '<div style="font-size:10px;font-weight:700;color:#D97706">CE QU\'ILS SURVEILLENT</div>';
+    html += '<div style="font-size:10px;color:#1A202C;margin-top:4px;line-height:1.5">';
+    html += '• Durée du conflit Iran<br>• Prix pétrole → inflation<br>• Opportunités de réexposition taux</div></div>';
+
+    html += '<div style="padding:10px;background:#FEF2F2;border-radius:6px;border-left:3px solid #DC2626">';
+    html += '<div style="font-size:10px;font-weight:700;color:#DC2626">RISQUES IDENTIFIÉS</div>';
+    html += '<div style="font-size:10px;color:#1A202C;margin-top:4px;line-height:1.5">';
+    html += '• Pétrole comprime les marges<br>• Visibilité court terme réduite<br>• Valeurs refuges classiques moins fiables</div></div>';
+
+    html += '</div>';
+
+    html += '<div style="padding:8px 10px;background:#F1F3F7;border-radius:4px;font-size:10px;color:#64748B">';
+    html += 'Source : Swiss Life Gestion Privée, Forces Spéciales Opération n°5, données au 13/04/2026. Performances Forces : -1.2% (F4) à -1.7% (F6) sur le trimestre, surperformant les catégories Morningstar de +0.2 à +0.8%.';
+    html += '</div></div></div>';
+
     html += '<div style="font-size:14px;font-weight:700;color:#059669;margin-bottom:10px">💡 Impact sur le carry trade</div>';
     var tec10Val = tec10.current || 3.10;
     var spreadVsEmprunt = tec10Val - 2.90;
