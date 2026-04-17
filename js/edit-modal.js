@@ -20,7 +20,7 @@ var STRUCTURE_TYPES = [
     { id: 'taux_fixe', label: 'Taux fixe / Callable' },
     { id: 'taux_fixe_in_fine', label: 'Taux fixe / Callable In Fine' },
     { id: 'range_accrual', label: '📊 Range Accrual' },
-    { id: 'capital_garanti', label: 'Capital garanti structuré' },
+    { id: 'capital_garanti', label: 'Capital garanti / TARN' },
     { id: 'reverse', label: 'Reverse convertible' },
     { id: 'participation', label: 'Participation / Bonus' },
     { id: 'twin_win', label: 'Twin-Win' },
@@ -158,8 +158,8 @@ window.showEditModal = function() {
         '<div class="form-field"><label>Protection capital (%)</label><input id="fe-protection" type="number" step="0.1" value="' + protection + '"></div>' +
         '</div>' +
 
-        // ─── Section 4: Remboursement anticipé ───
-        '<div style="font-size:10px;font-weight:700;color:var(--red);margin:20px 0 8px;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border);padding-bottom:4px">⏰ Remboursement Anticipé</div>' +
+        // ─── Section 4: Remboursement anticipé (masqué pour les produits simples) ───
+        '<div id="fe-section-autocall" style="font-size:10px;font-weight:700;color:var(--red);margin:20px 0 8px;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border);padding-bottom:4px">⏰ Remboursement Anticipé</div>' +
         '<div class="form-grid">' +
         '<div class="form-field"><label>Rappel possible</label><select id="fe-autocall"><option value="true"' + (autocall === 'true' ? ' selected' : '') + '>Oui</option><option value="false"' + (autocall === 'false' ? ' selected' : '') + '>Non</option></select></div>' +
         '<div class="form-field"><label>Type</label><select id="fe-er-type">' + erTypeOptions + '</select></div>' +
@@ -170,13 +170,15 @@ window.showEditModal = function() {
         '<div class="form-field"><label>Step-down (%/période)</label><input id="fe-stepdown-pct" type="number" step="0.1" value="' + erStepDownPct + '" placeholder="Ex: 2.5"></div>' +
         '</div>' +
 
-        // ─── Section 5: Décrément ───
+        // ─── Section 5: Décrément (seulement pour produits actions avec décrément) ───
+        (structureType === 'autocall' || structureType === 'phoenix_memoire' || structureType === 'basket' || decrementPct ? (
         '<div style="font-size:10px;font-weight:700;color:var(--purple);margin:20px 0 8px;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border);padding-bottom:4px">📉 Décrément</div>' +
         '<div class="form-grid">' +
         '<div class="form-field"><label>Décrément (%/an)</label><input id="fe-decrement" type="number" step="0.01" value="' + decrementPct + '" placeholder="Ex: 5"></div>' +
         '<div class="form-field"><label>Dividende réel (%/an)</label><input id="fe-divyield" type="number" step="0.01" value="' + divYield + '" placeholder="Ex: 0.97"></div>' +
         (decrementPct && divYield ? '<div class="form-field"><label>Drag annuel</label><div style="padding:8px;background:var(--red-dim);border-radius:var(--radius-sm);color:var(--red);font-size:12px;font-weight:600">' + (decrementPct - divYield).toFixed(2) + '%/an invisible</div></div>' : '') +
-        '</div>' +
+        '</div>'
+        ) : '') +
 
         // ─── Section 6: Range Accrual (conditional) ───
         (structureType === 'range_accrual' ? (
