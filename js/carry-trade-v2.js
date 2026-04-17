@@ -377,8 +377,17 @@
       '<div style="font-size:11px;font-weight:700;color:#059669">🛡️ Option C — SAFE</div>' +
       '<div style="font-size:11px;color:#1A202C;margin-top:4px">500K TARN 7% + 500K Fixe Callable 4,40% garanti. Pire cas toujours positif.</div></div>' +
       '</div>' +
-      '<div style="margin-top:10px;padding:10px;background:#F8F9FB;border:1px solid ' + B.border + ';border-radius:6px;font-size:12px;color:#1A202C;line-height:1.7;font-style:italic">' +
-      '"On consulte <strong>plusieurs établissements</strong> en parallèle. Qu\'est-ce que vous pouvez nous proposer de compétitif sur ces structures ? Et est-ce que vous avez un <strong>PUT investisseur à 5 ans</strong> sur le Digital, pour garantir la sortie au cas où l\'autocall ne se déclenche pas ?"' +
+      '<div style="margin-top:10px;padding:12px;background:#F8F9FB;border:1px solid ' + B.border + ';border-radius:8px;font-size:12px;color:#1A202C;line-height:1.7;font-style:italic">' +
+      '"On est ouverts sur le <strong>format</strong> — on veut voir ce qui est le plus compétitif :<br><br>' +
+      '• <strong>2 produits de 500K€ sur 10 ans</strong> — pour diversifier et combiner rendement + sécurité<br>' +
+      '• <strong>1 seul produit de 1M€ sur 10 ans</strong> — si le pricing est meilleur sur un gros nominal<br>' +
+      '• <strong>2 produits de 500K€ sur 5 ans</strong> — si vous avez des structures 5 ans compétitives qui matchent l\'emprunt<br>' +
+      '• <strong>1 produit 500K 5 ans + 1 produit 500K 10 ans</strong> — pour mixer sécurité court terme et rendement long terme<br><br>' +
+      'On privilégie le <strong>10 ans</strong> pour le budget option plus important, avec <strong>autocall vers An 4</strong> pour récupérer le capital et rembourser l\'emprunt. Mais si vous avez mieux en 5 ans, on est preneurs.<br><br>' +
+      'L\'essentiel c\'est : <strong>capital garanti 100%</strong>, sous-jacent taux, coupon au-dessus de notre emprunt à 2,90%."' +
+      '</div>' +
+      '<div style="margin-top:10px;padding:12px;background:#EFF6FF;border:1px solid #93C5FD;border-radius:8px;font-size:12px;color:#1E40AF;line-height:1.7;font-style:italic">' +
+      '"On consulte <strong>plusieurs établissements</strong> en parallèle. Qu\'est-ce que vous pouvez nous proposer de compétitif ? Et est-ce que vous avez un <strong>PUT investisseur à 5 ans</strong> comme filet de sécurité sur le produit 10 ans ?"' +
       '</div>');
 
     html += _acc('cdc-contexte', '🏦 Contexte détaillé',
