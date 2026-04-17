@@ -487,6 +487,26 @@
         observation: _gv('bp-ra-obs') || (_data.rangeAccrual && _data.rangeAccrual.observation) || 'daily'
       } : undefined
     };
+
+    // ─── Post-build correction for Callable In Fine ──────
+    if (product.structureType === 'taux_fixe_in_fine' || (product.name || '').toLowerCase().indexOf('in fine') >= 0) {
+      product.structureType = 'taux_fixe_in_fine';
+      product.type = 'taux_fixe_in_fine';
+      if (product.coupon) {
+        product.coupon.type = 'fixe_capitalise';
+        product.coupon.frequency = 'in_fine';
+        product.coupon.paymentTiming = 'at_redemption';
+      }
+      if (!product.guaranteedYears) product.guaranteedYears = product.maturityYears || 10;
+      // Copy callSchedule from aiParsed if available
+      if (_data.earlyRedemption && _data.earlyRedemption.callSchedule && product.earlyRedemption) {
+        product.earlyRedemption.callSchedule = _data.earlyRedemption.callSchedule;
+        product.earlyRedemption.firstCallDate = _data.earlyRedemption.firstCallDate;
+      }
+      console.log('[BrochureParser] Post-build: Callable In Fine corrected');
+    }
+
+    return product;
   }
 
   async function _analyzePDF(file) {
