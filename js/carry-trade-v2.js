@@ -212,38 +212,25 @@
 
     var configs = [
       {
-        id: 'A', name: '1M TARN 7% Sur-Mesure', emoji: '🏆',
-        desc: '1 produit de 1M€ TARN sur-mesure 10Y — coupon négocié 7.00% (+0.30% vs retail CIC 6.70%)',
-        products: [Object.assign({}, p10.tarn, { amount: L.amount })],
-        highlight: true
-      },
-      {
-        id: 'B', name: '500K TARN + 500K Digital', emoji: '🎯',
-        desc: 'OPTIMAL — TARN 7% + Digital Plancher 3%+Bonus+Autocall. Les 2 sortent en ~4 ans. Pire cas quasi nul.',
+        id: 'A', name: '500K TARN 7% + 500K Digital Plancher+Autocall', emoji: '🏆',
+        desc: 'RECOMMANDÉ — Les 2 produits sortent en ~4 ans via autocall. Le plancher 3% du Digital couvre l\'emprunt 2.90%. Pire cas quasi nul. Rendement max.',
         products: [
           Object.assign({}, p10.tarn, { amount: 500000 }),
           Object.assign({}, p10.digital, { amount: 500000 })
-        ]
+        ],
+        highlight: true
       },
       {
-        id: 'C', name: '500K TARN + 500K Fixe', emoji: '🛡️',
-        desc: 'SAFE — TARN 7% + Fixe Callable 4.40%. Pire cas toujours positif.',
+        id: 'B', name: '1M TARN 7% Sur-Mesure', emoji: '🎯',
+        desc: 'MAX RENDEMENT — 1 seul produit, tout sur le TARN. Coupon 7% sur 1M€. Autocall ~4 ans. Risque : si TEC10 > 4.60% après An 2, coupon 0% (mais capital garanti).',
+        products: [Object.assign({}, p10.tarn, { amount: L.amount })]
+      },
+      {
+        id: 'C', name: '500K TARN 7% + 500K Fixe Callable 4.40%', emoji: '🛡️',
+        desc: 'SAFE — Le Fixe 4.40% est garanti quoi qu\'il arrive. Le TARN booste le rendement. Pire cas toujours positif.',
         products: [
           Object.assign({}, p10.tarn, { amount: 500000 }),
           Object.assign({}, p10.fixe, { amount: 500000 })
-        ]
-      },
-      {
-        id: 'D', name: '1M Fixe Callable 4.40%', emoji: '🔒',
-        desc: 'ZÉRO RISQUE — 1 produit garanti 4.40%. Coupon + bas mais aucune condition.',
-        products: [Object.assign({}, p10.fixe, { amount: L.amount })]
-      },
-      {
-        id: 'E', name: '500K TARN + 500K Step-Up', emoji: '📈',
-        desc: 'MIX — TARN 7% + Step-Up Callable garanti croissant (3.50%→6.00%)',
-        products: [
-          Object.assign({}, p10.tarn, { amount: 500000 }),
-          Object.assign({}, p10.stepUp, { amount: 500000 })
         ]
       }
     ];
@@ -278,16 +265,16 @@
 
     // ═══ BLOC 1 : PRODUITS — Tableau comparatif des 5 configs ═══
     html += '<div style="background:' + B.card + ';border:1px solid ' + B.border + ';border-radius:8px;padding:16px;margin-bottom:16px">';
-    html += '<div style="font-size:14px;font-weight:800;color:' + B.text + ';margin-bottom:12px">📦 PRODUITS — 5 configurations comparées</div>';
+    html += '<div style="font-size:14px;font-weight:800;color:' + B.text + ';margin-bottom:12px">📦 PRODUITS — 3 configurations</div>';
 
     html += '<table style="width:100%;border-collapse:collapse;font-size:11px">';
     html += '<thead><tr style="background:' + B.header + ';border-bottom:2px solid ' + B.border + '">';
     html += '<th style="padding:10px 8px;text-align:left;color:' + B.muted + ';font-size:10px">CONFIG</th>';
     html += '<th style="padding:10px 8px;text-align:left;color:' + B.muted + ';font-size:10px">PRODUIT(S)</th>';
     html += '<th style="padding:10px 8px;text-align:center;color:#059669;font-size:10px">CENTRAL/AN</th>';
-    html += '<th style="padding:10px 8px;text-align:center;color:#059669;font-size:10px">CENTRAL 5A</th>';
-    html += '<th style="padding:10px 8px;text-align:center;color:#D97706;font-size:10px">ESPÉRANCE</th>';
-    html += '<th style="padding:10px 8px;text-align:center;color:#DC2626;font-size:10px">PIRE CAS</th>';
+    html += '<th style="padding:10px 8px;text-align:center;color:#059669;font-size:10px">BEST CASE 5A</th>';
+    html += '<th style="padding:10px 8px;text-align:center;color:#D97706;font-size:10px">ESPÉRANCE 5A</th>';
+    html += '<th style="padding:10px 8px;text-align:center;color:#DC2626;font-size:10px">WORST CASE 5A</th>';
     html += '<th style="padding:10px 8px;text-align:center;color:' + B.muted + ';font-size:10px"></th>';
     html += '</tr></thead><tbody>';
 
@@ -304,12 +291,13 @@
         html += '<div style="font-size:9px;margin-bottom:2px"><span style="color:' + p.color + ';font-weight:700">' + p.name.substring(0, 30) + '</span> <span style="color:' + B.dim + '">' + _f(p.amount / 1000) + 'K · ' + p.coupon + '%</span></div>';
       });
       html += '</td>';
-      // Central (coupon plein)
+      // Central/an
       html += '<td style="padding:8px;text-align:center;font-family:var(--mono);font-weight:800;font-size:13px;color:#059669">+' + _p(c.pnl.roiAnnual) + '%</td>';
+      // Best case = central (coupon plein, autocall An 4)
       html += '<td style="padding:8px;text-align:center;font-family:var(--mono);font-weight:700;color:#059669">+' + _f(c.pnl.netAfterTax) + '€</td>';
-      // Espérance pondérée (90/10)
+      // Espérance pondérée
       html += '<td style="padding:8px;text-align:center;font-family:var(--mono);font-weight:700;color:#D97706">+' + _f(c.pnl.esperance) + '€</td>';
-      // Pire cas
+      // Worst case
       html += '<td style="padding:8px;text-align:center;font-family:var(--mono);font-weight:700;color:' + (c.pnl.worstNet >= 0 ? '#059669' : '#DC2626') + '">' + (c.pnl.worstNet >= 0 ? '+' : '') + _f(c.pnl.worstNet) + '€</td>';
       html += '<td style="padding:8px;text-align:center"><button onclick="__carryV2Select(\'' + c.id + '\')" style="padding:4px 10px;border:1px solid #2563EB;border-radius:4px;background:' + (isBest ? '#2563EB' : '#fff') + ';color:' + (isBest ? '#fff' : '#2563EB') + ';font-size:9px;font-weight:700;cursor:pointer">Analyser →</button></td>';
       html += '</tr>';
@@ -414,15 +402,16 @@
       '<div style="margin-top:6px;font-size:11px;color:#1A202C"><strong>Argument de négo :</strong> Le plancher 3% + bonus 3,2% + autocall ≈ budget d\'une Digitale classique ~5% sans plancher. L\'autocall coûte ~0,30% de bonus en moins. Le plancher coûte ~1% de bonus. Total = le client accepte un coupon espéré de 6,20% au lieu de ~7,50% sans protection, en échange de la sécurité du plancher + la sortie autocall.</div>' +
       '<div style="margin-top:6px;font-size:11px;color:#64748B"><strong>À demander chez :</strong> SG (Pierre Meunier) · CIC · BNPP · Natixis (via BP)</div>');
 
-    html += _acc('cdc-configs', '📦 Les 5 configurations comparées',
+    html += _acc('cdc-configs', '📦 Les 3 configurations',
       '<table style="width:100%;border-collapse:collapse;font-size:12px">' +
-      '<tr style="background:' + B.header + ';font-weight:700"><td style="padding:8px">CONFIG</td><td style="padding:8px">PRODUIT(S)</td><td style="padding:8px">COUPON</td></tr>' +
-      '<tr style="border-bottom:1px solid ' + B.border + '"><td style="padding:8px;font-weight:700">🏆 A</td><td style="padding:8px">1M€ TARN TEC10 10Y</td><td style="padding:8px;font-weight:700;color:#D97706">7,00% conditionnel</td></tr>' +
-      '<tr style="background:#E8F0FE;border-bottom:1px solid ' + B.border + '"><td style="padding:8px;font-weight:700">🎯 B</td><td style="padding:8px"><strong>500K TARN + 500K Digital Plancher+Autocall</strong></td><td style="padding:8px;font-weight:700;color:#2563EB">7,00% + 6,20% ← RECOMMANDÉ</td></tr>' +
-      '<tr style="border-bottom:1px solid ' + B.border + '"><td style="padding:8px;font-weight:700">🛡️ C</td><td style="padding:8px">500K TARN + 500K Fixe Callable</td><td style="padding:8px;font-weight:700;color:#059669">7,00% + 4,40%</td></tr>' +
-      '<tr style="border-bottom:1px solid ' + B.border + ';background:' + B.row1 + '"><td style="padding:8px;font-weight:700">🔒 D</td><td style="padding:8px">1M€ Fixe Callable 10YNC3</td><td style="padding:8px;font-weight:700;color:#059669">4,40% garanti</td></tr>' +
-      '<tr><td style="padding:8px;font-weight:700">📈 E</td><td style="padding:8px">500K TARN + 500K Step-Up</td><td style="padding:8px;font-weight:700;color:#059669">7,00% + 3,50→6%</td></tr>' +
-      '</table>');
+      '<tr style="background:' + B.header + ';font-weight:700"><td style="padding:8px">CONFIG</td><td style="padding:8px">PRODUIT(S)</td><td style="padding:8px">COUPON</td><td style="padding:8px">SORTIE</td></tr>' +
+      '<tr style="background:#E8F0FE;border-bottom:1px solid ' + B.border + '"><td style="padding:8px;font-weight:700">🏆 A</td><td style="padding:8px"><strong>500K TARN 7% + 500K Digital Plancher 3%+Bonus+Autocall</strong></td><td style="padding:8px;font-weight:700;color:#2563EB">7,00% + 6,20%</td><td style="padding:8px;font-size:10px;color:#2563EB">RECOMMANDÉ — Les 2 autocall ~An 4. Plancher couvre emprunt.</td></tr>' +
+      '<tr style="border-bottom:1px solid ' + B.border + '"><td style="padding:8px;font-weight:700">🎯 B</td><td style="padding:8px">1M€ TARN TEC10 10Y</td><td style="padding:8px;font-weight:700;color:#D97706">7,00%</td><td style="padding:8px;font-size:10px">Max rendement. Autocall ~An 4. Tout sur 1 produit.</td></tr>' +
+      '<tr><td style="padding:8px;font-weight:700">🛡️ C</td><td style="padding:8px">500K TARN 7% + 500K Fixe Callable 4,40%</td><td style="padding:8px;font-weight:700;color:#059669">7,00% + 4,40%</td><td style="padding:8px;font-size:10px">Safe. Fixe garanti + TARN rendement. Pire cas positif.</td></tr>' +
+      '</table>' +
+      '<div style="margin-top:8px;padding:6px 10px;background:#ECFDF5;border-radius:4px;font-size:11px;color:#065F46">' +
+      '✅ <strong>Config A recommandée</strong> — TARN 7% (max coupon) + Digital Plancher 3%+Autocall (plancher couvre emprunt, autocall pour récupérer le capital). Les 2 sortent en ~4 ans.' +
+      '</div>');
 
     html += _acc('cdc-nego', '💪 Points de négociation',
       '<strong>Ce qu\'on sait et qu\'on peut utiliser :</strong><br><br>' +
@@ -456,7 +445,8 @@
       '<strong>Sur le Digital Plancher :</strong><br>' +
       '5. Un <strong>plancher 3% garanti + bonus digital TEC10</strong> ≤ 4,50%, c\'est faisable ?<br>' +
       '6. Quel <strong>bonus</strong> avec un plancher 3% ? (on cible 3,50%)<br>' +
-      '7. Avec ou sans <strong>mémoire</strong> sur le bonus ?<br><br>' +
+      '7. Avec ou sans <strong>mémoire</strong> sur le bonus ?<br>' +
+      '8. Combien coûte un <strong>PUT investisseur An 5</strong> (sortie à 100%) comme filet de sécurité ? En bp de bonus.<br><br>' +
       '<strong>Général :</strong><br>' +
       '8. Émetteur et <strong>notation</strong> (on veut A- minimum) ?<br>' +
       '9. <strong>Délai</strong> de mise en place (on doit signer avant 14/05) ?<br>' +
