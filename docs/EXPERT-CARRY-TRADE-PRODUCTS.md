@@ -83,7 +83,22 @@ C'est le montant que la banque peut utiliser pour financer les coupons (= valeur
 
 **Conclusion TARN trigger 4.40%** : Probabilité historique de coupon = **98.3%** sur 20 ans.
 
-> **QUESTION EXPERT** : La probabilité de 98.3% est basée sur l'historique. En régime de stagflation actuel (Brent $103, PCE 2.8%), faut-il appliquer un haircut ? Quelle probabilité forward recommandez-vous pour un TARN 5Y et un TARN 10Y ?
+### ⚠️ 3.1.1 Note de robustesse statistique
+
+**Le 98.3% est biaisé par la période ZIRP/NIRP (2012-2021)**. Cette période de taux négatifs/zéro représente ~45% de l'historique et gonfle artificiellement la probabilité de rester sous 4.40%.
+
+**Analyse conditionnelle au régime actuel** (taux normalisés 2.5-3%) :
+- Si on ne regarde que 2004-2008 + 2022-2026 (périodes de taux "normaux") : TEC10 > 4.40% pendant **~8% du temps**
+- La seule période de dépassement = 2007-2008 (crise financière, pic à 4.75%)
+- Depuis 2009, jamais au-dessus de 4.00%
+
+**Estimation forward recommandée** :
+- Probabilité brute historique : 98.3%
+- Probabilité conditionnelle au régime actuel : **85-92%**
+- Fourchette consensus (Claude + OpenAI après review) : **~90%**
+- Pour un TARN 10Y, appliquer un léger haircut supplémentaire : **85-90%**
+
+> **QUESTION EXPERT** : La probabilité de 98.3% est basée sur l'historique brut 20 ans. En conditionnant au régime actuel (BCE normalisée, stagflation, PCE 2.8%), nous estimons 85-92%. Quelle probabilité forward recommandez-vous pour un TARN 5Y et un TARN 10Y ?
 
 ### 3.2 Euribor 3M — Probabilité de franchissement
 
@@ -165,6 +180,32 @@ C'est le montant que la banque peut utiliser pour financer les coupons (= valeur
 | **C: 2×500K 5Y** | Hybride + Floater | +0.99% | +49 729€ | +3 750€ | 95% |
 | **D: 1M × 10Y** | Hybride 10Y | +1.65% | +82 421€ | -4 000€ | 93% |
 | **E: 500K+500K** | Fixe 5Y + TARN 10Y | +1.50% | +75 015€ | +15 750€ | 99% |
+
+### 5.1.1 Vérification arithmétique — Config A (TARN 1M × 10Y)
+
+Le rendement +2.18%/an peut sembler faible pour un coupon de 6.6%. Voici le détail :
+
+```
+An 1 : 6.60% GARANTI → +66 000€     (cumul coupon 6.6%)
+An 2 : 6.60% GARANTI → +66 000€     (cumul 13.2%)
+An 3 : 6.40% espéré (6.6%×97%) → +64 020€  (cumul 19.6%)
+An 4 : 6.40% espéré → +64 020€      (cumul 26.0% → AUTOCALL)
+An 5 : 3.00% CAT réinvesti → +30 000€  (post-autocall)
+───────────────────────────────────────
+Total revenus :           +290 040€
+Intérêts emprunt 5 ans :  -145 000€
+Spread brut :             +145 040€
+IS 25% :                   -36 260€
+═══════════════════════════════════════
+NET APRÈS IS :            +108 780€
+ROI total :               +10.88%
+ROI/an :                  +2.18%
+```
+
+**Pourquoi "seulement" 2.18% et pas 3.7% (6.6% - 2.90%)** :
+1. Probabilité 97% sur An 3-4 réduit le coupon effectif à 6.40%
+2. L'autocall en An 4 force le réinvestissement à 3% pour An 5 (net quasi nul)
+3. L'IS 25% s'applique sur tout le spread net
 
 ### 5.2 Analyse risque/rendement
 
