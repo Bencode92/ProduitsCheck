@@ -306,6 +306,10 @@
   "aiAnalyzedAt": "2026-04-09T12:06:08.045Z",
   "envelope": "",
   "minInvestment": 100000,
+  "guaranteedYears": 10,
+  "commissions": 1.3,
+  "decrementPct": null,
+  "actualDividendYield": null,
   "grading": {
     "grade": "C",
     "score": 56,
@@ -315,22 +319,22 @@
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 58,
+        "score": 63,
         "base": 56,
         "delta": 2,
-        "reasoning": "Rendement: base 56 → +2 = 58 (Coupon garanti 4.66% sans condition, spread attractif 158bps vs AAA 10Y dans un contexte stagflationniste favorable aux taux fixes) | Coupon 4.66%, protégé | Mat espérée: ~2.3a (prob mat: 1%)"
+        "reasoning": "Rendement: base 56 → +2 = 58 (Coupon fixe 4.66% garanti sans condition, spread 158bps vs AAA 10Y attractif en stagflation où les taux réels restent négatifs) | Coupon 4.66%, protégé | Mat espérée: ~2.3a (prob mat: 1%)"
       },
       "underlyingQuality": {
-        "score": 73,
+        "score": 69,
         "base": 71,
-        "delta": 2,
-        "reasoning": "Qualité: base 71 → +2 = 73 (Protection contre l'inflation avec taux fixe 4.66% > PCE 2.8%, produit sans sous-jacent action donc immunisé contre les rotations sectorielles négatives)"
+        "delta": -2,
+        "reasoning": "Qualité: base 71 → -2 = 69 (Produit taux sans exposition actions bénéficie du régime stagflation mais sensibilité duration élevée (DV01~10bps) avec risque de repricing hawkish)"
       },
       "portfolioFit": {
         "score": 55,
         "base": 70,
         "delta": 2,
-        "reasoning": "Fit: base 70 → +2 = 72 (Allocation défensive idéale en stagflation, diversification vs actions et protection nominale du capital alignée avec la stratégie TIPS recommandée)"
+        "reasoning": "Fit: base 70 → +2 = 72 (En stagflation avec TIPS privilégiés, un taux fixe 4.66% offre une protection inflation partielle supérieure aux obligations AAA)"
       },
       "riskPremium": {
         "score": 51,
@@ -339,49 +343,49 @@
         "reasoning": "Capital garanti: spread 4.7% - CAT 2.5% - illiq 0.7% = 1.5%"
       }
     },
-    "verdict": "Produit défensif attractif en stagflation avec coupon garanti 4.66% offrant 158bps de spread vs AAA 10Y (3.08%). La probabilité de call faible (20%) en environnement hawkish permet de sécuriser ce rendement sur longue durée. Principal risque: qualité crédit de l'émetteur non spécifiée et sensibilité duration élevée (DV01 ~10bps) sur 10 ans.",
+    "verdict": "Produit taux fixe attractif en stagflation avec coupon 4.66% offrant un spread de 158bps vs AAA 10Y (3.08%). La faible probabilité de call (20%) en régime hawkish garantit quasi-certainement le coupon sur 10 ans, mais expose à un risque duration important si la BCE durcit encore. Convient aux investisseurs cherchant un rendement fixe supérieur aux obligations AAA avec capital garanti, mais attention à l'immobilisation longue probable.",
     "keyRisks": [
-      "Défaut émetteur: capital garanti uniquement si émetteur solvable sur 10 ans",
-      "Duration élevée: perte latente de -10% si taux +100bps, liquidité secondaire limitée"
+      "Risque crédit émetteur sur 10 ans sans diversification",
+      "Duration élevée: -10% de valorisation si taux +100bps"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 4.66,
-        "return_eur": 4660,
+        "return_pct": 14,
+        "return_eur": 14000,
         "probability": 0.2,
-        "duration_years": 1
+        "duration_years": 3
       },
       "base": {
-        "return_pct": 4.66,
+        "return_pct": 46.6,
         "return_eur": 46600,
-        "probability": 0.6,
+        "probability": 0.5,
         "duration_years": 10
       },
       "stress": {
-        "return_pct": 2.5,
-        "return_eur": 25000,
-        "probability": 0.15,
-        "duration_years": 10
+        "return_pct": 23.3,
+        "return_eur": 23300,
+        "probability": 0.25,
+        "duration_years": 5
       },
       "worst": {
         "return_pct": -50,
         "return_eur": -50000,
         "probability": 0.05,
-        "duration_years": 5
+        "duration_years": 1
       }
     },
     "confidenceInterval": {
-      "low": 49,
-      "high": 67,
+      "low": 48,
+      "high": 66,
       "halfWidth": 9,
       "gradeStable": false,
       "gradeRange": "C-B",
-      "label": "C [49-67]"
+      "label": "C [48-66]"
     },
     "metadata": {
-      "gradedAt": "2026-04-17T15:43:28.085Z",
-      "durationMs": 19811,
+      "gradedAt": "2026-04-17T16:17:58.782Z",
+      "durationMs": 20884,
       "aiUsed": true,
       "version": "7.1",
       "productType": "taux_fixe",
@@ -405,7 +409,7 @@
       "baseGrade": "C",
       "adjustments": {
         "p1": 2,
-        "p2": 2,
+        "p2": -2,
         "p3": 2,
         "p4": -2
       },
@@ -415,9 +419,9 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Callable LT",
-      "ci_low": 49,
-      "ci_high": 67,
-      "ci_label": "C [49-67]",
+      "ci_low": 48,
+      "ci_high": 66,
+      "ci_label": "C [48-66]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
@@ -447,16 +451,12 @@
         "desc": "Taux baissent → call probable → coupon capitalisé versé en une fois"
       },
       "crash": {
-        "score": 49,
+        "score": 50,
         "grade": "C",
         "label": "Crash / Récession",
-        "delta": -7,
+        "delta": -6,
         "desc": "Taux montent → pas de call, intérêts simples sur 10 ans = rendement moindre"
       }
     }
-  },
-  "guaranteedYears": 10,
-  "commissions": 1.3,
-  "decrementPct": null,
-  "actualDividendYield": null
+  }
 }
