@@ -444,8 +444,13 @@
 
   function _buildProduct() {
     if (!_data) return null;
-    var st = _gv('bp-struct') || 'autocall';
-    var typeMap = { taux_fixe: 'taux-fixe', range_accrual: 'range-accrual' };
+    // Use aiParsed structureType as primary if the form still has the default/wrong value
+    var formSt = _gv('bp-struct');
+    var aiSt = (_data.structureType || '').toLowerCase();
+    var st = formSt || aiSt || 'autocall';
+    // If form has generic 'autocall' but aiParsed has a more specific type, prefer aiParsed
+    if (formSt === 'autocall' && aiSt && aiSt !== 'autocall') st = aiSt;
+    var typeMap = { taux_fixe: 'taux-fixe', range_accrual: 'range-accrual', taux_fixe_in_fine: 'taux_fixe_in_fine' };
     return {
       name: _gv('bp-name') || _data.name || '',
       type: typeMap[st] || st,
@@ -455,7 +460,8 @@
       underlyingType: _gv('bp-undtype') || 'single-index', currency: _gv('bp-currency') || 'EUR',
       maturity: (_gv('bp-years') || 5) + ' ans', maturityYears: _gv('bp-years') || 5,
       coupon: { rate: _gv('bp-rate'), rateIfCalled: _gv('bp-rateIfCalled'), rateIfMaturity: _gv('bp-rateIfMaturity'),
-        type: _gv('bp-coupontype') || 'conditionnel', frequency: _gv('bp-freq') || 'annuel',
+        type: _gv('bp-coupontype') || (_data.coupon && _data.coupon.type) || 'conditionnel',
+        frequency: _gv('bp-freq') || (_data.coupon && _data.coupon.frequency) || 'annuel',
         trigger: _gv('bp-barriercoupon') || _gv('bp-coupontrigger'),
         memory: _gv('bp-memory') || false, paymentTiming: _gv('bp-timing') || 'periodic' },
       participationRate: _gv('bp-participation'),
