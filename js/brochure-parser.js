@@ -252,13 +252,24 @@
     }
 
     // Callable In Fine auto-correction
-    var st = (data.structureType || '').toLowerCase();
-    if (st === 'taux_fixe_in_fine' || (er.type === 'callable' && c.paymentTiming === 'at_redemption') || (er.type === 'callable' && c.frequency === 'in_fine')) {
+    // Detect: callable + (paymentTiming maturity/at_redemption OR "In Fine" in name OR rateIfMaturity > 10)
+    var stLower = (data.structureType || '').toLowerCase();
+    var nameHasInFine = (data.name || '').toLowerCase().indexOf('in fine') >= 0;
+    var hasCallableInFine = (er.type === 'callable' && (c.paymentTiming === 'maturity' || c.paymentTiming === 'at_redemption'));
+    var hasHighMaturityRate = c.rateIfMaturity && c.rateIfMaturity > 10; // 46.6% = coupon total capitalise
+    if (stLower === 'taux_fixe_in_fine' || nameHasInFine || (hasCallableInFine && hasHighMaturityRate)) {
       data.structureType = 'taux_fixe_in_fine';
-      if (c.type === 'conditionnel') { c.type = 'fixe_capitalise'; console.log('[BrochureParser] Callable In Fine: coupon type forced to fixe_capitalise'); }
-      if (!c.frequency || c.frequency === 'annuel') { c.frequency = 'in_fine'; }
-      if (!c.paymentTiming || c.paymentTiming === 'periodic') { c.paymentTiming = 'at_redemption'; }
-      if (!data.guaranteedYears) { data.guaranteedYears = data.maturityYears || 10; console.log('[BrochureParser] Callable In Fine: guaranteedYears set to ' + data.guaranteedYears); }
+      data.type = 'taux_fixe_in_fine';
+      if (c.type === 'conditionnel') c.type = 'fixe_capitalise';
+      if (c.type === 'fixe') c.type = 'fixe_capitalise';
+      c.frequency = 'in_fine';
+      c.paymentTiming = 'at_redemption';
+      if (!data.guaranteedYears) { data.guaranteedYears = data.maturityYears || 10; }
+      // Compute annualized rate from maturity rate if needed
+      if (c.rateIfMaturity > 10 && c.rate < 10) {
+        c.annualizedRate = c.rate; // 4.66% is already annualized
+      }
+      console.log('[BrochureParser] Callable In Fine detected and corrected: ' + data.name);
     }
 
     if (c.rate && c.rate > 12) {
