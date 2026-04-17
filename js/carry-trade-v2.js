@@ -241,9 +241,12 @@
         ]
       },
       {
-        id: 'D', name: '1M × 10Y Hybride', emoji: '🚀',
-        desc: '1 produit de 1M€ Hybride 10 ans — plancher 3% garanti + bonus conditionnel, capital garanti',
-        products: [Object.assign({}, p10.hybride, { amount: L.amount })]
+        id: 'D', name: '2 × 500K × 10Y', emoji: '🚀',
+        desc: '2 produits de 500K€ sur 10 ans — max coupons 10Y, TARN + Hybride',
+        products: [
+          Object.assign({}, p10.tarn, { amount: 500000 }),
+          Object.assign({}, p10.hybride, { amount: 500000 })
+        ]
       },
       {
         id: 'E', name: '500K 5Y + 500K 10Y', emoji: '🎯',
@@ -391,23 +394,18 @@
       '• Coupon > 2,90% (sinon pas de portage positif)<br>' +
       '• Devise EUR · Éligible compte-titres ordinaire');
 
-    html += _acc('cdc-option-a', '🏆 Option A — 1 produit de 1M€ (TARN TEC10)',
-      '<strong>TARN TEC10 10 ans</strong><br>' +
-      '• Coupon cible : <strong>6,50 – 7,00%</strong><br>' +
-      '• Conditionnel : TEC10 ≤ 4,40% (fixing annuel Banque de France)<br>' +
-      '• Coupons <strong>garantis An 1-2</strong> (inconditionnels)<br>' +
-      '• Autocall : si cumul coupons versés ≥ 26-28%<br>' +
-      '• Capital garanti 100% à l\'échéance 10 ans<br>' +
-      '• Espérance : +' + _f((_configs.find(function(c){return c.id==='A';}) || {pnl:{esperance:0}}).pnl.esperance) + '€ sur 5 ans');
-
-    html += _acc('cdc-option-b', '🎯 Option B — 2 produits de 500K€ (Fixe + TARN)',
-      '<strong>Produit 1 (500K) — Fixe Callable</strong><br>' +
-      '• Coupon cible : <strong>4,00 – 4,50%</strong> garanti<br>' +
-      '• Callable émetteur à partir An 1 ou An 3<br>' +
-      '• Maturité 5Y ou 10Y NC3<br><br>' +
-      '<strong>Produit 2 (500K) — TARN TEC10</strong><br>' +
-      '• Mêmes specs que Option A (coupon 6,50-7,00%, trigger 4,40%)<br>' +
-      '• Espérance combinée : +' + _f((_configs.find(function(c){return c.id==='E';}) || {pnl:{esperance:0}}).pnl.esperance) + '€ · Pire cas positif');
+    html += _acc('cdc-configs', '📦 Les 5 configurations à pricer',
+      '<table style="width:100%;border-collapse:collapse;font-size:12px">' +
+      '<tr style="background:' + B.header + ';font-weight:700"><td style="padding:8px">CONFIG</td><td style="padding:8px">PRODUIT(S)</td><td style="padding:8px">DURÉE</td><td style="padding:8px">COUPON CIBLE</td></tr>' +
+      '<tr style="border-bottom:1px solid ' + B.border + '"><td style="padding:8px;font-weight:700">🏆 A</td><td style="padding:8px"><strong>1 produit de 1M€</strong> — TARN TEC10</td><td style="padding:8px"><strong>10 ans</strong></td><td style="padding:8px;color:#D97706;font-weight:700">6,50 – 7,00% conditionnel</td></tr>' +
+      '<tr style="border-bottom:1px solid ' + B.border + ';background:' + B.row1 + '"><td style="padding:8px;font-weight:700">🛡️ B</td><td style="padding:8px"><strong>1 produit de 1M€</strong> — Fixe Callable</td><td style="padding:8px"><strong>5 ans</strong></td><td style="padding:8px;color:#059669;font-weight:700">4,00 – 4,50% garanti</td></tr>' +
+      '<tr style="border-bottom:1px solid ' + B.border + '"><td style="padding:8px;font-weight:700">⚖️ C</td><td style="padding:8px"><strong>2 produits de 500K€</strong> — Hybride + Floater</td><td style="padding:8px"><strong>5 ans</strong></td><td style="padding:8px;color:#0891B2;font-weight:700">4,50% + 4,10% (plancher 3%)</td></tr>' +
+      '<tr style="border-bottom:1px solid ' + B.border + ';background:' + B.row1 + '"><td style="padding:8px;font-weight:700">🚀 D</td><td style="padding:8px"><strong>2 produits de 500K€</strong> — 2× TARN ou TARN + Hybride</td><td style="padding:8px"><strong>10 ans</strong></td><td style="padding:8px;color:#D97706;font-weight:700">6,50% + 4,50% conditionnel</td></tr>' +
+      '<tr style="background:#E8F0FE"><td style="padding:8px;font-weight:700">🎯 E</td><td style="padding:8px"><strong>500K 5 ans + 500K 10 ans</strong> — Fixe Callable + TARN TEC10</td><td style="padding:8px"><strong>5Y + 10Y</strong></td><td style="padding:8px;color:#2563EB;font-weight:700">4,00% garanti + 6,50% cond.</td></tr>' +
+      '</table>' +
+      '<div style="margin-top:8px;padding:6px 10px;background:#ECFDF5;border-radius:4px;font-size:11px;color:#065F46">' +
+      '✅ <strong>Config E recommandée</strong> : mix durées (5Y sécurisé + 10Y rendement), pire cas toujours positif, capte les coupons 10Y élevés.' +
+      '</div>');
 
     html += _acc('cdc-alternatives', '💡 Structures alternatives à demander',
       '• <strong>Callable In Fine</strong> 10YNC4 : coupon capitalisé ~4,70%, tout versé au call (CIC en propose)<br>' +
