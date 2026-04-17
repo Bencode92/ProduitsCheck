@@ -78,6 +78,7 @@ window.showEditModal = function() {
     var couponTypeOptions = [
         { id: 'conditionnel', label: 'Conditionnel' },
         { id: 'fixe', label: 'Fixe' },
+        { id: 'fixe_capitalise', label: 'Fixe capitalisé (In Fine)' },
         { id: 'garanti', label: 'Garanti' },
         { id: 'participation', label: 'Participation (%)' }
     ].map(function(t) {
@@ -89,15 +90,17 @@ window.showEditModal = function() {
         { id: 'semestriel', label: 'Semestriel' },
         { id: 'trimestriel', label: 'Trimestriel' },
         { id: 'mensuel', label: 'Mensuel' },
+        { id: 'in_fine', label: 'In Fine (capitalisé)' },
         { id: 'maturity', label: 'À maturité' }
     ].map(function(f) {
-        var sel = couponFreq.indexOf(f.id) >= 0 || (f.id === 'maturity' && couponFreq === 'maturity');
+        var sel = couponFreq === f.id || (f.id === 'maturity' && couponFreq === 'maturity');
         return '<option value="' + f.id + '"' + (sel ? ' selected' : '') + '>' + f.label + '</option>';
     }).join('');
 
     var erTypeOptions = [
         { id: 'autocall', label: 'Autocall (marché)' },
         { id: 'callable', label: 'Callable (émetteur)' },
+        { id: 'tarn', label: 'TARN (cumul coupons)' },
         { id: 'none', label: 'Aucun' }
     ].map(function(t) {
         return '<option value="' + t.id + '"' + (erType === t.id ? ' selected' : '') + '>' + t.label + '</option>';
