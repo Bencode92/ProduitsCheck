@@ -512,7 +512,21 @@
         var espere = p.type === 'fixe' ? p.coupon : p.type === 'hybride' ? (p.couponPlancher + p.couponBonus * (p.prob || 0.9)) : p.coupon * (p.prob || 0.9);
         h += '<div style="padding:14px;border:2px solid ' + p.color + '33;border-radius:8px;border-top:4px solid ' + p.color + '">';
         h += '<div style="font-size:12px;font-weight:700;color:' + p.color + '">' + p.name + '</div>';
-        h += '<div style="font-family:var(--mono);font-size:24px;font-weight:800;color:' + p.color + ';margin:6px 0">' + p.coupon + '%</div>';
+        // Explication simple pour non-expert
+        var explain = '';
+        if (p.type === 'conditionnel' && p.autocallTarget) {
+          explain = 'La banque vous verse ' + p.coupon + '% par an tant que le taux d\'État 10 ans (TEC10) reste en dessous de 4,60%. Les 2 premières années le coupon est garanti. Quand le total des coupons atteint ' + p.autocallTarget + '% (~' + p.autocallYears + ' ans), le produit s\'arrête et vous récupérez votre capital. Si le TEC10 dépasse 4,60%, le coupon n\'est pas versé cette année-là mais votre capital reste garanti.';
+        } else if (p.type === 'fixe' && p.name.indexOf('Step') >= 0) {
+          explain = 'La banque vous verse un coupon garanti qui augmente chaque année (de 3,50% à 6,00%). Aucune condition : vous touchez le coupon quoi qu\'il arrive. La banque peut rappeler le produit à partir de l\'année 3 si les taux baissent.';
+        } else if (p.type === 'fixe') {
+          explain = 'La banque vous verse ' + p.coupon + '% par an garanti, sans aucune condition. C\'est le placement le plus sûr : coupon fixe chaque année + capital remboursé à 100% à l\'échéance. La banque peut rappeler le produit si les taux baissent.';
+        } else if (p.type === 'hybride' && p.couponPlancher) {
+          explain = 'La banque vous verse au minimum ' + p.couponPlancher + '% par an garanti (ce qui couvre votre emprunt à 2,90%). En plus, vous recevez un bonus de ' + p.couponBonus + '% si le TEC10 reste en dessous de 4,50%. Le minimum garanti protège votre carry trade : même dans le pire cas, vous ne perdez pas d\'argent.';
+        }
+        if (explain) {
+          h += '<div style="margin:6px 0 8px;padding:8px 10px;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:6px;font-size:11px;color:#1E40AF;line-height:1.6">' + explain + '</div>';
+        }
+        h += '<div style="font-family:var(--mono);font-size:24px;font-weight:800;color:' + p.color + ';margin:4px 0">' + p.coupon + '%</div>';
         h += '<div style="font-size:10px;color:' + B.text + ';line-height:1.5">';
         h += '<strong>' + _f(p.amount) + '€</strong> · ' + p.duration + ' ans · Capital garanti 100%<br>';
         h += 'Proba coupon : <strong style="color:#059669">' + Math.round((p.prob || 1) * 100) + '%</strong> (historique 20 ans)<br>';
