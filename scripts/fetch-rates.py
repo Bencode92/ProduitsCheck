@@ -16,7 +16,7 @@ TD_API_KEY = os.environ.get("TWELVE_DATA_API_KEY", "")
 # ECB SDW changed series keys — using confirmed working ones
 RATE_SERIES = {
     "oat_fr_10y": {
-        "ecb_url": f"{BASE_ECB}/YC/B.U2.EUR.4F.G_N_A.SV_C_YM.SR_10Y?format=csvdata&lastNObservations=2500",
+        "ecb_url": f"{BASE_ECB}/YC/B.U2.EUR.4F.G_N_A.SV_C_YM.SR_10Y?format=csvdata&startPeriod=2004-01",
         "td_symbol": None,  # No direct OAT on TD
         "name": "Euro Area AAA 10Y Yield",
         "tec_equivalent": "TEC 10",
@@ -24,21 +24,21 @@ RATE_SERIES = {
         "freq": "monthly"
     },
     "bund_de_10y": {
-        "ecb_url": f"{BASE_ECB}/YC/B.U2.EUR.4F.G_N_A.SV_C_YM.SR_10Y?format=csvdata&lastNObservations=2500",
+        "ecb_url": f"{BASE_ECB}/YC/B.U2.EUR.4F.G_N_A.SV_C_YM.SR_10Y?format=csvdata&startPeriod=2004-01",
         "td_symbol": None,
         "name": "Euro Area AAA 10Y Yield",
         "description": "Rendement zone euro AAA 10 ans",
         "freq": "monthly"
     },
     "oat_fr_2y": {
-        "ecb_url": f"{BASE_ECB}/YC/B.U2.EUR.4F.G_N_A.SV_C_YM.SR_2Y?format=csvdata&lastNObservations=2500",
+        "ecb_url": f"{BASE_ECB}/YC/B.U2.EUR.4F.G_N_A.SV_C_YM.SR_2Y?format=csvdata&startPeriod=2004-01",
         "td_symbol": None,
         "name": "Euro Area AAA 2Y Yield",
         "description": "Rendement zone euro AAA 2 ans",
         "freq": "monthly"
     },
     "oat_fr_5y": {
-        "ecb_url": f"{BASE_ECB}/YC/B.U2.EUR.4F.G_N_A.SV_C_YM.SR_5Y?format=csvdata&lastNObservations=2500",
+        "ecb_url": f"{BASE_ECB}/YC/B.U2.EUR.4F.G_N_A.SV_C_YM.SR_5Y?format=csvdata&startPeriod=2004-01",
         "td_symbol": None,
         "name": "Euro Area AAA 5Y Yield",
         "description": "Rendement zone euro AAA 5 ans",
@@ -61,14 +61,14 @@ DAILY_RATES = {
 
 # Euribor avec historique complet (comme les yields)
 RATE_SERIES["euribor_3m"] = {
-    "ecb_url": f"{BASE_ECB}/FM/M.U2.EUR.RT.MM.EURIBOR3MD_.HSTA?format=csvdata&lastNObservations=120",
+    "ecb_url": f"{BASE_ECB}/FM/M.U2.EUR.RT.MM.EURIBOR3MD_.HSTA?format=csvdata&startPeriod=2000-01",
     "td_symbol": None,
     "name": "Euribor 3M",
     "description": "Taux interbancaire euro 3 mois (moyenne mensuelle)",
     "freq": "monthly"
 }
 RATE_SERIES["euribor_6m"] = {
-    "ecb_url": f"{BASE_ECB}/FM/M.U2.EUR.RT.MM.EURIBOR6MD_.HSTA?format=csvdata&lastNObservations=120",
+    "ecb_url": f"{BASE_ECB}/FM/M.U2.EUR.RT.MM.EURIBOR6MD_.HSTA?format=csvdata&startPeriod=2000-01",
     "td_symbol": None,
     "name": "Euribor 6M",
     "description": "Taux interbancaire euro 6 mois (moyenne mensuelle)",
@@ -151,14 +151,20 @@ def compute_stats(observations):
         stats["change_3m_bps"] = round(diff * 100, 1)
     else:
         stats["direction"] = "unknown"
-    # Smart history: daily for last 6 months, weekly for older data (keeps file size manageable)
+    # Smart history: daily for last 6 months, sampled for older (keeps file size manageable)
     full_hist = [{"date": d, "value": round(v, 3)} for d, v in observations]
     if len(full_hist) > 130:
-        # Keep last 130 daily (6 months) + sample every 5 for older
-        recent = full_hist[-130:]
+        recent = full_hist[-130:]  # last ~6 months daily
         older = full_hist[:-130]
-        sampled_older = [older[i] for i in range(0, len(older), 5)]
-        stats["history"] = sampled_older + recent
+        # Sample every 10 for very old data (>2 years), every 5 for medium
+        if len(older) > 500:
+            very_old = older[:len(older)-250]
+            medium = older[len(older)-250:]
+            sampled = [very_old[i] for i in range(0, len(very_old), 10)]
+            sampled += [medium[i] for i in range(0, len(medium), 5)]
+        else:
+            sampled = [older[i] for i in range(0, len(older), 5)]
+        stats["history"] = sampled + recent
     else:
         stats["history"] = full_hist
     return stats

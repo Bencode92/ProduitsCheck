@@ -648,7 +648,8 @@
       _periodStats(history, '12 mois', 12),
       _periodStats(history, '2 ans', 24),
       _periodStats(history, '5 ans', 60),
-      _periodStats(history, '10 ans', 120)
+      _periodStats(history, '10 ans', 120),
+      _periodStats(history, '20 ans', 250)
     ].filter(Boolean);
 
     // KPI cards
@@ -701,7 +702,7 @@
     html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px">';
     // Period buttons
     html += '<div style="display:flex;gap:4px" id="mkt-period-btns">';
-    [['12M',12],['2A',24],['5A',60],['10A',120],['MAX',9999]].forEach(function(p) {
+    [['12M',12],['2A',24],['5A',60],['10A',120],['20A',250],['MAX',9999]].forEach(function(p) {
       html += '<button onclick="_mktUpdateChart(' + p[1] + ')" style="padding:4px 12px;border-radius:4px;border:1px solid #D1D9E6;background:#fff;color:#64748B;font-size:10px;font-weight:600;cursor:pointer">' + p[0] + '</button>';
     });
     html += '</div>';
