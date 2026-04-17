@@ -57,18 +57,22 @@ DAILY_RATES = {
         "name": "ECB Deposit Facility Rate",
         "description": "Taux de dépôt BCE"
     },
-    "euribor_3m": {
-        "ecb_url": f"{BASE_ECB}/FM/D.U2.EUR.RT.MM.EURIBOR3MD_.HSTA?format=csvdata&lastNObservations=1",
-        "td_symbol": None,
-        "name": "Euribor 3M",
-        "description": "Taux interbancaire euro 3 mois"
-    },
-    "euribor_6m": {
-        "ecb_url": f"{BASE_ECB}/FM/D.U2.EUR.RT.MM.EURIBOR6MD_.HSTA?format=csvdata&lastNObservations=1",
-        "td_symbol": None,
-        "name": "Euribor 6M",
-        "description": "Taux interbancaire euro 6 mois"
-    },
+}
+
+# Euribor avec historique complet (comme les yields)
+RATE_SERIES["euribor_3m"] = {
+    "ecb_url": f"{BASE_ECB}/FM/M.U2.EUR.RT.MM.EURIBOR3MD_.HSTA?format=csvdata&lastNObservations=120",
+    "td_symbol": None,
+    "name": "Euribor 3M",
+    "description": "Taux interbancaire euro 3 mois (moyenne mensuelle)",
+    "freq": "monthly"
+}
+RATE_SERIES["euribor_6m"] = {
+    "ecb_url": f"{BASE_ECB}/FM/M.U2.EUR.RT.MM.EURIBOR6MD_.HSTA?format=csvdata&lastNObservations=120",
+    "td_symbol": None,
+    "name": "Euribor 6M",
+    "description": "Taux interbancaire euro 6 mois (moyenne mensuelle)",
+    "freq": "monthly"
 }
 
 # Twelve Data fallback tickers for yields

@@ -55,7 +55,7 @@
     var oat2y = yields.oat_fr_2y || {};
     var bce = policy.ecb_deposit_rate || {};
     var bceMain = policy.ecb_main_rate || {};
-    var eur3m = policy.euribor_3m || {};
+    var eur3m = yields.euribor_3m || policy.euribor_3m || {};
     var eur6m = policy.euribor_6m || {};
 
     var html = '<div style="background:' + BG.wrap + ';border-radius:12px;padding:24px;color:' + BG.text + '">';
@@ -76,7 +76,7 @@
       { id: 'oat_fr_10y', label: 'TEC10 (OAT 10 ans)', data: tec10, color: '#0891B2', sub: 'Vol ' + (tec10.vol_annualized_bps || 18) + 'bp · ' + (tec10.direction || 'stable') + ' · Range ' + (tec10.low_1y || '?') + '-' + (tec10.high_1y || '?') },
       { id: 'oat_fr_5y', label: 'OAT 5 ans', data: oat5y, color: '#2563EB', sub: 'Vol ' + (oat5y.vol_annualized_bps || 22) + 'bp · ' + (oat5y.direction || 'stable') + ' · Spread 5-10Y +' + Math.round(((tec10.current||3.10) - (oat5y.current||2.70)) * 100) + 'bp' },
       { id: 'oat_fr_2y', label: 'OAT 2 ans', data: oat2y, color: '#7C3AED', sub: 'Vol ' + (oat2y.vol_annualized_bps || 26) + 'bp · ' + (oat2y.direction || 'stable') + ' · Spread 2-10Y +' + Math.round(((tec10.current||3.10) - (oat2y.current||2.53)) * 100) + 'bp' },
-      { id: '_euribor3m', label: 'Euribor 3M', data: eur3m, color: '#D97706', sub: 'Réf Range Accrual · piloté par BCE' }
+      { id: 'euribor_3m', label: 'Euribor 3M', data: eur3m, color: '#D97706', sub: 'Réf Range Accrual · piloté par BCE' }
     ];
 
     html += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:8px">';
@@ -414,23 +414,17 @@
   window._mktChartPeriod = function(rateId, nObs) {
     var yields = _data.rates.yields || {};
     var rateObj = yields[rateId];
-    if (rateId === '_euribor3m' && _data.rates.policy_rates) rateObj = _data.rates.policy_rates.euribor_3m;
+    // Euribor: check yields first (with history), then policy_rates fallback
+    if (rateId === 'euribor_3m') {
+      if (yields.euribor_3m) rateObj = yields.euribor_3m;
+      else if (policy.euribor_3m) rateObj = policy.euribor_3m;
+    }
     if (!rateObj || !rateObj.history) return;
 
     var container = document.getElementById('mkt-chart-container');
     if (!container) return;
 
-    var thresholds = [];
-    if (rateId === 'oat_fr_10y') {
-      thresholds = [
-        { val: 4.40, label: 'TARN 4.40%', color: '#DC2626', dash: '6,3' },
-        { val: 4.50, label: 'Digital 4.50%', color: '#D97706', dash: '4,4' },
-        { val: 4.00, label: 'Hybride 4.00%', color: '#F59E0B', dash: '8,3' },
-        { val: 2.90, label: 'Emprunt 2.90%', color: '#7C3AED', dash: '3,3' }
-      ];
-    } else if (rateId === 'oat_fr_5y' || rateId === 'oat_fr_2y') {
-      thresholds = [{ val: 2.90, label: 'Emprunt 2.90%', color: '#7C3AED', dash: '3,3' }];
-    }
+    var thresholds = []; // chart vierge, seuils ajoutés seulement via Analyser
 
     var history = rateObj.history;
     var sliced = nObs >= 999 ? history : history.slice(-nObs);
@@ -488,12 +482,7 @@
       }
     }
 
-    // Default product thresholds for TEC10
-    if (rd.id === 'oat_fr_10y') {
-      thresholds.push({ val: 4.40, label: 'TARN 4.40%', color: '#F97316', dash: '8,4' });
-      thresholds.push({ val: 4.00, label: 'Hybride 4.00%', color: '#EAB308', dash: '6,4' });
-    }
-    thresholds.push({ val: 2.90, label: 'Emprunt 2.90%', color: '#7C3AED', dash: '3,3' });
+    // Pas de seuils par défaut — seulement les seuils custom de l'utilisateur
 
     // Render chart
     chartEl.innerHTML = _buildSVGChart(data, thresholds, rd.current, data.length);
@@ -593,7 +582,10 @@
     var rateObj = yields[rateId] || policy[rateId.replace('_', '')] || null;
 
     // Euribor special case
-    if (rateId === '_euribor3m' && policy.euribor_3m) rateObj = policy.euribor_3m;
+    if (rateId === 'euribor_3m') {
+      if (yields.euribor_3m) rateObj = yields.euribor_3m;
+      else if (policy.euribor_3m) rateObj = policy.euribor_3m;
+    }
 
     if (!rateObj) { panel.innerHTML = '<div style="padding:12px;color:#DC2626;font-size:12px">Pas de données pour ce taux</div>'; return; }
 
@@ -618,7 +610,7 @@
       // Thresholds
       html += '<div style="margin-top:12px;font-size:11px;color:#1A202C">';
       html += '<strong>Seuils produits liés :</strong>';
-      if (rateId === '_euribor3m') {
+      if (rateId === 'euribor_3m') {
         html += '<div style="margin-top:6px">Range Accrual corridor [1.50% — 3.80%] : ';
         var dist1 = Math.round((current - 1.50) * 100);
         var dist2 = Math.round((3.80 - current) * 100);
@@ -762,7 +754,7 @@
       tec10: { key: 'oat_fr_10y', label: 'TEC10', section: 'yields' },
       oat5y: { key: 'oat_fr_5y', label: 'OAT 5Y', section: 'yields' },
       oat2y: { key: 'oat_fr_2y', label: 'OAT 2Y', section: 'yields' },
-      euribor3m: { key: 'euribor_3m', label: 'Euribor 3M', section: 'policy_rates' }
+      euribor3m: { key: 'euribor_3m', label: 'Euribor 3M', section: 'yields' }
     };
     var rm = rateMap[rateSel];
     var history = [];
@@ -978,7 +970,7 @@
         html += '<td style="padding:6px;text-align:center;font-family:var(--mono);font-size:9px;color:' + (typeof marge === 'string' && marge.indexOf('+') === 0 ? '#059669' : '#DC2626') + '">' + marge + '</td>';
         // Analyser button — loads threshold into the chart above
         if (p.hasExploitableSeuil && p.rateAlias) {
-          var clickAction = '_mktOpenRate(\'' + (p.rateAlias === 'tec10' ? 'oat_fr_10y' : p.rateAlias === 'oat5y' ? 'oat_fr_5y' : p.rateAlias === 'oat2y' ? 'oat_fr_2y' : '_euribor3m') + '\')';
+          var clickAction = '_mktOpenRate(\'' + (p.rateAlias === 'tec10' ? 'oat_fr_10y' : p.rateAlias === 'oat5y' ? 'oat_fr_5y' : p.rateAlias === 'oat2y' ? 'oat_fr_2y' : 'euribor_3m') + '\')';
           html += '<td style="padding:6px;text-align:center"><button onclick="' + clickAction + ';setTimeout(function(){var e=document.getElementById(\'mkt-custom-threshold\');if(e){e.value=\'' + (p.threshold || p.corridorLow || '') + '\';var m=document.getElementById(\'mkt-custom-mode\');if(m)m.value=\'' + (p.thresholdMode || 'below') + '\';_mktUpdateChart()}},200)" style="padding:3px 8px;border-radius:3px;border:1px solid #7C3AED;background:#F5F3FF;color:#7C3AED;font-size:9px;font-weight:600;cursor:pointer">Analyser</button></td>';
         } else {
           html += '<td style="padding:6px;text-align:center;color:#94A3B8;font-size:9px">—</td>';
