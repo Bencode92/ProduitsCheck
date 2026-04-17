@@ -11,7 +11,7 @@
     wrap: '#F8F9FB', card: '#FFFFFF', input: '#F1F3F7',
     row0: '#FFFFFF', row1: '#F4F6F9', header: '#E8ECF2',
     border: '#D1D9E6', hi: '#E8F0FE',
-    text: '#1A202C', muted: '#64748B', dim: '#94A3B8'
+    text: '#1A202C', muted: '#64748B', dim: '#475569'
   };
   function _f(n) { return typeof formatNumber === 'function' ? formatNumber(n) : String(Math.round(n)); }
   function _p(n) { return (Math.round(n * 100) / 100).toFixed(2); }
@@ -120,7 +120,7 @@
           // Post-autocall: reinvest at CAT rate
           var reinvRev = Math.round(p.amount * CAT_REINVEST_RATE / 100);
           revenue += reinvRev;
-          flowDetail.products.push({ name: p.name + ' (réinvesti CAT ' + CAT_REINVEST_RATE + '%)', rev: reinvRev, color: '#94A3B8' });
+          flowDetail.products.push({ name: p.name + ' (réinvesti CAT ' + CAT_REINVEST_RATE + '%)', rev: reinvRev, color: '#475569' });
           return;
         }
 
@@ -288,7 +288,7 @@
       // Products column
       html += '<td style="padding:8px">';
       c.products.forEach(function(p) {
-        html += '<div style="font-size:9px;margin-bottom:2px"><span style="color:' + p.color + ';font-weight:700">' + p.name.substring(0, 30) + '</span> <span style="color:' + B.dim + '">' + _f(p.amount / 1000) + 'K · ' + p.coupon + '%</span></div>';
+        html += '<div style="font-size:11px;margin-bottom:2px"><span style="color:' + p.color + ';font-weight:700">' + p.name.substring(0, 30) + '</span> <span style="color:' + B.dim + '">' + _f(p.amount / 1000) + 'K · ' + p.coupon + '%</span></div>';
       });
       html += '</td>';
       // Central/an
@@ -299,7 +299,7 @@
       html += '<td style="padding:8px;text-align:center;font-family:var(--mono);font-weight:700;color:#D97706">+' + _f(c.pnl.esperance) + '€</td>';
       // Worst case
       html += '<td style="padding:8px;text-align:center;font-family:var(--mono);font-weight:700;color:' + (c.pnl.worstNet >= 0 ? '#059669' : '#DC2626') + '">' + (c.pnl.worstNet >= 0 ? '+' : '') + _f(c.pnl.worstNet) + '€</td>';
-      html += '<td style="padding:8px;text-align:center"><button onclick="__carryV2Select(\'' + c.id + '\')" style="padding:4px 10px;border:1px solid #2563EB;border-radius:4px;background:' + (isBest ? '#2563EB' : '#fff') + ';color:' + (isBest ? '#fff' : '#2563EB') + ';font-size:9px;font-weight:700;cursor:pointer">Analyser →</button></td>';
+      html += '<td style="padding:8px;text-align:center"><button onclick="__carryV2Select(\'' + c.id + '\')" style="padding:4px 10px;border:1px solid #2563EB;border-radius:4px;background:' + (isBest ? '#2563EB' : '#fff') + ';color:' + (isBest ? '#fff' : '#2563EB') + ';font-size:11px;font-weight:700;cursor:pointer">Analyser →</button></td>';
       html += '</tr>';
     });
     html += '</tbody></table>';
@@ -497,17 +497,35 @@
     html += '</div>';
 
     // ═══ IMPORT PROPOSITIONS BANQUIERS ═══
-    html += '<div style="background:' + B.card + ';border:2px dashed #7C3AED;border-radius:8px;padding:14px;margin-bottom:16px">';
-    html += '<div style="font-size:13px;font-weight:700;color:#7C3AED;margin-bottom:8px">📥 IMPORTER UNE PROPOSITION BANQUIER</div>';
-    html += '<div style="font-size:11px;color:' + B.dim + ';margin-bottom:10px">Collez le JSON d\'une proposition reçue pour la comparer avec nos configurations.</div>';
-    html += '<div style="display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:8px">';
-    html += '<textarea id="carry-import-json" placeholder=\'{"name":"TARN TEC10 CIC","coupon":6.70,"type":"conditionnel","trigger":4.60,"guaranteedYears":2,"autocallTarget":26.80,"duration":10,"amount":500000,"emetteur":"CIC","capitalGaranti":true}\' style="width:100%;height:70px;padding:8px;border:1px solid ' + B.border + ';border-radius:6px;background:' + B.input + ';color:' + B.text + ';font-family:var(--mono);font-size:10px;resize:vertical"></textarea>';
-    html += '<div style="display:flex;flex-direction:column;gap:4px">';
-    html += '<button onclick="__carryImport()" style="padding:8px 16px;background:#7C3AED;color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">Importer</button>';
-    html += '<button onclick="__carryImportExample()" style="padding:6px 12px;background:' + B.input + ';color:' + B.muted + ';border:1px solid ' + B.border + ';border-radius:6px;font-size:9px;cursor:pointer">Exemple</button>';
-    html += '</div></div>';
-    html += '<div id="carry-import-result"></div>';
-    // Liste des propositions importées
+    var _inputStyle = 'width:100%;padding:8px;border:1px solid ' + B.border + ';border-radius:6px;background:' + B.input + ';color:' + B.text + ';font-size:12px';
+    html += '<div style="background:' + B.card + ';border:2px dashed #7C3AED;border-radius:8px;padding:16px;margin-bottom:16px">';
+    html += '<div style="font-size:13px;font-weight:700;color:#7C3AED;margin-bottom:10px">📥 IMPORTER UNE PROPOSITION BANQUIER</div>';
+
+    // Formulaire structuré
+    html += '<div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr;gap:8px;margin-bottom:10px">';
+    html += '<div><label style="font-size:11px;color:' + B.muted + ';display:block;margin-bottom:3px">Nom du produit</label><input id="ci-name" placeholder="Ex: TARN TEC10 CIC" style="' + _inputStyle + '"></div>';
+    html += '<div><label style="font-size:11px;color:' + B.muted + ';display:block;margin-bottom:3px">Coupon (%)</label><input id="ci-coupon" type="number" step="0.1" placeholder="6.70" style="' + _inputStyle + ';font-family:var(--mono)"></div>';
+    html += '<div><label style="font-size:11px;color:' + B.muted + ';display:block;margin-bottom:3px">Trigger (%)</label><input id="ci-trigger" type="number" step="0.1" placeholder="4.60" style="' + _inputStyle + ';font-family:var(--mono)"></div>';
+    html += '<div><label style="font-size:11px;color:' + B.muted + ';display:block;margin-bottom:3px">Durée (ans)</label><input id="ci-duration" type="number" value="10" style="' + _inputStyle + ';font-family:var(--mono)"></div>';
+    html += '<div><label style="font-size:11px;color:' + B.muted + ';display:block;margin-bottom:3px">Montant (€)</label><input id="ci-amount" type="number" value="500000" step="50000" style="' + _inputStyle + ';font-family:var(--mono)"></div>';
+    html += '<div><label style="font-size:11px;color:' + B.muted + ';display:block;margin-bottom:3px">Émetteur</label><input id="ci-emetteur" placeholder="CIC, SG..." style="' + _inputStyle + '"></div>';
+    html += '</div>';
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:8px;align-items:end">';
+    html += '<div><label style="font-size:11px;color:' + B.muted + ';display:block;margin-bottom:3px">Type</label><select id="ci-type" style="' + _inputStyle + '"><option value="conditionnel">Conditionnel (TARN)</option><option value="fixe">Fixe garanti</option><option value="hybride">Hybride plancher+bonus</option></select></div>';
+    html += '<div><label style="font-size:11px;color:' + B.muted + ';display:block;margin-bottom:3px">Années garanties</label><input id="ci-guaranteed" type="number" value="2" style="' + _inputStyle + ';font-family:var(--mono)"></div>';
+    html += '<div><label style="font-size:11px;color:' + B.muted + ';display:block;margin-bottom:3px">Autocall cumul (%)</label><input id="ci-autocall" type="number" step="0.1" placeholder="26.80" style="' + _inputStyle + ';font-family:var(--mono)"></div>';
+    html += '<div><label style="font-size:11px;color:' + B.muted + ';display:block;margin-bottom:3px">Plancher (hybride)</label><input id="ci-plancher" type="number" step="0.1" placeholder="3.00" style="' + _inputStyle + ';font-family:var(--mono)"></div>';
+    html += '<button onclick="__carryImportForm()" style="padding:10px 20px;background:#7C3AED;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;height:38px">Ajouter →</button>';
+    html += '</div>';
+
+    // Option JSON avancé (caché)
+    html += '<div style="margin-top:8px"><span onclick="var j=document.getElementById(\'ci-json-wrap\');j.style.display=j.style.display===\'none\'?\'\':\'none\'" style="font-size:11px;color:#7C3AED;cursor:pointer;text-decoration:underline">JSON avancé ▼</span></div>';
+    html += '<div id="ci-json-wrap" style="display:none;margin-top:6px">';
+    html += '<textarea id="carry-import-json" placeholder=\'{"name":"...","coupon":6.70,...}\' style="width:100%;height:60px;padding:8px;border:1px solid ' + B.border + ';border-radius:6px;background:' + B.input + ';color:' + B.text + ';font-family:var(--mono);font-size:11px;resize:vertical"></textarea>';
+    html += '<button onclick="__carryImport()" style="margin-top:4px;padding:6px 14px;background:' + B.input + ';color:#7C3AED;border:1px solid #7C3AED;border-radius:6px;font-size:11px;cursor:pointer">Importer JSON</button>';
+    html += '</div>';
+
+    html += '<div id="carry-import-result" style="margin-top:8px"></div>';
     html += '<div id="carry-import-list"></div>';
     html += '</div>';
 
@@ -554,7 +572,7 @@
     html += '<td style="padding:8px"></td>';
     html += '</tr>';
     html += '</tbody></table>';
-    html += '<div style="margin-top:6px;font-size:9px;color:' + B.dim + '">In fine : intérêts seuls pendant 5 ans (' + _f(annualInt) + '€/an) + remboursement capital 1M€ à échéance. Coût total intérêts : ' + _f(annualInt * L.years) + '€ + frais ' + _f(L.fees) + '€ = ' + _f(annualInt * L.years + L.fees) + '€</div>';
+    html += '<div style="margin-top:6px;font-size:11px;color:' + B.dim + '">In fine : intérêts seuls pendant 5 ans (' + _f(annualInt) + '€/an) + remboursement capital 1M€ à échéance. Coût total intérêts : ' + _f(annualInt * L.years) + '€ + frais ' + _f(L.fees) + '€ = ' + _f(annualInt * L.years + L.fees) + '€</div>';
     html += '</div>';
 
     // ═══ BLOC 3 : ANALYSER — P&L année par année ═══
@@ -609,7 +627,7 @@
         h += '<div style="margin-top:8px;padding:6px 8px;background:' + B.row1 + ';border-radius:4px;font-size:10px">';
         h += 'Coupon espéré <strong style="color:#059669">' + _p(espere) + '%</strong> · Spread <strong style="color:' + (espere > LOAN.rate ? '#059669' : '#DC2626') + '">' + (espere > LOAN.rate ? '+' : '') + _p(espere - LOAN.rate) + '%</strong> vs emprunt';
         h += '</div>';
-        h += '<div style="margin-top:6px;font-size:9px;color:' + B.dim + ';line-height:1.4">' + (p.detail || '') + '</div>';
+        h += '<div style="margin-top:6px;font-size:11px;color:' + B.dim + ';line-height:1.4">' + (p.detail || '') + '</div>';
         h += '</div>';
       });
       h += '</div>';
@@ -623,7 +641,7 @@
         ['PIRE CAS/AN', (c.pnl.worstPerYear >= 0 ? '+' : '') + _f(c.pnl.worstPerYear) + '€', c.pnl.worstPerYear >= 0 ? '#059669' : '#DC2626']
       ].forEach(function(kpi) {
         h += '<div style="padding:10px;background:' + B.row1 + ';border-radius:6px;text-align:center">';
-        h += '<div style="font-size:8px;font-weight:700;color:' + B.dim + ';letter-spacing:0.5px">' + kpi[0] + '</div>';
+        h += '<div style="font-size:11px;font-weight:700;color:' + B.dim + ';letter-spacing:0.5px">' + kpi[0] + '</div>';
         h += '<div style="font-family:var(--mono);font-size:16px;font-weight:800;color:' + kpi[2] + ';margin-top:4px">' + kpi[1] + '</div>';
         h += '</div>';
       });
@@ -671,8 +689,8 @@
         p += '<td style="padding:6px 8px;font-weight:700;font-size:12px">An ' + f.year + '</td>';
         p += '<td style="padding:6px 8px">';
         f.products.forEach(function(fp) {
-          var isR = fp.color === '#94A3B8';
-          p += '<div style="font-size:9px;color:' + (isR ? '#94A3B8' : fp.color) + ';' + (isR ? 'font-style:italic' : '') + '">' + fp.name.substring(0, 35) + ' → <strong>+' + _f(fp.rev) + '€</strong></div>';
+          var isR = fp.color === '#475569';
+          p += '<div style="font-size:11px;color:' + (isR ? '#475569' : fp.color) + ';' + (isR ? 'font-style:italic' : '') + '">' + fp.name.substring(0, 35) + ' → <strong>+' + _f(fp.rev) + '€</strong></div>';
         });
         p += '</td>';
         p += '<td style="padding:6px 8px;text-align:right;font-family:var(--mono);font-weight:700;color:#059669">+' + _f(f.totalRev) + '€</td>';
@@ -706,6 +724,35 @@
 
   // ─── Import propositions banquiers ──────
   var _importedProducts = [];
+
+  window.__carryImportForm = function() {
+    var name = document.getElementById('ci-name')?.value || 'Proposition banquier';
+    var coupon = parseFloat(document.getElementById('ci-coupon')?.value) || 0;
+    var trigger = parseFloat(document.getElementById('ci-trigger')?.value) || 0;
+    var duration = parseInt(document.getElementById('ci-duration')?.value) || 10;
+    var amount = parseInt(document.getElementById('ci-amount')?.value) || 500000;
+    var emetteur = document.getElementById('ci-emetteur')?.value || '?';
+    var type = document.getElementById('ci-type')?.value || 'conditionnel';
+    var guaranteed = parseInt(document.getElementById('ci-guaranteed')?.value) || 0;
+    var autocall = parseFloat(document.getElementById('ci-autocall')?.value) || 0;
+    var plancher = parseFloat(document.getElementById('ci-plancher')?.value) || 0;
+
+    if (!coupon) { alert('Coupon obligatoire'); return; }
+
+    var json = JSON.stringify({
+      name: name, coupon: coupon, type: type, trigger: trigger,
+      guaranteedYears: guaranteed, autocallTarget: autocall,
+      duration: duration, amount: amount, emetteur: emetteur,
+      capitalGaranti: true, couponPlancher: plancher || undefined
+    });
+    var ta = document.getElementById('carry-import-json');
+    if (ta) ta.value = json;
+    __carryImport();
+    // Reset form
+    ['ci-name','ci-coupon','ci-trigger','ci-emetteur','ci-autocall','ci-plancher'].forEach(function(id) {
+      var el = document.getElementById(id); if (el) el.value = '';
+    });
+  };
 
   window.__carryImportExample = function() {
     var example = '{\n  "name": "TARN TEC10 CIC Avril 2036",\n  "coupon": 6.70,\n  "type": "conditionnel",\n  "trigger": 4.60,\n  "guaranteedYears": 2,\n  "autocallTarget": 26.80,\n  "duration": 10,\n  "amount": 500000,\n  "emetteur": "CIC (A+)",\n  "capitalGaranti": true\n}';

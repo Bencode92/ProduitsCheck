@@ -359,7 +359,7 @@
     highlight: '#E8F0FE',  // highlighted rows — light blue
     text: '#1A202C',       // dark text
     textMuted: '#64748B',  // muted text
-    textDim: '#94A3B8'     // dim text
+    textDim: '#475569'     // dim text
   };
 
   // ─── Light wrapper style override ─────────

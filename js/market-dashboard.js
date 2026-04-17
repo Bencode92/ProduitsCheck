@@ -16,7 +16,7 @@
     wrap: '#F8F9FB', section: '#FFFFFF', input: '#F1F3F7',
     row0: '#FFFFFF', row1: '#F4F6F9', header: '#E8ECF2',
     border: '#D1D9E6', highlight: '#E8F0FE',
-    text: '#1A202C', textMuted: '#64748B', textDim: '#94A3B8'
+    text: '#1A202C', textMuted: '#64748B', textDim: '#475569'
   };
 
   async function _loadData() {
@@ -35,9 +35,9 @@
 
   function _renderKPI(label, value, color, sub) {
     return '<div style="padding:14px;border:1px solid ' + BG.border + ';border-radius:8px;border-left:4px solid ' + color + ';background:' + BG.section + '">' +
-      '<div style="font-size:9px;font-weight:700;color:' + BG.textDim + ';letter-spacing:0.8px;text-transform:uppercase">' + label + '</div>' +
+      '<div style="font-size:11px;font-weight:700;color:' + BG.textDim + ';letter-spacing:0.8px;text-transform:uppercase">' + label + '</div>' +
       '<div style="font-family:var(--mono);font-size:22px;font-weight:800;color:' + color + ';margin:6px 0">' + value + '</div>' +
-      '<div style="font-size:9px;color:' + BG.textDim + ';line-height:1.4">' + sub + '</div></div>';
+      '<div style="font-size:11px;color:' + BG.textDim + ';line-height:1.4">' + sub + '</div></div>';
   }
 
   function _render(container) {
@@ -69,7 +69,7 @@
 
     // ═══ SECTION 1: TAUX SOUVERAINS (cliquables) ═══
     html += '<div style="font-size:14px;font-weight:700;color:' + BG.text + ';margin-bottom:4px">🏛️ Taux souverains EUR (zone euro AAA)</div>';
-    html += '<div style="font-size:9px;color:' + BG.textDim + ';margin-bottom:10px">Cliquez sur un taux pour voir l\'analyse détaillée et l\'historique</div>';
+    html += '<div style="font-size:11px;color:' + BG.textDim + ';margin-bottom:10px">Cliquez sur un taux pour voir l\'analyse détaillée et l\'historique</div>';
 
     // Clickable rate cards
     var eur12m = yields.euribor_12m || {};
@@ -96,10 +96,10 @@
     rateCards.forEach(function(rc) {
       var val = rc.data.current || 0;
       html += '<div onclick="_mktOpenRate(\'' + rc.id + '\')" style="padding:14px;border:1px solid ' + BG.border + ';border-radius:8px;border-left:4px solid ' + rc.color + ';background:' + BG.section + ';cursor:pointer;transition:all 0.2s" onmouseover="this.style.boxShadow=\'0 2px 8px rgba(0,0,0,0.1)\'" onmouseout="this.style.boxShadow=\'none\'">';
-      html += '<div style="font-size:9px;font-weight:700;color:' + BG.textDim + ';letter-spacing:0.8px;text-transform:uppercase">' + rc.label + ' <span style="color:' + rc.color + '">▼ clic</span></div>';
+      html += '<div style="font-size:11px;font-weight:700;color:' + BG.textDim + ';letter-spacing:0.8px;text-transform:uppercase">' + rc.label + ' <span style="color:' + rc.color + '">▼ clic</span></div>';
       html += '<div style="font-family:var(--mono);font-size:20px;font-weight:800;color:' + rc.color + ';margin:4px 0">' + val.toFixed(2) + '%</div>';
-      if (rc.desc) html += '<div style="font-size:8px;color:' + BG.text + ';line-height:1.3;margin-bottom:3px">' + rc.desc + '</div>';
-      html += '<div style="font-size:8px;color:' + BG.textDim + ';line-height:1.3">' + rc.sub + '</div>';
+      if (rc.desc) html += '<div style="font-size:11px;color:' + BG.text + ';line-height:1.3;margin-bottom:3px">' + rc.desc + '</div>';
+      html += '<div style="font-size:11px;color:' + BG.textDim + ';line-height:1.3">' + rc.sub + '</div>';
       html += '</div>';
     });
     html += '</div>';
@@ -141,7 +141,7 @@
       html += '<div style="flex:1;text-align:center">';
       html += '<div style="background:' + b[2] + ';height:' + h + 'px;border-radius:6px 6px 0 0;margin:0 3px;display:flex;align-items:flex-start;justify-content:center;padding-top:6px;min-height:30px">';
       html += '<span style="font-family:var(--mono);font-size:13px;font-weight:800;color:#fff">' + b[1].toFixed(2) + '%</span></div>';
-      html += '<div style="font-size:9px;color:' + BG.textMuted + ';margin-top:4px;white-space:pre-line;line-height:1.2">' + b[0] + '</div></div>';
+      html += '<div style="font-size:11px;color:' + BG.textMuted + ';margin-top:4px;white-space:pre-line;line-height:1.2">' + b[0] + '</div></div>';
     });
     html += '</div>';
     // Budget explanation
@@ -184,15 +184,15 @@
         var widthPct = Math.min(100 - leftPct, ((z.to - z.from) / totalRange) * 100);
         g += '<div style="position:absolute;left:' + leftPct + '%;width:' + widthPct + '%;height:100%;background:' + z.color + ';opacity:0.25" title="' + z.label + '"></div>';
         // Zone label
-        g += '<div style="position:absolute;left:' + leftPct + '%;width:' + widthPct + '%;height:100%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:600;color:' + z.color + ';pointer-events:none">' + z.label + '</div>';
+        g += '<div style="position:absolute;left:' + leftPct + '%;width:' + widthPct + '%;height:100%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:' + z.color + ';pointer-events:none">' + z.label + '</div>';
       });
       // Current position marker
       g += '<div style="position:absolute;left:' + currentPct + '%;top:0;width:3px;height:100%;background:#2563EB;border-radius:2px;z-index:2"></div>';
       g += '<div style="position:absolute;left:' + Math.max(0, currentPct - 3) + '%;top:-2px;z-index:3">';
-      g += '<div style="background:#2563EB;color:#fff;padding:1px 5px;border-radius:3px;font-family:var(--mono);font-size:9px;font-weight:700">' + currentVal.toFixed(2) + '</div></div>';
+      g += '<div style="background:#2563EB;color:#fff;padding:1px 5px;border-radius:3px;font-family:var(--mono);font-size:11px;font-weight:700">' + currentVal.toFixed(2) + '</div></div>';
       g += '</div>';
       // Scale labels
-      g += '<div style="display:flex;justify-content:space-between;margin-top:3px;font-size:8px;color:' + BG.textDim + '">';
+      g += '<div style="display:flex;justify-content:space-between;margin-top:3px;font-size:11px;color:' + BG.textDim + '">';
       g += '<span>' + min.toFixed(1) + unit + '</span>';
       zones.forEach(function(z) {
         if (z.from > min && z.from < max) g += '<span style="color:' + z.color + '">│ ' + z.from.toFixed(2) + '</span>';
@@ -256,7 +256,7 @@
     html += '<div style="font-size:13px;font-weight:700;color:#7C3AED">📄 Produits taux en brochure — détection auto des seuils</div>';
     html += '<span style="font-size:10px;color:#64748B">▶ Afficher</span></div>';
     html += '<div id="mkt-brochure-body" style="display:none;padding:0 16px 16px">';
-    html += '<div id="mkt-brochure-content" style="text-align:center;padding:12px;color:#94A3B8;font-size:11px">Chargement des brochures...</div>';
+    html += '<div id="mkt-brochure-content" style="text-align:center;padding:12px;color:#475569;font-size:11px">Chargement des brochures...</div>';
     html += '</div></div>';
 
     // ═══ SECTION 5: MACRO & RÉGIME ═══
@@ -375,8 +375,8 @@
         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">' +
         '<div style="font-size:13px;font-weight:700;color:' + BG.text + '">' + emoji + ' ' + name + '</div>' +
         '<div style="display:flex;gap:6px">' +
-        '<span style="padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700;background:#ECFDF5;color:#059669">' + coupon + '</span>' +
-        '<span style="padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700;background:' + (capital === 'Garanti' ? '#ECFDF5' : '#FEF2F2') + ';color:' + (capital === 'Garanti' ? '#059669' : '#DC2626') + '">Capital ' + capital + '</span>' +
+        '<span style="padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;background:#ECFDF5;color:#059669">' + coupon + '</span>' +
+        '<span style="padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;background:' + (capital === 'Garanti' ? '#ECFDF5' : '#FEF2F2') + ';color:' + (capital === 'Garanti' ? '#059669' : '#DC2626') + '">Capital ' + capital + '</span>' +
         '</div></div>' +
         '<div style="font-size:11px;color:' + BG.text + ';line-height:1.6;margin-bottom:6px">' + mecanism + '</div>' +
         '<div style="display:flex;gap:12px;font-size:10px">' +
@@ -461,21 +461,21 @@
     var spreadVsEmprunt = tec10Val - 2.90;
     html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">';
     html += '<div style="padding:10px;background:#fff;border-radius:6px;text-align:center">';
-    html += '<div style="font-size:9px;color:' + BG.textDim + '">Spread TEC10 vs emprunt</div>';
+    html += '<div style="font-size:11px;color:' + BG.textDim + '">Spread TEC10 vs emprunt</div>';
     html += '<div style="font-family:var(--mono);font-size:22px;font-weight:800;color:' + (spreadVsEmprunt > 0 ? '#059669' : '#DC2626') + '">+' + (spreadVsEmprunt * 100).toFixed(0) + 'bp</div>';
-    html += '<div style="font-size:9px;color:' + BG.textDim + '">' + tec10Val.toFixed(2) + '% - 2.90%</div></div>';
+    html += '<div style="font-size:11px;color:' + BG.textDim + '">' + tec10Val.toFixed(2) + '% - 2.90%</div></div>';
 
     html += '<div style="padding:10px;background:#fff;border-radius:6px;text-align:center">';
-    html += '<div style="font-size:9px;color:' + BG.textDim + '">Marge TARN (trigger 4.40%)</div>';
+    html += '<div style="font-size:11px;color:' + BG.textDim + '">Marge TARN (trigger 4.40%)</div>';
     html += '<div style="font-family:var(--mono);font-size:22px;font-weight:800;color:#0891B2">+' + ((4.40 - tec10Val) * 100).toFixed(0) + 'bp</div>';
-    html += '<div style="font-size:9px;color:' + BG.textDim + '">4.40% - ' + tec10Val.toFixed(2) + '% de marge</div></div>';
+    html += '<div style="font-size:11px;color:' + BG.textDim + '">4.40% - ' + tec10Val.toFixed(2) + '% de marge</div></div>';
 
     html += '<div style="padding:10px;background:#fff;border-radius:6px;text-align:center">';
-    html += '<div style="font-size:9px;color:' + BG.textDim + '">Euribor dans corridor Range Accrual</div>';
+    html += '<div style="font-size:11px;color:' + BG.textDim + '">Euribor dans corridor Range Accrual</div>';
     var eur3mVal = eur3m.current || 2.50;
     var inCorridor = eur3mVal >= 1.50 && eur3mVal <= 3.80;
     html += '<div style="font-family:var(--mono);font-size:22px;font-weight:800;color:' + (inCorridor ? '#059669' : '#DC2626') + '">' + (inCorridor ? '✅ OUI' : '❌ NON') + '</div>';
-    html += '<div style="font-size:9px;color:' + BG.textDim + '">' + eur3mVal.toFixed(2) + '% dans [1.50%-3.80%]</div></div>';
+    html += '<div style="font-size:11px;color:' + BG.textDim + '">' + eur3mVal.toFixed(2) + '% dans [1.50%-3.80%]</div></div>';
     html += '</div></div>';
 
     html += '</div>';
@@ -485,7 +485,7 @@
   // ═══ SVG Chart builder ═══
   function _buildSVGChart(history, thresholds, current, maxObs) {
     var data = history.slice(-Math.min(maxObs, history.length));
-    if (data.length < 2) return '<div style="padding:20px;text-align:center;color:#94A3B8">Pas assez de données</div>';
+    if (data.length < 2) return '<div style="padding:20px;text-align:center;color:#475569">Pas assez de données</div>';
 
     var W = 700, H = 180, padL = 50, padR = 10, padT = 10, padB = 24;
     var cW = W - padL - padR, cH = H - padT - padB;
@@ -509,7 +509,7 @@
       var gVal = yMin + (yRange * gi / nGrid);
       var gY = y(gVal);
       svg += '<line x1="' + padL + '" y1="' + gY + '" x2="' + (W - padR) + '" y2="' + gY + '" stroke="#E2E8F0" stroke-width="0.5"/>';
-      svg += '<text x="' + (padL - 4) + '" y="' + (gY + 3) + '" text-anchor="end" fill="#94A3B8" font-size="8">' + gVal.toFixed(2) + '%</text>';
+      svg += '<text x="' + (padL - 4) + '" y="' + (gY + 3) + '" text-anchor="end" fill="#475569" font-size="8">' + gVal.toFixed(2) + '%</text>';
     }
 
     // Min-max band (rolling 3-period)
@@ -563,7 +563,7 @@
     data.forEach(function(d, i) {
       if (i % dateEvery === 0 || i === lastI) {
         var dateShort = d.date.substring(0, 7); // YYYY-MM
-        svg += '<text x="' + x(i).toFixed(1) + '" y="' + (H - 2) + '" text-anchor="middle" fill="#94A3B8" font-size="7">' + dateShort + '</text>';
+        svg += '<text x="' + x(i).toFixed(1) + '" y="' + (H - 2) + '" text-anchor="middle" fill="#475569" font-size="7">' + dateShort + '</text>';
       }
     });
 
@@ -676,16 +676,16 @@
       var pctIn = Math.round(inside / data.length * 100);
       shtml += '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px">';
       shtml += '<div style="padding:10px;background:' + (data[data.length-1].value >= lo && data[data.length-1].value <= hi ? '#ECFDF5' : '#FEF2F2') + ';border-radius:6px;text-align:center;border:2px solid ' + (data[data.length-1].value >= lo && data[data.length-1].value <= hi ? '#059669' : '#DC2626') + '">';
-      shtml += '<div style="font-size:8px;color:#64748B">ACTUEL</div>';
+      shtml += '<div style="font-size:11px;color:#64748B">ACTUEL</div>';
       shtml += '<div style="font-family:var(--mono);font-size:16px;font-weight:800;color:' + (data[data.length-1].value >= lo && data[data.length-1].value <= hi ? '#059669' : '#DC2626') + '">' + (data[data.length-1].value >= lo && data[data.length-1].value <= hi ? '✅ DANS' : '❌ HORS') + '</div></div>';
-      shtml += '<div style="padding:10px;background:#F1F3F7;border-radius:6px;text-align:center"><div style="font-size:8px;color:#64748B">TEMPS DANS [' + lo.toFixed(2) + '-' + hi.toFixed(2) + ']</div>';
+      shtml += '<div style="padding:10px;background:#F1F3F7;border-radius:6px;text-align:center"><div style="font-size:11px;color:#64748B">TEMPS DANS [' + lo.toFixed(2) + '-' + hi.toFixed(2) + ']</div>';
       shtml += '<div style="font-family:var(--mono);font-size:16px;font-weight:800;color:' + (pctIn >= 80 ? '#059669' : pctIn >= 50 ? '#D97706' : '#DC2626') + '">' + pctIn + '%</div>';
-      shtml += '<div style="font-size:8px;color:#64748B">' + inside + '/' + data.length + ' obs</div></div>';
-      shtml += '<div style="padding:10px;background:#F1F3F7;border-radius:6px;text-align:center"><div style="font-size:8px;color:#64748B">FRANCHISSEMENTS</div>';
+      shtml += '<div style="font-size:11px;color:#64748B">' + inside + '/' + data.length + ' obs</div></div>';
+      shtml += '<div style="padding:10px;background:#F1F3F7;border-radius:6px;text-align:center"><div style="font-size:11px;color:#64748B">FRANCHISSEMENTS</div>';
       shtml += '<div style="font-family:var(--mono);font-size:16px;font-weight:800;color:#7C3AED">' + breaches + '</div></div>';
-      shtml += '<div style="padding:10px;background:#F1F3F7;border-radius:6px;text-align:center"><div style="font-size:8px;color:#64748B">MAX CONSEC. HORS</div>';
+      shtml += '<div style="padding:10px;background:#F1F3F7;border-radius:6px;text-align:center"><div style="font-size:11px;color:#64748B">MAX CONSEC. HORS</div>';
       shtml += '<div style="font-family:var(--mono);font-size:16px;font-weight:800;color:#DC2626">' + maxConsecOut + ' obs</div></div>';
-      shtml += '<div style="padding:10px;background:#F1F3F7;border-radius:6px;text-align:center"><div style="font-size:8px;color:#64748B">DERNIÈRE SORTIE</div>';
+      shtml += '<div style="padding:10px;background:#F1F3F7;border-radius:6px;text-align:center"><div style="font-size:11px;color:#64748B">DERNIÈRE SORTIE</div>';
       shtml += '<div style="font-family:var(--mono);font-size:11px;font-weight:700;color:#DC2626">' + (lastOut || 'Jamais') + '</div></div>';
       shtml += '</div>';
     } else {
@@ -708,24 +708,24 @@
 
       shtml += '<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px">';
       shtml += '<div style="padding:10px;background:' + (conditionMet ? '#ECFDF5' : '#FEF2F2') + ';border-radius:6px;text-align:center;border:2px solid ' + (conditionMet ? '#059669' : '#DC2626') + '">';
-      shtml += '<div style="font-size:8px;color:#64748B">ACTUEL vs ' + customVal.toFixed(2) + '%</div>';
+      shtml += '<div style="font-size:11px;color:#64748B">ACTUEL vs ' + customVal.toFixed(2) + '%</div>';
       shtml += '<div style="font-family:var(--mono);font-size:14px;font-weight:800;color:' + (conditionMet ? '#059669' : '#DC2626') + '">' + (conditionMet ? '✅ OUI' : '❌ NON') + '</div></div>';
 
-      shtml += '<div style="padding:10px;background:#F1F3F7;border-radius:6px;text-align:center"><div style="font-size:8px;color:#64748B">TEMPS AU-DESSUS</div>';
+      shtml += '<div style="padding:10px;background:#F1F3F7;border-radius:6px;text-align:center"><div style="font-size:11px;color:#64748B">TEMPS AU-DESSUS</div>';
       shtml += '<div style="font-family:var(--mono);font-size:16px;font-weight:800;color:#DC2626">' + pctAbove + '%</div>';
-      shtml += '<div style="font-size:8px;color:#64748B">' + above + '/' + data.length + '</div></div>';
+      shtml += '<div style="font-size:11px;color:#64748B">' + above + '/' + data.length + '</div></div>';
 
-      shtml += '<div style="padding:10px;background:#F1F3F7;border-radius:6px;text-align:center"><div style="font-size:8px;color:#64748B">TEMPS EN-DESSOUS</div>';
+      shtml += '<div style="padding:10px;background:#F1F3F7;border-radius:6px;text-align:center"><div style="font-size:11px;color:#64748B">TEMPS EN-DESSOUS</div>';
       shtml += '<div style="font-family:var(--mono);font-size:16px;font-weight:800;color:#059669">' + (100-pctAbove) + '%</div>';
-      shtml += '<div style="font-size:8px;color:#64748B">' + below + '/' + data.length + '</div></div>';
+      shtml += '<div style="font-size:11px;color:#64748B">' + below + '/' + data.length + '</div></div>';
 
-      shtml += '<div style="padding:10px;background:#F1F3F7;border-radius:6px;text-align:center"><div style="font-size:8px;color:#64748B">FRANCHISSEMENTS</div>';
+      shtml += '<div style="padding:10px;background:#F1F3F7;border-radius:6px;text-align:center"><div style="font-size:11px;color:#64748B">FRANCHISSEMENTS</div>';
       shtml += '<div style="font-family:var(--mono);font-size:16px;font-weight:800;color:#7C3AED">' + breaches + '</div></div>';
 
-      shtml += '<div style="padding:10px;background:#F1F3F7;border-radius:6px;text-align:center"><div style="font-size:8px;color:#64748B">DERNIER AU-DESSUS</div>';
+      shtml += '<div style="padding:10px;background:#F1F3F7;border-radius:6px;text-align:center"><div style="font-size:11px;color:#64748B">DERNIER AU-DESSUS</div>';
       shtml += '<div style="font-family:var(--mono);font-size:10px;font-weight:700;color:#DC2626">' + (lastAbove || 'Jamais') + '</div></div>';
 
-      shtml += '<div style="padding:10px;background:#F1F3F7;border-radius:6px;text-align:center"><div style="font-size:8px;color:#64748B">MAX CONSEC. ≥</div>';
+      shtml += '<div style="padding:10px;background:#F1F3F7;border-radius:6px;text-align:center"><div style="font-size:11px;color:#64748B">MAX CONSEC. ≥</div>';
       shtml += '<div style="font-family:var(--mono);font-size:16px;font-weight:800;color:#DC2626">' + maxConsecAbove + ' obs</div></div>';
       shtml += '</div>';
     }
@@ -765,7 +765,7 @@
       html += '<div style="padding:16px;text-align:center">';
       html += '<div style="font-family:var(--mono);font-size:32px;font-weight:800;color:#2563EB">' + current.toFixed(2) + '%</div>';
       html += '<div style="font-size:11px;color:#64748B;margin-top:4px">' + (rateObj.description || '') + '</div>';
-      html += '<div style="font-size:10px;color:#94A3B8;margin-top:4px">Date : ' + (rateObj.date || '—') + ' · Historique détaillé non disponible (taux quotidien sans série)</div>';
+      html += '<div style="font-size:10px;color:#475569;margin-top:4px">Date : ' + (rateObj.date || '—') + ' · Historique détaillé non disponible (taux quotidien sans série)</div>';
       html += '</div>';
 
       // Thresholds
@@ -816,42 +816,42 @@
     // KPI cards
     html += '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px">';
     html += '<div style="padding:8px;background:#F1F3F7;border-radius:6px;text-align:center">';
-    html += '<div style="font-size:8px;color:#94A3B8">ACTUEL</div>';
+    html += '<div style="font-size:11px;color:#475569">ACTUEL</div>';
     html += '<div style="font-family:var(--mono);font-size:18px;font-weight:800;color:#2563EB">' + current.toFixed(2) + '%</div></div>';
     html += '<div style="padding:8px;background:#F1F3F7;border-radius:6px;text-align:center">';
-    html += '<div style="font-size:8px;color:#94A3B8">MIN (' + nbObs + ' obs)</div>';
+    html += '<div style="font-size:11px;color:#475569">MIN (' + nbObs + ' obs)</div>';
     html += '<div style="font-family:var(--mono);font-size:18px;font-weight:800;color:#059669">' + minAll.toFixed(3) + '%</div></div>';
     html += '<div style="padding:8px;background:#F1F3F7;border-radius:6px;text-align:center">';
-    html += '<div style="font-size:8px;color:#94A3B8">MAX</div>';
+    html += '<div style="font-size:11px;color:#475569">MAX</div>';
     html += '<div style="font-family:var(--mono);font-size:18px;font-weight:800;color:#DC2626">' + maxAll.toFixed(3) + '%</div></div>';
     html += '<div style="padding:8px;background:#F1F3F7;border-radius:6px;text-align:center">';
-    html += '<div style="font-size:8px;color:#94A3B8">MOYENNE</div>';
+    html += '<div style="font-size:11px;color:#475569">MOYENNE</div>';
     html += '<div style="font-family:var(--mono);font-size:18px;font-weight:800;color:#7C3AED">' + avgAll.toFixed(3) + '%</div></div>';
     html += '<div style="padding:8px;background:#F1F3F7;border-radius:6px;text-align:center">';
-    html += '<div style="font-size:8px;color:#94A3B8">OBSERVATIONS</div>';
+    html += '<div style="font-size:11px;color:#475569">OBSERVATIONS</div>';
     html += '<div style="font-family:var(--mono);font-size:18px;font-weight:800;color:#1A202C">' + nbObs + '</div></div>';
     html += '</div>';
 
     // Period stats table
     html += '<table style="width:100%;border-collapse:collapse;font-size:11px;margin-bottom:14px">';
     html += '<thead><tr style="border-bottom:2px solid #D1D9E6">';
-    html += '<th style="padding:6px;text-align:left;color:#64748B;font-size:9px">PÉRIODE</th>';
-    html += '<th style="padding:6px;text-align:right;color:#64748B;font-size:9px">MIN</th>';
-    html += '<th style="padding:6px;text-align:right;color:#64748B;font-size:9px">MAX</th>';
-    html += '<th style="padding:6px;text-align:right;color:#64748B;font-size:9px">MOYENNE</th>';
-    html += '<th style="padding:6px;text-align:right;color:#64748B;font-size:9px">VARIATION</th>';
-    html += '<th style="padding:6px;text-align:right;color:#64748B;font-size:9px">OBS</th>';
+    html += '<th style="padding:6px;text-align:left;color:#64748B;font-size:11px">PÉRIODE</th>';
+    html += '<th style="padding:6px;text-align:right;color:#64748B;font-size:11px">MIN</th>';
+    html += '<th style="padding:6px;text-align:right;color:#64748B;font-size:11px">MAX</th>';
+    html += '<th style="padding:6px;text-align:right;color:#64748B;font-size:11px">MOYENNE</th>';
+    html += '<th style="padding:6px;text-align:right;color:#64748B;font-size:11px">VARIATION</th>';
+    html += '<th style="padding:6px;text-align:right;color:#64748B;font-size:11px">OBS</th>';
     html += '</tr></thead><tbody>';
     periods.forEach(function(p, i) {
       var bg = i % 2 === 0 ? '#FFFFFF' : '#F4F6F9';
       var chgColor = p.change >= 0 ? '#DC2626' : '#059669';
       html += '<tr style="background:' + bg + ';border-bottom:1px solid #D1D9E6">';
-      html += '<td style="padding:6px;font-weight:700">' + p.label + ' <span style="font-size:8px;color:#94A3B8">(' + p.startDate + '→' + p.endDate + ')</span></td>';
+      html += '<td style="padding:6px;font-weight:700">' + p.label + ' <span style="font-size:11px;color:#475569">(' + p.startDate + '→' + p.endDate + ')</span></td>';
       html += '<td style="padding:6px;text-align:right;font-family:var(--mono);color:#059669">' + p.min.toFixed(3) + '%</td>';
       html += '<td style="padding:6px;text-align:right;font-family:var(--mono);color:#DC2626">' + p.max.toFixed(3) + '%</td>';
       html += '<td style="padding:6px;text-align:right;font-family:var(--mono);color:#7C3AED">' + p.avg.toFixed(3) + '%</td>';
       html += '<td style="padding:6px;text-align:right;font-family:var(--mono);font-weight:700;color:' + chgColor + '">' + (p.change >= 0 ? '+' : '') + (p.change * 100).toFixed(0) + 'bp</td>';
-      html += '<td style="padding:6px;text-align:right;color:#94A3B8">' + p.count + '</td>';
+      html += '<td style="padding:6px;text-align:right;color:#475569">' + p.count + '</td>';
       html += '</tr>';
     });
     html += '</tbody></table>';
@@ -966,28 +966,28 @@
     // KPI row
     html += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px">';
     html += '<div style="padding:10px;background:' + (currentIn ? '#ECFDF5' : '#FEF2F2') + ';border-radius:6px;text-align:center;border:1px solid ' + (currentIn ? '#059669' : '#DC2626') + '">';
-    html += '<div style="font-size:9px;color:#64748B">STATUT ACTUEL</div>';
+    html += '<div style="font-size:11px;color:#64748B">STATUT ACTUEL</div>';
     html += '<div style="font-family:var(--mono);font-size:18px;font-weight:800;color:' + (currentIn ? '#059669' : '#DC2626') + '">' + (currentIn ? '✅ DANS' : '❌ HORS') + '</div>';
-    html += '<div style="font-size:9px;color:#64748B">' + rm.label + ' = ' + current.toFixed(2) + '%</div></div>';
+    html += '<div style="font-size:11px;color:#64748B">' + rm.label + ' = ' + current.toFixed(2) + '%</div></div>';
 
     html += '<div style="padding:10px;background:#F1F3F7;border-radius:6px;text-align:center">';
-    html += '<div style="font-size:9px;color:#64748B">TEMPS DANS LA ZONE</div>';
+    html += '<div style="font-size:11px;color:#64748B">TEMPS DANS LA ZONE</div>';
     html += '<div style="font-family:var(--mono);font-size:18px;font-weight:800;color:' + (pctIn >= 80 ? '#059669' : pctIn >= 50 ? '#D97706' : '#DC2626') + '">' + pctIn + '%</div>';
-    html += '<div style="font-size:9px;color:#64748B">' + inZone + '/' + total + ' observations</div></div>';
+    html += '<div style="font-size:11px;color:#64748B">' + inZone + '/' + total + ' observations</div></div>';
 
     html += '<div style="padding:10px;background:#F1F3F7;border-radius:6px;text-align:center">';
-    html += '<div style="font-size:9px;color:#64748B">FRANCHISSEMENTS</div>';
+    html += '<div style="font-size:11px;color:#64748B">FRANCHISSEMENTS</div>';
     html += '<div style="font-family:var(--mono);font-size:18px;font-weight:800;color:#7C3AED">' + breaches.length + '</div>';
-    html += '<div style="font-size:9px;color:#64748B">croisements de seuil</div></div>';
+    html += '<div style="font-size:11px;color:#64748B">croisements de seuil</div></div>';
 
     var distBp = 0;
     if (mode === 'below') distBp = Math.round((val1 - current) * 100);
     else if (mode === 'above') distBp = Math.round((current - val1) * 100);
     else distBp = Math.round(Math.min(current - val1, val2 - current) * 100);
     html += '<div style="padding:10px;background:#F1F3F7;border-radius:6px;text-align:center">';
-    html += '<div style="font-size:9px;color:#64748B">MARGE AU SEUIL</div>';
+    html += '<div style="font-size:11px;color:#64748B">MARGE AU SEUIL</div>';
     html += '<div style="font-family:var(--mono);font-size:18px;font-weight:800;color:' + (distBp > 0 ? '#059669' : '#DC2626') + '">' + (distBp > 0 ? '+' : '') + distBp + 'bp</div>';
-    html += '<div style="font-size:9px;color:#64748B">distance au plus proche</div></div>';
+    html += '<div style="font-size:11px;color:#64748B">distance au plus proche</div></div>';
     html += '</div>';
 
     // Visual chart with zone overlay
@@ -1013,12 +1013,12 @@
       // Lines for corridor
       html += '<div style="position:absolute;left:0;right:0;bottom:' + zoneBottom + 'px;height:1px;background:#059669;opacity:0.6"></div>';
       html += '<div style="position:absolute;left:0;right:0;bottom:' + zoneTop + 'px;height:1px;background:#059669;opacity:0.6"></div>';
-      html += '<div style="position:absolute;right:4px;bottom:' + (zoneBottom + 2) + 'px;font-size:8px;color:#059669;font-weight:700">' + val1.toFixed(2) + '%</div>';
-      html += '<div style="position:absolute;right:4px;bottom:' + (zoneTop + 2) + 'px;font-size:8px;color:#059669;font-weight:700">' + val2.toFixed(2) + '%</div>';
+      html += '<div style="position:absolute;right:4px;bottom:' + (zoneBottom + 2) + 'px;font-size:11px;color:#059669;font-weight:700">' + val1.toFixed(2) + '%</div>';
+      html += '<div style="position:absolute;right:4px;bottom:' + (zoneTop + 2) + 'px;font-size:11px;color:#059669;font-weight:700">' + val2.toFixed(2) + '%</div>';
     } else {
       var lineY = ((val1 - chartMin) / chartRange) * chartH;
       html += '<div style="position:absolute;left:0;right:0;bottom:' + lineY + 'px;height:2px;background:#DC2626;opacity:0.6"></div>';
-      html += '<div style="position:absolute;right:4px;bottom:' + (lineY + 3) + 'px;font-size:8px;color:#DC2626;font-weight:700">Seuil ' + val1.toFixed(2) + '%</div>';
+      html += '<div style="position:absolute;right:4px;bottom:' + (lineY + 3) + 'px;font-size:11px;color:#DC2626;font-weight:700">Seuil ' + val1.toFixed(2) + '%</div>';
       // Zone overlay
       if (mode === 'below') {
         html += '<div style="position:absolute;left:0;right:0;bottom:0;height:' + lineY + 'px;background:#059669;opacity:0.08"></div>';
@@ -1045,7 +1045,7 @@
     html += '</div>';
 
     // Date labels
-    html += '<div style="display:flex;justify-content:space-between;font-size:8px;color:#94A3B8;margin-top:3px">';
+    html += '<div style="display:flex;justify-content:space-between;font-size:11px;color:#475569;margin-top:3px">';
     html += '<span>' + history[0].date + '</span>';
     html += '<span style="color:#059669">■ Dans la zone</span><span style="color:#DC2626">■ Hors zone</span>';
     html += '<span>' + history[history.length - 1].date + '</span>';
@@ -1057,7 +1057,7 @@
       html += '<div style="font-size:10px;font-weight:700;color:#1A202C;margin-bottom:4px">Franchissements :</div>';
       html += '<div style="display:flex;flex-wrap:wrap;gap:4px">';
       breaches.forEach(function(b) {
-        html += '<span style="padding:2px 8px;border-radius:3px;font-size:9px;font-family:var(--mono);background:' + (b.entered ? '#ECFDF5' : '#FEF2F2') + ';color:' + (b.entered ? '#059669' : '#DC2626') + '">';
+        html += '<span style="padding:2px 8px;border-radius:3px;font-size:11px;font-family:var(--mono);background:' + (b.entered ? '#ECFDF5' : '#FEF2F2') + ';color:' + (b.entered ? '#059669' : '#DC2626') + '">';
         html += b.date + ' ' + b.value.toFixed(3) + '% ' + (b.entered ? '→ ENTRE' : '→ SORTI') + '</span>';
       });
       html += '</div>';
@@ -1071,14 +1071,14 @@
     var contentEl = document.getElementById('mkt-brochure-content');
     if (!contentEl) return;
     if (!window.MarketProductsScanner) {
-      contentEl.innerHTML = '<div style="color:#94A3B8;font-size:10px">Module MarketProductsScanner non chargé</div>';
+      contentEl.innerHTML = '<div style="color:#475569;font-size:10px">Module MarketProductsScanner non chargé</div>';
       return;
     }
 
     try {
       var products = await window.MarketProductsScanner.scan();
       if (!products || products.length === 0) {
-        contentEl.innerHTML = '<div style="color:#94A3B8;font-size:10px">Aucun produit taux détecté dans les brochures</div>';
+        contentEl.innerHTML = '<div style="color:#475569;font-size:10px">Aucun produit taux détecté dans les brochures</div>';
         return;
       }
 
@@ -1124,19 +1124,19 @@
         html += '<tr style="background:' + bg + ';border-bottom:1px solid #E2E8F0">';
         html += '<td style="padding:6px;font-weight:600;color:#1A202C;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + (p.name || '') + '">' + (p.name || '?').substring(0, 35) + '</td>';
         html += '<td style="padding:6px;color:#64748B">' + (p.emitter || '?').substring(0, 20) + '</td>';
-        html += '<td style="padding:6px;text-align:center"><span style="padding:2px 6px;border-radius:3px;background:#E0F7FA;color:#0891B2;font-size:9px;font-weight:600">' + (p.rateAlias || '—') + '</span></td>';
+        html += '<td style="padding:6px;text-align:center"><span style="padding:2px 6px;border-radius:3px;background:#E0F7FA;color:#0891B2;font-size:11px;font-weight:600">' + (p.rateAlias || '—') + '</span></td>';
         html += '<td style="padding:6px;text-align:center;font-family:var(--mono);font-weight:700;color:#7C3AED">' + seuilLabel + '</td>';
         html += '<td style="padding:6px;text-align:center;font-family:var(--mono);font-weight:700;color:#059669">' + (p.couponRate ? p.couponRate + '%' : '—') + '</td>';
         html += '<td style="padding:6px;text-align:center;color:#64748B">' + (p.maturityYears ? p.maturityYears + 'Y' : '—') + '</td>';
         html += '<td style="padding:6px;text-align:center">' + (statusOK === true ? '<span style="color:#059669;font-weight:700">✅</span>' : statusOK === false ? '<span style="color:#DC2626;font-weight:700">❌</span>' : '—') + '</td>';
         html += '<td style="padding:6px;text-align:center;font-family:var(--mono);font-weight:700;color:' + (typeof pctOK === 'number' && pctOK >= 80 ? '#059669' : '#D97706') + '">' + (typeof pctOK === 'number' ? pctOK + '%' : pctOK) + '</td>';
-        html += '<td style="padding:6px;text-align:center;font-family:var(--mono);font-size:9px;color:' + (typeof marge === 'string' && marge.indexOf('+') === 0 ? '#059669' : '#DC2626') + '">' + marge + '</td>';
+        html += '<td style="padding:6px;text-align:center;font-family:var(--mono);font-size:11px;color:' + (typeof marge === 'string' && marge.indexOf('+') === 0 ? '#059669' : '#DC2626') + '">' + marge + '</td>';
         // Analyser button — loads threshold into the chart above
         if (p.hasExploitableSeuil && p.rateAlias) {
           var clickAction = '_mktOpenRate(\'' + (p.rateAlias === 'tec10' ? 'oat_fr_10y' : p.rateAlias === 'oat5y' ? 'oat_fr_5y' : p.rateAlias === 'oat2y' ? 'oat_fr_2y' : 'euribor_3m') + '\')';
-          html += '<td style="padding:6px;text-align:center"><button onclick="' + clickAction + ';setTimeout(function(){var e=document.getElementById(\'mkt-custom-threshold\');if(e){e.value=\'' + (p.threshold || p.corridorLow || '') + '\';var m=document.getElementById(\'mkt-custom-mode\');if(m)m.value=\'' + (p.thresholdMode || 'below') + '\';_mktUpdateChart()}},200)" style="padding:3px 8px;border-radius:3px;border:1px solid #7C3AED;background:#F5F3FF;color:#7C3AED;font-size:9px;font-weight:600;cursor:pointer">Analyser</button></td>';
+          html += '<td style="padding:6px;text-align:center"><button onclick="' + clickAction + ';setTimeout(function(){var e=document.getElementById(\'mkt-custom-threshold\');if(e){e.value=\'' + (p.threshold || p.corridorLow || '') + '\';var m=document.getElementById(\'mkt-custom-mode\');if(m)m.value=\'' + (p.thresholdMode || 'below') + '\';_mktUpdateChart()}},200)" style="padding:3px 8px;border-radius:3px;border:1px solid #7C3AED;background:#F5F3FF;color:#7C3AED;font-size:11px;font-weight:600;cursor:pointer">Analyser</button></td>';
         } else {
-          html += '<td style="padding:6px;text-align:center;color:#94A3B8;font-size:9px">—</td>';
+          html += '<td style="padding:6px;text-align:center;color:#475569;font-size:11px">—</td>';
         }
         html += '</tr>';
       });
