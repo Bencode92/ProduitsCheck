@@ -134,18 +134,16 @@
           return;
         }
 
+        // Scénario CENTRAL: coupon PLEIN si condition remplie (pas pondéré par proba)
+        // La proba est utilisée pour l'espérance pondérée, pas pour réduire le coupon
         var couponEff = 0;
         if (p.type === 'fixe') {
           couponEff = p.coupon;
         } else if (p.type === 'hybride') {
-          couponEff = p.couponPlancher + p.couponBonus * (p.prob || 0.9);
+          couponEff = p.couponPlancher + p.couponBonus; // plancher + bonus PLEIN
         } else {
-          // Conditionnel (TARN)
-          if (yr <= (p.guaranteedYears || 0)) {
-            couponEff = p.coupon; // garanti
-          } else {
-            couponEff = p.coupon * (p.prob || 0.9); // conditionnel × proba
-          }
+          // Conditionnel (TARN): coupon PLEIN dans le scénario central
+          couponEff = p.coupon;
         }
         var rev = Math.round(p.amount * couponEff / 100);
         revenue += rev;
@@ -200,12 +198,18 @@
     var worstNet = worstRevenue - totalInterest;
     var worstTax = worstNet > 0 ? Math.round(worstNet * taxRate / 100) : 0;
 
+    // Espérance pondérée: 90% central + 10% worst
+    var worstFinal = worstNet - worstTax;
+    var esperance = Math.round(0.90 * netAfterTax + 0.10 * worstFinal);
+    var espRoiAnnual = Math.round(esperance / loanAmount / years * 100 * 100) / 100;
+
     return {
       totalRevenue: totalRevenue, totalInterest: totalInterest,
       netAfterTax: netAfterTax, perYear: Math.round(netAfterTax / years),
       roiPct: Math.round(netAfterTax / loanAmount * 100 * 100) / 100,
       roiAnnual: Math.round(netAfterTax / loanAmount / years * 100 * 100) / 100,
-      worstNet: worstNet - worstTax, worstPerYear: Math.round((worstNet - worstTax) / years),
+      worstNet: worstFinal, worstPerYear: Math.round(worstFinal / years),
+      esperance: esperance, espRoiAnnual: espRoiAnnual,
       flows: flows
     };
   }
@@ -287,10 +291,10 @@
     html += '<thead><tr style="background:' + B.header + ';border-bottom:2px solid ' + B.border + '">';
     html += '<th style="padding:10px 8px;text-align:left;color:' + B.muted + ';font-size:10px">CONFIG</th>';
     html += '<th style="padding:10px 8px;text-align:left;color:' + B.muted + ';font-size:10px">PRODUIT(S)</th>';
-    html += '<th style="padding:10px 8px;text-align:center;color:#059669;font-size:10px">RDT/AN</th>';
-    html += '<th style="padding:10px 8px;text-align:center;color:#059669;font-size:10px">GAIN 5A</th>';
-    html += '<th style="padding:10px 8px;text-align:center;color:#D97706;font-size:10px">PIRE CAS</th>';
-    html += '<th style="padding:10px 8px;text-align:center;color:#7C3AED;font-size:10px">PROBA</th>';
+    html += '<th style="padding:10px 8px;text-align:center;color:#059669;font-size:10px">CENTRAL/AN</th>';
+    html += '<th style="padding:10px 8px;text-align:center;color:#059669;font-size:10px">CENTRAL 5A</th>';
+    html += '<th style="padding:10px 8px;text-align:center;color:#D97706;font-size:10px">ESPÉRANCE</th>';
+    html += '<th style="padding:10px 8px;text-align:center;color:#DC2626;font-size:10px">PIRE CAS</th>';
     html += '<th style="padding:10px 8px;text-align:center;color:' + B.muted + ';font-size:10px"></th>';
     html += '</tr></thead><tbody>';
 
@@ -307,10 +311,13 @@
         html += '<div style="font-size:9px;margin-bottom:2px"><span style="color:' + p.color + ';font-weight:700">' + p.name.substring(0, 30) + '</span> <span style="color:' + B.dim + '">' + _f(p.amount / 1000) + 'K · ' + p.coupon + '%</span></div>';
       });
       html += '</td>';
+      // Central (coupon plein)
       html += '<td style="padding:8px;text-align:center;font-family:var(--mono);font-weight:800;font-size:13px;color:#059669">+' + _p(c.pnl.roiAnnual) + '%</td>';
       html += '<td style="padding:8px;text-align:center;font-family:var(--mono);font-weight:700;color:#059669">+' + _f(c.pnl.netAfterTax) + '€</td>';
+      // Espérance pondérée (90/10)
+      html += '<td style="padding:8px;text-align:center;font-family:var(--mono);font-weight:700;color:#D97706">+' + _f(c.pnl.esperance) + '€</td>';
+      // Pire cas
       html += '<td style="padding:8px;text-align:center;font-family:var(--mono);font-weight:700;color:' + (c.pnl.worstNet >= 0 ? '#059669' : '#DC2626') + '">' + (c.pnl.worstNet >= 0 ? '+' : '') + _f(c.pnl.worstNet) + '€</td>';
-      html += '<td style="padding:8px;text-align:center;font-family:var(--mono);font-weight:700;color:' + (avgProb >= 0.9 ? '#059669' : '#D97706') + '">' + Math.round(avgProb * 100) + '%</td>';
       html += '<td style="padding:8px;text-align:center"><button onclick="__carryV2Select(\'' + c.id + '\')" style="padding:4px 10px;border:1px solid #2563EB;border-radius:4px;background:' + (isBest ? '#2563EB' : '#fff') + ';color:' + (isBest ? '#fff' : '#2563EB') + ';font-size:9px;font-weight:700;cursor:pointer">Analyser →</button></td>';
       html += '</tr>';
     });
