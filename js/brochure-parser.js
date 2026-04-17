@@ -451,7 +451,7 @@
     // If form has generic 'autocall' but aiParsed has a more specific type, prefer aiParsed
     if (formSt === 'autocall' && aiSt && aiSt !== 'autocall') st = aiSt;
     var typeMap = { taux_fixe: 'taux-fixe', range_accrual: 'range-accrual', taux_fixe_in_fine: 'taux_fixe_in_fine' };
-    return {
+    var product = {
       name: _gv('bp-name') || _data.name || '',
       type: typeMap[st] || st,
       structureType: st,
