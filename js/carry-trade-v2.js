@@ -72,11 +72,12 @@
     return {
       tarn: {
         name: 'TARN TEC10 ' + tarnCoupon + '% ' + duration + 'Y',
-        type: 'conditionnel', coupon: tarnCoupon, prob: 0.97,
+        type: 'conditionnel', coupon: tarnCoupon, prob: 0.90,
+        probStress: 0.10, // proba scénario dégradé (TEC10 > 4.40% après An 2)
         duration: duration, guaranteedYears: tarnGuaranteed,
         autocallTarget: tarnAutocall, autocallYears: Math.ceil(tarnAutocall / tarnCoupon),
         risk: 'Faible',
-        detail: 'Coupon ' + tarnCoupon + '%/an · Garanti An 1-2 · Conditionnel si TEC10 ≤ 4.40% (proba 97% sur 20 ans) · Autocall si cumul ≥ ' + tarnAutocall + '% (~' + Math.ceil(tarnAutocall / tarnCoupon) + ' ans) · Capital garanti 100% à échéance',
+        detail: 'Coupon ' + tarnCoupon + '%/an · Garanti An 1-2 · Conditionnel si TEC10 ≤ 4.40% · Proba forward 85-92% (historique brut 98%, haircut stagflation) · Autocall cumul ≥ ' + tarnAutocall + '% (~' + Math.ceil(tarnAutocall / tarnCoupon) + ' ans) · Capital garanti 100%',
         color: '#D97706'
       },
       fixe: {
@@ -90,9 +91,9 @@
       hybride: {
         name: 'Hybride ' + floor + '% + ' + bonus + '% ' + duration + 'Y',
         type: 'hybride', coupon: floor + bonus, couponPlancher: floor, couponBonus: bonus,
-        prob: 0.93, duration: duration, guaranteedYears: 0,
+        prob: 0.90, duration: duration, guaranteedYears: 0,
         risk: 'Tres faible',
-        detail: 'Plancher ' + floor + '% GARANTI (couvre le 2.90% emprunt) + Bonus ' + bonus + '% si TEC10 ≤ 4.00% (proba ~93%) · Capital garanti 100%',
+        detail: 'Plancher ' + floor + '% GARANTI (couvre le 2.90% emprunt) + Bonus ' + bonus + '% si TEC10 ≤ 4.00% (proba forward ~90%) · Capital garanti 100%',
         color: '#0891B2'
       },
       floater: {
@@ -316,6 +317,47 @@
     html += '</tbody></table>';
     html += '</div>';
 
+    // ═══ PRIME DE COMPLEXITÉ vs alternatives simples ═══
+    html += '<div style="background:' + B.card + ';border:1px solid #D97706;border-radius:8px;padding:14px;margin-bottom:16px">';
+    html += '<div style="font-size:13px;font-weight:700;color:#D97706;margin-bottom:10px">⚖️ PRIME DE COMPLEXITÉ — Le jeu en vaut-il la chandelle ?</div>';
+    html += '<table style="width:100%;border-collapse:collapse;font-size:11px">';
+    html += '<thead><tr style="background:' + B.header + '">';
+    html += '<th style="padding:8px;text-align:left;color:' + B.muted + '">PLACEMENT</th>';
+    html += '<th style="padding:8px;text-align:center;color:#059669">RDT ESPÉRÉ/AN</th>';
+    html += '<th style="padding:8px;text-align:center;color:#059669">GARANTI MIN</th>';
+    html += '<th style="padding:8px;text-align:center;color:#D97706">PRIME vs FIXE</th>';
+    html += '<th style="padding:8px;text-align:center;color:#DC2626">PIRE CAS 5A</th>';
+    html += '</tr></thead><tbody>';
+
+    // CAT benchmark
+    html += '<tr style="background:' + B.row1 + ';border-bottom:1px solid ' + B.border + '">';
+    html += '<td style="padding:8px;color:' + B.dim + '">CAT simple 5Y ~3.20%</td>';
+    html += '<td style="padding:8px;text-align:center;font-family:var(--mono);color:' + B.muted + '">+0.23%/an</td>';
+    html += '<td style="padding:8px;text-align:center;font-family:var(--mono);color:#059669">+0.23%/an</td>';
+    html += '<td style="padding:8px;text-align:center;color:' + B.dim + '">—</td>';
+    html += '<td style="padding:8px;text-align:center;font-family:var(--mono);color:#059669">+11 250€</td>';
+    html += '</tr>';
+
+    // Configs with prime calculation
+    var fixeConfig = _configs.find(function(c) { return c.id === 'B'; });
+    var fixeRdt = fixeConfig ? fixeConfig.pnl.roiAnnual : 0.83;
+    _configs.forEach(function(c, i) {
+      var prime = c.pnl.roiAnnual - fixeRdt;
+      var bg = c.id === 'E' ? '#E8F0FE' : (i % 2 === 0 ? B.row0 : B.row1);
+      html += '<tr style="background:' + bg + ';border-bottom:1px solid ' + B.border + '">';
+      html += '<td style="padding:8px;font-weight:' + (c.id === 'E' ? '700' : '400') + '">' + c.emoji + ' ' + c.name + (c.id === 'E' ? ' <span style="font-size:8px;color:#2563EB">RECOMMANDÉ</span>' : '') + '</td>';
+      html += '<td style="padding:8px;text-align:center;font-family:var(--mono);font-weight:700;color:#059669">+' + _p(c.pnl.roiAnnual) + '%</td>';
+      var minRdt = c.pnl.worstNet >= 0 ? '+' + _p(c.pnl.worstNet / L.amount / L.years * 100) : _p(c.pnl.worstNet / L.amount / L.years * 100);
+      html += '<td style="padding:8px;text-align:center;font-family:var(--mono);color:' + (c.pnl.worstNet >= 0 ? '#059669' : '#DC2626') + '">' + minRdt + '%/an</td>';
+      html += '<td style="padding:8px;text-align:center;font-family:var(--mono);font-weight:700;color:' + (prime > 0 ? '#D97706' : B.dim) + '">' + (prime > 0 ? '+' + _p(prime) + '%' : '—') + '</td>';
+      html += '<td style="padding:8px;text-align:center;font-family:var(--mono);font-weight:700;color:' + (c.pnl.worstNet >= 0 ? '#059669' : '#DC2626') + '">' + (c.pnl.worstNet >= 0 ? '+' : '') + _f(c.pnl.worstNet) + '€</td>';
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+    html += '<div style="margin-top:8px;padding:6px 10px;background:#FEF3C7;border-radius:4px;font-size:9px;color:#92400E">';
+    html += '💡 <strong>Config E (Fixe + TARN)</strong> = meilleur ratio rendement/risque. Pire cas toujours positif. Prime de complexité vs Fixe = ~+0.67%/an de rendement supplémentaire pour un risque limité.';
+    html += '</div></div>';
+
     // ═══ BLOC 2 : DISCUSSION — Détail de la config sélectionnée ═══
     html += '<div id="carry-v2-discussion" style="background:' + B.card + ';border:1px solid ' + B.border + ';border-radius:8px;padding:16px;margin-bottom:16px">';
     html += '<div style="text-align:center;padding:20px;color:' + B.dim + ';font-size:12px">👆 Cliquez "Analyser" sur une configuration pour voir le détail des produits</div>';
@@ -378,6 +420,20 @@
         h += '</div>';
       });
       h += '</div>';
+
+      // Espérance pondérée si produit conditionnel
+      var hasCond = c.products.some(function(p) { return p.type === 'conditionnel'; });
+      if (hasCond) {
+        var probCentral = 0.90;
+        var probStress = 0.10;
+        var esperance = Math.round(probCentral * c.pnl.netAfterTax + probStress * c.pnl.worstNet);
+        var espRoi = (esperance / LOAN.amount / LOAN.years * 100);
+        h += '<div style="margin-top:8px;padding:10px;background:#FEF3C7;border:1px solid #F59E0B;border-radius:6px;font-size:10px;color:#92400E">';
+        h += '<strong>Espérance pondérée</strong> (90% central / 10% dégradé) : ';
+        h += '<strong style="font-family:var(--mono);font-size:13px;color:#D97706">' + _f(esperance) + '€</strong> net = <strong>' + _p(espRoi) + '%/an</strong>';
+        h += ' · Scénario dégradé = TEC10 > 4.40% après An 2 (persistant 2-3 ans, cf. 2007-2008)';
+        h += '</div>';
+      }
       disc.innerHTML = h;
     }
 
