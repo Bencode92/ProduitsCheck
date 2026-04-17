@@ -1,8 +1,8 @@
 {
   "id": "sp_mnrg6fhs_4opaz",
   "name": "TARN TEC 10 Avril 2036 B",
-  "type": "range_accrual",
-  "structureType": "range_accrual",
+  "type": "capital_garanti",
+  "structureType": "capital_garanti",
   "emitter": "Crédit Industriel et Commercial",
   "guarantor": "",
   "guarantorRating": {

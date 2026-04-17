@@ -22,6 +22,7 @@
     '- "performance relative" / "dispersion" / "paire d\'actions" = structureType "dispersion"',
     '- "panier équipondéré" / "niveau du panier" = structureType "basket"',
     '- "taux fixe" sans sous-jacent actions = structureType "taux_fixe"',
+    '- "TARN" ou "Target Accrual" ou "somme des coupons cumulés" = structureType "capital_garanti" (PAS range_accrual)',
     '- CAPITAL GARANTI + PAS de remboursement anticipé automatique = structureType "capital_garanti"',
     '  NE PAS confondre observations annuelles de coupon avec autocall.',
     '',
