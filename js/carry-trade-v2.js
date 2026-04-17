@@ -358,13 +358,38 @@
     html += '<div style="background:' + B.card + ';border:1px solid #2563EB;border-radius:8px;padding:14px;margin-bottom:16px">';
     html += '<div style="font-size:13px;font-weight:700;color:#2563EB;margin-bottom:10px">📋 CAHIER DES CHARGES — RDV Banquier</div>';
 
-    html += _acc('cdc-situation', '🏦 Notre situation',
-      '<strong>Emprunt SG Equipéa</strong> : ' + _f(L.amount) + '€ à ' + L.rate + '% fixe in fine ' + L.years + ' ans<br>' +
-      'Crédit en blanc (aucune garantie) · Entité : ' + L.entity + '<br>' +
-      'Coût total intérêts : ' + _f(Math.round(L.amount * L.rate / 100 * L.years)) + '€ + frais ' + _f(L.fees) + '€<br>' +
-      'Validité offre SG : 14/05/2026');
+    html += _acc('cdc-script', '🎤 Script de présentation — Ce qu\'on dit au banquier',
+      '<div style="padding:14px;background:#F8F9FB;border:1px solid ' + B.border + ';border-radius:8px;font-size:13px;color:#1A202C;line-height:1.8;font-style:italic">' +
+      '"Nous avons reçu une <strong>proposition d\'emprunt de trésorerie</strong> de la Société Générale : ' + _f(L.amount) + '€ à ' + L.rate + '% fixe, in fine sur ' + L.years + ' ans, crédit en blanc. L\'offre est validée et expire le 14 mai.<br><br>' +
+      'On souhaite utiliser cet emprunt pour faire du <strong>carry trade</strong> : placer le million sur des produits structurés de taux, capital garanti, qui rapportent plus que le 2,90% de l\'emprunt. La différence c\'est notre gain.<br><br>' +
+      'L\'avantage pour nous c\'est qu\'on <strong>investit sans toucher à notre trésorerie propre</strong>. Le capital est garanti à 100%, l\'emprunt est in fine (on ne paye que les intérêts de 29 000€/an pendant 5 ans), et les produits structurés génèrent des coupons de 6 à 7% sur le TEC10.<br><br>' +
+      'On a déjà <strong>reçu des propositions de plusieurs banques</strong> — notamment un TARN TEC10 du CIC à 6,70% (ISIN XS3340532707). On cherche à faire mieux en sur-mesure sur 500K à 1M€.<br><br>' +
+      'Concrètement, on a <strong>3 configurations</strong> en tête :"' +
+      '</div>' +
+      '<div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">' +
+      '<div style="padding:10px;background:#FEF3C7;border:1px solid #F59E0B;border-radius:6px">' +
+      '<div style="font-size:11px;font-weight:700;color:#D97706">🏆 Option A — RECOMMANDÉE</div>' +
+      '<div style="font-size:11px;color:#1A202C;margin-top:4px">500K TARN 7% + 500K Digital Plancher 3% avec autocall. Les 2 sortent en ~4 ans. Le plancher couvre l\'emprunt.</div></div>' +
+      '<div style="padding:10px;background:#EFF6FF;border:1px solid #93C5FD;border-radius:6px">' +
+      '<div style="font-size:11px;font-weight:700;color:#2563EB">🎯 Option B — MAX RENDEMENT</div>' +
+      '<div style="font-size:11px;color:#1A202C;margin-top:4px">1M€ tout sur un TARN TEC10 7%. Autocall ~4 ans. Maximum de coupon.</div></div>' +
+      '<div style="padding:10px;background:#ECFDF5;border:1px solid #6EE7B7;border-radius:6px">' +
+      '<div style="font-size:11px;font-weight:700;color:#059669">🛡️ Option C — SAFE</div>' +
+      '<div style="font-size:11px;color:#1A202C;margin-top:4px">500K TARN 7% + 500K Fixe Callable 4,40% garanti. Pire cas toujours positif.</div></div>' +
+      '</div>' +
+      '<div style="margin-top:10px;padding:10px;background:#F8F9FB;border:1px solid ' + B.border + ';border-radius:6px;font-size:12px;color:#1A202C;line-height:1.7;font-style:italic">' +
+      '"On consulte <strong>plusieurs établissements</strong> en parallèle. Qu\'est-ce que vous pouvez nous proposer de compétitif sur ces structures ? Et est-ce que vous avez un <strong>PUT investisseur à 5 ans</strong> sur le Digital, pour garantir la sortie au cas où l\'autocall ne se déclenche pas ?"' +
+      '</div>');
 
-    html += _acc('cdc-contraintes', '🔒 Contraintes non négociables',
+    html += _acc('cdc-contexte', '🏦 Contexte détaillé',
+      '<strong>Emprunt SG Equipéa :</strong> ' + _f(L.amount) + '€ à ' + L.rate + '% fixe in fine ' + L.years + ' ans · Crédit en blanc · ' + L.entity + '<br>' +
+      'Coût total intérêts : ' + _f(Math.round(L.amount * L.rate / 100 * L.years)) + '€ + frais ' + _f(L.fees) + '€ · Validité : 14/05/2026<br><br>' +
+      '<strong>Pourquoi le carry trade :</strong><br>' +
+      '• On emprunte à 2,90% fixe et on place à 6-7% sur des structurés taux → la différence est notre gain<br>' +
+      '• In fine = le capital reste investi à 100% pendant 5 ans (pas d\'amortissement)<br>' +
+      '• Capital garanti 100% = pas de risque de perte sur le nominal<br>' +
+      '• La trésorerie propre n\'est pas mobilisée — c\'est l\'emprunt qui finance l\'investissement<br><br>' +
+      '<strong>Contraintes non négociables :</strong><br>' +
       '• Capital garanti <strong>100% à échéance</strong> (inconditionnelle)<br>' +
       '• Sous-jacent <strong>taux uniquement</strong> (TEC10, Euribor, CMS) — pas d\'actions<br>' +
       '• Nominal minimum <strong>500 000€</strong> par produit<br>' +
