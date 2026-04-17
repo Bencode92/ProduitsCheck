@@ -18,13 +18,15 @@
       <div class="topbar-title">Struct<span>Board</span></div>
     </div>
     <div class="topbar-nav" id="main-nav">
-      <button class="nav-tab active" data-view="dashboard" onclick="switchMainView('dashboard')">Produits Structurés</button>
-      <button class="nav-tab" data-view="cat" onclick="switchMainView('cat')">Comptes à Terme</button>
+      <button class="nav-tab active" data-view="market" onclick="switchMainView('market')">📈 Marché</button>
+      <button class="nav-tab" data-view="carry" onclick="switchMainView('carry')">🏦 Carry Trade</button>
+      <span class="nav-sep"></span>
+      <button class="nav-tab" data-view="dashboard" onclick="switchMainView('dashboard')">Structurés</button>
+      <button class="nav-tab" data-view="cat" onclick="switchMainView('cat')">CAT</button>
+      <button class="nav-tab" data-view="analytics" onclick="switchMainView('analytics')">📊 Analytique</button>
+      <span class="nav-sep"></span>
       <button class="nav-tab" data-view="parser" onclick="switchMainView('parser')">📄 Analyseur</button>
       <button class="nav-tab" data-view="allocator" onclick="switchMainView('allocator')">⚡ Allocateur</button>
-      <button class="nav-tab" data-view="analytics" onclick="switchMainView('analytics')">📊 Analytique</button>
-      <button class="nav-tab" data-view="market" onclick="switchMainView('market')">📈 Marché</button>
-      <button class="nav-tab" data-view="carry" onclick="switchMainView('carry')">🏦 Carry Trade</button>
     </div>
     <div class="topbar-actions">
       <div class="topbar-status"><span class="dot-live"></span><span>Connecté</span></div>
@@ -125,6 +127,8 @@
       await loadCATAIConversation();
       if (typeof loadOptimizerResult === 'function') await loadOptimizerResult();
       if (typeof loadStructOptimizerResult === 'function') await loadStructOptimizerResult();
+      // Marché = page par défaut
+      switchMainView('market');
     });
   </script>
 </body>

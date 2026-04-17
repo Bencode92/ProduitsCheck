@@ -18,6 +18,7 @@
 .nav-tab{padding:6px 14px;border-radius:6px;border:1px solid transparent;background:transparent;color:rgba(255,255,255,0.75);font-family:var(--font);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s}
 .nav-tab:hover{background:rgba(255,255,255,0.12);color:#fff}
 .nav-tab.active{background:rgba(255,255,255,0.2);color:#fff;font-weight:700;border-color:rgba(255,255,255,0.25)}
+.nav-sep{width:1px;height:20px;background:rgba(255,255,255,0.2);margin:0 4px}
 
 .btn{padding:8px 16px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg-card);color:var(--text);font-family:var(--font);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s ease;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 .btn:hover{background:var(--bg-card-hover);border-color:var(--border-light)}.btn:disabled{opacity:.4;cursor:not-allowed}.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}.btn.primary:hover{background:#2563EB;box-shadow:0 0 20px rgba(59,130,246,.25)}
