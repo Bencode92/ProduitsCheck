@@ -383,50 +383,81 @@
       '• Coupon > 2,90% (sinon pas de portage positif)<br>' +
       '• Devise EUR · Éligible compte-titres ordinaire');
 
-    html += _acc('cdc-configs', '📦 Les 6 configurations (produits réels + sur-mesure)',
+    html += _acc('cdc-produit1', '🎯 PRODUIT 1 — TARN TEC10 sur-mesure (500K ou 1M€)',
+      '<div style="padding:10px;background:#FEF3C7;border:1px solid #F59E0B;border-radius:6px;margin-bottom:10px;font-size:12px;color:#92400E">' +
+      '<strong>Référence :</strong> CIC propose déjà un TARN TEC10 en série à 6,70% (XS3340532707). Sur un nominal de 500K-1M€ en sur-mesure, nous ciblons <strong>7,00%</strong> minimum.</div>' +
       '<table style="width:100%;border-collapse:collapse;font-size:12px">' +
-      '<tr style="background:' + B.header + ';font-weight:700"><td style="padding:8px">CONFIG</td><td style="padding:8px">PRODUIT(S)</td><td style="padding:8px">COUPON</td><td style="padding:8px">TYPE</td></tr>' +
-      '<tr style="border-bottom:1px solid ' + B.border + '"><td style="padding:8px;font-weight:700">🏆 A</td><td style="padding:8px"><strong>1M€ TARN TEC10</strong> 10Y</td><td style="padding:8px;color:#D97706;font-weight:700">7.00%</td><td style="padding:8px;font-size:10px">Max rendement, conditionnel TEC10 ≤ 4.60%</td></tr>' +
-      '<tr style="background:#E8F0FE;border-bottom:1px solid ' + B.border + '"><td style="padding:8px;font-weight:700">🎯 B</td><td style="padding:8px"><strong>500K TARN 7% + 500K Digital Plancher 3%+Bonus</strong></td><td style="padding:8px;color:#0891B2;font-weight:700">7.00% + 6.50%</td><td style="padding:8px;font-size:10px;color:#2563EB"><strong>RECOMMANDÉ — pire cas ~0</strong></td></tr>' +
-      '<tr style="border-bottom:1px solid ' + B.border + '"><td style="padding:8px;font-weight:700">🛡️ C</td><td style="padding:8px"><strong>500K TARN 7% + 500K Fixe Callable</strong></td><td style="padding:8px;color:#059669;font-weight:700">7.00% + 4.40%</td><td style="padding:8px;font-size:10px">Pire cas toujours positif</td></tr>' +
-      '<tr style="border-bottom:1px solid ' + B.border + ';background:' + B.row1 + '"><td style="padding:8px;font-weight:700">🔒 D</td><td style="padding:8px"><strong>1M€ Fixe Callable</strong> 10YNC3</td><td style="padding:8px;color:#059669;font-weight:700">4.40% garanti</td><td style="padding:8px;font-size:10px">Zéro risque, zéro condition</td></tr>' +
-      '<tr style="border-bottom:1px solid ' + B.border + '"><td style="padding:8px;font-weight:700">📈 E</td><td style="padding:8px"><strong>500K TARN 7% + 500K Step-Up Callable</strong></td><td style="padding:8px;color:#059669;font-weight:700">7.00% + 3.50→6%</td><td style="padding:8px;font-size:10px">TARN + garanti croissant</td></tr>' +
+      '<tr style="border-bottom:1px solid ' + B.border + '"><td style="padding:6px;color:#64748B;width:35%">Coupon cible</td><td style="padding:6px;font-weight:700;color:#D97706">≥ 7,00%/an</td></tr>' +
+      '<tr style="border-bottom:1px solid ' + B.border + ';background:' + B.row1 + '"><td style="padding:6px;color:#64748B">Condition</td><td style="padding:6px">TEC10 ≤ <strong>4,60%</strong> à la date de constatation annuelle</td></tr>' +
+      '<tr style="border-bottom:1px solid ' + B.border + '"><td style="padding:6px;color:#64748B">Coupons garantis</td><td style="padding:6px"><strong>An 1 + An 2</strong> (inconditionnels)</td></tr>' +
+      '<tr style="border-bottom:1px solid ' + B.border + ';background:' + B.row1 + '"><td style="padding:6px;color:#64748B">Autocall</td><td style="padding:6px">Si cumul coupons versés ≥ <strong>28%</strong></td></tr>' +
+      '<tr style="border-bottom:1px solid ' + B.border + '"><td style="padding:6px;color:#64748B">Maturité</td><td style="padding:6px"><strong>10 ans</strong> (sortie probable ~4 ans via autocall)</td></tr>' +
+      '<tr style="border-bottom:1px solid ' + B.border + ';background:' + B.row1 + '"><td style="padding:6px;color:#64748B">Capital</td><td style="padding:6px"><strong>Garanti 100%</strong> à l\'échéance (inconditionnelle)</td></tr>' +
+      '<tr><td style="padding:6px;color:#64748B">Nominal</td><td style="padding:6px"><strong>500 000€ ou 1 000 000€</strong></td></tr>' +
       '</table>' +
-      '<div style="margin-top:8px;padding:6px 10px;background:#ECFDF5;border-radius:4px;font-size:11px;color:#065F46">' +
-      '✅ <strong>Config B (TARN 7% + Digital Plancher 3%+Bonus)</strong> = rendement max avec pire cas quasi nul. Le plancher 3% couvre l\'emprunt 2.90%.' +
-      '</div>');
+      '<div style="margin-top:8px;font-size:11px;color:#1A202C"><strong>Argument de négo :</strong> Le CIC affiche 6,70% en retail (100K unitaire). Sur 500K-1M en sur-mesure, la marge banque passe de ~20% à ~15% du budget option → au moins +0,30% de coupon redistribuable.</div>');
 
-    html += _acc('cdc-alternatives', '💡 Structures alternatives à demander',
-      '• <strong>Callable In Fine</strong> 10YNC4 : coupon capitalisé ~4,70%, tout versé au call (CIC en propose)<br>' +
-      '• <strong>Range Accrual TEC10</strong> [2,00%-4,00%] : corridor centré, moins binaire que le TARN<br>' +
-      '• <strong>Step-Up Callable</strong> : coupon garanti croissant (3,50% → 5,50%)<br>' +
-      '• <strong>TARN avec Mémoire</strong> : coupons rattrapés si condition remplie plus tard<br>' +
-      '• Toute structure taux capital garanti > 5%');
+    html += _acc('cdc-produit2', '💎 PRODUIT 2 — Digital Plancher 3% + Bonus TEC10 (500K€, SUR-MESURE)',
+      '<div style="padding:10px;background:#DBEAFE;border:1px solid #93C5FD;border-radius:6px;margin-bottom:10px;font-size:12px;color:#1E40AF">' +
+      '<strong>Ce produit n\'existe pas en série.</strong> Le CIC propose une Digitale Mémoire TEC10 à 4,60% (trigger 4,40%) mais sans plancher garanti. Nous voulons combiner un plancher garanti + un bonus conditionnel.</div>' +
+      '<table style="width:100%;border-collapse:collapse;font-size:12px">' +
+      '<tr style="border-bottom:1px solid ' + B.border + '"><td style="padding:6px;color:#64748B;width:35%">Plancher garanti</td><td style="padding:6px;font-weight:700;color:#059669">3,00%/an INCONDITIONNEL (couvre emprunt 2,90%)</td></tr>' +
+      '<tr style="border-bottom:1px solid ' + B.border + ';background:' + B.row1 + '"><td style="padding:6px;color:#64748B">Bonus conditionnel</td><td style="padding:6px;font-weight:700;color:#0891B2">+3,50% si TEC10 ≤ 4,50%</td></tr>' +
+      '<tr style="border-bottom:1px solid ' + B.border + '"><td style="padding:6px;color:#64748B">Coupon total espéré</td><td style="padding:6px;font-weight:700;color:#D97706">6,50% (plancher 3% + bonus 3,5%)</td></tr>' +
+      '<tr style="border-bottom:1px solid ' + B.border + ';background:' + B.row1 + '"><td style="padding:6px;color:#64748B">Pire cas</td><td style="padding:6px;font-weight:700;color:#059669">3,00% GARANTI → carry toujours positif (+0,10% vs emprunt)</td></tr>' +
+      '<tr style="border-bottom:1px solid ' + B.border + '"><td style="padding:6px;color:#64748B">Maturité</td><td style="padding:6px"><strong>5 ou 10 ans</strong> · Capital garanti 100%</td></tr>' +
+      '<tr><td style="padding:6px;color:#64748B">Nominal</td><td style="padding:6px"><strong>500 000€</strong></td></tr>' +
+      '</table>' +
+      '<div style="margin-top:8px;font-size:11px;color:#1A202C"><strong>Argument de négo :</strong> Le plancher 3% + bonus 3,5% est équivalent en budget à une Digitale classique ~5,5% sans plancher. Le plancher nous coûte ~1% de coupon en moins mais élimine 100% du risque de portage négatif. C\'est le prix de l\'assurance.</div>' +
+      '<div style="margin-top:6px;font-size:11px;color:#64748B"><strong>À demander chez :</strong> SG (Pierre Meunier, salle de marché) · CIC (structuration) · BNPP · Natixis (via Banque Populaire)</div>');
 
-    html += _acc('cdc-marche', '📊 Nos hypothèses de marché',
-      'TEC10 = ' + _p(MR.tec10) + '% · OAT 5Y = ' + _p(MR.oat5y) + '% · Euribor 3M = ' + _p(MR.euribor3m) + '%<br>' +
-      'BCE dépôt = ' + _p(MR.bce) + '% · Courbe normale +59bp<br>' +
+    html += _acc('cdc-configs', '📦 Les 5 configurations comparées',
+      '<table style="width:100%;border-collapse:collapse;font-size:12px">' +
+      '<tr style="background:' + B.header + ';font-weight:700"><td style="padding:8px">CONFIG</td><td style="padding:8px">PRODUIT(S)</td><td style="padding:8px">COUPON</td></tr>' +
+      '<tr style="border-bottom:1px solid ' + B.border + '"><td style="padding:8px;font-weight:700">🏆 A</td><td style="padding:8px">1M€ TARN TEC10 10Y</td><td style="padding:8px;font-weight:700;color:#D97706">7,00% conditionnel</td></tr>' +
+      '<tr style="background:#E8F0FE;border-bottom:1px solid ' + B.border + '"><td style="padding:8px;font-weight:700">🎯 B</td><td style="padding:8px"><strong>500K TARN + 500K Digital Plancher</strong></td><td style="padding:8px;font-weight:700;color:#2563EB">7,00% + 6,50% ← RECOMMANDÉ</td></tr>' +
+      '<tr style="border-bottom:1px solid ' + B.border + '"><td style="padding:8px;font-weight:700">🛡️ C</td><td style="padding:8px">500K TARN + 500K Fixe Callable</td><td style="padding:8px;font-weight:700;color:#059669">7,00% + 4,40%</td></tr>' +
+      '<tr style="border-bottom:1px solid ' + B.border + ';background:' + B.row1 + '"><td style="padding:8px;font-weight:700">🔒 D</td><td style="padding:8px">1M€ Fixe Callable 10YNC3</td><td style="padding:8px;font-weight:700;color:#059669">4,40% garanti</td></tr>' +
+      '<tr><td style="padding:8px;font-weight:700">📈 E</td><td style="padding:8px">500K TARN + 500K Step-Up</td><td style="padding:8px;font-weight:700;color:#059669">7,00% + 3,50→6%</td></tr>' +
+      '</table>');
+
+    html += _acc('cdc-nego', '💪 Points de négociation',
+      '<strong>Ce qu\'on sait et qu\'on peut utiliser :</strong><br><br>' +
+      '• Le CIC propose le TARN en série à <strong>6,70%</strong> (XS3340532707). On part de là comme plancher.<br>' +
+      '• Le budget option 10Y = <strong>26,2% du nominal</strong> (~262K€ sur 1M€). La marge banque retail est ~20%. Sur sur-mesure on vise 12-15%.<br>' +
+      '• On consulte <strong>plusieurs établissements</strong> (CIC + SG + BNPP + Natixis). Le dire au banquier.<br>' +
+      '• Le nominal de <strong>500K-1M€</strong> justifie un pricing au-dessus du retail.<br>' +
+      '• La Digitale Mémoire TEC10 CIC est à 4,60% avec trigger 4,40%. Si on ajoute un plancher 3%, le bonus devrait être ~3,50% au lieu de 4,60% → total 6,50%.<br><br>' +
+      '<strong>Ce qu\'on demande :</strong><br><br>' +
+      '1. TARN TEC10 sur-mesure 500K-1M€ : <strong>quel coupon au-dessus de 6,70% ?</strong><br>' +
+      '2. Digital Plancher 3% + Bonus TEC10 ≤ 4,50% : <strong>quel bonus pouvez-vous donner ?</strong><br>' +
+      '3. Êtes-vous compétitif vs CIC/SG sur ces 2 structures ?<br>' +
+      '4. Délai de structuration et mise en place ?');
+
+    html += _acc('cdc-marche', '📊 Données de marché (à jour)',
+      'TEC10 = <strong>' + _p(MR.tec10) + '%</strong> · OAT 5Y = ' + _p(MR.oat5y) + '% · Euribor 3M = ' + _p(MR.euribor3m) + '%<br>' +
+      'BCE dépôt = ' + _p(MR.bce) + '% · Courbe normale <strong>+59bp</strong> (favorable)<br>' +
       'Régime : stagflation modérée (Brent $103, PCE 2,8%)<br><br>' +
-      '<strong>Analyse trigger 4,40%</strong> (20 ans historique) :<br>' +
-      '• TEC10 > 4,40% = 1,7% du temps (12/695 obs)<br>' +
-      '• Dernière fois : sept 2008 (18 ans sans)<br>' +
-      '• Proba forward retenue : 85-92%');
+      '<strong>Historique TEC10 (20 ans, 695 observations) :</strong><br>' +
+      '• TEC10 > 4,60% (trigger TARN) = <strong>0,3% du temps</strong> (2/695 obs) — quasi jamais<br>' +
+      '• TEC10 > 4,40% = 1,7% du temps — dernière fois <strong>sept 2008</strong><br>' +
+      '• Max historique = <strong>4,75%</strong> (juillet 2008)<br>' +
+      '• Depuis 2009, le TEC10 n\'a <strong>jamais dépassé 4,00%</strong>');
 
-    html += _acc('cdc-questions', '❓ Questions pour le banquier (11)',
-      '<strong>Pricing :</strong><br>' +
-      '1. Quel coupon TARN TEC10 sur 1M€ / 10Y / trigger 4,40% / 2 ans garantis ?<br>' +
-      '2. Quel coupon Fixe Callable sur 500K / 5Y ou 10YNC3 ?<br>' +
-      '3. Prime de taille 1M vs 500K — combien de bp ?<br>' +
-      '4. Autres structures taux capital garanti à proposer ?<br><br>' +
-      '<strong>Mécanique :</strong><br>' +
-      '5. Autocall = cumul coupons versés ou cumul théorique ?<br>' +
-      '6. Fixing TEC10 : quelle source, quelle date ?<br>' +
-      '7. Délai de mise en place ?<br>' +
-      '8. Éligible compte-titres ordinaire ?<br><br>' +
-      '<strong>Risque :</strong><br>' +
-      '9. Émetteur exact et notation ?<br>' +
-      '10. Rang de séniorité et recovery en cas de défaut ?<br>' +
-      '11. Marché secondaire disponible ?');
+    html += _acc('cdc-questions', '❓ Questions pour le banquier',
+      '<strong>Sur le TARN :</strong><br>' +
+      '1. Sur 500K-1M€ en sur-mesure, <strong>quel coupon au-dessus de 6,70%</strong> ?<br>' +
+      '2. Trigger 4,60% ou possibilité de <strong>monter à 4,80%</strong> (plus safe, même coupon) ?<br>' +
+      '3. Possibilité de <strong>3 ans garantis</strong> au lieu de 2 ?<br>' +
+      '4. Autocall = cumul des coupons <strong>effectivement versés</strong> ?<br><br>' +
+      '<strong>Sur le Digital Plancher :</strong><br>' +
+      '5. Un <strong>plancher 3% garanti + bonus digital TEC10</strong> ≤ 4,50%, c\'est faisable ?<br>' +
+      '6. Quel <strong>bonus</strong> avec un plancher 3% ? (on cible 3,50%)<br>' +
+      '7. Avec ou sans <strong>mémoire</strong> sur le bonus ?<br><br>' +
+      '<strong>Général :</strong><br>' +
+      '8. Émetteur et <strong>notation</strong> (on veut A- minimum) ?<br>' +
+      '9. <strong>Délai</strong> de mise en place (on doit signer avant 14/05) ?<br>' +
+      '10. <strong>Marché secondaire</strong> en cas de besoin de sortie anticipée ?');
 
     html += _acc('cdc-calendrier', '📅 Calendrier',
       '• Proposition emprunt SG validée : 14/04/2026<br>' +
