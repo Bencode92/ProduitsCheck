@@ -1,0 +1,147 @@
+{
+  "name": "Range Accrual Euribor Avril 2031 B",
+  "type": "range-accrual",
+  "structureType": "range_accrual",
+  "emitter": "Crédit Industriel et Commercial",
+  "guarantor": "",
+  "guarantorRating": {
+    "moodys": "A1",
+    "sp": "A+"
+  },
+  "underlyings": [
+    "Taux Euribor 3 mois"
+  ],
+  "underlyingType": "rates",
+  "currency": "EUR",
+  "maturity": "5 ans",
+  "maturityYears": 5,
+  "coupon": {
+    "rate": 5.2,
+    "rateIfCalled": null,
+    "rateIfMaturity": null,
+    "type": "conditionnel",
+    "frequency": "annuel",
+    "trigger": 3.5,
+    "memory": false,
+    "paymentTiming": "periodic"
+  },
+  "participationRate": null,
+  "guaranteedYears": 0,
+  "autocallCumulTarget": null,
+  "commissions": 1,
+  "isin": "XS3337420635",
+  "minInvestment": 10000,
+  "capitalProtection": {
+    "protected": true,
+    "level": 100,
+    "barrier": null,
+    "barrierCoupon": 3.5,
+    "barrierType": "europeenne"
+  },
+  "earlyRedemption": {
+    "possible": false,
+    "type": "none",
+    "trigger": null,
+    "frequency": "annuel",
+    "startSemester": null,
+    "stepDown": false,
+    "stepDownPct": null
+  },
+  "decrementPct": null,
+  "actualDividendYield": null,
+  "mechanism": "Coupon annuel de 5,20% calculé au prorata du nombre de jours où l'Euribor 3 mois clôture entre 1,75% et 3,50%. Capital garanti à 100% à l'échéance.",
+  "risks": [
+    "Risque de perte en capital en cours de vie",
+    "Risque de crédit émetteur",
+    "Risque de liquidité",
+    "Risque de marché",
+    "Risque de conflits d'intérêts"
+  ],
+  "summary": "Range Accrual sur Euribor 3 mois avec coupon conditionnel de 5,20% par an calculé proportionnellement au temps passé dans le corridor 1,75%-3,50%. Capital garanti à l'échéance.",
+  "aiParsed": {
+    "name": "Range Accrual Euribor Avril 2031 B",
+    "isin": "XS3337420635",
+    "structureType": "range_accrual",
+    "emitter": "Crédit Industriel et Commercial",
+    "guarantor": "",
+    "guarantorRating": {
+      "moodys": "A1",
+      "sp": "A+"
+    },
+    "underlyings": [
+      "Taux Euribor 3 mois"
+    ],
+    "underlyingType": "rates",
+    "currency": "EUR",
+    "maturity": "21 avril 2031",
+    "maturityYears": 5,
+    "coupon": {
+      "rate": 5.2,
+      "rateIfCalled": null,
+      "rateIfMaturity": null,
+      "type": "conditionnel",
+      "frequency": "annuel",
+      "trigger": null,
+      "memory": false,
+      "paymentTiming": "periodic"
+    },
+    "participationRate": null,
+    "guaranteedYears": 0,
+    "autocallCumulTarget": null,
+    "commissions": 1,
+    "capitalProtection": {
+      "protected": true,
+      "level": 100,
+      "barrier": null,
+      "barrierCoupon": 3.5,
+      "barrierType": "europeenne"
+    },
+    "earlyRedemption": {
+      "possible": false,
+      "type": "",
+      "trigger": null,
+      "frequency": "",
+      "startSemester": null,
+      "stepDown": false,
+      "stepDownPct": null,
+      "firstCallDate": null,
+      "callSchedule": []
+    },
+    "decrementPct": null,
+    "actualDividendYield": null,
+    "minInvestment": 10000,
+    "rangeAccrual": {
+      "lowerBound": 1.75,
+      "upperBound": 3.5,
+      "reference": "Taux Euribor 3 mois",
+      "observation": "daily"
+    },
+    "mechanism": "Coupon annuel de 5,20% calculé au prorata du nombre de jours où l'Euribor 3 mois clôture entre 1,75% et 3,50%. Capital garanti à 100% à l'échéance.",
+    "risks": [
+      "Risque de perte en capital en cours de vie",
+      "Risque de crédit émetteur",
+      "Risque de liquidité",
+      "Risque de marché",
+      "Risque de conflits d'intérêts"
+    ],
+    "summary": "Range Accrual sur Euribor 3 mois avec coupon conditionnel de 5,20% par an calculé proportionnellement au temps passé dans le corridor 1,75%-3,50%. Capital garanti à l'échéance.",
+    "type": "range-accrual",
+    "_parsingAlerts": []
+  },
+  "sourceFile": "XS3337420635 range Accrual Euribor avril 2031 B Brochure (1).pdf",
+  "rangeAccrual": {
+    "lowerBound": 1.75,
+    "upperBound": 3.5,
+    "reference": "Taux Euribor 3 mois",
+    "observation": "daily"
+  },
+  "investedAmount": 0,
+  "id": "sp_mo5lzuu0_y738z",
+  "bankId": "cic",
+  "status": "analyzing",
+  "receivedDate": "2026-04-19",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null
+}
