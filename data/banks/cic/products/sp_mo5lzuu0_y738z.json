@@ -143,5 +143,196 @@
   "conversation": [],
   "conversationSummary": null,
   "decision": null,
-  "decisionReason": null
+  "decisionReason": null,
+  "aiCategory": "track-taux",
+  "aiCategoryLabel": "📈 Tracker Taux",
+  "aiCategoryColor": "#FFB74D",
+  "aiOpinion": "Produit intéressant avec coupon attractif de 5,2% et protection du capital, mais le caractère conditionnel du coupon dépend probablement du maintien de l'Euribor dans une fourchette donnée (barrière non spécifiée). Le risque principal réside dans l'évolution des taux d'intérêt sur 5 ans qui pourrait compromettre le versement régulier des coupons malgré la protection du capital.",
+  "aiAnalyzedAt": "2026-04-19T10:14:27.333Z",
+  "grading": {
+    "grade": "C",
+    "score": 52,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 47,
+        "base": 57,
+        "delta": 0,
+        "reasoning": "Rendement: base 57 → -5 = 52 (En stagflation, la probabilité que l'Euribor reste sous 3.5% diminue fortement avec l'inflation persistante (PCE 2.8%) et le pétrole à 92$) | Coupon 5.2%, protégé | Barr.coupon 3.5%",
+        "_bsDelta": -10,
+        "_bs": {
+          "score": 47,
+          "probCoupon": 22.2,
+          "probExit": 0,
+          "rendementNet": 1.15,
+          "couponEffectif": 1.15,
+          "perteEsperee": 0,
+          "vols": [],
+          "matEsperee": 5,
+          "isRate": true,
+          "historicalBasis": "167 obs (2000-01→2026-03)",
+          "rateAlias": "euribor_3m",
+          "currentRate": 2.109,
+          "trigger": 3.5
+        }
+      },
+      "underlyingQuality": {
+        "score": 63,
+        "base": 68,
+        "delta": -5,
+        "reasoning": "Qualité: base 68 → -5 = 63 (Les taux courts sont très sensibles à la politique monétaire hawkish en stagflation, beta faible (0.01) mais volatilité élevée (22.5%)) | Worst: Taux Euribor 3 mois B:35"
+      },
+      "portfolioFit": {
+        "score": 57,
+        "base": 62,
+        "delta": 5,
+        "reasoning": "Fit: base 62 → +5 = 67 (Produit de taux pertinent en stagflation pour capturer la hausse des taux courts, diversification face aux actions sous pression)"
+      },
+      "riskPremium": {
+        "score": 56,
+        "base": 48,
+        "delta": -5,
+        "reasoning": "Capital garanti: spread 5.2% - CAT 2.5% - illiq 0.5% = 2.3%"
+      }
+    },
+    "verdict": "Produit inadapté au contexte de stagflation avec un coupon de 5.2% insuffisant face au risque de hausse durable de l'Euribor au-delà de 3.5%. La probabilité réelle de percevoir le coupon complet est fortement compromise avec une inflation à 2.8% et un pétrole à 92$ qui poussent les banques centrales vers des taux durablement élevés. Le risque callable ajoute une asymétrie défavorable : l'émetteur rappellera si les taux baissent mais vous restez bloqué 5 ans si l'Euribor monte.",
+    "keyRisks": [
+      "Euribor structurellement au-dessus de 3.5% en stagflation = coupons réduits ou nuls",
+      "Risque callable asymétrique : rappel si baisse des taux, mais bloqué 5 ans si hausse"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 5.2,
+        "return_eur": 5200,
+        "probability": 0.15,
+        "duration_years": 1
+      },
+      "base": {
+        "return_pct": 2.5,
+        "return_eur": 12500,
+        "probability": 0.35,
+        "duration_years": 5
+      },
+      "stress": {
+        "return_pct": 1,
+        "return_eur": 5000,
+        "probability": 0.35,
+        "duration_years": 5
+      },
+      "worst": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.15,
+        "duration_years": 5
+      }
+    },
+    "confidenceInterval": {
+      "low": 48,
+      "high": 64,
+      "halfWidth": 8,
+      "gradeStable": false,
+      "gradeRange": "C-B",
+      "label": "C [48-64]"
+    },
+    "metadata": {
+      "gradedAt": "2026-04-19T10:14:46.511Z",
+      "durationMs": 20881,
+      "aiUsed": true,
+      "version": "7.1",
+      "productType": "rate",
+      "marketDataAvailable": true,
+      "catBenchmark": 2.8,
+      "catSource": "allocator-confirmed",
+      "couponAnnualized": 5.2,
+      "couponRaw": 5.2,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": false,
+      "barrierPct": 0,
+      "barrierCouponPct": 3.5,
+      "couponProbability": 22.2,
+      "expectedMaturity": 5,
+      "maxMaturity": 5,
+      "maxBeta": 0.01,
+      "baseScore": 58,
+      "baseGrade": "C",
+      "adjustments": {
+        "p1": -5,
+        "p2": -5,
+        "p3": 5,
+        "p4": -5
+      },
+      "barrier_sigma": null,
+      "barrier_sigma_label": null,
+      "barrier_sigma_danger": null,
+      "liquidity_level": "L4",
+      "liquidity_score": 10,
+      "liquidity_label": "Illiquide",
+      "ci_low": 48,
+      "ci_high": 64,
+      "ci_label": "C [48-64]",
+      "issuer_rating": "A+",
+      "issuer_tier": "IG",
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "range_accrual",
+      "bsRendementNet": 1.15,
+      "bsProbCoupon": 22.2,
+      "bsPerteEsperee": 0,
+      "bsVols": [],
+      "bsMatEsperee": 5,
+      "isRateHistorical": true,
+      "historicalBasis": "167 obs (2000-01→2026-03)",
+      "rateAlias": "euribor_3m",
+      "currentRate": 2.109,
+      "rateTrigger": 3.5,
+      "probExit": 0,
+      "issuerCreditPenalty": 1,
+      "issuerCDS": 55,
+      "v6Weights": {
+        "p1": 0.3,
+        "p2": 0.2,
+        "p3": 0.15,
+        "p4": 0.3
+      },
+      "stockData": [
+        {
+          "name": "Taux Euribor 3 mois",
+          "ticker": "TAUX EURIBOR 3 MOIS",
+          "sector": "Commodity",
+          "volatility_3y": 22.5,
+          "max_drawdown_3y": -19.21
+        }
+      ]
+    },
+    "regimeScenarios": {
+      "current": {
+        "score": 52,
+        "grade": "C",
+        "label": "Actuel (stagflation)",
+        "desc": "Euribor dans le corridor mais BCE menaçante"
+      },
+      "bull": {
+        "score": 58,
+        "grade": "C",
+        "label": "Bull / Risk-on",
+        "delta": 6,
+        "desc": "Taux baissent → Euribor reste dans le corridor"
+      },
+      "crash": {
+        "score": 46,
+        "grade": "C",
+        "label": "Crash / Récession",
+        "delta": -6,
+        "desc": "Taux volatils → Euribor sort du corridor régulièrement"
+      }
+    }
+  },
+  "_couponProbability": 22.2,
+  "_bsRendementNet": 1.15
 }
