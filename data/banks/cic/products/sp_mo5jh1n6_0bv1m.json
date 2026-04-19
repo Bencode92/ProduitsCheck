@@ -32,8 +32,6 @@
   "capitalProtection": {
     "protected": true,
     "level": 100,
-    "barrier": null,
-    "barrierCoupon": null,
     "barrierType": "europeenne"
   },
   "earlyRedemption": {
@@ -74,7 +72,9 @@
         "amount": 100
       }
     ],
-    "firstCallDate": "20 avril 2029"
+    "firstCallDate": "20 avril 2029",
+    "hasAutocall": true,
+    "enabled": true
   },
   "decrementPct": null,
   "actualDividendYield": null,
@@ -218,5 +218,11 @@
   "conversation": [],
   "conversationSummary": null,
   "decision": null,
-  "decisionReason": null
+  "decisionReason": null,
+  "aiCategory": "capital-protege",
+  "aiCategoryLabel": "🛡️ Capital Protégé",
+  "aiCategoryColor": "#4CAF50",
+  "aiOpinion": "Produit à capital protégé offrant un rendement fixe de 4% annuel avec possibilité de remboursement anticipé, intéressant dans un contexte de taux bas mais le rendement reste modeste. La protection du capital à 100% limite les risques mais bride aussi le potentiel de performance, adapté aux profils conservateurs.",
+  "aiAnalyzedAt": "2026-04-19T09:03:51.709Z",
+  "envelope": ""
 }
