@@ -221,42 +221,42 @@
   "aiOpinion": "",
   "grading": {
     "grade": "C",
-    "score": 55,
+    "score": 56,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 65,
+        "score": 67,
         "base": 61,
-        "delta": -1,
-        "reasoning": "Rendement: base 61 → -1 = 60 (En régime stagflationniste avec BCE hawkish, la probabilité de call est très faible (20%), l'investisseur supportera probablement la duration complète de 10 ans) | Coupon 4%, protégé | Mat espérée: ~2.3a (prob mat: 1%)"
+        "delta": 1,
+        "reasoning": "Rendement: base 61 → +1 = 62 (Coupon garanti 4% vs TEC10 3.08% offre un spread solide de 92bps dans un contexte stagflationniste où les taux fixes sont privilégiés) | Coupon 4%, protégé | Mat espérée: ~2.3a (prob mat: 1%)"
       },
       "underlyingQuality": {
         "score": 75,
         "base": 76,
         "delta": -1,
-        "reasoning": "Qualité: base 76 → -1 = 75 (Spread de 92bps vs AAA 10Y insuffisant en stagflation où MI recommande TIPS et évite duration longue, risque crédit émetteur non compensé)"
+        "reasoning": "Qualité: base 76 → -1 = 75 (Régime stagflationniste avec probabilité de call faible (20%) augmente le risque de durée sur 10 ans et l'immobilisation du capital)"
       },
       "portfolioFit": {
-        "score": 54,
+        "score": 55,
         "base": 70,
-        "delta": -1,
-        "reasoning": "Fit: base 70 → -1 = 69 (Duration 10 ans inadaptée en stagflation avec volatilité taux à 14.3bps, MI privilégie TIPS et duration courte pour se protéger de l'inflation persistante)"
+        "delta": 1,
+        "reasoning": "Fit: base 70 → +1 = 71 (Produit taux fixe très pertinent en stagflation selon MI, offre protection contre volatilité avec rendement prévisible supérieur aux taux sans risque)"
       },
       "riskPremium": {
         "score": 41,
         "base": 29,
-        "delta": 0,
+        "delta": -1,
         "reasoning": "Capital garanti: spread 4.0% - CAT 2.5% - illiq 0.7% = 0.8%"
       }
     },
-    "verdict": "Produit inadapté au contexte stagflationniste actuel. Le coupon de 4% offre seulement 92bps au-dessus du taux AAA 10Y (3.075%) pour une duration de 10 ans et un risque crédit émetteur non précisé. Avec une probabilité de call de seulement 20% en environnement hawkish et inflation à 2.8%, l'investisseur sera probablement immobilisé 10 ans alors que le MI recommande les TIPS et évite la duration longue. Le rendement réel après inflation est quasi-nul (4% - 2.8% = 1.2%).",
+    "verdict": "Produit taux fixe offrant 4% annuel garanti, attractif avec un spread de 92bps au-dessus du TEC10 (3.08%) dans un contexte stagflationniste favorable aux obligations investment grade. La faible probabilité de call (20%) sous régime hawkish prolonge l'exposition à 10 ans, maximisant le rendement total mais immobilisant le capital. Principal risque reste le crédit émetteur sur une duration longue avec DV01 élevé (~10bps par 1% de hausse des taux).",
     "keyRisks": [
-      "Duration 10 ans = perte de -10% si taux +100bps en stagflation",
-      "Risque crédit émetteur non spécifié pour seulement +92bps vs AAA",
-      "Inflation à 2.8% érode le rendement réel à 1.2% seulement"
+      "Risque crédit émetteur sur 10 ans sans notation précisée",
+      "Risque de duration élevé (DV01 ~10bps) si taux montent en stagflation",
+      "Risque d'immobilisation du capital avec faible probabilité de call (20%)"
     ],
     "negotiationPoints": [],
     "scenarios": {
@@ -273,29 +273,29 @@
         "duration_years": 10
       },
       "stress": {
-        "return_pct": 2,
-        "return_eur": 20000,
+        "return_pct": 2.5,
+        "return_eur": 25000,
         "probability": 0.2,
         "duration_years": 10
       },
       "worst": {
-        "return_pct": -20,
-        "return_eur": -20000,
+        "return_pct": -10,
+        "return_eur": -10000,
         "probability": 0.1,
         "duration_years": 1
       }
     },
     "confidenceInterval": {
-      "low": 49,
-      "high": 67,
+      "low": 50,
+      "high": 68,
       "halfWidth": 9,
       "gradeStable": false,
       "gradeRange": "C-B",
-      "label": "C [49-67]"
+      "label": "C [50-68]"
     },
     "metadata": {
-      "gradedAt": "2026-04-19T09:13:09.317Z",
-      "durationMs": 21351,
+      "gradedAt": "2026-04-19T09:13:18.022Z",
+      "durationMs": 20580,
       "aiUsed": true,
       "version": "7.1",
       "productType": "taux_fixe",
@@ -318,10 +318,10 @@
       "baseScore": 59,
       "baseGrade": "C",
       "adjustments": {
-        "p1": -1,
+        "p1": 1,
         "p2": -1,
-        "p3": -1,
-        "p4": 0
+        "p3": 1,
+        "p4": -1
       },
       "barrier_sigma": null,
       "barrier_sigma_label": null,
@@ -329,9 +329,9 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Callable LT",
-      "ci_low": 49,
-      "ci_high": 67,
-      "ci_label": "C [49-67]",
+      "ci_low": 50,
+      "ci_high": 68,
+      "ci_label": "C [50-68]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
@@ -348,13 +348,13 @@
     },
     "regimeScenarios": {
       "current": {
-        "score": 55,
+        "score": 56,
         "grade": "C",
         "label": "Actuel (stagflation)",
         "desc": "Call unlikely (20%) → coupon garanti sur la durée"
       },
       "bull": {
-        "score": 60,
+        "score": 61,
         "grade": "B",
         "label": "Bull / Risk-on",
         "delta": 5,
@@ -364,7 +364,7 @@
         "score": 49,
         "grade": "C",
         "label": "Crash / Récession",
-        "delta": -6,
+        "delta": -7,
         "desc": "Taux montent → pas de call, coupon garanti = atout"
       }
     }
