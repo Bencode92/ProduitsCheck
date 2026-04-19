@@ -137,5 +137,183 @@
   "aiCategoryColor": "#4CAF50",
   "aiOpinion": "Produit offrant un rendement attractif de 4,6% annuel avec protection totale du capital, idéal pour les investisseurs averses au risque cherchant un revenu régulier. Le mécanisme mémoire permet de récupérer les coupons non versés, mais la performance reste limitée à l'évolution du TEC 10 sans potentiel d'appréciation du capital.",
   "aiAnalyzedAt": "2026-04-19T10:08:41.739Z",
-  "envelope": ""
+  "envelope": "",
+  "grading": {
+    "grade": "C",
+    "score": 57,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 72,
+        "base": 46,
+        "delta": 0,
+        "reasoning": "Rendement: base 46 → -5 = 41 (En stagflation avec Brent à $92, la volatilité des taux longs augmente fortement, réduisant la probabilité de toucher le coupon fixe si TEC10 > 4.4%) | Coupon 4.6%, protégé | Barr.coupon 4.4%",
+        "_bsDelta": 21,
+        "_bs": {
+          "score": 67,
+          "probCoupon": 98,
+          "probExit": 0,
+          "rendementNet": 4.51,
+          "couponEffectif": 4.51,
+          "perteEsperee": 0,
+          "vols": [],
+          "matEsperee": 5,
+          "isRate": true,
+          "historicalBasis": "695 obs (2004-09-06→2026-04-16)",
+          "rateAlias": "oat_fr_10y",
+          "currentRate": 3.075,
+          "trigger": 4.4
+        }
+      },
+      "underlyingQuality": {
+        "score": 63,
+        "base": 68,
+        "delta": -5,
+        "reasoning": "Qualité: base 68 → -5 = 63 (TEC10 sensible à l'inflation persistante (PCE 2.8%), la pentification de la courbe (+53bps) suggère des taux longs sous pression haussière)"
+      },
+      "portfolioFit": {
+        "score": 60,
+        "base": 80,
+        "delta": 5,
+        "reasoning": "Fit: base 80 → +5 = 85 (En stagflation, un produit à capital garanti avec coupon fixe 4.6% offre une protection attractive vs actions et obligations classiques)"
+      },
+      "riskPremium": {
+        "score": 47,
+        "base": 41,
+        "delta": 0,
+        "reasoning": "Capital garanti: spread 4.6% - CAT 2.5% - illiq 0.5% = 1.6%"
+      }
+    },
+    "verdict": "Produit défensif adapté au régime stagflationniste actuel avec capital garanti et coupon fixe 4.6%, mais la barrière à 4.4% devient contraignante avec TEC10 actuellement sous pression haussière (pentification +53bps). La probabilité de non-versement du coupon augmente significativement si l'inflation reste collante (PCE 2.8% vs target 2%), scenario renforcé par le Brent à $92. Score final ajusté à 52/100 reflète un produit correct mais risqué dans ce contexte de taux longs volatils.",
+    "keyRisks": [
+      "TEC10 > 4.4% = perte totale du coupon dans un contexte de hausse probable des taux longs",
+      "Risque de call anticipé si les taux baissent, limitant le rendement total",
+      "Inflation persistante (PCE 2.8%) pousse les taux longs à la hausse, menaçant le coupon"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 23,
+        "return_eur": 23000,
+        "probability": 0.2,
+        "duration_years": 5
+      },
+      "base": {
+        "return_pct": 9.2,
+        "return_eur": 9200,
+        "probability": 0.35,
+        "duration_years": 2
+      },
+      "stress": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.3,
+        "duration_years": 5
+      },
+      "worst": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.15,
+        "duration_years": 5
+      }
+    },
+    "confidenceInterval": {
+      "low": 46,
+      "high": 64,
+      "halfWidth": 9,
+      "gradeStable": false,
+      "gradeRange": "C-B",
+      "label": "C [46-64]"
+    },
+    "metadata": {
+      "gradedAt": "2026-04-19T10:09:09.486Z",
+      "durationMs": 22001,
+      "aiUsed": true,
+      "version": "7.1",
+      "productType": "rate",
+      "marketDataAvailable": false,
+      "catBenchmark": 2.8,
+      "catSource": "allocator-confirmed",
+      "couponAnnualized": 4.6,
+      "couponRaw": 4.6,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": false,
+      "barrierPct": 0,
+      "barrierCouponPct": 4.4,
+      "couponProbability": 98,
+      "expectedMaturity": 5,
+      "maxMaturity": 5,
+      "maxBeta": null,
+      "baseScore": 57,
+      "baseGrade": "C",
+      "adjustments": {
+        "p1": -5,
+        "p2": -5,
+        "p3": 5,
+        "p4": 0
+      },
+      "barrier_sigma": null,
+      "barrier_sigma_label": null,
+      "barrier_sigma_danger": null,
+      "liquidity_level": "L4",
+      "liquidity_score": 10,
+      "liquidity_label": "Illiquide",
+      "ci_low": 46,
+      "ci_high": 64,
+      "ci_label": "C [46-64]",
+      "issuer_rating": "A+",
+      "issuer_tier": "IG",
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "digitale_memoire",
+      "bsRendementNet": 4.51,
+      "bsProbCoupon": 98,
+      "bsPerteEsperee": 0,
+      "bsVols": [],
+      "bsMatEsperee": 5,
+      "isRateHistorical": true,
+      "historicalBasis": "695 obs (2004-09-06→2026-04-16)",
+      "rateAlias": "oat_fr_10y",
+      "currentRate": 3.075,
+      "rateTrigger": 4.4,
+      "probExit": 0,
+      "issuerCreditPenalty": 1,
+      "issuerCDS": 55,
+      "v6Weights": {
+        "p1": 0.3,
+        "p2": 0.2,
+        "p3": 0.15,
+        "p4": 0.3
+      }
+    },
+    "regimeScenarios": {
+      "current": {
+        "score": 57,
+        "grade": "C",
+        "label": "Actuel (stagflation)",
+        "desc": "Seuil menacé mais mémoire rattrape les coupons"
+      },
+      "bull": {
+        "score": 63,
+        "grade": "B",
+        "label": "Bull / Risk-on",
+        "delta": 6,
+        "desc": "Taux baissent sous le seuil → coupons + rattrapage"
+      },
+      "crash": {
+        "score": 51,
+        "grade": "C",
+        "label": "Crash / Récession",
+        "delta": -6,
+        "desc": "Taux au-dessus du seuil → 0% coupon (mémoire active)"
+      }
+    }
+  },
+  "_couponProbability": 98,
+  "_bsRendementNet": 4.51
 }
