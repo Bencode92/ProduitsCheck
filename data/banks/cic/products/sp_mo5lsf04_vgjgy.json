@@ -1,0 +1,134 @@
+{
+  "name": "Digitale Mémoire TEC10 Avril 2031",
+  "type": "digitale_memoire",
+  "structureType": "digitale_memoire",
+  "emitter": "Crédit Industriel et Commercial",
+  "guarantor": "",
+  "guarantorRating": {
+    "moodys": "Aa3",
+    "sp": "A+"
+  },
+  "underlyings": [
+    "TEC 10"
+  ],
+  "underlyingType": "single-index",
+  "currency": "EUR",
+  "maturity": "5 ans",
+  "maturityYears": 5,
+  "coupon": {
+    "rate": 4.6,
+    "rateIfCalled": null,
+    "rateIfMaturity": null,
+    "type": "conditionnel",
+    "frequency": "annuel",
+    "trigger": 4.4,
+    "memory": true,
+    "paymentTiming": "periodic"
+  },
+  "participationRate": null,
+  "guaranteedYears": 0,
+  "autocallCumulTarget": null,
+  "commissions": 1.25,
+  "isin": "XS3338270427",
+  "minInvestment": 10000,
+  "capitalProtection": {
+    "protected": true,
+    "level": 100,
+    "barrier": null,
+    "barrierCoupon": 4.4,
+    "barrierType": "europeenne"
+  },
+  "earlyRedemption": {
+    "possible": false,
+    "type": "none",
+    "trigger": null,
+    "frequency": "annuel",
+    "startSemester": null,
+    "stepDown": false,
+    "stepDownPct": null
+  },
+  "decrementPct": null,
+  "actualDividendYield": null,
+  "mechanism": "Coupon conditionnel de 4,60% si TEC 10 ≤ 4,40% avec mémoire des coupons non versés. Capital garanti à l'échéance.",
+  "risks": [
+    "Risque de perte en capital en cours de vie",
+    "Risque de marché",
+    "Risque de crédit de l'émetteur",
+    "Risque de liquidité",
+    "Plafonnement du gain potentiel"
+  ],
+  "summary": "Produit à capital garanti à l'échéance offrant un coupon annuel de 4,60% si l'indice TEC 10 est inférieur ou égal à 4,40%. Les coupons non versés sont mémorisés et peuvent être versés ultérieurement. Durée 5 ans.",
+  "aiParsed": {
+    "name": "Digitale Mémoire TEC10 Avril 2031",
+    "isin": "XS3338270427",
+    "structureType": "digitale_memoire",
+    "emitter": "Crédit Industriel et Commercial",
+    "guarantor": "",
+    "guarantorRating": {
+      "moodys": "Aa3",
+      "sp": "A+"
+    },
+    "underlyings": [
+      "TEC 10"
+    ],
+    "underlyingType": "single-index",
+    "currency": "EUR",
+    "maturity": "21 avril 2031",
+    "maturityYears": 5,
+    "coupon": {
+      "rate": 4.6,
+      "rateIfCalled": null,
+      "rateIfMaturity": null,
+      "type": "conditionnel",
+      "frequency": "annuel",
+      "trigger": 4.4,
+      "memory": true,
+      "paymentTiming": "periodic"
+    },
+    "participationRate": null,
+    "guaranteedYears": 0,
+    "autocallCumulTarget": null,
+    "commissions": 1.25,
+    "capitalProtection": {
+      "protected": true,
+      "level": 100,
+      "barrier": null,
+      "barrierCoupon": 4.4,
+      "barrierType": "europeenne"
+    },
+    "earlyRedemption": {
+      "possible": false,
+      "type": "",
+      "trigger": null,
+      "frequency": "",
+      "startSemester": null,
+      "stepDown": false,
+      "stepDownPct": null,
+      "firstCallDate": null,
+      "callSchedule": []
+    },
+    "decrementPct": null,
+    "actualDividendYield": null,
+    "minInvestment": 10000,
+    "mechanism": "Coupon conditionnel de 4,60% si TEC 10 ≤ 4,40% avec mémoire des coupons non versés. Capital garanti à l'échéance.",
+    "risks": [
+      "Risque de perte en capital en cours de vie",
+      "Risque de marché",
+      "Risque de crédit de l'émetteur",
+      "Risque de liquidité",
+      "Plafonnement du gain potentiel"
+    ],
+    "summary": "Produit à capital garanti à l'échéance offrant un coupon annuel de 4,60% si l'indice TEC 10 est inférieur ou égal à 4,40%. Les coupons non versés sont mémorisés et peuvent être versés ultérieurement. Durée 5 ans.",
+    "_parsingAlerts": []
+  },
+  "sourceFile": "XS3338270427 Digitale Mémoire TEC10 Avril 2031 Brochure (1).pdf",
+  "investedAmount": 0,
+  "id": "sp_mo5lsf04_vgjgy",
+  "bankId": "cic",
+  "status": "analyzing",
+  "receivedDate": "2026-04-19",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null
+}
