@@ -25,6 +25,8 @@ var STRUCTURE_TYPES = [
     { id: 'reverse', label: 'Reverse convertible' },
     { id: 'participation', label: 'Participation / Bonus' },
     { id: 'twin_win', label: 'Twin-Win' },
+    { id: 'fonds_obligataire', label: 'Fonds obligataire / OPCVM' },
+    { id: 'etf', label: 'ETF / Tracker' },
     { id: 'other', label: 'Autre' }
 ];
 

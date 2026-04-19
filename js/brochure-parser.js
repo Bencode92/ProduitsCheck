@@ -122,7 +122,9 @@
     { v: 'dispersion', l: 'Dispersion' },
     { v: 'basket', l: 'Panier équipondéré' },
     { v: 'reverse', l: 'Reverse convertible' },
-    { v: 'phoenix_memoire', l: 'Phoenix à mémoire' }
+    { v: 'phoenix_memoire', l: 'Phoenix à mémoire' },
+    { v: 'fonds_obligataire', l: 'Fonds obligataire / OPCVM' },
+    { v: 'etf', l: 'ETF / Tracker' }
   ];
 
   var UND_TYPES = ['single-stock', 'single-index', 'worst-of', 'basket', 'pairs', 'rates', 'none'];
@@ -157,8 +159,11 @@
     { v: 'autocall', l: '⚡ Autocall / Phoenix' },
     { v: 'phoenix_memoire', l: '🦅 Phoenix à mémoire' },
     { v: 'range_accrual', l: '📊 Range Accrual' },
+    { v: 'basket', l: '🧺 Panier équipondéré' },
     { v: 'dispersion', l: '🔀 Dispersion / Perf. relative' },
-    { v: 'reverse', l: '🔄 Reverse convertible' }
+    { v: 'reverse', l: '🔄 Reverse convertible' },
+    { v: 'fonds_obligataire', l: '💶 Fonds obligataire / OPCVM' },
+    { v: 'etf', l: '📈 ETF / Tracker' }
   ];
 
   function esc(s) { return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
