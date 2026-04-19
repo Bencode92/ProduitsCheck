@@ -1,0 +1,175 @@
+{
+  "name": "Autocall Euro Stoxx Banks Avril 2031",
+  "type": "autocall",
+  "structureType": "autocall",
+  "emitter": "Crédit Industriel et Commercial",
+  "guarantor": "",
+  "guarantorRating": {
+    "moodys": "A1",
+    "sp": "A+"
+  },
+  "underlyings": [
+    "Euro Stoxx Banks"
+  ],
+  "underlyingType": "single-index",
+  "currency": "EUR",
+  "maturity": "5 ans",
+  "maturityYears": 5,
+  "coupon": {
+    "rate": 4.85,
+    "rateIfCalled": null,
+    "rateIfMaturity": null,
+    "type": "conditionnel",
+    "frequency": "semestriel",
+    "trigger": 100,
+    "memory": false,
+    "paymentTiming": "periodic"
+  },
+  "participationRate": null,
+  "guaranteedYears": 0,
+  "autocallCumulTarget": null,
+  "commissions": 2.8,
+  "isin": "FR0014016MA5",
+  "minInvestment": 1000,
+  "capitalProtection": {
+    "protected": false,
+    "level": null,
+    "barrier": 60,
+    "barrierCoupon": 100,
+    "barrierType": "europeenne"
+  },
+  "earlyRedemption": {
+    "possible": true,
+    "type": "autocall",
+    "trigger": 100,
+    "frequency": "semestriel",
+    "startSemester": 2,
+    "stepDown": false,
+    "stepDownPct": null
+  },
+  "decrementPct": null,
+  "actualDividendYield": null,
+  "mechanism": "Remboursement automatique anticipé possible chaque semestre à partir du 2ème semestre si l'indice est stable ou en hausse par rapport à son niveau initial, avec gain de 4,85% par semestre écoulé. À l'échéance: gain de 48,50% si baisse ≤20%, remboursement intégral si baisse entre 20% et 40%, perte proportionnelle si baisse >40%.",
+  "risks": [
+    "Risque de perte partielle ou totale en capital",
+    "Risque lié au sous-jacent",
+    "Risques de marché",
+    "Risque de liquidité",
+    "Risque de crédit",
+    "Risque de conflits d'intérêts",
+    "Risque lié à l'inflation"
+  ],
+  "summary": "Autocall sur indice Euro Stoxx Banks avec remboursement automatique anticipé possible chaque semestre dès le 2ème semestre si l'indice est ≥100% de son niveau initial. Gain de 4,85% par semestre écoulé. Protection partielle du capital avec barrière à 60% du niveau initial.",
+  "aiParsed": {
+    "name": "Autocall Euro Stoxx Banks Avril 2031",
+    "isin": "FR0014016MA5",
+    "structureType": "autocall",
+    "emitter": "Crédit Industriel et Commercial",
+    "guarantor": "",
+    "guarantorRating": {
+      "moodys": "A1",
+      "sp": "A+"
+    },
+    "underlyings": [
+      "Euro Stoxx Banks"
+    ],
+    "underlyingType": "single-index",
+    "currency": "EUR",
+    "maturity": "28 avril 2031",
+    "maturityYears": 5,
+    "coupon": {
+      "rate": 4.85,
+      "rateIfCalled": null,
+      "rateIfMaturity": null,
+      "type": "conditionnel",
+      "frequency": "semestriel",
+      "trigger": 100,
+      "memory": false,
+      "paymentTiming": "periodic"
+    },
+    "participationRate": null,
+    "guaranteedYears": 0,
+    "autocallCumulTarget": null,
+    "commissions": 2.8,
+    "capitalProtection": {
+      "protected": false,
+      "level": null,
+      "barrier": 60,
+      "barrierCoupon": 100,
+      "barrierType": "europeenne"
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "autocall",
+      "trigger": 100,
+      "frequency": "semestriel",
+      "startSemester": 2,
+      "stepDown": false,
+      "stepDownPct": null,
+      "firstCallDate": "13/04/2027",
+      "callSchedule": [
+        {
+          "date": "27/04/2027",
+          "amount": 109.7
+        },
+        {
+          "date": "27/10/2027",
+          "amount": 114.55
+        },
+        {
+          "date": "27/04/2028",
+          "amount": 119.4
+        },
+        {
+          "date": "27/10/2028",
+          "amount": 124.25
+        },
+        {
+          "date": "27/04/2029",
+          "amount": 129.1
+        },
+        {
+          "date": "29/10/2029",
+          "amount": 133.95
+        },
+        {
+          "date": "29/04/2030",
+          "amount": 138.8
+        },
+        {
+          "date": "28/10/2030",
+          "amount": 143.65
+        },
+        {
+          "date": "28/04/2031",
+          "amount": 148.5
+        }
+      ]
+    },
+    "decrementPct": null,
+    "actualDividendYield": null,
+    "minInvestment": 1000,
+    "mechanism": "Remboursement automatique anticipé possible chaque semestre à partir du 2ème semestre si l'indice est stable ou en hausse par rapport à son niveau initial, avec gain de 4,85% par semestre écoulé. À l'échéance: gain de 48,50% si baisse ≤20%, remboursement intégral si baisse entre 20% et 40%, perte proportionnelle si baisse >40%.",
+    "risks": [
+      "Risque de perte partielle ou totale en capital",
+      "Risque lié au sous-jacent",
+      "Risques de marché",
+      "Risque de liquidité",
+      "Risque de crédit",
+      "Risque de conflits d'intérêts",
+      "Risque lié à l'inflation"
+    ],
+    "summary": "Autocall sur indice Euro Stoxx Banks avec remboursement automatique anticipé possible chaque semestre dès le 2ème semestre si l'indice est ≥100% de son niveau initial. Gain de 4,85% par semestre écoulé. Protection partielle du capital avec barrière à 60% du niveau initial.",
+    "_parsingAlerts": []
+  },
+  "sourceFile": "Brochure_Autocall_Euro_Stoxx_Banks_Avril_2031 (1).pdf",
+  "investedAmount": 0,
+  "id": "sp_mo5m5hco_jhq25",
+  "bankId": "cic",
+  "status": "analyzing",
+  "receivedDate": "2026-04-19",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null
+}
