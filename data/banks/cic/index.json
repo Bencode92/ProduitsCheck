@@ -1,7 +1,7 @@
 {
   "bankId": "cic",
   "bankName": "CIC",
-  "lastUpdated": "2026-04-09T12:22:44.464Z",
+  "lastUpdated": "2026-04-19T08:48:26.623Z",
   "products": [
     {
       "id": "sp_mnd7l0nm_d9zlp",
@@ -36,14 +36,6 @@
       "receivedDate": "2026-04-03"
     },
     {
-      "id": "sp_mnrek3u9_b3fvs",
-      "name": "Callable 10YNC3&1 Avril 2036 B",
-      "type": "taux_fixe",
-      "status": "analyzing",
-      "score": null,
-      "receivedDate": "2026-04-09"
-    },
-    {
       "id": "sp_mnrfkyrb_ccjm6",
       "name": "Callable In Fine 10YNC4&1 Avril 2036",
       "type": "taux_fixe_in_fine",
@@ -54,7 +46,7 @@
     {
       "id": "sp_mnrg6fhs_4opaz",
       "name": "TARN TEC 10 Avril 2036 B",
-      "type": "range_accrual",
+      "type": "capital_garanti",
       "status": "analyzing",
       "score": null,
       "receivedDate": "2026-04-09"
