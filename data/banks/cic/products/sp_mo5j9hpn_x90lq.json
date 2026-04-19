@@ -1,0 +1,153 @@
+{
+  "name": "Callable 10YNC3&1 Avril 2036 B",
+  "type": "taux-fixe",
+  "structureType": "taux_fixe",
+  "emitter": "",
+  "guarantor": "",
+  "guarantorRating": {
+    "moodys": "A1",
+    "sp": "A+"
+  },
+  "underlyings": [],
+  "underlyingType": "single-index",
+  "currency": "EUR",
+  "maturity": "5 ans",
+  "maturityYears": 5,
+  "coupon": {
+    "rate": null,
+    "rateIfCalled": null,
+    "rateIfMaturity": null,
+    "type": "fixe",
+    "frequency": "annuel",
+    "trigger": null,
+    "memory": false,
+    "paymentTiming": "periodic"
+  },
+  "participationRate": null,
+  "guaranteedYears": 10,
+  "autocallCumulTarget": null,
+  "commissions": 1.3,
+  "isin": "XS3340532459",
+  "minInvestment": null,
+  "capitalProtection": {
+    "protected": false,
+    "level": null,
+    "barrier": null,
+    "barrierCoupon": null,
+    "barrierType": "europeenne"
+  },
+  "earlyRedemption": {
+    "possible": false,
+    "type": "none",
+    "trigger": null,
+    "frequency": "annuel",
+    "startSemester": null,
+    "stepDown": false,
+    "stepDownPct": null
+  },
+  "decrementPct": null,
+  "actualDividendYield": null,
+  "mechanism": "",
+  "risks": [],
+  "summary": "Titre de créance callable offrant un coupon fixe garanti de 4% par an pendant 10 ans maximum, avec possibilité de remboursement anticipé par l'émetteur à partir de la 3ème année et garantie du capital à l'échéance",
+  "aiParsed": {
+    "name": "Callable 10YNC3&1 Avril 2036 B",
+    "isin": "XS3340532459",
+    "structureType": "taux_fixe",
+    "emitter": "Crédit Industriel et Commercial",
+    "guarantor": "",
+    "guarantorRating": {
+      "moodys": "A1",
+      "sp": "A+"
+    },
+    "underlyings": [],
+    "underlyingType": "none",
+    "currency": "EUR",
+    "maturity": "21 avril 2036",
+    "maturityYears": 10,
+    "coupon": {
+      "rate": 4,
+      "rateIfCalled": null,
+      "rateIfMaturity": null,
+      "type": "fixe",
+      "frequency": "annuel",
+      "trigger": null,
+      "memory": false,
+      "paymentTiming": "periodic"
+    },
+    "participationRate": null,
+    "guaranteedYears": 10,
+    "autocallCumulTarget": null,
+    "commissions": 1.3,
+    "capitalProtection": {
+      "protected": true,
+      "level": 100,
+      "barrier": null,
+      "barrierCoupon": null,
+      "barrierType": "europeenne"
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "callable",
+      "trigger": null,
+      "frequency": "annuel",
+      "startSemester": 6,
+      "stepDown": false,
+      "stepDownPct": null,
+      "firstCallDate": "20/04/2029",
+      "callSchedule": [
+        {
+          "date": "20/04/2029",
+          "amount": "100% + coupon 4%"
+        },
+        {
+          "date": "23/04/2030",
+          "amount": "100% + coupon 4%"
+        },
+        {
+          "date": "21/04/2031",
+          "amount": "100% + coupon 4%"
+        },
+        {
+          "date": "20/04/2032",
+          "amount": "100% + coupon 4%"
+        },
+        {
+          "date": "20/04/2033",
+          "amount": "100% + coupon 4%"
+        },
+        {
+          "date": "20/04/2034",
+          "amount": "100% + coupon 4%"
+        },
+        {
+          "date": "20/04/2035",
+          "amount": "100% + coupon 4%"
+        }
+      ]
+    },
+    "decrementPct": null,
+    "actualDividendYield": null,
+    "minInvestment": 100000,
+    "mechanism": "Produit callable : coupon fixe garanti de 4% par an, remboursement anticipé possible à partir de l'année 3 à la discrétion de l'émetteur à 100% plus dernier coupon, capital garanti à l'échéance",
+    "risks": [
+      "Risque de perte en capital en cours de vie",
+      "Risque de crédit de l'émetteur",
+      "Risque de liquidité",
+      "Risque de réinvestissement",
+      "Risque d'inflation"
+    ],
+    "summary": "Titre de créance callable offrant un coupon fixe garanti de 4% par an pendant 10 ans maximum, avec possibilité de remboursement anticipé par l'émetteur à partir de la 3ème année et garantie du capital à l'échéance",
+    "_parsingAlerts": []
+  },
+  "sourceFile": "Brochure XS3340532459 Callable 10YNC3&1 Avril 2036 B (1).pdf",
+  "investedAmount": 0,
+  "id": "sp_mo5j9hpn_x90lq",
+  "bankId": "cic",
+  "status": "analyzing",
+  "receivedDate": "2026-04-19",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null
+}
