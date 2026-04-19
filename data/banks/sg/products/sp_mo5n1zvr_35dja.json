@@ -16,14 +16,13 @@
   "maturity": "5 ans",
   "maturityYears": 5,
   "coupon": {
-    "rate": 4.5,
-    "rateIfCalled": null,
-    "rateIfMaturity": null,
+    "rate": 9,
+    "frequency": "annuel",
+    "annualized": true,
     "type": "conditionnel",
-    "frequency": "semestriel",
-    "trigger": 95,
     "memory": true,
-    "paymentTiming": "periodic"
+    "paymentTiming": "periodic",
+    "trigger": 95
   },
   "participationRate": null,
   "guaranteedYears": 0,
@@ -136,5 +135,214 @@
   "conversation": [],
   "conversationSummary": null,
   "decision": null,
-  "decisionReason": null
+  "decisionReason": null,
+  "_freqFixApplied": true,
+  "aiCategory": "autocall-mono",
+  "aiCategoryLabel": "⚡ Autocall Mono-actif",
+  "aiCategoryColor": "#06D6A0",
+  "aiOpinion": "Produit offrant un rendement attractif de 9% annuel avec effet mémoire sur un secteur spécialisé (mines d'or), mais présentant un risque significatif sans protection du capital. La barrière relativement basse à 50% et le seuil d'autocall élevé à 95% créent un profil risque/rendement déséquilibré, particulièrement sur un sous-jacent sectoriel volatil.",
+  "aiAnalyzedAt": "2026-04-19T10:44:07.272Z",
+  "grading": {
+    "grade": "D",
+    "score": 33,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 10,
+        "base": 53,
+        "delta": 0,
+        "reasoning": "Rendement: base 53 → +10 = 63 (En stagflation, l'or (gold miners) surperforme historiquement comme hedge inflation, augmentant la probabilité de toucher les coupons à 95%) | Coupon 9%, barrière 50% | Barr.coupon 95% | Mat espérée: ~2.5a (prob mat: 1%)",
+        "_bsDelta": -48,
+        "_bs": {
+          "score": 5,
+          "probCoupon": 49.1,
+          "rendementNet": -8.09,
+          "perteEsperee": 8.47,
+          "couponEffectif": 9,
+          "vols": [
+            39.27
+          ],
+          "matEsperee": 2.5,
+          "isBasket": false
+        }
+      },
+      "underlyingQuality": {
+        "score": 55,
+        "base": 40,
+        "delta": 15,
+        "reasoning": "Qualité: base 40 → +15 = 55 (Gold miners bénéficient directement du régime stagflationniste (Brent $92, PCE 2.8%), beta défensif 0.51 et corrélation inverse aux secteurs tech/cycliques évités) | Worst: Indice Solactive GDX EUR AR 5% B:35"
+      },
+      "portfolioFit": {
+        "score": 58,
+        "base": 80,
+        "delta": 5,
+        "reasoning": "Fit: base 80 → +5 = 85 (Diversification optimale en portefeuille stagflationniste, l'or agit comme protection contre l'inflation persistante et la faiblesse du dollar (EUR/USD 1.18))"
+      },
+      "riskPremium": {
+        "score": 34,
+        "base": 0,
+        "delta": 0,
+        "reasoning": "Capital garanti: spread 9.0% - CAT 2.5% - illiq 0.5% = 6.0%"
+      }
+    },
+    "verdict": "Produit particulièrement adapté au régime stagflationniste actuel. Les gold miners profitent directement de l'inflation élevée (PCE 2.8%) et du pétrole à $92, avec un beta défensif de 0.51 qui limite la corrélation aux secteurs évités (tech -1.2%, financials -1.6%). Le coupon de 9% avec barrière à 95% offre un rendement attractif dans un contexte où les TIPS sont privilégiés et le HY évité. La maturité moyenne espérée de 2.5 ans permet de capturer le cycle inflationniste sans s'exposer excessivement au risque de duration.",
+    "keyRisks": [
+      "Correction brutale du pétrole sous $80 qui réduirait l'attrait refuge de l'or",
+      "Hausse surprise des taux réels si la Fed devient plus hawkish face au PCE persistant à 2.8%",
+      "Barrière à 0.79σ (Danger) — vol 39.27%"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 9,
+        "return_eur": 9000,
+        "probability": 0.4,
+        "duration_years": 1
+      },
+      "base": {
+        "return_pct": 9,
+        "return_eur": 22500,
+        "probability": 0.35,
+        "duration_years": 2.5
+      },
+      "stress": {
+        "return_pct": 4.5,
+        "return_eur": 22500,
+        "probability": 0.2,
+        "duration_years": 5
+      },
+      "worst": {
+        "return_pct": -15,
+        "return_eur": -15000,
+        "probability": 0.05,
+        "duration_years": 5
+      }
+    },
+    "confidenceInterval": {
+      "low": 40,
+      "high": 60,
+      "halfWidth": 10,
+      "gradeStable": false,
+      "gradeRange": "D-B",
+      "label": "C [40-60]"
+    },
+    "metadata": {
+      "gradedAt": "2026-04-19T10:45:31.712Z",
+      "durationMs": 24961,
+      "aiUsed": true,
+      "version": "7.1",
+      "productType": "autocall",
+      "marketDataAvailable": true,
+      "catBenchmark": 2.8,
+      "catSource": "allocator-confirmed",
+      "couponAnnualized": 9,
+      "couponRaw": 9,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": true,
+      "barrierPct": 50,
+      "barrierCouponPct": 95,
+      "couponProbability": 49.1,
+      "expectedMaturity": 2.5,
+      "maxMaturity": 5,
+      "probReachMaturity": 1,
+      "maxBeta": 0.51,
+      "baseScore": 42,
+      "baseGrade": "D",
+      "adjustments": {
+        "p1": 10,
+        "p2": 15,
+        "p3": 5,
+        "p4": 0
+      },
+      "barrier_sigma": 0.79,
+      "barrier_sigma_label": "Danger",
+      "barrier_sigma_danger": true,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Rappelable 12M",
+      "ci_low": 40,
+      "ci_high": 60,
+      "ci_label": "C [40-60]",
+      "issuer_rating": "A",
+      "issuer_tier": "IG",
+      "hasDecrement": true,
+      "decrementDrag": 4.03,
+      "structureType": "autocall",
+      "bsRendementNet": -8.09,
+      "bsProbCoupon": 49.1,
+      "bsPerteEsperee": 8.47,
+      "bsVols": [
+        39.27
+      ],
+      "bsMatEsperee": 2.5,
+      "isBasket": false,
+      "issuerCreditPenalty": 1,
+      "issuerCDS": 70,
+      "v6Weights": {
+        "p1": 0.3,
+        "p2": 0.2,
+        "p3": 0.15,
+        "p4": 0.3
+      },
+      "barrierDistance": 58.8,
+      "barrierAlert": "safe",
+      "barrierWorst": "Indice Solactive GDX EUR AR 5%",
+      "stockData": [
+        {
+          "name": "Indice Solactive GDX EUR AR 5%",
+          "ticker": "GDX",
+          "sector": "Index",
+          "perf_ytd": 17.64,
+          "perf_1y": 94.28,
+          "volatility_3y": 39.27,
+          "max_drawdown_3y": -30.84
+        }
+      ]
+    },
+    "regimeScenarios": {
+      "current": {
+        "score": 33,
+        "grade": "D",
+        "label": "Actuel (stagflation)",
+        "desc": "Régime actuel → volatilité modérée"
+      },
+      "bull": {
+        "score": 39,
+        "grade": "D",
+        "label": "Bull / Risk-on",
+        "delta": 6,
+        "desc": "Marchés haussiers → prob coupon monte, barrière safe"
+      },
+      "crash": {
+        "score": 26,
+        "grade": "D",
+        "label": "Crash / Récession",
+        "delta": -7,
+        "desc": "Marchés baissiers → barrière menacée, vol en hausse"
+      }
+    }
+  },
+  "_couponProbability": 49.1,
+  "_bsRendementNet": -8.09,
+  "_barrierDistance": {
+    "distance": 58.8,
+    "barrier": 50,
+    "worstUnderlying": "Indice Solactive GDX EUR AR 5%",
+    "worstPct": 108.8,
+    "alert": "safe",
+    "details": [
+      {
+        "name": "Indice Solactive GDX EUR AR 5%",
+        "price": 100.85,
+        "pctOfStrike": 108.8,
+        "distance": 58.8,
+        "dd3y": 30.84
+      }
+    ]
+  }
 }
