@@ -145,7 +145,19 @@
     { v: 'none', l: 'Aucun' }
   ];
 
-  var _phase = 'upload', _data = null, _fileName = '', _error = '', _selectedBank = '', _investedAmount = '', _pdfBase64 = null;
+  var _phase = 'upload', _data = null, _fileName = '', _error = '', _selectedBank = '', _investedAmount = '', _pdfBase64 = null, _preCategory = '';
+
+  var PRE_CATEGORIES = [
+    { v: '', l: '🔍 Auto-détection (Claude devine)' },
+    { v: 'taux_fixe', l: '📌 Callable — coupon fixe annuel' },
+    { v: 'taux_fixe_in_fine', l: '📅 Callable In Fine — coupon capitalisé' },
+    { v: 'capital_garanti', l: '🛡️ TARN / Capital garanti' },
+    { v: 'autocall', l: '⚡ Autocall / Phoenix' },
+    { v: 'phoenix_memoire', l: '🧠 Phoenix à mémoire' },
+    { v: 'range_accrual', l: '📊 Range Accrual' },
+    { v: 'dispersion', l: '🔀 Dispersion / Perf. relative' },
+    { v: 'reverse', l: '🔄 Reverse convertible' }
+  ];
 
   function esc(s) { return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
 
@@ -585,7 +597,9 @@
         body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 3000, system: PARSER_PROMPT,
           messages: [{ role: 'user', content: [
             { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } },
-            { type: 'text', text: 'Analyse cette brochure et extrais les données dans le format JSON demandé.' } ]}] }) });
+            { type: 'text', text: _preCategory
+              ? 'Analyse cette brochure. Le type de produit est : ' + _preCategory + '. Extrais les données dans le format JSON demandé en utilisant ce type comme structureType.'
+              : 'Analyse cette brochure et extrais les données dans le format JSON demandé.' } ]}] }) });
       var result = await resp.json();
       if (result.error) throw new Error(result.error.message || 'Erreur API');
       var text = (result.content || []).map(function(b) { return b.text || ''; }).join('');
@@ -597,6 +611,11 @@
       if (!parsed.underlyings) parsed.underlyings = [];
       if (!parsed.risks) parsed.risks = [];
       if (typeof parsed.coupon === 'number') parsed.coupon = { rate: parsed.coupon };
+      // Force structureType from pre-category if user selected one
+      if (_preCategory) {
+        parsed.structureType = _preCategory;
+        console.log('[BrochureParser] Pre-category applied: ' + _preCategory);
+      }
       _data = _postProcess(parsed);
       _phase = 'review'; _render();
     } catch(e) { console.error('[BrochureParser] Error:', e); _error = e.message; _phase = 'upload'; _render(); }
@@ -615,7 +634,7 @@
       showToast('✅ ' + (product.name || 'Produit') + ' ajouté !', 'success');
       if (typeof analyzeProposal === 'function') analyzeProposal(saved).catch(function() {});
       app.openProduct(saved);
-      _phase = 'upload'; _data = null; _fileName = ''; _selectedBank = ''; _investedAmount = ''; _pdfBase64 = null;
+      _phase = 'upload'; _data = null; _fileName = ''; _selectedBank = ''; _investedAmount = ''; _pdfBase64 = null; _preCategory = '';
     } catch(e) { showToast('Erreur: ' + e.message, 'error'); } }
 
   function _copyJSON() { var product = _buildProduct();
@@ -628,9 +647,14 @@
     else if (_phase === 'bank-select') { container.innerHTML = _renderBankSelect(); _bindBankSelectEvents(); } }
 
   function _renderUpload() {
+    var catOpts = PRE_CATEGORIES.map(function(c) {
+      return '<option value="' + esc(c.v) + '"' + (_preCategory === c.v ? ' selected' : '') + '>' + c.l + '</option>';
+    }).join('');
     return '<div class="bp-center"><div class="bp-upload-header">' +
       '<div class="bp-upload-title">Analyseur de <span style="color:var(--accent)">Brochure PDF</span></div>' +
       '<div class="bp-upload-sub">Upload → Claude analyse → Tu valides → Ajout direct</div></div>' +
+      '<div style="margin-bottom:16px"><div class="bp-label" style="margin-bottom:6px;font-size:11px">TYPE DE PRODUIT (optionnel — accélère le parsing)</div>' +
+      '<select id="bp-pre-category" class="bp-select" style="max-width:400px;font-size:13px;padding:10px 12px">' + catOpts + '</select></div>' +
       '<div class="bp-dropzone" id="bp-dropzone"><div style="font-size:36px;margin-bottom:10px;opacity:.5">📄</div>' +
       '<div class="upload-text">Glisse un PDF ici ou clique</div><div class="upload-sub">SocGen, Swiss Life, CIC, Natixis...</div>' +
       '<input type="file" accept=".pdf" id="bp-file-input" style="display:none"></div>' +
@@ -639,14 +663,16 @@
       '<div class="bp-step"><div class="bp-step-icon">✏️</div><div class="bp-step-title">Validation</div><div class="bp-step-desc">Tu vérifies le formulaire</div></div>' +
       '<div class="bp-step"><div class="bp-step-icon">🚀</div><div class="bp-step-title">Ajout direct</div><div class="bp-step-desc">Ajouté à StructBoard</div></div></div></div>'; }
 
-  function _bindUploadEvents() { var dz = document.getElementById('bp-dropzone'), fi = document.getElementById('bp-file-input'); if (!dz||!fi) return;
+  function _bindUploadEvents() { var dz = document.getElementById('bp-dropzone'), fi = document.getElementById('bp-file-input'), catSel = document.getElementById('bp-pre-category'); if (!dz||!fi) return;
+    if (catSel) catSel.addEventListener('change', function() { _preCategory = catSel.value; });
     dz.addEventListener('click', function() { fi.click(); });
     dz.addEventListener('dragover', function(e) { e.preventDefault(); dz.classList.add('dragover'); });
     dz.addEventListener('dragleave', function() { dz.classList.remove('dragover'); });
     dz.addEventListener('drop', function(e) { e.preventDefault(); dz.classList.remove('dragover');
+      if (catSel) _preCategory = catSel.value;
       var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
       if (f && f.name.toLowerCase().endsWith('.pdf')) _analyzePDF(f); else { _error = 'Fichier PDF requis'; _render(); } });
-    fi.addEventListener('change', function(e) { var f = e.target.files && e.target.files[0]; if (f) _analyzePDF(f); }); }
+    fi.addEventListener('change', function(e) { if (catSel) _preCategory = catSel.value; var f = e.target.files && e.target.files[0]; if (f) _analyzePDF(f); }); }
 
   function _renderLoading() {
     return '<div class="bp-center" style="min-height:400px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px">' +
