@@ -118,6 +118,7 @@
     { v: 'taux_fixe_in_fine', l: 'Callable In Fine' },
     { v: 'range_accrual', l: '📊 Range Accrual' },
     { v: 'capital_garanti', l: 'Capital garanti / TARN' },
+    { v: 'digitale_memoire', l: 'Digitale Mémoire' },
     { v: 'dispersion', l: 'Dispersion' },
     { v: 'basket', l: 'Panier équipondéré' },
     { v: 'reverse', l: 'Reverse convertible' },
@@ -152,8 +153,9 @@
     { v: 'taux_fixe', l: '📌 Callable — coupon fixe annuel' },
     { v: 'taux_fixe_in_fine', l: '📅 Callable In Fine — coupon capitalisé' },
     { v: 'capital_garanti', l: '🛡️ TARN / Capital garanti' },
+    { v: 'digitale_memoire', l: '🧠 Digitale Mémoire — coupon conditionnel + rattrapage' },
     { v: 'autocall', l: '⚡ Autocall / Phoenix' },
-    { v: 'phoenix_memoire', l: '🧠 Phoenix à mémoire' },
+    { v: 'phoenix_memoire', l: '🦅 Phoenix à mémoire' },
     { v: 'range_accrual', l: '📊 Range Accrual' },
     { v: 'dispersion', l: '🔀 Dispersion / Perf. relative' },
     { v: 'reverse', l: '🔄 Reverse convertible' }

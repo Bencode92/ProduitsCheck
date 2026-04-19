@@ -21,6 +21,7 @@ var STRUCTURE_TYPES = [
     { id: 'taux_fixe_in_fine', label: 'Taux fixe / Callable In Fine' },
     { id: 'range_accrual', label: '📊 Range Accrual' },
     { id: 'capital_garanti', label: 'Capital garanti / TARN' },
+    { id: 'digitale_memoire', label: 'Digitale Mémoire' },
     { id: 'reverse', label: 'Reverse convertible' },
     { id: 'participation', label: 'Participation / Bonus' },
     { id: 'twin_win', label: 'Twin-Win' },
