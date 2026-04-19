@@ -11,7 +11,7 @@
   "underlyings": [
     "TEC 10"
   ],
-  "underlyingType": "single-index",
+  "underlyingType": "rates",
   "currency": "EUR",
   "maturity": "5 ans",
   "maturityYears": 5,
@@ -34,7 +34,6 @@
   "capitalProtection": {
     "protected": true,
     "level": 100,
-    "barrier": null,
     "barrierCoupon": 4.4,
     "barrierType": "europeenne"
   },
@@ -45,7 +44,9 @@
     "frequency": "annuel",
     "startSemester": null,
     "stepDown": false,
-    "stepDownPct": null
+    "stepDownPct": null,
+    "hasAutocall": false,
+    "enabled": false
   },
   "decrementPct": null,
   "actualDividendYield": null,
@@ -130,5 +131,11 @@
   "conversation": [],
   "conversationSummary": null,
   "decision": null,
-  "decisionReason": null
+  "decisionReason": null,
+  "aiCategory": "capital-protege",
+  "aiCategoryLabel": "🛡️ Capital Protégé",
+  "aiCategoryColor": "#4CAF50",
+  "aiOpinion": "Produit offrant un rendement attractif de 4,6% annuel avec protection totale du capital, idéal pour les investisseurs averses au risque cherchant un revenu régulier. Le mécanisme mémoire permet de récupérer les coupons non versés, mais la performance reste limitée à l'évolution du TEC 10 sans potentiel d'appréciation du capital.",
+  "aiAnalyzedAt": "2026-04-19T10:08:41.739Z",
+  "envelope": ""
 }
