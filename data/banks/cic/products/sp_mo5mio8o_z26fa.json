@@ -1,0 +1,138 @@
+{
+  "name": "Digitale WO LVMH Crédit Agricole Avril 2029",
+  "type": "digitale_memoire",
+  "structureType": "digitale_memoire",
+  "emitter": "Crédit Industriel et Commercial",
+  "guarantor": "Crédit Industriel et Commercial",
+  "guarantorRating": {
+    "moodys": "A1",
+    "sp": "A+"
+  },
+  "underlyings": [
+    "LVMH Moët Hennessy Louis Vuitton SA",
+    "Crédit Agricole S.A."
+  ],
+  "underlyingType": "worst-of",
+  "currency": "EUR",
+  "maturity": "3 ans",
+  "maturityYears": 3,
+  "coupon": {
+    "rate": 6.15,
+    "rateIfCalled": null,
+    "rateIfMaturity": null,
+    "type": "conditionnel",
+    "frequency": "annuel",
+    "trigger": 100,
+    "memory": true,
+    "paymentTiming": "periodic"
+  },
+  "participationRate": null,
+  "guaranteedYears": 0,
+  "autocallCumulTarget": null,
+  "commissions": 1.3,
+  "isin": "XS3319891266",
+  "minInvestment": 100000,
+  "capitalProtection": {
+    "protected": true,
+    "level": 100,
+    "barrier": null,
+    "barrierCoupon": 100,
+    "barrierType": "europeenne"
+  },
+  "earlyRedemption": {
+    "possible": false,
+    "type": "none",
+    "trigger": null,
+    "frequency": "annuel",
+    "startSemester": null,
+    "stepDown": false,
+    "stepDownPct": null
+  },
+  "decrementPct": null,
+  "actualDividendYield": null,
+  "mechanism": "Coupon conditionnel de 6,15% par an si le sous-jacent ayant le moins performé ≥ 100% de son niveau initial. Mémorisation des coupons non versés. Capital garanti à 100% à l'échéance.",
+  "risks": [
+    "Risque de perte en capital en cours de vie",
+    "Risque de crédit de l'émetteur",
+    "Plafonnement des gains à 6,15% par an",
+    "Pas de participation aux dividendes",
+    "Sensibilité aux conditions de marché",
+    "Risque de liquidité"
+  ],
+  "summary": "Produit à capital garanti offrant un coupon conditionnel annuel de 6,15% sur 2 actions (LVMH et Crédit Agricole) avec mécanisme worst-of. Le coupon est versé si le moins performant des 2 sous-jacents est au-dessus de son niveau initial. Les coupons non versés sont mémorisés. Capital garanti à 100% à l'échéance après 3 ans.",
+  "aiParsed": {
+    "name": "Digitale WO LVMH Crédit Agricole Avril 2029",
+    "isin": "XS3319891266",
+    "structureType": "digitale_memoire",
+    "emitter": "Crédit Industriel et Commercial",
+    "guarantor": "Crédit Industriel et Commercial",
+    "guarantorRating": {
+      "moodys": "A1",
+      "sp": "A+"
+    },
+    "underlyings": [
+      "LVMH Moët Hennessy Louis Vuitton SA",
+      "Crédit Agricole S.A."
+    ],
+    "underlyingType": "worst-of",
+    "currency": "EUR",
+    "maturity": "9 avril 2029",
+    "maturityYears": 3,
+    "coupon": {
+      "rate": 6.15,
+      "rateIfCalled": null,
+      "rateIfMaturity": null,
+      "type": "conditionnel",
+      "frequency": "annuel",
+      "trigger": 100,
+      "memory": true,
+      "paymentTiming": "periodic"
+    },
+    "participationRate": null,
+    "guaranteedYears": 0,
+    "autocallCumulTarget": null,
+    "commissions": 1.3,
+    "capitalProtection": {
+      "protected": true,
+      "level": 100,
+      "barrier": null,
+      "barrierCoupon": 100,
+      "barrierType": "europeenne"
+    },
+    "earlyRedemption": {
+      "possible": false,
+      "type": "",
+      "trigger": null,
+      "frequency": "",
+      "startSemester": null,
+      "stepDown": false,
+      "stepDownPct": null,
+      "firstCallDate": null,
+      "callSchedule": []
+    },
+    "decrementPct": null,
+    "actualDividendYield": null,
+    "minInvestment": 100000,
+    "mechanism": "Coupon conditionnel de 6,15% par an si le sous-jacent ayant le moins performé ≥ 100% de son niveau initial. Mémorisation des coupons non versés. Capital garanti à 100% à l'échéance.",
+    "risks": [
+      "Risque de perte en capital en cours de vie",
+      "Risque de crédit de l'émetteur",
+      "Plafonnement des gains à 6,15% par an",
+      "Pas de participation aux dividendes",
+      "Sensibilité aux conditions de marché",
+      "Risque de liquidité"
+    ],
+    "summary": "Produit à capital garanti offrant un coupon conditionnel annuel de 6,15% sur 2 actions (LVMH et Crédit Agricole) avec mécanisme worst-of. Le coupon est versé si le moins performant des 2 sous-jacents est au-dessus de son niveau initial. Les coupons non versés sont mémorisés. Capital garanti à 100% à l'échéance après 3 ans.",
+    "_parsingAlerts": []
+  },
+  "sourceFile": "Digitale WO LVMH Crédit Agricole (2).pdf",
+  "investedAmount": 0,
+  "id": "sp_mo5mio8o_z26fa",
+  "bankId": "cic",
+  "status": "analyzing",
+  "receivedDate": "2026-04-19",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null
+}
