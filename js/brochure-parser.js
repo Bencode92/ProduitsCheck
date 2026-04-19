@@ -145,7 +145,7 @@
     { v: 'none', l: 'Aucun' }
   ];
 
-  var _phase = 'upload', _data = null, _fileName = '', _error = '', _selectedBank = '', _investedAmount = '';
+  var _phase = 'upload', _data = null, _fileName = '', _error = '', _selectedBank = '', _investedAmount = '', _pdfBase64 = null;
 
   function esc(s) { return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
 
@@ -535,6 +535,7 @@
     try {
       var base64 = await new Promise(function(res, rej) { var r = new FileReader();
         r.onload = function() { res(r.result.split(',')[1]); }; r.onerror = function() { rej(new Error('Lecture échouée')); }; r.readAsDataURL(file); });
+      _pdfBase64 = base64;
       var resp = await fetch(CONFIG.AI_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 3000, system: PARSER_PROMPT,
           messages: [{ role: 'user', content: [
@@ -561,10 +562,15 @@
     var product = _buildProduct(); if (!product) return;
     product.investedAmount = parseFloat(_investedAmount) || 0;
     try { var saved = await app.addProposal(_selectedBank, product);
+      // Store PDF in localStorage for later viewing
+      if (_pdfBase64 && saved && saved.id) {
+        try { localStorage.setItem('pdf_' + saved.id, _pdfBase64); console.log('[BrochureParser] PDF stored for product ' + saved.id); }
+        catch(e) { console.warn('[BrochureParser] Could not store PDF (too large?):', e.message); }
+      }
       showToast('✅ ' + (product.name || 'Produit') + ' ajouté !', 'success');
       if (typeof analyzeProposal === 'function') analyzeProposal(saved).catch(function() {});
       app.openProduct(saved);
-      _phase = 'upload'; _data = null; _fileName = ''; _selectedBank = ''; _investedAmount = '';
+      _phase = 'upload'; _data = null; _fileName = ''; _selectedBank = ''; _investedAmount = ''; _pdfBase64 = null;
     } catch(e) { showToast('Erreur: ' + e.message, 'error'); } }
 
   function _copyJSON() { var product = _buildProduct();

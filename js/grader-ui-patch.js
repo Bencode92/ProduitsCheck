@@ -9,6 +9,24 @@
     if (typeof ProposalGrader === 'undefined') { console.warn('[GraderUI] ProposalGrader not loaded'); return; }
     if (typeof GRADING_CONFIG !== 'undefined' && GRADING_CONFIG.killCriteria) { delete GRADING_CONFIG.killCriteria.maxIssuerConcentration; }
 
+    // ─── View Brochure PDF ───
+    window.viewBrochurePDF = function() {
+        var p = app.state.currentProduct;
+        if (!p) return;
+        var pdf = null;
+        try { pdf = localStorage.getItem('pdf_' + p.id); } catch(e) {}
+        if (pdf) {
+            var blob = new Blob([Uint8Array.from(atob(pdf), function(c) { return c.charCodeAt(0); })], { type: 'application/pdf' });
+            var url = URL.createObjectURL(blob);
+            window.open(url, '_blank');
+            setTimeout(function() { URL.revokeObjectURL(url); }, 60000);
+        } else if (p.sourceFile && p.sourceFile !== 'JSON import') {
+            showToast('PDF non disponible — re-parsez la brochure pour stocker le PDF', 'info');
+        } else {
+            showToast('Aucune brochure associée', 'info');
+        }
+    };
+
     async function _clearOldKillGrading() { let cleared = 0; for (const [bankId, proposals] of Object.entries(app.state?.proposals || {})) { for (const p of proposals) { if (p.grading && p.grading.killCriteria?.triggered) { const reasons = p.grading.killCriteria.reasons || []; if (reasons.some(r => r.includes('metteur') || r.includes('book') || r.includes('max: 40'))) { delete p.grading; cleared++; try { await app._saveProductFile(bankId, p); } catch(e){} } } } } if (cleared > 0) { console.log('[GraderUI] Cleared ' + cleared + ' old F grades'); app.render(); } }
     setTimeout(_clearOldKillGrading, 3000);
 
@@ -105,10 +123,12 @@
             if (actionsCard) {
                 var hasModifier = actionsCard.innerHTML.indexOf('Modifier infos') >= 0;
                 var hasValorisation = actionsCard.innerHTML.indexOf('Valorisation') >= 0;
-                if (!hasModifier || !hasValorisation) {
+                var hasBrochure = actionsCard.innerHTML.indexOf('Brochure') >= 0;
+                if (!hasModifier || !hasValorisation || !hasBrochure) {
                     var extraBtns = '';
                     if (!hasModifier) extraBtns += '<button class="btn" style="width:100%;margin-bottom:6px" onclick="if(typeof showEditModal===\'function\')showEditModal();">\u270e Modifier infos</button>';
                     if (!hasValorisation) extraBtns += '<button class="btn" style="width:100%;margin-bottom:6px" onclick="if(typeof showTrackingModal===\'function\')showTrackingModal();">\ud83d\udccd Valorisation</button>';
+                    if (!hasBrochure && p.sourceFile && p.sourceFile !== 'JSON import') extraBtns += '<button class="btn" style="width:100%;margin-bottom:6px" onclick="viewBrochurePDF()">📄 Voir la brochure</button>';
                     var discuterBtn = actionsCard.querySelector('.ai-glow, [onclick*="showChat"], [onclick*="openChat"]');
                     if (discuterBtn) { var wrapper = document.createElement('div'); wrapper.innerHTML = extraBtns; while (wrapper.firstChild) discuterBtn.parentNode.insertBefore(wrapper.firstChild, discuterBtn); }
                     else { var cardBody = actionsCard.querySelector('.sheet-card-body') || actionsCard; var firstChild = cardBody.querySelector('button, a') || cardBody.firstChild; if (firstChild) { var wrapper2 = document.createElement('div'); wrapper2.innerHTML = extraBtns; while (wrapper2.firstChild) firstChild.parentNode.insertBefore(wrapper2.firstChild, firstChild); } else { cardBody.insertAdjacentHTML('afterbegin', extraBtns); } }
@@ -118,6 +138,7 @@
                 actDiv.innerHTML = '<h3 class="sheet-card-title">ACTIONS</h3>' +
                     '<button class="btn" style="width:100%;margin-bottom:6px" onclick="if(typeof showEditModal===\'function\')showEditModal();">\u270e Modifier infos</button>' +
                     '<button class="btn" style="width:100%;margin-bottom:6px" onclick="if(typeof showTrackingModal===\'function\')showTrackingModal();">\ud83d\udccd Valorisation</button>' +
+                    (p.sourceFile && p.sourceFile !== 'JSON import' ? '<button class="btn" style="width:100%;margin-bottom:6px" onclick="viewBrochurePDF()">📄 Voir la brochure</button>' : '') +
                     '<button class="btn ai-glow" style="width:100%;margin-bottom:6px" onclick="if(typeof showProposalChat===\'function\')showProposalChat();">\ud83d\udcac Discuter avec Claude</button>' +
                     (p.bankId ? '<button class="btn" style="width:100%;margin-bottom:6px" onclick="if(typeof integrateProduct===\'function\')integrateProduct();">\u2705 Int\u00e9grer</button>' : '') +
                     '<button class="btn" style="width:100%;margin-bottom:6px;color:var(--red)" onclick="if(typeof rejectProduct===\'function\')rejectProduct();">\u274c Rejeter</button>' +
