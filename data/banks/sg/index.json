@@ -1,7 +1,7 @@
 {
   "bankId": "sg",
   "bankName": "Société Générale",
-  "lastUpdated": "2026-04-19T10:39:10.303Z",
+  "lastUpdated": "2026-04-19T10:39:11.936Z",
   "products": [
     {
       "id": "sp_mnd6yq2v_as1r1",
@@ -29,6 +29,14 @@
     },
     {
       "id": "sp_mo5mvra7_kqv7o",
+      "name": "SOLUTION COURT TERME BOOSTÉE SUR PANIER D'ACTIONS",
+      "type": "dispersion",
+      "status": "analyzing",
+      "score": null,
+      "receivedDate": "2026-04-19"
+    },
+    {
+      "id": "sp_mo5mvsjk_giarq",
       "name": "SOLUTION COURT TERME BOOSTÉE SUR PANIER D'ACTIONS",
       "type": "dispersion",
       "status": "analyzing",
