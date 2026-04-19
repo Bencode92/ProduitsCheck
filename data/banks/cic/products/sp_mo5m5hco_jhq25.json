@@ -16,14 +16,12 @@
   "maturity": "5 ans",
   "maturityYears": 5,
   "coupon": {
-    "rate": 4.85,
-    "rateIfCalled": null,
-    "rateIfMaturity": null,
+    "rate": 9.7,
+    "frequency": "annuel",
+    "annualized": true,
     "type": "conditionnel",
-    "frequency": "semestriel",
-    "trigger": 100,
-    "memory": false,
-    "paymentTiming": "periodic"
+    "paymentTiming": "periodic",
+    "trigger": 100
   },
   "participationRate": null,
   "guaranteedYears": 0,
@@ -171,5 +169,198 @@
   "conversation": [],
   "conversationSummary": null,
   "decision": null,
-  "decisionReason": null
+  "decisionReason": null,
+  "_freqFixApplied": true,
+  "aiCategory": "autocall-mono",
+  "aiCategoryLabel": "⚡ Autocall Mono-actif",
+  "aiCategoryColor": "#06D6A0",
+  "aiOpinion": "Produit offrant un rendement attractif de 9,7% annuel avec possibilité de remboursement anticipé, mais exposé au risque sectoriel concentré des banques européennes. La barrière à 60% offre une protection relative, mais l'absence de protection du capital en cas de forte chute du secteur bancaire représente un risque significatif.",
+  "aiAnalyzedAt": "2026-04-19T10:18:49.747Z",
+  "grading": {
+    "grade": "C",
+    "score": 50,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 57,
+        "base": 42,
+        "delta": 0,
+        "reasoning": "Rendement: base 42 → -10 = 32 (En stagflation avec VIX à 22 et banks dans secteur évité (-1.63%), la probabilité de toucher le coupon à barrière 100% chute drastiquement) | Coupon 9.7%, barrière 60% | Barr.coupon 100% | Mat espérée: ~1.6a (prob mat: 1%)",
+        "_bsDelta": 15,
+        "_bs": {
+          "score": 57,
+          "probCoupon": 51.8,
+          "rendementNet": 3.64,
+          "perteEsperee": 1.39,
+          "couponEffectif": 9.7,
+          "vols": [
+            20.32
+          ],
+          "matEsperee": 1.6,
+          "isBasket": false
+        }
+      },
+      "underlyingQuality": {
+        "score": 71,
+        "base": 86,
+        "delta": -15,
+        "reasoning": "Qualité: base 86 → -15 = 71 (Secteur financials explicitement évité par le MI, beta 0.91 amplifie le risque en régime stagflationniste avec Brent à $92) | Worst: Euro Stoxx Banks B:67"
+      },
+      "portfolioFit": {
+        "score": 58,
+        "base": 80,
+        "delta": -5,
+        "reasoning": "Fit: base 80 → -5 = 75 (Surexposition sectorielle risquée quand seul energy est favorable, diversification nécessaire hors financials)"
+      },
+      "riskPremium": {
+        "score": 34,
+        "base": 5,
+        "delta": 0,
+        "reasoning": "Capital garanti: spread 9.7% - CAT 2.5% - illiq 0.5% = 6.7%"
+      }
+    },
+    "verdict": "Produit inadapté au contexte stagflationniste actuel. Le secteur bancaire européen, explicitement évité par le MI (-1.63% momentum 3M), fait face à des vents contraires avec inflation persistante (PCE 2.8%) et Brent à $92 qui compriment les marges. Avec seulement 1% de probabilité de maturité anticipée et une barrière coupon à 100%, le rendement de 9.7% ne compense pas le risque d'un drawdown potentiel de 25.7% dans un secteur sous pression.",
+    "keyRisks": [
+      "Secteur financials en zone rouge avec momentum négatif -1.63% sur 3 mois",
+      "Régime stagflationniste défavorable aux banques avec compression des marges nettes d'intérêts",
+      "Barrière coupon à 100% irréaliste avec VIX à 22 et volatilité sectorielle à 19.29%"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 9.7,
+        "return_eur": 9700,
+        "probability": 0.15,
+        "duration_years": 1
+      },
+      "base": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.4,
+        "duration_years": 5
+      },
+      "stress": {
+        "return_pct": -15,
+        "return_eur": -15000,
+        "probability": 0.3,
+        "duration_years": 5
+      },
+      "worst": {
+        "return_pct": -25,
+        "return_eur": -25000,
+        "probability": 0.15,
+        "duration_years": 5
+      }
+    },
+    "confidenceInterval": {
+      "low": 36,
+      "high": 52,
+      "halfWidth": 8,
+      "gradeStable": false,
+      "gradeRange": "D-C",
+      "label": "D [36-52]"
+    },
+    "metadata": {
+      "gradedAt": "2026-04-19T10:19:09.343Z",
+      "durationMs": 20849,
+      "aiUsed": true,
+      "version": "7.1",
+      "productType": "autocall",
+      "marketDataAvailable": true,
+      "catBenchmark": 2.8,
+      "catSource": "allocator-confirmed",
+      "couponAnnualized": 9.7,
+      "couponRaw": 9.7,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": true,
+      "barrierPct": 60,
+      "barrierCouponPct": 100,
+      "couponProbability": 51.8,
+      "expectedMaturity": 1.6,
+      "maxMaturity": 5,
+      "probReachMaturity": 1,
+      "maxBeta": 0.91,
+      "baseScore": 51,
+      "baseGrade": "C",
+      "adjustments": {
+        "p1": -10,
+        "p2": -15,
+        "p3": -5,
+        "p4": 0
+      },
+      "barrier_sigma": 1.18,
+      "barrier_sigma_label": "Attention",
+      "barrier_sigma_danger": false,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Rappelable 12M",
+      "ci_low": 36,
+      "ci_high": 52,
+      "ci_label": "D [36-52]",
+      "issuer_rating": "A+",
+      "issuer_tier": "IG",
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "autocall",
+      "bsRendementNet": 3.64,
+      "bsProbCoupon": 51.8,
+      "bsPerteEsperee": 1.39,
+      "bsVols": [
+        20.32
+      ],
+      "bsMatEsperee": 1.6,
+      "isBasket": false,
+      "issuerCreditPenalty": 1,
+      "issuerCDS": 55,
+      "v6Weights": {
+        "p1": 0.3,
+        "p2": 0.2,
+        "p3": 0.15,
+        "p4": 0.3
+      },
+      "stockData": [
+        {
+          "name": "Euro Stoxx Banks",
+          "ticker": "ENX",
+          "sector": "Finance",
+          "perf_ytd": 13.91,
+          "perf_1y": 2.6,
+          "volatility_3y": 19.29,
+          "max_drawdown_3y": 25.7,
+          "buffett_score": 67,
+          "quality_score": 62,
+          "buffett_grade": "B"
+        }
+      ]
+    },
+    "regimeScenarios": {
+      "current": {
+        "score": 50,
+        "grade": "C",
+        "label": "Actuel (stagflation)",
+        "desc": "Régime actuel → volatilité modérée"
+      },
+      "bull": {
+        "score": 56,
+        "grade": "C",
+        "label": "Bull / Risk-on",
+        "delta": 6,
+        "desc": "Marchés haussiers → prob coupon monte, barrière safe"
+      },
+      "crash": {
+        "score": 40,
+        "grade": "D",
+        "label": "Crash / Récession",
+        "delta": -10,
+        "desc": "Marchés baissiers → barrière menacée, vol en hausse"
+      }
+    }
+  },
+  "_couponProbability": 51.8,
+  "_bsRendementNet": 3.64
 }
