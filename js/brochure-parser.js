@@ -308,6 +308,18 @@
       console.log('[BrochureParser] Callable In Fine detected and corrected: ' + data.name);
     }
 
+    // Digitale Mémoire auto-detection
+    // Detect: conditional coupon + memory + capital guaranteed + no autocall
+    var isDigitaleMem = c.memory && c.type === 'conditionnel' && cp.protected && !er.possible;
+    var nameHasDigitale = (data.name || '').toLowerCase().indexOf('digitale') >= 0 || (data.name || '').toLowerCase().indexOf('digital') >= 0;
+    if (isDigitaleMem || (nameHasDigitale && c.memory)) {
+      if (data.structureType !== 'digitale_memoire') {
+        data.structureType = 'digitale_memoire';
+        data.type = 'digitale_memoire';
+        console.log('[BrochureParser] Digitale Mémoire detected: ' + data.name);
+      }
+    }
+
     if (c.rate && c.rate > 12) {
       if (c.frequency === 'semestriel' && c.rate > 15) {
         var p = c.rate / 2; if (p >= 2 && p <= 12) c.rate = p;
