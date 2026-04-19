@@ -150,5 +150,159 @@
   "conversation": [],
   "conversationSummary": null,
   "decision": null,
-  "decisionReason": null
+  "decisionReason": null,
+  "aiCategory": "track-taux",
+  "aiCategoryLabel": "📈 Tracker Taux",
+  "aiCategoryColor": "#FFB74D",
+  "aiOpinion": "Produit obligataire callable offrant un coupon fixe avec risque de remboursement anticipé par l'émetteur si les taux baissent, limitant le potentiel de plus-value. Simple et prévisible mais exposé au risque de réinvestissement et potentiellement moins attractif qu'une obligation classique en environnement de taux volatils.",
+  "aiAnalyzedAt": "2026-04-19T08:50:33.374Z",
+  "grading": {
+    "grade": "D",
+    "score": 29,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 5,
+        "base": 0,
+        "delta": -2,
+        "reasoning": "Rendement: base 0 → -2 = 0 (Produit 0% coupon dans environnement taux 5Y à 2.66%, aucune probabilité de surperformance) | Coupon 0%, protégé"
+      },
+      "underlyingQuality": {
+        "score": 74,
+        "base": 76,
+        "delta": -2,
+        "reasoning": "Qualité: base 76 → -2 = 74 (Régime stagflationniste avec stratégie MI recommandant d'éviter HY, spread négatif de -266bps injustifié)"
+      },
+      "portfolioFit": {
+        "score": 56,
+        "base": 70,
+        "delta": -2,
+        "reasoning": "Fit: base 70 → -2 = 68 (Allocation obligataire inadéquate en stagflation, TIPS préférés selon MI, produit sans protection inflation)"
+      },
+      "riskPremium": {
+        "score": 14,
+        "base": 5,
+        "delta": -2,
+        "reasoning": "Capital garanti: spread 0.0% - CAT 2.5% - illiq 0.5% = -3.0%"
+      }
+    },
+    "verdict": "Produit toxique offrant 0% dans un environnement de taux à 2.66%, soit une destruction de valeur garantie de -266bps annuels. En régime stagflationniste avec Brent à $92 et PCE à 2.8%, ce placement sans protection inflation est inadapté alors que le MI recommande les TIPS. L'absence de compensation pour le risque crédit émetteur et le risque de call dans un produit perdant -13.3% sur 5 ans en termes réels est injustifiable.",
+    "keyRisks": [
+      "Perte garantie de 2.66% annuel vs taux sans risque, -13.3% sur 5 ans",
+      "Risque crédit émetteur non compensé dans environnement stagflationniste",
+      "Aucune protection inflation avec PCE à 2.8% et risque choc pétrolier >$100"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.25,
+        "duration_years": 5
+      },
+      "base": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.35,
+        "duration_years": 5
+      },
+      "stress": {
+        "return_pct": -5,
+        "return_eur": -5000,
+        "probability": 0.25,
+        "duration_years": 3
+      },
+      "worst": {
+        "return_pct": -100,
+        "return_eur": -100000,
+        "probability": 0.15,
+        "duration_years": 1
+      }
+    },
+    "confidenceInterval": {
+      "low": 24,
+      "high": 42,
+      "halfWidth": 9,
+      "gradeStable": false,
+      "gradeRange": "F-D",
+      "label": "D [24-42]"
+    },
+    "metadata": {
+      "gradedAt": "2026-04-19T08:52:10.143Z",
+      "durationMs": 19808,
+      "aiUsed": true,
+      "version": "7.1",
+      "productType": "taux_fixe",
+      "marketDataAvailable": false,
+      "catBenchmark": 2.8,
+      "catSource": "allocator-confirmed",
+      "couponAnnualized": 0,
+      "couponRaw": 0,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": false,
+      "barrierPct": 0,
+      "barrierCouponPct": null,
+      "couponProbability": null,
+      "expectedMaturity": 5,
+      "maxMaturity": 5,
+      "maxBeta": null,
+      "baseScore": 34,
+      "baseGrade": "D",
+      "adjustments": {
+        "p1": -2,
+        "p2": -2,
+        "p3": -2,
+        "p4": -2
+      },
+      "barrier_sigma": null,
+      "barrier_sigma_label": null,
+      "barrier_sigma_danger": null,
+      "liquidity_level": "L4",
+      "liquidity_score": 10,
+      "liquidity_label": "Bloqué",
+      "ci_low": 24,
+      "ci_high": 42,
+      "ci_label": "D [24-42]",
+      "issuer_rating": "A+",
+      "issuer_tier": "IG",
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "taux_fixe",
+      "issuerCreditPenalty": 1,
+      "issuerCDS": 55,
+      "v6Weights": {
+        "p1": 0.3,
+        "p2": 0.2,
+        "p3": 0.15,
+        "p4": 0.3
+      }
+    },
+    "regimeScenarios": {
+      "current": {
+        "score": 29,
+        "grade": "D",
+        "label": "Actuel (stagflation)",
+        "desc": "Call unlikely (20%) → coupon garanti sur la durée"
+      },
+      "bull": {
+        "score": 34,
+        "grade": "D",
+        "label": "Bull / Risk-on",
+        "delta": 5,
+        "desc": "Taux baissent → call probable → réinvestissement à taux bas"
+      },
+      "crash": {
+        "score": 24,
+        "grade": "F",
+        "label": "Crash / Récession",
+        "delta": -5,
+        "desc": "Taux montent → pas de call, coupon garanti = atout"
+      }
+    }
+  }
 }
