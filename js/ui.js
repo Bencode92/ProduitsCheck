@@ -64,22 +64,27 @@ function renderBankSections(state) {
 
 // ═══ Call Schedule Table (for callable in fine / callable with redemption levels) ═══
 function _renderCallSchedule(p) {
-  const schedule = p.earlyRedemption?.callSchedule;
+  const schedule = p.earlyRedemption?.callSchedule || p.callSchedule;
   if (!schedule || !Array.isArray(schedule) || schedule.length === 0) return '';
   const matLevel = p.earlyRedemption?.maturityRedemptionLevel;
   return `<div class="fiche-call-schedule" style="margin-top:12px">
     <table style="width:100%;border-collapse:collapse;font-size:13px">
       <thead><tr style="border-bottom:2px solid var(--border);text-align:left">
-        <th style="padding:6px 8px">Date notification</th>
-        <th style="padding:6px 8px">Date remboursement</th>
+        <th style="padding:6px 8px">Année</th>
+        <th style="padding:6px 8px">Date de rappel</th>
         <th style="padding:6px 8px;text-align:right">Niveau remb.</th>
       </tr></thead>
       <tbody>
-        ${schedule.map(s => `<tr style="border-bottom:1px solid var(--border-dim)">
-          <td style="padding:5px 8px">${formatDate(s.notificationDate)}</td>
-          <td style="padding:5px 8px">${formatDate(s.redemptionDate)}</td>
-          <td style="padding:5px 8px;text-align:right;font-weight:600;color:var(--green)">${s.redemptionLevel}%</td>
-        </tr>`).join('')}
+        ${schedule.map((s, i) => {
+          const dt = s.date || s.redemptionDate || '';
+          const level = s.amount || s.redemptionLevel || 100;
+          const startYr = p.earlyRedemption?.startSemester ? Math.ceil(p.earlyRedemption.startSemester / 2) : 3;
+          return `<tr style="border-bottom:1px solid var(--border-dim)">
+          <td style="padding:5px 8px;font-weight:600">An ${startYr + i}</td>
+          <td style="padding:5px 8px">${dt || '—'}</td>
+          <td style="padding:5px 8px;text-align:right;font-weight:600;color:var(--green)">${level}%</td>
+        </tr>`;
+        }).join('')}
         ${matLevel ? `<tr style="border-top:2px solid var(--accent)">
           <td colspan="2" style="padding:5px 8px;font-weight:600">Remboursement final</td>
           <td style="padding:5px 8px;text-align:right;font-weight:700;color:var(--accent)">${matLevel}%</td>
