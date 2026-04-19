@@ -527,6 +527,26 @@
       console.log('[BrochureParser] Post-build: Callable In Fine corrected');
     }
 
+    // ─── Propagate callSchedule + firstCallDate for all callable products ──────
+    if (product.earlyRedemption && product.earlyRedemption.type === 'callable' && !product.callSchedule) {
+      var csAll = (_data.callSchedule) || (_data.earlyRedemption && _data.earlyRedemption.callSchedule) || [];
+      if (csAll.length) {
+        product.callSchedule = csAll;
+        product.earlyRedemption.callSchedule = csAll;
+      }
+      if (!product.earlyRedemption.firstCallDate) {
+        product.earlyRedemption.firstCallDate = (_data.earlyRedemption && _data.earlyRedemption.firstCallDate) || (csAll.length && csAll[0].date) || null;
+      }
+      // Derive startSemester from firstCallDate if missing
+      if (!product.earlyRedemption.startSemester && product.earlyRedemption.firstCallDate) {
+        var fcMatch = product.earlyRedemption.firstCallDate.match(/(\d{4})/);
+        if (fcMatch) {
+          var startYear = parseInt(fcMatch[1]) - 2026;
+          if (startYear > 0) product.earlyRedemption.startSemester = startYear * 2;
+        }
+      }
+    }
+
     return product;
   }
 
