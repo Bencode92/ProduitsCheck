@@ -468,34 +468,59 @@
     // If form has generic 'autocall' but aiParsed has a more specific type, prefer aiParsed
     if (formSt === 'autocall' && aiSt && aiSt !== 'autocall') st = aiSt;
     var typeMap = { taux_fixe: 'taux-fixe', range_accrual: 'range-accrual', taux_fixe_in_fine: 'taux_fixe_in_fine' };
+    // Helper: form value with fallback to aiParsed data
+    var dc = _data.coupon || {}, dcp = _data.capitalProtection || {}, der = _data.earlyRedemption || {};
+    function _fv(id, fallback) { var v = _gv(id); return (v !== null && v !== undefined && v !== '') ? v : fallback; }
+
+    var years = _fv('bp-years', _data.maturityYears || 10);
+    var capProtected = _fv('bp-capprotected', dcp.protected || false);
+
     var product = {
-      name: _gv('bp-name') || _data.name || '',
+      name: _fv('bp-name', _data.name || ''),
       type: typeMap[st] || st,
       structureType: st,
-      emitter: _gv('bp-emitter') || '', guarantor: _data.guarantor || '', guarantorRating: _data.guarantorRating || null,
-      underlyings: (_gv('bp-underlyings') || '').split(',').map(function(s) { return s.trim(); }).filter(Boolean),
-      underlyingType: _gv('bp-undtype') || 'single-index', currency: _gv('bp-currency') || 'EUR',
-      maturity: (_gv('bp-years') || 5) + ' ans', maturityYears: _gv('bp-years') || 5,
-      coupon: { rate: _gv('bp-rate'), rateIfCalled: _gv('bp-rateIfCalled'), rateIfMaturity: _gv('bp-rateIfMaturity'),
-        type: _gv('bp-coupontype') || (_data.coupon && _data.coupon.type) || 'conditionnel',
-        frequency: _gv('bp-freq') || (_data.coupon && _data.coupon.frequency) || 'annuel',
-        trigger: _gv('bp-barriercoupon') || _gv('bp-coupontrigger'),
-        memory: _gv('bp-memory') || false, paymentTiming: _gv('bp-timing') || 'periodic' },
-      participationRate: _gv('bp-participation'),
-      guaranteedYears: _gv('bp-guaranteedyears') || (_data.guaranteedYears || 0),
-      autocallCumulTarget: _gv('bp-autocallcumul') || (_data.autocallCumulTarget || null),
-      commissions: _gv('bp-commissions') || (_data.commissions || null),
-      isin: _gv('bp-isin') || (_data.isin || ''),
-      minInvestment: _gv('bp-mininvest'),
-      capitalProtection: { protected: _gv('bp-capprotected') || false,
-        level: _gv('bp-capprotected') ? (_gv('bp-caplevel') || 100) : null,
-        barrier: _gv('bp-barrier'), barrierCoupon: _gv('bp-barriercoupon'), barrierType: 'europeenne' },
-      earlyRedemption: { possible: _gv('bp-erpossible') || false, type: _gv('bp-ertype') || 'none',
-        trigger: _gv('bp-ertrigger'), frequency: _gv('bp-erfreq') || 'annuel',
-        startSemester: _gv('bp-erstart'), stepDown: _gv('bp-stepdown') || false, stepDownPct: _gv('bp-stepdownpct') },
-      decrementPct: _gv('bp-decrement'), actualDividendYield: _gv('bp-divyield'),
-      mechanism: _gv('bp-mechanism') || '',
-      risks: (_gv('bp-risks') || '').split('·').map(function(s) { return s.trim(); }).filter(Boolean),
+      emitter: _fv('bp-emitter', _data.emitter || ''),
+      guarantor: _data.guarantor || '', guarantorRating: _data.guarantorRating || null,
+      underlyings: (_fv('bp-underlyings', (_data.underlyings || []).join(', ')) || '').split(',').map(function(s) { return s.trim(); }).filter(Boolean),
+      underlyingType: _fv('bp-undtype', _data.underlyingType || 'single-index'),
+      currency: _fv('bp-currency', _data.currency || 'EUR'),
+      maturity: years + ' ans', maturityYears: years,
+      coupon: {
+        rate: _fv('bp-rate', dc.rate),
+        rateIfCalled: _fv('bp-rateIfCalled', dc.rateIfCalled),
+        rateIfMaturity: _fv('bp-rateIfMaturity', dc.rateIfMaturity),
+        type: _fv('bp-coupontype', dc.type || 'conditionnel'),
+        frequency: _fv('bp-freq', dc.frequency || 'annuel'),
+        trigger: _fv('bp-coupontrigger', dc.trigger) || _fv('bp-barriercoupon', dcp.barrierCoupon),
+        memory: _fv('bp-memory', dc.memory || false),
+        paymentTiming: _fv('bp-timing', dc.paymentTiming || 'periodic')
+      },
+      participationRate: _fv('bp-participation', _data.participationRate),
+      guaranteedYears: _fv('bp-guaranteedyears', _data.guaranteedYears || 0),
+      autocallCumulTarget: _fv('bp-autocallcumul', _data.autocallCumulTarget),
+      commissions: _fv('bp-commissions', _data.commissions),
+      isin: _fv('bp-isin', _data.isin || ''),
+      minInvestment: _fv('bp-mininvest', _data.minInvestment),
+      capitalProtection: {
+        protected: capProtected,
+        level: capProtected ? (_fv('bp-caplevel', dcp.level || 100)) : null,
+        barrier: _fv('bp-barrier', dcp.barrier),
+        barrierCoupon: _fv('bp-barriercoupon', dcp.barrierCoupon),
+        barrierType: dcp.barrierType || 'europeenne'
+      },
+      earlyRedemption: {
+        possible: _fv('bp-erpossible', der.possible || false),
+        type: _fv('bp-ertype', der.type || 'none'),
+        trigger: _fv('bp-ertrigger', der.trigger),
+        frequency: _fv('bp-erfreq', der.frequency || 'annuel'),
+        startSemester: _fv('bp-erstart', der.startSemester),
+        stepDown: _fv('bp-stepdown', der.stepDown || false),
+        stepDownPct: _fv('bp-stepdownpct', der.stepDownPct)
+      },
+      decrementPct: _fv('bp-decrement', _data.decrementPct),
+      actualDividendYield: _fv('bp-divyield', _data.actualDividendYield),
+      mechanism: _fv('bp-mechanism', _data.mechanism || ''),
+      risks: (_fv('bp-risks', (_data.risks || []).join(' · ')) || '').split('·').map(function(s) { return s.trim(); }).filter(Boolean),
       summary: _data.summary || '', aiParsed: _data, sourceFile: _fileName,
       rangeAccrual: st === 'range_accrual' ? {
         lowerBound: parseFloat(String(_gv('bp-ra-lower')).replace(',', '.')) || (_data.rangeAccrual && _data.rangeAccrual.lowerBound) || null,
