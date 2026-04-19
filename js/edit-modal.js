@@ -269,6 +269,12 @@ window.handleJSONImport = function() {
             _setFieldValue('fe-stepdown-pct', er.stepDownPct);
         }
 
+        // Extra fields
+        _setFieldValue('fe-guaranteed-years', json.guaranteedYears);
+        _setFieldValue('fe-commissions', json.commissions);
+        _setFieldValue('fe-autocall-cumul', json.autocallCumulTarget);
+        _setFieldValue('fe-strike-price', json.strikePrice);
+
         // Décrément
         _setFieldValue('fe-decrement', json.decrementPct);
         _setFieldValue('fe-divyield', json.actualDividendYield);
@@ -297,6 +303,14 @@ window.handleJSONImport = function() {
             if (json.coupon && json.coupon.rateIfMaturity) { if (!p.coupon) p.coupon = {}; p.coupon.rateIfMaturity = json.coupon.rateIfMaturity; }
             if (json.coupon && json.coupon.paymentTiming) { if (!p.coupon) p.coupon = {}; p.coupon.paymentTiming = json.coupon.paymentTiming; }
             if (json.coupon && json.coupon.trigger) { if (!p.coupon) p.coupon = {}; p.coupon.trigger = json.coupon.trigger; }
+            if (json.isin) p.isin = json.isin;
+            if (json.callSchedule) p.callSchedule = json.callSchedule;
+            if (json.earlyRedemption && json.earlyRedemption.callSchedule) {
+                if (!p.earlyRedemption) p.earlyRedemption = {};
+                p.earlyRedemption.callSchedule = json.earlyRedemption.callSchedule;
+                if (json.earlyRedemption.firstCallDate) p.earlyRedemption.firstCallDate = json.earlyRedemption.firstCallDate;
+            }
+            if (json.maturityYears) p.maturityYears = json.maturityYears;
             p.aiParsed = json;
             console.log('[EditModal V2.0] Product enriched with ALL JSON data');
         }
@@ -312,8 +326,24 @@ window.handleJSONImport = function() {
 
 function _setFieldValue(id, value) {
     var el = document.getElementById(id);
-    if (!el || value === null || value === undefined || value === '') return;
-    el.value = value;
+    if (!el) return;
+    if (value === null || value === undefined) return;
+    // Allow 0 and false as valid values
+    var strVal = String(value);
+    if (el.tagName === 'SELECT') {
+        // For selects, check if option exists before setting
+        var opts = el.options;
+        for (var i = 0; i < opts.length; i++) {
+            if (opts[i].value === strVal) { el.selectedIndex = i; return; }
+        }
+        // Try case-insensitive match
+        for (var j = 0; j < opts.length; j++) {
+            if (opts[j].value.toLowerCase() === strVal.toLowerCase()) { el.selectedIndex = j; return; }
+        }
+        console.warn('[EditModal] No matching option for #' + id + ' = "' + strVal + '"');
+    } else {
+        el.value = value;
+    }
 }
 
 function _getInfoBanners(structureType, barrierCoupon, strikePrice, decrementPct, divYield) {
@@ -326,6 +356,9 @@ function _getInfoBanners(structureType, barrierCoupon, strikePrice, decrementPct
     }
     if (structureType === 'taux_fixe') {
         html += '<div style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:12px;font-size:10px;color:var(--accent)">🏛 <strong>Taux fixe</strong> : comparaison au taux sans risque BCE.</div>';
+    }
+    if (structureType === 'taux_fixe_in_fine') {
+        html += '<div style="background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:12px;font-size:10px;color:#7C3AED">📅 <strong>Callable In Fine</strong> : coupon capitalisé versé uniquement au rappel ou à maturité.</div>';
     }
     if (structureType === 'range_accrual') {
         html += '<div style="background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:12px;font-size:10px;color:#A855F7">📊 <strong>Range Accrual</strong> : coupon = taux max × (jours dans le corridor / jours total). Capital garanti.</div>';
