@@ -186,7 +186,7 @@
   },
   "sourceFile": "JSON import",
   "bankId": "cic",
-  "status": "subscribed",
+  "status": "active",
   "receivedDate": "2026-04-09",
   "conversation": [],
   "conversationSummary": null,
@@ -385,5 +385,7 @@
         "desc": "Taux spike puis chutent → volatilité, incertitude coupon"
       }
     }
-  }
+  },
+  "investedAmount": 200000,
+  "addedDate": "2026-04-20"
 }
