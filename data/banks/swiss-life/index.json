@@ -1,7 +1,7 @@
 {
   "bankId": "swiss-life",
   "bankName": "Swiss Life",
-  "lastUpdated": "2026-04-20T16:40:08.183Z",
+  "lastUpdated": "2026-04-20T16:40:48.698Z",
   "products": [
     {
       "id": "sp_mnd8hjkx_40efj",
@@ -47,6 +47,14 @@
       "id": "sp_mo74ix5d_5pwu4",
       "name": "SL – PHOENIX MEMOIRE FAST SEMESTRIEL ASML AVRIL 2026",
       "type": "phoenix_memoire",
+      "status": "analyzing",
+      "score": null,
+      "receivedDate": "2026-04-20"
+    },
+    {
+      "id": "sp_mo7f8oje_k0y7q",
+      "name": "SL - TARN TEC10 10 ans",
+      "type": "capital_garanti",
       "status": "analyzing",
       "score": null,
       "receivedDate": "2026-04-20"
