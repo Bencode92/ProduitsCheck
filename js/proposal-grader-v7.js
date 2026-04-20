@@ -698,6 +698,78 @@
     if (isCG) result.pillars.adjustedReturn.score = Math.min(85, result.pillars.adjustedReturn.score + 10);
   }
 
+  // ═══ SECTION 6a2: DISPERSION BACKTEST 1Y ═══
+  function _computeDispersionBacktest(product) {
+    var st = (product.structureType || '').toLowerCase();
+    if (st !== 'dispersion') return null;
+
+    // Get 1Y performance for each underlying from grading data
+    var stocks = [];
+    if (product.grading && product.grading.pillars && product.grading.pillars.underlyingQuality) {
+      // Try from _stocksCache or product data
+    }
+    // Fallback: read from aiParsed or product underlyings with market data
+    var unds = product.underlyings || [];
+    if (unds.length < 2) return null;
+
+    // Try to get perf_1y from vol data cache
+    var perfs = [];
+    unds.forEach(function(u) {
+      var name = typeof u === 'string' ? u : (u.name || '');
+      var perf = null;
+      // Search in _volData (loaded during grading)
+      if (typeof _volData !== 'undefined' && _volData) {
+        var allStocks = [].concat(_volData.stocksEurope || [], _volData.stocksUS || []);
+        var match = allStocks.find(function(s) {
+          return s.name && (s.name.toUpperCase().indexOf(name.toUpperCase()) >= 0 ||
+            name.toUpperCase().indexOf((s.ticker || '').toUpperCase()) >= 0);
+        });
+        if (match && match.perf_1y != null) perf = parseFloat(match.perf_1y);
+      }
+      perfs.push({ name: name.substring(0, 20), perf: perf });
+    });
+
+    var validPerfs = perfs.filter(function(p) { return p.perf !== null; });
+    if (validPerfs.length < 2) return null;
+
+    // Compute all pairs dispersion
+    var pairResults = [];
+    for (var i = 0; i < validPerfs.length; i++) {
+      for (var j = i + 1; j < validPerfs.length; j++) {
+        var dispersion = Math.abs(validPerfs[i].perf - validPerfs[j].perf);
+        pairResults.push({
+          stock1: validPerfs[i].name,
+          stock2: validPerfs[j].name,
+          perf1: validPerfs[i].perf,
+          perf2: validPerfs[j].perf,
+          dispersion: dispersion
+        });
+      }
+    }
+
+    var avgDispersion = pairResults.reduce(function(s, p) { return s + p.dispersion; }, 0) / pairResults.length;
+    var participation = parseFloat(product.participationRate) || parseFloat(product.coupon && product.coupon.rate) || 7;
+    var returnPct = Math.round(participation * avgDispersion) / 100;
+    var nominal = parseFloat(product.investedAmount) || 100000;
+    var returnEur = Math.round(nominal * returnPct / 100);
+
+    // Sort pairs by dispersion (most dispersed first)
+    pairResults.sort(function(a, b) { return b.dispersion - a.dispersion; });
+
+    return {
+      pairs: pairResults,
+      avgDispersion: Math.round(avgDispersion * 100) / 100,
+      participation: participation,
+      returnPct: Math.round(returnPct * 100) / 100,
+      returnEur: returnEur,
+      nbPairs: pairResults.length,
+      nbStocks: validPerfs.length,
+      topPair: pairResults[0],
+      worstPair: pairResults[pairResults.length - 1],
+      perfs: validPerfs
+    };
+  }
+
   // ═══ SECTION 6b: REGIME SCENARIOS ═══
   // Simple 3-scenario analysis: current regime, bull, crash
   // Not a Monte Carlo — just "what would change if regime shifts"
@@ -910,6 +982,13 @@
 
       // Step 6: Mini-scenarios (v7.1 — stagflation/bull/crash)
       result.regimeScenarios = _computeRegimeScenarios(result, product, bs, catRate, issuer);
+
+      // Step 6b: Dispersion backtest 1Y
+      var backtest = _computeDispersionBacktest(product);
+      if (backtest) {
+        result.dispersionBacktest = backtest;
+        product._dispersionBacktest = backtest;
+      }
 
       if (result.metadata) {
         result.metadata.v6Weights = V7_WEIGHTS;

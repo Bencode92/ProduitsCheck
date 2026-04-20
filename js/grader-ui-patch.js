@@ -77,6 +77,34 @@
                 gradingHtml += '</div></div>';
             }
 
+            // v7.1: Dispersion backtest 1Y
+            var bt = p.grading.dispersionBacktest || p._dispersionBacktest;
+            if (bt) {
+                gradingHtml += '<div style="margin:14px 0;padding:14px;background:rgba(59,130,246,0.04);border:1px solid rgba(59,130,246,0.15);border-radius:8px">';
+                gradingHtml += '<div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:10px">📊 Simulation 1 an — Dispersion réelle</div>';
+                gradingHtml += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px">';
+                gradingHtml += '<div style="text-align:center;padding:8px;background:var(--bg-card);border-radius:6px"><div style="font-size:10px;color:var(--text-dim)">Dispersion moy.</div><div style="font-size:18px;font-weight:700;color:var(--accent)">' + bt.avgDispersion.toFixed(1) + '%</div></div>';
+                gradingHtml += '<div style="text-align:center;padding:8px;background:var(--bg-card);border-radius:6px"><div style="font-size:10px;color:var(--text-dim)">Participation</div><div style="font-size:18px;font-weight:700;color:var(--text-bright)">×' + bt.participation + '%</div></div>';
+                gradingHtml += '<div style="text-align:center;padding:8px;background:var(--bg-card);border-radius:6px"><div style="font-size:10px;color:var(--text-dim)">Rendement 1Y</div><div style="font-size:18px;font-weight:700;color:var(--green)">' + bt.returnPct.toFixed(1) + '%</div></div>';
+                gradingHtml += '<div style="text-align:center;padding:8px;background:rgba(6,214,160,0.08);border-radius:6px"><div style="font-size:10px;color:var(--text-dim)">Sur 100K€</div><div style="font-size:18px;font-weight:700;color:var(--green)">+' + (typeof formatNumber === 'function' ? formatNumber(bt.returnEur) : bt.returnEur) + '€</div></div>';
+                gradingHtml += '</div>';
+
+                // Top 3 and worst pair
+                gradingHtml += '<div style="font-size:10px;color:var(--text-muted);margin-bottom:4px">Top paires (sur ' + bt.nbPairs + ' paires, ' + bt.nbStocks + ' actions) :</div>';
+                gradingHtml += '<div style="display:flex;flex-wrap:wrap;gap:4px">';
+                bt.pairs.slice(0, 5).forEach(function(pair) {
+                    gradingHtml += '<div style="padding:3px 8px;background:var(--bg-card);border-radius:4px;font-size:10px;border:1px solid var(--border)">';
+                    gradingHtml += '<span style="color:var(--text-bright)">' + pair.stock1 + '</span>';
+                    gradingHtml += ' <span style="color:var(--text-dim)">vs</span> ';
+                    gradingHtml += '<span style="color:var(--text-bright)">' + pair.stock2 + '</span>';
+                    gradingHtml += ' → <span style="color:var(--green);font-weight:600">' + pair.dispersion.toFixed(1) + '%</span>';
+                    gradingHtml += '</div>';
+                });
+                gradingHtml += '</div>';
+                gradingHtml += '<div style="font-size:9px;color:var(--text-dim);margin-top:6px">Backtest basé sur les performances 1 an réelles. Résultat passé, non garanti.</div>';
+                gradingHtml += '</div>';
+            }
+
             // v7.1: Issuer credit badge
             if (p.grading && p.grading.metadata && p.grading.metadata.issuerCDS) {
                 var cds = p.grading.metadata.issuerCDS;
