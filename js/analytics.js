@@ -114,8 +114,8 @@ async function renderAnalytics(container) {
   const totalCAT = catDeposits.reduce((s,d) => s + (parseFloat(d.amount)||0), 0);
   const totalAll = totalStructured + totalCAT;
   const annualYieldStructured = products.reduce((s,p) => s + calcProductAnnualYield(p), 0);
-  const catStats = catManager?.getStats() || {};
-  const annualYieldCAT = catStats.totalInterest || 0;
+  // Compute CAT annual yield consistently: amount × rate / 100 (per deposit, annual)
+  const annualYieldCAT = catDeposits.reduce((s,d) => s + Math.round((parseFloat(d.amount)||0) * (parseFloat(d.rate)||0) / 100), 0);
   const annualYieldTotal = annualYieldStructured + annualYieldCAT;
   const avgYield = totalAll > 0 ? (annualYieldTotal / totalAll * 100) : 0;
 
