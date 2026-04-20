@@ -119,13 +119,33 @@ async function renderAnalytics(container) {
   const annualYieldTotal = annualYieldStructured + annualYieldCAT;
   const avgYield = totalAll > 0 ? (annualYieldTotal / totalAll * 100) : 0;
 
+  // ─── Compute per-entity breakdown ───
+  const IS_RATE = 0.25;
+  const netYieldTotal = Math.round(annualYieldTotal * (1 - IS_RATE));
+  const entities = _computeEntityBreakdown(products, catDeposits);
+  const fgdr = _computeFGDRExposure(products, catDeposits);
+  const events = _computeNextEvents(products, catDeposits);
+  const sensitivity = _computeRateSensitivity(products);
+
+  // ─── Duration moyenne pondérée ───
+  let durNum = 0, durDen = 0;
+  products.forEach(p => { const a = parseFloat(p.investedAmount)||0; const y = parseFloat(p.maturityYears)||0; if(a>0&&y>0){durNum+=a*y;durDen+=a;} });
+  catDeposits.forEach(d => { const a = parseFloat(d.amount)||0; const mat = d.maturityDate ? Math.max(0,(new Date(d.maturityDate)-new Date())/(365.25*24*3600*1000)) : 2; if(a>0){durNum+=a*mat;durDen+=a;} });
+  const avgDuration = durDen > 0 ? durNum / durDen : 0;
+
   container.innerHTML = `
-    <div class="stats-row">
+    <div class="stats-row" style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px">
       <div class="stat-card blue"><div class="stat-label">Total Investi</div><div class="stat-value">${formatNumber(totalAll)}€</div><div class="stat-sub">Structurés: ${formatNumber(totalStructured)}€ · CAT: ${formatNumber(totalCAT)}€</div></div>
-      <div class="stat-card green"><div class="stat-label">Rendement Annuel Estimé</div><div class="stat-value">${formatNumber(annualYieldTotal)}€</div><div class="stat-sub">Structurés: ${formatNumber(annualYieldStructured)}€ · CAT: ${formatNumber(annualYieldCAT)}€</div></div>
-      <div class="stat-card orange"><div class="stat-label">Rendement Moyen</div><div class="stat-value">${avgYield.toFixed(2).replace('.',',')}%</div><div class="stat-sub">Pondéré par montant</div></div>
-      <div class="stat-card purple"><div class="stat-label">Nombre de Placements</div><div class="stat-value">${products.length + catDeposits.length}</div><div class="stat-sub">${products.length} structurés · ${catDeposits.length} CAT/PS</div></div>
+      <div class="stat-card green"><div class="stat-label">Rendement Annuel Brut</div><div class="stat-value">${formatNumber(annualYieldTotal)}€</div><div class="stat-sub">Structurés: ${formatNumber(annualYieldStructured)}€ · CAT: ${formatNumber(annualYieldCAT)}€</div></div>
+      <div class="stat-card" style="border-left:3px solid #06D6A0"><div class="stat-label">Rendement Net IS (25%)</div><div class="stat-value" style="color:#06D6A0">${formatNumber(netYieldTotal)}€</div><div class="stat-sub">${avgYield > 0 ? (avgYield * (1 - IS_RATE)).toFixed(2).replace('.',',') : '0'}% net · ${avgYield.toFixed(2).replace('.',',')}% brut</div></div>
+      <div class="stat-card" style="border-left:3px solid #8338EC"><div class="stat-label">Duration Moyenne</div><div class="stat-value">${avgDuration.toFixed(1)} ans</div><div class="stat-sub">${products.length + catDeposits.length} placements</div></div>
+      <div class="stat-card" style="border-left:3px solid ${fgdr.alert ? '#EF233C' : '#06D6A0'}"><div class="stat-label">Couverture FGDR</div><div class="stat-value">${fgdr.coveredPct}%</div><div class="stat-sub">${fgdr.alert ? '⚠ ' + fgdr.alertCount + ' dépassement(s)' : '✓ Couvert'}</div></div>
     </div>
+
+    ${_renderEntityTables(entities, IS_RATE)}
+    ${_renderFGDRSection(fgdr)}
+    ${_renderNextEvents(events)}
+    ${_renderRateSensitivity(sensitivity)}
     ${_renderMaturityTimeline(products, catDeposits)}
     ${_renderStressTest(products, catDeposits)}
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
@@ -139,6 +159,322 @@ async function renderAnalytics(container) {
     </div>
     `;
   setTimeout(() => renderAllCharts(), 50);
+}
+
+// ═══ ENTITY BREAKDOWN ═══════════════════════════════════════
+function _computeEntityBreakdown(products, catDeposits) {
+  var entities = {};
+  products.forEach(function(p) {
+    var ent = p.envelope || p.entity || 'non_assigne';
+    if (!entities[ent]) entities[ent] = { products: [], catDeposits: [], totalInvested: 0, totalYield: 0 };
+    entities[ent].products.push(p);
+    entities[ent].totalInvested += parseFloat(p.investedAmount) || 0;
+    entities[ent].totalYield += calcProductAnnualYield(p);
+  });
+  catDeposits.forEach(function(d) {
+    var ent = d.entity || (d.entityName === 'Caméleons' ? 'cameleons' : d.entityName === 'ByCam' ? 'bycam' : 'non_assigne');
+    if (!entities[ent]) entities[ent] = { products: [], catDeposits: [], totalInvested: 0, totalYield: 0 };
+    entities[ent].catDeposits.push(d);
+    var amt = parseFloat(d.amount) || 0;
+    entities[ent].totalInvested += amt;
+    entities[ent].totalYield += Math.round(amt * (parseFloat(d.rate) || 0) / 100);
+  });
+  return entities;
+}
+
+function _renderEntityTables(entities, isRate) {
+  var fmt = typeof formatNumber === 'function' ? formatNumber : function(n) { return String(Math.round(n)); };
+  var entNames = { bycam: '🏢 ByCam', cameleons: '🦎 Caméléons Com Mark', non_assigne: '❓ Non assigné' };
+  var entColors = { bycam: '#3B82F6', cameleons: '#A855F7', non_assigne: '#94A3B8' };
+  var h = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">';
+
+  Object.keys(entities).forEach(function(ent) {
+    var e = entities[ent];
+    var name = entNames[ent] || ent;
+    var color = entColors[ent] || '#64748B';
+    var netYield = Math.round(e.totalYield * (1 - isRate));
+    var avgRate = e.totalInvested > 0 ? (e.totalYield / e.totalInvested * 100) : 0;
+
+    h += '<div class="fiche-section"><div class="fiche-section-header" style="border-color:' + color + '"><span style="color:' + color + ';font-weight:700">' + name + '</span>';
+    h += '<span style="font-size:11px;color:var(--text-muted);margin-left:auto">' + fmt(e.totalInvested) + '€ investi</span></div>';
+    h += '<div class="fiche-section-body">';
+
+    // Summary row
+    h += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px">';
+    h += '<div style="text-align:center;padding:8px;background:rgba(59,130,246,0.05);border-radius:6px"><div style="font-size:10px;color:var(--text-dim)">Rendement brut</div><div style="font-size:16px;font-weight:700;color:var(--green)">+' + fmt(e.totalYield) + '€/an</div></div>';
+    h += '<div style="text-align:center;padding:8px;background:rgba(6,214,160,0.05);border-radius:6px"><div style="font-size:10px;color:var(--text-dim)">Net IS (25%)</div><div style="font-size:16px;font-weight:700;color:#06D6A0">+' + fmt(netYield) + '€/an</div></div>';
+    h += '<div style="text-align:center;padding:8px;background:rgba(131,56,236,0.05);border-radius:6px"><div style="font-size:10px;color:var(--text-dim)">Taux moyen</div><div style="font-size:16px;font-weight:700;color:' + color + '">' + avgRate.toFixed(2) + '%</div></div>';
+    h += '</div>';
+
+    // Product list
+    h += '<table style="width:100%;font-size:11px;border-collapse:collapse"><thead><tr style="border-bottom:1px solid var(--border)">';
+    h += '<th style="padding:4px 6px;text-align:left;color:var(--text-dim);font-size:10px">Produit</th>';
+    h += '<th style="padding:4px 6px;text-align:right;color:var(--text-dim);font-size:10px">Montant</th>';
+    h += '<th style="padding:4px 6px;text-align:right;color:var(--text-dim);font-size:10px">Taux</th>';
+    h += '<th style="padding:4px 6px;text-align:right;color:var(--text-dim);font-size:10px">Rdt brut/an</th>';
+    h += '<th style="padding:4px 6px;text-align:right;color:var(--text-dim);font-size:10px">Net IS/an</th>';
+    h += '</tr></thead><tbody>';
+
+    e.products.forEach(function(p) {
+      var amt = parseFloat(p.investedAmount) || 0;
+      var rate = getAnnualizedRate(p);
+      var yld = calcProductAnnualYield(p);
+      var grade = p.grading ? p.grading.grade : '';
+      var gradeColor = {A:'#06D6A0',B:'#4ECDC4',C:'#FFB627',D:'#E85D04',F:'#EF233C'}[grade] || '#888';
+      h += '<tr style="border-bottom:1px solid var(--border)">';
+      h += '<td style="padding:4px 6px">' + (p.name || '?').substring(0, 30) + (grade ? ' <span style="color:' + gradeColor + ';font-weight:700;font-size:10px">' + grade + '</span>' : '') + '</td>';
+      h += '<td style="padding:4px 6px;text-align:right;font-family:var(--mono)">' + fmt(amt) + '€</td>';
+      h += '<td style="padding:4px 6px;text-align:right;color:var(--green)">' + rate.toFixed(2) + '%</td>';
+      h += '<td style="padding:4px 6px;text-align:right;font-family:var(--mono);color:var(--green)">+' + fmt(yld) + '€</td>';
+      h += '<td style="padding:4px 6px;text-align:right;font-family:var(--mono);color:#06D6A0">+' + fmt(Math.round(yld * (1 - isRate))) + '€</td>';
+      h += '</tr>';
+    });
+    e.catDeposits.forEach(function(d) {
+      var amt = parseFloat(d.amount) || 0;
+      var rate = parseFloat(d.rate) || 0;
+      var yld = Math.round(amt * rate / 100);
+      h += '<tr style="border-bottom:1px solid var(--border)">';
+      h += '<td style="padding:4px 6px">🏦 ' + (d.productName || 'CAT').substring(0, 30) + '</td>';
+      h += '<td style="padding:4px 6px;text-align:right;font-family:var(--mono)">' + fmt(amt) + '€</td>';
+      h += '<td style="padding:4px 6px;text-align:right;color:var(--orange)">' + rate.toFixed(2) + '%</td>';
+      h += '<td style="padding:4px 6px;text-align:right;font-family:var(--mono);color:var(--green)">+' + fmt(yld) + '€</td>';
+      h += '<td style="padding:4px 6px;text-align:right;font-family:var(--mono);color:#06D6A0">+' + fmt(Math.round(yld * (1 - isRate))) + '€</td>';
+      h += '</tr>';
+    });
+
+    h += '</tbody></table></div></div>';
+  });
+
+  h += '</div>';
+  return h;
+}
+
+// ═══ FGDR EXPOSURE ══════════════════════════════════════════
+function _computeFGDRExposure(products, catDeposits) {
+  var FGDR_LIMIT = 100000;
+  var banks = {};
+  // Only CAT and deposits are covered by FGDR, not structured products (which are debt securities)
+  catDeposits.forEach(function(d) {
+    var bank = d.bankName || d.bankId || '?';
+    var ent = d.entity || (d.entityName === 'Caméleons' ? 'cameleons' : 'bycam');
+    var key = bank + '|' + ent;
+    if (!banks[key]) banks[key] = { bank: bank, entity: ent, amount: 0 };
+    banks[key].amount += parseFloat(d.amount) || 0;
+  });
+  var entries = Object.values(banks);
+  var totalCovered = 0, totalExposed = 0, alertCount = 0;
+  entries.forEach(function(e) {
+    e.covered = Math.min(e.amount, FGDR_LIMIT);
+    e.excess = Math.max(0, e.amount - FGDR_LIMIT);
+    e.ratio = e.amount / FGDR_LIMIT;
+    totalCovered += e.covered;
+    totalExposed += e.amount;
+    if (e.excess > 0) alertCount++;
+  });
+  // Also track structured products (issuer risk, not FGDR but important)
+  var issuerExposure = {};
+  products.forEach(function(p) {
+    var emitter = p.emitter || BANKS.find(function(b) { return b.id === p.bankId; })?.name || p.bankId || '?';
+    if (!issuerExposure[emitter]) issuerExposure[emitter] = 0;
+    issuerExposure[emitter] += parseFloat(p.investedAmount) || 0;
+  });
+  return {
+    entries: entries,
+    issuerExposure: issuerExposure,
+    coveredPct: totalExposed > 0 ? Math.round(totalCovered / totalExposed * 100) : 100,
+    alert: alertCount > 0,
+    alertCount: alertCount,
+    totalExposed: totalExposed
+  };
+}
+
+function _renderFGDRSection(fgdr) {
+  var fmt = typeof formatNumber === 'function' ? formatNumber : function(n) { return String(Math.round(n)); };
+  var h = '<div class="fiche-section" style="margin-bottom:16px"><div class="fiche-section-header"><span class="fiche-section-icon">🏦</span><span class="fiche-section-title">Exposition FGDR & Concentration Émetteur</span></div>';
+  h += '<div class="fiche-section-body">';
+
+  if (fgdr.entries.length > 0) {
+    h += '<div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:6px">Dépôts CAT — Garantie FGDR (100K€ / banque / entité)</div>';
+    h += '<table style="width:100%;font-size:11px;border-collapse:collapse;margin-bottom:12px"><thead><tr style="border-bottom:2px solid var(--border)">';
+    h += '<th style="padding:5px 6px;text-align:left;color:var(--text-dim);font-size:10px">Banque</th>';
+    h += '<th style="padding:5px 6px;text-align:left;color:var(--text-dim);font-size:10px">Entité</th>';
+    h += '<th style="padding:5px 6px;text-align:right;color:var(--text-dim);font-size:10px">Montant</th>';
+    h += '<th style="padding:5px 6px;text-align:right;color:var(--text-dim);font-size:10px">Couvert</th>';
+    h += '<th style="padding:5px 6px;text-align:right;color:var(--text-dim);font-size:10px">Excédent</th>';
+    h += '<th style="padding:5px 6px;text-align:center;color:var(--text-dim);font-size:10px">Statut</th>';
+    h += '</tr></thead><tbody>';
+    fgdr.entries.sort(function(a, b) { return b.amount - a.amount; }).forEach(function(e) {
+      var entLabel = e.entity === 'bycam' ? '🏢 ByCam' : e.entity === 'cameleons' ? '🦎 Cam.' : e.entity;
+      var statusColor = e.excess > 0 ? 'var(--red)' : 'var(--green)';
+      var statusIcon = e.excess > 0 ? '⚠ ' + e.ratio.toFixed(1) + '×' : '✅';
+      h += '<tr style="border-bottom:1px solid var(--border)">';
+      h += '<td style="padding:5px 6px;font-weight:500">' + e.bank + '</td>';
+      h += '<td style="padding:5px 6px;font-size:10px">' + entLabel + '</td>';
+      h += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono)">' + fmt(e.amount) + '€</td>';
+      h += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:var(--green)">' + fmt(e.covered) + '€</td>';
+      h += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:' + (e.excess > 0 ? 'var(--red)' : 'var(--text-dim)') + '">' + (e.excess > 0 ? fmt(e.excess) + '€' : '—') + '</td>';
+      h += '<td style="padding:5px 6px;text-align:center;color:' + statusColor + ';font-weight:600">' + statusIcon + '</td>';
+      h += '</tr>';
+    });
+    h += '</tbody></table>';
+  }
+
+  // Issuer concentration for structured products
+  var issuers = Object.entries(fgdr.issuerExposure).sort(function(a, b) { return b[1] - a[1]; });
+  if (issuers.length > 0) {
+    var totalStr = issuers.reduce(function(s, e) { return s + e[1]; }, 0);
+    h += '<div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:6px">Structurés — Concentration émetteur (risque crédit)</div>';
+    h += '<div style="display:flex;gap:6px;flex-wrap:wrap">';
+    issuers.forEach(function(e) {
+      var pct = totalStr > 0 ? (e[1] / totalStr * 100) : 0;
+      var color = pct > 40 ? 'var(--red)' : pct > 25 ? 'var(--orange)' : 'var(--green)';
+      h += '<div style="padding:6px 10px;border-radius:6px;background:var(--bg-card);border:1px solid var(--border);font-size:11px">';
+      h += '<span style="font-weight:600">' + e[0].substring(0, 25) + '</span> ';
+      h += '<span style="font-family:var(--mono)">' + fmt(e[1]) + '€</span> ';
+      h += '<span style="color:' + color + ';font-weight:700">' + pct.toFixed(0) + '%</span>';
+      h += '</div>';
+    });
+    h += '</div>';
+  }
+
+  h += '</div></div>';
+  return h;
+}
+
+// ═══ NEXT EVENTS ════════════════════════════════════════════
+function _computeNextEvents(products, catDeposits) {
+  var now = new Date();
+  var events = [];
+  var threeMonths = new Date(now.getTime() + 90 * 24 * 3600 * 1000);
+
+  // CAT maturities
+  catDeposits.forEach(function(d) {
+    if (!d.maturityDate || d.status !== 'active') return;
+    var mat = new Date(d.maturityDate);
+    if (mat > now && mat <= threeMonths) {
+      events.push({ date: mat, type: 'maturity_cat', icon: '🏦', color: 'var(--green)', label: (d.productName || 'CAT') + ' — échéance', detail: formatNumber(parseFloat(d.amount) || 0) + '€ disponible' });
+    }
+  });
+
+  // Structured products: autocall dates, coupon observations
+  products.forEach(function(p) {
+    var cs = (p.earlyRedemption && p.earlyRedemption.callSchedule) || p.callSchedule || [];
+    cs.forEach(function(c) {
+      var dt = c.date ? _parseDate(c.date) : null;
+      if (dt && dt > now && dt <= threeMonths) {
+        var isAutocall = (p.earlyRedemption && p.earlyRedemption.type === 'autocall');
+        events.push({ date: dt, type: isAutocall ? 'autocall' : 'callable', icon: isAutocall ? '⚡' : '📅', color: isAutocall ? 'var(--orange)' : 'var(--purple)', label: (p.name || 'Produit').substring(0, 35) + ' — ' + (isAutocall ? 'observation autocall' : 'date de rappel'), detail: (c.amount || 100) + '% si call' });
+      }
+    });
+    // Coupon observation for rate products
+    if (p.coupon && p.coupon.type === 'conditionnel' && p.coupon.trigger) {
+      // Annual observation around subscription date
+      var sub = p.receivedDate ? new Date(p.receivedDate) : null;
+      if (sub) {
+        var nextObs = new Date(sub);
+        nextObs.setFullYear(now.getFullYear());
+        if (nextObs < now) nextObs.setFullYear(now.getFullYear() + 1);
+        if (nextObs <= threeMonths) {
+          events.push({ date: nextObs, type: 'coupon_obs', icon: '💰', color: 'var(--cyan)', label: (p.name || 'Produit').substring(0, 35) + ' — observation coupon', detail: 'Coupon ' + p.coupon.rate + '% si trigger ≤ ' + p.coupon.trigger + '%' });
+        }
+      }
+    }
+  });
+
+  events.sort(function(a, b) { return a.date - b.date; });
+  return events;
+}
+
+function _parseDate(str) {
+  if (!str) return null;
+  // Handle dd/mm/yyyy
+  var m = str.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+  if (m) return new Date(parseInt(m[3]), parseInt(m[2]) - 1, parseInt(m[1]));
+  // Handle yyyy-mm-dd or standard
+  var d = new Date(str);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function _renderNextEvents(events) {
+  if (events.length === 0) return '';
+  var h = '<div class="fiche-section" style="margin-bottom:16px"><div class="fiche-section-header"><span class="fiche-section-icon">📅</span><span class="fiche-section-title">Prochains Événements (90 jours)</span></div>';
+  h += '<div class="fiche-section-body">';
+  events.forEach(function(ev) {
+    var dateStr = ev.date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
+    h += '<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--border)">';
+    h += '<div style="font-size:14px">' + ev.icon + '</div>';
+    h += '<div style="min-width:50px;font-size:11px;font-weight:700;color:' + ev.color + '">' + dateStr + '</div>';
+    h += '<div style="flex:1;font-size:12px;color:var(--text-bright)">' + ev.label + '</div>';
+    h += '<div style="font-size:11px;color:var(--text-muted)">' + ev.detail + '</div>';
+    h += '</div>';
+  });
+  h += '</div></div>';
+  return h;
+}
+
+// ═══ RATE SENSITIVITY ═══════════════════════════════════════
+function _computeRateSensitivity(products) {
+  var rateProducts = products.filter(function(p) {
+    return p.coupon && p.coupon.type === 'conditionnel' && p.coupon.trigger && p.coupon.trigger < 10;
+  });
+  if (rateProducts.length === 0) return null;
+
+  // Compute impact at different TEC10 levels
+  var levels = [3.5, 4.0, 4.4, 4.6, 5.0, 5.5];
+  var results = levels.map(function(level) {
+    var totalLost = 0;
+    var affected = [];
+    rateProducts.forEach(function(p) {
+      var trigger = parseFloat(p.coupon.trigger) || 0;
+      var rate = getAnnualizedRate(p);
+      var amt = parseFloat(p.investedAmount) || 0;
+      if (level > trigger) {
+        var couponLost = Math.round(amt * rate / 100);
+        totalLost += couponLost;
+        affected.push({ name: (p.name || '?').substring(0, 25), trigger: trigger, lost: couponLost });
+      }
+    });
+    return { level: level, totalLost: totalLost, affected: affected };
+  });
+
+  return { products: rateProducts, results: results };
+}
+
+function _renderRateSensitivity(sensitivity) {
+  if (!sensitivity) return '';
+  var fmt = typeof formatNumber === 'function' ? formatNumber : function(n) { return String(Math.round(n)); };
+  var h = '<div class="fiche-section" style="margin-bottom:16px"><div class="fiche-section-header"><span class="fiche-section-icon">📉</span><span class="fiche-section-title">Sensibilité Taux — Impact sur les coupons conditionnels</span></div>';
+  h += '<div class="fiche-section-body">';
+  h += '<div style="display:grid;grid-template-columns:repeat(' + sensitivity.results.length + ',1fr);gap:6px;margin-bottom:10px">';
+  sensitivity.results.forEach(function(r) {
+    var color = r.totalLost === 0 ? 'var(--green)' : r.totalLost < 10000 ? 'var(--orange)' : 'var(--red)';
+    var bg = r.totalLost === 0 ? 'rgba(6,214,160,0.05)' : r.totalLost < 10000 ? 'rgba(255,190,11,0.05)' : 'rgba(239,35,60,0.05)';
+    h += '<div style="text-align:center;padding:8px;border-radius:6px;background:' + bg + ';border:1px solid ' + (r.totalLost === 0 ? 'rgba(6,214,160,0.2)' : r.totalLost < 10000 ? 'rgba(255,190,11,0.2)' : 'rgba(239,35,60,0.2)') + '">';
+    h += '<div style="font-size:10px;color:var(--text-dim)">TEC10 =</div>';
+    h += '<div style="font-size:14px;font-weight:700;color:var(--text-bright)">' + r.level.toFixed(1) + '%</div>';
+    h += '<div style="font-size:12px;font-weight:600;color:' + color + '">' + (r.totalLost === 0 ? '✓ OK' : '-' + fmt(r.totalLost) + '€/an') + '</div>';
+    if (r.affected.length > 0) {
+      h += '<div style="font-size:9px;color:var(--text-dim);margin-top:2px">' + r.affected.length + ' produit(s)</div>';
+    }
+    h += '</div>';
+  });
+  h += '</div>';
+
+  // Detail: which products are affected at each level
+  var maxLost = sensitivity.results[sensitivity.results.length - 1];
+  if (maxLost.affected.length > 0) {
+    h += '<div style="font-size:11px;color:var(--text-muted);margin-top:6px">';
+    h += '<strong>Produits exposés :</strong> ';
+    var seen = {};
+    maxLost.affected.forEach(function(a) {
+      if (seen[a.name]) return;
+      seen[a.name] = true;
+      h += a.name + ' (trigger ' + a.trigger + '%, coupon ' + fmt(a.lost) + '€/an) · ';
+    });
+    h += '</div>';
+  }
+  h += '</div></div>';
+  return h;
 }
 
 // ═══ MATURITY TIMELINE TABLE ═══════════════════════════════
