@@ -1,7 +1,7 @@
 {
   "bankId": "swiss-life",
   "bankName": "Swiss Life",
-  "lastUpdated": "2026-04-20T16:42:35.298Z",
+  "lastUpdated": "2026-04-20T16:43:19.880Z",
   "products": [
     {
       "id": "sp_mnd8hjkx_40efj",
@@ -55,6 +55,14 @@
       "id": "sp_mo7faysh_qtyge",
       "name": "SL - TARN TEC10 10 ans",
       "type": "capital_garanti",
+      "status": "analyzing",
+      "score": null,
+      "receivedDate": "2026-04-20"
+    },
+    {
+      "id": "sp_mo7fbx6w_m3sm9",
+      "name": "SL - Range Accrual CMS10Y 10 ans",
+      "type": "range-accrual",
       "status": "analyzing",
       "score": null,
       "receivedDate": "2026-04-20"
