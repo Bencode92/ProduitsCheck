@@ -284,7 +284,7 @@
     else if (/euribor\s*3/i.test(productText)) rateAlias = 'euribor_3m';
     else if (/oat\s*5/i.test(productText)) rateAlias = 'oat_fr_5y';
     else if (/oat\s*2/i.test(productText)) rateAlias = 'oat_fr_2y';
-    else if (st.indexOf('taux') >= 0 || st === 'capital_garanti') rateAlias = 'oat_fr_10y'; // default to TEC10
+    else if (st.indexOf('taux') >= 0 || st === 'capital_garanti' || st === 'digitale_memoire') rateAlias = 'oat_fr_10y'; // default to TEC10
 
     var rateData = rates.yields[rateAlias];
     if (!rateData || !rateData.history || rateData.history.length < 10) return null;
@@ -328,24 +328,35 @@
       probCoupon = probCoupon * 0.95;
     }
 
-    // Memory boost
-    if (hasMemory) probCoupon = Math.min(0.99, probCoupon * 1.05);
+    // Memory boost: if coupon is missed one year, it can be recovered later
+    // The effective probability is higher because missed coupons accumulate
+    // Model: over N years, prob of getting ALL coupons eventually ≈ 1 - (1-p)^N
+    // Simplified: boost proportional to maturity and base probability
+    if (hasMemory) {
+      var missProb = 1 - probCoupon;
+      // Probability of catching up over remaining years
+      var catchupBoost = 1 - Math.pow(missProb, Math.min(matMax, 5));
+      probCoupon = Math.min(0.99, probCoupon + (1 - probCoupon) * catchupBoost * 0.5);
+    }
     probCoupon = Math.max(0.01, Math.min(0.99, probCoupon));
 
-    // ─── Compute probExit (how easy to exit / autocall) ──────
+    // ─── Compute probExit + matEsperee ──────
     var er = product.earlyRedemption || {};
     var probExit = 0;
     var guaranteedYears = product.guaranteedYears || 0;
+    var matEsperee = matMax;
 
-    if (er.possible && er.type === 'autocall' && er.trigger) {
+    if (er.possible && (er.type === 'autocall' || er.type === 'tarn') && (er.trigger || product.autocallCumulTarget)) {
       // TARN autocall: cumulative coupon target
-      // If probCoupon is high, autocall happens quickly
-      var targetCumul = parseFloat(er.trigger) || 24;
+      // Use autocallCumulTarget if available (more precise), fallback to er.trigger
+      var targetCumul = parseFloat(product.autocallCumulTarget) || parseFloat(er.trigger) || 24;
       var couponPerYear = annRate || 0;
       if (couponPerYear > 0 && targetCumul > 0) {
         var yearsToTarget = targetCumul / couponPerYear;
         // Adjust for probability of receiving coupon each year
         var adjustedYears = yearsToTarget / probCoupon;
+        // matEsperee = adjusted years to reach target (capped at matMax)
+        matEsperee = Math.min(matMax, Math.max(guaranteedYears || 1, Math.ceil(adjustedYears)));
         probExit = Math.min(0.95, adjustedYears <= matMax ? (matMax - adjustedYears) / matMax : 0.05);
       }
     } else if (er.possible && er.type === 'callable') {
@@ -357,7 +368,9 @@
 
     // ─── Score ──────
     var couponEffectif = annRate * probCoupon;
-    var rendementNet = couponEffectif; // no capital loss for rate products (capital guaranteed)
+    // Deduct annualized commissions from net return
+    var commAnnual = (parseFloat(product.commissions) || 0) / matMax;
+    var rendementNet = couponEffectif - commAnnual;
     var score = Math.round(35 + rendementNet * 6);
     score = Math.max(5, Math.min(95, score));
 
@@ -376,7 +389,7 @@
       couponEffectif: Math.round(couponEffectif * 100) / 100,
       perteEsperee: 0,
       vols: [],
-      matEsperee: matMax,
+      matEsperee: matEsperee,
       isRate: true,
       historicalBasis: history.length + ' obs (' + history[0].date + '→' + history[history.length-1].date + ')',
       rateAlias: rateAlias,
@@ -415,7 +428,7 @@
 
     var unds = (product.underlyings || []).map(function(u) { return typeof u === 'string' ? u : (u.name || u.ticker || ''); }).filter(Boolean);
     var isDispersion = st === 'dispersion' || undType === 'pairs';
-    var isRate = st === 'taux_fixe' || st === 'taux_fixe_in_fine' || undType === 'rates' || undType === 'credit';
+    var isRate = st === 'taux_fixe' || st === 'taux_fixe_in_fine' || st === 'digitale_memoire' || undType === 'rates' || undType === 'credit';
     var isWorstOf = undType === 'worst-of' || undType === 'worst_of';
     var isBasket = _isBasketProduct(product);
     if (isBasket && isWorstOf) isWorstOf = false;
@@ -474,7 +487,9 @@
       perteEsperee = (1 - barrierCapital / 100) * 100 * 1.3 * probB / Math.max(1, matEsperee);
     }
 
-    var rendementNet = rendementEspere - perteEsperee - drag;
+    // Deduct annualized commissions
+    var bsCommAnnual = (parseFloat(product.commissions) || 0) / Math.max(1, matMax);
+    var rendementNet = rendementEspere - perteEsperee - drag - bsCommAnnual;
     var score = Math.round(35 + rendementNet * 6);
     score = Math.max(5, Math.min(95, score));
 
