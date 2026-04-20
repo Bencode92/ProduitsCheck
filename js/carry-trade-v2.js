@@ -807,56 +807,81 @@
       if (_importedProducts[idx]) selected.push(_importedProducts[idx]);
     });
     if (selected.length === 0) { showToast('Sélectionnez au moins une proposition', 'error'); return; }
-    // Compute PnL for selected
-    var pnl = _computePnL(selected, LOAN.amount, LOAN.rate, LOAN.years, LOAN.taxRate);
-    var totalAmount = selected.reduce(function(s, p) { return s + (p.amount || 0); }, 0);
-    // Render result in discussion zone
+
+    // Compute PnL for EACH product separately on 1M€
+    var results = selected.map(function(p) {
+      var copy = JSON.parse(JSON.stringify(p));
+      copy.amount = LOAN.amount; // Force 1M€
+      return { product: copy, pnl: _computePnL([copy], LOAN.amount, LOAN.rate, LOAN.years, LOAN.taxRate) };
+    });
+
+    // Sort by net after tax (best first)
+    results.sort(function(a, b) { return b.pnl.netAfterTax - a.pnl.netAfterTax; });
+
     var disc = document.getElementById('carry-v2-discussion');
     if (disc) {
-      var h = '<div style="font-size:13px;font-weight:700;color:#7C3AED;margin-bottom:12px">📊 SIMULATION — ' + selected.length + ' proposition' + (selected.length > 1 ? 's' : '') + ' sélectionnée' + (selected.length > 1 ? 's' : '') + ' (' + _f(totalAmount) + '€)</div>';
+      var h = '<div style="font-size:13px;font-weight:700;color:#7C3AED;margin-bottom:12px">📊 COMPARAISON — ' + selected.length + ' produit' + (selected.length > 1 ? 's' : '') + ' sur ' + _f(LOAN.amount) + '€ (emprunt ' + LOAN.rate + '% · ' + LOAN.years + ' ans)</div>';
 
-      // Product cards
-      h += '<div style="display:grid;grid-template-columns:repeat(' + Math.min(selected.length, 3) + ',1fr);gap:10px;margin-bottom:14px">';
-      selected.forEach(function(p) {
-        h += '<div style="padding:12px;border-radius:8px;border-left:4px solid ' + (p.color || '#7C3AED') + ';background:' + B.row1 + '">';
-        h += '<div style="font-size:12px;font-weight:700;color:' + (p.color || '#7C3AED') + '">' + p.name + '</div>';
-        h += '<div style="font-size:11px;color:' + B.muted + ';margin-top:4px">' + p.emetteur + ' · ' + _f(p.amount) + '€</div>';
-        h += '<div style="font-size:18px;font-weight:800;color:#D97706;margin-top:6px">' + p.coupon + '%</div>';
-        h += '<div style="font-size:10px;color:' + B.dim + '">' + (p.type === 'fixe' ? 'Fixe garanti' : p.type === 'hybride' ? 'Plancher ' + p.couponPlancher + '% + Bonus' : 'Conditionnel trigger ' + (p.trigger || '?') + '%') + '</div>';
-        h += '</div>';
-      });
-      h += '</div>';
+      // Comparison table
+      h += '<table style="width:100%;border-collapse:collapse;font-size:11px;margin-bottom:14px">';
+      h += '<thead><tr style="background:' + B.header + '">';
+      h += '<th style="padding:8px;text-align:left;color:' + B.muted + '">Produit</th>';
+      h += '<th style="padding:8px;text-align:center;color:' + B.muted + '">Coupon</th>';
+      h += '<th style="padding:8px;text-align:right;color:#059669">Coupons 5A</th>';
+      h += '<th style="padding:8px;text-align:right;color:#DC2626">Intérêts 5A</th>';
+      h += '<th style="padding:8px;text-align:right;color:#D97706">IS 25%</th>';
+      h += '<th style="padding:8px;text-align:right;font-weight:700">Net après IS</th>';
+      h += '<th style="padding:8px;text-align:right;color:#92400E">Pire cas</th>';
+      h += '<th style="padding:8px;text-align:center">Rang</th>';
+      h += '</tr></thead><tbody>';
 
-      // PnL table
-      h += '<table style="width:100%;border-collapse:collapse;font-size:11px;margin-bottom:10px">';
-      h += '<thead><tr style="background:' + B.header + '"><th style="padding:6px">Année</th>';
-      selected.forEach(function(p) { h += '<th style="padding:6px;color:' + (p.color || '#7C3AED') + '">' + (p.name || '').substring(0, 20) + '</th>'; });
-      h += '<th style="padding:6px;color:#059669">Total coupons</th><th style="padding:6px;color:#DC2626">Intérêts emprunt</th><th style="padding:6px;font-weight:700">Net</th></tr></thead><tbody>';
-      pnl.flows.forEach(function(f) {
-        var bg = f.year % 2 === 0 ? B.row0 : B.row1;
-        h += '<tr style="background:' + bg + ';border-bottom:1px solid ' + B.border + '">';
-        h += '<td style="padding:5px 6px;font-weight:700">An ' + f.year + '</td>';
-        f.products.forEach(function(fp) { h += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:' + (fp.color || '#059669') + '">+' + _f(fp.rev) + '€</td>'; });
-        h += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:#059669;font-weight:600">+' + _f(f.totalRev) + '€</td>';
-        h += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:#DC2626">-' + _f(f.interest) + '€</td>';
-        h += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);font-weight:700;color:' + (f.net >= 0 ? '#059669' : '#DC2626') + '">' + (f.net >= 0 ? '+' : '') + _f(f.net) + '€</td>';
+      results.forEach(function(r, i) {
+        var p = r.product, pnl = r.pnl;
+        var isFirst = i === 0;
+        var bg = isFirst ? 'rgba(6,214,160,0.06)' : (i % 2 === 0 ? B.row0 : B.row1);
+        var netColor = pnl.netAfterTax >= 0 ? '#059669' : '#DC2626';
+
+        h += '<tr style="background:' + bg + ';border-bottom:1px solid ' + B.border + (isFirst ? ';border-left:3px solid #059669' : '') + '">';
+        h += '<td style="padding:8px"><div style="font-weight:700;color:' + B.text + '">' + p.name.substring(0, 30) + '</div><div style="font-size:10px;color:' + B.muted + '">' + (p.emetteur || '').substring(0, 20) + ' · ' + (p.type === 'fixe' ? 'Fixe garanti' : 'Conditionnel ' + (p.trigger || '') + '%') + '</div></td>';
+        h += '<td style="padding:8px;text-align:center;font-family:var(--mono);font-weight:800;color:#D97706;font-size:14px">' + p.coupon + '%</td>';
+        h += '<td style="padding:8px;text-align:right;font-family:var(--mono);color:#059669">+' + _f(pnl.totalRevenue) + '€</td>';
+        h += '<td style="padding:8px;text-align:right;font-family:var(--mono);color:#DC2626">-' + _f(pnl.totalInterest) + '€</td>';
+        h += '<td style="padding:8px;text-align:right;font-family:var(--mono);color:#D97706">-' + _f(pnl.tax) + '€</td>';
+        h += '<td style="padding:8px;text-align:right;font-family:var(--mono);font-weight:800;font-size:13px;color:' + netColor + '">' + (pnl.netAfterTax >= 0 ? '+' : '') + _f(pnl.netAfterTax) + '€</td>';
+        h += '<td style="padding:8px;text-align:right;font-family:var(--mono);font-size:10px;color:#92400E">' + _f(pnl.worstNet) + '€</td>';
+        h += '<td style="padding:8px;text-align:center"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:' + (isFirst ? '#059669' : i === 1 ? '#4ECDC4' : '#94A3B8') + ';color:white;font-weight:700;font-size:11px">' + (i + 1) + '</span></td>';
         h += '</tr>';
       });
       h += '</tbody></table>';
 
-      // Summary
-      h += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">';
-      h += '<div style="text-align:center;padding:10px;background:#ECFDF5;border-radius:6px;border:1px solid #6EE7B7"><div style="font-size:10px;color:#065F46">Coupons bruts 5A</div><div style="font-size:18px;font-weight:800;color:#059669">+' + _f(pnl.totalRevenue) + '€</div></div>';
-      h += '<div style="text-align:center;padding:10px;background:#FEF2F2;border-radius:6px;border:1px solid #FCA5A5"><div style="font-size:10px;color:#991B1B">Intérêts emprunt 5A</div><div style="font-size:18px;font-weight:800;color:#DC2626">-' + _f(pnl.totalInterest) + '€</div></div>';
-      h += '<div style="text-align:center;padding:10px;background:#FFF7ED;border-radius:6px;border:1px solid #FDBA74"><div style="font-size:10px;color:#92400E">IS 25%</div><div style="font-size:18px;font-weight:800;color:#D97706">-' + _f(pnl.tax) + '€</div></div>';
-      h += '<div style="text-align:center;padding:10px;background:' + (pnl.netAfterTax >= 0 ? '#ECFDF5' : '#FEF2F2') + ';border-radius:6px;border:2px solid ' + (pnl.netAfterTax >= 0 ? '#059669' : '#DC2626') + '"><div style="font-size:10px;color:' + (pnl.netAfterTax >= 0 ? '#065F46' : '#991B1B') + '">NET APRÈS IS</div><div style="font-size:18px;font-weight:800;color:' + (pnl.netAfterTax >= 0 ? '#059669' : '#DC2626') + '">' + (pnl.netAfterTax >= 0 ? '+' : '') + _f(pnl.netAfterTax) + '€</div></div>';
+      // Winner highlight
+      var winner = results[0];
+      h += '<div style="padding:12px;background:rgba(6,214,160,0.08);border:2px solid #059669;border-radius:8px;margin-bottom:10px">';
+      h += '<div style="font-size:12px;font-weight:700;color:#059669;margin-bottom:4px">🏆 MEILLEUR : ' + winner.product.name + '</div>';
+      h += '<div style="font-size:11px;color:' + B.dim + '">Net après IS : <strong style="color:#059669">+' + _f(winner.pnl.netAfterTax) + '€</strong> sur 5 ans';
+      h += ' · Pire cas : ' + _f(winner.pnl.worstNet) + '€';
+      h += ' · Espérance : +' + _f(winner.pnl.esperance) + '€</div>';
+      if (results.length > 1) {
+        var diff = winner.pnl.netAfterTax - results[results.length - 1].pnl.netAfterTax;
+        h += '<div style="font-size:11px;color:#059669;margin-top:4px">Avantage vs dernier : <strong>+' + _f(diff) + '€</strong></div>';
+      }
       h += '</div>';
 
-      // Worst case
-      h += '<div style="margin-top:10px;padding:8px;background:#FFF7ED;border-radius:6px;font-size:11px;color:#92400E">';
-      h += '<strong>Pire cas :</strong> +' + _f(pnl.worstNet) + '€ (coupons garantis uniquement)';
-      h += ' · <strong>Espérance pondérée :</strong> +' + _f(pnl.esperance) + '€ (90% central + 10% pire)';
-      h += '</div>';
+      // Detail year by year for winner
+      h += '<div style="font-size:11px;font-weight:600;color:' + B.muted + ';margin-bottom:6px">Détail année par année — ' + winner.product.name + '</div>';
+      h += '<table style="width:100%;border-collapse:collapse;font-size:11px">';
+      h += '<thead><tr style="background:' + B.header + '"><th style="padding:6px">Année</th><th style="padding:6px;text-align:right;color:#059669">Coupons</th><th style="padding:6px;text-align:right;color:#DC2626">Intérêts</th><th style="padding:6px;text-align:right;color:#D97706">IS</th><th style="padding:6px;text-align:right;font-weight:700">Net</th></tr></thead><tbody>';
+      winner.pnl.flows.forEach(function(f) {
+        var bg2 = f.year % 2 === 0 ? B.row0 : B.row1;
+        h += '<tr style="background:' + bg2 + ';border-bottom:1px solid ' + B.border + '">';
+        h += '<td style="padding:5px 6px;font-weight:700">An ' + f.year + '</td>';
+        h += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:#059669">+' + _f(f.totalRev) + '€</td>';
+        h += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:#DC2626">-' + _f(f.interest) + '€</td>';
+        h += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:#D97706">-' + _f(f.tax) + '€</td>';
+        h += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);font-weight:700;color:' + (f.net >= 0 ? '#059669' : '#DC2626') + '">' + (f.net >= 0 ? '+' : '') + _f(f.net) + '€</td>';
+        h += '</tr>';
+      });
+      h += '</tbody></table>';
 
       disc.innerHTML = h;
     }
