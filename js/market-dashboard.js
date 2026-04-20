@@ -50,7 +50,7 @@
     var policy = r.policy_rates || {};
     var curve = r.yield_curve || {};
 
-    var tec10 = yields.oat_fr_10y || {};
+    var tec10 = yields.tec10_fr || yields.oat_fr_10y || {};
     var oat5y = yields.oat_fr_5y || {};
     var oat2y = yields.oat_fr_2y || {};
     var bce = policy.ecb_deposit_rate || {};
@@ -75,8 +75,8 @@
     var eur12m = yields.euribor_12m || {};
 
     var rateCards = [
-      { id: 'oat_fr_10y', label: 'TEC10 (OAT 10 ans)', data: tec10, color: '#0891B2',
-        desc: 'Taux auquel l\'État français emprunte sur 10 ans. Référence pour les TARN et produits structurés taux longs.',
+      { id: 'tec10_fr', label: 'TEC10 (OAT 10 ans)', data: tec10, color: '#0891B2',
+        desc: 'Taux d\'État français 10 ans (Banque de France). Référence pour les TARN et produits structurés taux longs.',
         sub: 'Vol ' + (tec10.vol_annualized_bps || 18) + 'bp · ' + (tec10.direction || 'stable') + ' · Range ' + (tec10.low_1y || '?') + '-' + (tec10.high_1y || '?') },
       { id: 'oat_fr_5y', label: 'OAT 5 ans', data: oat5y, color: '#2563EB',
         desc: 'Taux souverain à 5 ans. Sert au calcul du budget option des produits structurés 5 ans.',
@@ -913,7 +913,7 @@
 
     // Get history
     var rateMap = {
-      tec10: { key: 'oat_fr_10y', label: 'TEC10', section: 'yields' },
+      tec10: { key: 'tec10_fr', label: 'TEC10', section: 'yields', fallback: 'oat_fr_10y' },
       oat5y: { key: 'oat_fr_5y', label: 'OAT 5Y', section: 'yields' },
       oat2y: { key: 'oat_fr_2y', label: 'OAT 2Y', section: 'yields' },
       euribor3m: { key: 'euribor_3m', label: 'Euribor 3M', section: 'yields' },
@@ -922,9 +922,11 @@
     var rm = rateMap[rateSel];
     var history = [];
     var current = 0;
-    if (rm.section === 'yields' && _data.rates.yields && _data.rates.yields[rm.key]) {
-      history = _data.rates.yields[rm.key].history || [];
-      current = _data.rates.yields[rm.key].current || 0;
+    var yieldKey = rm.key;
+    if (rm.section === 'yields' && _data.rates.yields && !_data.rates.yields[yieldKey] && rm.fallback) yieldKey = rm.fallback;
+    if (rm.section === 'yields' && _data.rates.yields && _data.rates.yields[yieldKey]) {
+      history = _data.rates.yields[yieldKey].history || [];
+      current = _data.rates.yields[yieldKey].current || 0;
     } else if (rm.section === 'policy_rates' && _data.rates.policy_rates && _data.rates.policy_rates[rm.key]) {
       current = _data.rates.policy_rates[rm.key].current || 0;
       // Policy rates don't have history array, use single point
