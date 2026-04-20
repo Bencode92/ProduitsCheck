@@ -341,9 +341,12 @@
     else if (/euribor\s*12/i.test(productText)) rateAlias = 'euribor_12m';
     else if (/euribor\s*3/i.test(productText)) rateAlias = 'euribor_3m';
     else if (/euribor\s*6/i.test(productText)) rateAlias = 'euribor_6m';
+    else if (/tec\s*7/i.test(productText)) rateAlias = 'tec7_fr';
+    else if (/tec\s*5/i.test(productText)) rateAlias = 'tec5_fr';
+    else if (/tec\s*2/i.test(productText)) rateAlias = 'tec2_fr';
     else if (/cms\s*10/i.test(productText)) rateAlias = 'oat_fr_10y'; // CMS 10Y ≈ OAT AAA (proxy)
-    else if (/oat\s*5/i.test(productText)) rateAlias = 'oat_fr_5y';
-    else if (/oat\s*2/i.test(productText)) rateAlias = 'oat_fr_2y';
+    else if (/oat\s*5/i.test(productText)) rateAlias = 'tec5_fr';
+    else if (/oat\s*2/i.test(productText)) rateAlias = 'tec2_fr';
     else if (st.indexOf('taux') >= 0 || st === 'capital_garanti' || st === 'digitale_memoire') rateAlias = 'tec10_fr'; // default to TEC10
 
     var rateData = rates.yields[rateAlias];

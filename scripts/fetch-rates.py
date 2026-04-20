@@ -108,6 +108,12 @@ BDF_TEC_SERIES = {
         "description": "Taux d'État français 2 ans.",
         "maturity": 2
     },
+    "tec7_fr": {
+        "series_key": "FM.D.FR.EUR.FR2.BB.FRMOYTEC7.HSTA",
+        "name": "TEC 7 (Banque de France)",
+        "description": "Taux d'État français 7 ans. Référence Callable 7Y NC3.",
+        "maturity": 7
+    },
 }
 
 
