@@ -69,49 +69,63 @@
         continue;
       }
 
-      // Coupon logic
+      // Coupon logic — TARN is binary: full coupon or nothing
+      var couponPaid = false;
       if (yr <= guaranteed) {
-        // Garanti
+        // Garanti — always paid
         couponReceived = Math.round(amount * coupon / 100);
+        couponPaid = true;
       } else if (scenario === 'pessimiste') {
-        // Pessimiste: pas de coupon après garantie
+        // Pessimiste: no conditional coupon
         couponReceived = 0;
+        couponPaid = false;
       } else if (scenario === 'optimiste') {
-        // Optimiste: toujours coupon
+        // Optimiste: always paid
         couponReceived = Math.round(amount * coupon / 100);
+        couponPaid = true;
       } else {
-        // Normal: coupon × probabilité
+        // Normal: binary — coupon paid with prob, or not
+        // Model: each year independently, coupon = full or 0
+        // Use prob to determine expected value but show full coupon × prob as weighted
+        // For display: show coupon as full but flag probability
+        couponReceived = Math.round(amount * coupon / 100);
+        couponPaid = true;
+        // Adjust: multiply by prob for net calculation
         couponReceived = Math.round(amount * coupon * scenProb / 100);
       }
 
-      cumCoupons += coupon * (couponReceived > 0 ? 1 : 0);
+      if (couponPaid) cumCoupons += coupon;
 
-      // Check autocall
+      // Check autocall AFTER receiving this year's coupon
+      var autocallThisYear = false;
       if (autocallTarget > 0 && cumCoupons >= autocallTarget && !autocalled) {
         autocalled = true;
         autocallYear = yr;
+        autocallThisYear = true;
       }
 
-      // Réinvestissement des coupons précédents
+      // Réinvestissement des coupons précédents en CAT
       var totalRev2 = couponReceived + catInterest;
       var net2 = totalRev2 - interest;
       var tax2 = net2 > 0 ? Math.round(net2 * LOAN.taxRate / 100) : 0;
       var netAfterTax2 = net2 - tax2;
       cumulNet += netAfterTax2;
 
-      var statusText = yr <= guaranteed ? 'Garanti' :
-        (couponReceived > 0 ? 'Coupon versé' : 'Pas de coupon');
-      if (autocalled && autocallYear === yr) statusText = 'AUTOCALL — capital récupéré';
+      var statusText = yr <= guaranteed ? 'Garanti (' + guaranteed + ' ans)' :
+        (couponPaid ? 'Conditionnel versé' : 'Pas de coupon');
+      if (autocallThisYear) statusText = 'Coupon + AUTOCALL → réinvesti ' + POST_CALL_RATE + '%';
+      var statusColor = yr <= guaranteed ? B.green :
+        (autocallThisYear ? B.purple : (couponPaid ? '#4ECDC4' : B.red));
 
       flows.push({
         year: yr, coupon: couponReceived, catInterest: catInterest, postCallRev: 0,
         totalRev: totalRev2, interest: interest, tax: tax2, net: netAfterTax2,
         cumul: cumulNet, roi: cumulNet / amount * 100,
         status: statusText,
-        color: yr <= guaranteed ? B.green : (couponReceived > 0 ? '#4ECDC4' : B.red)
+        color: statusColor
       });
 
-      // Ajouter le coupon net au pool CAT pour réinvestissement
+      // Ajouter le coupon au pool CAT pour réinvestissement
       if (couponReceived > 0) catPool += couponReceived;
     }
 
