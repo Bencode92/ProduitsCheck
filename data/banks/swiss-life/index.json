@@ -1,7 +1,7 @@
 {
   "bankId": "swiss-life",
   "bankName": "Swiss Life",
-  "lastUpdated": "2026-04-20T11:23:33.616Z",
+  "lastUpdated": "2026-04-20T11:24:55.332Z",
   "products": [
     {
       "id": "sp_mnd8hjkx_40efj",
@@ -50,14 +50,6 @@
       "status": "analyzing",
       "score": 4,
       "receivedDate": "2026-03-30"
-    },
-    {
-      "id": "sp_mnpqqdgl_onyab",
-      "name": "SL - Athena Fast Semestriel Saint Gobain Mai 2026",
-      "type": "autocall",
-      "status": "analyzing",
-      "score": null,
-      "receivedDate": "2026-04-08"
     },
     {
       "id": "sp_mo73woz4_z0zcu",
