@@ -10,6 +10,46 @@ function getPortfolioData() {
   return { products, catDeposits };
 }
 
+// ─── Get current applicable rate for a CAT deposit (progressive schedule) ───
+function _getCurrentCATRate(deposit) {
+  var rate = parseFloat(deposit.rate) || 0;
+  var schedule = deposit.rateSchedule;
+  if (!schedule || !Array.isArray(schedule) || schedule.length === 0) return rate;
+
+  var now = new Date();
+  // Find current period in schedule
+  for (var i = 0; i < schedule.length; i++) {
+    var s = schedule[i];
+    var from = s.from ? new Date(s.from) : null;
+    var to = s.to ? new Date(s.to) : null;
+    if (from && to && now >= from && now <= to) {
+      return parseFloat(s.rate) || rate;
+    }
+    // Match by fromMonth if no date match
+    if (!from && s.fromMonth !== undefined && deposit.startDate) {
+      var start = new Date(deposit.startDate);
+      var monthsElapsed = Math.round((now - start) / (30.44 * 24 * 60 * 60 * 1000));
+      if (monthsElapsed >= (s.fromMonth - 1) && monthsElapsed < (s.toMonth || 999)) {
+        return parseFloat(s.rate) || rate;
+      }
+    }
+  }
+
+  // If past all periods, use last period rate
+  var lastPeriod = schedule[schedule.length - 1];
+  if (lastPeriod && lastPeriod.to && now > new Date(lastPeriod.to)) {
+    return parseFloat(lastPeriod.rate) || rate;
+  }
+
+  // If before all periods, use first period rate
+  var firstPeriod = schedule[0];
+  if (firstPeriod && firstPeriod.from && now < new Date(firstPeriod.from)) {
+    return parseFloat(firstPeriod.rate) || rate;
+  }
+
+  return rate;
+}
+
 // ─── SMART: Annualiser le coupon selon la fréquence ─────────
 // Si coupon = 1.88% trimestriel → annualisé = 1.88 × 4 = 7.52%
 // Si coupon = 3.5% semestriel → annualisé = 3.5 × 2 = 7%
@@ -64,7 +104,7 @@ function projectCashflows(years) {
     });
     catDeposits.forEach(d => {
       const matYear = d.maturityDate ? new Date(d.maturityDate).getFullYear() : (now.getFullYear() + 5);
-      if (year <= matYear) cat += Math.round((parseFloat(d.amount)||0) * (parseFloat(d.rate)||0) / 100);
+      if (year <= matYear) cat += Math.round((parseFloat(d.amount)||0) * _getCurrentCATRate(d) / 100);
     });
     flows.push({ year, structured, cat, total: structured + cat });
   }
@@ -114,8 +154,8 @@ async function renderAnalytics(container) {
   const totalCAT = catDeposits.reduce((s,d) => s + (parseFloat(d.amount)||0), 0);
   const totalAll = totalStructured + totalCAT;
   const annualYieldStructured = products.reduce((s,p) => s + calcProductAnnualYield(p), 0);
-  // Compute CAT annual yield consistently: amount × rate / 100 (per deposit, annual)
-  const annualYieldCAT = catDeposits.reduce((s,d) => s + Math.round((parseFloat(d.amount)||0) * (parseFloat(d.rate)||0) / 100), 0);
+  // Compute CAT annual yield using CURRENT progressive rate (not average)
+  const annualYieldCAT = catDeposits.reduce((s,d) => s + Math.round((parseFloat(d.amount)||0) * _getCurrentCATRate(d) / 100), 0);
   const annualYieldTotal = annualYieldStructured + annualYieldCAT;
   const avgYield = totalAll > 0 ? (annualYieldTotal / totalAll * 100) : 0;
 
@@ -177,7 +217,7 @@ function _computeEntityBreakdown(products, catDeposits) {
     entities[ent].catDeposits.push(d);
     var amt = parseFloat(d.amount) || 0;
     entities[ent].totalInvested += amt;
-    entities[ent].totalYield += Math.round(amt * (parseFloat(d.rate) || 0) / 100);
+    entities[ent].totalYield += Math.round(amt * _getCurrentCATRate(d) / 100);
   });
   return entities;
 }
@@ -231,7 +271,7 @@ function _renderEntityTables(entities, isRate) {
     });
     e.catDeposits.forEach(function(d) {
       var amt = parseFloat(d.amount) || 0;
-      var rate = parseFloat(d.rate) || 0;
+      var rate = _getCurrentCATRate(d);
       var yld = Math.round(amt * rate / 100);
       h += '<tr style="border-bottom:1px solid var(--border)">';
       h += '<td style="padding:4px 6px">🏦 ' + (d.productName || 'CAT').substring(0, 30) + '</td>';
@@ -485,7 +525,7 @@ function _renderMaturityTimeline(products, catDeposits) {
     if (d.status !== 'active' || !d.maturityDate) return;
     var mat = new Date(d.maturityDate);
     var amount = parseFloat(d.amount) || 0;
-    var rate = parseFloat(d.rate) || 0;
+    var rate = _getCurrentCATRate(d);
     var annualReturn = Math.round(amount * rate / 100);
     assets.push({
       name: d.productName || 'CAT',
