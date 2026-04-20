@@ -222,7 +222,7 @@
         "score": 83,
         "base": 100,
         "delta": 0,
-        "reasoning": "Rendement: base 100 → -1 = 99 (En stagflation avec courbe pentifiée, la probabilité que TEC10 reste au-dessus de 4.6% diminue si la Fed doit resserrer davantage face à l'inflation persistante) | Coupon 6.7%, protégé | Barr.coupon 4.6% | Mat espérée: ~1.2a (prob mat: 0%)",
+        "reasoning": "Rendement: base 100 → -1 = 99 (En stagflation avec taux élevés, le TEC 10 à 4.6% sera plus volatil et moins prévisible pour déclencher le coupon) | Coupon 6.7%, protégé | Barr.coupon 4.6% | Mat espérée: ~1.2a (prob mat: 0%)",
         "_bsDelta": -22,
         "_bs": {
           "score": 78,
@@ -244,13 +244,13 @@
         "score": 75,
         "base": 76,
         "delta": -1,
-        "reasoning": "Qualité: base 76 → -1 = 75 (TEC10 très sensible aux taux longs, régime stagflationnaire avec PCE 2.8% et risque de bear flattening si Fed devient plus hawkish)"
+        "reasoning": "Qualité: base 76 → -1 = 75 (Le TEC 10 est très sensible au régime stagflationniste actuel avec PCE à 2.8% et risque de bear flattening)"
       },
       "portfolioFit": {
         "score": 55,
         "base": 80,
         "delta": 1,
-        "reasoning": "Fit: base 80 → +1 = 81 (Capital garanti en stagflation offre une protection précieuse, coupon 6.7% attractif vs obligations classiques)"
+        "reasoning": "Fit: base 80 → +1 = 81 (En stagflation, un produit à capital garanti sur taux devient plus pertinent pour protéger le portefeuille)"
       },
       "riskPremium": {
         "score": 77,
@@ -259,29 +259,29 @@
         "reasoning": "Capital garanti: spread 6.7% - CAT 2.5% - illiq 0.7% = 3.5%"
       }
     },
-    "verdict": "Produit capital garanti avec coupon conditionnel 6.7% lié au TEC10 (>4.6%) dans un contexte stagflationnaire défavorable aux taux longs. Avec PCE à 2.8% et courbe pentifiée +54bps, le risque principal est une remontée des taux longs réduisant la probabilité du coupon. Le capital garanti offre une protection bienvenue mais l'espérance de rendement est fortement dégradée par le régime macro actuel.",
+    "verdict": "Ce produit à capital garanti offre un coupon de 6.7% si le TEC 10 reste au-dessus de 4.6%, dans un contexte stagflationniste défavorable aux taux. Avec le PCE à 2.8% et la Fed en pause, le TEC 10 risque de rester volatil et potentiellement monter au-dessus du seuil d'autocall de 26.8%, limitant le rendement total. La protection du capital est appréciable mais le coupon conditionnel dans ce régime macro hostile aux obligations réduit l'attractivité à un score final de 73/100.",
     "keyRisks": [
-      "Remontée brutale des taux longs si Fed devient plus hawkish face à inflation persistante",
-      "Bear flattening de la courbe réduisant drastiquement la probabilité du coupon conditionnel"
+      "Hausse brutale du TEC 10 au-delà de 26.8% déclenchant un autocall précoce",
+      "Volatilité accrue des taux en stagflation rendant le coupon imprévisible"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 6.7,
-        "return_eur": 6700,
-        "probability": 0.15,
+        "return_pct": 8,
+        "return_eur": 8000,
+        "probability": 0.2,
         "duration_years": 1
       },
       "base": {
-        "return_pct": 2.5,
-        "return_eur": 7500,
+        "return_pct": 3.5,
+        "return_eur": 10500,
         "probability": 0.35,
         "duration_years": 3
       },
       "stress": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.35,
+        "probability": 0.3,
         "duration_years": 10
       },
       "worst": {
@@ -300,8 +300,8 @@
       "label": "A [73-91]"
     },
     "metadata": {
-      "gradedAt": "2026-04-20T11:50:04.437Z",
-      "durationMs": 18736,
+      "gradedAt": "2026-04-20T11:50:51.266Z",
+      "durationMs": 20847,
       "aiUsed": true,
       "version": "7.1",
       "productType": "capital_garanti",
