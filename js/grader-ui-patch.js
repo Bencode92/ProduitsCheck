@@ -111,11 +111,15 @@
             if (bt) {
                 gradingHtml += '<div style="margin:14px 0;padding:14px;background:rgba(59,130,246,0.04);border:1px solid rgba(59,130,246,0.15);border-radius:8px">';
                 gradingHtml += '<div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:10px">📊 Simulation 1 an — Dispersion réelle</div>';
-                gradingHtml += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px">';
-                gradingHtml += '<div style="text-align:center;padding:8px;background:var(--bg-card);border-radius:6px"><div style="font-size:10px;color:var(--text-dim)">Dispersion moy.</div><div style="font-size:18px;font-weight:700;color:var(--accent)">' + bt.avgDispersion.toFixed(1) + '%</div></div>';
+                var matY = parseFloat(p.maturityYears) || 3;
+                var projectedPct = Math.round(bt.returnPct * matY * 100) / 100;
+                var projectedEur = Math.round(bt.returnEur * matY);
+                gradingHtml += '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:10px">';
+                gradingHtml += '<div style="text-align:center;padding:8px;background:var(--bg-card);border-radius:6px"><div style="font-size:10px;color:var(--text-dim)">Dispersion moy.</div><div style="font-size:18px;font-weight:700;color:var(--accent)">' + bt.avgDispersion.toFixed(1) + '%</div><div style="font-size:9px;color:var(--text-dim)">' + bt.nbPairs + ' paires</div></div>';
                 gradingHtml += '<div style="text-align:center;padding:8px;background:var(--bg-card);border-radius:6px"><div style="font-size:10px;color:var(--text-dim)">Participation</div><div style="font-size:18px;font-weight:700;color:var(--text-bright)">×' + bt.participation + '%</div></div>';
-                gradingHtml += '<div style="text-align:center;padding:8px;background:var(--bg-card);border-radius:6px"><div style="font-size:10px;color:var(--text-dim)">Rendement 1Y</div><div style="font-size:18px;font-weight:700;color:var(--green)">' + bt.returnPct.toFixed(1) + '%</div></div>';
-                gradingHtml += '<div style="text-align:center;padding:8px;background:rgba(6,214,160,0.08);border-radius:6px"><div style="font-size:10px;color:var(--text-dim)">Sur 100K€</div><div style="font-size:18px;font-weight:700;color:var(--green)">+' + (typeof formatNumber === 'function' ? formatNumber(bt.returnEur) : bt.returnEur) + '€</div></div>';
+                gradingHtml += '<div style="text-align:center;padding:8px;background:var(--bg-card);border-radius:6px"><div style="font-size:10px;color:var(--text-dim)">Rendement /an</div><div style="font-size:18px;font-weight:700;color:var(--green)">' + bt.returnPct.toFixed(1) + '%</div><div style="font-size:9px;color:var(--text-dim)">×' + bt.participation + '% × ' + bt.avgDispersion.toFixed(0) + '%</div></div>';
+                gradingHtml += '<div style="text-align:center;padding:8px;background:rgba(6,214,160,0.06);border-radius:6px"><div style="font-size:10px;color:var(--text-dim)">Projeté ' + matY + ' ans</div><div style="font-size:18px;font-weight:700;color:var(--green)">' + projectedPct.toFixed(1) + '%</div><div style="font-size:9px;color:var(--text-dim)">~' + (typeof formatNumber === 'function' ? formatNumber(projectedEur) : projectedEur) + '€</div></div>';
+                gradingHtml += '<div style="text-align:center;padding:8px;background:rgba(6,214,160,0.10);border-radius:6px;border:1px solid rgba(6,214,160,0.2)"><div style="font-size:10px;color:var(--text-dim)">Sur 100K€ / ' + matY + 'a</div><div style="font-size:18px;font-weight:700;color:var(--green)">+' + (typeof formatNumber === 'function' ? formatNumber(projectedEur) : projectedEur) + '€</div><div style="font-size:9px;color:var(--green)">' + (projectedPct / matY).toFixed(1) + '%/an</div></div>';
                 gradingHtml += '</div>';
 
                 // Top 3 and worst pair
