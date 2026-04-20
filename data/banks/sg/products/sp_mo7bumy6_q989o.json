@@ -170,7 +170,7 @@
         "score": 95,
         "base": 70,
         "delta": 0,
-        "reasoning": "Rendement: base 70 → +2 = 72 (Dispersion garantie rentable avec 7 SJ tech à vol élevée (NVDA 48%, TSLA 58%) en régime stagflation favorisant la divergence sectorielle) | Coupon 3.033333333333333%, protégé",
+        "reasoning": "Rendement: base 70 → +2 = 72 (Produit dispersion avec capital garanti : volatilité élevée (NVDA 48%, TSLA 58%) et régime stagflation augmentent la dispersion entre les tech stocks, garantissant un rendement positif.) | Coupon 3.033333333333333%, protégé",
         "_bsDelta": 25,
         "_bs": {
           "score": 95,
@@ -196,33 +196,33 @@
         "score": 70,
         "base": 72,
         "delta": -2,
-        "reasoning": "Qualité: base 72 → -2 = 70 (100% tech dans secteur évité (information-technology -1.22%, communication-services -2.51%) avec betas élevés en stagflation) | Worst: Tesla B:17"
+        "reasoning": "Qualité: base 72 → -2 = 70 (7/8 sous-jacents dans tech/communication-services (secteurs évités en stagflation), seul TSLA bénéficie du momentum energy, betas élevés (1.07-1.89) vulnérables aux rotations sectorielles.) | Worst: Tesla B:17"
       },
       "portfolioFit": {
         "score": 65,
         "base": 70,
-        "delta": 2,
+        "delta": 0,
         "reasoning": "En portefeuille"
       },
       "riskPremium": {
         "score": 52,
         "base": 20,
-        "delta": 0,
+        "delta": 2,
         "reasoning": "Capital garanti: spread 3.0% - CAT 2.5% - illiq 0.3% = 0.2%"
       }
     },
-    "verdict": "Produit dispersion optimal en stagflation avec capital garanti et 7% de participation sur 8 tech leaders à volatilités divergentes (NVDA 48% vs AAPL 26%). Le régime macro favorise les écarts de performance entre TSLA/NVDA volatiles et AAPL/MSFT défensives, maximisant la dispersion capturable. Rendement annuel 3% garanti sans risque de perte, idéal pour naviguer l'incertitude avec VIX à 22 et tech sous pression.",
+    "verdict": "Produit dispersion attractif en stagflation avec VIX à 22 et volatilités individuelles élevées (23-58%). Le capital garanti et la participation 7% sur la dispersion moyenne offrent une exposition positive à la volatilité sans risque de perte. Avec 7/8 sous-jacents dans les secteurs évités (tech/comm-services) et des betas moyens de 1.3, la dispersion intra-panier sera maximisée lors des rotations sectorielles. Le rendement annualisé de 3.03% est conservateur mais réaliste dans ce contexte de marché stressé.",
     "keyRisks": [
-      "Corrélation élevée limitant la dispersion si rally tech synchronisé",
-      "Participation 7% plafonne le rendement même avec dispersion extrême"
+      "Corrélation élevée entre les 7 tech stocks pourrait réduire la dispersion si le secteur se synchronise",
+      "Rally court terme du SPX (+4.5%) pourrait être un short squeeze temporaire réduisant la volatilité à court terme"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 12,
-        "return_eur": 12000,
-        "probability": 0.25,
-        "duration_years": 3
+        "return_pct": 5.5,
+        "return_eur": 5500,
+        "probability": 0.3,
+        "duration_years": 1
       },
       "base": {
         "return_pct": 9.1,
@@ -233,7 +233,7 @@
       "stress": {
         "return_pct": 3,
         "return_eur": 3000,
-        "probability": 0.25,
+        "probability": 0.2,
         "duration_years": 3
       },
       "worst": {
@@ -252,8 +252,8 @@
       "label": "C [49-63]"
     },
     "metadata": {
-      "gradedAt": "2026-04-20T15:31:12.853Z",
-      "durationMs": 22340,
+      "gradedAt": "2026-04-20T16:11:54.580Z",
+      "durationMs": 25228,
       "aiUsed": true,
       "version": "7.1",
       "productType": "dispersion",
@@ -277,8 +277,8 @@
       "adjustments": {
         "p1": 2,
         "p2": -2,
-        "p3": 2,
-        "p4": 0
+        "p3": 0,
+        "p4": 2
       },
       "barrier_sigma": null,
       "barrier_sigma_label": null,
@@ -435,6 +435,486 @@
         "delta": -6,
         "desc": "Panique → corrélation spike → coupon baisse (cap garanti)"
       }
+    },
+    "dispersionBacktest": {
+      "pairs": [
+        {
+          "stock1": "Alphabet (Ex Google)",
+          "stock2": "Netflix",
+          "perf1": 118.58,
+          "perf2": -0.36,
+          "dispersion": 118.94
+        },
+        {
+          "stock1": "Alphabet (Ex Google)",
+          "stock2": "Meta Platforms",
+          "perf1": 118.58,
+          "perf2": 0.72,
+          "dispersion": 117.86
+        },
+        {
+          "stock1": "Alphabet (Ex Google)",
+          "stock2": "Microsoft",
+          "perf1": 118.58,
+          "perf2": 9.6,
+          "dispersion": 108.98
+        },
+        {
+          "stock1": "Apple",
+          "stock2": "Alphabet (Ex Google)",
+          "perf1": 33.67,
+          "perf2": 118.58,
+          "dispersion": 84.91
+        },
+        {
+          "stock1": "NVIDIA",
+          "stock2": "Netflix",
+          "perf1": 79.74,
+          "perf2": -0.36,
+          "dispersion": 80.1
+        },
+        {
+          "stock1": "Amazon",
+          "stock2": "Alphabet (Ex Google)",
+          "perf1": 39.48,
+          "perf2": 118.58,
+          "dispersion": 79.1
+        },
+        {
+          "stock1": "NVIDIA",
+          "stock2": "Meta Platforms",
+          "perf1": 79.74,
+          "perf2": 0.72,
+          "dispersion": 79.02
+        },
+        {
+          "stock1": "NVIDIA",
+          "stock2": "Microsoft",
+          "perf1": 79.74,
+          "perf2": 9.6,
+          "dispersion": 70.14
+        },
+        {
+          "stock1": "Tesla",
+          "stock2": "Alphabet (Ex Google)",
+          "perf1": 57.67,
+          "perf2": 118.58,
+          "dispersion": 60.91
+        },
+        {
+          "stock1": "Tesla",
+          "stock2": "Netflix",
+          "perf1": 57.67,
+          "perf2": -0.36,
+          "dispersion": 58.03
+        },
+        {
+          "stock1": "Tesla",
+          "stock2": "Meta Platforms",
+          "perf1": 57.67,
+          "perf2": 0.72,
+          "dispersion": 56.95
+        },
+        {
+          "stock1": "Tesla",
+          "stock2": "Microsoft",
+          "perf1": 57.67,
+          "perf2": 9.6,
+          "dispersion": 48.07
+        },
+        {
+          "stock1": "NVIDIA",
+          "stock2": "Apple",
+          "perf1": 79.74,
+          "perf2": 33.67,
+          "dispersion": 46.06999999999999
+        },
+        {
+          "stock1": "NVIDIA",
+          "stock2": "Amazon",
+          "perf1": 79.74,
+          "perf2": 39.48,
+          "dispersion": 40.26
+        },
+        {
+          "stock1": "Amazon",
+          "stock2": "Netflix",
+          "perf1": 39.48,
+          "perf2": -0.36,
+          "dispersion": 39.839999999999996
+        },
+        {
+          "stock1": "NVIDIA",
+          "stock2": "Alphabet (Ex Google)",
+          "perf1": 79.74,
+          "perf2": 118.58,
+          "dispersion": 38.84
+        },
+        {
+          "stock1": "Amazon",
+          "stock2": "Meta Platforms",
+          "perf1": 39.48,
+          "perf2": 0.72,
+          "dispersion": 38.76
+        },
+        {
+          "stock1": "Apple",
+          "stock2": "Netflix",
+          "perf1": 33.67,
+          "perf2": -0.36,
+          "dispersion": 34.03
+        },
+        {
+          "stock1": "Apple",
+          "stock2": "Meta Platforms",
+          "perf1": 33.67,
+          "perf2": 0.72,
+          "dispersion": 32.95
+        },
+        {
+          "stock1": "Amazon",
+          "stock2": "Microsoft",
+          "perf1": 39.48,
+          "perf2": 9.6,
+          "dispersion": 29.879999999999995
+        },
+        {
+          "stock1": "Apple",
+          "stock2": "Microsoft",
+          "perf1": 33.67,
+          "perf2": 9.6,
+          "dispersion": 24.07
+        },
+        {
+          "stock1": "Apple",
+          "stock2": "Tesla",
+          "perf1": 33.67,
+          "perf2": 57.67,
+          "dispersion": 24
+        },
+        {
+          "stock1": "NVIDIA",
+          "stock2": "Tesla",
+          "perf1": 79.74,
+          "perf2": 57.67,
+          "dispersion": 22.069999999999993
+        },
+        {
+          "stock1": "Amazon",
+          "stock2": "Tesla",
+          "perf1": 39.48,
+          "perf2": 57.67,
+          "dispersion": 18.190000000000005
+        },
+        {
+          "stock1": "Microsoft",
+          "stock2": "Netflix",
+          "perf1": 9.6,
+          "perf2": -0.36,
+          "dispersion": 9.959999999999999
+        },
+        {
+          "stock1": "Microsoft",
+          "stock2": "Meta Platforms",
+          "perf1": 9.6,
+          "perf2": 0.72,
+          "dispersion": 8.879999999999999
+        },
+        {
+          "stock1": "Apple",
+          "stock2": "Amazon",
+          "perf1": 33.67,
+          "perf2": 39.48,
+          "dispersion": 5.809999999999995
+        },
+        {
+          "stock1": "Meta Platforms",
+          "stock2": "Netflix",
+          "perf1": 0.72,
+          "perf2": -0.36,
+          "dispersion": 1.08
+        }
+      ],
+      "avgDispersion": 49.2,
+      "participation": 7,
+      "returnPct": 3.44,
+      "returnEur": 3440,
+      "nbPairs": 28,
+      "nbStocks": 8,
+      "perfs": [
+        {
+          "name": "NVIDIA",
+          "perf": 79.74
+        },
+        {
+          "name": "Apple",
+          "perf": 33.67
+        },
+        {
+          "name": "Amazon",
+          "perf": 39.48
+        },
+        {
+          "name": "Tesla",
+          "perf": 57.67
+        },
+        {
+          "name": "Alphabet (Ex Google)",
+          "perf": 118.58
+        },
+        {
+          "name": "Microsoft",
+          "perf": 9.6
+        },
+        {
+          "name": "Meta Platforms",
+          "perf": 0.72
+        },
+        {
+          "name": "Netflix",
+          "perf": -0.36
+        }
+      ]
     }
+  },
+  "_dispersionBacktest": {
+    "pairs": [
+      {
+        "stock1": "Alphabet (Ex Google)",
+        "stock2": "Netflix",
+        "perf1": 118.58,
+        "perf2": -0.36,
+        "dispersion": 118.94
+      },
+      {
+        "stock1": "Alphabet (Ex Google)",
+        "stock2": "Meta Platforms",
+        "perf1": 118.58,
+        "perf2": 0.72,
+        "dispersion": 117.86
+      },
+      {
+        "stock1": "Alphabet (Ex Google)",
+        "stock2": "Microsoft",
+        "perf1": 118.58,
+        "perf2": 9.6,
+        "dispersion": 108.98
+      },
+      {
+        "stock1": "Apple",
+        "stock2": "Alphabet (Ex Google)",
+        "perf1": 33.67,
+        "perf2": 118.58,
+        "dispersion": 84.91
+      },
+      {
+        "stock1": "NVIDIA",
+        "stock2": "Netflix",
+        "perf1": 79.74,
+        "perf2": -0.36,
+        "dispersion": 80.1
+      },
+      {
+        "stock1": "Amazon",
+        "stock2": "Alphabet (Ex Google)",
+        "perf1": 39.48,
+        "perf2": 118.58,
+        "dispersion": 79.1
+      },
+      {
+        "stock1": "NVIDIA",
+        "stock2": "Meta Platforms",
+        "perf1": 79.74,
+        "perf2": 0.72,
+        "dispersion": 79.02
+      },
+      {
+        "stock1": "NVIDIA",
+        "stock2": "Microsoft",
+        "perf1": 79.74,
+        "perf2": 9.6,
+        "dispersion": 70.14
+      },
+      {
+        "stock1": "Tesla",
+        "stock2": "Alphabet (Ex Google)",
+        "perf1": 57.67,
+        "perf2": 118.58,
+        "dispersion": 60.91
+      },
+      {
+        "stock1": "Tesla",
+        "stock2": "Netflix",
+        "perf1": 57.67,
+        "perf2": -0.36,
+        "dispersion": 58.03
+      },
+      {
+        "stock1": "Tesla",
+        "stock2": "Meta Platforms",
+        "perf1": 57.67,
+        "perf2": 0.72,
+        "dispersion": 56.95
+      },
+      {
+        "stock1": "Tesla",
+        "stock2": "Microsoft",
+        "perf1": 57.67,
+        "perf2": 9.6,
+        "dispersion": 48.07
+      },
+      {
+        "stock1": "NVIDIA",
+        "stock2": "Apple",
+        "perf1": 79.74,
+        "perf2": 33.67,
+        "dispersion": 46.06999999999999
+      },
+      {
+        "stock1": "NVIDIA",
+        "stock2": "Amazon",
+        "perf1": 79.74,
+        "perf2": 39.48,
+        "dispersion": 40.26
+      },
+      {
+        "stock1": "Amazon",
+        "stock2": "Netflix",
+        "perf1": 39.48,
+        "perf2": -0.36,
+        "dispersion": 39.839999999999996
+      },
+      {
+        "stock1": "NVIDIA",
+        "stock2": "Alphabet (Ex Google)",
+        "perf1": 79.74,
+        "perf2": 118.58,
+        "dispersion": 38.84
+      },
+      {
+        "stock1": "Amazon",
+        "stock2": "Meta Platforms",
+        "perf1": 39.48,
+        "perf2": 0.72,
+        "dispersion": 38.76
+      },
+      {
+        "stock1": "Apple",
+        "stock2": "Netflix",
+        "perf1": 33.67,
+        "perf2": -0.36,
+        "dispersion": 34.03
+      },
+      {
+        "stock1": "Apple",
+        "stock2": "Meta Platforms",
+        "perf1": 33.67,
+        "perf2": 0.72,
+        "dispersion": 32.95
+      },
+      {
+        "stock1": "Amazon",
+        "stock2": "Microsoft",
+        "perf1": 39.48,
+        "perf2": 9.6,
+        "dispersion": 29.879999999999995
+      },
+      {
+        "stock1": "Apple",
+        "stock2": "Microsoft",
+        "perf1": 33.67,
+        "perf2": 9.6,
+        "dispersion": 24.07
+      },
+      {
+        "stock1": "Apple",
+        "stock2": "Tesla",
+        "perf1": 33.67,
+        "perf2": 57.67,
+        "dispersion": 24
+      },
+      {
+        "stock1": "NVIDIA",
+        "stock2": "Tesla",
+        "perf1": 79.74,
+        "perf2": 57.67,
+        "dispersion": 22.069999999999993
+      },
+      {
+        "stock1": "Amazon",
+        "stock2": "Tesla",
+        "perf1": 39.48,
+        "perf2": 57.67,
+        "dispersion": 18.190000000000005
+      },
+      {
+        "stock1": "Microsoft",
+        "stock2": "Netflix",
+        "perf1": 9.6,
+        "perf2": -0.36,
+        "dispersion": 9.959999999999999
+      },
+      {
+        "stock1": "Microsoft",
+        "stock2": "Meta Platforms",
+        "perf1": 9.6,
+        "perf2": 0.72,
+        "dispersion": 8.879999999999999
+      },
+      {
+        "stock1": "Apple",
+        "stock2": "Amazon",
+        "perf1": 33.67,
+        "perf2": 39.48,
+        "dispersion": 5.809999999999995
+      },
+      {
+        "stock1": "Meta Platforms",
+        "stock2": "Netflix",
+        "perf1": 0.72,
+        "perf2": -0.36,
+        "dispersion": 1.08
+      }
+    ],
+    "avgDispersion": 49.2,
+    "participation": 7,
+    "returnPct": 3.44,
+    "returnEur": 3440,
+    "nbPairs": 28,
+    "nbStocks": 8,
+    "perfs": [
+      {
+        "name": "NVIDIA",
+        "perf": 79.74
+      },
+      {
+        "name": "Apple",
+        "perf": 33.67
+      },
+      {
+        "name": "Amazon",
+        "perf": 39.48
+      },
+      {
+        "name": "Tesla",
+        "perf": 57.67
+      },
+      {
+        "name": "Alphabet (Ex Google)",
+        "perf": 118.58
+      },
+      {
+        "name": "Microsoft",
+        "perf": 9.6
+      },
+      {
+        "name": "Meta Platforms",
+        "perf": 0.72
+      },
+      {
+        "name": "Netflix",
+        "perf": -0.36
+      }
+    ]
   }
 }
