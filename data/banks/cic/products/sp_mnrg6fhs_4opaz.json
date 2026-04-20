@@ -186,7 +186,7 @@
   },
   "sourceFile": "JSON import",
   "bankId": "cic",
-  "status": "active",
+  "status": "subscribed",
   "receivedDate": "2026-04-09",
   "conversation": [],
   "conversationSummary": null,
