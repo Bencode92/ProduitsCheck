@@ -63,9 +63,28 @@ renderCAT = function(container) {
   const fgdrCount = stats.fgdrAlerts.length;
 
   const active = catManager.deposits.filter(d => d.status === 'active');
-  const annualInterest = active.reduce((sum, d) => sum + Math.round((parseFloat(d.amount) || 0) * ((parseFloat(d.rate) || 0) / 100) * 100) / 100, 0);
+  // Use current progressive rate (not average) for annual interest
+  const annualInterest = active.reduce((sum, d) => {
+    var amt = parseFloat(d.amount) || 0;
+    var rate = parseFloat(d.rate) || 0;
+    // Check rateSchedule for current period rate
+    if (d.rateSchedule && Array.isArray(d.rateSchedule) && d.rateSchedule.length > 0) {
+      var now = new Date();
+      for (var i = 0; i < d.rateSchedule.length; i++) {
+        var s = d.rateSchedule[i];
+        var from = s.from ? new Date(s.from) : null;
+        var to = s.to ? new Date(s.to) : null;
+        if (from && to && now >= from && now <= to) { rate = parseFloat(s.rate) || rate; break; }
+      }
+      // If past all periods, use last
+      var last = d.rateSchedule[d.rateSchedule.length - 1];
+      if (last && last.to && now > new Date(last.to)) rate = parseFloat(last.rate) || rate;
+    }
+    return sum + Math.round(amt * (rate / 100) * 100) / 100;
+  }, 0);
   const totalInterestAllTime = stats.totalInterest;
-  const weightedRate = stats.weightedRate || 0;
+  // Weighted rate using current progressive rates
+  const weightedRate = stats.totalInvested > 0 ? annualInterest / stats.totalInvested * 100 : 0;
   const bestRate = catManager.rates?.rates?.reduce((max, r) => r.rate > max ? r.rate : max, 0) || 0;
   const rateVsMarket = bestRate > 0 && weightedRate > 0 ? (weightedRate >= bestRate ? '✅ Leader' : '⚠️ -' + (bestRate - weightedRate).toFixed(2) + '%') : '';
   const nowStr = new Date().toISOString().split('T')[0];
