@@ -170,7 +170,7 @@
         "score": 95,
         "base": 70,
         "delta": 0,
-        "reasoning": "Rendement: base 70 → +2 = 72 (Produit dispersion avec capital garanti : volatilités élevées (NVDA 48%, TSLA 58%) et régime stagflationniste augmentent la probabilité de dispersion forte entre les paires.) | Coupon 3.033333333333333%, protégé",
+        "reasoning": "Rendement: base 70 → +2 = 72 (Dispersion garantie rentable avec 7 SJ tech à vol élevée (NVDA 48%, TSLA 58%) en régime stagflation favorisant la divergence sectorielle) | Coupon 3.033333333333333%, protégé",
         "_bsDelta": 25,
         "_bs": {
           "score": 95,
@@ -196,7 +196,7 @@
         "score": 70,
         "base": 72,
         "delta": -2,
-        "reasoning": "Qualité: base 72 → -2 = 70 (80% des sous-jacents dans des secteurs évités (tech/comm-services) en stagflation, seuls AAPL/MSFT relativement défensifs avec beta ~1.07.) | Worst: Tesla B:17"
+        "reasoning": "Qualité: base 72 → -2 = 70 (100% tech dans secteur évité (information-technology -1.22%, communication-services -2.51%) avec betas élevés en stagflation) | Worst: Tesla B:17"
       },
       "portfolioFit": {
         "score": 65,
@@ -211,23 +211,23 @@
         "reasoning": "Capital garanti: spread 3.0% - CAT 2.5% - illiq 0.3% = 0.2%"
       }
     },
-    "verdict": "Produit dispersion idéal en régime stagflationniste avec VIX à 22 et volatilités élevées (TSLA 58%, NVDA 48%). La participation de 7% sur la dispersion moyenne avec capital 100% garanti offre un rendement annualisé de 3.03% sans risque de perte. Le contexte macro défavorable aux tech (80% du panier dans secteurs évités) augmente paradoxalement l'attractivité car plus de dispersion attendue entre les titres.",
+    "verdict": "Produit dispersion optimal en stagflation avec capital garanti et 7% de participation sur 8 tech leaders à volatilités divergentes (NVDA 48% vs AAPL 26%). Le régime macro favorise les écarts de performance entre TSLA/NVDA volatiles et AAPL/MSFT défensives, maximisant la dispersion capturable. Rendement annuel 3% garanti sans risque de perte, idéal pour naviguer l'incertitude avec VIX à 22 et tech sous pression.",
     "keyRisks": [
-      "Corrélation soudaine des tech stocks réduisant la dispersion en cas de rally coordonné",
-      "Participation limitée à 7% plafonne le rendement même en cas de dispersion extrême"
+      "Corrélation élevée limitant la dispersion si rally tech synchronisé",
+      "Participation 7% plafonne le rendement même avec dispersion extrême"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 15,
-        "return_eur": 15000,
+        "return_pct": 12,
+        "return_eur": 12000,
         "probability": 0.25,
         "duration_years": 3
       },
       "base": {
         "return_pct": 9.1,
         "return_eur": 9100,
-        "probability": 0.35,
+        "probability": 0.4,
         "duration_years": 3
       },
       "stress": {
@@ -239,7 +239,7 @@
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.15,
+        "probability": 0.1,
         "duration_years": 3
       }
     },
@@ -252,8 +252,8 @@
       "label": "C [49-63]"
     },
     "metadata": {
-      "gradedAt": "2026-04-20T15:21:35.104Z",
-      "durationMs": 20221,
+      "gradedAt": "2026-04-20T15:31:12.853Z",
+      "durationMs": 22340,
       "aiUsed": true,
       "version": "7.1",
       "productType": "dispersion",
