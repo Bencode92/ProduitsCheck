@@ -889,8 +889,11 @@
   var _sbProposals = []; // populated during render
 
   window.__carryAddFromSB = function() {
+    console.log('[CarryTrade] __carryAddFromSB called');
+    try {
     // Read which checkboxes are checked
     var checked = document.querySelectorAll('.carry-sb-check:checked');
+    console.log('[CarryTrade] Checked:', checked.length);
     if (checked.length === 0) { showToast('Sélectionnez au moins un produit', 'error'); return; }
     var amount = LOAN.amount; // 1M€ = montant de l'emprunt
 
@@ -905,6 +908,7 @@
         if (isRate || isProtected) allP.push(p);
       });
     });
+    console.log('[CarryTrade] allP:', allP.length, 'products');
 
     var added = 0;
     checked.forEach(function(cb) {
@@ -956,6 +960,7 @@
     } else {
       showToast('Produits déjà importés', 'info');
     }
+    } catch(e) { console.error('[CarryTrade] Error in __carryAddFromSB:', e); showToast('Erreur: ' + e.message, 'error'); }
   };
 
   window.__carryImportForm = function() {
