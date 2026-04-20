@@ -1,0 +1,283 @@
+// ═══════════════════════════════════════════════════════════════════════════════
+// STRUCTBOARD — Carry Trade P&L Simulator — Page dédiée
+// 3 scénarios (optimiste/normal/pessimiste) + réinvestissement coupons + capital
+// ═══════════════════════════════════════════════════════════════════════════════
+
+(function() {
+  'use strict';
+
+  var B = {
+    card: '#FFFFFF', row0: '#FFFFFF', row1: '#F4F6F9', header: '#E8ECF2',
+    border: '#D1D9E6', text: '#1A202C', muted: '#64748B', dim: '#475569',
+    green: '#059669', red: '#DC2626', orange: '#D97706', purple: '#7C3AED'
+  };
+
+  function _f(n) { return typeof formatNumber === 'function' ? formatNumber(Math.round(n)) : String(Math.round(n)); }
+  function _pct(n) { return (Math.round(n * 100) / 100).toFixed(2); }
+
+  // ─── LOAN PARAMS ──────
+  var LOAN = { amount: 1000000, rate: 2.90, years: 5, taxRate: 25 };
+  var CAT_REINVEST = 3.0;   // taux réinvestissement coupons sur CAT
+  var POST_CALL_RATE = 4.0;  // taux réinvestissement capital post-autocall
+
+  // ─── SCENARIO ENGINE ──────
+  function _simulate(product, scenario) {
+    var years = LOAN.years;
+    var amount = LOAN.amount;
+    var coupon = product.coupon || 0;
+    var guaranteed = product.guaranteedYears || 0;
+    var autocallTarget = product.autocallTarget || 0;
+    var prob = product.prob || 0.90;
+
+    // Scenario adjustments
+    var scenProb;
+    if (scenario === 'optimiste') scenProb = Math.min(0.99, prob * 1.08);
+    else if (scenario === 'pessimiste') scenProb = 0; // only guaranteed
+    else scenProb = prob; // normal
+
+    var flows = [];
+    var cumCoupons = 0;
+    var cumulNet = 0;
+    var catPool = 0; // coupons réinvestis en CAT
+    var autocalled = false;
+    var autocallYear = 0;
+
+    for (var yr = 1; yr <= years; yr++) {
+      var interest = Math.round(amount * LOAN.rate / 100);
+      var couponReceived = 0;
+      var catInterest = Math.round(catPool * CAT_REINVEST / 100);
+      var postCallRev = 0;
+
+      if (autocalled) {
+        // Capital réinvesti post-autocall
+        postCallRev = Math.round(amount * POST_CALL_RATE / 100);
+        var totalRev = postCallRev + catInterest;
+        var net = totalRev - interest;
+        var tax = net > 0 ? Math.round(net * LOAN.taxRate / 100) : 0;
+        var netAfterTax = net - tax;
+        cumulNet += netAfterTax;
+
+        flows.push({
+          year: yr, coupon: 0, catInterest: catInterest, postCallRev: postCallRev,
+          totalRev: totalRev, interest: interest, tax: tax, net: netAfterTax,
+          cumul: cumulNet, roi: cumulNet / amount * 100,
+          status: 'Réinvesti CAT ' + POST_CALL_RATE + '%',
+          color: '#475569'
+        });
+        // Les coupons post-call sont aussi réinvestis
+        catPool += postCallRev;
+        continue;
+      }
+
+      // Coupon logic
+      if (yr <= guaranteed) {
+        // Garanti
+        couponReceived = Math.round(amount * coupon / 100);
+      } else if (scenario === 'pessimiste') {
+        // Pessimiste: pas de coupon après garantie
+        couponReceived = 0;
+      } else if (scenario === 'optimiste') {
+        // Optimiste: toujours coupon
+        couponReceived = Math.round(amount * coupon / 100);
+      } else {
+        // Normal: coupon × probabilité
+        couponReceived = Math.round(amount * coupon * scenProb / 100);
+      }
+
+      cumCoupons += coupon * (couponReceived > 0 ? 1 : 0);
+
+      // Check autocall
+      if (autocallTarget > 0 && cumCoupons >= autocallTarget && !autocalled) {
+        autocalled = true;
+        autocallYear = yr;
+      }
+
+      // Réinvestissement des coupons précédents
+      var totalRev2 = couponReceived + catInterest;
+      var net2 = totalRev2 - interest;
+      var tax2 = net2 > 0 ? Math.round(net2 * LOAN.taxRate / 100) : 0;
+      var netAfterTax2 = net2 - tax2;
+      cumulNet += netAfterTax2;
+
+      var statusText = yr <= guaranteed ? 'Garanti' :
+        (couponReceived > 0 ? 'Coupon versé' : 'Pas de coupon');
+      if (autocalled && autocallYear === yr) statusText = 'AUTOCALL — capital récupéré';
+
+      flows.push({
+        year: yr, coupon: couponReceived, catInterest: catInterest, postCallRev: 0,
+        totalRev: totalRev2, interest: interest, tax: tax2, net: netAfterTax2,
+        cumul: cumulNet, roi: cumulNet / amount * 100,
+        status: statusText,
+        color: yr <= guaranteed ? B.green : (couponReceived > 0 ? '#4ECDC4' : B.red)
+      });
+
+      // Ajouter le coupon net au pool CAT pour réinvestissement
+      if (couponReceived > 0) catPool += couponReceived;
+    }
+
+    var totalCoupons = flows.reduce(function(s, f) { return s + f.coupon; }, 0);
+    var totalCatInterest = flows.reduce(function(s, f) { return s + f.catInterest; }, 0);
+    var totalPostCall = flows.reduce(function(s, f) { return s + f.postCallRev; }, 0);
+    var totalInterest = flows.reduce(function(s, f) { return s + f.interest; }, 0);
+    var totalTax = flows.reduce(function(s, f) { return s + f.tax; }, 0);
+
+    return {
+      flows: flows,
+      totalCoupons: totalCoupons,
+      totalCatInterest: totalCatInterest,
+      totalPostCall: totalPostCall,
+      totalRevenue: totalCoupons + totalCatInterest + totalPostCall,
+      totalInterest: totalInterest,
+      totalTax: totalTax,
+      netAfterTax: cumulNet,
+      autocalled: autocalled,
+      autocallYear: autocallYear,
+      finalCatPool: catPool
+    };
+  }
+
+  // ─── RENDER PAGE ──────
+  function _renderPnLPage(product) {
+    var opti = _simulate(product, 'optimiste');
+    var normal = _simulate(product, 'normal');
+    var pessi = _simulate(product, 'pessimiste');
+
+    var scenarios = [
+      { name: 'Optimiste', key: 'optimiste', data: opti, color: '#059669', bg: '#ECFDF5', border: '#6EE7B7', desc: 'Tous les coupons versés, autocall au plus tôt' },
+      { name: 'Normal', key: 'normal', data: normal, color: '#2563EB', bg: '#EFF6FF', border: '#93C5FD', desc: 'Coupon × probabilité historique (' + Math.round(product.prob * 100) + '%)' },
+      { name: 'Pessimiste', key: 'pessimiste', data: pessi, color: '#DC2626', bg: '#FEF2F2', border: '#FCA5A5', desc: 'Seuls les coupons garantis (' + (product.guaranteedYears || 0) + ' ans)' }
+    ];
+
+    var h = '';
+
+    // Header
+    h += '<div style="margin-bottom:20px">';
+    h += '<button class="btn ghost" onclick="switchMainView(\'carry\')" style="margin-bottom:10px">← Retour Carry Trade</button>';
+    h += '<h2 style="color:' + B.text + ';font-size:20px;font-weight:800;margin:0">📊 Analyse P&L — ' + product.name + '</h2>';
+    h += '<div style="color:' + B.muted + ';font-size:12px;margin-top:4px">' + product.emetteur + ' · Coupon ' + product.coupon + '% · Emprunt ' + _f(LOAN.amount) + '€ à ' + LOAN.rate + '% · ' + LOAN.years + ' ans</div>';
+    h += '</div>';
+
+    // 3 scenario summary cards
+    h += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">';
+    scenarios.forEach(function(sc) {
+      var d = sc.data;
+      h += '<div style="padding:16px;background:' + sc.bg + ';border:2px solid ' + sc.border + ';border-radius:10px">';
+      h += '<div style="font-size:13px;font-weight:700;color:' + sc.color + ';margin-bottom:4px">' + sc.name + '</div>';
+      h += '<div style="font-size:10px;color:' + B.muted + ';margin-bottom:10px">' + sc.desc + '</div>';
+      h += '<div style="font-size:28px;font-weight:800;color:' + sc.color + '">' + (d.netAfterTax >= 0 ? '+' : '') + _f(d.netAfterTax) + '€</div>';
+      h += '<div style="font-size:11px;color:' + B.dim + ';margin-top:4px">Net après IS 25% sur 5 ans</div>';
+      h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px;font-size:10px">';
+      h += '<div>Coupons: <strong style="color:' + B.green + '">+' + _f(d.totalCoupons) + '€</strong></div>';
+      h += '<div>Intérêts CAT: <strong style="color:#4ECDC4">+' + _f(d.totalCatInterest) + '€</strong></div>';
+      if (d.totalPostCall > 0) h += '<div>Post-call: <strong style="color:' + B.orange + '">+' + _f(d.totalPostCall) + '€</strong></div>';
+      h += '<div>Emprunt: <strong style="color:' + B.red + '">-' + _f(d.totalInterest) + '€</strong></div>';
+      h += '</div>';
+      if (d.autocalled) h += '<div style="margin-top:8px;padding:4px 8px;background:' + sc.color + '15;border-radius:4px;font-size:10px;color:' + sc.color + '">Autocall An ' + d.autocallYear + ' → réinvesti à ' + POST_CALL_RATE + '%</div>';
+      h += '</div>';
+    });
+    h += '</div>';
+
+    // Params box
+    h += '<div style="padding:10px 14px;background:' + B.row1 + ';border-radius:6px;margin-bottom:16px;font-size:11px;color:' + B.muted + ';display:flex;gap:16px;flex-wrap:wrap">';
+    h += '<span>Emprunt: <strong>' + _f(LOAN.amount) + '€</strong> à ' + LOAN.rate + '%</span>';
+    h += '<span>Réinvestissement coupons: <strong>CAT ' + CAT_REINVEST + '%</strong></span>';
+    h += '<span>Post-autocall: <strong>' + POST_CALL_RATE + '%</strong></span>';
+    h += '<span>IS: <strong>' + LOAN.taxRate + '%</strong></span>';
+    h += '<span>Trigger: <strong>' + (product.trigger || '—') + '%</strong></span>';
+    h += '<span>Autocall cumul: <strong>' + (product.autocallTarget || '—') + '%</strong></span>';
+    h += '</div>';
+
+    // Detailed tables per scenario
+    scenarios.forEach(function(sc) {
+      var d = sc.data;
+      h += '<div style="margin-bottom:20px">';
+      h += '<div style="font-size:13px;font-weight:700;color:' + sc.color + ';margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid ' + sc.border + '">' + sc.name.toUpperCase() + ' — Détail année par année</div>';
+      h += '<table style="width:100%;border-collapse:collapse;font-size:11px">';
+      h += '<thead><tr style="background:' + B.header + '">';
+      h += '<th style="padding:6px;text-align:left">An</th>';
+      h += '<th style="padding:6px;text-align:left">Statut</th>';
+      h += '<th style="padding:6px;text-align:right;color:' + B.green + '">Coupons</th>';
+      h += '<th style="padding:6px;text-align:right;color:#4ECDC4">Intérêts CAT</th>';
+      if (d.totalPostCall > 0) h += '<th style="padding:6px;text-align:right;color:' + B.orange + '">Post-call</th>';
+      h += '<th style="padding:6px;text-align:right;color:' + B.green + '">Total rev.</th>';
+      h += '<th style="padding:6px;text-align:right;color:' + B.red + '">Emprunt</th>';
+      h += '<th style="padding:6px;text-align:right;color:' + B.orange + '">IS</th>';
+      h += '<th style="padding:6px;text-align:right;font-weight:700">Net</th>';
+      h += '<th style="padding:6px;text-align:right;color:' + B.purple + '">Cumul</th>';
+      h += '<th style="padding:6px;text-align:right">ROI</th>';
+      h += '</tr></thead><tbody>';
+
+      d.flows.forEach(function(f) {
+        var bg = f.year % 2 === 0 ? B.row0 : B.row1;
+        var netColor = f.net >= 0 ? B.green : B.red;
+        h += '<tr style="background:' + bg + ';border-bottom:1px solid ' + B.border + '">';
+        h += '<td style="padding:5px 6px;font-weight:700">An ' + f.year + '</td>';
+        h += '<td style="padding:5px 6px;font-size:10px;color:' + f.color + '">' + f.status + '</td>';
+        h += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:' + B.green + '">' + (f.coupon > 0 ? '+' + _f(f.coupon) + '€' : '—') + '</td>';
+        h += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:#4ECDC4">' + (f.catInterest > 0 ? '+' + _f(f.catInterest) + '€' : '—') + '</td>';
+        if (d.totalPostCall > 0) h += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:' + B.orange + '">' + (f.postCallRev > 0 ? '+' + _f(f.postCallRev) + '€' : '—') + '</td>';
+        h += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:' + B.green + ';font-weight:600">+' + _f(f.totalRev) + '€</td>';
+        h += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:' + B.red + '">-' + _f(f.interest) + '€</td>';
+        h += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:' + B.orange + '">' + (f.tax > 0 ? '-' + _f(f.tax) + '€' : '—') + '</td>';
+        h += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);font-weight:700;color:' + netColor + '">' + (f.net >= 0 ? '+' : '') + _f(f.net) + '€</td>';
+        h += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:' + B.purple + ';font-weight:600">' + (f.cumul >= 0 ? '+' : '') + _f(f.cumul) + '€</td>';
+        h += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);font-size:10px;color:' + (f.roi >= 0 ? B.green : B.red) + '">' + (f.roi >= 0 ? '+' : '') + _pct(f.roi) + '%</td>';
+        h += '</tr>';
+      });
+
+      // Total row
+      h += '<tr style="background:' + B.header + ';font-weight:700">';
+      h += '<td style="padding:8px 6px" colspan="2">TOTAL 5 ANS</td>';
+      h += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:' + B.green + '">+' + _f(d.totalCoupons) + '€</td>';
+      h += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:#4ECDC4">+' + _f(d.totalCatInterest) + '€</td>';
+      if (d.totalPostCall > 0) h += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:' + B.orange + '">+' + _f(d.totalPostCall) + '€</td>';
+      h += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:' + B.green + '">+' + _f(d.totalRevenue) + '€</td>';
+      h += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:' + B.red + '">-' + _f(d.totalInterest) + '€</td>';
+      h += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:' + B.orange + '">-' + _f(d.totalTax) + '€</td>';
+      h += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);font-size:14px;color:' + (d.netAfterTax >= 0 ? B.green : B.red) + '">' + (d.netAfterTax >= 0 ? '+' : '') + _f(d.netAfterTax) + '€</td>';
+      h += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono);color:' + B.purple + '">' + (d.netAfterTax >= 0 ? '+' : '') + _f(d.netAfterTax) + '€</td>';
+      h += '<td style="padding:8px 6px;text-align:right;font-family:var(--mono)">' + _pct(d.netAfterTax / LOAN.amount * 100) + '%</td>';
+      h += '</tr>';
+      h += '</tbody></table></div>';
+    });
+
+    // Synthesis
+    h += '<div style="padding:16px;background:' + B.card + ';border:2px solid ' + B.border + ';border-radius:10px;margin-bottom:20px">';
+    h += '<div style="font-size:14px;font-weight:700;color:' + B.text + ';margin-bottom:10px">📋 Synthèse</div>';
+    h += '<table style="width:100%;border-collapse:collapse;font-size:12px">';
+    h += '<tr style="border-bottom:1px solid ' + B.border + '"><td style="padding:6px;color:' + B.muted + '">Scénario</td><td style="padding:6px;text-align:right;color:#059669;font-weight:700">Optimiste</td><td style="padding:6px;text-align:right;color:#2563EB;font-weight:700">Normal</td><td style="padding:6px;text-align:right;color:#DC2626;font-weight:700">Pessimiste</td></tr>';
+    h += '<tr style="border-bottom:1px solid ' + B.border + '"><td style="padding:6px">Net après IS</td><td style="padding:6px;text-align:right;font-family:var(--mono);font-weight:700;color:#059669">+' + _f(opti.netAfterTax) + '€</td><td style="padding:6px;text-align:right;font-family:var(--mono);font-weight:700;color:#2563EB">+' + _f(normal.netAfterTax) + '€</td><td style="padding:6px;text-align:right;font-family:var(--mono);font-weight:700;color:#DC2626">' + (pessi.netAfterTax >= 0 ? '+' : '') + _f(pessi.netAfterTax) + '€</td></tr>';
+    h += '<tr style="border-bottom:1px solid ' + B.border + '"><td style="padding:6px">ROI 5 ans</td><td style="padding:6px;text-align:right;font-family:var(--mono);color:#059669">+' + _pct(opti.netAfterTax / LOAN.amount * 100) + '%</td><td style="padding:6px;text-align:right;font-family:var(--mono);color:#2563EB">+' + _pct(normal.netAfterTax / LOAN.amount * 100) + '%</td><td style="padding:6px;text-align:right;font-family:var(--mono);color:#DC2626">' + _pct(pessi.netAfterTax / LOAN.amount * 100) + '%</td></tr>';
+    h += '<tr style="border-bottom:1px solid ' + B.border + '"><td style="padding:6px">Autocall</td><td style="padding:6px;text-align:right">' + (opti.autocalled ? 'An ' + opti.autocallYear : 'Non') + '</td><td style="padding:6px;text-align:right">' + (normal.autocalled ? 'An ' + normal.autocallYear : 'Non') + '</td><td style="padding:6px;text-align:right">' + (pessi.autocalled ? 'An ' + pessi.autocallYear : 'Non') + '</td></tr>';
+    h += '<tr><td style="padding:6px">Intérêts CAT accumulés</td><td style="padding:6px;text-align:right;font-family:var(--mono);color:#4ECDC4">+' + _f(opti.totalCatInterest) + '€</td><td style="padding:6px;text-align:right;font-family:var(--mono);color:#4ECDC4">+' + _f(normal.totalCatInterest) + '€</td><td style="padding:6px;text-align:right;font-family:var(--mono);color:#4ECDC4">+' + _f(pessi.totalCatInterest) + '€</td></tr>';
+    h += '</table>';
+
+    // Espérance pondérée
+    var esperance = Math.round(opti.netAfterTax * 0.25 + normal.netAfterTax * 0.50 + pessi.netAfterTax * 0.25);
+    h += '<div style="margin-top:12px;padding:10px;background:rgba(37,99,235,0.06);border-radius:6px;font-size:12px;text-align:center">';
+    h += '<strong style="color:#2563EB">Espérance pondérée</strong> (25% opti + 50% normal + 25% pessi) = ';
+    h += '<strong style="font-size:16px;color:#2563EB">' + (esperance >= 0 ? '+' : '') + _f(esperance) + '€</strong>';
+    h += '</div>';
+    h += '</div>';
+
+    return h;
+  }
+
+  // ─── PUBLIC API ──────
+  window.renderCarryPnLPage = function(container, product) {
+    container.innerHTML = '<div class="main">' + _renderPnLPage(product) + '</div>';
+  };
+
+  // Called from carry trade comparison
+  window.__carryOpenPnL = function(idx) {
+    var products = window._carryImportedForPnL || [];
+    var p = products[idx];
+    if (!p) { showToast('Produit introuvable', 'error'); return; }
+    app.setState({ view: 'carry-pnl' });
+    window._carryPnLProduct = p;
+    var main = document.getElementById('main-content');
+    if (main) renderCarryPnLPage(main, p);
+  };
+
+  console.log('[StructBoard] Carry P&L Page loaded');
+})();

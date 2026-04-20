@@ -818,6 +818,9 @@
     // Sort by net after tax (best first)
     results.sort(function(a, b) { return b.pnl.netAfterTax - a.pnl.netAfterTax; });
 
+    // Store globally for P&L page access
+    window._carryImportedForPnL = results.map(function(r) { return r.product; });
+
     var disc = document.getElementById('carry-v2-discussion');
     if (disc) {
       var h = '<div style="font-size:13px;font-weight:700;color:#7C3AED;margin-bottom:12px">📊 COMPARAISON — ' + selected.length + ' produit' + (selected.length > 1 ? 's' : '') + ' sur ' + _f(LOAN.amount) + '€ (emprunt ' + LOAN.rate + '% · ' + LOAN.years + ' ans)</div>';
@@ -833,6 +836,7 @@
       h += '<th style="padding:8px;text-align:right;font-weight:700">Net après IS</th>';
       h += '<th style="padding:8px;text-align:right;color:#92400E">Pire cas</th>';
       h += '<th style="padding:8px;text-align:center">Rang</th>';
+      h += '<th style="padding:8px;text-align:center">Détail</th>';
       h += '</tr></thead><tbody>';
 
       results.forEach(function(r, i) {
@@ -850,6 +854,7 @@
         h += '<td style="padding:8px;text-align:right;font-family:var(--mono);font-weight:800;font-size:13px;color:' + netColor + '">' + (pnl.netAfterTax >= 0 ? '+' : '') + _f(pnl.netAfterTax) + '€</td>';
         h += '<td style="padding:8px;text-align:right;font-family:var(--mono);font-size:10px;color:#92400E">' + _f(pnl.worstNet) + '€</td>';
         h += '<td style="padding:8px;text-align:center"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:' + (isFirst ? '#059669' : i === 1 ? '#4ECDC4' : '#94A3B8') + ';color:white;font-weight:700;font-size:11px">' + (i + 1) + '</span></td>';
+        h += '<td style="padding:8px;text-align:center"><button onclick="__carryOpenPnL(' + i + ')" style="padding:4px 10px;background:#7C3AED;color:#fff;border:none;border-radius:4px;font-size:10px;cursor:pointer">P&L →</button></td>';
         h += '</tr>';
       });
       h += '</tbody></table>';
