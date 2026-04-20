@@ -1708,5 +1708,446 @@
     "investedAmount": 200000,
     "addedDate": "2026-04-20",
     "entity": "cameleons"
+  },
+  {
+    "name": "SOLUTION COURT TERME BOOSTÉE SUR PANIER D'ACTIONS (ByCam)",
+    "type": "dispersion",
+    "structureType": "dispersion",
+    "emitter": "SG Issuer",
+    "guarantor": "Société Générale",
+    "guarantorRating": {
+      "moodys": "A1",
+      "sp": "A"
+    },
+    "underlyings": [
+      "NVIDIA",
+      "Apple",
+      "Amazon",
+      "Tesla",
+      "Alphabet (Ex Google)",
+      "Microsoft",
+      "Meta Platforms",
+      "Netflix"
+    ],
+    "underlyingType": "pairs",
+    "currency": "EUR",
+    "maturity": "3 ans",
+    "maturityYears": 3,
+    "coupon": {
+      "rate": 7,
+      "rateIfCalled": null,
+      "rateIfMaturity": null,
+      "type": "participation",
+      "frequency": "in_fine",
+      "trigger": null,
+      "memory": false,
+      "paymentTiming": "maturity"
+    },
+    "participationRate": 7,
+    "guaranteedYears": 0,
+    "autocallCumulTarget": null,
+    "commissions": null,
+    "isin": "",
+    "minInvestment": null,
+    "capitalProtection": {
+      "protected": true,
+      "level": 100,
+      "barrier": null,
+      "barrierCoupon": null,
+      "barrierType": "europeenne"
+    },
+    "earlyRedemption": {
+      "possible": false,
+      "type": "none",
+      "trigger": null,
+      "frequency": "annuel",
+      "startSemester": null,
+      "stepDown": false,
+      "stepDownPct": null
+    },
+    "decrementPct": null,
+    "actualDividendYield": null,
+    "mechanism": "L'investisseur reçoit son capital initial plus une participation de 7% basée sur la Performance Relative Moyenne calculée sur 16 paires d'actions technologiques américaines. La Performance Relative de chaque paire est la différence entre la meilleure et la pire performance des deux actions de la paire.",
+    "risks": [
+      "Protection du capital uniquement à l'échéance",
+      "Risque de crédit Société Générale",
+      "Pas de dividendes",
+      "Risque de liquidité avant échéance",
+      "Rendement dépend de la dispersion et non de la performance du secteur"
+    ],
+    "summary": "Produit à capital protégé à maturité offrant une participation de 7% à la performance relative moyenne de 16 paires d'actions technologiques américaines sur 3 ans",
+    "aiParsed": {
+      "name": "SOLUTION COURT TERME BOOSTÉE SUR PANIER D'ACTIONS",
+      "isin": "",
+      "structureType": "dispersion",
+      "emitter": "SG Issuer",
+      "guarantor": "Société Générale",
+      "guarantorRating": {
+        "moodys": "A1",
+        "sp": "A"
+      },
+      "underlyings": [
+        "NVIDIA",
+        "Apple",
+        "Amazon",
+        "Tesla",
+        "Alphabet (Ex Google)",
+        "Microsoft",
+        "Meta Platforms",
+        "Netflix"
+      ],
+      "underlyingType": "pairs",
+      "currency": "EUR",
+      "maturity": "3 ans",
+      "maturityYears": 3,
+      "coupon": {
+        "rate": 7,
+        "rateIfCalled": null,
+        "rateIfMaturity": null,
+        "type": "participation",
+        "frequency": "in_fine",
+        "trigger": null,
+        "memory": false,
+        "paymentTiming": "maturity"
+      },
+      "participationRate": 7,
+      "guaranteedYears": 0,
+      "autocallCumulTarget": null,
+      "commissions": null,
+      "capitalProtection": {
+        "protected": true,
+        "level": 100,
+        "barrier": null,
+        "barrierCoupon": null,
+        "barrierType": "europeenne"
+      },
+      "earlyRedemption": {
+        "possible": false,
+        "type": "",
+        "trigger": null,
+        "frequency": "",
+        "startSemester": null,
+        "stepDown": false,
+        "stepDownPct": null,
+        "firstCallDate": null,
+        "callSchedule": []
+      },
+      "decrementPct": null,
+      "actualDividendYield": null,
+      "minInvestment": null,
+      "mechanism": "L'investisseur reçoit son capital initial plus une participation de 7% basée sur la Performance Relative Moyenne calculée sur 16 paires d'actions technologiques américaines. La Performance Relative de chaque paire est la différence entre la meilleure et la pire performance des deux actions de la paire.",
+      "risks": [
+        "Protection du capital uniquement à l'échéance",
+        "Risque de crédit Société Générale",
+        "Pas de dividendes",
+        "Risque de liquidité avant échéance",
+        "Rendement dépend de la dispersion et non de la performance du secteur"
+      ],
+      "summary": "Produit à capital protégé à maturité offrant une participation de 7% à la performance relative moyenne de 16 paires d'actions technologiques américaines sur 3 ans",
+      "_parsingAlerts": [
+        "Commissions non détectées (vérifier dans la brochure)",
+        "Code ISIN non détecté"
+      ]
+    },
+    "sourceFile": "Produit_3_Solution_Court_Terme_Boostee (1).pdf",
+    "investedAmount": 100000,
+    "id": "sp_mo7bumy6_q989o",
+    "bankId": "sg",
+    "status": "active",
+    "receivedDate": "2026-04-19",
+    "conversation": [],
+    "conversationSummary": null,
+    "decision": "subscribed",
+    "decisionReason": null,
+    "aiCategory": "capital-protege",
+    "aiCategoryLabel": "🛡️ Capital Protégé",
+    "aiCategoryColor": "#4CAF50",
+    "aiOpinion": "Produit offrant une protection totale du capital avec un potentiel de rendement de 7% sur 3 ans lié à la performance du panier technologique. Le rendement reste modeste comparé au risque de concentration sectorielle, mais la protection intégrale du capital en fait un choix sécurisé pour les investisseurs prudents cherchant une exposition aux valeurs tech sans risque de perte.",
+    "aiAnalyzedAt": "2026-04-19T10:39:17.286Z",
+    "grading": {
+      "grade": "B",
+      "score": 68,
+      "killCriteria": {
+        "triggered": false,
+        "reasons": []
+      },
+      "pillars": {
+        "adjustedReturn": {
+          "score": 95,
+          "base": 70,
+          "delta": 0,
+          "reasoning": "Rendement: base 70 → -2 = 68 (En régime stagflationniste avec 4 sous-jacents tech/comm services évités (NVDA, META, NFLX, GOOGL), la probabilité de dispersion suffisante pour le coupon de 43% est fortement réduite) | Coupon 3.033333333333333%, protégé",
+          "_bsDelta": 25,
+          "_bs": {
+            "score": 95,
+            "probCoupon": 95,
+            "rendementNet": 10.45,
+            "perteEsperee": 0,
+            "couponEffectif": 11,
+            "vols": [
+              25,
+              25,
+              25,
+              25,
+              25,
+              25,
+              26.85,
+              25
+            ],
+            "matEsperee": 3,
+            "isBasket": false
+          }
+        },
+        "underlyingQuality": {
+          "score": 70,
+          "base": 72,
+          "delta": -2,
+          "reasoning": "Qualité: base 72 → -2 = 70 (Panier concentré à 87.5% dans les secteurs évités par le MI (tech/comm services), avec des betas élevés (moy. 1.24) particulièrement vulnérables en stagflation) | Worst: Tesla B:17"
+        },
+        "portfolioFit": {
+          "score": 65,
+          "base": 72,
+          "delta": 2,
+          "reasoning": "Fit: base 72 → +2 = 74 (La garantie du capital et la maturité courte (3a) offrent une protection précieuse en régime stagflationniste, malgré le coupon modeste)"
+        },
+        "riskPremium": {
+          "score": 52,
+          "base": 20,
+          "delta": 0,
+          "reasoning": "Capital garanti: spread 3.0% - CAT 2.5% - illiq 0.3% = 0.2%"
+        }
+      },
+      "verdict": "Produit inadapté au contexte macro actuel. Le panier est dangereusement exposé aux secteurs évités (87.5% tech/comm services) en pleine stagflation avec Brent à $92 et PCE à 2.8%. Malgré la garantie du capital, le coupon annualisé de 3.03% ne compense pas l'inflation et la participation de seulement 7% à la dispersion limite drastiquement le potentiel dans un environnement où la volatilité moyenne dépasse 37%. Score final: 45/100 (D).",
+      "keyRisks": [
+        "Exposition massive (87.5%) aux secteurs tech/comm services explicitement évités en stagflation",
+        "Participation de seulement 7% à la dispersion, limitant le gain même en cas de forte volatilité",
+        "Coupon réel négatif avec PCE à 2.8% vs rendement de 3.03%"
+      ],
+      "negotiationPoints": [],
+      "scenarios": {
+        "optimistic": {
+          "return_pct": 3.03,
+          "return_eur": 9100,
+          "probability": 0.2,
+          "duration_years": 3
+        },
+        "base": {
+          "return_pct": 2,
+          "return_eur": 6000,
+          "probability": 0.35,
+          "duration_years": 3
+        },
+        "stress": {
+          "return_pct": 0,
+          "return_eur": 0,
+          "probability": 0.3,
+          "duration_years": 3
+        },
+        "worst": {
+          "return_pct": 0,
+          "return_eur": 0,
+          "probability": 0.15,
+          "duration_years": 3
+        }
+      },
+      "confidenceInterval": {
+        "low": 51,
+        "high": 65,
+        "halfWidth": 7,
+        "gradeStable": false,
+        "gradeRange": "C-B",
+        "label": "C [51-65]"
+      },
+      "metadata": {
+        "gradedAt": "2026-04-19T10:39:38.883Z",
+        "durationMs": 25114,
+        "aiUsed": true,
+        "version": "7.1",
+        "productType": "dispersion",
+        "marketDataAvailable": true,
+        "catBenchmark": 2.8,
+        "catSource": "allocator-confirmed",
+        "couponAnnualized": 3.033333333333333,
+        "couponRaw": 7,
+        "couponMultiplier": 1,
+        "couponFrequency": "annuel",
+        "isInPortfolio": false,
+        "hasBarrier": false,
+        "barrierPct": 0,
+        "barrierCouponPct": null,
+        "couponProbability": 95,
+        "expectedMaturity": 3,
+        "maxMaturity": 3,
+        "maxBeta": 1.89,
+        "baseScore": 58,
+        "baseGrade": "C",
+        "adjustments": {
+          "p1": -2,
+          "p2": -2,
+          "p3": 2,
+          "p4": 0
+        },
+        "barrier_sigma": null,
+        "barrier_sigma_label": null,
+        "barrier_sigma_danger": null,
+        "liquidity_level": "L4",
+        "liquidity_score": 10,
+        "liquidity_label": "Illiquide",
+        "ci_low": 51,
+        "ci_high": 65,
+        "ci_label": "C [51-65]",
+        "issuer_rating": "A",
+        "issuer_tier": "IG",
+        "hasDecrement": false,
+        "decrementDrag": 0,
+        "structureType": "dispersion",
+        "bsRendementNet": 10.45,
+        "bsProbCoupon": 95,
+        "bsPerteEsperee": 0,
+        "bsVols": [
+          25,
+          25,
+          25,
+          25,
+          25,
+          25,
+          26.85,
+          25
+        ],
+        "bsMatEsperee": 3,
+        "isBasket": false,
+        "v6Weights": {
+          "p1": 0.3,
+          "p2": 0.2,
+          "p3": 0.15,
+          "p4": 0.3
+        },
+        "stockData": [
+          {
+            "name": "NVIDIA",
+            "ticker": "NVDA",
+            "sector": "Technologie de l'information",
+            "perf_ytd": 6.32,
+            "perf_1y": 79.1,
+            "volatility_3y": 48.14,
+            "max_drawdown_3y": 36.89,
+            "buffett_score": 67,
+            "quality_score": 91,
+            "buffett_grade": "B"
+          },
+          {
+            "name": "Apple",
+            "ticker": "AAPL",
+            "sector": "Technologie de l'information",
+            "perf_ytd": -3.15,
+            "perf_1y": 30.01,
+            "volatility_3y": 25.57,
+            "max_drawdown_3y": 33.43,
+            "buffett_score": 67,
+            "quality_score": 70,
+            "buffett_grade": "B"
+          },
+          {
+            "name": "Amazon",
+            "ticker": "AMZN",
+            "sector": "Biens de consommation cycliques",
+            "perf_ytd": 8.18,
+            "perf_1y": 37.11,
+            "volatility_3y": 31.33,
+            "max_drawdown_3y": 30.88,
+            "buffett_score": 67,
+            "quality_score": 61,
+            "buffett_grade": "B"
+          },
+          {
+            "name": "Tesla",
+            "ticker": "TSLA",
+            "sector": "Biens de consommation cycliques",
+            "perf_ytd": -13.55,
+            "perf_1y": 54.06,
+            "volatility_3y": 57.57,
+            "max_drawdown_3y": 53.77,
+            "buffett_score": 17,
+            "quality_score": 43,
+            "buffett_grade": "D"
+          },
+          {
+            "name": "Alphabet (Ex Google)",
+            "ticker": "GOOGL",
+            "sector": "La communication",
+            "perf_ytd": 7.35,
+            "perf_1y": 111.23,
+            "volatility_3y": 29.13,
+            "max_drawdown_3y": 29.89,
+            "buffett_score": 67,
+            "quality_score": 73,
+            "buffett_grade": "B"
+          },
+          {
+            "name": "Microsoft",
+            "ticker": "MSFT",
+            "sector": "Technologie de l'information",
+            "perf_ytd": -13.13,
+            "perf_1y": 8.33,
+            "volatility_3y": 23.68,
+            "max_drawdown_3y": 34.18,
+            "buffett_score": 67,
+            "quality_score": 78,
+            "buffett_grade": "B"
+          },
+          {
+            "name": "Meta Platforms",
+            "ticker": "RHM",
+            "sector": "Industries",
+            "perf_ytd": -4.22,
+            "perf_1y": 0.72,
+            "volatility_3y": 40.05,
+            "max_drawdown_3y": 30.63,
+            "buffett_score": 50,
+            "quality_score": 65,
+            "buffett_grade": "C"
+          },
+          {
+            "name": "Netflix",
+            "ticker": "NFLX",
+            "sector": "La communication",
+            "perf_ytd": 14.89,
+            "perf_1y": 15.67,
+            "volatility_3y": 33.47,
+            "max_drawdown_3y": 43.35,
+            "buffett_score": 83,
+            "quality_score": 68,
+            "buffett_grade": "A"
+          }
+        ]
+      },
+      "regimeScenarios": {
+        "current": {
+          "score": 68,
+          "grade": "B",
+          "label": "Actuel (stagflation)",
+          "desc": "Corrélation 0.43 → dispersion favorable"
+        },
+        "bull": {
+          "score": 71,
+          "grade": "B",
+          "label": "Bull / Risk-on",
+          "delta": 3,
+          "desc": "Marchés calmes → corrélation baisse → coupon monte"
+        },
+        "crash": {
+          "score": 62,
+          "grade": "B",
+          "label": "Crash / Récession",
+          "delta": -6,
+          "desc": "Panique → corrélation spike → coupon baisse (cap garanti)"
+        }
+      }
+    },
+    "_couponProbability": 95,
+    "_bsRendementNet": 10.45,
+    "envelope": "bycam",
+    "entity": "bycam",
+    "addedDate": "2026-04-20"
   }
 ]
