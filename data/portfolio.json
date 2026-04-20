@@ -765,6 +765,17 @@
         "decrementDrag": 0,
         "structureType": "basket"
       }
+    },
+    "tracking": {
+      "history": [
+        {
+          "date": "2026-04-20",
+          "level": 103.03,
+          "year": 1
+        }
+      ],
+      "level": 103.03,
+      "date": "2026-04-20"
     }
   },
   {
