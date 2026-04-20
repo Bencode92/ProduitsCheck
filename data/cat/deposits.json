@@ -485,7 +485,7 @@
     "exitCondition": "notice",
     "exitPenalty": "Aucun intérêt si retrait dans le mois de souscription",
     "autoRenew": false,
-    "status": "active",
+    "status": "archived",
     "entity": "cameleons",
     "entityName": "Caméleons",
     "sourceFile": "CAT CONQUETE 09.2024.PDF.pdf",
@@ -493,7 +493,14 @@
     "id": "pl_mmyv18bl_sao",
     "createdDate": "2026-03-20",
     "maturityDate": "2026-09-18",
-    "estimatedInterest": 8592.12
+    "estimatedInterest": 8592.12,
+    "archived": {
+      "date": "2026-09-18",
+      "reason": "maturite",
+      "reasonLabel": "Maturité",
+      "interestReceived": 8592.12,
+      "capitalReturned": 150000
+    }
   },
   {
     "productType": "cat",
