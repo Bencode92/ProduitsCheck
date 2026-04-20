@@ -1,0 +1,129 @@
+{
+  "name": "TARN TEC10",
+  "type": "capital_garanti",
+  "structureType": "capital_garanti",
+  "emitter": "Non déterminé (min. A2 / A / A+)",
+  "guarantor": "",
+  "guarantorRating": {
+    "moodys": "A2",
+    "sp": "A"
+  },
+  "underlyings": [
+    "TEC10"
+  ],
+  "underlyingType": "single-index",
+  "currency": "EUR",
+  "maturity": "10 ans",
+  "maturityYears": 10,
+  "coupon": {
+    "rate": 7,
+    "rateIfCalled": null,
+    "rateIfMaturity": null,
+    "type": "conditionnel",
+    "frequency": "annuel",
+    "trigger": 4.15,
+    "memory": false,
+    "paymentTiming": "maturity"
+  },
+  "participationRate": null,
+  "guaranteedYears": 2,
+  "autocallCumulTarget": 21,
+  "commissions": null,
+  "isin": "",
+  "minInvestment": null,
+  "capitalProtection": {
+    "protected": true,
+    "level": 100,
+    "barrier": null,
+    "barrierCoupon": 4.15,
+    "barrierType": "europeenne"
+  },
+  "earlyRedemption": {
+    "possible": true,
+    "type": "automatic",
+    "trigger": null,
+    "frequency": "annuel",
+    "startSemester": null,
+    "stepDown": false,
+    "stepDownPct": null
+  },
+  "decrementPct": null,
+  "actualDividendYield": null,
+  "mechanism": "TARN avec remboursement automatique après 3 coupons payés dont 2 garantis. Coupon de 7% garanti années 1-2, puis conditionnel si TEC10 ≤ 4.15%. Capital garanti 100%.",
+  "risks": [
+    "Plafonnement des gains en cas de forte hausse du sous-jacent"
+  ],
+  "summary": "Produit TARN sur TEC10 avec capital garanti 100%. Coupon 7% garanti les 2 premières années, puis conditionnel (TEC10 ≤ 4.15%). Remboursement automatique dès que 3 coupons ont été payés. Maturité 10 ans.",
+  "aiParsed": {
+    "name": "TARN TEC10",
+    "isin": "",
+    "structureType": "capital_garanti",
+    "emitter": "Non déterminé (min. A2 / A / A+)",
+    "guarantor": "",
+    "guarantorRating": {
+      "moodys": "A2",
+      "sp": "A"
+    },
+    "underlyings": [
+      "TEC10"
+    ],
+    "underlyingType": "single-index",
+    "currency": "EUR",
+    "maturity": "10 ans",
+    "maturityYears": 10,
+    "coupon": {
+      "rate": 7,
+      "rateIfCalled": null,
+      "rateIfMaturity": null,
+      "type": "conditionnel",
+      "frequency": "annuel",
+      "trigger": 4.15,
+      "memory": false,
+      "paymentTiming": "maturity"
+    },
+    "participationRate": null,
+    "guaranteedYears": 2,
+    "autocallCumulTarget": 21,
+    "commissions": null,
+    "capitalProtection": {
+      "protected": true,
+      "level": 100,
+      "barrier": null,
+      "barrierCoupon": 4.15,
+      "barrierType": "europeenne"
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "automatic",
+      "trigger": null,
+      "frequency": "annuel",
+      "startSemester": null,
+      "stepDown": false,
+      "stepDownPct": null,
+      "firstCallDate": null,
+      "callSchedule": []
+    },
+    "decrementPct": null,
+    "actualDividendYield": null,
+    "minInvestment": null,
+    "mechanism": "TARN avec remboursement automatique après 3 coupons payés dont 2 garantis. Coupon de 7% garanti années 1-2, puis conditionnel si TEC10 ≤ 4.15%. Capital garanti 100%.",
+    "risks": [
+      "Plafonnement des gains en cas de forte hausse du sous-jacent"
+    ],
+    "summary": "Produit TARN sur TEC10 avec capital garanti 100%. Coupon 7% garanti les 2 premières années, puis conditionnel (TEC10 ≤ 4.15%). Remboursement automatique dès que 3 coupons ont été payés. Maturité 10 ans.",
+    "_parsingAlerts": [
+      "Commissions non détectées (vérifier dans la brochure)",
+      "Code ISIN non détecté"
+    ]
+  },
+  "sourceFile": "PRODUIT 1.pdf",
+  "investedAmount": 0,
+  "id": "sp_mo7f672q_butxa",
+  "bankId": "cic",
+  "status": "analyzing",
+  "receivedDate": "2026-04-20",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null
+}
