@@ -16,14 +16,12 @@
   "maturity": "8 ans",
   "maturityYears": 8,
   "coupon": {
-    "rate": 4,
-    "rateIfCalled": null,
-    "rateIfMaturity": null,
+    "rate": 8,
+    "frequency": "annuel",
+    "annualized": true,
     "type": "conditionnel",
-    "frequency": "semestriel",
-    "trigger": 100,
-    "memory": false,
-    "paymentTiming": "periodic"
+    "paymentTiming": "periodic",
+    "trigger": 100
   },
   "participationRate": null,
   "guaranteedYears": 0,
@@ -189,5 +187,199 @@
   "conversation": [],
   "conversationSummary": null,
   "decision": null,
-  "decisionReason": null
+  "decisionReason": null,
+  "_freqFixApplied": true,
+  "aiCategory": "autocall-mono",
+  "aiCategoryLabel": "⚡ Autocall Mono-actif",
+  "aiCategoryColor": "#06D6A0",
+  "aiOpinion": "Produit offrant un rendement attractif de 8% annuel avec possibilité de remboursement anticipé dès que Saint-Gobain retrouve son niveau initial, mais sans protection du capital en cas de forte baisse. Le risque est concentré sur une seule valeur avec une barrière relativement basse à 60%, exposant à des pertes importantes si Saint-Gobain chute durablement.",
+  "aiAnalyzedAt": "2026-04-20T11:23:39.912Z",
+  "grading": {
+    "grade": "D",
+    "score": 39,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 30,
+        "base": 36,
+        "delta": 0,
+        "reasoning": "Rendement: base 36 → -7 = 29 (Barrière coupon à 100% très exigeante en stagflation avec VIX 22, probabilité de toucher les coupons fortement réduite sur 8 ans) | Coupon 8%, barrière 60% | Barr.coupon 100% | Mat espérée: ~1.6a (prob mat: 0%)",
+        "_bsDelta": 2,
+        "_bs": {
+          "score": 38,
+          "probCoupon": 49.4,
+          "rendementNet": 0.45,
+          "perteEsperee": 3.5,
+          "couponEffectif": 8,
+          "vols": [
+            24.91
+          ],
+          "matEsperee": 1.6,
+          "isBasket": false
+        }
+      },
+      "underlyingQuality": {
+        "score": 74,
+        "base": 79,
+        "delta": -5,
+        "reasoning": "Qualité: base 79 → -5 = 74 (SGO (materials) en zone neutre mais beta 1.14 vulnérable en stagflation, DD -35.71% inquiétant malgré fondamentaux corrects) | Worst: Compagnie de Saint-Gobain S.A. B:67"
+      },
+      "portfolioFit": {
+        "score": 35,
+        "base": 80,
+        "delta": 0,
+        "reasoning": "Fit: base 80"
+      },
+      "riskPremium": {
+        "score": 34,
+        "base": 5,
+        "delta": -7,
+        "reasoning": "Capital garanti: spread 8.0% - CAT 2.5% - illiq 0.6% = 4.9%"
+      }
+    },
+    "verdict": "Produit à ÉVITER en contexte de stagflation. Le coupon 8% annualisé est insuffisant pour compenser une barrière à 100% sur 8 ans avec SGO en DD -35.71% et beta 1.14. En régime stagflationniste avec VIX 22 et Brent à $90, la probabilité de toucher les coupons est très faible. Le ratio risque/rendement est défavorable avec un capital non protégé à 60% et une espérance de maturité de 1.6 ans peu crédible.",
+    "keyRisks": [
+      "Barrière coupon 100% irréaliste sur 8 ans en stagflation",
+      "Beta 1.14 de SGO amplifie les corrections en régime volatil",
+      "Spread 8% insuffisant vs risque de perte 40% du capital",
+      "Barrière à 0.64σ (Danger) — vol 28.06%"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 4,
+        "return_eur": 4000,
+        "probability": 0.15,
+        "duration_years": 0.5
+      },
+      "base": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.4,
+        "duration_years": 8
+      },
+      "stress": {
+        "return_pct": -20,
+        "return_eur": -20000,
+        "probability": 0.35,
+        "duration_years": 8
+      },
+      "worst": {
+        "return_pct": -40,
+        "return_eur": -40000,
+        "probability": 0.1,
+        "duration_years": 8
+      }
+    },
+    "confidenceInterval": {
+      "low": 35,
+      "high": 51,
+      "halfWidth": 8,
+      "gradeStable": false,
+      "gradeRange": "D-C",
+      "label": "D [35-51]"
+    },
+    "metadata": {
+      "gradedAt": "2026-04-20T11:24:00.153Z",
+      "durationMs": 20484,
+      "aiUsed": true,
+      "version": "7.1",
+      "productType": "autocall",
+      "marketDataAvailable": true,
+      "catBenchmark": 2.8,
+      "catSource": "allocator-confirmed",
+      "couponAnnualized": 8,
+      "couponRaw": 8,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": true,
+      "barrierPct": 60,
+      "barrierCouponPct": 100,
+      "couponProbability": 49.4,
+      "expectedMaturity": 1.6,
+      "maxMaturity": 8,
+      "probReachMaturity": 0,
+      "maxBeta": 1.14,
+      "baseScore": 48,
+      "baseGrade": "C",
+      "adjustments": {
+        "p1": -7,
+        "p2": -5,
+        "p3": 0,
+        "p4": -7
+      },
+      "barrier_sigma": 0.64,
+      "barrier_sigma_label": "Danger",
+      "barrier_sigma_danger": true,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Rappelable 12M",
+      "ci_low": 35,
+      "ci_high": 51,
+      "ci_label": "D [35-51]",
+      "issuer_rating": "A+",
+      "issuer_tier": "IG",
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "autocall",
+      "bsRendementNet": 0.45,
+      "bsProbCoupon": 49.4,
+      "bsPerteEsperee": 3.5,
+      "bsVols": [
+        24.91
+      ],
+      "bsMatEsperee": 1.6,
+      "isBasket": false,
+      "issuerCreditPenalty": 1,
+      "issuerCDS": 60,
+      "v6Weights": {
+        "p1": 0.3,
+        "p2": 0.2,
+        "p3": 0.15,
+        "p4": 0.3
+      },
+      "stockData": [
+        {
+          "name": "Compagnie de Saint-Gobain S.A.",
+          "ticker": "SGO",
+          "sector": "Industries",
+          "perf_ytd": -6.35,
+          "perf_1y": -5.21,
+          "volatility_3y": 28.06,
+          "max_drawdown_3y": 35.71,
+          "buffett_score": 67,
+          "quality_score": 72,
+          "buffett_grade": "B"
+        }
+      ]
+    },
+    "regimeScenarios": {
+      "current": {
+        "score": 39,
+        "grade": "D",
+        "label": "Actuel (stagflation)",
+        "desc": "Régime actuel → volatilité modérée"
+      },
+      "bull": {
+        "score": 45,
+        "grade": "C",
+        "label": "Bull / Risk-on",
+        "delta": 6,
+        "desc": "Marchés haussiers → prob coupon monte, barrière safe"
+      },
+      "crash": {
+        "score": 29,
+        "grade": "D",
+        "label": "Crash / Récession",
+        "delta": -10,
+        "desc": "Marchés baissiers → barrière menacée, vol en hausse"
+      }
+    }
+  },
+  "_couponProbability": 49.4,
+  "_bsRendementNet": 0.45
 }
