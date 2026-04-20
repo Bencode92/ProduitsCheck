@@ -32,5 +32,22 @@
     "source": "import",
     "emetteur": "Swiss Life(A2/A/A+)",
     "trigger": 3.35
+  },
+  {
+    "name": "SL - Range Accrual Euribor 12M 10ans",
+    "type": "conditionnel",
+    "coupon": 7,
+    "prob": 0.92,
+    "duration": 10,
+    "guaranteedYears": 2,
+    "autocallTarget": 0,
+    "autocallYears": 0,
+    "amount": 500000,
+    "risk": "Faible",
+    "detail": "Swiss Life(A2/A/A+) · Trigger 4.1% · Capital garanti 100%",
+    "color": "#7C3AED",
+    "source": "import",
+    "emetteur": "Swiss Life(A2/A/A+)",
+    "trigger": 4.1
   }
 ]
