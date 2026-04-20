@@ -575,8 +575,10 @@
     html += '</div>';
 
     html += '<div id="carry-import-result" style="margin-top:8px"></div>';
-    html += '<div id="carry-import-list"></div>';
     html += '</div></div>';
+
+    // ═══ PROPOSITIONS LIST (visible, outside accordion) ═══
+    html += '<div id="carry-import-list" style="margin-bottom:16px"></div>';
 
     // ═══ BLOC 2 : DISCUSSION — Détail de la config sélectionnée ═══
     html += '<div id="carry-v2-discussion" style="background:' + B.card + ';border:1px solid ' + B.border + ';border-radius:8px;padding:16px;margin-bottom:16px">';
@@ -953,8 +955,9 @@
       }
     });
 
+    console.log('[CarryTrade] Added:', added, 'Total imported:', _importedProducts.length);
     if (added > 0) {
-      _saveImportedProducts();
+      _saveImportedProducts().catch(function(e) { console.warn('[CarryTrade] Save error (non-blocking):', e.message); });
       _refreshImportList();
       showToast(added + ' produit' + (added > 1 ? 's' : '') + ' ajouté' + (added > 1 ? 's' : '') + ' depuis StructBoard', 'success');
     } else {
