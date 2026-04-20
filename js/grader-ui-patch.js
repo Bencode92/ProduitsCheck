@@ -107,7 +107,7 @@
             }
 
             // v7.1: Dispersion backtest 1Y
-            var bt = p.grading.dispersionBacktest || p._dispersionBacktest;
+            var bt = (p.grading && p.grading.dispersionBacktest) || p._dispersionBacktest;
             if (bt) {
                 gradingHtml += '<div style="margin:14px 0;padding:14px;background:rgba(59,130,246,0.04);border:1px solid rgba(59,130,246,0.15);border-radius:8px">';
                 gradingHtml += '<div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:10px">📊 Simulation 1 an — Dispersion réelle</div>';
