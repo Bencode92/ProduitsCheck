@@ -147,13 +147,13 @@
     "tracking": {
       "history": [
         {
-          "date": "2026-04-20",
-          "level": 102.5,
+          "date": "2026-03-24",
+          "level": 102.13,
           "year": 1
         }
       ],
-      "level": 102.5,
-      "date": "2026-04-20",
+      "level": 102.13,
+      "date": "2026-03-24",
       "note": ""
     },
     "envelope": "cameleons",
@@ -165,7 +165,7 @@
       "ENI S.p.A.": 16
     },
     "_strikePriceSource": "confirmed",
-    "_strikePriceDate": "2026-04-20",
+    "_strikePriceDate": "2026-03-26",
     "structureType": "capital_garanti",
     "grading": {
       "grade": "C",
@@ -439,13 +439,13 @@
     "tracking": {
       "history": [
         {
-          "date": "2026-04-20",
-          "level": 100.09,
+          "date": "2026-03-24",
+          "level": 99.26,
           "year": 1
         }
       ],
-      "level": 100.09,
-      "date": "2026-04-20",
+      "level": 99.26,
+      "date": "2026-03-24",
       "note": ""
     },
     "grading": {
@@ -765,17 +765,6 @@
         "decrementDrag": 0,
         "structureType": "basket"
       }
-    },
-    "tracking": {
-      "history": [
-        {
-          "date": "2026-04-20",
-          "level": 103.03,
-          "year": 1
-        }
-      ],
-      "level": 103.03,
-      "date": "2026-04-20"
     }
   },
   {
@@ -916,13 +905,13 @@
     "tracking": {
       "history": [
         {
-          "date": "2026-04-20",
-          "level": 96.98,
+          "date": "2026-03-24",
+          "level": 93,
           "year": 1
         }
       ],
-      "level": 96.98,
-      "date": "2026-04-20",
+      "level": 93,
+      "date": "2026-03-24",
       "note": ""
     },
     "envelope": "cameleons",
@@ -1196,13 +1185,13 @@
     "tracking": {
       "history": [
         {
-          "date": "2026-03-24",
-          "level": 94.07,
+          "date": "2026-04-20",
+          "level": 95.85,
           "year": 1
         }
       ],
-      "level": 94.07,
-      "date": "2026-03-24",
+      "level": 95.85,
+      "date": "2026-04-20",
       "note": ""
     },
     "envelope": "cameleons",
