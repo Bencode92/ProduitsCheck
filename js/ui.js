@@ -571,11 +571,61 @@ function showManualEntryModal(context, bankId) {
 }
 function showIntegrateModal(productId, bankId) {
   const modal = document.getElementById('modal');
-  modal.innerHTML = `<div class="modal-overlay" onclick="closeModal()"><div class="modal-content" onclick="event.stopPropagation()">
+  const product = app._findProduct(productId, bankId);
+  const pName = product ? (product.name || 'Produit').substring(0, 40) : 'Produit';
+  const entOpts = (typeof MY_ENTITIES !== 'undefined' ? MY_ENTITIES : []).map(e =>
+    `<option value="${e.id}">${e.icon || ''} ${e.name}</option>`
+  ).join('');
+
+  modal.innerHTML = `<div class="modal-overlay" onclick="closeModal()"><div class="modal-content" onclick="event.stopPropagation()" style="max-width:560px">
     <h2 class="modal-title">Intégrer au portefeuille</h2>
-    <div class="form-field"><label>Montant investi (€)</label><input id="f-integrate-amount" type="number" placeholder="50000" autofocus></div>
-    <div class="modal-actions"><button class="btn" onclick="closeModal()">Annuler</button><button class="btn success" onclick="handleIntegrate('${productId}','${bankId}')">✅ Confirmer</button></div></div></div>`;
+    <div style="color:var(--text-muted);font-size:12px;margin-bottom:16px">${escapeHTML(pName)}</div>
+
+    <div id="integrate-contracts">
+      <div class="integrate-row" style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;margin-bottom:10px">
+        <div class="form-field" style="margin:0"><label>Entreprise</label><select class="int-entity">${entOpts}</select></div>
+        <div class="form-field" style="margin:0"><label>Montant (€)</label><input class="int-amount" type="number" placeholder="100000" autofocus></div>
+        <button class="btn sm" onclick="this.closest('.integrate-row').remove()" style="color:var(--red);margin-bottom:2px" title="Retirer">✕</button>
+      </div>
+    </div>
+
+    <button class="btn sm" onclick="_addIntegrateRow()" style="margin-bottom:16px;color:var(--accent);border-color:var(--accent)">+ Ajouter un contrat</button>
+
+    <div id="integrate-summary" style="padding:10px;background:rgba(6,214,160,0.05);border-radius:8px;margin-bottom:16px;font-size:12px;color:var(--text-muted)">
+      Total : <strong id="integrate-total">0€</strong>
+    </div>
+
+    <div class="modal-actions"><button class="btn" onclick="closeModal()">Annuler</button><button class="btn success" onclick="handleIntegrateMulti('${productId}','${bankId}')">✅ Intégrer</button></div></div></div>`;
   modal.classList.add('visible');
+
+  // Live total update
+  modal.addEventListener('input', _updateIntegrateTotal);
+  _updateIntegrateTotal();
+}
+
+function _addIntegrateRow() {
+  const container = document.getElementById('integrate-contracts');
+  if (!container) return;
+  const entOpts = (typeof MY_ENTITIES !== 'undefined' ? MY_ENTITIES : []).map(e =>
+    `<option value="${e.id}">${e.icon || ''} ${e.name}</option>`
+  ).join('');
+  const row = document.createElement('div');
+  row.className = 'integrate-row';
+  row.style.cssText = 'display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;margin-bottom:10px';
+  row.innerHTML = `
+    <div class="form-field" style="margin:0"><label>Entreprise</label><select class="int-entity">${entOpts}</select></div>
+    <div class="form-field" style="margin:0"><label>Montant (€)</label><input class="int-amount" type="number" placeholder="100000"></div>
+    <button class="btn sm" onclick="this.closest('.integrate-row').remove();_updateIntegrateTotal()" style="color:var(--red);margin-bottom:2px" title="Retirer">✕</button>`;
+  container.appendChild(row);
+  row.querySelector('.int-amount')?.focus();
+}
+
+function _updateIntegrateTotal() {
+  const amounts = document.querySelectorAll('.int-amount');
+  let total = 0;
+  amounts.forEach(a => { total += parseFloat(a.value) || 0; });
+  const el = document.getElementById('integrate-total');
+  if (el) el.textContent = (typeof formatNumber === 'function' ? formatNumber(total) : total) + '€';
 }
 function closeModal() { const m = document.getElementById('modal'); m.classList.remove('visible'); setTimeout(()=>{m.innerHTML='';},300); }
 
@@ -614,6 +664,44 @@ async function handleIntegrate(productId, bankId) {
   const amount = document.getElementById('f-integrate-amount')?.value; if (!amount) { showToast('Montant requis','error'); return; }
   const product = app._findProduct(productId, bankId); if (!product) return; closeModal();
   await app.updateProposalStatus(bankId, productId, 'subscribed'); await app.addToPortfolio({...product}, amount); app.goToDashboard();
+}
+
+async function handleIntegrateMulti(productId, bankId) {
+  const rows = document.querySelectorAll('.integrate-row');
+  if (rows.length === 0) { showToast('Ajoutez au moins un contrat', 'error'); return; }
+
+  const contracts = [];
+  rows.forEach(row => {
+    const entity = row.querySelector('.int-entity')?.value || '';
+    const amount = parseFloat(row.querySelector('.int-amount')?.value) || 0;
+    if (amount > 0) contracts.push({ entity, amount });
+  });
+
+  if (contracts.length === 0) { showToast('Montant requis', 'error'); return; }
+
+  const product = app._findProduct(productId, bankId);
+  if (!product) return;
+  closeModal();
+
+  // Mark proposal as subscribed
+  await app.updateProposalStatus(bankId, productId, 'subscribed');
+
+  // Add each contract as a separate portfolio entry
+  for (let i = 0; i < contracts.length; i++) {
+    const c = contracts[i];
+    const copy = JSON.parse(JSON.stringify(product));
+    copy.id = app._uid(); // unique ID for each contract
+    copy.envelope = c.entity;
+    copy.entity = c.entity;
+    if (contracts.length > 1) {
+      const entName = (typeof MY_ENTITIES !== 'undefined' ? MY_ENTITIES.find(e => e.id === c.entity)?.name : c.entity) || c.entity;
+      copy.name = (product.name || 'Produit') + ' (' + entName + ')';
+    }
+    await app.addToPortfolio(copy, c.amount);
+  }
+
+  showToast(contracts.length + ' contrat' + (contracts.length > 1 ? 's' : '') + ' intégré' + (contracts.length > 1 ? 's' : ''), 'success');
+  app.goToDashboard();
 }
 
 // ─── REJETER: change le statut mais garde le produit ────────
