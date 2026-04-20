@@ -124,5 +124,168 @@
   "conversation": [],
   "conversationSummary": null,
   "decision": null,
-  "decisionReason": null
+  "decisionReason": null,
+  "aiCategory": "capital-protege",
+  "aiCategoryLabel": "🛡️ Capital Protégé",
+  "aiCategoryColor": "#4CAF50",
+  "aiOpinion": "Produit intéressant avec protection du capital et coupon attractif de 7% lié à l'évolution de l'Euribor 12M, mais le mécanisme range-accrual implique que le coupon ne s'active que si le taux reste dans une fourchette prédéfinie. La durée de 10 ans est longue avec un risque de liquidité et d'opportunité, compensé partiellement par la clause d'autocall qui pourrait permettre un remboursement anticipé.",
+  "aiAnalyzedAt": "2026-04-20T16:44:09.353Z",
+  "grading": {
+    "grade": "B",
+    "score": 67,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 89,
+        "base": 89,
+        "delta": -2,
+        "reasoning": "Rendement: base 89 → -2 = 87 (En stagflation avec taux élevés, l'Euribor 12M risque de rester au-dessus de 4.1% longtemps, réduisant drastiquement la probabilité de percevoir le coupon.) | Coupon 7%, protégé | Barr.coupon 4.1% | Mat espérée: ~2.3a (prob mat: 1%)"
+      },
+      "underlyingQuality": {
+        "score": 70,
+        "base": 68,
+        "delta": 2,
+        "reasoning": "Qualité: base 68 → +2 = 70 (Produit de taux parfaitement adapté au contexte stagflationniste avec courbe pentifiée et Fed hawkish, l'Euribor 12M reflète directement la politique monétaire restrictive.) | Worst: Euribor 12 mois B:35"
+      },
+      "portfolioFit": {
+        "score": 41,
+        "base": 54,
+        "delta": 2,
+        "reasoning": "Fit: base 54 → +2 = 56 (Excellent diversificateur en stagflation où actions et obligations souffrent simultanément, ce produit offre un rendement décorrélé via l'exposition aux taux courts.)"
+      },
+      "riskPremium": {
+        "score": 69,
+        "base": 64,
+        "delta": -2,
+        "reasoning": "Capital garanti: spread 7.0% - CAT 2.5% - illiq 0.7% = 3.8%"
+      }
+    },
+    "verdict": "Produit structurellement inadapté au régime stagflationniste actuel malgré un score ajusté de 76/100. Avec l'Euribor 12M actuellement autour de 3.5-4% et une Fed hawkish (PCE 2.8%, 0 cuts prévus), la barrière à 4.1% sera probablement dépassée durablement, annihilant le coupon. La maturité espérée de 2.3 ans est irréaliste (prob 1%) car l'autocall nécessite un retour de l'Euribor sous les niveaux pré-2022, improbable en stagflation. Le capital garanti offre une protection bienvenue mais au prix d'un rendement potentiellement nul sur 10 ans.",
+    "keyRisks": [
+      "Risque de coupon zéro prolongé si l'Euribor reste > 4.1% en contexte stagflationniste persistant",
+      "Risque de blocage 10 ans avec 0% de rendement si les taux restent élevés et l'inflation sticky"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 7,
+        "return_eur": 16100,
+        "probability": 0.15,
+        "duration_years": 2.3
+      },
+      "base": {
+        "return_pct": 2,
+        "return_eur": 10000,
+        "probability": 0.35,
+        "duration_years": 5
+      },
+      "stress": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.35,
+        "duration_years": 10
+      },
+      "worst": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.15,
+        "duration_years": 10
+      }
+    },
+    "confidenceInterval": {
+      "low": 62,
+      "high": 78,
+      "halfWidth": 8,
+      "gradeStable": false,
+      "gradeRange": "B-A",
+      "label": "B [62-78]"
+    },
+    "metadata": {
+      "gradedAt": "2026-04-20T16:44:31.493Z",
+      "durationMs": 24028,
+      "aiUsed": true,
+      "version": "7.1",
+      "productType": "rate",
+      "marketDataAvailable": true,
+      "catBenchmark": 2.8,
+      "catSource": "allocator-confirmed",
+      "couponAnnualized": 7,
+      "couponRaw": 7,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": false,
+      "barrierPct": 0,
+      "barrierCouponPct": 4.1,
+      "couponProbability": null,
+      "expectedMaturity": 2.3,
+      "maxMaturity": 10,
+      "probReachMaturity": 1,
+      "maxBeta": 0.01,
+      "baseScore": 71,
+      "baseGrade": "B",
+      "adjustments": {
+        "p1": -2,
+        "p2": 2,
+        "p3": 2,
+        "p4": -2
+      },
+      "barrier_sigma": null,
+      "barrier_sigma_label": null,
+      "barrier_sigma_danger": null,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Rappelable 12M",
+      "ci_low": 62,
+      "ci_high": 78,
+      "ci_label": "B [62-78]",
+      "issuer_rating": "A+",
+      "issuer_tier": "IG",
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "range_accrual",
+      "issuerCreditPenalty": 1,
+      "issuerCDS": 60,
+      "v6Weights": {
+        "p1": 0.25,
+        "p2": 0.2,
+        "p3": 0.25,
+        "p4": 0.3
+      },
+      "stockData": [
+        {
+          "name": "Euribor 12 mois",
+          "ticker": "EURIBOR 12 MOIS",
+          "sector": "Commodity",
+          "volatility_3y": 22.52,
+          "max_drawdown_3y": -19.21
+        }
+      ]
+    },
+    "regimeScenarios": {
+      "current": {
+        "score": 67,
+        "grade": "B",
+        "label": "Actuel (stagflation)",
+        "desc": "Euribor dans le corridor mais BCE menaçante"
+      },
+      "bull": {
+        "score": 72,
+        "grade": "B",
+        "label": "Bull / Risk-on",
+        "delta": 5,
+        "desc": "Taux baissent → Euribor reste dans le corridor"
+      },
+      "crash": {
+        "score": 61,
+        "grade": "B",
+        "label": "Crash / Récession",
+        "delta": -6,
+        "desc": "Taux volatils → Euribor sort du corridor régulièrement"
+      }
+    }
+  }
 }
