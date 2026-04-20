@@ -29,8 +29,7 @@
   </div>
   <script>
   // Access code hash (SHA-256) — change this hash to change the code
-  // Current code: "structboard2026" → hash below
-  var ACCESS_HASH = 'a182751f34e3490e437a2e3e631c495e1fe00dec2d4c25b850cc43df3a2911ee';
+  var ACCESS_HASH = '7b48cb9db9019c19652e945e4b05c764085ccb6a8967016293f0e1d1df8c398f';
   async function _sha256(str) {
     var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
     return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0')}).join('');
