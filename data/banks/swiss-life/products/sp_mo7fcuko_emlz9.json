@@ -1,0 +1,128 @@
+{
+  "id": "sp_mo7fcuko_emlz9",
+  "name": "SL - Range Accrual Euribor 12M 10 ans",
+  "type": "range-accrual",
+  "structureType": "range_accrual",
+  "emitter": "Swiss Life Banque Privée",
+  "guarantor": "",
+  "guarantorRating": {
+    "moodys": "A2",
+    "sp": "A+"
+  },
+  "underlyings": [
+    "Euribor 12 mois"
+  ],
+  "underlyingType": "rates",
+  "currency": "EUR",
+  "maturity": "10 ans",
+  "maturityYears": 10,
+  "coupon": {
+    "rate": 7,
+    "rateIfCalled": null,
+    "rateIfMaturity": null,
+    "type": "conditionnel",
+    "frequency": "in_fine",
+    "trigger": null,
+    "memory": false,
+    "paymentTiming": "periodic"
+  },
+  "participationRate": null,
+  "capitalProtection": {
+    "protected": true,
+    "level": 100,
+    "barrier": null,
+    "barrierCoupon": 4.1,
+    "barrierType": "europeenne"
+  },
+  "earlyRedemption": {
+    "possible": true,
+    "type": "callable",
+    "trigger": null,
+    "frequency": "annuel",
+    "startSemester": 6,
+    "stepDown": false,
+    "stepDownPct": null
+  },
+  "decrementPct": null,
+  "actualDividendYield": null,
+  "mechanism": "Range Accrual sur Euribor 12M. Coupon garanti 7% payé in fine années 1-2. Dès année 3, coupon = 7% × (nb jours Euribor 12M dans [1.30%-4.10%] / nb jours total), sans effet mémoire, payé in fine. Callable par émetteur dès année 3. Capital garanti 100%.",
+  "risks": [
+    "Risque de coupon réduit si Euribor 12M sort du corridor",
+    "Risque de réinvestissement si rappel anticipé",
+    "Risque de crédit émetteur",
+    "Risque de liquidité"
+  ],
+  "summary": "Range Accrual Euribor 12M avec coupon max 7% payé in fine, garanti 2 ans, puis prorata des jours dans le corridor [1.30%-4.10%]. Callable dès année 3.",
+  "aiParsed": {
+    "name": "SL - Range Accrual Euribor 12M 10 ans",
+    "type": "range-accrual",
+    "structureType": "range_accrual",
+    "emitter": "Swiss Life Banque Privée",
+    "guarantor": "",
+    "guarantorRating": {
+      "moodys": "A2",
+      "sp": "A+"
+    },
+    "underlyings": [
+      "Euribor 12 mois"
+    ],
+    "underlyingType": "rates",
+    "currency": "EUR",
+    "maturity": "10 ans",
+    "maturityYears": 10,
+    "coupon": {
+      "rate": 7,
+      "rateIfCalled": null,
+      "rateIfMaturity": null,
+      "type": "conditionnel",
+      "frequency": "in_fine",
+      "trigger": null,
+      "memory": false,
+      "paymentTiming": "periodic"
+    },
+    "participationRate": null,
+    "guaranteedYears": 2,
+    "autocallCumulTarget": null,
+    "commissions": null,
+    "isin": "",
+    "minInvestment": 100000,
+    "capitalProtection": {
+      "protected": true,
+      "level": 100,
+      "barrier": null,
+      "barrierCoupon": 4.1,
+      "barrierType": "europeenne"
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "callable",
+      "trigger": null,
+      "frequency": "annuel",
+      "startSemester": 6,
+      "stepDown": false,
+      "stepDownPct": null
+    },
+    "mechanism": "Range Accrual sur Euribor 12M. Coupon garanti 7% payé in fine années 1-2. Dès année 3, coupon = 7% × (nb jours Euribor 12M dans [1.30%-4.10%] / nb jours total), sans effet mémoire, payé in fine. Callable par émetteur dès année 3. Capital garanti 100%.",
+    "risks": [
+      "Risque de coupon réduit si Euribor 12M sort du corridor",
+      "Risque de réinvestissement si rappel anticipé",
+      "Risque de crédit émetteur",
+      "Risque de liquidité"
+    ],
+    "summary": "Range Accrual Euribor 12M avec coupon max 7% payé in fine, garanti 2 ans, puis prorata des jours dans le corridor [1.30%-4.10%]. Callable dès année 3.",
+    "rangeAccrual": {
+      "lowerBound": 1.3,
+      "upperBound": 4.1,
+      "reference": "Euribor 12 mois",
+      "observation": "daily"
+    }
+  },
+  "sourceFile": "JSON import",
+  "bankId": "swiss-life",
+  "status": "analyzing",
+  "receivedDate": "2026-04-20",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null
+}
