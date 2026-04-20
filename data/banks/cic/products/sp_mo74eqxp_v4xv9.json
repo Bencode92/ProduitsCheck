@@ -1,0 +1,142 @@
+{
+  "name": "OBJECTIF MAI 2026",
+  "type": "autocall",
+  "structureType": "autocall",
+  "emitter": "Goldman Sachs Finance Corp International Ltd",
+  "guarantor": "The Goldman Sachs Group, Inc.",
+  "guarantorRating": {
+    "moodys": "A2",
+    "sp": "BBB+"
+  },
+  "underlyings": [
+    "ASML Holding N.V.",
+    "Intesa Sanpaolo S.p.A.",
+    "Siemens Energy AG",
+    "Banco Santander S.A."
+  ],
+  "underlyingType": "basket",
+  "currency": "EUR",
+  "maturity": "6 ans",
+  "maturityYears": 6,
+  "coupon": {
+    "rate": 9.7,
+    "rateIfCalled": null,
+    "rateIfMaturity": null,
+    "type": "conditionnel",
+    "frequency": "annuel",
+    "trigger": 95,
+    "memory": false,
+    "paymentTiming": "periodic"
+  },
+  "participationRate": null,
+  "guaranteedYears": 0,
+  "autocallCumulTarget": null,
+  "commissions": 1,
+  "isin": "FR1459ABE278",
+  "minInvestment": 1000,
+  "capitalProtection": {
+    "protected": false,
+    "level": null,
+    "barrier": 60,
+    "barrierCoupon": 95,
+    "barrierType": "europeenne"
+  },
+  "earlyRedemption": {
+    "possible": true,
+    "type": "autocall",
+    "trigger": 95,
+    "frequency": "annuel",
+    "startSemester": 2,
+    "stepDown": false,
+    "stepDownPct": null
+  },
+  "decrementPct": null,
+  "actualDividendYield": null,
+  "mechanism": "Mécanisme de remboursement automatique anticipé activable automatiquement à partir de l'année 1 si le panier équi-pondéré clôture à un niveau supérieur ou égal à 95% de son niveau initial à une date de constatation annuelle. Gain de 9,70% par année écoulée depuis le 29 mai 2026 en cas de remboursement anticipé ou à l'échéance si niveau ≥ 95%. Protection du capital si niveau entre 60% et 95% à l'échéance. Perte en capital proportionnelle à la baisse si niveau < 60% à l'échéance.",
+  "risks": [
+    "Risque de perte en capital partielle ou totale",
+    "Risque de crédit (émetteur et garant)",
+    "Risque de marché",
+    "Risque de liquidité",
+    "Risques liés au panier de sous-jacents",
+    "Événements extraordinaires affectant le sous-jacent"
+  ],
+  "summary": "Titre de créance de 6 ans sur panier équi-pondéré de 4 actions européennes avec mécanisme d'autocall annuel à partir de l'année 1 (barrière 95%), offrant un gain de 9,70% par année écoulée, plafonné à 9,46% de rendement annuel maximum, avec barrière de perte à 60% du niveau initial.",
+  "aiParsed": {
+    "name": "OBJECTIF MAI 2026",
+    "isin": "FR1459ABE278",
+    "structureType": "autocall",
+    "emitter": "Goldman Sachs Finance Corp International Ltd",
+    "guarantor": "The Goldman Sachs Group, Inc.",
+    "guarantorRating": {
+      "moodys": "A2",
+      "sp": "BBB+"
+    },
+    "underlyings": [
+      "ASML Holding N.V.",
+      "Intesa Sanpaolo S.p.A.",
+      "Siemens Energy AG",
+      "Banco Santander S.A."
+    ],
+    "underlyingType": "basket",
+    "currency": "EUR",
+    "maturity": "07/06/2032",
+    "maturityYears": 6,
+    "coupon": {
+      "rate": 9.7,
+      "rateIfCalled": null,
+      "rateIfMaturity": null,
+      "type": "conditionnel",
+      "frequency": "annuel",
+      "trigger": 95,
+      "memory": false,
+      "paymentTiming": "periodic"
+    },
+    "participationRate": null,
+    "guaranteedYears": 0,
+    "autocallCumulTarget": null,
+    "commissions": 1,
+    "capitalProtection": {
+      "protected": false,
+      "level": null,
+      "barrier": 60,
+      "barrierCoupon": 95,
+      "barrierType": "europeenne"
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "autocall",
+      "trigger": 95,
+      "frequency": "annuel",
+      "startSemester": 2,
+      "stepDown": false,
+      "stepDownPct": null,
+      "firstCallDate": "07/06/2027",
+      "callSchedule": []
+    },
+    "decrementPct": null,
+    "actualDividendYield": null,
+    "minInvestment": 1000,
+    "mechanism": "Mécanisme de remboursement automatique anticipé activable automatiquement à partir de l'année 1 si le panier équi-pondéré clôture à un niveau supérieur ou égal à 95% de son niveau initial à une date de constatation annuelle. Gain de 9,70% par année écoulée depuis le 29 mai 2026 en cas de remboursement anticipé ou à l'échéance si niveau ≥ 95%. Protection du capital si niveau entre 60% et 95% à l'échéance. Perte en capital proportionnelle à la baisse si niveau < 60% à l'échéance.",
+    "risks": [
+      "Risque de perte en capital partielle ou totale",
+      "Risque de crédit (émetteur et garant)",
+      "Risque de marché",
+      "Risque de liquidité",
+      "Risques liés au panier de sous-jacents",
+      "Événements extraordinaires affectant le sous-jacent"
+    ],
+    "summary": "Titre de créance de 6 ans sur panier équi-pondéré de 4 actions européennes avec mécanisme d'autocall annuel à partir de l'année 1 (barrière 95%), offrant un gain de 9,70% par année écoulée, plafonné à 9,46% de rendement annuel maximum, avec barrière de perte à 60% du niveau initial.",
+    "_parsingAlerts": []
+  },
+  "sourceFile": "Brochure OBJECTIF MAI 2026 (1).pdf",
+  "investedAmount": 0,
+  "id": "sp_mo74eqxp_v4xv9",
+  "bankId": "cic",
+  "status": "analyzing",
+  "receivedDate": "2026-04-20",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null
+}
