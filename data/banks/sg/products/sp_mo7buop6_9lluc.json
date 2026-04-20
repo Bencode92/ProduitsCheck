@@ -437,5 +437,10 @@
   "_bsRendementNet": 10.45,
   "envelope": "cameleons",
   "entity": "cameleons",
-  "addedDate": "2026-04-20"
+  "addedDate": "2026-04-20",
+  "strikePrice": 200.1,
+  "_strikePriceDate": "2026-04-20",
+  "_strikePriceSource": "twelve_data:NVDA",
+  "_strikePriceOpen": 199.98,
+  "_strikePriceRequested": "2026-04-20"
 }

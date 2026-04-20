@@ -916,5 +916,10 @@
         "perf": -0.36
       }
     ]
-  }
+  },
+  "strikePrice": 200.1,
+  "_strikePriceDate": "2026-04-20",
+  "_strikePriceSource": "twelve_data:NVDA",
+  "_strikePriceOpen": 199.98,
+  "_strikePriceRequested": "2026-04-20"
 }
