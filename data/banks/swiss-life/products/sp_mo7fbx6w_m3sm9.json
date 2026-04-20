@@ -124,5 +124,160 @@
   "conversation": [],
   "conversationSummary": null,
   "decision": null,
-  "decisionReason": null
+  "decisionReason": null,
+  "aiCategory": "autre",
+  "aiCategoryLabel": "📝 Autre",
+  "aiCategoryColor": "#94A3B8",
+  "aiOpinion": "Ce range accrual sur CMS 10 ans offre un coupon attractif de 7% mais nécessite que les taux restent dans une fourchette pendant 10 ans, ce qui est très incertain. La protection du capital à 100% limite les pertes mais la structure complexe et la longue maturité exposent à un risque de taux et de liquidité significatif.",
+  "aiAnalyzedAt": "2026-04-20T16:43:25.271Z",
+  "grading": {
+    "grade": "B",
+    "score": 70,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 89,
+        "base": 89,
+        "delta": -2,
+        "reasoning": "Rendement: base 89 → -2 = 87 (En stagflation avec courbe pentifiée (+54bps) et Fed hawkish, le CMS 10Y pourrait rester durablement au-dessus de 3.35%, réduisant la probabilité des coupons) | Coupon 7%, protégé | Barr.coupon 3.35% | Mat espérée: ~2.3a (prob mat: 1%)"
+      },
+      "underlyingQuality": {
+        "score": 66,
+        "base": 68,
+        "delta": -2,
+        "reasoning": "Qualité: base 68 → -2 = 66 (Produit de taux en régime stagflationnaire avec Brent à $90 et PCE élevé (2.8%) : environnement toxique pour les produits de duration longue (10 ans))"
+      },
+      "portfolioFit": {
+        "score": 55,
+        "base": 80,
+        "delta": -2,
+        "reasoning": "Fit: base 80 → -2 = 78 (Duration effective ~2.3 ans acceptable mais risque de blocage à 10 ans (prob 1%) en cas de persistance de l'inflation au-dessus de 3%)"
+      },
+      "riskPremium": {
+        "score": 69,
+        "base": 64,
+        "delta": 0,
+        "reasoning": "Capital garanti: spread 7.0% - CAT 2.5% - illiq 0.7% = 3.8%"
+      }
+    },
+    "verdict": "Produit INADAPTÉ au contexte stagflationniste actuel. Avec le CMS 10Y actuellement autour de 4.5% et une barrière à 3.35%, le risque de non-paiement des coupons est élevé tant que la Fed maintient sa politique restrictive. La duration longue (10 ans) expose à un risque de blocage si les taux restent élevés. Score ajusté: 56/100 (D), à éviter dans ce régime macro.",
+    "keyRisks": [
+      "Taux CMS 10Y durablement >3.35% = zéro coupon pendant plusieurs années",
+      "Duration réelle pourrait atteindre 10 ans si inflation persiste",
+      "Régime stagflationniste défavorable aux produits de taux longs"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 7,
+        "return_eur": 16100,
+        "probability": 0.15,
+        "duration_years": 2.3
+      },
+      "base": {
+        "return_pct": 3.5,
+        "return_eur": 8050,
+        "probability": 0.35,
+        "duration_years": 2.3
+      },
+      "stress": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.35,
+        "duration_years": 5
+      },
+      "worst": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.15,
+        "duration_years": 10
+      }
+    },
+    "confidenceInterval": {
+      "low": 65,
+      "high": 83,
+      "halfWidth": 9,
+      "gradeStable": false,
+      "gradeRange": "B-A",
+      "label": "B [65-83]"
+    },
+    "metadata": {
+      "gradedAt": "2026-04-20T16:43:48.264Z",
+      "durationMs": 22584,
+      "aiUsed": true,
+      "version": "7.1",
+      "productType": "rate",
+      "marketDataAvailable": false,
+      "catBenchmark": 2.8,
+      "catSource": "allocator-confirmed",
+      "couponAnnualized": 7,
+      "couponRaw": 7,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": false,
+      "barrierPct": 0,
+      "barrierCouponPct": 3.35,
+      "couponProbability": null,
+      "expectedMaturity": 2.3,
+      "maxMaturity": 10,
+      "probReachMaturity": 1,
+      "maxBeta": null,
+      "baseScore": 76,
+      "baseGrade": "A",
+      "adjustments": {
+        "p1": -2,
+        "p2": -2,
+        "p3": -2,
+        "p4": 0
+      },
+      "barrier_sigma": null,
+      "barrier_sigma_label": null,
+      "barrier_sigma_danger": null,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Rappelable 12M",
+      "ci_low": 65,
+      "ci_high": 83,
+      "ci_label": "B [65-83]",
+      "issuer_rating": "A+",
+      "issuer_tier": "IG",
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "range_accrual",
+      "issuerCreditPenalty": 1,
+      "issuerCDS": 60,
+      "v6Weights": {
+        "p1": 0.25,
+        "p2": 0.2,
+        "p3": 0.25,
+        "p4": 0.3
+      }
+    },
+    "regimeScenarios": {
+      "current": {
+        "score": 70,
+        "grade": "B",
+        "label": "Actuel (stagflation)",
+        "desc": "Euribor dans le corridor mais BCE menaçante"
+      },
+      "bull": {
+        "score": 75,
+        "grade": "A",
+        "label": "Bull / Risk-on",
+        "delta": 5,
+        "desc": "Taux baissent → Euribor reste dans le corridor"
+      },
+      "crash": {
+        "score": 64,
+        "grade": "B",
+        "label": "Crash / Récession",
+        "delta": -6,
+        "desc": "Taux volatils → Euribor sort du corridor régulièrement"
+      }
+    }
+  }
 }
