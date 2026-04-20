@@ -496,10 +496,59 @@
 
     html += '</div>';
 
-    // ═══ IMPORT PROPOSITIONS BANQUIERS ═══
+    // ═══ SELECT FROM STRUCTBOARD ═══
+    var allProposals = [];
+    Object.keys(app.state.proposals || {}).forEach(function(bankId) {
+      (app.state.proposals[bankId] || []).forEach(function(p) {
+        var st = (p.structureType || p.type || '').toLowerCase();
+        var ut = (p.underlyingType || '').toLowerCase();
+        var isRate = st.indexOf('taux') >= 0 || st === 'capital_garanti' || st === 'digitale_memoire' || st === 'range_accrual' || ut === 'rates';
+        var isProtected = p.capitalProtection && p.capitalProtection.protected;
+        if (isRate || isProtected) {
+          allProposals.push({ id: p.id, bankId: bankId, name: p.name || '?', coupon: (p.coupon && p.coupon.rate) || 0,
+            trigger: (p.coupon && p.coupon.trigger) || (p.capitalProtection && p.capitalProtection.barrierCoupon) || null,
+            type: st, maturity: p.maturityYears || 10, emitter: p.emitter || bankId,
+            guaranteedYears: p.guaranteedYears || 0, autocallTarget: p.autocallCumulTarget || (p.earlyRedemption && p.earlyRedemption.trigger) || 0,
+            grade: p.grading ? p.grading.grade : '?', score: p.grading ? p.grading.score : null,
+            prob: p._couponProbability ? p._couponProbability / 100 : 0.90,
+            memory: p.coupon && p.coupon.memory });
+        }
+      });
+    });
+
+    html += '<div style="background:' + B.card + ';border:2px solid #7C3AED;border-radius:8px;padding:16px;margin-bottom:16px">';
+    html += '<div style="font-size:13px;font-weight:700;color:#7C3AED;margin-bottom:10px">📋 SÉLECTIONNER DEPUIS STRUCTBOARD</div>';
+
+    if (allProposals.length > 0) {
+      html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px;margin-bottom:12px">';
+      allProposals.forEach(function(p, i) {
+        var gradeColor = {A:'#06D6A0',B:'#4ECDC4',C:'#FFB627',D:'#E85D04',F:'#EF233C'}[p.grade] || '#94A3B8';
+        html += '<label style="display:flex;align-items:center;gap:8px;padding:10px;border:1px solid ' + B.border + ';border-radius:6px;cursor:pointer;background:' + B.row1 + '">';
+        html += '<input type="checkbox" class="carry-sb-check" data-idx="' + i + '" style="width:16px;height:16px">';
+        html += '<div style="flex:1;min-width:0">';
+        html += '<div style="font-size:11px;font-weight:700;color:' + B.text + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + p.name.substring(0, 35) + '</div>';
+        html += '<div style="font-size:10px;color:' + B.muted + '">' + p.emitter.substring(0, 20) + ' · ' + p.maturity + 'Y</div>';
+        html += '</div>';
+        html += '<div style="text-align:right">';
+        html += '<div style="font-size:14px;font-weight:800;color:#D97706">' + p.coupon + '%</div>';
+        html += '<div style="display:inline-block;padding:1px 6px;border-radius:4px;background:' + gradeColor + '22;color:' + gradeColor + ';font-size:10px;font-weight:700">' + p.grade + (p.score ? ' ' + p.score : '') + '</div>';
+        html += '</div></label>';
+      });
+      html += '</div>';
+      html += '<div style="display:flex;gap:8px;align-items:center">';
+      html += '<div><label style="font-size:11px;color:' + B.muted + ';display:block;margin-bottom:3px">Montant par produit (€)</label><input id="carry-sb-amount" type="number" value="500000" step="50000" style="' + _inputStyle + ';width:150px;font-family:var(--mono)"></div>';
+      html += '<button onclick="__carryAddFromSB()" style="padding:10px 20px;background:#7C3AED;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;margin-top:14px">Ajouter les sélectionnés →</button>';
+      html += '</div>';
+    } else {
+      html += '<div style="color:' + B.dim + ';font-size:12px;padding:12px">Aucun produit capital garanti / taux dans StructBoard. Importez des brochures d\'abord.</div>';
+    }
+    html += '</div>';
+
+    // ═══ IMPORT MANUEL (accordion) ═══
     var _inputStyle = 'width:100%;padding:8px;border:1px solid ' + B.border + ';border-radius:6px;background:' + B.input + ';color:' + B.text + ';font-size:12px';
-    html += '<div style="background:' + B.card + ';border:2px dashed #7C3AED;border-radius:8px;padding:16px;margin-bottom:16px">';
-    html += '<div style="font-size:13px;font-weight:700;color:#7C3AED;margin-bottom:10px">📥 IMPORTER UNE PROPOSITION BANQUIER</div>';
+    html += '<div style="background:' + B.card + ';border:1px dashed ' + B.border + ';border-radius:8px;margin-bottom:16px">';
+    html += '<div onclick="var c=document.getElementById(\'carry-manual-form\');c.style.display=c.style.display===\'none\'?\'\':\'none\'" style="padding:12px 16px;cursor:pointer;font-size:12px;color:' + B.muted + '">✏️ Saisie manuelle (si pas dans StructBoard) ▼</div>';
+    html += '<div id="carry-manual-form" style="display:none;padding:0 16px 16px">';
 
     // Formulaire structuré
     html += '<div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr;gap:8px;margin-bottom:10px">';
@@ -527,7 +576,7 @@
 
     html += '<div id="carry-import-result" style="margin-top:8px"></div>';
     html += '<div id="carry-import-list"></div>';
-    html += '</div>';
+    html += '</div></div>';
 
     // ═══ BLOC 2 : DISCUSSION — Détail de la config sélectionnée ═══
     html += '<div id="carry-v2-discussion" style="background:' + B.card + ';border:1px solid ' + B.border + ';border-radius:8px;padding:16px;margin-bottom:16px">';
@@ -835,6 +884,79 @@
     h += '<button onclick="__carrySimulateSelected()" style="margin-top:10px;padding:10px 24px;background:#7C3AED;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">📊 Simuler les sélectionnées</button>';
     list.innerHTML = h;
   }
+
+  // ─── Add products from StructBoard selection ──────
+  var _sbProposals = []; // populated during render
+
+  window.__carryAddFromSB = function() {
+    // Read which checkboxes are checked
+    var checked = document.querySelectorAll('.carry-sb-check:checked');
+    if (checked.length === 0) { showToast('Sélectionnez au moins un produit', 'error'); return; }
+    var amount = parseInt(document.getElementById('carry-sb-amount')?.value) || 500000;
+
+    // Get the allProposals array from render scope — re-build it
+    var allP = [];
+    Object.keys(app.state.proposals || {}).forEach(function(bankId) {
+      (app.state.proposals[bankId] || []).forEach(function(p) {
+        var st = (p.structureType || p.type || '').toLowerCase();
+        var ut = (p.underlyingType || '').toLowerCase();
+        var isRate = st.indexOf('taux') >= 0 || st === 'capital_garanti' || st === 'digitale_memoire' || st === 'range_accrual' || ut === 'rates';
+        var isProtected = p.capitalProtection && p.capitalProtection.protected;
+        if (isRate || isProtected) allP.push(p);
+      });
+    });
+
+    var added = 0;
+    checked.forEach(function(cb) {
+      var idx = parseInt(cb.dataset.idx);
+      var p = allP[idx];
+      if (!p) return;
+
+      var couponRate = (p.coupon && p.coupon.rate) || 0;
+      var trigger = (p.coupon && p.coupon.trigger) || (p.capitalProtection && p.capitalProtection.barrierCoupon) || null;
+      var st = (p.structureType || '').toLowerCase();
+      var type = st.indexOf('fixe') >= 0 ? 'fixe' : 'conditionnel';
+      var prob = p._couponProbability ? p._couponProbability / 100 : (type === 'fixe' ? 1.0 : 0.90);
+
+      var product = {
+        name: p.name || 'Produit StructBoard',
+        type: type,
+        coupon: couponRate,
+        prob: prob,
+        duration: p.maturityYears || 10,
+        guaranteedYears: p.guaranteedYears || 0,
+        autocallTarget: p.autocallCumulTarget || (p.earlyRedemption && p.earlyRedemption.trigger > 10 ? p.earlyRedemption.trigger : 0) || 0,
+        autocallYears: 0,
+        amount: amount,
+        risk: (p.capitalProtection && p.capitalProtection.protected) ? 'Faible' : 'Modéré',
+        detail: (p.emitter || '') + (trigger ? ' · Trigger ' + trigger + '%' : '') + ' · ' + ((p.capitalProtection && p.capitalProtection.protected) ? 'Capital garanti 100%' : ''),
+        color: '#7C3AED',
+        source: 'structboard',
+        emetteur: p.emitter || '?',
+        trigger: trigger,
+        _productId: p.id,
+        _bankId: p.bankId
+      };
+      if (product.autocallTarget && product.coupon > 0) {
+        product.autocallYears = Math.ceil(product.autocallTarget / product.coupon);
+      }
+
+      // Check if already imported
+      var exists = _importedProducts.some(function(ip) { return ip._productId === p.id; });
+      if (!exists) {
+        _importedProducts.push(product);
+        added++;
+      }
+    });
+
+    if (added > 0) {
+      _saveImportedProducts();
+      _refreshImportList();
+      showToast(added + ' produit' + (added > 1 ? 's' : '') + ' ajouté' + (added > 1 ? 's' : '') + ' depuis StructBoard', 'success');
+    } else {
+      showToast('Produits déjà importés', 'info');
+    }
+  };
 
   window.__carryImportForm = function() {
     var name = document.getElementById('ci-name')?.value || 'Proposition banquier';
