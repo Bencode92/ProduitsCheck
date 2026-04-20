@@ -1,7 +1,7 @@
 {
   "bankId": "sg",
   "bankName": "Société Générale",
-  "lastUpdated": "2026-04-20T11:19:15.488Z",
+  "lastUpdated": "2026-04-20T15:05:52.184Z",
   "products": [
     {
       "id": "sp_mnddjla9_k0729",
@@ -15,7 +15,7 @@
       "id": "sp_mo5mvsjk_giarq",
       "name": "SOLUTION COURT TERME BOOSTÉE SUR PANIER D'ACTIONS",
       "type": "dispersion",
-      "status": "analyzing",
+      "status": "subscribed",
       "score": null,
       "receivedDate": "2026-04-19"
     },
