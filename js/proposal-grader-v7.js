@@ -336,11 +336,15 @@
     // Guess which rate this product tracks
     var rateAlias = null;
     var productText = [product.name, (coupon.triggerDetail || ''), (product.mechanism || '')].join(' ').toLowerCase();
-    if (/tec\s*10|oat\s*10/i.test(productText)) rateAlias = 'oat_fr_10y';
+    if (/tec\s*10/i.test(productText)) rateAlias = 'tec10_fr'; // French TEC10 (BdF), NOT OAT AAA
+    else if (/oat\s*10/i.test(productText)) rateAlias = 'tec10_fr'; // OAT 10Y France = TEC10
+    else if (/euribor\s*12/i.test(productText)) rateAlias = 'euribor_12m';
     else if (/euribor\s*3/i.test(productText)) rateAlias = 'euribor_3m';
+    else if (/euribor\s*6/i.test(productText)) rateAlias = 'euribor_6m';
+    else if (/cms\s*10/i.test(productText)) rateAlias = 'oat_fr_10y'; // CMS 10Y ≈ OAT AAA (proxy)
     else if (/oat\s*5/i.test(productText)) rateAlias = 'oat_fr_5y';
     else if (/oat\s*2/i.test(productText)) rateAlias = 'oat_fr_2y';
-    else if (st.indexOf('taux') >= 0 || st === 'capital_garanti' || st === 'digitale_memoire') rateAlias = 'oat_fr_10y'; // default to TEC10
+    else if (st.indexOf('taux') >= 0 || st === 'capital_garanti' || st === 'digitale_memoire') rateAlias = 'tec10_fr'; // default to TEC10
 
     var rateData = rates.yields[rateAlias];
     if (!rateData || !rateData.history || rateData.history.length < 10) return null;
