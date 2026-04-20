@@ -22,8 +22,9 @@
   'use strict';
 
   // ═══ CONSTANTS ═══
-  var V7_WEIGHTS = { p1: 0.30, p2: 0.20, p3: 0.15, p4: 0.30 };
+  var V7_WEIGHTS = { p1: 0.25, p2: 0.20, p3: 0.25, p4: 0.30 };
   var MAX_IA_DELTA = 20;
+  var RISK_FREE_RATE = 2.05; // €STR proxy — used for BS diffusion only, NOT for P4 spread
 
   // ═══ SECTION 1: MATH HELPERS ═══
   function _normcdf(x) {
@@ -41,6 +42,61 @@
     T = Math.max(0.25, T);
     var d2 = (Math.log(100 / trigger) + (r - sigma * sigma / 2) * T) / (sigma * Math.sqrt(T));
     return _normcdf(d2);
+  }
+
+  // Gaussian copula for worst-of: P(all underlyings above trigger)
+  // Uses Monte Carlo with Cholesky decomposition (fast for n≤8)
+  function _worstOfCopula(marginalProbs, rho, nSim) {
+    nSim = nSim || 5000;
+    var n = marginalProbs.length;
+    if (n <= 1) return marginalProbs[0] || 0.5;
+
+    // Convert marginal probs to Gaussian thresholds via inverse CDF
+    var zThresholds = marginalProbs.map(function(p) { return _norminv(p); });
+
+    // Build correlation matrix and Cholesky decompose
+    // For uniform rho, Cholesky is: L[i][j] = rho for j<i (first col), sqrt(1-rho^2) diagonal
+    var sqrtRho = Math.sqrt(Math.max(0, rho));
+    var sqrtOneMinusRho = Math.sqrt(Math.max(0.001, 1 - rho));
+
+    // Monte Carlo: count how often ALL Z_i > -zThreshold_i
+    var count = 0;
+    // Use deterministic seed-like approach with quasi-random for speed
+    for (var s = 0; s < nSim; s++) {
+      var common = _boxMuller(s * 2);
+      var allAbove = true;
+      for (var j = 0; j < n; j++) {
+        var idio = _boxMuller(s * 2 + j * nSim + 1);
+        var z = sqrtRho * common + sqrtOneMinusRho * idio;
+        if (z < -zThresholds[j]) { allAbove = false; break; }
+      }
+      if (allAbove) count++;
+    }
+    return Math.max(0.01, Math.min(0.99, count / nSim));
+  }
+
+  // Approximate inverse normal CDF (Beasley-Springer-Moro)
+  function _norminv(p) {
+    if (p <= 0.001) return -3.09;
+    if (p >= 0.999) return 3.09;
+    if (p === 0.5) return 0;
+    // Rational approximation
+    var t = p < 0.5 ? Math.sqrt(-2 * Math.log(p)) : Math.sqrt(-2 * Math.log(1 - p));
+    var c0 = 2.515517, c1 = 0.802853, c2 = 0.010328;
+    var d1 = 1.432788, d2 = 0.189269, d3 = 0.001308;
+    var result = t - (c0 + c1 * t + c2 * t * t) / (1 + d1 * t + d2 * t * t + d3 * t * t * t);
+    return p < 0.5 ? -result : result;
+  }
+
+  // Deterministic pseudo-random normal (Box-Muller with hash)
+  function _boxMuller(seed) {
+    // Simple hash for reproducibility
+    var x = Math.sin(seed * 12.9898 + 78.233) * 43758.5453;
+    var u1 = x - Math.floor(x);
+    x = Math.sin((seed + 1) * 12.9898 + 78.233) * 43758.5453;
+    var u2 = x - Math.floor(x);
+    u1 = Math.max(0.0001, u1);
+    return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
   }
 
   function _probBreach(barrierPct, volPct, T, rPct) {
@@ -297,35 +353,53 @@
     var isRange = st === 'range_accrual' || st === 'range-accrual';
     var ra = product.rangeAccrual || {};
 
+    // Exponential weighting: half-life 5 years — recent data matters more
+    var HALF_LIFE_YEARS = 5;
+    var lastDate = new Date(history[history.length - 1].date);
+    var weights = history.map(function(h) {
+      var ageMs = lastDate - new Date(h.date);
+      var ageYears = ageMs / (365.25 * 24 * 3600 * 1000);
+      return Math.exp(-Math.LN2 * ageYears / HALF_LIFE_YEARS);
+    });
+    var totalWeight = weights.reduce(function(s, w) { return s + w; }, 0);
+
     if (isRange && ra.lowerBound && ra.upperBound) {
-      // Range Accrual: % time in corridor
-      var inCorridor = 0;
-      history.forEach(function(h) {
-        if (h.value >= ra.lowerBound && h.value <= ra.upperBound) inCorridor++;
+      // Range Accrual: weighted % time in corridor
+      var inCorridorW = 0;
+      history.forEach(function(h, i) {
+        if (h.value >= ra.lowerBound && h.value <= ra.upperBound) inCorridorW += weights[i];
       });
-      probCoupon = inCorridor / history.length;
+      probCoupon = inCorridorW / totalWeight;
     } else if (trigger > 0 && trigger < 10) {
       // TARN / Digital: trigger is a rate level (e.g., 4.40%)
-      // "coupon paid if rate ≤ trigger"
-      var below = 0;
-      history.forEach(function(h) {
-        if (h.value <= trigger) below++;
+      // "coupon paid if rate ≤ trigger" — weighted by recency
+      var belowW = 0;
+      history.forEach(function(h, i) {
+        if (h.value <= trigger) belowW += weights[i];
       });
-      probCoupon = below / history.length;
+      probCoupon = belowW / totalWeight;
     } else {
       // Trigger > 10 means it's a percentage trigger for actions (100%, 77%)
       // Not applicable for rate historical — skip
       return null;
     }
 
-    // Adjust for regime: if recent values (last 12 months) are higher than historical
-    // the probability is somewhat lower going forward
-    var recent = history.slice(-12);
-    var recentAvg = recent.reduce(function(s, h) { return s + h.value; }, 0) / recent.length;
-    var fullAvg = history.reduce(function(s, h) { return s + h.value; }, 0) / history.length;
-    if (recentAvg > fullAvg * 1.1) {
-      // Recent rates above historical average → slightly reduce probability
-      probCoupon = probCoupon * 0.95;
+    // Regime adjustment using z-score of current rate vs weighted history
+    var wAvg = 0, wVar = 0;
+    history.forEach(function(h, i) { wAvg += h.value * weights[i]; });
+    wAvg /= totalWeight;
+    history.forEach(function(h, i) { wVar += weights[i] * Math.pow(h.value - wAvg, 2); });
+    var wStd = Math.sqrt(wVar / totalWeight);
+    var zScore = wStd > 0 ? (current - wAvg) / wStd : 0;
+
+    if (zScore > 1.5) {
+      // Current rate well above weighted mean → reduce P(coupon) for below-trigger products
+      probCoupon = probCoupon * 0.85;
+    } else if (zScore > 0.5) {
+      probCoupon = probCoupon * 0.93;
+    } else if (zScore < -1.5) {
+      // Current rate well below weighted mean → coupon very likely
+      probCoupon = Math.min(0.99, probCoupon * 1.05);
     }
 
     // Memory boost: if coupon is missed one year, it can be recovered later
@@ -442,7 +516,7 @@
     }
 
     var vols = _resolveVols(unds, undType);
-    var r = rfRate || 2.5;
+    var r = RISK_FREE_RATE; // €STR for BS diffusion, not CAT benchmark
     var probCoupon, couponEffectif, perteEsperee;
 
     // Get real correlation if available (from stock-analysis-platform data)
@@ -465,10 +539,12 @@
       probCoupon = _probAbove(triggerCoupon, bVol, matEsperee, r);
       couponEffectif = annRate;
     } else if (isWorstOf && vols.length > 1) {
+      // Gaussian copula approximation for worst-of
       var probs = vols.map(function(v) { return _probAbove(triggerCoupon, v, matEsperee, r); });
-      probCoupon = probs.reduce(function(a, b) { return a * b; }, 1);
-      var corrAdj = 1 + (realCorr || 0.15) * (vols.length - 1);
-      probCoupon = Math.min(probCoupon * corrAdj, Math.min.apply(null, probs));
+      var rho = realCorr || 0.40;
+      probCoupon = _worstOfCopula(probs, rho);
+      // Stress scenario: also compute at rho=0.85 for crash correlation
+      var probStress = _worstOfCopula(probs, 0.85);
       couponEffectif = annRate;
     } else {
       var vol = vols.length > 0 ? Math.max.apply(null, vols) : 25;
