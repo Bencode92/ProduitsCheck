@@ -1,7 +1,7 @@
 {
   "bankId": "cic",
   "bankName": "CIC",
-  "lastUpdated": "2026-04-20T15:05:18.240Z",
+  "lastUpdated": "2026-04-20T16:38:51.405Z",
   "products": [
     {
       "id": "sp_mnrfkyrb_ccjm6",
@@ -50,6 +50,14 @@
       "status": "analyzing",
       "score": null,
       "receivedDate": "2026-04-19"
+    },
+    {
+      "id": "sp_mo7f6619_dqjxv",
+      "name": "TARN TEC10",
+      "type": "capital_garanti",
+      "status": "analyzing",
+      "score": null,
+      "receivedDate": "2026-04-20"
     }
   ]
 }
