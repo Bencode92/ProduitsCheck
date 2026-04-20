@@ -299,7 +299,7 @@
       html += '<td style="padding:8px;text-align:center;font-family:var(--mono);font-weight:700;color:#D97706">+' + _f(c.pnl.esperance) + '€</td>';
       // Worst case
       html += '<td style="padding:8px;text-align:center;font-family:var(--mono);font-weight:700;color:' + (c.pnl.worstNet >= 0 ? '#059669' : '#DC2626') + '">' + (c.pnl.worstNet >= 0 ? '+' : '') + _f(c.pnl.worstNet) + '€</td>';
-      html += '<td style="padding:8px;text-align:center"><button onclick="__carryV2Select(\'' + c.id + '\')" style="padding:4px 10px;border:1px solid #2563EB;border-radius:4px;background:' + (isBest ? '#2563EB' : '#fff') + ';color:' + (isBest ? '#fff' : '#2563EB') + ';font-size:11px;font-weight:700;cursor:pointer">Analyser →</button></td>';
+      html += '<td style="padding:8px;text-align:center;white-space:nowrap"><button onclick="__carryV2Select(\'' + c.id + '\')" style="padding:4px 10px;border:1px solid #2563EB;border-radius:4px;background:' + (isBest ? '#2563EB' : '#fff') + ';color:' + (isBest ? '#fff' : '#2563EB') + ';font-size:11px;font-weight:700;cursor:pointer">Analyser</button> <button onclick="__carryConfigPnL(\'' + c.id + '\')" style="padding:4px 10px;background:#7C3AED;color:#fff;border:none;border-radius:4px;font-size:10px;cursor:pointer">P&L →</button></td>';
       html += '</tr>';
     });
     html += '</tbody></table>';
@@ -639,6 +639,27 @@
   }
 
   // ─── Select a config: update Discussion + P&L ──────
+  window.__carryConfigPnL = function(configId) {
+    var c = _configs.find(function(x) { return x.id === configId; });
+    if (!c || !c.products || c.products.length === 0) return;
+    // Use first product of the config for P&L (main product)
+    var p = c.products[0];
+    var product = {
+      name: c.name || p.name,
+      coupon: p.coupon,
+      prob: p.prob || 0.90,
+      guaranteedYears: p.guaranteedYears || 0,
+      autocallTarget: p.autocallTarget || 0,
+      trigger: p.trigger || null,
+      emetteur: p.emetteur || p.detail || '',
+      type: p.type
+    };
+    window._carryPnLProduct = product;
+    app.setState({ view: 'carry-pnl' });
+    var main = document.getElementById('main-content');
+    if (main) renderCarryPnLPage(main, product);
+  };
+
   window.__carryV2Select = function(configId) {
     if (!_configs) return;
     var c = _configs.find(function(x) { return x.id === configId; });
