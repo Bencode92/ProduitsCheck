@@ -222,7 +222,7 @@
         "score": 83,
         "base": 100,
         "delta": 0,
-        "reasoning": "Rendement: base 100 → +1 = 100 (TEC 10 à 4.6% très élevé historiquement, coupon 6.7% quasi-certain dans ce contexte de taux durablement hauts) | Coupon 6.7%, protégé | Barr.coupon 4.6% | Mat espérée: ~1.2a (prob mat: 0%)",
+        "reasoning": "Rendement: base 100 → -1 = 99 (En stagflation avec courbe pentifiée, la probabilité que TEC10 reste au-dessus de 4.6% diminue si la Fed doit resserrer davantage face à l'inflation persistante) | Coupon 6.7%, protégé | Barr.coupon 4.6% | Mat espérée: ~1.2a (prob mat: 0%)",
         "_bsDelta": -22,
         "_bs": {
           "score": 78,
@@ -232,7 +232,7 @@
           "couponEffectif": 6.35,
           "perteEsperee": 0,
           "vols": [],
-          "matEsperee": 10,
+          "matEsperee": 5,
           "isRate": true,
           "historicalBasis": "695 obs (2004-09-06→2026-04-16)",
           "rateAlias": "oat_fr_10y",
@@ -244,13 +244,13 @@
         "score": 75,
         "base": 76,
         "delta": -1,
-        "reasoning": "Qualité: base 76 → -1 = 75 (Régime stagflationniste avec Brent à $96 pousse les taux longs mais crée volatilité défavorable aux produits structurés)"
+        "reasoning": "Qualité: base 76 → -1 = 75 (TEC10 très sensible aux taux longs, régime stagflationnaire avec PCE 2.8% et risque de bear flattening si Fed devient plus hawkish)"
       },
       "portfolioFit": {
         "score": 55,
         "base": 80,
         "delta": 1,
-        "reasoning": "Fit: base 80 → +1 = 81 (Capital garanti + exposition taux longs idéal en stagflation où l'inflation érode les liquidités)"
+        "reasoning": "Fit: base 80 → +1 = 81 (Capital garanti en stagflation offre une protection précieuse, coupon 6.7% attractif vs obligations classiques)"
       },
       "riskPremium": {
         "score": 77,
@@ -259,49 +259,49 @@
         "reasoning": "Capital garanti: spread 6.7% - CAT 2.5% - illiq 0.7% = 3.5%"
       }
     },
-    "verdict": "Produit défensif adapté au régime stagflationniste avec capital garanti et coupon élevé de 6.7% quasi-assuré (TEC 10 à 4.6% vs barrière 4.6%). L'autocall à 26.8% est illusoire - le TEC 10 devrait sextupler, scénario impossible. Attendez-vous à toucher 67,000€ de coupons sur 10 ans (6.7% × 10) avec capital restitué à terme, soit un rendement total de 167% en nominal.",
+    "verdict": "Produit capital garanti avec coupon conditionnel 6.7% lié au TEC10 (>4.6%) dans un contexte stagflationnaire défavorable aux taux longs. Avec PCE à 2.8% et courbe pentifiée +54bps, le risque principal est une remontée des taux longs réduisant la probabilité du coupon. Le capital garanti offre une protection bienvenue mais l'espérance de rendement est fortement dégradée par le régime macro actuel.",
     "keyRisks": [
-      "Risque de réinvestissement si les taux baissent drastiquement après 10 ans",
-      "Inflation élevée érode le pouvoir d'achat du capital garanti sur 10 ans"
+      "Remontée brutale des taux longs si Fed devient plus hawkish face à inflation persistante",
+      "Bear flattening de la courbe réduisant drastiquement la probabilité du coupon conditionnel"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 67,
-        "return_eur": 67000,
-        "probability": 0.85,
-        "duration_years": 10
+        "return_pct": 6.7,
+        "return_eur": 6700,
+        "probability": 0.15,
+        "duration_years": 1
       },
       "base": {
-        "return_pct": 67,
-        "return_eur": 67000,
-        "probability": 0.1,
-        "duration_years": 10
+        "return_pct": 2.5,
+        "return_eur": 7500,
+        "probability": 0.35,
+        "duration_years": 3
       },
       "stress": {
-        "return_pct": 40,
-        "return_eur": 40000,
-        "probability": 0.04,
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.35,
         "duration_years": 10
       },
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.01,
+        "probability": 0.15,
         "duration_years": 10
       }
     },
     "confidenceInterval": {
-      "low": 74,
-      "high": 92,
+      "low": 73,
+      "high": 91,
       "halfWidth": 9,
       "gradeStable": false,
       "gradeRange": "B-A",
-      "label": "A [74-92]"
+      "label": "A [73-91]"
     },
     "metadata": {
-      "gradedAt": "2026-04-17T15:42:27.357Z",
-      "durationMs": 19170,
+      "gradedAt": "2026-04-20T11:50:04.437Z",
+      "durationMs": 18736,
       "aiUsed": true,
       "version": "7.1",
       "productType": "capital_garanti",
@@ -324,7 +324,7 @@
       "baseScore": 83,
       "baseGrade": "A",
       "adjustments": {
-        "p1": 1,
+        "p1": -1,
         "p2": -1,
         "p3": 1,
         "p4": -1
@@ -335,9 +335,9 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 74,
-      "ci_high": 92,
-      "ci_label": "A [74-92]",
+      "ci_low": 73,
+      "ci_high": 91,
+      "ci_label": "A [73-91]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
@@ -347,7 +347,7 @@
       "bsProbCoupon": 94.7,
       "bsPerteEsperee": 0,
       "bsVols": [],
-      "bsMatEsperee": 10,
+      "bsMatEsperee": 5,
       "isRateHistorical": true,
       "historicalBasis": "695 obs (2004-09-06→2026-04-16)",
       "rateAlias": "oat_fr_10y",
