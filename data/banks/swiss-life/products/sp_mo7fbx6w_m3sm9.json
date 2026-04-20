@@ -1,0 +1,128 @@
+{
+  "id": "sp_mo7fbx6w_m3sm9",
+  "name": "SL - Range Accrual CMS10Y 10 ans",
+  "type": "range-accrual",
+  "structureType": "range_accrual",
+  "emitter": "Swiss Life Banque Privée",
+  "guarantor": "",
+  "guarantorRating": {
+    "moodys": "A2",
+    "sp": "A+"
+  },
+  "underlyings": [
+    "CMS 10 ans"
+  ],
+  "underlyingType": "rates",
+  "currency": "EUR",
+  "maturity": "10 ans",
+  "maturityYears": 10,
+  "coupon": {
+    "rate": 7,
+    "rateIfCalled": null,
+    "rateIfMaturity": null,
+    "type": "conditionnel",
+    "frequency": "in_fine",
+    "trigger": null,
+    "memory": false,
+    "paymentTiming": "periodic"
+  },
+  "participationRate": null,
+  "capitalProtection": {
+    "protected": true,
+    "level": 100,
+    "barrier": null,
+    "barrierCoupon": 3.35,
+    "barrierType": "europeenne"
+  },
+  "earlyRedemption": {
+    "possible": true,
+    "type": "callable",
+    "trigger": null,
+    "frequency": "annuel",
+    "startSemester": 6,
+    "stepDown": false,
+    "stepDownPct": null
+  },
+  "decrementPct": null,
+  "actualDividendYield": null,
+  "mechanism": "Range Accrual sur CMS 10Y. Coupon garanti 7% payé in fine années 1-2. Dès année 3, coupon = 7% × (nb jours CMS10Y dans [1.50%-3.35%] / nb jours total), sans effet mémoire, payé in fine. Callable par émetteur dès année 3. Capital garanti 100%.",
+  "risks": [
+    "Risque de coupon réduit si CMS10Y sort du corridor",
+    "Risque de réinvestissement si rappel anticipé",
+    "Risque de crédit émetteur",
+    "Risque de liquidité"
+  ],
+  "summary": "Range Accrual CMS10Y avec coupon max 7% payé in fine, garanti 2 ans, puis prorata des jours dans le corridor [1.50%-3.35%]. Callable dès année 3.",
+  "aiParsed": {
+    "name": "SL - Range Accrual CMS10Y 10 ans",
+    "type": "range-accrual",
+    "structureType": "range_accrual",
+    "emitter": "Swiss Life Banque Privée",
+    "guarantor": "",
+    "guarantorRating": {
+      "moodys": "A2",
+      "sp": "A+"
+    },
+    "underlyings": [
+      "CMS 10 ans"
+    ],
+    "underlyingType": "rates",
+    "currency": "EUR",
+    "maturity": "10 ans",
+    "maturityYears": 10,
+    "coupon": {
+      "rate": 7,
+      "rateIfCalled": null,
+      "rateIfMaturity": null,
+      "type": "conditionnel",
+      "frequency": "in_fine",
+      "trigger": null,
+      "memory": false,
+      "paymentTiming": "periodic"
+    },
+    "participationRate": null,
+    "guaranteedYears": 2,
+    "autocallCumulTarget": null,
+    "commissions": null,
+    "isin": "",
+    "minInvestment": 100000,
+    "capitalProtection": {
+      "protected": true,
+      "level": 100,
+      "barrier": null,
+      "barrierCoupon": 3.35,
+      "barrierType": "europeenne"
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "callable",
+      "trigger": null,
+      "frequency": "annuel",
+      "startSemester": 6,
+      "stepDown": false,
+      "stepDownPct": null
+    },
+    "mechanism": "Range Accrual sur CMS 10Y. Coupon garanti 7% payé in fine années 1-2. Dès année 3, coupon = 7% × (nb jours CMS10Y dans [1.50%-3.35%] / nb jours total), sans effet mémoire, payé in fine. Callable par émetteur dès année 3. Capital garanti 100%.",
+    "risks": [
+      "Risque de coupon réduit si CMS10Y sort du corridor",
+      "Risque de réinvestissement si rappel anticipé",
+      "Risque de crédit émetteur",
+      "Risque de liquidité"
+    ],
+    "summary": "Range Accrual CMS10Y avec coupon max 7% payé in fine, garanti 2 ans, puis prorata des jours dans le corridor [1.50%-3.35%]. Callable dès année 3.",
+    "rangeAccrual": {
+      "lowerBound": 1.5,
+      "upperBound": 3.35,
+      "reference": "CMS 10 ans",
+      "observation": "daily"
+    }
+  },
+  "sourceFile": "JSON import",
+  "bankId": "swiss-life",
+  "status": "analyzing",
+  "receivedDate": "2026-04-20",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null
+}
