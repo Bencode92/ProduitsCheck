@@ -222,7 +222,7 @@
         "score": 83,
         "base": 100,
         "delta": 0,
-        "reasoning": "Rendement: base 100 → -1 = 99 (En stagflation avec taux élevés, le TEC 10 à 4.6% sera plus volatil et moins prévisible pour déclencher le coupon) | Coupon 6.7%, protégé | Barr.coupon 4.6% | Mat espérée: ~1.2a (prob mat: 0%)",
+        "reasoning": "Rendement: base 100 → -1 = 99 (En stagflation avec courbe pentifiée +54bps, la probabilité que le TEC 10 dépasse 4.6% est réduite car les taux longs montent moins vite que prévu) | Coupon 6.7%, protégé | Barr.coupon 4.6% | Mat espérée: ~1.2a (prob mat: 0%)",
         "_bsDelta": -22,
         "_bs": {
           "score": 78,
@@ -244,64 +244,64 @@
         "score": 75,
         "base": 76,
         "delta": -1,
-        "reasoning": "Qualité: base 76 → -1 = 75 (Le TEC 10 est très sensible au régime stagflationniste actuel avec PCE à 2.8% et risque de bear flattening)"
+        "reasoning": "Qualité: base 76 → -1 = 75 (Le TEC 10 est exposé aux taux longs français, vulnérable en stagflation si la BCE reste restrictive face à l'inflation à 2.8%)"
       },
       "portfolioFit": {
         "score": 55,
         "base": 80,
-        "delta": 1,
-        "reasoning": "Fit: base 80 → +1 = 81 (En stagflation, un produit à capital garanti sur taux devient plus pertinent pour protéger le portefeuille)"
+        "delta": 0,
+        "reasoning": "Fit: base 80"
       },
       "riskPremium": {
         "score": 77,
         "base": 72,
-        "delta": -1,
+        "delta": 1,
         "reasoning": "Capital garanti: spread 6.7% - CAT 2.5% - illiq 0.7% = 3.5%"
       }
     },
-    "verdict": "Ce produit à capital garanti offre un coupon de 6.7% si le TEC 10 reste au-dessus de 4.6%, dans un contexte stagflationniste défavorable aux taux. Avec le PCE à 2.8% et la Fed en pause, le TEC 10 risque de rester volatil et potentiellement monter au-dessus du seuil d'autocall de 26.8%, limitant le rendement total. La protection du capital est appréciable mais le coupon conditionnel dans ce régime macro hostile aux obligations réduit l'attractivité à un score final de 73/100.",
+    "verdict": "Ce TARN sur TEC 10 offre un coupon attractif de 6.7% annualisé avec capital garanti, idéal en stagflation. La barrière à 4.6% semble atteignable avec le TEC 10 actuel, mais la pentification de la courbe (+54bps) et l'inflation persistante (PCE 2.8%) limitent le potentiel de hausse des taux longs. Le mécanisme TARN avec seuil à 26.8% protège contre une hausse excessive tout en garantissant le capital.",
     "keyRisks": [
-      "Hausse brutale du TEC 10 au-delà de 26.8% déclenchant un autocall précoce",
-      "Volatilité accrue des taux en stagflation rendant le coupon imprévisible"
+      "Risque de maintien prolongé du TEC 10 sous 4.6% si la BCE reste accommodante malgré l'inflation",
+      "Risque de rappel anticipé si les taux longs montent brutalement au-delà de 26.8% de gain cumulé"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 8,
-        "return_eur": 8000,
-        "probability": 0.2,
-        "duration_years": 1
+        "return_pct": 26.8,
+        "return_eur": 26800,
+        "probability": 0.15,
+        "duration_years": 4
       },
       "base": {
-        "return_pct": 3.5,
-        "return_eur": 10500,
-        "probability": 0.35,
+        "return_pct": 6.7,
+        "return_eur": 20100,
+        "probability": 0.4,
         "duration_years": 3
       },
       "stress": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.3,
+        "probability": 0.35,
         "duration_years": 10
       },
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.15,
+        "probability": 0.1,
         "duration_years": 10
       }
     },
     "confidenceInterval": {
-      "low": 73,
-      "high": 91,
+      "low": 74,
+      "high": 92,
       "halfWidth": 9,
       "gradeStable": false,
       "gradeRange": "B-A",
-      "label": "A [73-91]"
+      "label": "A [74-92]"
     },
     "metadata": {
-      "gradedAt": "2026-04-20T11:50:51.266Z",
-      "durationMs": 20847,
+      "gradedAt": "2026-04-20T11:56:15.564Z",
+      "durationMs": 20112,
       "aiUsed": true,
       "version": "7.1",
       "productType": "capital_garanti",
@@ -317,7 +317,7 @@
       "barrierPct": 0,
       "barrierCouponPct": 4.6,
       "couponProbability": 94.7,
-      "expectedMaturity": 1.2,
+      "expectedMaturity": 5,
       "maxMaturity": 10,
       "probReachMaturity": 0,
       "maxBeta": null,
@@ -326,8 +326,8 @@
       "adjustments": {
         "p1": -1,
         "p2": -1,
-        "p3": 1,
-        "p4": -1
+        "p3": 0,
+        "p4": 1
       },
       "barrier_sigma": null,
       "barrier_sigma_label": null,
@@ -335,9 +335,9 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 73,
-      "ci_high": 91,
-      "ci_label": "A [73-91]",
+      "ci_low": 74,
+      "ci_high": 92,
+      "ci_label": "A [74-92]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
