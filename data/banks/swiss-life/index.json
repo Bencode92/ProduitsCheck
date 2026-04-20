@@ -1,7 +1,7 @@
 {
   "bankId": "swiss-life",
   "bankName": "Swiss Life",
-  "lastUpdated": "2026-04-20T16:40:48.698Z",
+  "lastUpdated": "2026-04-20T16:41:43.666Z",
   "products": [
     {
       "id": "sp_mnd8hjkx_40efj",
@@ -52,7 +52,7 @@
       "receivedDate": "2026-04-20"
     },
     {
-      "id": "sp_mo7f8oje_k0y7q",
+      "id": "sp_mo7f9uy9_yth58",
       "name": "SL - TARN TEC10 10 ans",
       "type": "capital_garanti",
       "status": "analyzing",
