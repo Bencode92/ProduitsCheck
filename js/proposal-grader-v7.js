@@ -765,6 +765,7 @@
           result.metadata.bsPerteEsperee = bs.perteEsperee;
           result.metadata.bsVols = bs.vols;
           result.metadata.bsMatEsperee = bs.matEsperee;
+          result.metadata.expectedMaturity = bs.matEsperee;
           result.metadata.couponProbability = bs.probCoupon;
           result.metadata.isBasket = bs.isBasket;
           // Rate product historical data
