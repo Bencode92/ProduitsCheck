@@ -719,11 +719,122 @@
   window.renderCarrySimulator = async function(container) {
     container.innerHTML = '<div style="text-align:center;padding:40px;color:#64748B">Calcul des configurations optimales...</div>';
     await _loadRates();
+    await _loadImportedProducts();
     _render(container);
+    setTimeout(_refreshImportList, 100);
   };
 
-  // ─── Import propositions banquiers ──────
+  // ─── Import propositions banquiers (persisted to GitHub) ──────
   var _importedProducts = [];
+  var _importedLoaded = false;
+
+  async function _loadImportedProducts() {
+    if (_importedLoaded) return;
+    try {
+      var data = await github.readFile(CONFIG.DATA_PATH + '/carry-trade/proposals.json');
+      if (Array.isArray(data)) _importedProducts = data;
+      _importedLoaded = true;
+    } catch(e) { _importedLoaded = true; }
+  }
+
+  async function _saveImportedProducts() {
+    try {
+      await github.writeFile(CONFIG.DATA_PATH + '/carry-trade/proposals.json', _importedProducts, '[StructBoard] Update carry trade proposals');
+    } catch(e) { console.warn('[CarryTrade] Save error:', e.message); }
+  }
+
+  window.__carryDeleteProposal = function(idx) {
+    _importedProducts.splice(idx, 1);
+    _saveImportedProducts();
+    _refreshImportList();
+  };
+
+  window.__carrySimulateSelected = function() {
+    var selected = [];
+    document.querySelectorAll('.carry-prop-check:checked').forEach(function(cb) {
+      var idx = parseInt(cb.dataset.idx);
+      if (_importedProducts[idx]) selected.push(_importedProducts[idx]);
+    });
+    if (selected.length === 0) { showToast('Sélectionnez au moins une proposition', 'error'); return; }
+    // Compute PnL for selected
+    var pnl = _computePnL(selected, LOAN.amount, LOAN.rate, LOAN.years, LOAN.taxRate);
+    var totalAmount = selected.reduce(function(s, p) { return s + (p.amount || 0); }, 0);
+    // Render result in discussion zone
+    var disc = document.getElementById('carry-v2-discussion');
+    if (disc) {
+      var h = '<div style="font-size:13px;font-weight:700;color:#7C3AED;margin-bottom:12px">📊 SIMULATION — ' + selected.length + ' proposition' + (selected.length > 1 ? 's' : '') + ' sélectionnée' + (selected.length > 1 ? 's' : '') + ' (' + _f(totalAmount) + '€)</div>';
+
+      // Product cards
+      h += '<div style="display:grid;grid-template-columns:repeat(' + Math.min(selected.length, 3) + ',1fr);gap:10px;margin-bottom:14px">';
+      selected.forEach(function(p) {
+        h += '<div style="padding:12px;border-radius:8px;border-left:4px solid ' + (p.color || '#7C3AED') + ';background:' + B.row1 + '">';
+        h += '<div style="font-size:12px;font-weight:700;color:' + (p.color || '#7C3AED') + '">' + p.name + '</div>';
+        h += '<div style="font-size:11px;color:' + B.muted + ';margin-top:4px">' + p.emetteur + ' · ' + _f(p.amount) + '€</div>';
+        h += '<div style="font-size:18px;font-weight:800;color:#D97706;margin-top:6px">' + p.coupon + '%</div>';
+        h += '<div style="font-size:10px;color:' + B.dim + '">' + (p.type === 'fixe' ? 'Fixe garanti' : p.type === 'hybride' ? 'Plancher ' + p.couponPlancher + '% + Bonus' : 'Conditionnel trigger ' + (p.trigger || '?') + '%') + '</div>';
+        h += '</div>';
+      });
+      h += '</div>';
+
+      // PnL table
+      h += '<table style="width:100%;border-collapse:collapse;font-size:11px;margin-bottom:10px">';
+      h += '<thead><tr style="background:' + B.header + '"><th style="padding:6px">Année</th>';
+      selected.forEach(function(p) { h += '<th style="padding:6px;color:' + (p.color || '#7C3AED') + '">' + (p.name || '').substring(0, 20) + '</th>'; });
+      h += '<th style="padding:6px;color:#059669">Total coupons</th><th style="padding:6px;color:#DC2626">Intérêts emprunt</th><th style="padding:6px;font-weight:700">Net</th></tr></thead><tbody>';
+      pnl.flows.forEach(function(f) {
+        var bg = f.year % 2 === 0 ? B.row0 : B.row1;
+        h += '<tr style="background:' + bg + ';border-bottom:1px solid ' + B.border + '">';
+        h += '<td style="padding:5px 6px;font-weight:700">An ' + f.year + '</td>';
+        f.products.forEach(function(fp) { h += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:' + (fp.color || '#059669') + '">+' + _f(fp.rev) + '€</td>'; });
+        h += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:#059669;font-weight:600">+' + _f(f.totalRev) + '€</td>';
+        h += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:#DC2626">-' + _f(f.interest) + '€</td>';
+        h += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);font-weight:700;color:' + (f.net >= 0 ? '#059669' : '#DC2626') + '">' + (f.net >= 0 ? '+' : '') + _f(f.net) + '€</td>';
+        h += '</tr>';
+      });
+      h += '</tbody></table>';
+
+      // Summary
+      h += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">';
+      h += '<div style="text-align:center;padding:10px;background:#ECFDF5;border-radius:6px;border:1px solid #6EE7B7"><div style="font-size:10px;color:#065F46">Coupons bruts 5A</div><div style="font-size:18px;font-weight:800;color:#059669">+' + _f(pnl.totalRevenue) + '€</div></div>';
+      h += '<div style="text-align:center;padding:10px;background:#FEF2F2;border-radius:6px;border:1px solid #FCA5A5"><div style="font-size:10px;color:#991B1B">Intérêts emprunt 5A</div><div style="font-size:18px;font-weight:800;color:#DC2626">-' + _f(pnl.totalInterest) + '€</div></div>';
+      h += '<div style="text-align:center;padding:10px;background:#FFF7ED;border-radius:6px;border:1px solid #FDBA74"><div style="font-size:10px;color:#92400E">IS 25%</div><div style="font-size:18px;font-weight:800;color:#D97706">-' + _f(pnl.tax) + '€</div></div>';
+      h += '<div style="text-align:center;padding:10px;background:' + (pnl.netAfterTax >= 0 ? '#ECFDF5' : '#FEF2F2') + ';border-radius:6px;border:2px solid ' + (pnl.netAfterTax >= 0 ? '#059669' : '#DC2626') + '"><div style="font-size:10px;color:' + (pnl.netAfterTax >= 0 ? '#065F46' : '#991B1B') + '">NET APRÈS IS</div><div style="font-size:18px;font-weight:800;color:' + (pnl.netAfterTax >= 0 ? '#059669' : '#DC2626') + '">' + (pnl.netAfterTax >= 0 ? '+' : '') + _f(pnl.netAfterTax) + '€</div></div>';
+      h += '</div>';
+
+      // Worst case
+      h += '<div style="margin-top:10px;padding:8px;background:#FFF7ED;border-radius:6px;font-size:11px;color:#92400E">';
+      h += '<strong>Pire cas :</strong> +' + _f(pnl.worstNet) + '€ (coupons garantis uniquement)';
+      h += ' · <strong>Espérance pondérée :</strong> +' + _f(pnl.esperance) + '€ (90% central + 10% pire)';
+      h += '</div>';
+
+      disc.innerHTML = h;
+    }
+  };
+
+  function _refreshImportList() {
+    var list = document.getElementById('carry-import-list');
+    if (!list) return;
+    if (_importedProducts.length === 0) { list.innerHTML = ''; return; }
+    var h = '<div style="font-size:12px;font-weight:700;color:#7C3AED;margin:12px 0 8px">📋 Propositions reçues (' + _importedProducts.length + ')</div>';
+    h += '<table style="width:100%;border-collapse:collapse;font-size:11px">';
+    h += '<tr style="background:' + B.header + '"><th style="padding:6px;width:30px"></th><th style="padding:6px;text-align:left">Produit</th><th style="padding:6px">Émetteur</th><th style="padding:6px">Coupon</th><th style="padding:6px">Trigger</th><th style="padding:6px">Montant</th><th style="padding:6px">Net 5A</th><th style="padding:6px;width:30px"></th></tr>';
+    _importedProducts.forEach(function(p, i) {
+      var ppnl = _computePnL([p], LOAN.amount, LOAN.rate, LOAN.years, LOAN.taxRate);
+      h += '<tr style="border-bottom:1px solid ' + B.border + '">';
+      h += '<td style="padding:6px;text-align:center"><input type="checkbox" class="carry-prop-check" data-idx="' + i + '" checked></td>';
+      h += '<td style="padding:6px;font-weight:600;color:' + (p.color || '#7C3AED') + '">' + p.name + '</td>';
+      h += '<td style="padding:6px;color:' + B.muted + '">' + (p.emetteur || '—') + '</td>';
+      h += '<td style="padding:6px;font-family:var(--mono);font-weight:700;color:#D97706">' + p.coupon + '%</td>';
+      h += '<td style="padding:6px;font-family:var(--mono)">' + (p.trigger || '—') + '%</td>';
+      h += '<td style="padding:6px;font-family:var(--mono)">' + _f(p.amount) + '€</td>';
+      h += '<td style="padding:6px;font-family:var(--mono);font-weight:700;color:#059669">+' + _f(ppnl.esperance) + '€</td>';
+      h += '<td style="padding:6px;text-align:center"><button onclick="__carryDeleteProposal(' + i + ')" style="background:none;border:none;color:#DC2626;cursor:pointer;font-size:12px" title="Supprimer">✕</button></td>';
+      h += '</tr>';
+    });
+    h += '</table>';
+    h += '<button onclick="__carrySimulateSelected()" style="margin-top:10px;padding:10px 24px;background:#7C3AED;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">📊 Simuler les sélectionnées</button>';
+    list.innerHTML = h;
+  }
 
   window.__carryImportForm = function() {
     var name = document.getElementById('ci-name')?.value || 'Proposition banquier';
@@ -791,32 +902,14 @@
         product.couponBonus = product.coupon - product.couponPlancher;
       }
       _importedProducts.push(product);
+      _saveImportedProducts();
 
       // Compute PnL for this product alone
       var pnl = _computePnL([product], LOAN.amount, LOAN.rate, LOAN.years, LOAN.taxRate);
 
-      result.innerHTML = '<div style="padding:8px;background:#ECFDF5;border:1px solid #6EE7B7;border-radius:6px;font-size:11px;color:#065F46;margin-bottom:8px">✅ <strong>' + product.name + '</strong> importé — coupon ' + product.coupon + '% · Net espéré <strong>+' + _f(pnl.esperance) + '€</strong> sur 5 ans</div>';
+      result.innerHTML = '<div style="padding:8px;background:#ECFDF5;border:1px solid #6EE7B7;border-radius:6px;font-size:11px;color:#065F46;margin-bottom:8px">✅ <strong>' + product.name + '</strong> sauvegardé — coupon ' + product.coupon + '% · Net espéré <strong>+' + _f(pnl.esperance) + '€</strong> sur 5 ans</div>';
       ta.value = '';
-
-      // Render list
-      if (list) {
-        var h = '<div style="font-size:11px;font-weight:700;color:#7C3AED;margin:8px 0 6px">Propositions importées (' + _importedProducts.length + ') :</div>';
-        h += '<table style="width:100%;border-collapse:collapse;font-size:11px">';
-        h += '<tr style="background:#E8ECF2"><th style="padding:6px;text-align:left">Produit</th><th style="padding:6px">Emetteur</th><th style="padding:6px">Coupon</th><th style="padding:6px">Trigger</th><th style="padding:6px">Montant</th><th style="padding:6px">Net espéré 5A</th></tr>';
-        _importedProducts.forEach(function(p) {
-          var ppnl = _computePnL([p], LOAN.amount, LOAN.rate, LOAN.years, LOAN.taxRate);
-          h += '<tr style="border-bottom:1px solid #D1D9E6">';
-          h += '<td style="padding:6px;font-weight:600">' + p.name + '</td>';
-          h += '<td style="padding:6px;color:#64748B">' + p.emetteur + '</td>';
-          h += '<td style="padding:6px;font-family:var(--mono);font-weight:700;color:#D97706">' + p.coupon + '%</td>';
-          h += '<td style="padding:6px;font-family:var(--mono)">' + (p.trigger || '—') + '%</td>';
-          h += '<td style="padding:6px;font-family:var(--mono)">' + _f(p.amount) + '€</td>';
-          h += '<td style="padding:6px;font-family:var(--mono);font-weight:700;color:#059669">+' + _f(ppnl.esperance) + '€</td>';
-          h += '</tr>';
-        });
-        h += '</table>';
-        list.innerHTML = h;
-      }
+      _refreshImportList();
     } catch(e) {
       result.innerHTML = '<div style="padding:8px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:6px;font-size:11px;color:#DC2626">❌ JSON invalide : ' + e.message + '</div>';
     }
