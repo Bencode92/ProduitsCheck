@@ -699,33 +699,29 @@
   }
 
   // ═══ SECTION 6a2: DISPERSION BACKTEST 1Y ═══
-  function _computeDispersionBacktest(product) {
+  function _computeDispersionBacktest(product, stockData) {
     var st = (product.structureType || '').toLowerCase();
     if (st !== 'dispersion') return null;
 
-    // Get 1Y performance for each underlying from grading data
-    var stocks = [];
-    if (product.grading && product.grading.pillars && product.grading.pillars.underlyingQuality) {
-      // Try from _stocksCache or product data
-    }
-    // Fallback: read from aiParsed or product underlyings with market data
     var unds = product.underlyings || [];
     if (unds.length < 2) return null;
 
-    // Try to get perf_1y from vol data cache
+    // Use stockData from grading context (has perf_1y for each underlying)
+    var sd = stockData || (product.grading && product.grading.metadata && product.grading.metadata.stockData) || [];
+
     var perfs = [];
     unds.forEach(function(u) {
       var name = typeof u === 'string' ? u : (u.name || '');
       var perf = null;
-      // Search in _volData (loaded during grading)
-      if (typeof _volData !== 'undefined' && _volData) {
-        var allStocks = [].concat(_volData.stocksEurope || [], _volData.stocksUS || []);
-        var match = allStocks.find(function(s) {
-          return s.name && (s.name.toUpperCase().indexOf(name.toUpperCase()) >= 0 ||
-            name.toUpperCase().indexOf((s.ticker || '').toUpperCase()) >= 0);
-        });
-        if (match && match.perf_1y != null) perf = parseFloat(match.perf_1y);
-      }
+      // Match with stockData
+      var match = sd.find(function(s) {
+        return s && (
+          (s.name || '').toUpperCase().indexOf(name.toUpperCase()) >= 0 ||
+          name.toUpperCase().indexOf((s.name || '').toUpperCase()) >= 0 ||
+          (s.ticker || '').toUpperCase() === name.toUpperCase()
+        );
+      });
+      if (match && match.perf_1y != null) perf = parseFloat(match.perf_1y);
       perfs.push({ name: name.substring(0, 20), perf: perf });
     });
 

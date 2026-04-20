@@ -27,12 +27,41 @@
         }
     };
 
+    // Dispersion backtest using stockData (called after grading when perf_1y is available)
+    function _computeDispersionBacktest1Y(product, stockData) {
+      if (!stockData || stockData.length < 2) return null;
+      var unds = product.underlyings || [];
+      var perfs = [];
+      unds.forEach(function(u) {
+        var name = typeof u === 'string' ? u : (u.name || '');
+        var match = stockData.find(function(s) {
+          return s && ((s.name || '').toUpperCase().indexOf(name.toUpperCase()) >= 0 ||
+            name.toUpperCase().indexOf((s.ticker || '').toUpperCase()) >= 0 ||
+            (s.ticker || '').toUpperCase() === name.toUpperCase());
+        });
+        if (match && match.perf_1y != null) perfs.push({ name: name.substring(0, 20), perf: parseFloat(match.perf_1y) });
+      });
+      if (perfs.length < 2) return null;
+      var pairs = [];
+      for (var i = 0; i < perfs.length; i++) {
+        for (var j = i + 1; j < perfs.length; j++) {
+          pairs.push({ stock1: perfs[i].name, stock2: perfs[j].name, perf1: perfs[i].perf, perf2: perfs[j].perf, dispersion: Math.abs(perfs[i].perf - perfs[j].perf) });
+        }
+      }
+      var avg = pairs.reduce(function(s, p) { return s + p.dispersion; }, 0) / pairs.length;
+      var part = parseFloat(product.participationRate) || parseFloat(product.coupon && product.coupon.rate) || 7;
+      var retPct = Math.round(part * avg) / 100;
+      var nom = parseFloat(product.investedAmount) || 100000;
+      pairs.sort(function(a, b) { return b.dispersion - a.dispersion; });
+      return { pairs: pairs, avgDispersion: Math.round(avg * 100) / 100, participation: part, returnPct: Math.round(retPct * 100) / 100, returnEur: Math.round(nom * retPct / 100), nbPairs: pairs.length, nbStocks: perfs.length, perfs: perfs };
+    }
+
     async function _clearOldKillGrading() { let cleared = 0; for (const [bankId, proposals] of Object.entries(app.state?.proposals || {})) { for (const p of proposals) { if (p.grading && p.grading.killCriteria?.triggered) { const reasons = p.grading.killCriteria.reasons || []; if (reasons.some(r => r.includes('metteur') || r.includes('book') || r.includes('max: 40'))) { delete p.grading; cleared++; try { await app._saveProductFile(bankId, p); } catch(e){} } } } } if (cleared > 0) { console.log('[GraderUI] Cleared ' + cleared + ' old F grades'); app.render(); } }
     setTimeout(_clearOldKillGrading, 3000);
 
     async function _saveGrading(product) { var saved = { proposal: false, portfolio: false }; if (product.bankId) { try { await app._saveProductFile(product.bankId, product); saved.proposal = true; } catch(e) {} } var portfolio = app.state.portfolio || []; var pfProduct = portfolio.find(function(p) { return p.id === product.id; }); if (pfProduct) { pfProduct.grading = product.grading; try { await github.writeFile(CONFIG.DATA_PATH + '/portfolio.json', portfolio, '[StructBoard] Grading: ' + (product.grading.grade || '?') + ' \u2014 ' + (product.name || product.id).substring(0, 40)); saved.portfolio = true; } catch(e) {} } return saved; }
 
-    window.triggerGrading = async function(btn) { const product = app.state.currentProduct; if (!product) { showToast('Aucun produit', 'error'); return; } if (btn && btn.disabled) return; if (btn) { btn.disabled = true; btn.textContent = '\u23f3 Analyse en cours...'; } try { delete product.grading; if (typeof _mktCache !== 'undefined') { _mktCache = null; _mktCacheTs = 0; } showToast('Grading en cours...', 'info'); const result = await ProposalGrader.grade(product); try { if (_mktCache && result && result.metadata && typeof _extractStockData === 'function') { var norm = ProposalGrader.normalize(product); var stockInfo = _extractStockData(norm, _mktCache); if (stockInfo.available && stockInfo.stocks.length > 0) { result.metadata.stockData = stockInfo.stocks.filter(function(s) { return s.found; }).map(function(s) { return { name: s.name, ticker: s.ticker, sector: s.sector || '\u2014', perf_ytd: s.perf_ytd, perf_1y: s.perf_1y, volatility_3y: s.volatility_3y, max_drawdown_3y: s.max_drawdown_3y, buffett_score: s.buffett_score, quality_score: s.quality_score, buffett_grade: s.buffett_grade }; }); product.grading = result; } } } catch(e) {} var saveResult = await _saveGrading(product); app.openProduct(product); var gc = ProposalGrader.config.grades[result.grade] || {}; showToast('Grade ' + result.grade + ' \u2014 ' + (gc.label || '') + ' (' + (result.score !== null ? result.score + '/100' : 'liquidit\u00e9') + ')', 'success'); } catch (e) { console.error('[Grader] Error:', e); if (btn) { btn.textContent = '\u274c Erreur'; btn.disabled = false; } showToast('Erreur: ' + e.message, 'error'); } };
+    window.triggerGrading = async function(btn) { const product = app.state.currentProduct; if (!product) { showToast('Aucun produit', 'error'); return; } if (btn && btn.disabled) return; if (btn) { btn.disabled = true; btn.textContent = '\u23f3 Analyse en cours...'; } try { delete product.grading; if (typeof _mktCache !== 'undefined') { _mktCache = null; _mktCacheTs = 0; } showToast('Grading en cours...', 'info'); const result = await ProposalGrader.grade(product); try { if (_mktCache && result && result.metadata && typeof _extractStockData === 'function') { var norm = ProposalGrader.normalize(product); var stockInfo = _extractStockData(norm, _mktCache); if (stockInfo.available && stockInfo.stocks.length > 0) { result.metadata.stockData = stockInfo.stocks.filter(function(s) { return s.found; }).map(function(s) { return { name: s.name, ticker: s.ticker, sector: s.sector || '\u2014', perf_ytd: s.perf_ytd, perf_1y: s.perf_1y, volatility_3y: s.volatility_3y, max_drawdown_3y: s.max_drawdown_3y, buffett_score: s.buffett_score, quality_score: s.quality_score, buffett_grade: s.buffett_grade }; }); product.grading = result; if ((product.structureType||'').toLowerCase()==='dispersion' && result.metadata.stockData && result.metadata.stockData.length>=2) { var _bt=_computeDispersionBacktest1Y(product,result.metadata.stockData); if(_bt){result.dispersionBacktest=_bt;product._dispersionBacktest=_bt;} } } } } catch(e) {} var saveResult = await _saveGrading(product); app.openProduct(product); var gc = ProposalGrader.config.grades[result.grade] || {}; showToast('Grade ' + result.grade + ' \u2014 ' + (gc.label || '') + ' (' + (result.score !== null ? result.score + '/100' : 'liquidit\u00e9') + ')', 'success'); } catch (e) { console.error('[Grader] Error:', e); if (btn) { btn.textContent = '\u274c Erreur'; btn.disabled = false; } showToast('Erreur: ' + e.message, 'error'); } };
 
     window.tagAsLiquidity = async function(btn) { var product = app.state.currentProduct; if (!product) return; product.grading = { grade: '-', score: null, killCriteria: { triggered: false, reasons: [] }, pillars: { adjustedReturn: { score: null }, underlyingQuality: { score: null }, portfolioFit: { score: null }, riskPremium: { score: null } }, verdict: 'Produit de liquidit\u00e9 / parking cash.', keyRisks: ['Rendement tr\u00e8s faible'], scenarios: null, metadata: { gradedAt: new Date().toISOString(), durationMs: 0, aiUsed: false, version: '4.1', productType: 'liquidity', isInPortfolio: true } }; await _saveGrading(product); app.openProduct(product); showToast('Marqu\u00e9 comme liquidit\u00e9', 'success'); };
 
