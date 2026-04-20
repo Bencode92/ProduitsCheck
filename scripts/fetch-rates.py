@@ -9,6 +9,7 @@ import json, csv, io, sys, os, statistics
 from datetime import datetime, timezone
 from urllib.request import urlopen, Request
 from urllib.error import URLError
+from urllib.parse import quote
 
 BASE_ECB = "https://data-api.ecb.europa.eu/service/data"
 BDF_PROXY = "https://studyforge-proxy.benoit-comas.workers.dev/bdf"
@@ -90,22 +91,19 @@ RATE_SERIES["euribor_12m"] = {
 # Different from OAT AAA zone euro (ECB) which excludes France spread
 BDF_TEC_SERIES = {
     "tec10_fr": {
-        "series_key_pattern": "FM.B.FR.EUR.FR2.BB.FR10YT_RR.YBAV",
-        "search_title": "TEC 10",
+        "series_key": "FM.D.FR.EUR.FR2.BB.FRMOYTEC10.HSTA",
         "name": "TEC 10 (Banque de France)",
         "description": "Taux d'État français 10 ans. Référence TARN et produits structurés taux longs.",
         "maturity": 10
     },
     "tec5_fr": {
-        "series_key_pattern": "FM.B.FR.EUR.FR2.BB.FR5YT_RR.YBAV",
-        "search_title": "TEC 5",
+        "series_key": "FM.D.FR.EUR.FR2.BB.FRMOYTEC5.HSTA",
         "name": "TEC 5 (Banque de France)",
         "description": "Taux d'État français 5 ans.",
         "maturity": 5
     },
     "tec2_fr": {
-        "series_key_pattern": "FM.B.FR.EUR.FR2.BB.FR2YT_RR.YBAV",
-        "search_title": "TEC 2",
+        "series_key": "FM.D.FR.EUR.FR2.BB.FRMOYTEC2.HSTA",
         "name": "TEC 2 (Banque de France)",
         "description": "Taux d'État français 2 ans.",
         "maturity": 2
@@ -113,85 +111,56 @@ BDF_TEC_SERIES = {
 }
 
 
-def fetch_bdf_tec(series_config, start_period="2004-01-01", timeout=20):
+def _bdf_url(endpoint, params):
+    """Build properly encoded BdF API URL via Worker proxy."""
+    encoded = "&".join(f"{k}={quote(str(v), safe='')}" for k, v in params.items())
+    return f"{BDF_PROXY}/{endpoint}?{encoded}"
+
+
+def _bdf_fetch(url, timeout=30):
+    """Fetch JSON from BdF Worker proxy."""
+    req = Request(url, headers={"Accept": "application/json", "User-Agent": "StructBoard/1.0"})
+    with urlopen(req, timeout=timeout) as resp:
+        return json.loads(resp.read().decode("utf-8"))
+
+
+def fetch_bdf_tec(series_config, start_period="2004-01-01", timeout=30):
     """Fetch TEC data from Banque de France via Cloudflare Worker proxy.
-    Tries series_key_pattern first, then falls back to title search."""
+    Uses exact series_key with refine parameter (most reliable)."""
 
-    # Strategy 1: Try direct series_key match
-    key_pattern = series_config["series_key_pattern"]
-    url = (f'{BDF_PROXY}/observations/exports/json'
-           f'?select=series_key,title_fr,time_period_start,obs_value'
-           f'&where=series_key like "{key_pattern.split(".")[0]}.B.FR*" and title_fr like "{series_config["search_title"]}" and time_period_start>date\'{start_period}\''
-           f'&order_by=time_period_start&limit=10000')
+    key = series_config["series_key"]
 
+    # Use refine (facet) which is the recommended BdF API approach
+    url = _bdf_url("observations/exports/json", {
+        "select": "time_period_start,obs_value",
+        "refine": f'series_key:{key}',
+        "where": f"time_period_start>date'{start_period}'",
+        "order_by": "time_period_start",
+        "limit": "10000"
+    })
     try:
-        req = Request(url, headers={"Accept": "application/json", "User-Agent": "StructBoard/1.0"})
-        with urlopen(req, timeout=timeout) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-
+        data = _bdf_fetch(url, timeout)
         if isinstance(data, list) and len(data) > 0:
-            results = []
-            for entry in data:
-                date = entry.get("time_period_start", "")
-                value = entry.get("obs_value")
-                if date and value is not None:
-                    results.append((date, float(value)))
+            results = [(e["time_period_start"], float(e["obs_value"]))
+                       for e in data if e.get("obs_value") is not None]
             return results
     except Exception as e:
-        print(f"  ⚠ BdF Strategy 1 failed: {e}", file=sys.stderr)
+        print(f"  ⚠ BdF refine failed: {e}", file=sys.stderr)
 
-    # Strategy 2: Search by title
-    search = series_config["search_title"]
-    url2 = (f'{BDF_PROXY}/observations/exports/json'
-            f'?select=series_key,title_fr,time_period_start,obs_value'
-            f'&where=title_fr like "{search}" and time_period_start>date\'{start_period}\''
-            f'&order_by=time_period_start&limit=10000')
-
+    # Fallback: use where clause with exact series_key
+    url2 = _bdf_url("observations/exports/json", {
+        "select": "time_period_start,obs_value",
+        "where": f'series_key="{key}" and time_period_start>date\'{start_period}\'',
+        "order_by": "time_period_start",
+        "limit": "10000"
+    })
     try:
-        req = Request(url2, headers={"Accept": "application/json", "User-Agent": "StructBoard/1.0"})
-        with urlopen(req, timeout=timeout) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-
+        data = _bdf_fetch(url2, timeout)
         if isinstance(data, list) and len(data) > 0:
-            results = []
-            found_key = data[0].get("series_key", "?")
-            print(f"  ℹ Found via title search: {found_key}")
-            for entry in data:
-                date = entry.get("time_period_start", "")
-                value = entry.get("obs_value")
-                if date and value is not None:
-                    results.append((date, float(value)))
-            return results
+            return [(e["time_period_start"], float(e["obs_value"]))
+                    for e in data if e.get("obs_value") is not None]
     except Exception as e:
-        print(f"  ⚠ BdF Strategy 2 failed: {e}", file=sys.stderr)
-
-    # Strategy 3: List available FM series to find the right key
-    url3 = (f'{BDF_PROXY}/series/exports/json'
-            f'?select=series_key,title_fr'
-            f'&where=dataset_id="FM" and title_fr like "{search}"'
-            f'&limit=10')
-
-    try:
-        req = Request(url3, headers={"Accept": "application/json", "User-Agent": "StructBoard/1.0"})
-        with urlopen(req, timeout=timeout) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-
-        if isinstance(data, list) and len(data) > 0:
-            for s in data:
-                print(f"  → Found series: {s.get('series_key','')} = {s.get('title_fr','')}")
-            # Try first matching series
-            first_key = data[0]["series_key"]
-            url4 = (f'{BDF_PROXY}/observations/exports/json'
-                    f'?select=time_period_start,obs_value'
-                    f'&where=series_key="{first_key}" and time_period_start>date\'{start_period}\''
-                    f'&order_by=time_period_start&limit=10000')
-            req = Request(url4, headers={"Accept": "application/json", "User-Agent": "StructBoard/1.0"})
-            with urlopen(req, timeout=timeout) as resp:
-                obs_data = json.loads(resp.read().decode("utf-8"))
-            if isinstance(obs_data, list):
-                return [(e["time_period_start"], float(e["obs_value"])) for e in obs_data if e.get("obs_value") is not None]
-    except Exception as e:
-        print(f"  ⚠ BdF Strategy 3 failed: {e}", file=sys.stderr)
+        print(f"  ⚠ BdF where failed: {e}", file=sys.stderr)
 
     return []
 
