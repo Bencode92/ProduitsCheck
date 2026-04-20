@@ -161,5 +161,242 @@
   "conversation": [],
   "conversationSummary": null,
   "decision": null,
-  "decisionReason": null
+  "decisionReason": null,
+  "aiCategory": "autocall-multi",
+  "aiCategoryLabel": "⚡ Autocall Multi-actifs",
+  "aiCategoryColor": "#2EC4B6",
+  "aiOpinion": "Produit offrant un coupon attractif de 7% annuel avec possibilité de remboursement anticipé dès 95% des niveaux initiaux, mais sans protection du capital ce qui expose à des pertes importantes si la barrière de 60% est franchie. Le risque est accentué par un panier de 4 actions européennes corrélées et un seuil d'autocall élevé à 95% qui limite les chances de sortie anticipée.",
+  "aiAnalyzedAt": "2026-04-20T11:31:23.118Z",
+  "grading": {
+    "grade": "D",
+    "score": 42,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 39,
+        "base": 38,
+        "delta": 0,
+        "reasoning": "Rendement: base 38 → -5 = 33 (Siemens Energy (DD=72%, vol=61%) en régime stagflation avec seul 24% de prob maturité anticipe des difficultés pour maintenir le coupon) | Coupon 7%, barrière 60% | Barr.coupon 62% | Mat espérée: ~3.3a (prob mat: 24%) | Basket +25pts (vol÷0.79)",
+        "_bsDelta": 1,
+        "_bs": {
+          "score": 39,
+          "probCoupon": 56,
+          "rendementNet": 0.73,
+          "perteEsperee": 3.19,
+          "couponEffectif": 7,
+          "vols": [
+            24.98,
+            28.94,
+            37.63,
+            28.71
+          ],
+          "matEsperee": 3.3,
+          "isBasket": true
+        }
+      },
+      "underlyingQuality": {
+        "score": 54,
+        "base": 31,
+        "delta": -5,
+        "reasoning": "Qualité: base 31 → -5 = 26 (3/4 SJ dans secteurs évités (financials: ISP/SAN, tech: ASML), seul ENR dans energy favorisé mais déjà en DD extrême) | Worst: Siemens Energy AG B:20 | Basket équipondéré 4 actifs: P2 +28pts (diversification)"
+      },
+      "portfolioFit": {
+        "score": 61,
+        "base": 80,
+        "delta": -5,
+        "reasoning": "Fit: base 80 → -5 = 75 (Diversification sectorielle pertinente mais exposition excessive aux secteurs évités en stagflation)"
+      },
+      "riskPremium": {
+        "score": 34,
+        "base": 64,
+        "delta": -5,
+        "reasoning": "Capital garanti: spread 7.0% - CAT 2.5% - illiq 0.5% = 4.0%"
+      }
+    },
+    "verdict": "Produit à ÉVITER en régime stagflation avec 75% des sous-jacents dans des secteurs structurellement défavorisés. Le worst-of Siemens Energy (-72% DD) compromet sévèrement la probabilité de coupon malgré une barrière à 62%. Avec seulement 24% de probabilité de maturité anticipée et un VIX à 22 signalant une volatilité élevée, le couple rendement/risque est défavorable pour un capital non protégé.",
+    "keyRisks": [
+      "Exposition worst-of avec 3 SJ sur 4 dans secteurs évités (financials/tech) en stagflation",
+      "Siemens Energy en drawdown extrême (-72%) avec volatilité 61% menace directement les coupons",
+      "Capital non protégé avec barrière 60% vulnérable si le régime stagflationniste persiste",
+      "Barrière à 0.34σ (Critique) — vol 60.96%"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 7,
+        "return_eur": 7000,
+        "probability": 0.15,
+        "duration_years": 1
+      },
+      "base": {
+        "return_pct": 3.5,
+        "return_eur": 10500,
+        "probability": 0.3,
+        "duration_years": 3
+      },
+      "stress": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.35,
+        "duration_years": 6
+      },
+      "worst": {
+        "return_pct": -40,
+        "return_eur": -40000,
+        "probability": 0.2,
+        "duration_years": 6
+      }
+    },
+    "confidenceInterval": {
+      "low": 35,
+      "high": 57,
+      "halfWidth": 11,
+      "gradeStable": false,
+      "gradeRange": "D-C",
+      "label": "C [35-57]"
+    },
+    "metadata": {
+      "gradedAt": "2026-04-20T11:31:42.592Z",
+      "durationMs": 22515,
+      "aiUsed": true,
+      "version": "7.1",
+      "productType": "autocall",
+      "marketDataAvailable": true,
+      "catBenchmark": 2.8,
+      "catSource": "allocator-confirmed",
+      "couponAnnualized": 7,
+      "couponRaw": 7,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": true,
+      "barrierPct": 60,
+      "barrierCouponPct": 62,
+      "couponProbability": 56,
+      "expectedMaturity": 3.3,
+      "maxMaturity": 6,
+      "probReachMaturity": 24,
+      "maxBeta": 1.54,
+      "baseScore": 51,
+      "baseGrade": "C",
+      "adjustments": {
+        "p1": -5,
+        "p2": -5,
+        "p3": -5,
+        "p4": -5
+      },
+      "barrier_sigma": 0.34,
+      "barrier_sigma_label": "Critique",
+      "barrier_sigma_danger": true,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Rappelable 12M",
+      "ci_low": 35,
+      "ci_high": 57,
+      "ci_label": "C [35-57]",
+      "issuer_rating": "A+",
+      "issuer_tier": "IG",
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "basket",
+      "bsRendementNet": 0.73,
+      "bsProbCoupon": 56,
+      "bsPerteEsperee": 3.19,
+      "bsVols": [
+        24.98,
+        28.94,
+        37.63,
+        28.71
+      ],
+      "bsMatEsperee": 3.3,
+      "isBasket": true,
+      "issuerCreditPenalty": 1,
+      "issuerCDS": 60,
+      "v6Weights": {
+        "p1": 0.3,
+        "p2": 0.2,
+        "p3": 0.15,
+        "p4": 0.3
+      },
+      "stockData": [
+        {
+          "name": "Intesa Sanpaolo",
+          "ticker": "ISP",
+          "sector": "Finance",
+          "perf_ytd": -0.34,
+          "perf_1y": 34.56,
+          "volatility_3y": 24.98,
+          "max_drawdown_3y": 21.19,
+          "buffett_score": 60,
+          "quality_score": 72,
+          "buffett_grade": "B"
+        },
+        {
+          "name": "Siemens Energy AG",
+          "ticker": "ENR",
+          "sector": "Industries",
+          "perf_ytd": 42.91,
+          "perf_1y": 198.09,
+          "volatility_3y": 60.96,
+          "max_drawdown_3y": 71.9,
+          "buffett_score": 20,
+          "quality_score": 39,
+          "buffett_grade": "D"
+        },
+        {
+          "name": "ASML Holding NV",
+          "ticker": "ASML",
+          "sector": "Technologie de l'information",
+          "perf_ytd": 35.01,
+          "perf_1y": 121.71,
+          "volatility_3y": 37.63,
+          "max_drawdown_3y": 45.12,
+          "buffett_score": 67,
+          "quality_score": 69,
+          "buffett_grade": "B"
+        },
+        {
+          "name": "Banco Santander SA",
+          "ticker": "SAN",
+          "sector": "Finance",
+          "perf_ytd": 9.65,
+          "perf_1y": 82.42,
+          "volatility_3y": 28.71,
+          "max_drawdown_3y": 20.79,
+          "buffett_score": 60,
+          "quality_score": 69,
+          "buffett_grade": "B"
+        }
+      ]
+    },
+    "regimeScenarios": {
+      "current": {
+        "score": 42,
+        "grade": "D",
+        "label": "Actuel (stagflation)",
+        "desc": "Régime actuel → volatilité modérée"
+      },
+      "bull": {
+        "score": 48,
+        "grade": "C",
+        "label": "Bull / Risk-on",
+        "delta": 6,
+        "desc": "Marchés haussiers → prob coupon monte, barrière safe"
+      },
+      "crash": {
+        "score": 32,
+        "grade": "D",
+        "label": "Crash / Récession",
+        "delta": -10,
+        "desc": "Marchés baissiers → barrière menacée, vol en hausse"
+      }
+    },
+    "_isBasket": true,
+    "_basketInfo": "Panier équipondéré 4 actions"
+  },
+  "_couponProbability": 56,
+  "_bsRendementNet": 0.73
 }
