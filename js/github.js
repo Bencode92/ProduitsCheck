@@ -48,11 +48,23 @@ class GitHubAPI {
       const sha = this.cache.get(path) || await this._getSHA(path);
       if (sha) body.sha = sha;
 
-      const res = await fetch(`${this.proxyURL}/github/${this.owner}/${this.repo}/contents/${path}`, {
+      let res = await fetch(`${this.proxyURL}/github/${this.owner}/${this.repo}/contents/${path}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
+      // Retry on 409 Conflict (stale SHA) — fetch fresh SHA and retry once
+      if (res.status === 409 || res.status === 422) {
+        console.warn(`[GitHub] SHA conflict on ${path}, retrying with fresh SHA...`);
+        this.cache.delete(path);
+        const freshSha = await this._getSHA(path);
+        if (freshSha) body.sha = freshSha;
+        res = await fetch(`${this.proxyURL}/github/${this.owner}/${this.repo}/contents/${path}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+      }
       if (!res.ok) { const err = await res.text(); throw new Error(`GitHub PUT ${res.status}: ${err}`); }
       const result = await res.json();
       if (result.content?.sha) this.cache.set(path, result.content.sha);
