@@ -497,6 +497,7 @@
     html += '</div>';
 
     // ═══ SELECT FROM STRUCTBOARD ═══
+    var _inputStyle = 'width:100%;padding:8px;border:1px solid ' + B.border + ';border-radius:6px;background:' + B.input + ';color:' + B.text + ';font-size:12px';
     var allProposals = [];
     Object.keys(app.state.proposals || {}).forEach(function(bankId) {
       (app.state.proposals[bankId] || []).forEach(function(p) {
@@ -536,8 +537,8 @@
       });
       html += '</div>';
       html += '<div style="display:flex;gap:8px;align-items:center">';
-      html += '<div><label style="font-size:11px;color:' + B.muted + ';display:block;margin-bottom:3px">Montant par produit (€)</label><input id="carry-sb-amount" type="number" value="500000" step="50000" style="' + _inputStyle + ';width:150px;font-family:var(--mono)"></div>';
-      html += '<button onclick="__carryAddFromSB()" style="padding:10px 20px;background:#7C3AED;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;margin-top:14px">Ajouter les sélectionnés →</button>';
+      html += '<div style="font-size:11px;color:' + B.muted + ';padding:8px;background:' + B.row1 + ';border-radius:6px">Emprunt : <strong style="color:' + B.text + '">' + _f(L.amount) + '€</strong> · 1 produit = ' + _f(L.amount) + '€</div>';
+      html += '<button onclick="__carryAddFromSB()" style="padding:10px 20px;background:#7C3AED;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">Ajouter les sélectionnés →</button>';
       html += '</div>';
     } else {
       html += '<div style="color:' + B.dim + ';font-size:12px;padding:12px">Aucun produit capital garanti / taux dans StructBoard. Importez des brochures d\'abord.</div>';
@@ -545,7 +546,6 @@
     html += '</div>';
 
     // ═══ IMPORT MANUEL (accordion) ═══
-    var _inputStyle = 'width:100%;padding:8px;border:1px solid ' + B.border + ';border-radius:6px;background:' + B.input + ';color:' + B.text + ';font-size:12px';
     html += '<div style="background:' + B.card + ';border:1px dashed ' + B.border + ';border-radius:8px;margin-bottom:16px">';
     html += '<div onclick="var c=document.getElementById(\'carry-manual-form\');c.style.display=c.style.display===\'none\'?\'\':\'none\'" style="padding:12px 16px;cursor:pointer;font-size:12px;color:' + B.muted + '">✏️ Saisie manuelle (si pas dans StructBoard) ▼</div>';
     html += '<div id="carry-manual-form" style="display:none;padding:0 16px 16px">';
@@ -892,7 +892,7 @@
     // Read which checkboxes are checked
     var checked = document.querySelectorAll('.carry-sb-check:checked');
     if (checked.length === 0) { showToast('Sélectionnez au moins un produit', 'error'); return; }
-    var amount = parseInt(document.getElementById('carry-sb-amount')?.value) || 500000;
+    var amount = LOAN.amount; // 1M€ = montant de l'emprunt
 
     // Get the allProposals array from render scope — re-build it
     var allP = [];
