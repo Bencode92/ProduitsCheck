@@ -1,7 +1,7 @@
 {
   "bankId": "cic",
   "bankName": "CIC",
-  "lastUpdated": "2026-04-20T11:37:35.965Z",
+  "lastUpdated": "2026-04-20T11:41:48.441Z",
   "products": [
     {
       "id": "sp_mnrfkyrb_ccjm6",
@@ -58,14 +58,6 @@
       "status": "analyzing",
       "score": null,
       "receivedDate": "2026-04-19"
-    },
-    {
-      "id": "sp_mo74epj6_ionof",
-      "name": "OBJECTIF MAI 2026",
-      "type": "autocall",
-      "status": "analyzing",
-      "score": null,
-      "receivedDate": "2026-04-20"
     },
     {
       "id": "sp_mo74eqxp_v4xv9",
