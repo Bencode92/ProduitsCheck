@@ -1,0 +1,193 @@
+{
+  "name": "SL - Athena Fast Semestriel Saint Gobain Mai 2026",
+  "type": "autocall",
+  "structureType": "autocall",
+  "emitter": "J.P. Morgan Structured Products B.V.",
+  "guarantor": "JPMorgan Chase Bank, N.A.",
+  "guarantorRating": {
+    "moodys": "Aa2",
+    "sp": "AA-"
+  },
+  "underlyings": [
+    "Compagnie de Saint-Gobain S.A."
+  ],
+  "underlyingType": "single-stock",
+  "currency": "EUR",
+  "maturity": "8 ans",
+  "maturityYears": 8,
+  "coupon": {
+    "rate": 4,
+    "rateIfCalled": null,
+    "rateIfMaturity": null,
+    "type": "conditionnel",
+    "frequency": "semestriel",
+    "trigger": 100,
+    "memory": false,
+    "paymentTiming": "periodic"
+  },
+  "participationRate": null,
+  "guaranteedYears": 0,
+  "autocallCumulTarget": null,
+  "commissions": 1,
+  "isin": "XS3296866984",
+  "minInvestment": 100000,
+  "capitalProtection": {
+    "protected": false,
+    "level": null,
+    "barrier": 60,
+    "barrierCoupon": 100,
+    "barrierType": "europeenne"
+  },
+  "earlyRedemption": {
+    "possible": true,
+    "type": "autocall",
+    "trigger": 100,
+    "frequency": "semestriel",
+    "startSemester": 2,
+    "stepDown": true,
+    "stepDownPct": 2.05
+  },
+  "decrementPct": null,
+  "actualDividendYield": null,
+  "mechanism": "Remboursement automatique anticipé dès le semestre 2 si l'action clôture au niveau de la barrière de remboursement automatique anticipé (100% initialement, puis décroissante de 2,05% par semestre). Coupon de 4% par semestre écoulé versé à chaque remboursement anticipé ou à maturité si niveau supérieur à 71,30%. Protection partielle du capital avec barrière à 60% à maturité.",
+  "risks": [
+    "Risque de perte en Capital",
+    "Risque de crédit",
+    "Risque de marché",
+    "Risque de liquidité",
+    "Risque de conflit d'intérêts",
+    "Risque relatif à l'inflation"
+  ],
+  "summary": "Produit structuré de 8 ans sur l'action Saint-Gobain avec mécanisme de remboursement automatique anticipé semestriel à partir du semestre 2. Gain plafonné de 4% par semestre écoulé (8% par an). Barrière de remboursement anticipé décroissante de 100% à 73,35%. Capital partiellement protégé avec barrière de perte à 60% du niveau initial.",
+  "aiParsed": {
+    "name": "SL - Athena Fast Semestriel Saint Gobain Mai 2026",
+    "isin": "XS3296866984",
+    "structureType": "autocall",
+    "emitter": "J.P. Morgan Structured Products B.V.",
+    "guarantor": "JPMorgan Chase Bank, N.A.",
+    "guarantorRating": {
+      "moodys": "Aa2",
+      "sp": "AA-"
+    },
+    "underlyings": [
+      "Compagnie de Saint-Gobain S.A."
+    ],
+    "underlyingType": "single-stock",
+    "currency": "EUR",
+    "maturity": "05/06/2034",
+    "maturityYears": 8,
+    "coupon": {
+      "rate": 4,
+      "rateIfCalled": null,
+      "rateIfMaturity": null,
+      "type": "conditionnel",
+      "frequency": "semestriel",
+      "trigger": null,
+      "memory": false,
+      "paymentTiming": "periodic"
+    },
+    "participationRate": null,
+    "guaranteedYears": 0,
+    "autocallCumulTarget": null,
+    "commissions": 1,
+    "capitalProtection": {
+      "protected": false,
+      "level": null,
+      "barrier": 60,
+      "barrierCoupon": 100,
+      "barrierType": "europeenne"
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "autocall",
+      "trigger": 100,
+      "frequency": "semestriel",
+      "startSemester": 2,
+      "stepDown": true,
+      "stepDownPct": 2.05,
+      "firstCallDate": null,
+      "callSchedule": [
+        {
+          "date": "07/06/2027",
+          "amount": 108
+        },
+        {
+          "date": "06/12/2027",
+          "amount": 112
+        },
+        {
+          "date": "05/06/2028",
+          "amount": 116
+        },
+        {
+          "date": "06/12/2028",
+          "amount": 120
+        },
+        {
+          "date": "05/06/2029",
+          "amount": 124
+        },
+        {
+          "date": "06/12/2029",
+          "amount": 128
+        },
+        {
+          "date": "05/06/2030",
+          "amount": 132
+        },
+        {
+          "date": "06/12/2030",
+          "amount": 136
+        },
+        {
+          "date": "05/06/2031",
+          "amount": 140
+        },
+        {
+          "date": "08/12/2031",
+          "amount": 144
+        },
+        {
+          "date": "07/06/2032",
+          "amount": 148
+        },
+        {
+          "date": "06/12/2032",
+          "amount": 152
+        },
+        {
+          "date": "06/06/2033",
+          "amount": 156
+        },
+        {
+          "date": "06/12/2033",
+          "amount": 160
+        }
+      ]
+    },
+    "decrementPct": null,
+    "actualDividendYield": null,
+    "minInvestment": 100000,
+    "mechanism": "Remboursement automatique anticipé dès le semestre 2 si l'action clôture au niveau de la barrière de remboursement automatique anticipé (100% initialement, puis décroissante de 2,05% par semestre). Coupon de 4% par semestre écoulé versé à chaque remboursement anticipé ou à maturité si niveau supérieur à 71,30%. Protection partielle du capital avec barrière à 60% à maturité.",
+    "risks": [
+      "Risque de perte en Capital",
+      "Risque de crédit",
+      "Risque de marché",
+      "Risque de liquidité",
+      "Risque de conflit d'intérêts",
+      "Risque relatif à l'inflation"
+    ],
+    "summary": "Produit structuré de 8 ans sur l'action Saint-Gobain avec mécanisme de remboursement automatique anticipé semestriel à partir du semestre 2. Gain plafonné de 4% par semestre écoulé (8% par an). Barrière de remboursement anticipé décroissante de 100% à 73,35%. Capital partiellement protégé avec barrière de perte à 60% du niveau initial.",
+    "_parsingAlerts": []
+  },
+  "sourceFile": "Brochure ATHENA FAST SEMESTRIEL SAINT GOBAIN MAI 2026 (1).pdf",
+  "investedAmount": 0,
+  "id": "sp_mo73woz4_z0zcu",
+  "bankId": "swiss-life",
+  "status": "analyzing",
+  "receivedDate": "2026-04-20",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null
+}
