@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""Fetch sovereign yields + ECB rates.
+"""Fetch sovereign yields + ECB rates + Banque de France TEC.
 Primary: ECB Statistical Data Warehouse (free, no key).
+BdF TEC: Banque de France Webstat API (via Cloudflare Worker proxy).
 Fallback: Twelve Data API (for yields if ECB fails).
 Outputs data/market/rates.json.
 """
@@ -10,6 +11,7 @@ from urllib.request import urlopen, Request
 from urllib.error import URLError
 
 BASE_ECB = "https://data-api.ecb.europa.eu/service/data"
+BDF_PROXY = "https://studyforge-proxy.benoit-comas.workers.dev/bdf"
 TD_API_KEY = os.environ.get("TWELVE_DATA_API_KEY", "")
 
 # ─── ECB API endpoints (updated 2026) ─────────────────────────
@@ -81,6 +83,118 @@ RATE_SERIES["euribor_12m"] = {
     "description": "Taux interbancaire euro 12 mois (moyenne mensuelle)",
     "freq": "monthly"
 }
+
+# ─── Banque de France TEC series (via Worker proxy) ─────────
+# TEC = Taux de l'Échéance Constante (French government bond yields)
+# These are the REAL rates referenced by TARN and structured products
+# Different from OAT AAA zone euro (ECB) which excludes France spread
+BDF_TEC_SERIES = {
+    "tec10_fr": {
+        "series_key_pattern": "FM.B.FR.EUR.FR2.BB.FR10YT_RR.YBAV",
+        "search_title": "TEC 10",
+        "name": "TEC 10 (Banque de France)",
+        "description": "Taux d'État français 10 ans. Référence TARN et produits structurés taux longs.",
+        "maturity": 10
+    },
+    "tec5_fr": {
+        "series_key_pattern": "FM.B.FR.EUR.FR2.BB.FR5YT_RR.YBAV",
+        "search_title": "TEC 5",
+        "name": "TEC 5 (Banque de France)",
+        "description": "Taux d'État français 5 ans.",
+        "maturity": 5
+    },
+    "tec2_fr": {
+        "series_key_pattern": "FM.B.FR.EUR.FR2.BB.FR2YT_RR.YBAV",
+        "search_title": "TEC 2",
+        "name": "TEC 2 (Banque de France)",
+        "description": "Taux d'État français 2 ans.",
+        "maturity": 2
+    },
+}
+
+
+def fetch_bdf_tec(series_config, start_period="2004-01-01", timeout=20):
+    """Fetch TEC data from Banque de France via Cloudflare Worker proxy.
+    Tries series_key_pattern first, then falls back to title search."""
+
+    # Strategy 1: Try direct series_key match
+    key_pattern = series_config["series_key_pattern"]
+    url = (f'{BDF_PROXY}/observations/exports/json'
+           f'?select=series_key,title_fr,time_period_start,obs_value'
+           f'&where=series_key like "{key_pattern.split(".")[0]}.B.FR*" and title_fr like "{series_config["search_title"]}" and time_period_start>date\'{start_period}\''
+           f'&order_by=time_period_start&limit=10000')
+
+    try:
+        req = Request(url, headers={"Accept": "application/json", "User-Agent": "StructBoard/1.0"})
+        with urlopen(req, timeout=timeout) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+
+        if isinstance(data, list) and len(data) > 0:
+            results = []
+            for entry in data:
+                date = entry.get("time_period_start", "")
+                value = entry.get("obs_value")
+                if date and value is not None:
+                    results.append((date, float(value)))
+            return results
+    except Exception as e:
+        print(f"  ⚠ BdF Strategy 1 failed: {e}", file=sys.stderr)
+
+    # Strategy 2: Search by title
+    search = series_config["search_title"]
+    url2 = (f'{BDF_PROXY}/observations/exports/json'
+            f'?select=series_key,title_fr,time_period_start,obs_value'
+            f'&where=title_fr like "{search}" and time_period_start>date\'{start_period}\''
+            f'&order_by=time_period_start&limit=10000')
+
+    try:
+        req = Request(url2, headers={"Accept": "application/json", "User-Agent": "StructBoard/1.0"})
+        with urlopen(req, timeout=timeout) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+
+        if isinstance(data, list) and len(data) > 0:
+            results = []
+            found_key = data[0].get("series_key", "?")
+            print(f"  ℹ Found via title search: {found_key}")
+            for entry in data:
+                date = entry.get("time_period_start", "")
+                value = entry.get("obs_value")
+                if date and value is not None:
+                    results.append((date, float(value)))
+            return results
+    except Exception as e:
+        print(f"  ⚠ BdF Strategy 2 failed: {e}", file=sys.stderr)
+
+    # Strategy 3: List available FM series to find the right key
+    url3 = (f'{BDF_PROXY}/series/exports/json'
+            f'?select=series_key,title_fr'
+            f'&where=dataset_id="FM" and title_fr like "{search}"'
+            f'&limit=10')
+
+    try:
+        req = Request(url3, headers={"Accept": "application/json", "User-Agent": "StructBoard/1.0"})
+        with urlopen(req, timeout=timeout) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+
+        if isinstance(data, list) and len(data) > 0:
+            for s in data:
+                print(f"  → Found series: {s.get('series_key','')} = {s.get('title_fr','')}")
+            # Try first matching series
+            first_key = data[0]["series_key"]
+            url4 = (f'{BDF_PROXY}/observations/exports/json'
+                    f'?select=time_period_start,obs_value'
+                    f'&where=series_key="{first_key}" and time_period_start>date\'{start_period}\''
+                    f'&order_by=time_period_start&limit=10000')
+            req = Request(url4, headers={"Accept": "application/json", "User-Agent": "StructBoard/1.0"})
+            with urlopen(req, timeout=timeout) as resp:
+                obs_data = json.loads(resp.read().decode("utf-8"))
+            if isinstance(obs_data, list):
+                return [(e["time_period_start"], float(e["obs_value"])) for e in obs_data if e.get("obs_value") is not None]
+    except Exception as e:
+        print(f"  ⚠ BdF Strategy 3 failed: {e}", file=sys.stderr)
+
+    return []
+
 
 # Twelve Data fallback tickers for yields
 TD_YIELD_PROXIES = {
@@ -183,7 +297,7 @@ def main():
     print("═" * 60)
 
     output = {
-        "source": "ECB + Twelve Data",
+        "source": "ECB + Banque de France (TEC) + Twelve Data",
         "fetched_at": datetime.now(timezone.utc).isoformat(),
         "yields": {},
         "policy_rates": {},
@@ -209,6 +323,47 @@ def main():
             print(f"  ✓ {config['name']}: {stats['current']}%")
         else:
             print(f"  ✗ No data for {config['name']}")
+
+    # ─── Fetch Banque de France TEC (real French sovereign yields) ───
+    print(f"\n{'─' * 40}")
+    print("Banque de France — TEC (via Worker proxy)")
+    print(f"{'─' * 40}")
+    for key, config in BDF_TEC_SERIES.items():
+        print(f"\n→ {config['name']}...")
+        obs = fetch_bdf_tec(config)
+        if obs:
+            stats = compute_stats(obs)
+            if stats:
+                stats["name"] = config["name"]
+                stats["description"] = config["description"]
+                stats["source"] = "Banque de France (Webstat API)"
+                stats["note"] = f"Taux souverain français {config['maturity']}Y — différent de l'OAT AAA zone euro"
+                output["yields"][key] = stats
+                print(f"  ✓ {config['name']}: {stats['current']}%  ({stats['observations']} obs)")
+        else:
+            print(f"  ✗ No BdF data for {config['name']} — will use ECB proxy")
+            # Fallback: estimate TEC from OAT AAA + France spread (~65bps for 10Y)
+            ecb_key = f"oat_fr_{config['maturity']}y"
+            if ecb_key in output["yields"]:
+                spread = 0.65 if config["maturity"] >= 10 else (0.45 if config["maturity"] >= 5 else 0.30)
+                ecb_data = output["yields"][ecb_key]
+                estimated = {
+                    "name": config["name"],
+                    "description": config["description"],
+                    "source": f"Estimated from ECB OAT AAA + {int(spread*100)}bps France spread",
+                    "current": round(ecb_data["current"] + spread, 3),
+                    "date": ecb_data["date"],
+                    "high_1y": round(ecb_data.get("high_1y", ecb_data["current"]) + spread, 3),
+                    "low_1y": round(ecb_data.get("low_1y", ecb_data["current"]) + spread, 3),
+                    "avg_1y": round(ecb_data.get("avg_1y", ecb_data["current"]) + spread, 3),
+                    "observations": ecb_data.get("observations", 0),
+                    "vol_annualized_bps": ecb_data.get("vol_annualized_bps", 15),
+                    "direction": ecb_data.get("direction", "stable"),
+                    "history": [{"date": h["date"], "value": round(h["value"] + spread, 3)} for h in ecb_data.get("history", [])],
+                    "note": f"ESTIMATION — BdF API indisponible. OAT AAA + {int(spread*100)}bps spread France."
+                }
+                output["yields"][key] = estimated
+                print(f"  ≈ Estimated {config['name']}: {estimated['current']}% (OAT {ecb_data['current']}% + {int(spread*100)}bps)")
 
     # ─── Fetch daily policy rates (ECB) ───
     for key, config in DAILY_RATES.items():
