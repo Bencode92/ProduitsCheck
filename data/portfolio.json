@@ -1881,7 +1881,7 @@
           "score": 95,
           "base": 70,
           "delta": 0,
-          "reasoning": "Rendement: base 70 → -2 = 68 (Régime stagflation + 6/8 SJ dans secteurs évités (tech/comm) = forte probabilité de dispersion élevée réduisant le coupon) | Coupon 3.033333333333333%, protégé",
+          "reasoning": "Rendement: base 70 → +2 = 72 (Produit dispersion avec capital garanti : volatilités élevées (NVDA 48%, TSLA 58%) et régime stagflationniste augmentent la probabilité de dispersion forte entre les paires.) | Coupon 3.033333333333333%, protégé",
           "_bsDelta": 25,
           "_bs": {
             "score": 95,
@@ -1907,7 +1907,7 @@
           "score": 70,
           "base": 72,
           "delta": -2,
-          "reasoning": "Qualité: base 72 → -2 = 70 (75% du panier en tech/comm évités, betas élevés (1.61 TSLA, 1.89 NVDA) amplifient le risque en stagflation) | Worst: Tesla B:17"
+          "reasoning": "Qualité: base 72 → -2 = 70 (80% des sous-jacents dans des secteurs évités (tech/comm-services) en stagflation, seuls AAPL/MSFT relativement défensifs avec beta ~1.07.) | Worst: Tesla B:17"
         },
         "portfolioFit": {
           "score": 65,
@@ -1918,34 +1918,33 @@
         "riskPremium": {
           "score": 52,
           "base": 20,
-          "delta": -2,
+          "delta": 0,
           "reasoning": "Capital garanti: spread 3.0% - CAT 2.5% - illiq 0.3% = 0.2%"
         }
       },
-      "verdict": "Produit défensif adapté à la stagflation grâce au capital garanti, mais coupon fortement menacé par la surexposition tech (75% du panier) dans un régime défavorable. Avec TSLA à B=17% et vol=57%, la dispersion risque d'exploser au-delà du seuil de 7%, annulant le coupon. Le rendement réel négatif (-0.23% vs inflation 2.8%) et l'exposition à des secteurs en difficulté structurelle limitent l'attrait malgré la protection capitale.",
+      "verdict": "Produit dispersion idéal en régime stagflationniste avec VIX à 22 et volatilités élevées (TSLA 58%, NVDA 48%). La participation de 7% sur la dispersion moyenne avec capital 100% garanti offre un rendement annualisé de 3.03% sans risque de perte. Le contexte macro défavorable aux tech (80% du panier dans secteurs évités) augmente paradoxalement l'attractivité car plus de dispersion attendue entre les titres.",
       "keyRisks": [
-        "Dispersion >7% très probable avec 6/8 SJ tech/comm en régime stagflation",
-        "Rendement réel négatif (-0.23%) peu attractif vs TIPS en environnement inflationniste",
-        "Rally SPX +4.5% identifié comme short squeeze = risque de correction violente"
+        "Corrélation soudaine des tech stocks réduisant la dispersion en cas de rally coordonné",
+        "Participation limitée à 7% plafonne le rendement même en cas de dispersion extrême"
       ],
       "negotiationPoints": [],
       "scenarios": {
         "optimistic": {
-          "return_pct": 9.1,
-          "return_eur": 9100,
-          "probability": 0.15,
+          "return_pct": 15,
+          "return_eur": 15000,
+          "probability": 0.25,
           "duration_years": 3
         },
         "base": {
-          "return_pct": 3.03,
-          "return_eur": 3030,
-          "probability": 0.25,
-          "duration_years": 1
+          "return_pct": 9.1,
+          "return_eur": 9100,
+          "probability": 0.35,
+          "duration_years": 3
         },
         "stress": {
-          "return_pct": 0,
-          "return_eur": 0,
-          "probability": 0.45,
+          "return_pct": 3,
+          "return_eur": 3000,
+          "probability": 0.25,
           "duration_years": 3
         },
         "worst": {
@@ -1956,16 +1955,16 @@
         }
       },
       "confidenceInterval": {
-        "low": 47,
-        "high": 61,
+        "low": 49,
+        "high": 63,
         "halfWidth": 7,
         "gradeStable": false,
         "gradeRange": "C-B",
-        "label": "C [47-61]"
+        "label": "C [49-63]"
       },
       "metadata": {
-        "gradedAt": "2026-04-20T15:07:33.431Z",
-        "durationMs": 22479,
+        "gradedAt": "2026-04-20T15:21:35.104Z",
+        "durationMs": 20221,
         "aiUsed": true,
         "version": "7.1",
         "productType": "dispersion",
@@ -1987,10 +1986,10 @@
         "baseScore": 56,
         "baseGrade": "C",
         "adjustments": {
-          "p1": -2,
+          "p1": 2,
           "p2": -2,
           "p3": 2,
-          "p4": -2
+          "p4": 0
         },
         "barrier_sigma": null,
         "barrier_sigma_label": null,
@@ -1998,9 +1997,9 @@
         "liquidity_level": "L4",
         "liquidity_score": 10,
         "liquidity_label": "Illiquide",
-        "ci_low": 47,
-        "ci_high": 61,
-        "ci_label": "C [47-61]",
+        "ci_low": 49,
+        "ci_high": 63,
+        "ci_label": "C [49-63]",
         "issuer_rating": "A",
         "issuer_tier": "IG",
         "hasDecrement": false,
