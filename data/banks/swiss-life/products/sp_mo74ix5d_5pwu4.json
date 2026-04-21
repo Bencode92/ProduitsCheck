@@ -159,28 +159,31 @@
   "aiCategoryColor": "#3B82F6",
   "aiOpinion": "Produit offrant un rendement attractif de 7% avec effet mémoire sur un sous-jacent technologique de qualité (ASML), mais sans protection du capital. Le risque principal réside dans la volatilité du secteur des semi-conducteurs et l'exposition à 100% aux baisses au-delà de la barrière de 60%.",
   "aiAnalyzedAt": "2026-04-20T11:40:56.104Z",
+  "_couponProbability": 49.8,
+  "_bsRendementNet": -3.41,
+  "envelope": "swiss-life",
   "grading": {
     "grade": "D",
-    "score": 30,
+    "score": 36,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 5,
+        "score": 17,
         "base": 40,
         "delta": 0,
-        "reasoning": "Rendement: base 40 → -9 = 31 (Barrière à 60% distante (B=67) mais volatilité extrême (37.63%) et régime stagflationniste défavorable aux tech réduisent drastiquement la probabilité de coupons réguliers) | Coupon 7%, barrière 60% | Barr.coupon 60% | Mat espérée: ~1.6a (prob mat: 0%)",
-        "_bsDelta": -35,
+        "reasoning": "Rendement: base 40 → -9 = 31 (Régime stagflationniste + ASML (tech cyclique évité) avec vol 37.62% et DD -45% réduit fortement la probabilité de toucher les coupons à 60%) | Coupon 7%, barrière 60% | Barr.coupon 60% | Mat espérée: ~1.6a (prob mat: 0%)",
+        "_bsDelta": -25,
         "_bs": {
-          "score": 5,
-          "probCoupon": 47.8,
-          "rendementNet": -7.33,
-          "perteEsperee": 10.68,
+          "score": 15,
+          "probCoupon": 49.8,
+          "rendementNet": -3.41,
+          "perteEsperee": 6.73,
           "couponEffectif": 7,
           "vols": [
-            37.63
+            37.62
           ],
           "matEsperee": 1.6,
           "isBasket": false
@@ -190,13 +193,13 @@
         "score": 61,
         "base": 70,
         "delta": -9,
-        "reasoning": "Qualité: base 70 → -9 = 61 (ASML dans tech (secteur ÉVITÉ, -1.22% momentum), beta élevé 1.26 en stagflation avec VIX=22, drawdown massif -45% amplifie la vulnérabilité) | Worst: ASML Holding NV B:67"
+        "reasoning": "Qualité: base 70 → -9 = 61 (ASML dans tech sector ÉVITÉ en stagflation, beta 1.26 amplifie les risques, DD -45% confirme la fragilité structurelle) | Worst: ASML Holding NV B:67"
       },
       "portfolioFit": {
         "score": 40,
         "base": 80,
         "delta": -5,
-        "reasoning": "Fit: base 80 → -5 = 75 (Exposition mono-ligne sur tech cyclique inadaptée en stagflation, surpondération tech déjà problématique dans la plupart des portefeuilles)"
+        "reasoning": "Fit: base 80 → -5 = 75 (Concentration sur un seul titre tech en stagflation réduit la diversification, inadapté au régime actuel favorisant energy)"
       },
       "riskPremium": {
         "score": 34,
@@ -205,12 +208,12 @@
         "reasoning": "Capital garanti: spread 7.0% - CAT 2.5% - illiq 0.5% = 4.0%"
       }
     },
-    "verdict": "Produit TOXIQUE en régime stagflationniste : ASML (tech/semiconducteurs) cumule tous les facteurs négatifs avec secteur évité (-1.22% momentum), volatilité extrême (37.63%), beta élevé (1.26) et drawdown massif (-45.12%). La barrière à 60% paraît sûre mais avec B=67 et cette volatilité, le risque de breach est significatif (>30% sur 6 ans). Le coupon de 7% ne compense absolument pas le risque de perte en capital dans un environnement où la tech est structurellement sous pression avec Brent à $90 et PCE à 2.8%.",
+    "verdict": "Produit INADAPTÉ au contexte stagflationniste actuel. ASML (DD -45%, vol 37.62%) appartient au secteur tech explicitement ÉVITÉ selon le Market Intelligence, avec un beta 1.26 qui amplifie la volatilité dans ce régime défavorable. La barrière à 60% offre peu de protection avec une probabilité d'autocall nulle et une maturité espérée de 1.6 ans qui pourrait s'étendre à 6 ans. Le coupon de 7% ne compense pas le risque de perte en capital sur un titre ayant déjà chuté de 45% dans un secteur sous pression structurelle.",
     "keyRisks": [
-      "Secteur tech ÉVITÉ en stagflation avec momentum négatif persistant",
-      "Volatilité 37.63% peut facilement pousser ASML sous la barrière 60%",
-      "Beta 1.26 amplifie les chocs macro dans un régime défavorable",
-      "Barrière à 0.55σ (Danger) — vol 37.63%"
+      "Exposition concentrée sur ASML (tech sector évité) en régime stagflationniste défavorable",
+      "Drawdown actuel de -45% proche de la barrière 60% avec volatilité élevée à 37.62%",
+      "Risque d'extension à 6 ans sans coupons si ASML reste sous pression sectorielle",
+      "Barrière à 0.55σ (Danger) — vol 37.62%"
     ],
     "negotiationPoints": [],
     "scenarios": {
@@ -222,20 +225,20 @@
       },
       "base": {
         "return_pct": 3.5,
-        "return_eur": 10500,
-        "probability": 0.25,
-        "duration_years": 3
+        "return_eur": 5250,
+        "probability": 0.3,
+        "duration_years": 1.5
       },
       "stress": {
-        "return_pct": -15,
-        "return_eur": -15000,
+        "return_pct": 0,
+        "return_eur": 0,
         "probability": 0.35,
-        "duration_years": 6
+        "duration_years": 4
       },
       "worst": {
-        "return_pct": -40,
-        "return_eur": -40000,
-        "probability": 0.25,
+        "return_pct": -30,
+        "return_eur": -30000,
+        "probability": 0.2,
         "duration_years": 6
       }
     },
@@ -248,8 +251,8 @@
       "label": "D [33-49]"
     },
     "metadata": {
-      "gradedAt": "2026-04-20T11:41:17.245Z",
-      "durationMs": 23696,
+      "gradedAt": "2026-04-21T09:06:48.891Z",
+      "durationMs": 22884,
       "aiUsed": true,
       "version": "7.1",
       "productType": "autocall",
@@ -264,7 +267,7 @@
       "hasBarrier": true,
       "barrierPct": 60,
       "barrierCouponPct": 60,
-      "couponProbability": 47.8,
+      "couponProbability": 49.8,
       "expectedMaturity": 1.6,
       "maxMaturity": 6,
       "probReachMaturity": 0,
@@ -291,61 +294,59 @@
       "hasDecrement": false,
       "decrementDrag": 0,
       "structureType": "phoenix_memoire",
-      "bsRendementNet": -7.33,
-      "bsProbCoupon": 47.8,
-      "bsPerteEsperee": 10.68,
+      "bsRendementNet": -3.41,
+      "bsProbCoupon": 49.8,
+      "bsPerteEsperee": 6.73,
       "bsVols": [
-        37.63
+        37.62
       ],
       "bsMatEsperee": 1.6,
       "isBasket": false,
       "issuerCreditPenalty": 1,
       "issuerCDS": 60,
       "v6Weights": {
-        "p1": 0.3,
-        "p2": 0.2,
+        "p1": 0.35,
+        "p2": 0.25,
         "p3": 0.15,
-        "p4": 0.3
+        "p4": 0.25
       },
+      "envelopeMode": "swiss-life",
       "stockData": [
         {
           "name": "ASML Holding NV",
           "ticker": "ASML",
           "sector": "Technologie de l'information",
-          "perf_ytd": 35.01,
-          "perf_1y": 121.71,
-          "volatility_3y": 37.63,
+          "perf_ytd": 35.12,
+          "perf_1y": 114.32,
+          "volatility_3y": 37.62,
           "max_drawdown_3y": 45.12,
           "buffett_score": 67,
-          "quality_score": 69,
+          "quality_score": 71,
           "buffett_grade": "B"
         }
       ]
     },
     "regimeScenarios": {
       "current": {
-        "score": 30,
+        "score": 36,
         "grade": "D",
         "label": "Actuel (stagflation)",
         "desc": "Régime actuel → volatilité modérée"
       },
       "bull": {
-        "score": 36,
+        "score": 42,
         "grade": "D",
         "label": "Bull / Risk-on",
         "delta": 6,
         "desc": "Marchés haussiers → prob coupon monte, barrière safe"
       },
       "crash": {
-        "score": 25,
+        "score": 28,
         "grade": "D",
         "label": "Crash / Récession",
-        "delta": -5,
+        "delta": -8,
         "desc": "Marchés baissiers → barrière menacée, vol en hausse"
       }
     }
-  },
-  "_couponProbability": 47.8,
-  "_bsRendementNet": -7.33,
-  "envelope": "swiss-life"
+  }
 }
