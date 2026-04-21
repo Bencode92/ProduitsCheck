@@ -1,0 +1,134 @@
+{
+  "name": "SL - ATHENA SEMESTRIEL LVMH JUIN 2026",
+  "type": "autocall",
+  "structureType": "autocall",
+  "emitter": "HSBC Continental Europe",
+  "guarantor": "",
+  "guarantorRating": {
+    "moodys": "A3",
+    "sp": "A+"
+  },
+  "underlyings": [
+    "LVMH MOET HENNESSY LOUIS VUITTON"
+  ],
+  "underlyingType": "single-stock",
+  "currency": "EUR",
+  "maturity": "8 ans",
+  "maturityYears": 8,
+  "coupon": {
+    "rate": 5,
+    "rateIfCalled": null,
+    "rateIfMaturity": null,
+    "type": "conditionnel",
+    "frequency": "semestriel",
+    "trigger": 100,
+    "memory": true,
+    "paymentTiming": "periodic"
+  },
+  "participationRate": null,
+  "guaranteedYears": 0,
+  "autocallCumulTarget": null,
+  "commissions": 0.75,
+  "isin": "FR0014017VY4",
+  "minInvestment": 100000,
+  "capitalProtection": {
+    "protected": false,
+    "level": null,
+    "barrier": 60,
+    "barrierCoupon": 100,
+    "barrierType": "europeenne"
+  },
+  "earlyRedemption": {
+    "possible": true,
+    "type": "autocall",
+    "trigger": 100,
+    "frequency": "semestriel",
+    "startSemester": 2,
+    "stepDown": false,
+    "stepDownPct": null
+  },
+  "decrementPct": null,
+  "actualDividendYield": null,
+  "mechanism": "Mécanisme de remboursement anticipé automatique à partir du semestre 2. Prime conditionnelle de 5.00% par semestre écoulé. Remboursement du capital à l'échéance si pas de baisse de plus de 40%. Risque de perte partielle ou totale du capital.",
+  "risks": [
+    "Risque de perte en capital",
+    "Risque de crédit et de défaut de l'émetteur",
+    "Risque de marché",
+    "Risque de liquidité",
+    "Risque d'inflation"
+  ],
+  "summary": "Titre de créance structuré sur l'action LVMH avec remboursement anticipé automatique à 100% du niveau initial dès le semestre 2, prime conditionnelle de 5% par semestre écoulé à mémoire, protection du capital à 60% à l'échéance.",
+  "aiParsed": {
+    "name": "SL - ATHENA SEMESTRIEL LVMH JUIN 2026",
+    "isin": "FR0014017VY4",
+    "structureType": "autocall",
+    "emitter": "HSBC Continental Europe",
+    "guarantor": "",
+    "guarantorRating": {
+      "moodys": "A3",
+      "sp": "A+"
+    },
+    "underlyings": [
+      "LVMH MOET HENNESSY LOUIS VUITTON"
+    ],
+    "underlyingType": "single-stock",
+    "currency": "EUR",
+    "maturity": "12 juin 2034",
+    "maturityYears": 8,
+    "coupon": {
+      "rate": 5,
+      "rateIfCalled": null,
+      "rateIfMaturity": null,
+      "type": "conditionnel",
+      "frequency": "semestriel",
+      "trigger": 100,
+      "memory": true,
+      "paymentTiming": "periodic"
+    },
+    "participationRate": null,
+    "guaranteedYears": 0,
+    "autocallCumulTarget": null,
+    "commissions": 0.75,
+    "capitalProtection": {
+      "protected": false,
+      "level": null,
+      "barrier": 60,
+      "barrierCoupon": 100,
+      "barrierType": "europeenne"
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "autocall",
+      "trigger": 100,
+      "frequency": "semestriel",
+      "startSemester": 2,
+      "stepDown": false,
+      "stepDownPct": null,
+      "firstCallDate": null,
+      "callSchedule": []
+    },
+    "decrementPct": null,
+    "actualDividendYield": null,
+    "minInvestment": 100000,
+    "mechanism": "Mécanisme de remboursement anticipé automatique à partir du semestre 2. Prime conditionnelle de 5.00% par semestre écoulé. Remboursement du capital à l'échéance si pas de baisse de plus de 40%. Risque de perte partielle ou totale du capital.",
+    "risks": [
+      "Risque de perte en capital",
+      "Risque de crédit et de défaut de l'émetteur",
+      "Risque de marché",
+      "Risque de liquidité",
+      "Risque d'inflation"
+    ],
+    "summary": "Titre de créance structuré sur l'action LVMH avec remboursement anticipé automatique à 100% du niveau initial dès le semestre 2, prime conditionnelle de 5% par semestre écoulé à mémoire, protection du capital à 60% à l'échéance.",
+    "_parsingAlerts": []
+  },
+  "sourceFile": "Brochure ATHENA SEMESTRIEL LVMH JUIN 2026.pdf",
+  "investedAmount": 0,
+  "id": "sp_mo8d4ew7_l4pu9",
+  "bankId": "swiss-life",
+  "status": "analyzing",
+  "receivedDate": "2026-04-21",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null
+}
