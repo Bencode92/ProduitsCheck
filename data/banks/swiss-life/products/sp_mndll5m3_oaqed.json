@@ -236,111 +236,111 @@
   "aiCategoryColor": "#2EC4B6",
   "aiOpinion": "Produit offrant un rendement attractif de 9,7% avec remboursement anticipé possible dès 95% des cours initiaux, mais risque élevé sans protection du capital sur 4 sous-jacents diversifiés. La barrière basse à 60% offre une marge de sécurité correcte, toutefois l'exposition aux secteurs financier et énergétique ajoute de la volatilité.",
   "aiAnalyzedAt": "2026-03-30T19:45:28.603Z",
-  "_couponProbability": 56.1,
-  "_bsRendementNet": 2.58,
+  "_couponProbability": 54.3,
+  "_bsRendementNet": 3.36,
+  "envelope": "swiss-life",
+  "guaranteedYears": 0,
+  "autocallCumulTarget": 95,
   "grading": {
     "grade": "C",
-    "score": 46,
+    "score": 50,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 51,
-        "base": 40,
+        "score": 55,
+        "base": 28,
         "delta": 0,
-        "reasoning": "BS: Basket vol=21% (avg 4 SJ corr=0.4) | P(panier>95% T=3.3a) = 56.1% | Breach 60%: P=18.1% -> perte esperee 2.9%/an | Rdt net: 5.4% - 2.9% = 2.6%/an | Spread vs CAT: 0.1%",
-        "_bsDelta": 11,
+        "reasoning": "Rendement: base 28 → -9 = 19 (ENR à 71.9% de DD avec vol 60.95% en stagflation réduit drastiquement la probabilité de toucher le coupon 9.7%) | Coupon 9.7%, barrière 60% | Barr.coupon 95% | Mat espérée: ~3.3a (prob mat: 24%) | Basket +25pts (vol÷0.79)",
+        "_bsDelta": 27,
         "_bs": {
-          "score": 51,
-          "probCoupon": 56.1,
+          "score": 55,
+          "probCoupon": 54.3,
+          "rendementNet": 3.36,
+          "perteEsperee": 1.91,
           "couponEffectif": 9.7,
-          "rendementEspere": 5.44,
-          "perteEsperee": 2.86,
-          "rendementNet": 2.58,
-          "drag": 0,
           "vols": [
-            37.09,
-            24.51,
-            28.12,
-            24.51
+            37.62,
+            24.45,
+            28.96,
+            24.45
           ],
           "matEsperee": 3.3,
-          "reasoning": "Basket vol=21% (avg 4 SJ corr=0.4) | P(panier>95% T=3.3a) = 56.1% | Breach 60%: P=18.1% -> perte esperee 2.9%/an | Rdt net: 5.4% - 2.9% = 2.6%/an",
-          "method": "BS-simplifie-v1.2"
+          "isBasket": true
         }
       },
       "underlyingQuality": {
-        "score": 53,
-        "base": 33,
+        "score": 51,
+        "base": 31,
         "delta": -9,
-        "reasoning": "Qualité: base 33 → -9 = 24 (Worst-of avec 3/4 secteurs évités (financials ISP/SAN, tech ASML) en stagflation, seul ENR dans energy favorisé mais très volatil) | Worst: Intesa Sanpaolo S.p.A. B:25 | Basket équipondéré 4 actifs: P2 +29pts (diversification)"
+        "reasoning": "Qualité: base 31 → -9 = 22 (3 sous-jacents sur 4 dans des secteurs évités (ASML tech, ISP/SAN financials) avec ENR ultra-volatil en stagflation) | Worst: Siemens Energy AG B:20 | Basket équipondéré 4 actifs: P2 +29pts (diversification)"
       },
       "portfolioFit": {
-        "score": 62,
+        "score": 60,
         "base": 80,
         "delta": 0,
-        "reasoning": "Fit: base 50 → 62 (basket, autocall) | Fit: base 80"
+        "reasoning": "Fit: base 80"
       },
       "riskPremium": {
-        "score": 35,
+        "score": 34,
         "base": 5,
         "delta": -5,
-        "reasoning": "Capital garanti: spread 9.7% - CAT 2.5% - illiq 0.5% = 6.7% | v6-BS: P4 90→35 (rdtNet BS=2.6% vs CAT 2.5%)"
+        "reasoning": "Capital garanti: spread 9.7% - CAT 2.5% - illiq 0.5% = 6.7%"
       }
     },
-    "verdict": "Produit très risqué en stagflation avec 9.7% annualisé. Le worst-of sur 4 sous-jacents dont 3 dans des secteurs évités (financials et tech) rend improbable l'atteinte régulière du coupon à 95%. Siemens Energy, malgré son secteur favorisé, affiche une volatilité extrême (60%) et un drawdown de -71%. La maturité espérée de 3.3 ans semble optimiste avec seulement 24% de probabilité d'autocall.",
+    "verdict": "Produit toxique en régime stagflationnaire avec ENR à -71.9% du plus haut et volatilité extrême à 60.95%. Le worst-of sur 4 sous-jacents dont 3 dans des secteurs évités (tech/financials) face à un Brent à $90 et VIX 22 rend le coupon 9.7% quasi-inatteignable. Avec seulement 24% de probabilité de maturité anticipée et une barrière capital à 60%, le risque de perte en capital est significatif sur 6 ans.",
     "keyRisks": [
-      "Risque de non-coupon élevé avec 3/4 sous-jacents dans secteurs évités en stagflation",
-      "Siemens Energy ultra-volatil (60%) malgré secteur energy favorisé",
-      "Choc pétrolier >$110 aggraverait la sous-performance tech/financials",
-      "Barrière à 0.34σ (Critique) — vol 60.47%"
+      "ENR peut chuter de 28% supplémentaires avant toucher la barrière capital",
+      "Stagflation + secteurs évités = probabilité élevée de non-paiement des coupons",
+      "Worst-of amplifie l'exposition aux secteurs en difficulté structurelle",
+      "Barrière à 0.34σ (Critique) — vol 60.95%"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 9.7,
-        "return_eur": 32010,
-        "probability": 0.2,
-        "duration_years": 3.3
+        "return_eur": 9700,
+        "probability": 0.15,
+        "duration_years": 1
       },
       "base": {
-        "return_pct": 4.85,
-        "return_eur": 29100,
-        "probability": 0.35,
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.4,
         "duration_years": 6
       },
       "stress": {
-        "return_pct": 0,
-        "return_eur": 0,
+        "return_pct": -15,
+        "return_eur": -15000,
         "probability": 0.3,
         "duration_years": 6
       },
       "worst": {
-        "return_pct": -30,
-        "return_eur": -30000,
+        "return_pct": -40,
+        "return_eur": -40000,
         "probability": 0.15,
         "duration_years": 6
       }
     },
     "confidenceInterval": {
-      "low": 12,
-      "high": 34,
+      "low": 16,
+      "high": 38,
       "halfWidth": 11,
       "gradeStable": false,
       "gradeRange": "F-D",
-      "label": "F [12-34]"
+      "label": "D [16-38]"
     },
     "metadata": {
-      "gradedAt": "2026-03-31T13:29:40.375Z",
-      "durationMs": 20894,
+      "gradedAt": "2026-04-21T09:28:11.273Z",
+      "durationMs": 20150,
       "aiUsed": true,
-      "version": "6.2",
+      "version": "7.1",
       "productType": "autocall",
       "marketDataAvailable": true,
-      "catBenchmark": 2.5,
-      "catSource": "fallback-2026",
+      "catBenchmark": 2.8,
+      "catSource": "allocator-confirmed",
       "couponAnnualized": 9.7,
       "couponRaw": 9.7,
       "couponMultiplier": 1,
@@ -349,12 +349,12 @@
       "hasBarrier": true,
       "barrierPct": 60,
       "barrierCouponPct": 95,
-      "couponProbability": 56.1,
+      "couponProbability": 54.3,
       "expectedMaturity": 3.3,
       "maxMaturity": 6,
       "probReachMaturity": 24,
-      "maxBeta": 1.56,
-      "baseScore": 29,
+      "maxBeta": 1.54,
+      "baseScore": 33,
       "baseGrade": "D",
       "adjustments": {
         "p1": -9,
@@ -368,89 +368,106 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 12,
-      "ci_high": 34,
-      "ci_label": "F [12-34]",
+      "ci_low": 16,
+      "ci_high": 38,
+      "ci_label": "D [16-38]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
       "decrementDrag": 0,
       "structureType": "autocall",
-      "bsMethod": "BS-simplifie-v1.2",
-      "bsProbCoupon": 56.1,
-      "bsRendementNet": 2.58,
-      "bsPerteEsperee": 2.86,
-      "bsCouponEffectif": 9.7,
+      "bsRendementNet": 3.36,
+      "bsProbCoupon": 54.3,
+      "bsPerteEsperee": 1.91,
       "bsVols": [
-        37.09,
-        24.51,
-        28.12,
-        24.51
+        37.62,
+        24.45,
+        28.96,
+        24.45
       ],
       "bsMatEsperee": 3.3,
       "isBasket": true,
+      "issuerCreditPenalty": 1,
+      "issuerCDS": 60,
       "v6Weights": {
-        "p1": 0.3,
-        "p2": 0.2,
+        "p1": 0.35,
+        "p2": 0.25,
         "p3": 0.15,
-        "p4": 0.3
+        "p4": 0.25
       },
-      "p3Recalibrated": true,
-      "p4BsCorrected": true,
-      "isGuaranteedRate": false,
+      "envelopeMode": "swiss-life",
       "stockData": [
         {
           "name": "ASML Holding N.V.",
           "ticker": "ASML",
           "sector": "Technologie de l'information",
-          "perf_ytd": 20.69,
-          "perf_1y": 80.43,
-          "volatility_3y": 37.09,
+          "perf_ytd": 35.12,
+          "perf_1y": 114.32,
+          "volatility_3y": 37.62,
           "max_drawdown_3y": 45.12,
-          "buffett_score": 50,
+          "buffett_score": 67,
           "quality_score": 71,
-          "buffett_grade": "C"
+          "buffett_grade": "B"
         },
         {
           "name": "Intesa Sanpaolo S.p.A.",
           "ticker": "ISP",
           "sector": "Finance",
-          "perf_ytd": -13.93,
-          "perf_1y": 7.89,
-          "volatility_3y": 24.76,
+          "perf_ytd": -2.24,
+          "perf_1y": 33.19,
+          "volatility_3y": 25.01,
           "max_drawdown_3y": 21.19,
-          "buffett_score": 25,
-          "quality_score": 61,
-          "buffett_grade": "D"
+          "buffett_score": 60,
+          "quality_score": 73,
+          "buffett_grade": "B"
         },
         {
           "name": "Siemens Energy AG",
           "ticker": "ENR",
           "sector": "Industries",
-          "perf_ytd": 17.94,
-          "perf_1y": 163.74,
-          "volatility_3y": 60.47,
+          "perf_ytd": 40.23,
+          "perf_1y": 164.64,
+          "volatility_3y": 60.95,
           "max_drawdown_3y": 71.9,
-          "buffett_score": 40,
-          "quality_score": 41,
-          "buffett_grade": "C"
+          "buffett_score": 20,
+          "quality_score": 39,
+          "buffett_grade": "D"
         },
         {
           "name": "Banco Santander S.A.",
           "ticker": "SAN",
           "sector": "Finance",
-          "perf_ytd": -5.76,
-          "perf_1y": 49.4,
-          "volatility_3y": 28.42,
+          "perf_ytd": 6.81,
+          "perf_1y": 70.19,
+          "volatility_3y": 28.72,
           "max_drawdown_3y": 20.79,
-          "buffett_score": 40,
-          "quality_score": 71,
-          "buffett_grade": "C"
+          "buffett_score": 60,
+          "quality_score": 69,
+          "buffett_grade": "B"
         }
       ]
+    },
+    "regimeScenarios": {
+      "current": {
+        "score": 50,
+        "grade": "C",
+        "label": "Actuel (stagflation)",
+        "desc": "Régime actuel → volatilité modérée"
+      },
+      "bull": {
+        "score": 55,
+        "grade": "C",
+        "label": "Bull / Risk-on",
+        "delta": 5,
+        "desc": "Marchés haussiers → prob coupon monte, barrière safe"
+      },
+      "crash": {
+        "score": 40,
+        "grade": "D",
+        "label": "Crash / Récession",
+        "delta": -10,
+        "desc": "Marchés baissiers → barrière menacée, vol en hausse"
+      }
     }
-  },
-  "envelope": "swiss-life",
-  "guaranteedYears": 0,
-  "autocallCumulTarget": 95
+  }
 }
