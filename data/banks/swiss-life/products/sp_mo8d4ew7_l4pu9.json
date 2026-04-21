@@ -151,7 +151,7 @@
         "score": 45,
         "base": 43,
         "delta": 0,
-        "reasoning": "Rendement: base 43 → -7 = 36 (Barrière coupon à 100% en régime stagflationniste avec LVMH à B=83 et vol=29.62% rend les coupons très incertains) | Coupon 10%, barrière 60% | Barr.coupon 100% | Mat espérée: ~1.6a (prob mat: 0%)",
+        "reasoning": "Rendement: base 43 → -7 = 36 (Barrière à 100% nécessite une hausse immédiate de 17% (B=83) dans un contexte stagflationniste défavorable au luxe cyclique) | Coupon 10%, barrière 60% | Barr.coupon 100% | Mat espérée: ~1.6a (prob mat: 0%)",
         "_bsDelta": 0,
         "_bs": {
           "score": 43,
@@ -167,10 +167,10 @@
         }
       },
       "underlyingQuality": {
-        "score": 70,
+        "score": 68,
         "base": 75,
-        "delta": -5,
-        "reasoning": "Qualité: base 75 → -5 = 70 (LVMH (consommation discrétionnaire) vulnérable en stagflation avec Brent à $90 et PCE élevé pesant sur les marges) | Worst: LVMH MOET HENNESSY LOUIS VUITTON B:83"
+        "delta": -7,
+        "reasoning": "Qualité: base 75 → -7 = 68 (LVMH exposé au ralentissement chinois et à la consommation discrétionnaire, secteur consumer discretionary sous pression en stagflation) | Worst: LVMH MOET HENNESSY LOUIS VUITTON B:83"
       },
       "portfolioFit": {
         "score": 35,
@@ -181,24 +181,24 @@
       "riskPremium": {
         "score": 34,
         "base": 17,
-        "delta": -7,
+        "delta": 7,
         "reasoning": "Capital garanti: spread 10.0% - CAT 2.5% - illiq 0.6% = 6.9%"
       }
     },
-    "verdict": "Produit très risqué en régime stagflationniste avec coupon conditionnel à 100% du niveau initial alors que LVMH cote déjà à B=83 avec volatilité élevée (29.62%). Le nominal de 100k€ sur 8 ans sans protection du capital et une probabilité de maturité anticipée proche de 0% expose à des pertes significatives. Le contexte macro avec Brent à $90 et inflation persistante (PCE 2.8%) pèse sur les valorisations du luxe.",
+    "verdict": "Produit hautement risqué avec score final de 42 (D) dans un contexte stagflationniste hostile au luxe. La barrière coupon à 100% rend les coupons quasi-inaccessibles avec LVMH à 83% du strike, nécessitant +20.5% pour toucher le premier coupon. Le régime macro actuel avec Brent à $90 pénalise la consommation discrétionnaire, et LVMH reste 51% sous ses plus hauts historiques avec une volatilité élevée de 29.6%.",
     "keyRisks": [
-      "Barrière coupon à 100% quasi-impossible à franchir avec B=83 actuel",
-      "Stagflation et Brent $90 pèsent sur consommation discrétionnaire luxe",
-      "Duration 8 ans sans protection capitale en environnement volatil (VIX 22)",
+      "Probabilité nulle de toucher un coupon avant 2-3 ans minimum en stagflation",
+      "Risque de perte en capital significatif si LVMH reste sous pression",
+      "Exposition concentrée sur un seul titre du luxe cyclique en phase macro défavorable",
       "Barrière à 0.61σ (Danger) — vol 29.62%"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 10,
-        "return_eur": 10000,
+        "return_pct": 3,
+        "return_eur": 3000,
         "probability": 0.15,
-        "duration_years": 1
+        "duration_years": 3
       },
       "base": {
         "return_pct": 0,
@@ -207,8 +207,8 @@
         "duration_years": 8
       },
       "stress": {
-        "return_pct": -20,
-        "return_eur": -20000,
+        "return_pct": -15,
+        "return_eur": -15000,
         "probability": 0.3,
         "duration_years": 8
       },
@@ -220,16 +220,16 @@
       }
     },
     "confidenceInterval": {
-      "low": 39,
-      "high": 55,
+      "low": 42,
+      "high": 58,
       "halfWidth": 8,
       "gradeStable": false,
       "gradeRange": "D-C",
-      "label": "C [39-55]"
+      "label": "C [42-58]"
     },
     "metadata": {
-      "gradedAt": "2026-04-21T08:52:34.378Z",
-      "durationMs": 19805,
+      "gradedAt": "2026-04-21T09:06:03.200Z",
+      "durationMs": 20593,
       "aiUsed": true,
       "version": "7.1",
       "productType": "autocall",
@@ -253,9 +253,9 @@
       "baseGrade": "C",
       "adjustments": {
         "p1": -7,
-        "p2": -5,
+        "p2": -7,
         "p3": 0,
-        "p4": -7
+        "p4": 7
       },
       "barrier_sigma": 0.61,
       "barrier_sigma_label": "Danger",
@@ -263,9 +263,9 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 39,
-      "ci_high": 55,
-      "ci_label": "C [39-55]",
+      "ci_low": 42,
+      "ci_high": 58,
+      "ci_label": "C [42-58]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
@@ -311,10 +311,10 @@
         "desc": "Régime actuel → volatilité modérée"
       },
       "bull": {
-        "score": 50,
+        "score": 49,
         "grade": "C",
         "label": "Bull / Risk-on",
-        "delta": 3,
+        "delta": 2,
         "desc": "Marchés haussiers → prob coupon monte, barrière safe"
       },
       "crash": {
