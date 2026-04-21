@@ -16,14 +16,13 @@
   "maturity": "8 ans",
   "maturityYears": 8,
   "coupon": {
-    "rate": 5,
-    "rateIfCalled": null,
-    "rateIfMaturity": null,
+    "rate": 10,
+    "frequency": "annuel",
+    "annualized": true,
     "type": "conditionnel",
-    "frequency": "semestriel",
-    "trigger": 100,
     "memory": true,
-    "paymentTiming": "periodic"
+    "paymentTiming": "periodic",
+    "trigger": 100
   },
   "participationRate": null,
   "guaranteedYears": 0,
@@ -130,5 +129,199 @@
   "conversation": [],
   "conversationSummary": null,
   "decision": null,
-  "decisionReason": null
+  "decisionReason": null,
+  "_freqFixApplied": true,
+  "aiCategory": "autocall-mono",
+  "aiCategoryLabel": "⚡ Autocall Mono-actif",
+  "aiCategoryColor": "#06D6A0",
+  "aiOpinion": "Produit offrant un rendement attractif de 10% avec mécanisme de remboursement anticipé possible, mais exposé au risque de perte en capital sans protection en cas de baisse significative de LVMH. Le risque de concentration sur un seul titre et l'absence de barrière de protection constituent les principales faiblesses face à un potentiel rendement élevé.",
+  "aiAnalyzedAt": "2026-04-21T08:29:22.988Z",
+  "grading": {
+    "grade": "D",
+    "score": 39,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 23,
+        "base": 43,
+        "delta": 0,
+        "reasoning": "Rendement: base 43 → -7 = 36 (Coupon à 100% irréaliste en stagflation avec LVMH à B=83 et vol=29.62%, probabilité de toucher le coupon très faible) | Coupon 10%, barrière 60% | Barr.coupon 100% | Mat espérée: ~1.6a (prob mat: 0%)",
+        "_bsDelta": -17,
+        "_bs": {
+          "score": 26,
+          "probCoupon": 49.7,
+          "rendementNet": -1.54,
+          "perteEsperee": 6.41,
+          "couponEffectif": 10,
+          "vols": [
+            29.62
+          ],
+          "matEsperee": 1.6,
+          "isBasket": false
+        }
+      },
+      "underlyingQuality": {
+        "score": 70,
+        "base": 75,
+        "delta": -5,
+        "reasoning": "Qualité: base 75 → -5 = 70 (LVMH (luxe) vulnérable en stagflation, beta 0.93 proche du marché mais DD important -51.49%, secteur consumer discretionary défavorisé) | Worst: LVMH MOET HENNESSY LOUIS VUITTON B:83"
+      },
+      "portfolioFit": {
+        "score": 35,
+        "base": 80,
+        "delta": 0,
+        "reasoning": "Fit: base 80"
+      },
+      "riskPremium": {
+        "score": 34,
+        "base": 17,
+        "delta": -7,
+        "reasoning": "Capital garanti: spread 10.0% - CAT 2.5% - illiq 0.6% = 6.9%"
+      }
+    },
+    "verdict": "Produit très risqué en régime stagflationniste avec barrière coupon à 100% irréaliste. LVMH à 83% de son niveau initial avec -51.49% de drawdown et volatilité 29.62% rend improbable tout coupon. Le nominal de 100k€ expose à une perte potentielle significative (-40k€) si LVMH touche la barrière capitale 60%. La maturité longue de 8 ans amplifie les risques dans un environnement macro défavorable au luxe.",
+    "keyRisks": [
+      "Aucun coupon probable avec barrière 100% et LVMH déjà à 83%",
+      "Secteur luxe vulnérable en stagflation avec Brent à $90",
+      "Risque de perte capitale -40% si barrière 60% touchée",
+      "Barrière à 0.61σ (Danger) — vol 29.62%"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 10,
+        "return_eur": 10000,
+        "probability": 0.05,
+        "duration_years": 1
+      },
+      "base": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.4,
+        "duration_years": 8
+      },
+      "stress": {
+        "return_pct": -20,
+        "return_eur": -20000,
+        "probability": 0.35,
+        "duration_years": 8
+      },
+      "worst": {
+        "return_pct": -40,
+        "return_eur": -40000,
+        "probability": 0.2,
+        "duration_years": 8
+      }
+    },
+    "confidenceInterval": {
+      "low": 39,
+      "high": 55,
+      "halfWidth": 8,
+      "gradeStable": false,
+      "gradeRange": "D-C",
+      "label": "C [39-55]"
+    },
+    "metadata": {
+      "gradedAt": "2026-04-21T08:29:51.237Z",
+      "durationMs": 20618,
+      "aiUsed": true,
+      "version": "7.1",
+      "productType": "autocall",
+      "marketDataAvailable": true,
+      "catBenchmark": 2.8,
+      "catSource": "allocator-confirmed",
+      "couponAnnualized": 10,
+      "couponRaw": 10,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": true,
+      "barrierPct": 60,
+      "barrierCouponPct": 100,
+      "couponProbability": 49.7,
+      "expectedMaturity": 1.6,
+      "maxMaturity": 8,
+      "probReachMaturity": 0,
+      "maxBeta": 0.93,
+      "baseScore": 52,
+      "baseGrade": "C",
+      "adjustments": {
+        "p1": -7,
+        "p2": -5,
+        "p3": 0,
+        "p4": -7
+      },
+      "barrier_sigma": 0.61,
+      "barrier_sigma_label": "Danger",
+      "barrier_sigma_danger": true,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Rappelable 12M",
+      "ci_low": 39,
+      "ci_high": 55,
+      "ci_label": "C [39-55]",
+      "issuer_rating": "A+",
+      "issuer_tier": "IG",
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "autocall",
+      "bsRendementNet": -1.54,
+      "bsProbCoupon": 49.7,
+      "bsPerteEsperee": 6.41,
+      "bsVols": [
+        29.62
+      ],
+      "bsMatEsperee": 1.6,
+      "isBasket": false,
+      "issuerCreditPenalty": 1,
+      "issuerCDS": 60,
+      "v6Weights": {
+        "p1": 0.25,
+        "p2": 0.2,
+        "p3": 0.25,
+        "p4": 0.3
+      },
+      "stockData": [
+        {
+          "name": "LVMH MOET HENNESSY LOUIS VUITTON",
+          "ticker": "MC",
+          "sector": "Biens de consommation cycliques",
+          "perf_ytd": -23.95,
+          "perf_1y": -1.95,
+          "volatility_3y": 29.62,
+          "max_drawdown_3y": 51.49,
+          "buffett_score": 83,
+          "quality_score": 59,
+          "buffett_grade": "A"
+        }
+      ]
+    },
+    "regimeScenarios": {
+      "current": {
+        "score": 39,
+        "grade": "D",
+        "label": "Actuel (stagflation)",
+        "desc": "Régime actuel → volatilité modérée"
+      },
+      "bull": {
+        "score": 44,
+        "grade": "D",
+        "label": "Bull / Risk-on",
+        "delta": 5,
+        "desc": "Marchés haussiers → prob coupon monte, barrière safe"
+      },
+      "crash": {
+        "score": 30,
+        "grade": "D",
+        "label": "Crash / Récession",
+        "delta": -9,
+        "desc": "Marchés baissiers → barrière menacée, vol en hausse"
+      }
+    }
+  },
+  "_couponProbability": 49.7,
+  "_bsRendementNet": -1.54
 }
