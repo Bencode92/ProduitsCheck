@@ -1,7 +1,7 @@
 {
   "bankId": "swiss-life",
   "bankName": "Swiss Life",
-  "lastUpdated": "2026-04-21T08:51:49.483Z",
+  "lastUpdated": "2026-04-21T09:16:58.980Z",
   "products": [
     {
       "id": "sp_mnd8hjkx_40efj",
@@ -78,6 +78,14 @@
     {
       "id": "sp_mo8d4ew7_l4pu9",
       "name": "SL - ATHENA SEMESTRIEL LVMH JUIN 2026",
+      "type": "autocall",
+      "status": "analyzing",
+      "score": null,
+      "receivedDate": "2026-04-21"
+    },
+    {
+      "id": "sp_mo8etrl0_dglm3",
+      "name": "SL – PHOENIX MEMOIRE FAST SEMESTRIEL ASML AVRIL 2026",
       "type": "autocall",
       "status": "analyzing",
       "score": null,
