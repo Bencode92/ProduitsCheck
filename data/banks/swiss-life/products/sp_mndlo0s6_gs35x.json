@@ -44,10 +44,10 @@
     "frequency": "annuel",
     "startSemester": 2,
     "stepDown": false,
-    "stepDownPct": null
+    "stepDownPct": null,
+    "hasAutocall": true,
+    "enabled": true
   },
-  "decrementPct": null,
-  "actualDividendYield": null,
   "mechanism": "Remboursement automatique anticipé possible de l'année 1 à 5 si le niveau du panier équipondéré ≥ 95% de son niveau initial, avec gain de 7% par année écoulée. À l'échéance: si niveau ≥ 62%, gain de 7% par année écoulée (soit 42% total). Si niveau entre 60% et 62%, remboursement du capital initial. Si niveau < 60%, perte proportionnelle à la baisse du panier.",
   "risks": [
     "Risque de perte en capital",
@@ -464,5 +464,8 @@
         "desc": "Marchés baissiers → barrière menacée, vol en hausse"
       }
     }
-  }
+  },
+  "envelope": "swiss-life",
+  "guaranteedYears": 0,
+  "autocallCumulTarget": 95
 }
