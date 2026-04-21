@@ -44,10 +44,10 @@
     "frequency": "annuel",
     "startSemester": 2,
     "stepDown": false,
-    "stepDownPct": null
+    "stepDownPct": null,
+    "hasAutocall": true,
+    "enabled": true
   },
-  "decrementPct": null,
-  "actualDividendYield": null,
   "mechanism": "Un mécanisme de remboursement automatique anticipé activé si le panier équi-pondéré clôture à un niveau supérieur ou égal à 95% à une date de constatation annuelle. Un objectif de gain de 9,70% par année écoulée. Risque de perte en capital si le panier clôture strictement en-dessous de 60% du niveau initial à l'échéance.",
   "risks": [
     "Risque de perte en capital",
@@ -449,5 +449,8 @@
         }
       ]
     }
-  }
+  },
+  "envelope": "swiss-life",
+  "guaranteedYears": 0,
+  "autocallCumulTarget": 95
 }
