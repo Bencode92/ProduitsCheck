@@ -196,7 +196,7 @@
         "score": 37,
         "base": 40,
         "delta": 0,
-        "reasoning": "Rendement: base 40 → -9 = 31 (ASML en sector tech évité + stagflation défavorable aux valeurs growth = probabilité coupon réduite) | Coupon 7%, barrière 60% | Barr.coupon 60% | Mat espérée: ~1.6a (prob mat: 0%)",
+        "reasoning": "Rendement: base 40 → -9 = 31 (En stagflation avec ASML (tech) dans un secteur évité (-1.22% drawdown), la probabilité d'atteindre les coupons diminue significativement avec une volatilité à 37.62%) | Coupon 7%, barrière 60% | Barr.coupon 60% | Mat espérée: ~1.6a (prob mat: 0%)",
         "_bsDelta": -5,
         "_bs": {
           "score": 35,
@@ -215,13 +215,13 @@
         "score": 61,
         "base": 70,
         "delta": -9,
-        "reasoning": "Qualité: base 70 → -9 = 61 (Tech sector avoided, beta 1.26 en stagflation, DD -45% = forte vulnérabilité macro) | Worst: ASML Holding NV B:67"
+        "reasoning": "Qualité: base 70 → -9 = 61 (ASML en information-technology explicitement évité par MI, beta élevé 1.26 en régime stagflationniste, drawdown massif -45.12% confirme la vulnérabilité) | Worst: ASML Holding NV B:67"
       },
       "portfolioFit": {
         "score": 40,
         "base": 80,
-        "delta": 0,
-        "reasoning": "Fit: base 80"
+        "delta": -5,
+        "reasoning": "Fit: base 80 → -5 = 75 (Phoenix sur tech cyclique en stagflation inadapté pour un portefeuille défensif, concentration sectorielle extrême augmente le risque)"
       },
       "riskPremium": {
         "score": 34,
@@ -230,24 +230,24 @@
         "reasoning": "Capital garanti: spread 7.0% - CAT 2.5% - illiq 0.5% = 4.0%"
       }
     },
-    "verdict": "Produit très risqué en stagflation avec ASML (tech évité) à -45% du plus haut et volatilité 38%. Barrière à 60% offre peu de protection avec un beta 1.26 dans un contexte où le rally tech semble être un short squeeze. Coupon 7% insuffisant vs risque de perte capitale dans un secteur sous pression.",
+    "verdict": "Score final ajusté: 27/100. En régime STAGFLATIONNISTE avec le secteur tech explicitement ÉVITÉ (-1.22% momentum), ce Phoenix ASML est extrêmement risqué. Avec un drawdown de -45.12%, une barrière à 60% (niveau 67 actuel) et une volatilité de 37.62%, la probabilité de toucher la barrière capitale est élevée. Le coupon de 7% annualisé ne compense pas le risque de perte en capital sur un sous-jacent tech cyclique (beta 1.26) en période de rotation sectorielle défavorable.",
     "keyRisks": [
-      "ASML dans tech sector évité avec DD -45% et vol 38%",
-      "Stagflation défavorable aux valeurs growth à beta élevé",
-      "Rally actuel probablement short squeeze, risque retracement",
+      "Secteur tech explicitement évité en stagflation avec momentum négatif -1.22%",
+      "Barrière capitale à 60% avec niveau actuel 67 et volatilité 37.62% = risque élevé",
+      "Rally SPX +4.5% identifié comme short squeeze par MI, retracement violent probable",
       "Barrière à 0.55σ (Danger) — vol 37.62%"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 7,
-        "return_eur": 7000,
+        "return_pct": 3.5,
+        "return_eur": 3500,
         "probability": 0.15,
-        "duration_years": 1.5
+        "duration_years": 1
       },
       "base": {
-        "return_pct": 3.5,
-        "return_eur": 10500,
+        "return_pct": 0,
+        "return_eur": 0,
         "probability": 0.3,
         "duration_years": 3
       },
@@ -255,7 +255,7 @@
         "return_pct": -15,
         "return_eur": -15000,
         "probability": 0.35,
-        "duration_years": 4
+        "duration_years": 6
       },
       "worst": {
         "return_pct": -40,
@@ -265,16 +265,16 @@
       }
     },
     "confidenceInterval": {
-      "low": 34,
-      "high": 50,
+      "low": 33,
+      "high": 49,
       "halfWidth": 8,
       "gradeStable": false,
       "gradeRange": "D-C",
-      "label": "D [34-50]"
+      "label": "D [33-49]"
     },
     "metadata": {
-      "gradedAt": "2026-04-21T09:21:49.738Z",
-      "durationMs": 17463,
+      "gradedAt": "2026-04-21T09:23:02.891Z",
+      "durationMs": 22746,
       "aiUsed": true,
       "version": "7.1",
       "productType": "autocall",
@@ -299,7 +299,7 @@
       "adjustments": {
         "p1": -9,
         "p2": -9,
-        "p3": 0,
+        "p3": -5,
         "p4": 0
       },
       "barrier_sigma": 0.55,
@@ -308,9 +308,9 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 34,
-      "ci_high": 50,
-      "ci_label": "D [34-50]",
+      "ci_low": 33,
+      "ci_high": 49,
+      "ci_label": "D [33-49]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
