@@ -631,7 +631,7 @@
       var volForBreach = (isBasket && vols.length > 1) ? _basketVol(vols, 0.4) : (vols.length > 0 ? Math.max.apply(null, vols) : 25);
       var probB = _probBreach(barrierCapital, volForBreach, matEsperee, r);
       // Swiss Life: lower loss multiplier (long-term envelope, risk accepted)
-      var lossMult = _isSwissLifeEnvelope(product) ? 0.8 : 1.3;
+      var lossMult = _isSwissLifeEnvelope(product) ? 0.6 : 1.3;
       perteEsperee = (1 - barrierCapital / 100) * 100 * lossMult * probB / Math.max(1, matEsperee);
     }
 
