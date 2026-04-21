@@ -520,10 +520,28 @@
       matEsperee = product.grading.metadata.expectedMaturity;
     } else if (isAutocall || product.autocall) {
       if (hasStepDown) {
-        // Step-down: trigger drops each period → autocall becomes easier → shorter maturity
-        // E.g., 100% → 95% → 90% → 85% → 80% over 5 semesters
-        // Rough estimate: maturity ~40% of max for strong step-down
-        matEsperee = Math.min(matMax, Math.max(1, matMax * 0.30));
+        // Step-down: compute sequential autocall probability
+        var sdPct = parseFloat(er.stepDownPct) || 2.5;
+        var sdFreq = (er.frequency || 'semestriel').toLowerCase();
+        var sdObs = sdFreq.indexOf('semestr') >= 0 ? 2 : sdFreq.indexOf('trimestr') >= 0 ? 4 : 1;
+        var sdStart = er.startSemester || 2;
+        var sdTotalObs = Math.floor(matMax * sdObs);
+        var sdVol = vols.length > 0 ? Math.max.apply(null, vols) : 28;
+        var sdSurv = 1.0;
+        var sdExpMat = 0;
+        for (var sdI = 1; sdI <= sdTotalObs; sdI++) {
+          if (sdI < sdStart) continue;
+          var sdT = sdI / sdObs;
+          var sdTrigger = Math.max(70, triggerAutocall - sdPct * (sdI - sdStart));
+          var sdSigma = sdVol / 100;
+          var sdD2 = (Math.log(100 / sdTrigger) + (0.02 - sdSigma * sdSigma / 2) * sdT) / (sdSigma * Math.sqrt(sdT));
+          var sdProbCall = _normcdf(sdD2);
+          var sdProbThisObs = sdSurv * sdProbCall;
+          sdExpMat += sdProbThisObs * sdT;
+          sdSurv *= (1 - sdProbCall);
+        }
+        sdExpMat += sdSurv * matMax;
+        matEsperee = Math.max(1, Math.min(matMax, sdExpMat));
       } else {
         matEsperee = Math.min(matMax, Math.max(1, matMax * 0.35));
       }
@@ -586,10 +604,25 @@
     }
 
     var isSL = _isSwissLifeEnvelope(product);
-    var memBoost = isSL ? 1.15 : 1.08;
-    if (hasMemory && !isDispersion) probCoupon = Math.min(0.99, probCoupon * memBoost);
-    // Swiss Life + step-down + memory = very likely to pay out → extra boost
-    if (isSL && hasMemory && hasStepDown) probCoupon = Math.min(0.99, probCoupon * 1.05);
+
+    // Memory: use cumulative probability formula 1-(1-p)^N
+    // Over N observations, prob of receiving coupon AT LEAST ONCE = 1-(1-p)^N
+    // This is the correct model for memory products (catch-up)
+    if (hasMemory && !isDispersion && probCoupon < 0.95) {
+      var freq2 = ((product.coupon && product.coupon.frequency) || 'annuel').toLowerCase();
+      var obsPerYr = freq2.indexOf('semestr') >= 0 ? 2 : freq2.indexOf('trimestr') >= 0 ? 4 : 1;
+      var nObs = Math.round(matEsperee * obsPerYr);
+      if (nObs < 2) nObs = 2;
+      // Prob of at least one coupon over N observations
+      var probAtLeastOne = 1 - Math.pow(1 - probCoupon, nObs);
+      // Effective prob = weighted average: short-term prob × weight + cumulative prob × weight
+      // This reflects that memory accumulates but doesn't guarantee every coupon
+      var memoryEffective = probCoupon * 0.3 + probAtLeastOne * 0.7;
+      probCoupon = Math.min(0.98, memoryEffective);
+    } else if (!hasMemory && !isDispersion) {
+      // No memory: no boost, coupon missed = lost
+      probCoupon = probCoupon;
+    }
     probCoupon = Math.max(0.01, Math.min(0.99, probCoupon));
 
     var rendementEspere = couponEffectif * probCoupon;
@@ -656,8 +689,19 @@
     if (guaranteedYears >= 2) adj += 5;
     else if (guaranteedYears >= 1) adj += 3;
     var slMode = _isSwissLifeEnvelope(product);
-    if (ut === 'single-stock') adj -= slMode ? 2 : 5;
-    if (ut === 'single-stock' && product.capitalProtection && parseFloat(product.capitalProtection.barrier) > 0 && parseFloat(product.capitalProtection.barrier) < 65) adj -= slMode ? 1 : 3;
+    // Single-stock penalty based on VOLATILITY, not fixed
+    if (ut === 'single-stock') {
+      var stockVol = 28; // default
+      if (product.grading && product.grading.metadata && product.grading.metadata.bsVols && product.grading.metadata.bsVols.length > 0) {
+        stockVol = Math.max.apply(null, product.grading.metadata.bsVols);
+      }
+      if (slMode) {
+        // Swiss Life: penalty scales with vol
+        adj -= stockVol < 25 ? 1 : stockVol < 35 ? 3 : 5;
+      } else {
+        adj -= stockVol < 25 ? 3 : stockVol < 35 ? 5 : 8;
+      }
+    }
     return Math.max(5, Math.min(95, oldP1 + adj));
   }
 
@@ -965,11 +1009,12 @@
       }
 
       // Step 4: v6 calibration
-      // 4a. Cap IA deltas to ±20 (skip adjustedReturn since BS set delta=0)
+      // 4a. Cap IA deltas (±20 normal, ±10 Swiss Life — less IA influence in long-term mode)
+      var maxDelta = _isSwissLifeEnvelope(product) ? 10 : MAX_IA_DELTA;
       ['underlyingQuality', 'portfolioFit', 'riskPremium'].forEach(function(key) {
         var pillar = result.pillars[key];
-        if (pillar && pillar.delta !== undefined && Math.abs(pillar.delta) > MAX_IA_DELTA) {
-          var capped = Math.max(-MAX_IA_DELTA, Math.min(MAX_IA_DELTA, pillar.delta));
+        if (pillar && pillar.delta !== undefined && Math.abs(pillar.delta) > maxDelta) {
+          var capped = Math.max(-maxDelta, Math.min(maxDelta, pillar.delta));
           var diff = pillar.delta - capped;
           pillar.score = Math.max(0, Math.min(100, pillar.score - diff));
           pillar.delta = capped;
