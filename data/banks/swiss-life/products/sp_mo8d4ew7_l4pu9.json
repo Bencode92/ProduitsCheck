@@ -26,7 +26,7 @@
   },
   "participationRate": null,
   "guaranteedYears": 0,
-  "autocallCumulTarget": null,
+  "autocallCumulTarget": 100,
   "commissions": 0.75,
   "isin": "FR0014017VY4",
   "minInvestment": 100000,
@@ -44,10 +44,10 @@
     "frequency": "semestriel",
     "startSemester": 2,
     "stepDown": false,
-    "stepDownPct": null
+    "stepDownPct": null,
+    "hasAutocall": true,
+    "enabled": true
   },
-  "decrementPct": null,
-  "actualDividendYield": null,
   "mechanism": "Mécanisme de remboursement anticipé automatique à partir du semestre 2. Prime conditionnelle de 5.00% par semestre écoulé. Remboursement du capital à l'échéance si pas de baisse de plus de 40%. Risque de perte partielle ou totale du capital.",
   "risks": [
     "Risque de perte en capital",
@@ -323,5 +323,6 @@
     }
   },
   "_couponProbability": 49.7,
-  "_bsRendementNet": -1.54
+  "_bsRendementNet": -1.54,
+  "envelope": "swiss-life"
 }
