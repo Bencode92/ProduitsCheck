@@ -23,8 +23,17 @@
 
   // ═══ CONSTANTS ═══
   var V7_WEIGHTS = { p1: 0.25, p2: 0.20, p3: 0.25, p4: 0.30 };
+  var V7_WEIGHTS_SL = { p1: 0.35, p2: 0.25, p3: 0.15, p4: 0.25 }; // Swiss Life: more weight on return
   var MAX_IA_DELTA = 20;
   var RISK_FREE_RATE = 2.05; // €STR proxy — used for BS diffusion only, NOT for P4 spread
+
+  function _isSwissLifeEnvelope(product) {
+    var env = (product.envelope || '').toLowerCase();
+    return env === 'swiss-life' || env === 'swisslife' || env === 'sl' ||
+      (product.emitter || '').toLowerCase().indexOf('swiss life') >= 0 ||
+      (product.name || '').toLowerCase().indexOf('sl -') === 0 ||
+      (product.name || '').toLowerCase().indexOf('sl –') === 0;
+  }
 
   // ═══ SECTION 1: MATH HELPERS ═══
   function _normcdf(x) {
@@ -559,7 +568,8 @@
       couponEffectif = annRate;
     }
 
-    if (hasMemory && !isDispersion) probCoupon = Math.min(0.99, probCoupon * 1.08);
+    var memBoost = _isSwissLifeEnvelope(product) ? 1.15 : 1.08;
+    if (hasMemory && !isDispersion) probCoupon = Math.min(0.99, probCoupon * memBoost);
     probCoupon = Math.max(0.01, Math.min(0.99, probCoupon));
 
     var rendementEspere = couponEffectif * probCoupon;
@@ -567,7 +577,9 @@
     if (!isProtected && barrierCapital > 0 && barrierCapital < 100) {
       var volForBreach = (isBasket && vols.length > 1) ? _basketVol(vols, 0.4) : (vols.length > 0 ? Math.max.apply(null, vols) : 25);
       var probB = _probBreach(barrierCapital, volForBreach, matEsperee, r);
-      perteEsperee = (1 - barrierCapital / 100) * 100 * 1.3 * probB / Math.max(1, matEsperee);
+      // Swiss Life: lower loss multiplier (long-term envelope, risk accepted)
+      var lossMult = _isSwissLifeEnvelope(product) ? 0.8 : 1.3;
+      perteEsperee = (1 - barrierCapital / 100) * 100 * lossMult * probB / Math.max(1, matEsperee);
     }
 
     // Deduct annualized commissions
@@ -623,8 +635,9 @@
     var guaranteedYears = product.guaranteedYears || (product.aiParsed && product.aiParsed.guaranteedYears) || 0;
     if (guaranteedYears >= 2) adj += 5;
     else if (guaranteedYears >= 1) adj += 3;
-    if (ut === 'single-stock') adj -= 5;
-    if (ut === 'single-stock' && product.capitalProtection && parseFloat(product.capitalProtection.barrier) > 0 && parseFloat(product.capitalProtection.barrier) < 65) adj -= 3;
+    var slMode = _isSwissLifeEnvelope(product);
+    if (ut === 'single-stock') adj -= slMode ? 2 : 5;
+    if (ut === 'single-stock' && product.capitalProtection && parseFloat(product.capitalProtection.barrier) > 0 && parseFloat(product.capitalProtection.barrier) < 65) adj -= slMode ? 1 : 3;
     return Math.max(5, Math.min(95, oldP1 + adj));
   }
 
@@ -979,7 +992,8 @@
       var p2 = result.pillars.underlyingQuality.score;
       var p3 = result.pillars.portfolioFit.score;
       var p4 = result.pillars.riskPremium.score;
-      var total = Math.round(p1 * V7_WEIGHTS.p1 + p2 * V7_WEIGHTS.p2 + p3 * V7_WEIGHTS.p3 + p4 * V7_WEIGHTS.p4);
+      var _w = _isSwissLifeEnvelope(product) ? V7_WEIGHTS_SL : V7_WEIGHTS;
+      var total = Math.round(p1 * _w.p1 + p2 * _w.p2 + p3 * _w.p3 + p4 * _w.p4);
       result.score = total;
       result.grade = total >= 75 ? 'A' : total >= 60 ? 'B' : total >= 45 ? 'C' : total >= 25 ? 'D' : 'F';
 
@@ -996,6 +1010,10 @@
       if (result.metadata) {
         result.metadata.v6Weights = V7_WEIGHTS;
         result.metadata.version = '7.1';
+        if (_isSwissLifeEnvelope(product)) {
+          result.metadata.envelopeMode = 'swiss-life';
+          result.metadata.v6Weights = _w;
+        }
       }
 
       return result;
