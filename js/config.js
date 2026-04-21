@@ -18,6 +18,7 @@ const CONFIG = {
 const MY_ENTITIES = [
   { id: 'bycam', name: 'ByCam', color: '#06D6A0', icon: '🏢' },
   { id: 'cameleons', name: 'Cam.', color: '#8338EC', icon: '🦎' },
+  { id: 'swiss-life', name: 'Swiss Life', color: '#E85D04', icon: '🛡️' },
 ];
 
 const BANKS_LIST = [

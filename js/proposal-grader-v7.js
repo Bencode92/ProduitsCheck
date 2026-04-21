@@ -29,10 +29,12 @@
 
   function _isSwissLifeEnvelope(product) {
     var env = (product.envelope || '').toLowerCase();
-    return env === 'swiss-life' || env === 'swisslife' || env === 'sl' ||
-      (product.emitter || '').toLowerCase().indexOf('swiss life') >= 0 ||
-      (product.name || '').toLowerCase().indexOf('sl -') === 0 ||
-      (product.name || '').toLowerCase().indexOf('sl –') === 0;
+    if (env === 'swiss-life' || env === 'swisslife' || env === 'sl') return true;
+    // Also auto-detect from emitter/name if envelope not explicitly set
+    if ((product.emitter || '').toLowerCase().indexOf('swiss life') >= 0) return true;
+    if ((product.name || '').toLowerCase().indexOf('sl -') === 0) return true;
+    if ((product.name || '').toLowerCase().indexOf('sl –') === 0) return true;
+    return false;
   }
 
   // ═══ SECTION 1: MATH HELPERS ═══

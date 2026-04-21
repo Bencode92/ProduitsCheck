@@ -8,7 +8,8 @@
 var ENVELOPES = [
     { id: '', label: '— Aucune —', color: '#94A3B8', icon: '', liquidity: 0 },
     { id: 'bycam', label: 'ByCam', color: '#3B82F6', icon: '🏢', liquidity: 100000 },
-    { id: 'cameleons', label: 'Caméléons', color: '#A855F7', icon: '🦎', liquidity: 100000 }
+    { id: 'cameleons', label: 'Caméléons', color: '#A855F7', icon: '🦎', liquidity: 100000 },
+    { id: 'swiss-life', label: 'Swiss Life (long terme)', color: '#E85D04', icon: '🛡️', liquidity: 0 }
 ];
 
 var STRUCTURE_TYPES = [
