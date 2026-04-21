@@ -164,6 +164,9 @@
         // Don't apply to capital garanti (lower lockup risk)
         if (result.metadata.barrierPct === 0 && type === 'capital_garanti') return;
 
+        // Swiss Life mode: reduced illiquidity penalty (long-term envelope)
+        var isSL = result.metadata.envelopeMode === 'swiss-life';
+
         var T = result.metadata.maxMaturity || result.metadata.expectedMaturity || 5;
         if (T <= 1) return; // no penalty for very short products
 
@@ -171,11 +174,14 @@
         var oldPremium = 0.5 + 0.10 * Math.max(0, T - 2);
         // New illiquidity premium: 1.5 + 0.20 * max(0, T-2)
         var newPremium = 1.5 + 0.20 * Math.max(0, T - 2);
-        var deltaPremium = newPremium - oldPremium; // ~1.0-1.3% for typical products
+        var deltaPremium = newPremium - oldPremium;
+
+        // Swiss Life: halve the illiquidity penalty (long-term = lower liquidity need)
+        if (isSL) deltaPremium *= 0.5;
 
         // Convert premium delta to score delta (~5 pts per 1% premium)
         var scoreDelta = Math.round(deltaPremium * 5);
-        scoreDelta = Math.min(scoreDelta, 10); // cap at -10
+        scoreDelta = Math.min(scoreDelta, isSL ? 5 : 10);
 
         // Apply to P4
         var p4 = result.pillars.riskPremium;
@@ -183,13 +189,18 @@
         p4.score = Math.max(0, p4.score - scoreDelta);
 
         if (scoreDelta > 0 && p4.reasoning) {
-            p4.reasoning += ' | Illiq. premium +' + deltaPremium.toFixed(1) + '% (-' + scoreDelta + 'pts)';
+            p4.reasoning += ' | Illiq. premium +' + deltaPremium.toFixed(1) + '% (-' + scoreDelta + 'pts)' + (isSL ? ' [SL réduit]' : '');
         }
 
-        // Recalculate total score
-        var w = result.metadata.isInPortfolio ?
+        // Use v7 weights if available (respect Swiss Life weights)
+        var w = (result.metadata.v6Weights) ? {
+            adjustedReturn: result.metadata.v6Weights.p1,
+            underlyingQuality: result.metadata.v6Weights.p2,
+            portfolioFit: result.metadata.v6Weights.p3,
+            riskPremium: result.metadata.v6Weights.p4
+        } : (result.metadata.isInPortfolio ?
             { adjustedReturn: 0.35, underlyingQuality: 0.35, portfolioFit: 0, riskPremium: 0.30 } :
-            { adjustedReturn: 0.30, underlyingQuality: 0.25, portfolioFit: 0.20, riskPremium: 0.25 };
+            { adjustedReturn: 0.25, underlyingQuality: 0.20, portfolioFit: 0.25, riskPremium: 0.30 });
 
         var newTotal = Math.round(
             (result.pillars.adjustedReturn.score || 0) * w.adjustedReturn +
