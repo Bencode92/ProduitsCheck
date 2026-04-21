@@ -487,6 +487,79 @@ function _renderInvestorMetrics(p) {
     }
 
     html += '<div style="font-size:10px;color:#94A3B8;margin-top:4px">Vol implicite : ' + vol.toFixed(1) + '% · Trigger autocall : ' + triggerAC + '%' + (er.stepDown ? ' (step-down -' + er.stepDownPct + '%/sem)' : '') + '</div>';
+
+    // ─── Détail coupon & remboursement ───
+    var nominal = parseFloat(p.investedAmount) || parseFloat(p.minInvestment) || 100000;
+    var guaranteedYrs = p.guaranteedYears || 0;
+    var annualizedCoupon = couponRate * obsPerYear;
+    var couponPerObs = Math.round(nominal * couponRate / 100);
+    var couponPerYear = couponPerObs * obsPerYear;
+
+    html += '<div style="margin-top:10px;padding:12px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px">';
+    html += '<div style="font-size:12px;font-weight:700;color:#92400E;margin-bottom:8px">💰 Détail Coupons & Remboursement</div>';
+
+    // Coupon summary
+    html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px">';
+    html += '<div style="padding:8px;background:white;border-radius:6px;text-align:center;border:1px solid #E2E8F0">';
+    html += '<div style="font-size:10px;color:#475569">Coupon / observation</div>';
+    html += '<div style="font-family:var(--mono);font-size:16px;font-weight:800;color:#D97706">' + couponRate + '% = ' + formatNumber(couponPerObs) + '€</div>';
+    html += '<div style="font-size:10px;color:#475569">' + (obsPerYear === 2 ? 'Semestriel' : obsPerYear === 4 ? 'Trimestriel' : 'Annuel') + '</div></div>';
+
+    html += '<div style="padding:8px;background:white;border-radius:6px;text-align:center;border:1px solid #E2E8F0">';
+    html += '<div style="font-size:10px;color:#475569">Coupon annualisé</div>';
+    html += '<div style="font-family:var(--mono);font-size:16px;font-weight:800;color:#D97706">' + annualizedCoupon + '% = ' + formatNumber(couponPerYear) + '€/an</div></div>';
+
+    html += '<div style="padding:8px;background:white;border-radius:6px;text-align:center;border:1px solid #E2E8F0">';
+    html += '<div style="font-size:10px;color:#475569">Coupon max total (' + matYears + 'a)</div>';
+    html += '<div style="font-family:var(--mono);font-size:16px;font-weight:800;color:#059669">' + (annualizedCoupon * matYears) + '% = ' + formatNumber(couponPerYear * matYears) + '€</div></div>';
+    html += '</div>';
+
+    // Guaranteed coupons
+    if (guaranteedYrs > 0) {
+      var guaranteedTotal = couponPerYear * guaranteedYrs;
+      html += '<div style="padding:8px;background:#ECFDF5;border:1px solid #6EE7B7;border-radius:6px;font-size:11px;color:#065F46;margin-bottom:6px">';
+      html += '✅ <strong>' + guaranteedYrs + ' an' + (guaranteedYrs > 1 ? 's' : '') + ' de coupons garantis</strong> = <strong>' + formatNumber(guaranteedTotal) + '€ acquis</strong> sans condition de marché</div>';
+    } else {
+      html += '<div style="padding:8px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:6px;font-size:11px;color:#991B1B;margin-bottom:6px">';
+      html += '⚠️ <strong>Aucun coupon garanti</strong> — tous les coupons sont conditionnels (sous-jacent ≥ ' + triggerAC + '%)</div>';
+    }
+
+    // Memory detail
+    if (hasMemory) {
+      html += '<div style="padding:8px;background:#EFF6FF;border:1px solid #93C5FD;border-radius:6px;font-size:11px;color:#1E40AF;margin-bottom:6px">';
+      html += '🧠 <strong>Effet mémoire</strong> — Exemple : si coupon manqué au S3 et S4, puis condition remplie au S5 → versement de <strong>3 × ' + formatNumber(couponPerObs) + '€ = ' + formatNumber(couponPerObs * 3) + '€</strong> d\'un coup. ';
+      html += 'Les coupons non versés s\'accumulent et sont tous payés dès le premier retour au-dessus de ' + triggerAC + '%.</div>';
+    } else {
+      html += '<div style="padding:8px;background:#FFF7ED;border:1px solid #FDBA74;border-radius:6px;font-size:11px;color:#92400E;margin-bottom:6px">';
+      html += '❌ <strong>Pas de mémoire</strong> — Un coupon manqué est perdu définitivement.</div>';
+    }
+
+    // Step-down detail
+    if (er.stepDown && er.stepDownPct) {
+      html += '<div style="padding:8px;background:#F5F3FF;border:1px solid #C4B5FD;border-radius:6px;font-size:11px;color:#5B21B6;margin-bottom:6px">';
+      html += '📉 <strong>Step-down</strong> — Le seuil d\'autocall baisse de ' + er.stepDownPct + '% par semestre : ';
+      var startSem = er.startSemester || 2;
+      for (var sd = 0; sd < Math.min(6, totalObs2 - startSem + 1); sd++) {
+        var sdTrigger = Math.max(70, triggerAC - er.stepDownPct * sd);
+        html += (sd > 0 ? ' → ' : '') + sdTrigger.toFixed(1) + '%';
+      }
+      html += '... Plus le temps passe, plus l\'autocall est facile à atteindre.</div>';
+    } else if (hasAutocallProb) {
+      html += '<div style="padding:8px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:6px;font-size:11px;color:#475569;margin-bottom:6px">';
+      html += '📌 <strong>Seuil constant</strong> — L\'autocall se déclenche toujours à ' + triggerAC + '% du niveau initial. Pas de step-down.</div>';
+    }
+
+    // Capital protection detail
+    if (barrier > 0 && barrier < 100) {
+      html += '<div style="padding:8px;background:' + (barrier >= 60 ? '#FFF7ED' : '#FEF2F2') + ';border:1px solid ' + (barrier >= 60 ? '#FDBA74' : '#FCA5A5') + ';border-radius:6px;font-size:11px;color:' + (barrier >= 60 ? '#92400E' : '#991B1B') + ';margin-bottom:6px">';
+      html += '🛡️ <strong>Protection partielle</strong> — Capital protégé si le sous-jacent ne baisse pas de plus de ' + (100 - barrier) + '% sur ' + matYears + ' ans (barrière à ' + barrier + '%). ';
+      html += 'Si barrière touchée → perte proportionnelle à la baisse (ex: sous-jacent à 50% → perte de 50% soit -' + formatNumber(nominal * 0.5) + '€).</div>';
+    } else if (isProtected) {
+      html += '<div style="padding:8px;background:#ECFDF5;border:1px solid #6EE7B7;border-radius:6px;font-size:11px;color:#065F46;margin-bottom:6px">';
+      html += '✅ <strong>Capital 100% garanti</strong> à l\'échéance.</div>';
+    }
+
+    html += '</div>';
     html += '</div>';
   }
 
