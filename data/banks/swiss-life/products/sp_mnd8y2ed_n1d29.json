@@ -238,6 +238,8 @@
   "envelope": "swiss-life",
   "_couponProbability": 88.2,
   "_bsRendementNet": -0.06,
+  "guaranteedYears": 0,
+  "autocallCumulTarget": 100,
   "grading": {
     "grade": "D",
     "score": 43,
@@ -250,7 +252,7 @@
         "score": 37,
         "base": 26,
         "delta": 0,
-        "reasoning": "Rendement: base 26 → -9 = 17 (En stagflation avec VIX à 22, la probabilité d'atteindre le coupon 75% diminue significativement pour un titre luxury cyclique) | Coupon 3.75%, barrière 60% | Barr.coupon 75% | Mat espérée: ~1.6a (prob mat: 0%)",
+        "reasoning": "Rendement: base 26 → -9 = 17 (En stagflation avec VIX à 22, la probabilité de toucher les coupons est fortement réduite pour un titre luxury cyclique comme Richemont) | Coupon 3.75%, barrière 60% | Barr.coupon 75% | Mat espérée: ~1.6a (prob mat: 0%)",
         "_bsDelta": 9,
         "_bs": {
           "score": 35,
@@ -269,13 +271,13 @@
         "score": 64,
         "base": 73,
         "delta": -9,
-        "reasoning": "Qualité: base 73 → -9 = 64 (Richemont (luxury) très vulnérable en stagflation + beta 1.05 amplifie la volatilité + drawdown déjà à -33%) | Worst: RICHEMONT (CIE FIN.) B:50"
+        "reasoning": "Qualité: base 73 → -9 = 64 (Richemont souffre du contexte stagflationniste (luxury cyclique), avec un drawdown de -33% déjà sévère et une volatilité élevée à 31%) | Worst: RICHEMONT (CIE FIN.) B:50"
       },
       "portfolioFit": {
         "score": 40,
         "base": 80,
         "delta": -5,
-        "reasoning": "Fit: base 80 → -5 = 75 (Exposition single-stock sur luxury en stagflation inadaptée pour diversification, malgré le coupon attractif)"
+        "reasoning": "Fit: base 80 → -5 = 75 (En régime stagflationniste, un produit structuré sur une valeur luxury offre peu de diversification face à l'inflation et au ralentissement)"
       },
       "riskPremium": {
         "score": 33,
@@ -284,11 +286,11 @@
         "reasoning": "Capital garanti: spread 3.8% - CAT 2.5% - illiq 0.5% = 0.8%"
       }
     },
-    "verdict": "Produit TRÈS RISQUÉ en contexte stagflationniste. Richemont (luxury goods) souffre particulièrement avec -33% de drawdown, une volatilité élevée à 31% et un beta de 1.05 qui amplifie les mouvements baissiers. Le coupon de 3.75% annualisé paraît insuffisant face au risque d'une barrière capitale à 60% dans un environnement où le luxe est pénalisé par l'inflation et le ralentissement. La probabilité de toucher la barrière augmente significativement.",
+    "verdict": "Produit TRÈS RISQUÉ (score ajusté: 27/100) en contexte stagflationniste. Richemont, titre luxury ultra-cyclique (beta 1.05), est particulièrement vulnérable avec -33% de drawdown et 31% de volatilité. Le coupon de 3.75% annualisé ne compense pas le risque de perte en capital avec une barrière à 60% qui pourrait être touchée en cas de récession. La probabilité de rappel anticipé est nulle selon les données, suggérant un blocage prolongé du capital.",
     "keyRisks": [
-      "Secteur luxury très exposé en stagflation avec consommation réduite",
-      "Volatilité 31% + beta 1.05 = risque élevé de toucher la barrière 60%",
-      "Duration longue (6 ans) inadaptée avec inflation persistante",
+      "Risque sectoriel majeur: luxury très sensible au ralentissement économique en stagflation",
+      "Barrière capitale à 60% atteignable avec vol 31% et DD déjà à -33%",
+      "Blocage du capital probable sur 6 ans avec 0% de probabilité de maturité anticipée",
       "Barrière à 0.67σ (Danger) — vol 31%"
     ],
     "negotiationPoints": [],
@@ -300,20 +302,20 @@
         "duration_years": 1
       },
       "base": {
-        "return_pct": 7.5,
+        "return_pct": 2.5,
         "return_eur": 7500,
         "probability": 0.3,
-        "duration_years": 2
+        "duration_years": 3
       },
       "stress": {
-        "return_pct": -20,
-        "return_eur": -20000,
+        "return_pct": 0,
+        "return_eur": 0,
         "probability": 0.35,
-        "duration_years": 4
+        "duration_years": 6
       },
       "worst": {
-        "return_pct": -40,
-        "return_eur": -40000,
+        "return_pct": -20,
+        "return_eur": -20000,
         "probability": 0.2,
         "duration_years": 6
       }
@@ -327,8 +329,8 @@
       "label": "D [28-44]"
     },
     "metadata": {
-      "gradedAt": "2026-04-21T09:28:45.099Z",
-      "durationMs": 20443,
+      "gradedAt": "2026-04-21T09:37:36.267Z",
+      "durationMs": 21509,
       "aiUsed": true,
       "version": "7.1",
       "productType": "autocall",
@@ -424,7 +426,5 @@
         "desc": "Marchés baissiers → barrière menacée, vol en hausse"
       }
     }
-  },
-  "guaranteedYears": 0,
-  "autocallCumulTarget": 100
+  }
 }
