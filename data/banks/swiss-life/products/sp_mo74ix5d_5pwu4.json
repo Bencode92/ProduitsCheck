@@ -174,7 +174,7 @@
         "score": 17,
         "base": 40,
         "delta": 0,
-        "reasoning": "Rendement: base 40 → -9 = 31 (Régime stagflationniste + ASML (tech cyclique évité) avec vol 37.62% et DD -45% réduit fortement la probabilité de toucher les coupons à 60%) | Coupon 7%, barrière 60% | Barr.coupon 60% | Mat espérée: ~1.6a (prob mat: 0%)",
+        "reasoning": "Rendement: base 40 → -9 = 31 (Vol 37.62% et DD 45% en stagflation avec beta 1.26 réduisent drastiquement la probabilité du coupon à 60%, surtout avec ASML en secteur tech évité) | Coupon 7%, barrière 60% | Barr.coupon 60% | Mat espérée: ~1.6a (prob mat: 0%)",
         "_bsDelta": -25,
         "_bs": {
           "score": 15,
@@ -193,13 +193,13 @@
         "score": 61,
         "base": 70,
         "delta": -9,
-        "reasoning": "Qualité: base 70 → -9 = 61 (ASML dans tech sector ÉVITÉ en stagflation, beta 1.26 amplifie les risques, DD -45% confirme la fragilité structurelle) | Worst: ASML Holding NV B:67"
+        "reasoning": "Qualité: base 70 → -9 = 61 (ASML en information-technology, secteur ÉVITÉ (-1.22% momentum) en stagflation, beta élevé 1.26 amplifie les risques dans ce régime défavorable) | Worst: ASML Holding NV B:67"
       },
       "portfolioFit": {
         "score": 40,
         "base": 80,
         "delta": -5,
-        "reasoning": "Fit: base 80 → -5 = 75 (Concentration sur un seul titre tech en stagflation réduit la diversification, inadapté au régime actuel favorisant energy)"
+        "reasoning": "Fit: base 80 → -5 = 75 (Phoenix sur single-stock tech volatil inadapté en stagflation, diversification nulle face aux risques sectoriels concentrés)"
       },
       "riskPremium": {
         "score": 34,
@@ -208,37 +208,37 @@
         "reasoning": "Capital garanti: spread 7.0% - CAT 2.5% - illiq 0.5% = 4.0%"
       }
     },
-    "verdict": "Produit INADAPTÉ au contexte stagflationniste actuel. ASML (DD -45%, vol 37.62%) appartient au secteur tech explicitement ÉVITÉ selon le Market Intelligence, avec un beta 1.26 qui amplifie la volatilité dans ce régime défavorable. La barrière à 60% offre peu de protection avec une probabilité d'autocall nulle et une maturité espérée de 1.6 ans qui pourrait s'étendre à 6 ans. Le coupon de 7% ne compense pas le risque de perte en capital sur un titre ayant déjà chuté de 45% dans un secteur sous pression structurelle.",
+    "verdict": "Produit TRÈS RISQUÉ (score 17/100) en stagflation avec ASML dans le secteur tech ÉVITÉ par le marché. La volatilité de 37.62% et le drawdown de 45% rendent la barrière à 60% très fragile, d'autant plus avec un beta de 1.26 qui amplifie les mouvements baissiers. Le coupon de 7% annualisé ne compense pas le risque de perte en capital sur ce single-stock dans un secteur en difficulté structurelle avec momentum négatif de -1.22%.",
     "keyRisks": [
-      "Exposition concentrée sur ASML (tech sector évité) en régime stagflationniste défavorable",
-      "Drawdown actuel de -45% proche de la barrière 60% avec volatilité élevée à 37.62%",
-      "Risque d'extension à 6 ans sans coupons si ASML reste sous pression sectorielle",
+      "Secteur tech évité en stagflation avec momentum -1.22%, risque de sous-performance structurelle",
+      "Vol 37.62% et DD 45% menacent directement la barrière 60%, perte capitale probable",
+      "Beta 1.26 amplifie la baisse dans un marché stagflationniste défavorable aux valeurs growth",
       "Barrière à 0.55σ (Danger) — vol 37.62%"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 7,
-        "return_eur": 7000,
+        "return_pct": 3.5,
+        "return_eur": 3500,
         "probability": 0.15,
-        "duration_years": 1
+        "duration_years": 0.5
       },
       "base": {
-        "return_pct": 3.5,
-        "return_eur": 5250,
-        "probability": 0.3,
-        "duration_years": 1.5
+        "return_pct": -5,
+        "return_eur": -5000,
+        "probability": 0.35,
+        "duration_years": 3
       },
       "stress": {
-        "return_pct": 0,
-        "return_eur": 0,
+        "return_pct": -20,
+        "return_eur": -20000,
         "probability": 0.35,
-        "duration_years": 4
+        "duration_years": 5
       },
       "worst": {
-        "return_pct": -30,
-        "return_eur": -30000,
-        "probability": 0.2,
+        "return_pct": -40,
+        "return_eur": -40000,
+        "probability": 0.15,
         "duration_years": 6
       }
     },
@@ -251,8 +251,8 @@
       "label": "D [33-49]"
     },
     "metadata": {
-      "gradedAt": "2026-04-21T09:06:48.891Z",
-      "durationMs": 22884,
+      "gradedAt": "2026-04-21T09:08:24.935Z",
+      "durationMs": 22413,
       "aiUsed": true,
       "version": "7.1",
       "productType": "autocall",
