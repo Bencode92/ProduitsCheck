@@ -151,7 +151,7 @@
         "score": 51,
         "base": 43,
         "delta": 0,
-        "reasoning": "Rendement: base 43 → -7 = 36 (Barrière à 100% très exigeante en stagflation avec VIX à 22, probabilité réelle de toucher le coupon fortement réduite) | Coupon 10%, barrière 60% | Barr.coupon 100% | Mat espérée: ~1.6a (prob mat: 0%)",
+        "reasoning": "Rendement: base 43 → -7 = 36 (Barrière coupon à 100% en régime stagflation avec LVMH à -51% de son ATH et volatilité élevée (30%) réduit drastiquement la probabilité de toucher les coupons) | Coupon 10%, barrière 60% | Barr.coupon 100% | Mat espérée: ~1.6a (prob mat: 0%)",
         "_bsDelta": 6,
         "_bs": {
           "score": 49,
@@ -170,7 +170,7 @@
         "score": 70,
         "base": 75,
         "delta": -5,
-        "reasoning": "Qualité: base 75 → -5 = 70 (LVMH (luxe) vulnérable en stagflation, beta 0.93 offre peu de protection, DD important de -51.49%) | Worst: LVMH MOET HENNESSY LOUIS VUITTON B:83"
+        "reasoning": "Qualité: base 75 → -5 = 70 (LVMH (consumer discretionary) vulnérable en stagflation avec beta 0.93, mais non listé parmi les secteurs évités et leader mondial du luxe avec pricing power) | Worst: LVMH MOET HENNESSY LOUIS VUITTON B:83"
       },
       "portfolioFit": {
         "score": 35,
@@ -185,11 +185,11 @@
         "reasoning": "Capital garanti: spread 10.0% - CAT 2.5% - illiq 0.6% = 6.9%"
       }
     },
-    "verdict": "Produit inadapté au régime stagflationniste actuel avec un score ajusté de 22/100. La barrière coupon à 100% est irréaliste avec VIX à 22 et LVMH déjà en drawdown de -51.49%. Le coupon de 10% annualisé ne compense pas le risque de perte en capital jusqu'à -40% sur 8 ans dans un contexte où le luxe souffre de l'inflation et du ralentissement. La probabilité de maturation anticipée est nulle selon les données.",
+    "verdict": "Produit TRÈS RISQUÉ (score ajusté: 37/100) inadapté au contexte stagflationniste. Avec LVMH à -51% de son ATH et une barrière coupon à 100%, la probabilité de toucher le coupon 10% annualisé est inférieure à 20% dans les 2 prochaines années. Le régime stagflationniste pénalise le luxe (compression des marges, baisse du pouvoir d'achat) et avec un VIX à 22, la volatilité de 30% rend le rappel AT peu probable. Nominal de 100k€ exposé à une perte potentielle de 40% si la barrière capital 60% est touchée.",
     "keyRisks": [
-      "Exposition 100% au luxe en période stagflationniste défavorable",
-      "Barrière coupon à 100% quasi-impossible à maintenir avec volatilité à 29.62%",
-      "Risque de perte maximale de -40% du capital investi",
+      "Barrière coupon AT 100% quasi-impossible à atteindre avec LVMH à -51% en stagflation",
+      "Exposition luxe vulnérable: inflation érode pouvoir d'achat des classes moyennes, principal moteur de croissance LVMH",
+      "Duration réelle probable >5 ans avec risque de perte capitale si récession suit la stagflation",
       "Barrière à 0.61σ (Danger) — vol 29.62%"
     ],
     "negotiationPoints": [],
@@ -204,7 +204,7 @@
         "return_pct": 0,
         "return_eur": 0,
         "probability": 0.4,
-        "duration_years": 4
+        "duration_years": 6
       },
       "stress": {
         "return_pct": -20,
@@ -228,8 +228,8 @@
       "label": "C [39-55]"
     },
     "metadata": {
-      "gradedAt": "2026-04-21T12:36:53.956Z",
-      "durationMs": 18552,
+      "gradedAt": "2026-04-21T12:49:56.782Z",
+      "durationMs": 25739,
       "aiUsed": true,
       "version": "7.1",
       "productType": "autocall",
