@@ -235,7 +235,7 @@
   "_freqFixApplied": true,
   "summary": "Autocall Phoenix à mémoire sur action Richemont. Remboursement anticipé automatique à 100% dès S2. Coupon conditionnel 3,75%/semestre si performance ≥ -25% avec mémoire. Capital non protégé, barrière de perte à 60%.",
   "emitter": "HSBC Continental Europe",
-  "envelope": "",
+  "envelope": "swiss-life",
   "_couponProbability": 88.2,
   "_bsRendementNet": -0.06,
   "grading": {
@@ -424,5 +424,7 @@
         "desc": "Marchés baissiers → barrière menacée, vol en hausse"
       }
     }
-  }
+  },
+  "guaranteedYears": 0,
+  "autocallCumulTarget": 100
 }
