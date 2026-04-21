@@ -232,6 +232,8 @@
   "envelope": "swiss-life",
   "_couponProbability": 61,
   "_bsRendementNet": 1.83,
+  "guaranteedYears": 0,
+  "autocallCumulTarget": 91,
   "grading": {
     "grade": "C",
     "score": 47,
@@ -244,7 +246,7 @@
         "score": 44,
         "base": 46,
         "delta": 0,
-        "reasoning": "Rendement: base 46 → -1 = 45 (Régime stagflationniste défavorable aux banques européennes + ISP dans secteur financials évité réduit probabilité d'autocall rapide) | Coupon 3%, protégé | Barr.coupon 91% | Mat espérée: ~1.4a (prob mat: 0%)",
+        "reasoning": "Rendement: base 46 → -1 = 45 (Barrière à 91% élevée en stagflation avec un SJ financier évité, probabilité de coupon fortement réduite) | Coupon 3%, protégé | Barr.coupon 91% | Mat espérée: ~1.4a (prob mat: 0%)",
         "_bsDelta": 0,
         "_bs": {
           "score": 46,
@@ -263,51 +265,51 @@
         "score": 74,
         "base": 75,
         "delta": -1,
-        "reasoning": "Qualité: base 75 → -1 = 74 (ISP secteur financials explicitement évité par MI, DD -21% et volatilité 25% en stagflation = risque fondamental élevé) | Worst: Intesa Sanpaolo S.p.A. B:60"
+        "reasoning": "Qualité: base 75 → -1 = 74 (ISP dans secteur financials évité (-1.63% momentum), beta 0.88 en régime stagflationniste défavorable) | Worst: Intesa Sanpaolo S.p.A. B:60"
       },
       "portfolioFit": {
         "score": 55,
         "base": 80,
-        "delta": 1,
-        "reasoning": "Fit: base 80 → +1 = 81 (Capital garanti particulièrement pertinent en stagflation avec VIX 22 et incertitudes macro)"
+        "delta": 0,
+        "reasoning": "Fit: base 80"
       },
       "riskPremium": {
         "score": 18,
         "base": 4,
-        "delta": -1,
+        "delta": 0,
         "reasoning": "Capital garanti: spread 3.0% - CAT 2.5% - illiq 0.7% = -0.2%"
       }
     },
-    "verdict": "Produit capital garanti paradoxalement risqué en stagflation. ISP (financials) est dans un secteur explicitement évité avec -21% de drawdown actuel. Le coupon 3% annualisé nécessite que ISP reste >91% pendant 10 ans dans un contexte où les banques européennes souffrent. Malgré la garantie du capital, l'opportunité coût sur 10 ans est significative avec un spread de 7.78% qui semble excessif.",
+    "verdict": "Produit inadapté au contexte stagflationniste actuel. ISP (financials) est dans un secteur explicitement évité avec momentum négatif -1.63%, et la barrière coupon à 91% est trop contraignante quand le VIX est à 22. Le rendement de 3% annualisé ne compense pas l'inflation (PCE 2.8%) sur une durée espérée de 1.4 ans. Malgré le capital garanti, le couple rendement/risque est défavorable avec une probabilité de remboursement anticipé quasi-nulle.",
     "keyRisks": [
-      "Blocage capital 10 ans si ISP reste <91% en stagflation prolongée",
-      "Secteur financials évité avec momentum négatif -1.63%",
-      "Opportunité coût vs obligations TIPS recommandées par MI"
+      "Secteur financials en difficulté structurelle avec risque de correction supplémentaire",
+      "Rendement réel négatif avec PCE à 2.8% vs coupon 3%",
+      "Duration longue probable (>5 ans) avec barrière 91% difficile à franchir"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 3,
         "return_eur": 3000,
-        "probability": 0.15,
-        "duration_years": 1.4
+        "probability": 0.2,
+        "duration_years": 1
       },
       "base": {
+        "return_pct": 6,
+        "return_eur": 6000,
+        "probability": 0.35,
+        "duration_years": 2
+      },
+      "stress": {
         "return_pct": 15,
         "return_eur": 15000,
         "probability": 0.3,
         "duration_years": 5
       },
-      "stress": {
-        "return_pct": 0,
-        "return_eur": 0,
-        "probability": 0.35,
-        "duration_years": 10
-      },
       "worst": {
-        "return_pct": 0,
-        "return_eur": 0,
-        "probability": 0.2,
+        "return_pct": 30,
+        "return_eur": 30000,
+        "probability": 0.15,
         "duration_years": 10
       }
     },
@@ -320,8 +322,8 @@
       "label": "C [42-56]"
     },
     "metadata": {
-      "gradedAt": "2026-04-21T09:29:10.463Z",
-      "durationMs": 17721,
+      "gradedAt": "2026-04-21T09:29:38.277Z",
+      "durationMs": 16971,
       "aiUsed": true,
       "version": "7.1",
       "productType": "autocall",
@@ -346,8 +348,8 @@
       "adjustments": {
         "p1": -1,
         "p2": -1,
-        "p3": 1,
-        "p4": -1
+        "p3": 0,
+        "p4": 0
       },
       "barrier_sigma": null,
       "barrier_sigma_label": null,
@@ -417,7 +419,5 @@
         "desc": "Marchés baissiers → barrière menacée, vol en hausse"
       }
     }
-  },
-  "guaranteedYears": 0,
-  "autocallCumulTarget": 91
+  }
 }
