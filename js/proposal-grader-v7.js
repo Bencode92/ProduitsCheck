@@ -499,19 +499,34 @@
     var st = (product.structureType || '').toLowerCase();
 
     var annRate = norm.coupon || 0;
-    var triggerCoupon = 0;
     var isAutocall = er.type === 'autocall' || (er.possible && er.trigger > 0);
-    triggerCoupon = isAutocall ? (parseFloat(er.trigger) || parseFloat(cp.barrierCoupon) || parseFloat(coupon.trigger) || 100)
-      : (parseFloat(cp.barrierCoupon) || parseFloat(coupon.trigger) || 100);
+
+    // IMPORTANT: separate coupon trigger from autocall trigger
+    // Phoenix: coupon trigger = 60% (barrierCoupon), autocall trigger = 100% (er.trigger)
+    var triggerCoupon = parseFloat(cp.barrierCoupon) || parseFloat(coupon.trigger) || 100;
+    var triggerAutocall = isAutocall ? (parseFloat(er.trigger) || 100) : 100;
+
+    // For probCoupon calculation, use the COUPON trigger (lower = easier)
+    // For autocall timing, use the AUTOCALL trigger
 
     var barrierCapital = parseFloat(cp.barrier) || 0;
     var isProtected = cp.protected || false;
     var matMax = parseFloat(product.maturityYears) || 5;
     var matEsperee = matMax;
+
+    // Step-down reduces effective autocall trigger over time → shorter expected maturity
+    var hasStepDown = er.stepDown && er.stepDownPct;
     if (product.grading && product.grading.metadata && product.grading.metadata.expectedMaturity) {
       matEsperee = product.grading.metadata.expectedMaturity;
     } else if (isAutocall || product.autocall) {
-      matEsperee = Math.min(matMax, Math.max(1, matMax * 0.35));
+      if (hasStepDown) {
+        // Step-down: trigger drops each period → autocall becomes easier → shorter maturity
+        // E.g., 100% → 95% → 90% → 85% → 80% over 5 semesters
+        // Rough estimate: maturity ~40% of max for strong step-down
+        matEsperee = Math.min(matMax, Math.max(1, matMax * 0.30));
+      } else {
+        matEsperee = Math.min(matMax, Math.max(1, matMax * 0.35));
+      }
     }
 
     var dec = parseFloat(product.decrementPct) || 0;
@@ -570,8 +585,11 @@
       couponEffectif = annRate;
     }
 
-    var memBoost = _isSwissLifeEnvelope(product) ? 1.15 : 1.08;
+    var isSL = _isSwissLifeEnvelope(product);
+    var memBoost = isSL ? 1.15 : 1.08;
     if (hasMemory && !isDispersion) probCoupon = Math.min(0.99, probCoupon * memBoost);
+    // Swiss Life + step-down + memory = very likely to pay out → extra boost
+    if (isSL && hasMemory && hasStepDown) probCoupon = Math.min(0.99, probCoupon * 1.05);
     probCoupon = Math.max(0.01, Math.min(0.99, probCoupon));
 
     var rendementEspere = couponEffectif * probCoupon;
