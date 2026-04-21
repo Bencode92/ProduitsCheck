@@ -49,23 +49,22 @@
       var postCallRev = 0;
 
       if (autocalled) {
-        // Capital réinvesti post-autocall
-        postCallRev = Math.round(amount * POST_CALL_RATE / 100);
-        var totalRev = postCallRev + catInterest;
+        // Post-autocall: TOUT le capital (1M) + coupons accumulés réinvestis à POST_CALL_RATE
+        var totalPool = amount + catPool; // capital + coupons accumulés
+        postCallRev = Math.round(totalPool * POST_CALL_RATE / 100);
+        var totalRev = postCallRev;
         var net = totalRev - interest;
         var tax = net > 0 ? Math.round(net * LOAN.taxRate / 100) : 0;
         var netAfterTax = net - tax;
         cumulNet += netAfterTax;
 
         flows.push({
-          year: yr, coupon: 0, catInterest: catInterest, postCallRev: postCallRev,
+          year: yr, coupon: 0, catInterest: 0, postCallRev: postCallRev,
           totalRev: totalRev, interest: interest, tax: tax, net: netAfterTax,
           cumul: cumulNet, roi: cumulNet / amount * 100,
-          status: 'Réinvesti CAT ' + POST_CALL_RATE + '%',
+          status: 'Réinvesti ' + _f(totalPool) + '€ à ' + POST_CALL_RATE + '%',
           color: '#475569'
         });
-        // Les coupons post-call sont aussi réinvestis
-        catPool += postCallRev;
         continue;
       }
 
@@ -113,7 +112,7 @@
 
       var statusText = yr <= guaranteed ? 'Garanti (' + guaranteed + ' ans)' :
         (couponPaid ? 'Conditionnel versé' : 'Pas de coupon');
-      if (autocallThisYear) statusText = 'Coupon + AUTOCALL → réinvesti ' + POST_CALL_RATE + '%';
+      if (autocallThisYear) statusText = 'Coupon + AUTOCALL → ' + _f(amount + catPool + couponReceived) + '€ réinvesti à ' + POST_CALL_RATE + '%';
       var statusColor = yr <= guaranteed ? B.green :
         (autocallThisYear ? B.purple : (couponPaid ? '#4ECDC4' : B.red));
 
