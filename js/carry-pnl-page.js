@@ -21,13 +21,15 @@
   var POST_CALL_RATE = 4.0;  // taux réinvestissement capital post-autocall
 
   // ─── SCENARIO ENGINE ──────
-  function _simulate(product, scenario) {
+  function _simulate(product, scenario, overrides) {
+    overrides = overrides || {};
     var years = LOAN.years;
     var amount = LOAN.amount;
-    var coupon = product.coupon || 0;
+    var coupon = overrides.coupon || product.coupon || 0;
     var guaranteed = product.guaranteedYears || 0;
-    var autocallTarget = product.autocallTarget || 0;
+    var autocallTarget = overrides.coupon ? (coupon * (product.autocallTarget ? Math.round(product.autocallTarget / (product.coupon || 7)) : 3)) : (product.autocallTarget || 0);
     var prob = product.prob || 0.90;
+    var postCallRate = overrides.postCallRate || POST_CALL_RATE;
 
     // Scenario adjustments
     var scenProb;
@@ -51,7 +53,7 @@
       if (autocalled) {
         // Post-autocall: TOUT le capital (1M) + coupons accumulés réinvestis à POST_CALL_RATE
         var totalPool = amount + catPool; // capital + coupons accumulés
-        postCallRev = Math.round(totalPool * POST_CALL_RATE / 100);
+        postCallRev = Math.round(totalPool * postCallRate / 100);
         var totalRev = postCallRev;
         var net = totalRev - interest;
         var tax = net > 0 ? Math.round(net * LOAN.taxRate / 100) : 0;
@@ -62,7 +64,7 @@
           year: yr, coupon: 0, catInterest: 0, postCallRev: postCallRev,
           totalRev: totalRev, interest: interest, tax: tax, net: netAfterTax,
           cumul: cumulNet, roi: cumulNet / amount * 100,
-          status: 'Réinvesti ' + _f(totalPool) + '€ à ' + POST_CALL_RATE + '%',
+          status: 'Réinvesti ' + _f(totalPool) + '€ à ' + postCallRate + '%',
           color: '#475569'
         });
         continue;
@@ -112,7 +114,7 @@
 
       var statusText = yr <= guaranteed ? 'Garanti (' + guaranteed + ' ans)' :
         (couponPaid ? 'Conditionnel versé' : 'Pas de coupon');
-      if (autocallThisYear) statusText = 'Coupon + AUTOCALL → ' + _f(amount + catPool + couponReceived) + '€ réinvesti à ' + POST_CALL_RATE + '%';
+      if (autocallThisYear) statusText = 'Coupon + AUTOCALL → ' + _f(amount + catPool + couponReceived) + '€ réinvesti à ' + postCallRate + '%';
       var statusColor = yr <= guaranteed ? B.green :
         (autocallThisYear ? B.purple : (couponPaid ? '#4ECDC4' : B.red));
 
@@ -150,10 +152,19 @@
   }
 
   // ─── RENDER PAGE ──────
-  function _renderPnLPage(product) {
-    var opti = _simulate(product, 'optimiste');
-    var normal = _simulate(product, 'normal');
-    var pessi = _simulate(product, 'pessimiste');
+  var _currentCouponOverride = 0;
+  var _currentPostCallOverride = 0;
+
+  function _renderPnLPage(product, customCoupon, customPostCall) {
+    var couponRate = customCoupon || product.coupon || 7;
+    var postCallRate = customPostCall || POST_CALL_RATE;
+    _currentCouponOverride = couponRate;
+    _currentPostCallOverride = postCallRate;
+
+    var overrides = { coupon: couponRate, postCallRate: postCallRate };
+    var opti = _simulate(product, 'optimiste', overrides);
+    var normal = _simulate(product, 'normal', overrides);
+    var pessi = _simulate(product, 'pessimiste', overrides);
 
     var scenarios = [
       { name: 'Optimiste', key: 'optimiste', data: opti, color: '#059669', bg: '#ECFDF5', border: '#6EE7B7', desc: 'Tous les coupons versés, autocall au plus tôt' },
@@ -167,8 +178,48 @@
     h += '<div style="margin-bottom:20px">';
     h += '<button class="btn ghost" onclick="switchMainView(\'carry\')" style="margin-bottom:10px">← Retour Carry Trade</button>';
     h += '<h2 style="color:' + B.text + ';font-size:20px;font-weight:800;margin:0">📊 Analyse P&L — ' + product.name + '</h2>';
-    h += '<div style="color:' + B.muted + ';font-size:12px;margin-top:4px">' + product.emetteur + ' · Coupon ' + product.coupon + '% · Emprunt ' + _f(LOAN.amount) + '€ à ' + LOAN.rate + '% · ' + LOAN.years + ' ans</div>';
+    h += '<div style="color:' + B.muted + ';font-size:12px;margin-top:4px">' + product.emetteur + ' · Coupon ' + couponRate + '% · Emprunt ' + _f(LOAN.amount) + '€ à ' + LOAN.rate + '% · ' + LOAN.years + ' ans · Post-autocall ' + postCallRate + '%</div>';
     h += '</div>';
+
+    // ─── Controls: modulable rates ───
+    h += '<div style="background:' + B.card + ';border:2px solid ' + B.purple + ';border-radius:10px;padding:16px;margin-bottom:20px">';
+    h += '<div style="font-size:13px;font-weight:700;color:' + B.purple + ';margin-bottom:10px">🎛️ Paramètres modulables</div>';
+    h += '<div style="display:flex;gap:16px;align-items:end;flex-wrap:wrap">';
+    h += '<div><label style="font-size:11px;color:' + B.muted + ';display:block;margin-bottom:4px">Coupon garanti An 1-2 (%)</label>';
+    h += '<input id="pnl-coupon" type="number" step="0.1" value="' + couponRate + '" style="padding:8px 12px;border:1px solid ' + B.border + ';border-radius:6px;font-size:14px;font-family:var(--mono);width:100px;font-weight:700;color:' + B.orange + '"></div>';
+    h += '<div><label style="font-size:11px;color:' + B.muted + ';display:block;margin-bottom:4px">Taux réinvest. post-autocall (%)</label>';
+    h += '<input id="pnl-postcall" type="number" step="0.1" value="' + postCallRate + '" style="padding:8px 12px;border:1px solid ' + B.border + ';border-radius:6px;font-size:14px;font-family:var(--mono);width:100px;font-weight:700;color:' + B.green + '"></div>';
+    h += '<button onclick="__pnlRecalculate()" style="padding:8px 20px;background:' + B.purple + ';color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;height:38px">Recalculer</button>';
+    h += '</div></div>';
+
+    // ─── Sensitivity matrix ───
+    var couponRates = [5.5, 6.0, 6.5, 7.0, 7.5, 8.0];
+    var postCallRates = [3.0, 3.5, 4.0, 4.5, 5.0];
+
+    h += '<div style="background:' + B.card + ';border:1px solid ' + B.border + ';border-radius:10px;padding:16px;margin-bottom:20px">';
+    h += '<div style="font-size:13px;font-weight:700;color:' + B.text + ';margin-bottom:10px">📐 Tableau de sensibilité — Net après IS sur ' + LOAN.years + ' ans (optimiste)</div>';
+    h += '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px">';
+    h += '<thead><tr><th style="padding:6px;background:' + B.header + ';color:' + B.muted + ';font-size:10px">Coupon ↓ \\ Réinvest. →</th>';
+    postCallRates.forEach(function(pcr) {
+      var isCurrent = Math.abs(pcr - postCallRate) < 0.05;
+      h += '<th style="padding:6px;background:' + (isCurrent ? B.purple + '15' : B.header) + ';color:' + (isCurrent ? B.purple : B.muted) + ';font-weight:' + (isCurrent ? '800' : '600') + '">' + pcr.toFixed(1) + '%</th>';
+    });
+    h += '</tr></thead><tbody>';
+
+    couponRates.forEach(function(cr) {
+      var isCurrentRow = Math.abs(cr - couponRate) < 0.05;
+      h += '<tr>';
+      h += '<td style="padding:6px;font-weight:700;background:' + (isCurrentRow ? B.purple + '15' : B.row1) + ';color:' + (isCurrentRow ? B.purple : B.orange) + '">' + cr.toFixed(1) + '%</td>';
+      postCallRates.forEach(function(pcr) {
+        var sim = _simulate(product, 'optimiste', { coupon: cr, postCallRate: pcr });
+        var net = sim.netAfterTax;
+        var isCurrent = isCurrentRow && Math.abs(pcr - postCallRate) < 0.05;
+        var color = net >= 100000 ? B.green : net >= 50000 ? '#4ECDC4' : net >= 0 ? B.orange : B.red;
+        h += '<td style="padding:6px;text-align:right;font-family:var(--mono);font-weight:' + (isCurrent ? '800' : '600') + ';color:' + color + ';background:' + (isCurrent ? B.purple + '12' : 'transparent') + ';border:' + (isCurrent ? '2px solid ' + B.purple : '1px solid ' + B.border) + '">' + (net >= 0 ? '+' : '') + _f(net) + '€</td>';
+      });
+      h += '</tr>';
+    });
+    h += '</tbody></table></div></div>';
 
     // 3 scenario summary cards
     h += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">';
@@ -281,8 +332,17 @@
   }
 
   // ─── PUBLIC API ──────
-  window.renderCarryPnLPage = function(container, product) {
-    container.innerHTML = '<div class="main">' + _renderPnLPage(product) + '</div>';
+  window.renderCarryPnLPage = function(container, product, customCoupon, customPostCall) {
+    container.innerHTML = '<div class="main">' + _renderPnLPage(product, customCoupon, customPostCall) + '</div>';
+  };
+
+  window.__pnlRecalculate = function() {
+    var coupon = parseFloat(document.getElementById('pnl-coupon')?.value) || 7;
+    var postCall = parseFloat(document.getElementById('pnl-postcall')?.value) || 4;
+    var product = window._carryPnLProduct;
+    if (!product) return;
+    var main = document.getElementById('main-content');
+    if (main) renderCarryPnLPage(main, product, coupon, postCall);
   };
 
   // Called from carry trade comparison
