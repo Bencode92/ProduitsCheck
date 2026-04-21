@@ -21,11 +21,12 @@
     "annualized": true,
     "type": "conditionnel",
     "paymentTiming": "periodic",
-    "trigger": 100
+    "trigger": 100,
+    "memory": false
   },
   "participationRate": null,
   "guaranteedYears": 0,
-  "autocallCumulTarget": null,
+  "autocallCumulTarget": 100,
   "commissions": 1,
   "isin": "XS3296866984",
   "minInvestment": 100000,
@@ -43,10 +44,10 @@
     "frequency": "semestriel",
     "startSemester": 2,
     "stepDown": true,
-    "stepDownPct": 2.05
+    "stepDownPct": 2.05,
+    "hasAutocall": true,
+    "enabled": true
   },
-  "decrementPct": null,
-  "actualDividendYield": null,
   "mechanism": "Remboursement automatique anticipé dès le semestre 2 si l'action clôture au niveau de la barrière de remboursement automatique anticipé (100% initialement, puis décroissante de 2,05% par semestre). Coupon de 4% par semestre écoulé versé à chaque remboursement anticipé ou à maturité si niveau supérieur à 71,30%. Protection partielle du capital avec barrière à 60% à maturité.",
   "risks": [
     "Risque de perte en Capital",
@@ -381,5 +382,6 @@
     }
   },
   "_couponProbability": 49.4,
-  "_bsRendementNet": 0.45
+  "_bsRendementNet": 0.45,
+  "envelope": "swiss-life"
 }
