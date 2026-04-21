@@ -196,8 +196,8 @@
     h += '</div></div>';
 
     // ─── Sensitivity matrix: CAT reinvest rate × post-call rate ───
-    var catRates = [2.0, 2.5, 3.0, 3.5, 4.0, 4.5];
-    var postCallRates = [3.0, 3.5, 4.0, 4.5, 5.0];
+    var catRates = [2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0];
+    var postCallRates = [2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 7.0];
 
     h += '<div style="background:' + B.card + ';border:1px solid ' + B.border + ';border-radius:10px;padding:16px;margin-bottom:20px">';
     h += '<div style="font-size:13px;font-weight:700;color:' + B.text + ';margin-bottom:4px">📐 Tableau de sensibilité — Net après IS sur ' + LOAN.years + ' ans (optimiste)</div>';
