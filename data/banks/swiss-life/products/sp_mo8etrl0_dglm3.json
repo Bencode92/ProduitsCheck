@@ -196,7 +196,7 @@
         "score": 32,
         "base": 40,
         "delta": 0,
-        "reasoning": "Rendement: base 40 → -9 = 31 (ASML en tech sector évité + drawdown 45% + vol 37.6% en stagflation = probabilité coupon fortement réduite) | Coupon 7%, barrière 60% | Barr.coupon 60% | Mat espérée: ~1.6a (prob mat: 0%)",
+        "reasoning": "Rendement: base 40 → -9 = 31 (Régime stagflationniste + ASML (tech cyclique) dans secteur évité + volatilité 37.62% = probabilité de toucher les coupons fortement réduite) | Coupon 7%, barrière 60% | Barr.coupon 60% | Mat espérée: ~1.6a (prob mat: 0%)",
         "_bsDelta": -8,
         "_bs": {
           "score": 32,
@@ -215,13 +215,13 @@
         "score": 61,
         "base": 70,
         "delta": -9,
-        "reasoning": "Qualité: base 70 → -9 = 61 (Tech explicitement évité par MI + beta 1.26 en régime stagflation + ASML cyclique = risque maximal) | Worst: ASML Holding NV B:67"
+        "reasoning": "Qualité: base 70 → -9 = 61 (ASML dans tech sector ÉVITÉ en stagflation + beta 1.26 + drawdown -45% = risque maximal sur ce sous-jacent) | Worst: ASML Holding NV B:67"
       },
       "portfolioFit": {
         "score": 40,
         "base": 80,
         "delta": -5,
-        "reasoning": "Fit: base 80 → -5 = 75 (Phoenix 6 ans peu adapté en stagflation avec tech en difficulté structurelle)"
+        "reasoning": "Fit: base 80 → -5 = 75 (Surpondération tech déjà problématique en stagflation, ce produit aggrave le biais sectoriel défavorable)"
       },
       "riskPremium": {
         "score": 34,
@@ -230,38 +230,38 @@
         "reasoning": "Capital garanti: spread 7.0% - CAT 2.5% - illiq 0.5% = 4.0%"
       }
     },
-    "verdict": "Produit TRÈS RISQUÉ en stagflation. ASML (tech, beta 1.26) dans secteur explicitement évité par MI avec drawdown -45% et vol 37.6%. Barrière 60% vulnérable avec seulement 15% de marge depuis B=67. Phoenix 6 ans inadapté au contexte macro actuel, maturité espérée 1.6a optimiste. Score ajusté: 17/100.",
+    "verdict": "Produit INADAPTÉ au contexte stagflationniste actuel. ASML (tech, beta 1.26) est dans le secteur le plus ÉVITÉ avec -45% de drawdown et 37.6% de volatilité. La barrière à 60% semble sûre mais en stagflation + tech évité, le risque de toucher 55% (60% - step-down 5%) est réel. Avec VIX à 22 et le warning sur le rally SPX probablement temporaire, la probabilité de percevoir les coupons est très faible.",
     "keyRisks": [
-      "ASML en tech sector évité + stagflation = probabilité élevée de toucher barrière 60%",
-      "Vol 37.6% et beta 1.26 = mouvements violents attendus, risque perte capitale",
-      "Phoenix 6 ans en stagflation = blocage capital probable sans coupons",
+      "Secteur tech ÉVITÉ en stagflation avec momentum négatif -1.22%",
+      "Volatilité 37.6% + beta 1.26 = mouvements amplifiés dans un contexte défavorable",
+      "Step-down -5%/sem peut rapidement éroder la protection à 60%",
       "Barrière à 0.55σ (Danger) — vol 37.62%"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 7,
-        "return_eur": 7000,
+        "return_pct": 3.5,
+        "return_eur": 3500,
         "probability": 0.15,
         "duration_years": 1
       },
       "base": {
-        "return_pct": 3.5,
-        "return_eur": 10500,
-        "probability": 0.25,
-        "duration_years": 3
-      },
-      "stress": {
         "return_pct": 0,
         "return_eur": 0,
         "probability": 0.35,
         "duration_years": 6
       },
+      "stress": {
+        "return_pct": -20,
+        "return_eur": -20000,
+        "probability": 0.35,
+        "duration_years": 3
+      },
       "worst": {
-        "return_pct": -33,
-        "return_eur": -33000,
-        "probability": 0.25,
-        "duration_years": 6
+        "return_pct": -40,
+        "return_eur": -40000,
+        "probability": 0.15,
+        "duration_years": 2
       }
     },
     "confidenceInterval": {
@@ -273,8 +273,8 @@
       "label": "D [33-49]"
     },
     "metadata": {
-      "gradedAt": "2026-04-21T12:42:30.804Z",
-      "durationMs": 19625,
+      "gradedAt": "2026-04-21T12:48:50.318Z",
+      "durationMs": 20941,
       "aiUsed": true,
       "version": "7.1",
       "productType": "autocall",
