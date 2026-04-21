@@ -379,6 +379,117 @@ function _renderInvestorMetrics(p) {
     }
   }
 
+  // ─── Probabilités détaillées (produits actions: autocall, phoenix) ──────
+  if (!isRate && couponRate > 0) {
+    var er = p.earlyRedemption || {};
+    var hasAutocallProb = er.possible && (er.type === 'autocall' || er.type === 'callable');
+    var freq = (coupon.frequency || 'annuel').toLowerCase();
+    var obsPerYear = freq.indexOf('semestr') >= 0 ? 2 : freq.indexOf('trimestr') >= 0 ? 4 : 1;
+    var triggerAC = parseFloat(er.trigger) || parseFloat(coupon.trigger) || 100;
+    var vol = 28; // default single-stock
+    var hasMemory = coupon.memory === true;
+
+    // Try to get real vol from grading metadata
+    if (p.grading && p.grading.metadata && p.grading.metadata.bsVols && p.grading.metadata.bsVols.length > 0) {
+      vol = Math.max.apply(null, p.grading.metadata.bsVols);
+    }
+
+    // Compute prob autocall at each observation date
+    var totalObs2 = Math.floor(matYears * obsPerYear);
+    var probSurvival = 1.0;
+    var autocallProbs = [];
+    var cumulProb = 0;
+
+    for (var obs = 1; obs <= totalObs2; obs++) {
+      var T = obs / obsPerYear;
+      // Start semester check
+      if (er.startSemester && obs < er.startSemester) {
+        autocallProbs.push({ obs: obs, year: T, probCall: 0, probCumul: 0, probSurvival: probSurvival });
+        continue;
+      }
+      // Step-down: trigger decreases over time
+      var adjTrigger = triggerAC;
+      if (er.stepDown && er.stepDownPct) {
+        adjTrigger = Math.max(70, triggerAC - (er.stepDownPct * (obs - (er.startSemester || 2))));
+      }
+      // BS prob of being above trigger at time T
+      var sigma = vol / 100;
+      var d2 = (Math.log(100 / adjTrigger) + (0.02 - sigma * sigma / 2) * T) / (sigma * Math.sqrt(T));
+      var probAbove = _normcdfApprox(d2);
+      var probCallThisObs = probSurvival * probAbove;
+      cumulProb += probCallThisObs;
+      probSurvival *= (1 - probAbove);
+
+      autocallProbs.push({ obs: obs, year: T, trigger: adjTrigger, probCall: probCallThisObs, probCumul: cumulProb, probSurvival: probSurvival });
+    }
+
+    var probReachMaturity = probSurvival;
+    var expectedMat = 0;
+    autocallProbs.forEach(function(ap) { expectedMat += ap.probCall * ap.year; });
+    expectedMat += probReachMaturity * matYears;
+
+    // Prob de coupon (au moins un coupon versé sur la durée avec mémoire)
+    var probAtLeastOneCoupon = hasMemory ? (1 - Math.pow(1 - autocallProbs[0].probCall, totalObs2)) : (autocallProbs.length > 0 ? autocallProbs[0].probCall / (autocallProbs[0].probSurvival || 1) : 0.5);
+
+    // Prob de perte (reach maturity AND below barrier)
+    var probLoss = 0;
+    if (barrier > 0 && barrier < 100) {
+      var d2Loss = (Math.log(100 / barrier) + (0.02 - (vol/100) * (vol/100) / 2) * matYears) / ((vol/100) * Math.sqrt(matYears));
+      probLoss = Math.round((1 - _normcdfApprox(d2Loss)) * probReachMaturity * 1000) / 10;
+    }
+
+    html += '<div style="padding:14px;background:#F0F9FF;border:1px solid #BAE6FD;border-radius:8px;margin-bottom:8px">';
+    html += '<div style="font-size:12px;font-weight:700;color:#0369A1;margin-bottom:10px">📊 Probabilités détaillées — Autocall & Coupon</div>';
+
+    // Summary KPIs
+    html += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px">';
+    html += '<div style="padding:10px;background:white;border-radius:6px;text-align:center;border:1px solid #E2E8F0">';
+    html += '<div style="font-size:10px;color:#475569">Maturité espérée</div>';
+    html += '<div style="font-family:var(--mono);font-size:18px;font-weight:800;color:#7C3AED">' + expectedMat.toFixed(1) + ' ans</div>';
+    html += '<div style="font-size:10px;color:#475569">sur ' + matYears + ' max</div></div>';
+
+    html += '<div style="padding:10px;background:white;border-radius:6px;text-align:center;border:1px solid #E2E8F0">';
+    html += '<div style="font-size:10px;color:#475569">Prob autocall < 3 ans</div>';
+    var probBefore3 = 0;
+    autocallProbs.forEach(function(ap) { if (ap.year <= 3) probBefore3 = ap.probCumul; });
+    html += '<div style="font-family:var(--mono);font-size:18px;font-weight:800;color:#059669">' + Math.round(probBefore3 * 100) + '%</div></div>';
+
+    html += '<div style="padding:10px;background:white;border-radius:6px;text-align:center;border:1px solid #E2E8F0">';
+    html += '<div style="font-size:10px;color:#475569">Prob atteindre maturité</div>';
+    html += '<div style="font-family:var(--mono);font-size:18px;font-weight:800;color:#D97706">' + Math.round(probReachMaturity * 100) + '%</div></div>';
+
+    html += '<div style="padding:10px;background:white;border-radius:6px;text-align:center;border:1px solid #E2E8F0">';
+    html += '<div style="font-size:10px;color:#475569">Prob perte en capital</div>';
+    html += '<div style="font-family:var(--mono);font-size:18px;font-weight:800;color:' + (probLoss < 5 ? '#059669' : probLoss < 15 ? '#D97706' : '#DC2626') + '">' + probLoss + '%</div></div>';
+    html += '</div>';
+
+    // Autocall timeline
+    html += '<div style="font-size:11px;font-weight:600;color:#475569;margin-bottom:6px">Probabilité d\'autocall par date d\'observation :</div>';
+    html += '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">';
+    autocallProbs.forEach(function(ap) {
+      if (ap.probCall <= 0) return;
+      var pct = Math.round(ap.probCall * 100);
+      var cumPct = Math.round(ap.probCumul * 100);
+      var label = obsPerYear >= 2 ? 'S' + ap.obs : 'An ' + ap.obs;
+      var bg = cumPct >= 70 ? '#ECFDF5' : cumPct >= 40 ? '#FFF7ED' : '#F8FAFC';
+      var color = cumPct >= 70 ? '#059669' : cumPct >= 40 ? '#D97706' : '#475569';
+      html += '<div style="padding:4px 8px;background:' + bg + ';border:1px solid #E2E8F0;border-radius:4px;text-align:center;min-width:50px">';
+      html += '<div style="font-size:9px;color:#94A3B8">' + label + '</div>';
+      html += '<div style="font-size:12px;font-weight:700;color:' + color + '">' + pct + '%</div>';
+      html += '<div style="font-size:9px;color:#94A3B8">cum. ' + cumPct + '%</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+
+    if (hasMemory) {
+      html += '<div style="padding:6px 10px;background:#ECFDF5;border:1px solid #6EE7B7;border-radius:4px;font-size:10px;color:#065F46;margin-bottom:4px">';
+      html += '🧠 <strong>Effet mémoire</strong> : les coupons non versés sont accumulés et versés dès que la condition est remplie. Sur ' + totalObs2 + ' observations, la probabilité de ne JAMAIS recevoir de coupon est de ' + Math.round(probReachMaturity * 100) + '%.</div>';
+    }
+
+    html += '<div style="font-size:10px;color:#94A3B8;margin-top:4px">Vol implicite : ' + vol.toFixed(1) + '% · Trigger autocall : ' + triggerAC + '%' + (er.stepDown ? ' (step-down -' + er.stepDownPct + '%/sem)' : '') + '</div>';
+    html += '</div>';
+  }
+
   // ─── Stress test 3 scénarios (pour produits actions) ──────
   if (!isRate && barrier) {
     html += '<div style="padding:12px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:8px;margin-bottom:8px">';
