@@ -16,18 +16,17 @@
   "maturity": "6 ans",
   "maturityYears": 6,
   "coupon": {
-    "rate": 3.5,
-    "rateIfCalled": null,
-    "rateIfMaturity": null,
+    "rate": 7,
+    "frequency": "annuel",
+    "annualized": true,
     "type": "conditionnel",
-    "frequency": "semestriel",
-    "trigger": -40,
     "memory": true,
-    "paymentTiming": "periodic"
+    "paymentTiming": "periodic",
+    "trigger": -40
   },
   "participationRate": null,
   "guaranteedYears": 0,
-  "autocallCumulTarget": null,
+  "autocallCumulTarget": 100,
   "commissions": 0.9667,
   "isin": "FR0014016TS2",
   "minInvestment": 100000,
@@ -45,10 +44,10 @@
     "frequency": "semestriel",
     "startSemester": 2,
     "stepDown": true,
-    "stepDownPct": 5
+    "stepDownPct": 5,
+    "hasAutocall": true,
+    "enabled": true
   },
-  "decrementPct": null,
-  "actualDividendYield": null,
   "mechanism": "Phoenix à mémoire avec remboursement anticipé automatique dès le semestre 2. Coupon de 3.50% par semestre si performance de l'action ≥ -40%. Remboursement anticipé si action ≥ barrière (100% puis décroissante). Protection partielle du capital si performance finale entre -40% et -60%.",
   "risks": [
     "Risque de perte en capital partielle ou totale",
@@ -175,5 +174,12 @@
   "conversation": [],
   "conversationSummary": null,
   "decision": null,
-  "decisionReason": null
+  "decisionReason": null,
+  "_freqFixApplied": true,
+  "aiCategory": "phoenix-mono",
+  "aiCategoryLabel": "🎯 Phoenix Mono-actif",
+  "aiCategoryColor": "#3B82F6",
+  "aiOpinion": "Produit Phoenix mono sous-jacent offrant un coupon attractif de 7% avec mécanisme mémoire, mais exposition importante au risque ASML sans protection du capital. La barrière à 60% offre une marge de sécurité correcte, toutefois la durée de 6 ans et l'absence de protection exposent à des pertes significatives en cas de forte baisse du titre.",
+  "aiAnalyzedAt": "2026-04-21T09:17:04.803Z",
+  "envelope": "swiss-life"
 }
