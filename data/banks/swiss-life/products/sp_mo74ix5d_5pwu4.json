@@ -26,7 +26,7 @@
   },
   "participationRate": null,
   "guaranteedYears": 0,
-  "autocallCumulTarget": null,
+  "autocallCumulTarget": 100,
   "commissions": 0.9667,
   "isin": "FR0014016TS2",
   "minInvestment": 100000,
@@ -44,10 +44,10 @@
     "frequency": "semestriel",
     "startSemester": 2,
     "stepDown": true,
-    "stepDownPct": 5
+    "stepDownPct": 5,
+    "hasAutocall": true,
+    "enabled": true
   },
-  "decrementPct": null,
-  "actualDividendYield": null,
   "mechanism": "Phoenix à mémoire avec remboursement automatique anticipé dès le semestre 2. Coupon conditionnel de 3.50% semestriel si performance ≥ -40%. Barrières autocall dégressives : 100% aux semestres 2-3, puis -5% tous les 2 semestres jusqu'à 80%. Capital à risque si performance finale < -60%.",
   "risks": [
     "Risque de perte en capital partielle ou totale",
@@ -346,5 +346,6 @@
     }
   },
   "_couponProbability": 47.8,
-  "_bsRendementNet": -7.33
+  "_bsRendementNet": -7.33,
+  "envelope": "swiss-life"
 }
