@@ -237,26 +237,29 @@
   "aiOpinion": "Produit offrant un rendement attractif de 7% annuel avec possibilité de remboursement anticipé dès 95%, mais exposé au risque de perte en capital avec une barrière relativement basse à 60%. La diversification sur 4 secteurs différents (banque, énergie, tech) réduit les risques mais l'absence de protection du capital reste le principal point faible sur 6 ans.",
   "aiAnalyzedAt": "2026-03-30T19:47:42.334Z",
   "_couponProbability": 87.3,
-  "_bsRendementNet": 2.66,
+  "_bsRendementNet": 3.99,
+  "envelope": "swiss-life",
+  "guaranteedYears": 0,
+  "autocallCumulTarget": 95,
   "grading": {
     "grade": "C",
-    "score": 49,
+    "score": 52,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 51,
+        "score": 59,
         "base": 38,
         "delta": 0,
-        "reasoning": "Rendement: base 38 → -5 = 33 (Siemens Energy (DD 71.9%) en stagflation avec VIX 22 réduit fortement la probabilité de toucher les coupons régulièrement) | Coupon 7%, barrière 60% | Barr.coupon 62% | Mat espérée: ~3.3a (prob mat: 24%) | Basket +25pts (vol÷0.79)",
-        "_bsDelta": 13,
+        "reasoning": "Rendement: base 38 → -5 = 33 (Siemens Energy (DD=71.9%, vol=60.95%) en stagflation avec barrière coupon 62% rend les coupons très incertains, probabilité réelle <40%) | Coupon 7%, barrière 60% | Barr.coupon 62% | Mat espérée: ~3.3a (prob mat: 24%) | Basket +25pts (vol÷0.79)",
+        "_bsDelta": 21,
         "_bs": {
-          "score": 51,
+          "score": 59,
           "probCoupon": 87.3,
-          "rendementNet": 2.66,
-          "perteEsperee": 3.45,
+          "rendementNet": 3.99,
+          "perteEsperee": 2.12,
           "couponEffectif": 7,
           "vols": [
             25.01,
@@ -272,7 +275,7 @@
         "score": 54,
         "base": 31,
         "delta": -5,
-        "reasoning": "Qualité: base 31 → -5 = 26 (3 SJ sur 4 dans des secteurs évités (ISP/SAN financials, ASML tech), seul ENR dans energy favorisé mais avec volatilité extrême 61%) | Worst: Siemens Energy AG B:20 | Basket équipondéré 4 actifs: P2 +28pts (diversification)"
+        "reasoning": "Qualité: base 31 → -5 = 26 (3/4 sous-jacents dans secteurs évités (ASML/ISP/SAN en tech/financials), seul ENR dans energy favorisé mais ultra-volatil (beta=1.54)) | Worst: Siemens Energy AG B:20 | Basket équipondéré 4 actifs: P2 +28pts (diversification)"
       },
       "portfolioFit": {
         "score": 61,
@@ -287,36 +290,37 @@
         "reasoning": "Capital garanti: spread 7.0% - CAT 2.5% - illiq 0.5% = 4.0%"
       }
     },
-    "verdict": "Produit très risqué en stagflation avec 3/4 des sous-jacents dans des secteurs évités par le marché. Le worst performer Siemens Energy affiche une volatilité extrême (61%) et un drawdown de -71.9%, rendant l'autocall à 95% très improbable. Avec une probabilité de maturité de seulement 24% et un score final ajusté de 36/100, ce produit présente un profil risque/rendement défavorable malgré le coupon de 7%.",
+    "verdict": "Produit MAL ADAPTÉ au régime stagflationniste actuel avec 3/4 sous-jacents dans des secteurs évités par le marché. Le worst-of Siemens Energy (DD=71.9%, vol=60.95%) compromet sévèrement les coupons malgré son secteur energy favorisé. Avec une probabilité de maturité à 24% seulement et un score ajusté de 21/100, ce produit présente un couple risque/rendement défavorable dans le contexte macro actuel où seul le secteur energy performe.",
     "keyRisks": [
-      "Siemens Energy à -71.9% du peak avec vol 61% compromet fortement la structure",
-      "3 SJ sur 4 dans des secteurs évités en stagflation",
+      "Siemens Energy DD=71.9% menace directement le capital (barrière 60%)",
+      "3/4 sous-jacents dans secteurs évités en stagflation (tech/financials)",
+      "VIX à 22 avec rally SPX +4.5% = probable short squeeze avant correction",
       "Barrière à 0.34σ (Critique) — vol 60.95%"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 7,
-        "return_eur": 21000,
-        "probability": 0.2,
-        "duration_years": 3
+        "return_eur": 7000,
+        "probability": 0.15,
+        "duration_years": 1
       },
       "base": {
         "return_pct": 3.5,
-        "return_eur": 21000,
-        "probability": 0.35,
-        "duration_years": 6
+        "return_eur": 11550,
+        "probability": 0.3,
+        "duration_years": 3.3
       },
       "stress": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.3,
+        "probability": 0.35,
         "duration_years": 6
       },
       "worst": {
         "return_pct": -40,
         "return_eur": -40000,
-        "probability": 0.15,
+        "probability": 0.2,
         "duration_years": 6
       }
     },
@@ -329,8 +333,8 @@
       "label": "C [36-58]"
     },
     "metadata": {
-      "gradedAt": "2026-04-21T09:38:12.075Z",
-      "durationMs": 18593,
+      "gradedAt": "2026-04-21T09:39:12.862Z",
+      "durationMs": 21898,
       "aiUsed": true,
       "version": "7.1",
       "productType": "autocall",
@@ -372,9 +376,9 @@
       "hasDecrement": false,
       "decrementDrag": 0,
       "structureType": "autocall",
-      "bsRendementNet": 2.66,
+      "bsRendementNet": 3.99,
       "bsProbCoupon": 87.3,
-      "bsPerteEsperee": 3.45,
+      "bsPerteEsperee": 2.12,
       "bsVols": [
         25.01,
         28.96,
@@ -386,11 +390,12 @@
       "issuerCreditPenalty": 1,
       "issuerCDS": 60,
       "v6Weights": {
-        "p1": 0.25,
-        "p2": 0.2,
-        "p3": 0.25,
-        "p4": 0.3
+        "p1": 0.35,
+        "p2": 0.25,
+        "p3": 0.15,
+        "p4": 0.25
       },
+      "envelopeMode": "swiss-life",
       "stockData": [
         {
           "name": "Intesa Sanpaolo",
@@ -444,28 +449,25 @@
     },
     "regimeScenarios": {
       "current": {
-        "score": 49,
+        "score": 52,
         "grade": "C",
         "label": "Actuel (stagflation)",
         "desc": "Régime actuel → volatilité modérée"
       },
       "bull": {
-        "score": 55,
+        "score": 57,
         "grade": "C",
         "label": "Bull / Risk-on",
-        "delta": 6,
+        "delta": 5,
         "desc": "Marchés haussiers → prob coupon monte, barrière safe"
       },
       "crash": {
-        "score": 40,
+        "score": 42,
         "grade": "D",
         "label": "Crash / Récession",
-        "delta": -9,
+        "delta": -10,
         "desc": "Marchés baissiers → barrière menacée, vol en hausse"
       }
     }
-  },
-  "envelope": "swiss-life",
-  "guaranteedYears": 0,
-  "autocallCumulTarget": 95
+  }
 }
