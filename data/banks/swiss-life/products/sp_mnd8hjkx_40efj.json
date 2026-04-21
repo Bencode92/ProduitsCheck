@@ -229,7 +229,7 @@
   "aiCategoryColor": "#06D6A0",
   "aiOpinion": "Produit attractif avec un coupon fixe de 6% annuel et protection totale du capital, offrant un bon équilibre rendement/sécurité. Le risque principal reste la concentration sur un seul titre bancaire italien et la possibilité de remboursement anticipé dès que le sous-jacent dépasse 91%.",
   "aiAnalyzedAt": "2026-03-30T13:38:45.016Z",
-  "envelope": "",
+  "envelope": "swiss-life",
   "_couponProbability": 61,
   "_bsRendementNet": 1.83,
   "grading": {
@@ -417,5 +417,7 @@
         "desc": "Marchés baissiers → barrière menacée, vol en hausse"
       }
     }
-  }
+  },
+  "guaranteedYears": 0,
+  "autocallCumulTarget": 91
 }
