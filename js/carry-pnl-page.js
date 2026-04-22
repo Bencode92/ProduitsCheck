@@ -16,7 +16,7 @@
   function _pct(n) { return (Math.round(n * 100) / 100).toFixed(2); }
 
   // ─── LOAN PARAMS ──────
-  var LOAN = { amount: 1000000, rate: 2.90, years: 5, taxRate: 25 };
+  var LOAN = { amount: 1000000, rate: 2.90, years: 5, taxRate: 25, type: 'in_fine' };
   var CAT_REINVEST = 3.0;   // taux réinvestissement coupons sur CAT
   var POST_CALL_RATE = 4.0;  // taux réinvestissement capital post-autocall
 
@@ -45,8 +45,25 @@
     var autocalled = false;
     var autocallYear = 0;
 
+    // Amortizable loan: compute schedule
+    var loanType = overrides.loanType || LOAN.type || 'in_fine';
+    var remainingCapital = amount;
+    var annuity = 0;
+    if (loanType === 'amortissable') {
+      // Constant annuity formula: A = P × r / (1 - (1+r)^-n)
+      var r = LOAN.rate / 100;
+      annuity = Math.round(amount * r / (1 - Math.pow(1 + r, -years)));
+    }
+
     for (var yr = 1; yr <= years; yr++) {
-      var interest = Math.round(amount * LOAN.rate / 100);
+      var interest, capitalRepaid = 0;
+      if (loanType === 'amortissable') {
+        interest = Math.round(remainingCapital * LOAN.rate / 100);
+        capitalRepaid = annuity - interest;
+        remainingCapital = Math.max(0, remainingCapital - capitalRepaid);
+      } else {
+        interest = Math.round(amount * LOAN.rate / 100);
+      }
       var couponReceived = 0;
       var catInterest = Math.round(catPool * catRate / 100);
       var postCallRev = 0;
@@ -56,14 +73,15 @@
         var totalPool = amount + catPool; // capital + coupons accumulés
         postCallRev = Math.round(totalPool * postCallRate / 100);
         var totalRev = postCallRev;
-        var net = totalRev - interest;
+        var totalCost = interest + capitalRepaid;
+        var net = totalRev - totalCost;
         var tax = net > 0 ? Math.round(net * LOAN.taxRate / 100) : 0;
         var netAfterTax = net - tax;
         cumulNet += netAfterTax;
 
         flows.push({
           year: yr, coupon: 0, catInterest: 0, postCallRev: postCallRev,
-          totalRev: totalRev, interest: interest, tax: tax, net: netAfterTax,
+          totalRev: totalRev, interest: interest, capitalRepaid: capitalRepaid, tax: tax, net: netAfterTax,
           cumul: cumulNet, roi: cumulNet / amount * 100,
           status: 'Réinvesti ' + _f(totalPool) + '€ à ' + postCallRate + '%',
           color: '#475569'
@@ -108,7 +126,8 @@
 
       // Réinvestissement des coupons précédents en CAT
       var totalRev2 = couponReceived + catInterest;
-      var net2 = totalRev2 - interest;
+      var totalCost2 = interest + capitalRepaid;
+      var net2 = totalRev2 - totalCost2;
       var tax2 = net2 > 0 ? Math.round(net2 * LOAN.taxRate / 100) : 0;
       var netAfterTax2 = net2 - tax2;
       cumulNet += netAfterTax2;
@@ -120,7 +139,7 @@
         (autocallThisYear ? B.purple : (couponPaid ? '#4ECDC4' : B.red));
 
       flows.push({
-        year: yr, coupon: couponReceived, catInterest: catInterest, postCallRev: 0,
+        year: yr, coupon: couponReceived, catInterest: catInterest, postCallRev: 0, capitalRepaid: capitalRepaid,
         totalRev: totalRev2, interest: interest, tax: tax2, net: netAfterTax2,
         cumul: cumulNet, roi: cumulNet / amount * 100,
         status: statusText,
@@ -156,14 +175,15 @@
   var _currentCouponOverride = 0;
   var _currentPostCallOverride = 0;
 
-  function _renderPnLPage(product, customCatRate, customPostCall) {
-    var couponRate = product.coupon || 7; // FIXED — product coupon doesn't change
+  function _renderPnLPage(product, customCatRate, customPostCall, customLoanType) {
+    var couponRate = product.coupon || 7;
     var catReinvest = customCatRate || CAT_REINVEST;
     var postCallRate = customPostCall || POST_CALL_RATE;
+    var loanType = customLoanType || LOAN.type || 'in_fine';
     _currentCouponOverride = catReinvest;
     _currentPostCallOverride = postCallRate;
 
-    var overrides = { catReinvest: catReinvest, postCallRate: postCallRate };
+    var overrides = { catReinvest: catReinvest, postCallRate: postCallRate, loanType: loanType };
     var opti = _simulate(product, 'optimiste', overrides);
     var normal = _simulate(product, 'normal', overrides);
     var pessi = _simulate(product, 'pessimiste', overrides);
@@ -180,7 +200,8 @@
     h += '<div style="margin-bottom:20px">';
     h += '<button class="btn ghost" onclick="switchMainView(\'carry\')" style="margin-bottom:10px">← Retour Carry Trade</button>';
     h += '<h2 style="color:' + B.text + ';font-size:20px;font-weight:800;margin:0">📊 Analyse P&L — ' + product.name + '</h2>';
-    h += '<div style="color:' + B.muted + ';font-size:12px;margin-top:4px">' + product.emetteur + ' · Coupon ' + couponRate + '% · Emprunt ' + _f(LOAN.amount) + '€ à ' + LOAN.rate + '% · ' + LOAN.years + ' ans · Post-autocall ' + postCallRate + '%</div>';
+    var loanLabel = loanType === 'amortissable' ? 'Amortissable' : 'In Fine';
+    h += '<div style="color:' + B.muted + ';font-size:12px;margin-top:4px">' + product.emetteur + ' · Coupon ' + couponRate + '% · Emprunt ' + _f(LOAN.amount) + '€ à ' + LOAN.rate + '% <strong style="color:' + (loanType === 'amortissable' ? B.orange : B.text) + '">' + loanLabel + '</strong> · ' + LOAN.years + ' ans · Post-autocall ' + postCallRate + '%</div>';
     h += '</div>';
 
     // ─── Controls: modulable reinvestment rates ───
@@ -188,6 +209,11 @@
     h += '<div style="font-size:13px;font-weight:700;color:' + B.purple + ';margin-bottom:4px">🎛️ Paramètres modulables</div>';
     h += '<div style="font-size:10px;color:' + B.muted + ';margin-bottom:10px">Le coupon du produit est fixe (' + product.coupon + '%). Ici vous modulez les taux de réinvestissement.</div>';
     h += '<div style="display:flex;gap:16px;align-items:end;flex-wrap:wrap">';
+    h += '<div><label style="font-size:11px;color:' + B.muted + ';display:block;margin-bottom:4px">Type emprunt</label>';
+    h += '<select id="pnl-loantype" style="padding:8px 12px;border:1px solid ' + B.border + ';border-radius:6px;font-size:13px;font-weight:700;color:' + B.red + '">';
+    h += '<option value="in_fine"' + (loanType === 'in_fine' ? ' selected' : '') + '>In Fine</option>';
+    h += '<option value="amortissable"' + (loanType === 'amortissable' ? ' selected' : '') + '>Amortissable</option>';
+    h += '</select></div>';
     h += '<div><label style="font-size:11px;color:' + B.muted + ';display:block;margin-bottom:4px">Réinvest. coupons (CAT %)</label>';
     h += '<input id="pnl-cat" type="number" step="0.1" value="' + catReinvest + '" style="padding:8px 12px;border:1px solid ' + B.border + ';border-radius:6px;font-size:14px;font-family:var(--mono);width:100px;font-weight:700;color:#4ECDC4"></div>';
     h += '<div><label style="font-size:11px;color:' + B.muted + ';display:block;margin-bottom:4px">Réinvest. post-autocall (%)</label>';
@@ -271,7 +297,8 @@
       h += '<th style="padding:6px;text-align:right;color:#4ECDC4">Intérêts CAT</th>';
       if (d.totalPostCall > 0) h += '<th style="padding:6px;text-align:right;color:' + B.orange + '">Post-call</th>';
       h += '<th style="padding:6px;text-align:right;color:' + B.green + '">Total rev.</th>';
-      h += '<th style="padding:6px;text-align:right;color:' + B.red + '">Emprunt</th>';
+      h += '<th style="padding:6px;text-align:right;color:' + B.red + '">Intérêts</th>';
+      if (loanType === 'amortissable') h += '<th style="padding:6px;text-align:right;color:' + B.red + '">Amort.</th>';
       h += '<th style="padding:6px;text-align:right;color:' + B.orange + '">IS</th>';
       h += '<th style="padding:6px;text-align:right;font-weight:700">Net</th>';
       h += '<th style="padding:6px;text-align:right;color:' + B.purple + '">Cumul</th>';
@@ -289,6 +316,7 @@
         if (d.totalPostCall > 0) h += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:' + B.orange + '">' + (f.postCallRev > 0 ? '+' + _f(f.postCallRev) + '€' : '—') + '</td>';
         h += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:' + B.green + ';font-weight:600">+' + _f(f.totalRev) + '€</td>';
         h += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:' + B.red + '">-' + _f(f.interest) + '€</td>';
+        if (loanType === 'amortissable') h += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:' + B.red + '">' + (f.capitalRepaid > 0 ? '-' + _f(f.capitalRepaid) + '€' : '—') + '</td>';
         h += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:' + B.orange + '">' + (f.tax > 0 ? '-' + _f(f.tax) + '€' : '—') + '</td>';
         h += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);font-weight:700;color:' + netColor + '">' + (f.net >= 0 ? '+' : '') + _f(f.net) + '€</td>';
         h += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:' + B.purple + ';font-weight:600">' + (f.cumul >= 0 ? '+' : '') + _f(f.cumul) + '€</td>';
@@ -336,17 +364,18 @@
   }
 
   // ─── PUBLIC API ──────
-  window.renderCarryPnLPage = function(container, product, customCoupon, customPostCall) {
-    container.innerHTML = '<div class="main">' + _renderPnLPage(product, customCoupon, customPostCall) + '</div>';
+  window.renderCarryPnLPage = function(container, product, customCatRate, customPostCall, customLoanType) {
+    container.innerHTML = '<div class="main">' + _renderPnLPage(product, customCatRate, customPostCall, customLoanType) + '</div>';
   };
 
   window.__pnlRecalculate = function() {
     var catRate = parseFloat(document.getElementById('pnl-cat')?.value) || 3;
     var postCall = parseFloat(document.getElementById('pnl-postcall')?.value) || 4;
+    var loanTypeVal = document.getElementById('pnl-loantype')?.value || 'in_fine';
     var product = window._carryPnLProduct;
     if (!product) return;
     var main = document.getElementById('main-content');
-    if (main) renderCarryPnLPage(main, product, catRate, postCall);
+    if (main) renderCarryPnLPage(main, product, catRate, postCall, loanTypeVal);
   };
 
   // Called from carry trade comparison
