@@ -73,15 +73,16 @@
         var totalPool = amount + catPool; // capital + coupons accumulés
         postCallRev = Math.round(totalPool * postCallRate / 100);
         var totalRev = postCallRev;
-        var totalCost = interest + capitalRepaid;
-        var net = totalRev - totalCost;
+        // Net = revenue - interest only (capital repayment is not a cost, it reduces debt)
+        var net = totalRev - interest;
         var tax = net > 0 ? Math.round(net * LOAN.taxRate / 100) : 0;
         var netAfterTax = net - tax;
         cumulNet += netAfterTax;
 
+        var cashflow = totalRev - interest - capitalRepaid - tax;
         flows.push({
           year: yr, coupon: 0, catInterest: 0, postCallRev: postCallRev,
-          totalRev: totalRev, interest: interest, capitalRepaid: capitalRepaid, tax: tax, net: netAfterTax,
+          totalRev: totalRev, interest: interest, capitalRepaid: capitalRepaid, tax: tax, net: netAfterTax, cashflow: cashflow,
           cumul: cumulNet, roi: cumulNet / amount * 100,
           status: 'Réinvesti ' + _f(totalPool) + '€ à ' + postCallRate + '%',
           color: '#475569'
@@ -126,8 +127,8 @@
 
       // Réinvestissement des coupons précédents en CAT
       var totalRev2 = couponReceived + catInterest;
-      var totalCost2 = interest + capitalRepaid;
-      var net2 = totalRev2 - totalCost2;
+      // Net = revenue - interest only (capital repayment reduces debt, not a P&L cost)
+      var net2 = totalRev2 - interest;
       var tax2 = net2 > 0 ? Math.round(net2 * LOAN.taxRate / 100) : 0;
       var netAfterTax2 = net2 - tax2;
       cumulNet += netAfterTax2;
@@ -138,8 +139,9 @@
       var statusColor = yr <= guaranteed ? B.green :
         (autocallThisYear ? B.purple : (couponPaid ? '#4ECDC4' : B.red));
 
+      var cashflow2 = totalRev2 - interest - capitalRepaid - tax2;
       flows.push({
-        year: yr, coupon: couponReceived, catInterest: catInterest, postCallRev: 0, capitalRepaid: capitalRepaid,
+        year: yr, coupon: couponReceived, catInterest: catInterest, postCallRev: 0, capitalRepaid: capitalRepaid, cashflow: cashflow2,
         totalRev: totalRev2, interest: interest, tax: tax2, net: netAfterTax2,
         cumul: cumulNet, roi: cumulNet / amount * 100,
         status: statusText,
@@ -316,7 +318,9 @@
         if (d.totalPostCall > 0) h += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:' + B.orange + '">' + (f.postCallRev > 0 ? '+' + _f(f.postCallRev) + '€' : '—') + '</td>';
         h += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:' + B.green + ';font-weight:600">+' + _f(f.totalRev) + '€</td>';
         h += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:' + B.red + '">-' + _f(f.interest) + '€</td>';
-        if (loanType === 'amortissable') h += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:' + B.red + '">' + (f.capitalRepaid > 0 ? '-' + _f(f.capitalRepaid) + '€' : '—') + '</td>';
+        if (loanType === 'amortissable') {
+          h += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:' + B.red + '">' + (f.capitalRepaid > 0 ? '-' + _f(f.capitalRepaid) + '€' : '—') + '</td>';
+        }
         h += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:' + B.orange + '">' + (f.tax > 0 ? '-' + _f(f.tax) + '€' : '—') + '</td>';
         h += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);font-weight:700;color:' + netColor + '">' + (f.net >= 0 ? '+' : '') + _f(f.net) + '€</td>';
         h += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:' + B.purple + ';font-weight:600">' + (f.cumul >= 0 ? '+' : '') + _f(f.cumul) + '€</td>';
