@@ -16,7 +16,7 @@
   function _pct(n) { return (Math.round(n * 100) / 100).toFixed(2); }
 
   // ─── LOAN PARAMS ──────
-  var LOAN = { amount: 1000000, rate: 2.90, years: 5, taxRate: 25, type: 'in_fine' };
+  var LOAN = { amount: 1000000, rate: 2.90, years: 5, taxRate: 25, type: 'in_fine', fees: 800 };
   var CAT_REINVEST = 3.0;   // taux réinvestissement coupons sur CAT
   var POST_CALL_RATE = 4.0;  // taux réinvestissement capital post-autocall
 
@@ -158,6 +158,21 @@
     var totalInterest = flows.reduce(function(s, f) { return s + f.interest; }, 0);
     var totalTax = flows.reduce(function(s, f) { return s + f.tax; }, 0);
 
+    // Fees (deducted from net)
+    var fees = LOAN.fees || 0;
+
+    // Coût d'opportunité amortissable : capital remboursé aurait rapporté X% en CAT
+    var coutOpportunite = 0;
+    if (loanType === 'amortissable') {
+      var cumulCapRepaid = 0;
+      flows.forEach(function(f) {
+        cumulCapRepaid += f.capitalRepaid || 0;
+        coutOpportunite += Math.round(cumulCapRepaid * CAT_REINVEST / 100);
+      });
+    }
+
+    var netFinal = cumulNet - fees - coutOpportunite;
+
     return {
       flows: flows,
       totalCoupons: totalCoupons,
@@ -166,7 +181,10 @@
       totalRevenue: totalCoupons + totalCatInterest + totalPostCall,
       totalInterest: totalInterest,
       totalTax: totalTax,
-      netAfterTax: cumulNet,
+      fees: fees,
+      coutOpportunite: coutOpportunite,
+      netAfterTax: netFinal,
+      netBeforeFees: cumulNet,
       autocalled: autocalled,
       autocallYear: autocallYear,
       finalCatPool: catPool
@@ -190,10 +208,19 @@
     var normal = _simulate(product, 'normal', overrides);
     var pessi = _simulate(product, 'pessimiste', overrides);
 
+    // Stress scenario: pessimiste + capital lock-up 5 ans supplémentaires (produit 10Y, emprunt 5Y)
+    var stress = JSON.parse(JSON.stringify(pessi));
+    // Add lock-up cost: capital 1M bloqué 5 ans de plus (An 6-10) sans coupon → coût d'opportunité CAT
+    var lockupCost = Math.round(LOAN.amount * CAT_REINVEST / 100 * 5); // 5 ans × 3% × 1M = 150K
+    stress.lockupCost = lockupCost;
+    stress.netAfterTax = pessi.netAfterTax - lockupCost;
+    stress.totalRevenue = pessi.totalRevenue;
+
     var scenarios = [
-      { name: 'Optimiste', key: 'optimiste', data: opti, color: '#059669', bg: '#ECFDF5', border: '#6EE7B7', desc: 'Tous les coupons versés, autocall au plus tôt' },
-      { name: 'Normal', key: 'normal', data: normal, color: '#2563EB', bg: '#EFF6FF', border: '#93C5FD', desc: 'Coupon × probabilité historique (' + Math.round(product.prob * 100) + '%)' },
-      { name: 'Pessimiste', key: 'pessimiste', data: pessi, color: '#DC2626', bg: '#FEF2F2', border: '#FCA5A5', desc: 'Seuls les coupons garantis (' + (product.guaranteedYears || 0) + ' ans)' }
+      { name: 'Optimiste', key: 'optimiste', data: opti, color: '#059669', bg: '#ECFDF5', border: '#6EE7B7', desc: 'Tous les coupons versés, autocall An ' + Math.ceil((product.autocallTarget || 21) / (product.coupon || 7)) },
+      { name: 'Normal', key: 'normal', data: normal, color: '#2563EB', bg: '#EFF6FF', border: '#93C5FD', desc: 'Coupon × probabilité (' + Math.round(product.prob * 100) + '%)' },
+      { name: 'Pessimiste', key: 'pessimiste', data: pessi, color: '#DC2626', bg: '#FEF2F2', border: '#FCA5A5', desc: 'Coupons garantis uniquement (' + (product.guaranteedYears || 0) + ' ans)' },
+      { name: 'Stress', key: 'stress', data: stress, color: '#7C3AED', bg: '#F5F3FF', border: '#C4B5FD', desc: 'Pessimiste + capital bloqué 10 ans (pas d\'autocall, remboursement maturité)' }
     ];
 
     var h = '';
@@ -254,7 +281,7 @@
     h += '</tbody></table></div></div>';
 
     // 3 scenario summary cards
-    h += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">';
+    h += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px">';
     scenarios.forEach(function(sc) {
       var d = sc.data;
       h += '<div style="padding:16px;background:' + sc.bg + ';border:2px solid ' + sc.border + ';border-radius:10px">';
@@ -270,6 +297,9 @@
       h += '<div>Intérêts CAT: <strong style="color:#4ECDC4">+' + _f(d.totalCatInterest) + '€</strong></div>';
       if (d.totalPostCall > 0) h += '<div>Post-call: <strong style="color:' + B.orange + '">+' + _f(d.totalPostCall) + '€</strong></div>';
       h += '<div>Intérêts: <strong style="color:' + B.red + '">-' + _f(d.totalInterest) + '€</strong></div>';
+      if (d.fees > 0) h += '<div>Frais dossier: <strong style="color:' + B.red + '">-' + _f(d.fees) + '€</strong></div>';
+      if (d.coutOpportunite > 0) h += '<div>Coût opportunité: <strong style="color:' + B.red + '">-' + _f(d.coutOpportunite) + '€</strong></div>';
+      if (d.lockupCost > 0) h += '<div>Lock-up 5Y suppl.: <strong style="color:' + B.purple + '">-' + _f(d.lockupCost) + '€</strong></div>';
       h += '</div>';
       if (loanType === 'amortissable') {
         var totalCapRepaid = d.flows.reduce(function(s, f) { return s + (f.capitalRepaid || 0); }, 0);
@@ -370,9 +400,9 @@
     h += '</table>';
 
     // Espérance pondérée
-    var esperance = Math.round(opti.netAfterTax * 0.25 + normal.netAfterTax * 0.50 + pessi.netAfterTax * 0.25);
+    var esperance = Math.round(opti.netAfterTax * 0.20 + normal.netAfterTax * 0.50 + pessi.netAfterTax * 0.20 + stress.netAfterTax * 0.10);
     h += '<div style="margin-top:12px;padding:10px;background:rgba(37,99,235,0.06);border-radius:6px;font-size:12px;text-align:center">';
-    h += '<strong style="color:#2563EB">Espérance pondérée</strong> (25% opti + 50% normal + 25% pessi) = ';
+    h += '<strong style="color:#2563EB">Espérance pondérée</strong> (20% opti + 50% normal + 20% pessi + 10% stress) = ';
     h += '<strong style="font-size:16px;color:#2563EB">' + (esperance >= 0 ? '+' : '') + _f(esperance) + '€</strong>';
     h += '</div>';
     h += '</div>';
@@ -384,10 +414,11 @@
     var bilanScenarios = [
       { name: 'Optimiste', data: opti, color: '#06D6A0' },
       { name: 'Normal', data: normal, color: '#3B82F6' },
-      { name: 'Pessimiste', data: pessi, color: '#EF4444' }
+      { name: 'Pessimiste', data: pessi, color: '#EF4444' },
+      { name: 'Stress', data: stress, color: '#7C3AED' }
     ];
 
-    h += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">';
+    h += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">';
     bilanScenarios.forEach(function(bs) {
       var d = bs.data;
       var totalCapRepaid = d.flows.reduce(function(s, f) { return s + (f.capitalRepaid || 0); }, 0);
@@ -416,6 +447,8 @@
       if (d.totalPostCall > 0) h += '<div style="font-size:11px;margin-bottom:4px"><span style="color:#94A3B8">Revenus post-call :</span> <span style="color:#D97706;font-family:var(--mono)">+' + _f(d.totalPostCall) + '€</span></div>';
       h += '<div style="font-size:11px;margin-bottom:4px"><span style="color:#94A3B8">Intérêts emprunt :</span> <span style="color:#EF4444;font-family:var(--mono)">-' + _f(d.totalInterest) + '€</span></div>';
       h += '<div style="font-size:11px;margin-bottom:4px"><span style="color:#94A3B8">IS 25% :</span> <span style="color:#D97706;font-family:var(--mono)">-' + _f(d.totalTax) + '€</span></div>';
+      if (d.fees > 0) h += '<div style="font-size:11px;margin-bottom:4px"><span style="color:#94A3B8">Frais dossier :</span> <span style="color:#EF4444;font-family:var(--mono)">-' + _f(d.fees) + '€</span></div>';
+      if (d.lockupCost > 0) h += '<div style="font-size:11px;margin-bottom:4px"><span style="color:#94A3B8">Lock-up capital 5Y :</span> <span style="color:#7C3AED;font-family:var(--mono)">-' + _f(d.lockupCost) + '€</span></div>';
 
       if (loanType === 'amortissable' && tresoSortie > 0) {
         h += '<div style="font-size:11px;margin-bottom:4px"><span style="color:#94A3B8">Sortie tréso (amort.) :</span> <span style="color:#EF4444;font-family:var(--mono)">-' + _f(tresoSortie) + '€</span></div>';
