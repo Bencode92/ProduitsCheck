@@ -377,6 +377,74 @@
     h += '</div>';
     h += '</div>';
 
+    // ─── BILAN FINAL CLAIR — Ce que j'ai en poche à N+5 ───
+    h += '<div style="padding:16px;background:#1E293B;border-radius:10px;margin-bottom:20px;color:white">';
+    h += '<div style="font-size:14px;font-weight:800;color:white;margin-bottom:12px">💰 BILAN FINAL À N+' + LOAN.years + ' — Ce que j\'ai en poche</div>';
+
+    var bilanScenarios = [
+      { name: 'Optimiste', data: opti, color: '#06D6A0' },
+      { name: 'Normal', data: normal, color: '#3B82F6' },
+      { name: 'Pessimiste', data: pessi, color: '#EF4444' }
+    ];
+
+    h += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">';
+    bilanScenarios.forEach(function(bs) {
+      var d = bs.data;
+      var totalCapRepaid = d.flows.reduce(function(s, f) { return s + (f.capitalRepaid || 0); }, 0);
+
+      // Recettes
+      var recettes = d.totalCoupons + d.totalCatInterest + d.totalPostCall;
+      // Coûts
+      var couts = d.totalInterest + d.totalTax;
+      // Tréso sortie pour amortissement
+      var tresoSortie = 0;
+      if (loanType === 'amortissable') {
+        d.flows.forEach(function(f) {
+          var annuite = f.interest + (f.capitalRepaid || 0);
+          var deficit = Math.max(0, annuite - f.totalRev);
+          tresoSortie += deficit;
+        });
+      }
+      // Capital: in fine = récupéré et remboursé (neutre), amortissable = déjà remboursé
+      var netEnPoche = d.netAfterTax - tresoSortie;
+
+      h += '<div style="padding:12px;background:rgba(255,255,255,0.08);border-radius:8px;border-top:3px solid ' + bs.color + '">';
+      h += '<div style="font-size:12px;font-weight:700;color:' + bs.color + ';margin-bottom:8px">' + bs.name + '</div>';
+
+      h += '<div style="font-size:11px;margin-bottom:4px"><span style="color:#94A3B8">Coupons reçus :</span> <span style="color:#06D6A0;font-family:var(--mono)">+' + _f(d.totalCoupons) + '€</span></div>';
+      h += '<div style="font-size:11px;margin-bottom:4px"><span style="color:#94A3B8">Intérêts CAT :</span> <span style="color:#4ECDC4;font-family:var(--mono)">+' + _f(d.totalCatInterest) + '€</span></div>';
+      if (d.totalPostCall > 0) h += '<div style="font-size:11px;margin-bottom:4px"><span style="color:#94A3B8">Revenus post-call :</span> <span style="color:#D97706;font-family:var(--mono)">+' + _f(d.totalPostCall) + '€</span></div>';
+      h += '<div style="font-size:11px;margin-bottom:4px"><span style="color:#94A3B8">Intérêts emprunt :</span> <span style="color:#EF4444;font-family:var(--mono)">-' + _f(d.totalInterest) + '€</span></div>';
+      h += '<div style="font-size:11px;margin-bottom:4px"><span style="color:#94A3B8">IS 25% :</span> <span style="color:#D97706;font-family:var(--mono)">-' + _f(d.totalTax) + '€</span></div>';
+
+      if (loanType === 'amortissable' && tresoSortie > 0) {
+        h += '<div style="font-size:11px;margin-bottom:4px"><span style="color:#94A3B8">Sortie tréso (amort.) :</span> <span style="color:#EF4444;font-family:var(--mono)">-' + _f(tresoSortie) + '€</span></div>';
+      }
+
+      h += '<div style="border-top:1px solid rgba(255,255,255,0.2);margin-top:8px;padding-top:8px">';
+
+      if (loanType === 'in_fine') {
+        h += '<div style="font-size:11px;margin-bottom:4px;color:#94A3B8">Capital structuré récupéré : <span style="color:#06D6A0;font-family:var(--mono)">+' + _f(LOAN.amount) + '€</span></div>';
+        h += '<div style="font-size:11px;margin-bottom:8px;color:#94A3B8">Emprunt remboursé : <span style="color:#EF4444;font-family:var(--mono)">-' + _f(LOAN.amount) + '€</span></div>';
+        h += '<div style="font-size:11px;color:#94A3B8;margin-bottom:4px">= Net capital : 0€ (neutre)</div>';
+      } else {
+        h += '<div style="font-size:11px;margin-bottom:8px;color:#94A3B8">Emprunt déjà remboursé dans les annuités</div>';
+        h += '<div style="font-size:11px;margin-bottom:8px;color:#94A3B8">Capital structuré récupéré à maturité : <span style="color:#06D6A0;font-family:var(--mono)">+' + _f(LOAN.amount) + '€</span></div>';
+      }
+
+      h += '<div style="font-size:22px;font-weight:800;color:' + (netEnPoche >= 0 ? '#06D6A0' : '#EF4444') + '">';
+      h += '🏦 ' + (netEnPoche >= 0 ? '+' : '') + _f(netEnPoche) + '€';
+      h += '</div>';
+      h += '<div style="font-size:10px;color:#94A3B8">net en poche après ' + LOAN.years + ' ans</div>';
+      if (loanType === 'in_fine') {
+        h += '<div style="font-size:10px;color:#06D6A0;margin-top:4px">Trésorerie mobilisée : 0€</div>';
+      } else {
+        h += '<div style="font-size:10px;color:#EF4444;margin-top:4px">Trésorerie mobilisée : ' + _f(tresoSortie) + '€</div>';
+      }
+      h += '</div></div>';
+    });
+    h += '</div></div>';
+
     return h;
   }
 
