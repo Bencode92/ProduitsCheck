@@ -269,9 +269,22 @@
       h += '<div>Coupons: <strong style="color:' + B.green + '">+' + _f(d.totalCoupons) + '€</strong></div>';
       h += '<div>Intérêts CAT: <strong style="color:#4ECDC4">+' + _f(d.totalCatInterest) + '€</strong></div>';
       if (d.totalPostCall > 0) h += '<div>Post-call: <strong style="color:' + B.orange + '">+' + _f(d.totalPostCall) + '€</strong></div>';
-      h += '<div>Emprunt: <strong style="color:' + B.red + '">-' + _f(d.totalInterest) + '€</strong></div>';
+      h += '<div>Intérêts: <strong style="color:' + B.red + '">-' + _f(d.totalInterest) + '€</strong></div>';
       h += '</div>';
-      if (d.autocalled) h += '<div style="margin-top:8px;padding:4px 8px;background:' + sc.color + '15;border-radius:4px;font-size:10px;color:' + sc.color + '">Autocall An ' + d.autocallYear + ' → réinvesti à ' + POST_CALL_RATE + '%</div>';
+      if (loanType === 'amortissable') {
+        var totalCapRepaid = d.flows.reduce(function(s, f) { return s + (f.capitalRepaid || 0); }, 0);
+        var totalCashOut = d.flows.reduce(function(s, f) { return s + Math.max(0, (f.interest + (f.capitalRepaid || 0)) - f.totalRev); }, 0);
+        h += '<div style="margin-top:8px;padding:6px 8px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:4px;font-size:10px">';
+        h += '<div style="color:' + B.red + ';font-weight:700">💸 Impact trésorerie (amortissable)</div>';
+        h += '<div style="color:#991B1B">Capital remboursé : -' + _f(totalCapRepaid) + '€</div>';
+        h += '<div style="color:#991B1B;font-weight:700">Sortie nette tréso : -' + _f(totalCashOut) + '€ sur ' + LOAN.years + ' ans</div>';
+        h += '</div>';
+      } else {
+        h += '<div style="margin-top:8px;padding:4px 8px;background:#ECFDF5;border:1px solid #6EE7B7;border-radius:4px;font-size:10px;color:#065F46">';
+        h += '✅ <strong>In fine</strong> : 0€ de trésorerie sortie (intérêts couverts par coupons)';
+        h += '</div>';
+      }
+      if (d.autocalled) h += '<div style="margin-top:4px;padding:4px 8px;background:' + sc.color + '15;border-radius:4px;font-size:10px;color:' + sc.color + '">Autocall An ' + d.autocallYear + ' → réinvesti à ' + postCallRate + '%</div>';
       h += '</div>';
     });
     h += '</div>';
