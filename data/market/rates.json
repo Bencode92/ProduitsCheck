@@ -1,6 +1,6 @@
 {
   "source": "ECB + Banque de France (TEC) + Twelve Data",
-  "fetched_at": "2026-04-22T18:02:22.705517+00:00",
+  "fetched_at": "2026-04-23T08:26:15.548260+00:00",
   "yields": {
     "oat_fr_10y": {
       "current": 3.037,
@@ -24389,13 +24389,13 @@
       "name": "ECB Main Refinancing Rate",
       "description": "Taux directeur BCE",
       "current": 2.15,
-      "date": "2026-04-22"
+      "date": "2026-04-23"
     },
     "ecb_deposit_rate": {
       "name": "ECB Deposit Facility Rate",
       "description": "Taux de dépôt BCE",
       "current": 2.0,
-      "date": "2026-04-22"
+      "date": "2026-04-23"
     }
   },
   "yield_curve": {
