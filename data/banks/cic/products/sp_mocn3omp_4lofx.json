@@ -10,7 +10,7 @@
     "sp": "A+"
   },
   "underlyings": [
-    "BFRTEC10"
+    "TEC10"
   ],
   "underlyingType": "rates",
   "currency": "EUR",
@@ -137,5 +137,13 @@
   "conversation": [],
   "conversationSummary": null,
   "decision": null,
-  "decisionReason": null
+  "decisionReason": null,
+  "aiCategory": "autocall-mono",
+  "aiCategoryLabel": "⚡ Autocall Mono-actif",
+  "aiCategoryColor": "#06D6A0",
+  "aiOpinion": "Produit attractif avec un coupon généreux de 6,75% annuel et une protection totale du capital, offrant un bon équilibre rendement/sécurité. Le seuil d'autocall relativement bas à 20,25% au-dessus du niveau initial facilite le remboursement anticipé, mais la performance reste liée à un seul sous-jacent technologique potentiellement volatil.",
+  "aiAnalyzedAt": "2026-04-24T08:19:48.958Z",
+  "envelope": "",
+  "guaranteedYears": 0,
+  "autocallCumulTarget": 20.25
 }
