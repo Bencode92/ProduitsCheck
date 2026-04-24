@@ -975,22 +975,26 @@
       var type = st.indexOf('fixe') >= 0 ? 'fixe' : 'conditionnel';
       var prob = p._couponProbability ? p._couponProbability / 100 : (type === 'fixe' ? 1.0 : 0.90);
 
+      var paymentTiming = (p.coupon && p.coupon.paymentTiming) ||
+                          (p.coupon && p.coupon.frequency === 'in_fine' ? 'in_fine' : null) ||
+                          'periodic';
       var product = {
         name: p.name || 'Produit StructBoard',
         type: type,
         coupon: couponRate,
         prob: prob,
         duration: p.maturityYears || 10,
-        guaranteedYears: p.guaranteedYears || 0,
+        guaranteedYears: p.guaranteedYears || (p.coupon && p.coupon.guaranteedYears) || 0,
         autocallTarget: p.autocallCumulTarget || (p.earlyRedemption && p.earlyRedemption.trigger > 10 ? p.earlyRedemption.trigger : 0) || 0,
         autocallYears: 0,
         amount: amount,
         risk: (p.capitalProtection && p.capitalProtection.protected) ? 'Faible' : 'Modéré',
-        detail: (p.emitter || '') + (trigger ? ' · Trigger ' + trigger + '%' : '') + ' · ' + ((p.capitalProtection && p.capitalProtection.protected) ? 'Capital garanti 100%' : ''),
+        detail: (p.emitter || '') + (trigger ? ' · Trigger ' + trigger + '%' : '') + ' · ' + ((p.capitalProtection && p.capitalProtection.protected) ? 'Capital garanti 100%' : '') + (paymentTiming === 'in_fine' ? ' · Coupons in fine' : ''),
         color: '#7C3AED',
         source: 'structboard',
         emetteur: p.emitter || '?',
         trigger: trigger,
+        paymentTiming: paymentTiming,
         _productId: p.id,
         _bankId: p.bankId
       };
@@ -1060,22 +1064,34 @@
 
     try {
       var d = JSON.parse(ta.value);
+      // Support both number and object forms for coupon (from analyseur JSON)
+      var couponObj = (d.coupon && typeof d.coupon === 'object') ? d.coupon : null;
+      var couponNum = couponObj ? parseFloat(couponObj.rate) : parseFloat(d.coupon);
+      var paymentTiming = d.paymentTiming || (couponObj && couponObj.paymentTiming) ||
+                          (couponObj && couponObj.frequency === 'in_fine' ? 'in_fine' : null) ||
+                          'periodic';
+      var guaranteed = parseInt(d.guaranteedYears) || (couponObj && parseInt(couponObj.guaranteedYears)) || 0;
+      var triggerVal = d.trigger || (couponObj && couponObj.trigger) || (d.capitalProtection && d.capitalProtection.barrierCoupon) || null;
+      var autocallTgt = parseFloat(d.autocallTarget) || (d.earlyRedemption && d.earlyRedemption.trigger > 10 ? d.earlyRedemption.trigger : 0) || 0;
+      var capGaranti = d.capitalGaranti !== undefined ? d.capitalGaranti : ((d.capitalProtection && d.capitalProtection.protected) || false);
+      var emetteur = d.emetteur || d.emitter || '?';
       var product = {
         name: d.name || 'Proposition banquier',
         type: d.type || 'conditionnel',
-        coupon: parseFloat(d.coupon) || 0,
+        coupon: couponNum || 0,
         prob: d.type === 'fixe' ? 1.0 : 0.92,
-        duration: parseInt(d.duration) || 10,
-        guaranteedYears: parseInt(d.guaranteedYears) || 0,
-        autocallTarget: parseFloat(d.autocallTarget) || 0,
-        autocallYears: d.autocallTarget ? Math.ceil(d.autocallTarget / (d.coupon || 6)) : 0,
-        amount: parseInt(d.amount) || 500000,
-        risk: d.capitalGaranti ? 'Faible' : 'Modéré',
-        detail: (d.emetteur || '') + ' · Trigger ' + (d.trigger || '?') + '% · ' + (d.capitalGaranti ? 'Capital garanti 100%' : 'Capital non garanti'),
+        duration: parseInt(d.duration) || parseInt(d.maturityYears) || 10,
+        guaranteedYears: guaranteed,
+        autocallTarget: autocallTgt,
+        autocallYears: autocallTgt && couponNum ? Math.ceil(autocallTgt / couponNum) : 0,
+        amount: parseInt(d.amount) || parseInt(d.minInvestment) || 500000,
+        risk: capGaranti ? 'Faible' : 'Modéré',
+        detail: emetteur + ' · Trigger ' + (triggerVal || '?') + '% · ' + (capGaranti ? 'Capital garanti 100%' : 'Capital non garanti') + (paymentTiming === 'in_fine' ? ' · Coupons in fine' : ''),
         color: '#7C3AED',
         source: 'import',
-        emetteur: d.emetteur || '?',
-        trigger: d.trigger || null
+        emetteur: emetteur,
+        trigger: triggerVal,
+        paymentTiming: paymentTiming
       };
       if (d.couponPlancher) {
         product.type = 'hybride';

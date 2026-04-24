@@ -31,6 +31,7 @@
     var prob = product.prob || 0.90;
     var catRate = overrides.catReinvest || CAT_REINVEST;
     var postCallRate = overrides.postCallRate || POST_CALL_RATE;
+    var isInFine = (product.paymentTiming === 'in_fine'); // coupons payés en un seul flux à l'autocall/maturité
 
     // Scenario adjustments
     var scenProb;
@@ -41,7 +42,8 @@
     var flows = [];
     var cumCoupons = 0;
     var cumulNet = 0;
-    var catPool = 0; // coupons réinvestis en CAT
+    var catPool = 0; // coupons réinvestis en CAT (mode périodique uniquement)
+    var pendingCoupons = 0; // coupons accumulés non encore versés (mode in fine)
     var autocalled = false;
     var autocallYear = 0;
 
@@ -92,37 +94,47 @@
 
       // Coupon logic — TARN is binary: full coupon or nothing
       var couponPaid = false;
+      var couponEarned = 0; // coupon dû cette année (que le cash soit versé maintenant ou à la sortie)
       if (yr <= guaranteed) {
         // Garanti — always paid
-        couponReceived = Math.round(amount * coupon / 100);
+        couponEarned = Math.round(amount * coupon / 100);
         couponPaid = true;
       } else if (scenario === 'pessimiste') {
         // Pessimiste: no conditional coupon
-        couponReceived = 0;
+        couponEarned = 0;
         couponPaid = false;
       } else if (scenario === 'optimiste') {
         // Optimiste: always paid
-        couponReceived = Math.round(amount * coupon / 100);
+        couponEarned = Math.round(amount * coupon / 100);
         couponPaid = true;
       } else {
-        // Normal: binary — coupon paid with prob, or not
-        // Model: each year independently, coupon = full or 0
-        // Use prob to determine expected value but show full coupon × prob as weighted
-        // For display: show coupon as full but flag probability
-        couponReceived = Math.round(amount * coupon / 100);
+        // Normal: coupon × probability (expected value)
+        couponEarned = Math.round(amount * coupon * scenProb / 100);
         couponPaid = true;
-        // Adjust: multiply by prob for net calculation
-        couponReceived = Math.round(amount * coupon * scenProb / 100);
       }
 
       if (couponPaid) cumCoupons += coupon;
 
-      // Check autocall AFTER receiving this year's coupon
+      // Payment timing: periodic = cash reçu l'année courante ; in_fine = accumulé, payé à l'autocall/maturité
+      if (isInFine) {
+        pendingCoupons += couponEarned;
+        couponReceived = 0;
+        catInterest = 0; // pas de réinvestissement CAT (pas de cash reçu)
+      } else {
+        couponReceived = couponEarned;
+      }
+
+      // Check autocall AFTER earning this year's coupon
       var autocallThisYear = false;
       if (autocallTarget > 0 && cumCoupons >= autocallTarget && !autocalled) {
         autocalled = true;
         autocallYear = yr;
         autocallThisYear = true;
+        // In fine: tous les coupons en attente sont versés au moment de l'autocall
+        if (isInFine) {
+          couponReceived = pendingCoupons;
+          pendingCoupons = 0;
+        }
       }
 
       // Réinvestissement des coupons précédents en CAT
@@ -187,7 +199,9 @@
       netBeforeFees: cumulNet,
       autocalled: autocalled,
       autocallYear: autocallYear,
-      finalCatPool: catPool
+      finalCatPool: catPool,
+      isInFine: isInFine,
+      pendingAtEnd: pendingCoupons // coupons accumulés mais non versés à la fin de la simulation (in fine sans autocall)
     };
   }
 
@@ -230,8 +244,30 @@
     h += '<button class="btn ghost" onclick="switchMainView(\'carry\')" style="margin-bottom:10px">← Retour Carry Trade</button>';
     h += '<h2 style="color:' + B.text + ';font-size:20px;font-weight:800;margin:0">📊 Analyse P&L — ' + product.name + '</h2>';
     var loanLabel = loanType === 'amortissable' ? 'Amortissable' : 'In Fine';
-    h += '<div style="color:' + B.muted + ';font-size:12px;margin-top:4px">' + product.emetteur + ' · Coupon ' + couponRate + '% · Emprunt ' + _f(LOAN.amount) + '€ à ' + LOAN.rate + '% <strong style="color:' + (loanType === 'amortissable' ? B.orange : B.text) + '">' + loanLabel + '</strong> · ' + LOAN.years + ' ans · Post-autocall ' + postCallRate + '%</div>';
+    var isProductInFine = (product.paymentTiming === 'in_fine');
+    h += '<div style="color:' + B.muted + ';font-size:12px;margin-top:4px">' + product.emetteur + ' · Coupon ' + couponRate + '%' + (isProductInFine ? ' <strong style="color:' + B.orange + '">(in fine)</strong>' : '') + ' · Emprunt ' + _f(LOAN.amount) + '€ à ' + LOAN.rate + '% <strong style="color:' + (loanType === 'amortissable' ? B.orange : B.text) + '">' + loanLabel + '</strong> · ' + LOAN.years + ' ans · Post-autocall ' + postCallRate + '%</div>';
     h += '</div>';
+
+    // ─── Treasury warning banner for in-fine products ───
+    if (isProductInFine) {
+      var annualInterest = Math.round(LOAN.amount * LOAN.rate / 100);
+      // Estimate cash deficit for optimiste scenario (autocall year - 1 years of pure loan interest)
+      var expAutocallYr = (product.autocallTarget && product.coupon) ? Math.ceil(product.autocallTarget / product.coupon) : LOAN.years;
+      var holdingYearsOpti = Math.min(Math.max(1, expAutocallYr) - 1, LOAN.years);
+      var deficitOpti = holdingYearsOpti * annualInterest;
+      var deficitPessi = LOAN.years * annualInterest;
+      h += '<div style="background:#FFF7ED;border:2px solid ' + B.orange + ';border-radius:10px;padding:14px;margin-bottom:16px">';
+      h += '<div style="font-size:13px;font-weight:800;color:' + B.orange + ';margin-bottom:6px">⚠️ Coupons payés in fine — impact trésorerie</div>';
+      h += '<div style="font-size:11px;color:' + B.text + ';line-height:1.6">';
+      h += 'Les coupons de ce produit ne sont <strong>pas versés année par année</strong> : ils sont accumulés et payés en <strong>un seul flux à l\'autocall</strong> (ou à la maturité si aucun trigger).<br>';
+      h += 'Pendant les années de détention sans flux, les intérêts de l\'emprunt sont à <strong>financer sur ta trésorerie</strong> :';
+      h += '<ul style="margin:6px 0 0 20px;padding:0">';
+      h += '<li>Scénario <strong style="color:' + B.green + '">Optimiste</strong> (autocall An ' + expAutocallYr + ') : <strong style="color:' + B.red + '">−' + _f(deficitOpti) + '€</strong> à financer sur ' + holdingYearsOpti + ' an(s)</li>';
+      h += '<li>Scénario <strong style="color:' + B.red + '">Pessimiste</strong> (pas d\'autocall) : <strong style="color:' + B.red + '">−' + _f(deficitPessi) + '€</strong> à financer sur ' + LOAN.years + ' ans (les coupons garantis restent bloqués jusqu\'à la maturité du produit)</li>';
+      h += '</ul>';
+      h += '<div style="margin-top:6px;font-size:10px;color:' + B.muted + '">Pas de réinvestissement CAT possible pendant la détention (aucun coupon reçu).</div>';
+      h += '</div></div>';
+    }
 
     // ─── Controls: modulable reinvestment rates ───
     h += '<div style="background:' + B.card + ';border:2px solid ' + B.purple + ';border-radius:10px;padding:16px;margin-bottom:20px">';
@@ -309,9 +345,19 @@
         h += '<div style="color:#991B1B">Capital remboursé : -' + _f(totalCapRepaid) + '€</div>';
         h += '<div style="color:#991B1B;font-weight:700">Sortie nette tréso : -' + _f(totalCashOut) + '€ sur ' + LOAN.years + ' ans</div>';
         h += '</div>';
+      } else if (isProductInFine) {
+        // Produit in-fine : calculer la tréso à sortir pendant les années de détention sans flux
+        var holdingYears = d.autocalled ? Math.max(0, d.autocallYear - 1) : LOAN.years;
+        var tresoSortie2 = holdingYears * Math.round(LOAN.amount * LOAN.rate / 100);
+        h += '<div style="margin-top:8px;padding:4px 8px;background:#FFF7ED;border:1px solid ' + B.orange + ';border-radius:4px;font-size:10px;color:#9A3412">';
+        h += '⚠️ <strong>Coupons in fine</strong> : ' + _f(tresoSortie2) + '€ à financer sur ' + holdingYears + ' an(s) (aucun coupon pendant la détention)';
+        if (d.pendingAtEnd > 0) {
+          h += '<br>🔒 <strong>' + _f(d.pendingAtEnd) + '€ de coupons bloqués</strong> dans le produit (versés à maturité, après l\'emprunt)';
+        }
+        h += '</div>';
       } else {
         h += '<div style="margin-top:8px;padding:4px 8px;background:#ECFDF5;border:1px solid #6EE7B7;border-radius:4px;font-size:10px;color:#065F46">';
-        h += '✅ <strong>In fine</strong> : 0€ de trésorerie sortie (intérêts couverts par coupons)';
+        h += '✅ <strong>In fine</strong> (emprunt) : 0€ de trésorerie sortie (intérêts couverts par coupons annuels)';
         h += '</div>';
       }
       if (d.autocalled) h += '<div style="margin-top:4px;padding:4px 8px;background:' + sc.color + '15;border-radius:4px;font-size:10px;color:' + sc.color + '">Autocall An ' + d.autocallYear + ' → réinvesti à ' + postCallRate + '%</div>';
