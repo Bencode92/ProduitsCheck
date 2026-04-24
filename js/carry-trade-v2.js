@@ -17,7 +17,7 @@
   function _p(n) { return (Math.round(n * 100) / 100).toFixed(2); }
 
   // ─── Loan params (SG Equipéa) ──────
-  var LOAN = { amount: 1000000, rate: 2.90, years: 5, fees: 1000, taxRate: 25, entity: 'Caméleons Com Mark' };
+  var LOAN = { amount: 1000000, rate: 3.10, years: 5, fees: 1000, taxRate: 25, entity: 'Caméleons Com Mark' };
 
   // ─── Load market rates ──────
   var MR = { tec10: 3.09, oat5y: 2.66, oat2y: 2.50, bce: 2.00, euribor3m: 2.50, loaded: false };
@@ -71,7 +71,7 @@
         duration: duration, guaranteedYears: 0,
         autocallTarget: 25, autocallYears: 4, // ~4 ans à 6.20%
         risk: 'Tres faible',
-        detail: 'SUR-MESURE à négocier · Plancher 3% GARANTI (couvre emprunt 2.90%) · Bonus +3.20% si TEC10 ≤ 4.50% · Autocall si cumul ≥ 25% (~4 ans) · Sortie An 4 = capital récupéré pour rembourser emprunt · Pire cas = 3%/an garanti · Capital garanti 100%',
+        detail: 'SUR-MESURE à négocier · Plancher 3% GARANTI (pire cas −0,10pt/an vs emprunt 3.10%) · Bonus +3,20% si TEC10 ≤ 4,50% (marge nette +0,10pt) · Autocall si cumul ≥ 25% (~4 ans) · Sortie An 4 = capital récupéré pour rembourser emprunt · Capital garanti 100%',
         color: '#0891B2'
       },
       // ─── Fixe Callable (CIC propose 4% en série) ──────
@@ -213,7 +213,7 @@
     var configs = [
       {
         id: 'A', name: '500K TARN 7% + 500K Digital Plancher+Autocall', emoji: '🏆',
-        desc: 'RECOMMANDÉ — Les 2 produits sortent en ~4 ans via autocall. Le plancher 3% du Digital couvre l\'emprunt 2.90%. Pire cas quasi nul. Rendement max.',
+        desc: 'RECOMMANDÉ — Les 2 produits sortent en ~4 ans via autocall. Le plancher 3% du Digital limite le pire cas à −0,10pt/an vs emprunt 3.10% (quasi neutre). Rendement max.',
         products: [
           Object.assign({}, p10.tarn, { amount: 500000 }),
           Object.assign({}, p10.digital, { amount: 500000 })
@@ -361,7 +361,7 @@
     html += _acc('cdc-script', '🎤 Script de présentation — Ce qu\'on dit au banquier',
       '<div style="padding:14px;background:#F8F9FB;border:1px solid ' + B.border + ';border-radius:8px;font-size:13px;color:#1A202C;line-height:1.8;font-style:italic">' +
       '"Nous avons reçu une <strong>proposition d\'emprunt de trésorerie</strong> de la Société Générale : ' + _f(L.amount) + '€ à ' + L.rate + '% fixe, in fine sur ' + L.years + ' ans, crédit en blanc. L\'offre est validée et expire le 14 mai.<br><br>' +
-      'On souhaite utiliser cet emprunt pour faire du <strong>carry trade</strong> : placer le million sur des produits structurés de taux, capital garanti, qui rapportent plus que le 2,90% de l\'emprunt. La différence c\'est notre gain.<br><br>' +
+      'On souhaite utiliser cet emprunt pour faire du <strong>carry trade</strong> : placer le million sur des produits structurés de taux, capital garanti, qui rapportent plus que le 3,10% de l\'emprunt. La différence c\'est notre gain.<br><br>' +
       'L\'avantage pour nous c\'est qu\'on <strong>investit sans toucher à notre trésorerie propre</strong>. Le capital est garanti à 100%, l\'emprunt est in fine (on ne paye que les intérêts de 29 000€/an pendant 5 ans), et les produits structurés génèrent des coupons de 6 à 7% sur le TEC10.<br><br>' +
       'On a déjà <strong>reçu des propositions de plusieurs banques</strong> — notamment un TARN TEC10 du CIC à 6,70% (ISIN XS3340532707). On cherche à faire mieux en sur-mesure sur 500K à 1M€.<br><br>' +
       'Concrètement, on a <strong>3 configurations</strong> en tête :"' +
@@ -369,7 +369,7 @@
       '<div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">' +
       '<div style="padding:10px;background:#FEF3C7;border:1px solid #F59E0B;border-radius:6px">' +
       '<div style="font-size:11px;font-weight:700;color:#D97706">🏆 Option A — RECOMMANDÉE</div>' +
-      '<div style="font-size:11px;color:#1A202C;margin-top:4px">500K TARN 7% + 500K Digital Plancher 3% avec autocall. Les 2 sortent en ~4 ans. Le plancher couvre l\'emprunt.</div></div>' +
+      '<div style="font-size:11px;color:#1A202C;margin-top:4px">500K TARN 7% + 500K Digital Plancher 3% avec autocall. Les 2 sortent en ~4 ans. Plancher : pire cas −0,10pt/an vs emprunt 3,10%.</div></div>' +
       '<div style="padding:10px;background:#EFF6FF;border:1px solid #93C5FD;border-radius:6px">' +
       '<div style="font-size:11px;font-weight:700;color:#2563EB">🎯 Option B — MAX RENDEMENT</div>' +
       '<div style="font-size:11px;color:#1A202C;margin-top:4px">1M€ tout sur un TARN TEC10 7%. Autocall ~4 ans. Maximum de coupon.</div></div>' +
@@ -384,7 +384,7 @@
       '• <strong>2 produits de 500K€ sur 5 ans</strong> — si vous avez des structures 5 ans compétitives qui matchent l\'emprunt<br>' +
       '• <strong>1 produit 500K 5 ans + 1 produit 500K 10 ans</strong> — pour mixer sécurité court terme et rendement long terme<br><br>' +
       'On privilégie le <strong>10 ans</strong> pour le budget option plus important, avec <strong>autocall vers An 4</strong> pour récupérer le capital et rembourser l\'emprunt. Mais si vous avez mieux en 5 ans, on est preneurs.<br><br>' +
-      'L\'essentiel c\'est : <strong>capital garanti 100%</strong>, sous-jacent taux, coupon au-dessus de notre emprunt à 2,90%."' +
+      'L\'essentiel c\'est : <strong>capital garanti 100%</strong>, sous-jacent taux, coupon au-dessus de notre emprunt à 3,10%."' +
       '</div>' +
       '<div style="margin-top:10px;padding:12px;background:#EFF6FF;border:1px solid #93C5FD;border-radius:8px;font-size:12px;color:#1E40AF;line-height:1.7;font-style:italic">' +
       '"On consulte <strong>plusieurs établissements</strong> en parallèle. Qu\'est-ce que vous pouvez nous proposer de compétitif ? Et est-ce que vous avez un <strong>PUT investisseur à 5 ans</strong> comme filet de sécurité sur le produit 10 ans ?"' +
@@ -394,7 +394,7 @@
       '<strong>Emprunt SG Equipéa :</strong> ' + _f(L.amount) + '€ à ' + L.rate + '% fixe in fine ' + L.years + ' ans · Crédit en blanc · ' + L.entity + '<br>' +
       'Coût total intérêts : ' + _f(Math.round(L.amount * L.rate / 100 * L.years)) + '€ + frais ' + _f(L.fees) + '€ · Validité : 14/05/2026<br><br>' +
       '<strong>Pourquoi le carry trade :</strong><br>' +
-      '• On emprunte à 2,90% fixe et on place à 6-7% sur des structurés taux → la différence est notre gain<br>' +
+      '• On emprunte à 3,10% fixe et on place à 6-7% sur des structurés taux → la différence est notre gain<br>' +
       '• In fine = le capital reste investi à 100% pendant 5 ans (pas d\'amortissement)<br>' +
       '• Capital garanti 100% = pas de risque de perte sur le nominal<br>' +
       '• La trésorerie propre n\'est pas mobilisée — c\'est l\'emprunt qui finance l\'investissement<br><br>' +
@@ -403,7 +403,7 @@
       '• Sous-jacent <strong>taux uniquement</strong> (TEC10, Euribor, CMS) — pas d\'actions<br>' +
       '• Nominal minimum <strong>500 000€</strong> par produit<br>' +
       '• Émetteur <strong>Investment Grade A-</strong> minimum<br>' +
-      '• Coupon > 2,90% (sinon pas de portage positif)<br>' +
+      '• Coupon > 3,10% (sinon pas de portage positif)<br>' +
       '• Devise EUR · Éligible compte-titres ordinaire');
 
     html += _acc('cdc-produit1', '🎯 PRODUIT 1 — TARN TEC10 sur-mesure (500K ou 1M€)',
@@ -424,7 +424,7 @@
       '<div style="padding:10px;background:#DBEAFE;border:1px solid #93C5FD;border-radius:6px;margin-bottom:10px;font-size:12px;color:#1E40AF">' +
       '<strong>Ce produit n\'existe pas en série — à structurer sur-mesure.</strong> On combine : plancher garanti (comme un Fixe) + bonus conditionnel (comme une Digitale) + autocall (comme un TARN) pour récupérer le capital et rembourser l\'emprunt.</div>' +
       '<table style="width:100%;border-collapse:collapse;font-size:12px">' +
-      '<tr style="border-bottom:1px solid ' + B.border + '"><td style="padding:6px;color:#64748B;width:35%">Plancher garanti</td><td style="padding:6px;font-weight:700;color:#059669">3,00%/an INCONDITIONNEL (couvre emprunt 2,90%)</td></tr>' +
+      '<tr style="border-bottom:1px solid ' + B.border + '"><td style="padding:6px;color:#64748B;width:35%">Plancher garanti</td><td style="padding:6px;font-weight:700;color:#059669">3,00%/an INCONDITIONNEL (pire cas −0,10pt/an vs emprunt 3,10%)</td></tr>' +
       '<tr style="border-bottom:1px solid ' + B.border + ';background:' + B.row1 + '"><td style="padding:6px;color:#64748B">Bonus conditionnel</td><td style="padding:6px;font-weight:700;color:#0891B2">+3,20% si TEC10 ≤ 4,50% (bonus réduit de 0,30% pour financer l\'autocall)</td></tr>' +
       '<tr style="border-bottom:1px solid ' + B.border + '"><td style="padding:6px;color:#64748B">Coupon total espéré</td><td style="padding:6px;font-weight:700;color:#D97706">6,20% (plancher 3% + bonus 3,2%)</td></tr>' +
       '<tr style="border-bottom:1px solid ' + B.border + ';background:' + B.row1 + '"><td style="padding:6px;color:#64748B">Autocall</td><td style="padding:6px;font-weight:700;color:#D97706">Si cumul coupons ≥ 25% (~4 ans à 6,20%) → capital récupéré pour rembourser emprunt SG</td></tr>' +
@@ -439,12 +439,12 @@
     html += _acc('cdc-configs', '📦 Les 3 configurations',
       '<table style="width:100%;border-collapse:collapse;font-size:12px">' +
       '<tr style="background:' + B.header + ';font-weight:700"><td style="padding:8px">CONFIG</td><td style="padding:8px">PRODUIT(S)</td><td style="padding:8px">COUPON</td><td style="padding:8px">SORTIE</td></tr>' +
-      '<tr style="background:#E8F0FE;border-bottom:1px solid ' + B.border + '"><td style="padding:8px;font-weight:700">🏆 A</td><td style="padding:8px"><strong>500K TARN 7% + 500K Digital Plancher 3%+Bonus+Autocall</strong></td><td style="padding:8px;font-weight:700;color:#2563EB">7,00% + 6,20%</td><td style="padding:8px;font-size:10px;color:#2563EB">RECOMMANDÉ — Les 2 autocall ~An 4. Plancher couvre emprunt.</td></tr>' +
+      '<tr style="background:#E8F0FE;border-bottom:1px solid ' + B.border + '"><td style="padding:8px;font-weight:700">🏆 A</td><td style="padding:8px"><strong>500K TARN 7% + 500K Digital Plancher 3%+Bonus+Autocall</strong></td><td style="padding:8px;font-weight:700;color:#2563EB">7,00% + 6,20%</td><td style="padding:8px;font-size:10px;color:#2563EB">RECOMMANDÉ — Les 2 autocall ~An 4. Plancher : pire cas −0,10pt/an.</td></tr>' +
       '<tr style="border-bottom:1px solid ' + B.border + '"><td style="padding:8px;font-weight:700">🎯 B</td><td style="padding:8px">1M€ TARN TEC10 10Y</td><td style="padding:8px;font-weight:700;color:#D97706">7,00%</td><td style="padding:8px;font-size:10px">Max rendement. Autocall ~An 4. Tout sur 1 produit.</td></tr>' +
       '<tr><td style="padding:8px;font-weight:700">🛡️ C</td><td style="padding:8px">500K TARN 7% + 500K Fixe Callable 4,40%</td><td style="padding:8px;font-weight:700;color:#059669">7,00% + 4,40%</td><td style="padding:8px;font-size:10px">Safe. Fixe garanti + TARN rendement. Pire cas positif.</td></tr>' +
       '</table>' +
       '<div style="margin-top:8px;padding:6px 10px;background:#ECFDF5;border-radius:4px;font-size:11px;color:#065F46">' +
-      '✅ <strong>Config A recommandée</strong> — TARN 7% (max coupon) + Digital Plancher 3%+Autocall (plancher couvre emprunt, autocall pour récupérer le capital). Les 2 sortent en ~4 ans.' +
+      '✅ <strong>Config A recommandée</strong> — TARN 7% (max coupon) + Digital Plancher 3%+Autocall (plancher limite la perte à −0,10pt/an, bonus +3,20% rend positif ; autocall pour récupérer le capital). Les 2 sortent en ~4 ans.' +
       '</div>');
 
     html += _acc('cdc-nego', '💪 Points de négociation',
@@ -684,7 +684,7 @@
         } else if (p.type === 'fixe') {
           explain = 'La banque vous verse ' + p.coupon + '% par an garanti, sans aucune condition. C\'est le placement le plus sûr : coupon fixe chaque année + capital remboursé à 100% à l\'échéance. La banque peut rappeler le produit si les taux baissent.';
         } else if (p.type === 'hybride' && p.couponPlancher) {
-          explain = 'La banque vous verse au minimum ' + p.couponPlancher + '% par an garanti (ce qui couvre votre emprunt à 2,90%). En plus, vous recevez un bonus de ' + p.couponBonus + '% si le TEC10 reste en dessous de 4,50%. ' + (p.autocallTarget ? 'Quand le total des coupons atteint ' + p.autocallTarget + '% (~' + p.autocallYears + ' ans), le produit s\'arrête et vous récupérez votre capital pour rembourser l\'emprunt. ' : '') + 'Le minimum garanti protège votre carry trade : même dans le pire cas, vous ne perdez pas d\'argent.';
+          explain = 'La banque vous verse au minimum ' + p.couponPlancher + '% par an garanti. Votre emprunt étant à 3,10%, le plancher seul laisse une perte limitée (~0,10pt/an dans le pire cas). Le bonus de ' + p.couponBonus + '% si le TEC10 reste sous 4,50% fait basculer l\'opération en positif. ' + (p.autocallTarget ? 'Quand le total des coupons atteint ' + p.autocallTarget + '% (~' + p.autocallYears + ' ans), le produit s\'arrête et vous récupérez votre capital pour rembourser l\'emprunt. ' : '') + 'Le plancher garantit que la perte reste marginale même sans le bonus.';
         }
         if (explain) {
           h += '<div style="margin:6px 0 8px;padding:8px 10px;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:6px;font-size:11px;color:#1E40AF;line-height:1.6">' + explain + '</div>';

@@ -16,7 +16,7 @@
   function _pct(n) { return (Math.round(n * 100) / 100).toFixed(2); }
 
   // ─── LOAN PARAMS ──────
-  var LOAN = { amount: 1000000, rate: 2.90, years: 5, taxRate: 25, type: 'in_fine', fees: 800 };
+  var LOAN = { amount: 1000000, rate: 3.10, years: 5, taxRate: 25, type: 'in_fine', fees: 800 };
   var CAT_REINVEST = 3.0;   // taux réinvestissement coupons sur CAT
   var POST_CALL_RATE = 4.0;  // taux réinvestissement capital post-autocall
 

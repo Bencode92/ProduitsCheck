@@ -598,14 +598,14 @@
     var eur3m = window.MarketAnalyzer.resolveRate(_state.rates, 'euribor3m');
     if (!tec10 || !eur3m) return '';
     var tec = tec10.current || 0, eu = eur3m.current || 0;
-    var spreadBp = Math.round((tec - 2.90) * 100);
+    var spreadBp = Math.round((tec - 3.10) * 100);
     var marginTARN = Math.round((4.40 - tec) * 100);
     var inCorridor = eu >= 1.50 && eu <= 3.80;
 
     var html = '<div style="background:#ECFDF5;border:2px solid ' + C.success + ';border-radius:10px;padding:14px;margin-bottom:16px">';
     html += '<div style="font-size:13px;font-weight:800;color:' + C.success + ';margin-bottom:10px">💡 Impact carry trade (rappel)</div>';
     html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">';
-    html += '<div style="padding:10px;background:#fff;border-radius:6px;text-align:center"><div style="font-size:9px;color:' + C.muted + '">Spread TEC10 vs emprunt 2.90%</div><div style="font-family:var(--mono,monospace);font-size:22px;font-weight:800;color:' + (spreadBp > 0 ? C.success : C.danger) + '">' + (spreadBp>0?'+':'') + spreadBp + 'bp</div></div>';
+    html += '<div style="padding:10px;background:#fff;border-radius:6px;text-align:center"><div style="font-size:9px;color:' + C.muted + '">Spread TEC10 vs emprunt 3.10%</div><div style="font-family:var(--mono,monospace);font-size:22px;font-weight:800;color:' + (spreadBp > 0 ? C.success : C.danger) + '">' + (spreadBp>0?'+':'') + spreadBp + 'bp</div></div>';
     html += '<div style="padding:10px;background:#fff;border-radius:6px;text-align:center"><div style="font-size:9px;color:' + C.muted + '">Marge TARN (trigger 4.40%)</div><div style="font-family:var(--mono,monospace);font-size:22px;font-weight:800;color:' + C.cyan + '">+' + marginTARN + 'bp</div></div>';
     html += '<div style="padding:10px;background:#fff;border-radius:6px;text-align:center"><div style="font-size:9px;color:' + C.muted + '">Euribor dans corridor [1.50-3.80%]</div><div style="font-family:var(--mono,monospace);font-size:22px;font-weight:800;color:' + (inCorridor?C.success:C.danger) + '">' + (inCorridor ? '✅ OUI' : '❌ NON') + '</div></div>';
     html += '</div></div>';

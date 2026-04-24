@@ -8,7 +8,7 @@
 
   var _state = {
     amount: 1000000,
-    rate: 2.90,
+    rate: 3.10,
     years: 5,
     taxRate: 25,
     loanType: 'both', // 'inFine', 'amortissable', 'both'
@@ -85,8 +85,8 @@
         duration: 5, capitalGaranti: true,
         condition: 'Plancher 3% + bonus 3.50% si TEC10 ≤ 4.50%', conditionProb: CONSENSUS_PROBS.cat_hybride,
         color: '#0891B2',
-        risk: 'Faible — plancher couvre l\'emprunt, trigger large (TEC10 < 4.50% = 140bp de marge)',
-        detail: 'Combinaison sécurité + rendement. Le plancher 3% couvre le 2.90% de l\'emprunt. Le bonus 3.50% se déclenche si TEC10 reste sous 4.50% (très probable sur 5 ans).',
+        risk: 'Faible — plancher 3% limite la perte à −0,10pt/an vs emprunt 3,10%, bonus 3,50% très probable (TEC10 < 4,50% = 140bp de marge)',
+        detail: 'Combinaison sécurité + rendement. Plancher 3% = pire cas −0,10pt/an vs emprunt 3,10%. Avec bonus 3,50% (TEC10 ≤ 4,50%, très probable sur 5 ans) la marge nette est de +0,40pt/an.',
         category: 'conservative', amount: 0
       },
       {
@@ -396,7 +396,7 @@
     html += '<div style="padding:8px 12px;background:#F3E8FF;border:1px solid #D8B4FE;border-radius:6px;font-size:11px;color:#A855F7">';
     html += 'AMORTISSABLE : -' + _fmt(_state.monthlyPayment) + '€/mois · Total intérêts : <strong>-' + _fmt(totalCostAmort) + '€</strong> · Capital décroissant → carry ÷2</div>';
     html += '</div>';
-    html += '<div style="margin-top:6px;padding:8px 12px;background:#ECFDF5;border:1px solid #A7F3D0;border-radius:6px;font-size:10px;color:#059669">✅ Prêt Equipéa SG — <strong>In fine ou amortissable au choix</strong> · 2,90% fixe de 2 à 5 ans · Jusqu\'à 1M€ · Frais : ' + _fmt(_state.loanFees) + '€ · <strong>Aucune garantie</strong> (crédit en blanc) · Entité : Caméleons Com Mark · Valide jusqu\'au 14/05/2026</div>';
+    html += '<div style="margin-top:6px;padding:8px 12px;background:#ECFDF5;border:1px solid #A7F3D0;border-radius:6px;font-size:10px;color:#059669">✅ Prêt Equipéa SG — <strong>In fine ou amortissable au choix</strong> · 3,10% fixe de 2 à 5 ans · Jusqu\'à 1M€ · Frais : ' + _fmt(_state.loanFees) + '€ · <strong>Aucune garantie</strong> (crédit en blanc) · Entité : Caméleons Com Mark · Valide jusqu\'au 14/05/2026</div>';
     html += '</div>';
 
     // ─── Costs breakdown ──────
@@ -522,7 +522,7 @@
     html += '<div style="margin-top:10px;padding:10px;background:' + BG.row1 + ';border-radius:6px;font-size:10px;color:' + BG.text + '">';
     html += '<strong>Contraintes communes :</strong> Capital garanti 100% inconditionnelle · Sous-jacent taux uniquement (pas d\'actions) · ';
     html += 'Émetteur IG A- minimum · Coupon annuel ou trimestriel · Devise EUR · ';
-    html += 'Entité : Caméleons Com Mark · Adossé à emprunt SG 2.90% in fine 5 ans';
+    html += 'Entité : Caméleons Com Mark · Adossé à emprunt SG 3.10% in fine 5 ans';
     html += '</div>';
     // Other structures to ask about
     html += '<div style="margin-top:10px;padding:10px;background:#FEF3C7;border:1px solid #F59E0B;border-radius:6px;font-size:10px;color:#92400E">';
@@ -1064,7 +1064,7 @@
 
   window._carrySimulate = function() {
     _state.amount = parseFloat(document.getElementById('carry-amount')?.value) || 1000000;
-    _state.rate = parseFloat(document.getElementById('carry-rate')?.value) || 2.90;
+    _state.rate = parseFloat(document.getElementById('carry-rate')?.value) || 3.10;
     _state.years = parseInt(document.getElementById('carry-years')?.value) || 10;
     _state.loanType = document.getElementById('carry-loantype')?.value || 'both';
 

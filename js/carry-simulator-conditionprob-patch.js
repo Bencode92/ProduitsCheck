@@ -25,7 +25,7 @@
     cat_tarn5:     0.90,   // TARN TEC10 5Y — marge 130bp au trigger, 1Y garanti
     cat_tarn10:    0.88,   // TARN TEC10 10Y — même trigger, plus long = plus d'incertitude
     cat_digital:   0.93,   // Digital Mémoire — trigger 4.50% (140bp marge) + effet mémoire
-    cat_hybride:   0.93,   // Hybride Plancher+Digital — plancher 3% garanti couvre l'emprunt
+    cat_hybride:   0.93,   // Hybride Plancher+Digital — plancher 3% garanti, pire cas −0,10pt/an vs emprunt 3,10%
     cat_range:     0.82,   // Range Accrual Euribor — corridor [1.50-3.80%], plus volatil que TEC10
     cat_floater:   0.97,   // Floater Plancher 3% — plancher quasi-sûr, bonus si TEC10 > 2.20%
     cat_steepener: 0.75,   // CMS Steepener — pari directionnel sur la pente, plus risqué

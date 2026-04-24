@@ -1,14 +1,14 @@
 // ═══════════════════════════════════════════════════════════════════════════════
 // STRUCTBOARD — Patch Benchmark Carry Trade
-// Remplace le benchmark CAT 2.50% par le coût d'emprunt 2.90% (+ marge).
+// Remplace le benchmark CAT 2.50% par le coût d'emprunt 3.10% (+ marge).
 //
 // MOTIVATION :
 //   Pour un carry trade, le vrai benchmark n'est PAS un CAT théorique :
 //   c'est le coût de financement net d'impôt + prime de risque minimale.
 //
 //   Formule consensus :
-//     seuil_break_even = taux_emprunt × (1 - IS)  = 2.90% × 0.75 = 2.175%
-//     seuil_cible      = break_even + 50bp       = 2.675%
+//     seuil_break_even = taux_emprunt × (1 - IS)  = 3.10% × 0.75 = 2.325%
+//     seuil_cible      = break_even + 50bp       = 2.825%
 //
 //   Tout produit < 2.675% de rendement attendu net ne devrait PAS être retenu
 //   pour le carry trade, même s'il bat un CAT classique.
@@ -23,7 +23,7 @@
   'use strict';
 
   var DEFAULT_PARAMS = {
-    loanRate: 0.029,         // 2.90% emprunt SG Equipéa
+    loanRate: 0.031,         // 3.10% emprunt SG Equipéa
     taxRate: 0.25,            // IS 25%
     minRiskPremium: 0.005     // 50bp prime minimale pour couvrir risque émetteur + réinvestissement
   };

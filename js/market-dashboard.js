@@ -133,7 +133,7 @@
       ['Euribor\n3M', eur3m.current || 2.50, '#D97706'],
       ['OAT\n2 ans', oat2y.current || 2.53, '#7C3AED'],
       ['OAT\n5 ans', oat5y.current || 2.70, '#2563EB'],
-      ['Emprunt\nSG', 2.90, '#DC2626'],
+      ['Emprunt\nSG', 3.10, '#DC2626'],
       ['TEC10\n10 ans', tec10.current || 3.10, '#0891B2']
     ];
     barData.forEach(function(b) {
@@ -413,7 +413,7 @@
       'Investisseur qui veut sécuriser le début', 'Faible — phase variable peut être basse', '#D97706');
 
     html += _guideCard('🛟', 'Floater avec Plancher', 'Coupon 3-4.5% variable', 'Garanti',
-      'Coupon = max(plancher 3%, TEC10 - spread). Le plancher couvre l\'emprunt. Si taux montent → coupon monte. Si taux baissent → plancher protège.',
+      'Coupon = max(plancher 3%, TEC10 - spread). Plancher 3% = pire cas −0,10pt/an vs emprunt 3,10%. Si taux montent → coupon monte. Si taux baissent → plancher limite la perte.',
       'Carry trade qui veut profiter de la hausse des taux', 'Très faible — plancher garanti', '#0891B2');
 
     html += _guideCard('🧠', 'Digital Mémoire Taux', 'Coupon 4.6-7% conditionnel', 'Garanti',
@@ -449,7 +449,7 @@
 
     // Résumé
     html += '<div style="margin-top:12px;padding:10px;background:#DBEAFE;border-radius:6px;font-size:11px;color:#1E40AF;line-height:1.6">';
-    html += '<strong>Pour le carry trade (emprunt 2.90%, capital garanti obligatoire) :</strong><br>';
+    html += '<strong>Pour le carry trade (emprunt 3.10%, capital garanti obligatoire) :</strong><br>';
     html += '✅ TARN · Fixe Callable · Callable In Fine · Range Accrual · Step-Up · Floater · Digital Mémoire<br>';
     html += '❌ Autocall · Phoenix · Worst-of · Reverse Convertible (risque capital = incompatible avec carry trade adossé à un emprunt)';
     html += '</div>';
@@ -458,12 +458,12 @@
 
     html += '<div style="font-size:14px;font-weight:700;color:#059669;margin-bottom:10px">💡 Impact sur le carry trade</div>';
     var tec10Val = tec10.current || 3.10;
-    var spreadVsEmprunt = tec10Val - 2.90;
+    var spreadVsEmprunt = tec10Val - 3.10;
     html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">';
     html += '<div style="padding:10px;background:#fff;border-radius:6px;text-align:center">';
     html += '<div style="font-size:11px;color:' + BG.textDim + '">Spread TEC10 vs emprunt</div>';
     html += '<div style="font-family:var(--mono);font-size:22px;font-weight:800;color:' + (spreadVsEmprunt > 0 ? '#059669' : '#DC2626') + '">+' + (spreadVsEmprunt * 100).toFixed(0) + 'bp</div>';
-    html += '<div style="font-size:11px;color:' + BG.textDim + '">' + tec10Val.toFixed(2) + '% - 2.90%</div></div>';
+    html += '<div style="font-size:11px;color:' + BG.textDim + '">' + tec10Val.toFixed(2) + '% - 3.10%</div></div>';
 
     html += '<div style="padding:10px;background:#fff;border-radius:6px;text-align:center">';
     html += '<div style="font-size:11px;color:' + BG.textDim + '">Marge TARN (trigger 4.40%)</div>';
