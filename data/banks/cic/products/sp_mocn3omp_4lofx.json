@@ -1,0 +1,141 @@
+{
+  "id": "sp_mocn3omp_4lofx",
+  "name": "TARN TEC 10 - CIC 6,75% 10Y",
+  "type": "capital_garanti",
+  "structureType": "capital_garanti",
+  "emitter": "Crédit Industriel et Commercial",
+  "guarantor": "",
+  "guarantorRating": {
+    "moodys": "A1",
+    "sp": "A+"
+  },
+  "underlyings": [
+    "BFRTEC10"
+  ],
+  "underlyingType": "rates",
+  "currency": "EUR",
+  "maturity": "10 ans",
+  "maturityYears": 10,
+  "coupon": {
+    "rate": 6.75,
+    "rateIfCalled": 20.25,
+    "rateIfMaturity": 6.75,
+    "type": "conditionnel",
+    "frequency": "annuel",
+    "trigger": 4.35,
+    "memory": false,
+    "paymentTiming": "periodic",
+    "guaranteed": false,
+    "guaranteedYears": 2,
+    "guaranteedRate": 6.75,
+    "barrierCoupon": 4.35,
+    "barrierCouponType": "BFRTEC10 <= 4.35%"
+  },
+  "participationRate": null,
+  "capitalProtection": {
+    "protected": true,
+    "level": 100,
+    "atMaturityOnly": true,
+    "barrierCoupon": 4.35,
+    "barrierType": null
+  },
+  "earlyRedemption": {
+    "possible": true,
+    "type": "tarn",
+    "discretionary": false,
+    "trigger": 20.25,
+    "targetCouponLevel": 20.25,
+    "frequency": "annuel",
+    "startSemester": null,
+    "stepDown": false,
+    "stepDownPct": null,
+    "hasAutocall": true,
+    "enabled": true
+  },
+  "decrementPct": null,
+  "actualDividendYield": null,
+  "mechanism": "TARN TEC10 sur indice BFRTEC10. Start J+15, EUR 1M, 10 ans. Y1-Y2 : coupon 6,75% garanti, versé annuellement. Y3-Y10 : coupon 6,75% versé annuellement si BFRTEC10 <= 4,35%. TARGET = 3 x 6,75% = 20,25% : dès que le cumul des coupons atteint 20,25%, le produit s'arrête et verse 100% du capital. Durée minimale 3 ans, maximale 10 ans. Capital garanti 100%.",
+  "risks": [
+    "Risque de réinvestissement en cas de remboursement anticipé",
+    "Risque de crédit de l'émetteur CIC",
+    "Risque de liquidité (produit non liquide)",
+    "Exposition aux taux d'intérêt BFRTEC10",
+    "Coupons conditionnels Y3-Y10 non versés si BFRTEC10 > 4,35%"
+  ],
+  "summary": "TARN sur BFRTEC10 1M€ 10 ans. Coupon 6,75% annuel garanti 2 ans puis conditionnel (BFRTEC10 <= 4,35%). Autocall dès 3 coupons cumulés (20,25%). Capital garanti 100%.",
+  "aiParsed": {
+    "name": "TARN TEC 10 - CIC 6,75% 10Y",
+    "type": "capital_garanti",
+    "structureType": "capital_garanti",
+    "emitter": "Crédit Industriel et Commercial",
+    "guarantor": "",
+    "guarantorRating": {
+      "moodys": "A1",
+      "sp": "A+"
+    },
+    "underlyings": [
+      "BFRTEC10"
+    ],
+    "underlyingType": "rates",
+    "currency": "EUR",
+    "maturity": "10 ans",
+    "maturityYears": 10,
+    "coupon": {
+      "rate": 6.75,
+      "rateIfCalled": 20.25,
+      "rateIfMaturity": 6.75,
+      "type": "conditionnel",
+      "frequency": "annuel",
+      "trigger": 4.35,
+      "memory": false,
+      "paymentTiming": "periodic",
+      "guaranteed": false,
+      "guaranteedYears": 2,
+      "guaranteedRate": 6.75,
+      "barrierCoupon": 4.35,
+      "barrierCouponType": "BFRTEC10 <= 4.35%"
+    },
+    "participationRate": null,
+    "capitalProtection": {
+      "protected": true,
+      "level": 100,
+      "atMaturityOnly": true,
+      "barrierCoupon": 4.35,
+      "barrierType": null
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "tarn",
+      "discretionary": false,
+      "trigger": 20.25,
+      "targetCouponLevel": 20.25,
+      "frequency": "annuel",
+      "startSemester": null,
+      "stepDown": false,
+      "stepDownPct": null,
+      "hasAutocall": true,
+      "enabled": true
+    },
+    "guaranteedYears": 2,
+    "decrementPct": null,
+    "actualDividendYield": null,
+    "mechanism": "TARN TEC10 sur indice BFRTEC10. Start J+15, EUR 1M, 10 ans. Y1-Y2 : coupon 6,75% garanti, versé annuellement. Y3-Y10 : coupon 6,75% versé annuellement si BFRTEC10 <= 4,35%. TARGET = 3 x 6,75% = 20,25% : dès que le cumul des coupons atteint 20,25%, le produit s'arrête et verse 100% du capital. Durée minimale 3 ans, maximale 10 ans. Capital garanti 100%.",
+    "risks": [
+      "Risque de réinvestissement en cas de remboursement anticipé",
+      "Risque de crédit de l'émetteur CIC",
+      "Risque de liquidité (produit non liquide)",
+      "Exposition aux taux d'intérêt BFRTEC10",
+      "Coupons conditionnels Y3-Y10 non versés si BFRTEC10 > 4,35%"
+    ],
+    "summary": "TARN sur BFRTEC10 1M€ 10 ans. Coupon 6,75% annuel garanti 2 ans puis conditionnel (BFRTEC10 <= 4,35%). Autocall dès 3 coupons cumulés (20,25%). Capital garanti 100%.",
+    "minInvestment": 1000000
+  },
+  "sourceFile": "JSON import",
+  "bankId": "cic",
+  "status": "analyzing",
+  "receivedDate": "2026-04-24",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null
+}
