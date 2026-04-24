@@ -31,7 +31,10 @@
     var prob = product.prob || 0.90;
     var catRate = overrides.catReinvest || CAT_REINVEST;
     var postCallRate = overrides.postCallRate || POST_CALL_RATE;
-    var isInFine = (product.paymentTiming === 'in_fine'); // coupons payés en un seul flux à l'autocall/maturité
+    // Allow override from UI; otherwise read from product metadata
+    var isInFine = (overrides.paymentTiming !== undefined)
+      ? (overrides.paymentTiming === 'in_fine')
+      : (product.paymentTiming === 'in_fine'); // coupons payés en un seul flux à l'autocall/maturité
 
     // Scenario adjustments
     var scenProb;
@@ -209,15 +212,17 @@
   var _currentCouponOverride = 0;
   var _currentPostCallOverride = 0;
 
-  function _renderPnLPage(product, customCatRate, customPostCall, customLoanType) {
+  function _renderPnLPage(product, customCatRate, customPostCall, customLoanType, customPaymentTiming) {
     var couponRate = product.coupon || 7;
     var catReinvest = customCatRate || CAT_REINVEST;
     var postCallRate = customPostCall || POST_CALL_RATE;
     var loanType = customLoanType || LOAN.type || 'in_fine';
+    // Override product paymentTiming from UI toggle (falls back to product metadata)
+    var paymentTiming = customPaymentTiming || product.paymentTiming || 'periodic';
     _currentCouponOverride = catReinvest;
     _currentPostCallOverride = postCallRate;
 
-    var overrides = { catReinvest: catReinvest, postCallRate: postCallRate, loanType: loanType };
+    var overrides = { catReinvest: catReinvest, postCallRate: postCallRate, loanType: loanType, paymentTiming: paymentTiming };
     var opti = _simulate(product, 'optimiste', overrides);
     var normal = _simulate(product, 'normal', overrides);
     var pessi = _simulate(product, 'pessimiste', overrides);
@@ -244,7 +249,7 @@
     h += '<button class="btn ghost" onclick="switchMainView(\'carry\')" style="margin-bottom:10px">← Retour Carry Trade</button>';
     h += '<h2 style="color:' + B.text + ';font-size:20px;font-weight:800;margin:0">📊 Analyse P&L — ' + product.name + '</h2>';
     var loanLabel = loanType === 'amortissable' ? 'Amortissable' : 'In Fine';
-    var isProductInFine = (product.paymentTiming === 'in_fine');
+    var isProductInFine = (paymentTiming === 'in_fine');
     h += '<div style="color:' + B.muted + ';font-size:12px;margin-top:4px">' + product.emetteur + ' · Coupon ' + couponRate + '%' + (isProductInFine ? ' <strong style="color:' + B.orange + '">(in fine)</strong>' : '') + ' · Emprunt ' + _f(LOAN.amount) + '€ à ' + LOAN.rate + '% <strong style="color:' + (loanType === 'amortissable' ? B.orange : B.text) + '">' + loanLabel + '</strong> · ' + LOAN.years + ' ans · Post-autocall ' + postCallRate + '%</div>';
     h += '</div>';
 
@@ -278,6 +283,11 @@
     h += '<select id="pnl-loantype" style="padding:8px 12px;border:1px solid ' + B.border + ';border-radius:6px;font-size:13px;font-weight:700;color:' + B.red + '">';
     h += '<option value="in_fine"' + (loanType === 'in_fine' ? ' selected' : '') + '>In Fine</option>';
     h += '<option value="amortissable"' + (loanType === 'amortissable' ? ' selected' : '') + '>Amortissable</option>';
+    h += '</select></div>';
+    h += '<div><label style="font-size:11px;color:' + B.muted + ';display:block;margin-bottom:4px">Coupons produit</label>';
+    h += '<select id="pnl-paymenttiming" style="padding:8px 12px;border:1px solid ' + B.border + ';border-radius:6px;font-size:13px;font-weight:700;color:' + B.orange + '">';
+    h += '<option value="periodic"' + (paymentTiming === 'periodic' ? ' selected' : '') + '>Annuels</option>';
+    h += '<option value="in_fine"' + (paymentTiming === 'in_fine' ? ' selected' : '') + '>In fine (à la sortie)</option>';
     h += '</select></div>';
     h += '<div><label style="font-size:11px;color:' + B.muted + ';display:block;margin-bottom:4px">Réinvest. coupons (CAT %)</label>';
     h += '<input id="pnl-cat" type="number" step="0.1" value="' + catReinvest + '" style="padding:8px 12px;border:1px solid ' + B.border + ';border-radius:6px;font-size:14px;font-family:var(--mono);width:100px;font-weight:700;color:#4ECDC4"></div>';
@@ -528,18 +538,19 @@
   }
 
   // ─── PUBLIC API ──────
-  window.renderCarryPnLPage = function(container, product, customCatRate, customPostCall, customLoanType) {
-    container.innerHTML = '<div class="main">' + _renderPnLPage(product, customCatRate, customPostCall, customLoanType) + '</div>';
+  window.renderCarryPnLPage = function(container, product, customCatRate, customPostCall, customLoanType, customPaymentTiming) {
+    container.innerHTML = '<div class="main">' + _renderPnLPage(product, customCatRate, customPostCall, customLoanType, customPaymentTiming) + '</div>';
   };
 
   window.__pnlRecalculate = function() {
     var catRate = parseFloat(document.getElementById('pnl-cat')?.value) || 3;
     var postCall = parseFloat(document.getElementById('pnl-postcall')?.value) || 4;
     var loanTypeVal = document.getElementById('pnl-loantype')?.value || 'in_fine';
+    var paymentTimingVal = document.getElementById('pnl-paymenttiming')?.value || null;
     var product = window._carryPnLProduct;
     if (!product) return;
     var main = document.getElementById('main-content');
-    if (main) renderCarryPnLPage(main, product, catRate, postCall, loanTypeVal);
+    if (main) renderCarryPnLPage(main, product, catRate, postCall, loanTypeVal, paymentTimingVal);
   };
 
   // Called from carry trade comparison
