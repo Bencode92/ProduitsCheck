@@ -145,5 +145,183 @@
   "aiAnalyzedAt": "2026-04-24T08:19:48.958Z",
   "envelope": "",
   "guaranteedYears": 0,
-  "autocallCumulTarget": 20.25
+  "autocallCumulTarget": 20.25,
+  "grading": {
+    "grade": "B",
+    "score": 73,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 82,
+        "base": 100,
+        "delta": 0,
+        "reasoning": "Rendement: base 100 → +1 = 100 (TEC10 à 4.35% avec coupon si >4.35% offre une probabilité très élevée en stagflation où les taux restent élevés) | Coupon 6.75%, protégé | Barr.coupon 4.35% | Mat espérée: ~1.2a (prob mat: 0%)",
+        "_bsDelta": -23,
+        "_bs": {
+          "score": 77,
+          "probCoupon": 92.5,
+          "probExit": 68,
+          "rendementNet": 6.24,
+          "couponEffectif": 6.24,
+          "perteEsperee": 0,
+          "vols": [],
+          "matEsperee": 4,
+          "isRate": true,
+          "historicalBasis": "692 obs (2004-11-03→2026-04-23)",
+          "rateAlias": "tec10_fr",
+          "currentRate": 3.75,
+          "trigger": 4.35
+        }
+      },
+      "underlyingQuality": {
+        "score": 77,
+        "base": 76,
+        "delta": 1,
+        "reasoning": "Qualité: base 76 → +1 = 77 (Taux long terme favorisés en stagflation, TEC10 immunisé contre risques sectoriels equity avec beta quasi-nul)"
+      },
+      "portfolioFit": {
+        "score": 55,
+        "base": 80,
+        "delta": 1,
+        "reasoning": "Fit: base 80 → +1 = 81 (Produit de taux idéal en portefeuille stagflationnaire pour diversifier hors actions avec rendement attractif)"
+      },
+      "riskPremium": {
+        "score": 77,
+        "base": 73,
+        "delta": -1,
+        "reasoning": "Capital garanti: spread 6.8% - CAT 2.5% - illiq 0.7% = 3.5%"
+      }
+    },
+    "verdict": "Produit exceptionnellement adapté au régime stagflationnaire avec TEC10 actuellement à 3.50-4.00% offrant une marge confortable vs barrière 4.35%. Le coupon 6.75% sur capital garanti est remarquable dans ce contexte de taux élevés persistants. L'autocall à 20.25% (6.75%×3) est atteignable en 3 ans si les taux restent modérément hauts. Structure idéale pour capturer la prime de taux sans risque equity en environnement inflationniste.",
+    "keyRisks": [
+      "Baisse brutale des taux sous 4.35% réduisant les coupons à zéro",
+      "Blocage 10 ans sans coupon si TEC10 chute durablement sous barrière"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 20.25,
+        "return_eur": 20250,
+        "probability": 0.35,
+        "duration_years": 3
+      },
+      "base": {
+        "return_pct": 6.75,
+        "return_eur": 40500,
+        "probability": 0.4,
+        "duration_years": 6
+      },
+      "stress": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.2,
+        "duration_years": 10
+      },
+      "worst": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.05,
+        "duration_years": 10
+      }
+    },
+    "confidenceInterval": {
+      "low": 74,
+      "high": 92,
+      "halfWidth": 9,
+      "gradeStable": false,
+      "gradeRange": "B-A",
+      "label": "A [74-92]"
+    },
+    "metadata": {
+      "gradedAt": "2026-04-24T08:20:27.213Z",
+      "durationMs": 21370,
+      "aiUsed": true,
+      "version": "7.1",
+      "productType": "capital_garanti",
+      "marketDataAvailable": false,
+      "catBenchmark": 2.8,
+      "catSource": "allocator-confirmed",
+      "couponAnnualized": 6.75,
+      "couponRaw": 6.75,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": false,
+      "barrierPct": 0,
+      "barrierCouponPct": 4.35,
+      "couponProbability": 92.5,
+      "expectedMaturity": 4,
+      "maxMaturity": 10,
+      "probReachMaturity": 0,
+      "maxBeta": null,
+      "baseScore": 83,
+      "baseGrade": "A",
+      "adjustments": {
+        "p1": 1,
+        "p2": 1,
+        "p3": 1,
+        "p4": -1
+      },
+      "barrier_sigma": null,
+      "barrier_sigma_label": null,
+      "barrier_sigma_danger": null,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Rappelable 12M",
+      "ci_low": 74,
+      "ci_high": 92,
+      "ci_label": "A [74-92]",
+      "issuer_rating": "A+",
+      "issuer_tier": "IG",
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "capital_garanti",
+      "bsRendementNet": 6.24,
+      "bsProbCoupon": 92.5,
+      "bsPerteEsperee": 0,
+      "bsVols": [],
+      "bsMatEsperee": 4,
+      "isRateHistorical": true,
+      "historicalBasis": "692 obs (2004-11-03→2026-04-23)",
+      "rateAlias": "tec10_fr",
+      "currentRate": 3.75,
+      "rateTrigger": 4.35,
+      "probExit": 68,
+      "issuerCreditPenalty": 1,
+      "issuerCDS": 55,
+      "v6Weights": {
+        "p1": 0.25,
+        "p2": 0.2,
+        "p3": 0.25,
+        "p4": 0.3
+      }
+    },
+    "regimeScenarios": {
+      "current": {
+        "score": 73,
+        "grade": "B",
+        "label": "Actuel (stagflation)",
+        "desc": "Taux élevés, BCE hawkish → coupon sous pression"
+      },
+      "bull": {
+        "score": 78,
+        "grade": "A",
+        "label": "Bull / Risk-on",
+        "delta": 5,
+        "desc": "Taux baissent → coupon plus probable, call risk monte"
+      },
+      "crash": {
+        "score": 67,
+        "grade": "B",
+        "label": "Crash / Récession",
+        "delta": -6,
+        "desc": "Taux spike puis chutent → volatilité, incertitude coupon"
+      }
+    }
+  },
+  "_couponProbability": 92.5,
+  "_bsRendementNet": 6.24
 }
