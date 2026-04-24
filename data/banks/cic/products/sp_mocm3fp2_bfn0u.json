@@ -10,7 +10,7 @@
     "sp": "A+"
   },
   "underlyings": [
-    "BFRTEC10"
+    "TEC10"
   ],
   "underlyingType": "rates",
   "currency": "EUR",
@@ -21,7 +21,7 @@
     "rateIfCalled": 21.9,
     "rateIfMaturity": 7.3,
     "type": "conditionnel",
-    "frequency": "annuel",
+    "frequency": "in_fine",
     "trigger": 4.35,
     "memory": false,
     "paymentTiming": "in_fine",
@@ -85,7 +85,7 @@
       "rateIfCalled": 21.9,
       "rateIfMaturity": 7.3,
       "type": "conditionnel",
-      "frequency": "annuel",
+      "frequency": "in_fine",
       "trigger": 4.35,
       "memory": false,
       "paymentTiming": "in_fine",
@@ -137,5 +137,13 @@
   "conversation": [],
   "conversationSummary": null,
   "decision": null,
-  "decisionReason": null
+  "decisionReason": null,
+  "aiCategory": "autocall-mono",
+  "aiCategoryLabel": "⚡ Autocall Mono-actif",
+  "aiCategoryColor": "#06D6A0",
+  "aiOpinion": "Produit attractif avec un coupon de 7,30% et protection totale du capital, offrant un bon compromis risque/rendement. Le seuil d'autocall relativement bas (21,9%) augmente les chances de sortie anticipée mais dépend entièrement de la performance de l'indice technologique BFRTEC10.",
+  "aiAnalyzedAt": "2026-04-24T07:51:38.612Z",
+  "envelope": "",
+  "guaranteedYears": 0,
+  "autocallCumulTarget": 21.9
 }
