@@ -30,8 +30,7 @@
   "capitalProtection": {
     "protected": true,
     "level": 100,
-    "barrier": null,
-    "barrierCoupon": 4.1,
+    "barrierCoupon": 4.5,
     "barrierType": "europeenne"
   },
   "earlyRedemption": {
@@ -41,7 +40,9 @@
     "frequency": "annuel",
     "startSemester": null,
     "stepDown": false,
-    "stepDownPct": null
+    "stepDownPct": null,
+    "hasAutocall": true,
+    "enabled": true
   },
   "decrementPct": null,
   "actualDividendYield": null,
@@ -301,5 +302,8 @@
     }
   },
   "_couponProbability": 92,
-  "_bsRendementNet": 6.44
+  "_bsRendementNet": 6.44,
+  "envelope": "",
+  "guaranteedYears": 0,
+  "autocallCumulTarget": 21
 }
