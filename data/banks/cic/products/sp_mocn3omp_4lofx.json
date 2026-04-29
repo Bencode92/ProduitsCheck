@@ -146,6 +146,8 @@
   "envelope": "",
   "guaranteedYears": 0,
   "autocallCumulTarget": 20.25,
+  "_couponProbability": 92.5,
+  "_bsRendementNet": 6.29,
   "grading": {
     "grade": "B",
     "score": 73,
@@ -155,75 +157,75 @@
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 82,
+        "score": 83,
         "base": 100,
         "delta": 0,
-        "reasoning": "Rendement: base 100 → +1 = 100 (TEC10 à 4.35% avec coupon si >4.35% offre une probabilité très élevée en stagflation où les taux restent élevés) | Coupon 6.75%, protégé | Barr.coupon 4.35% | Mat espérée: ~1.2a (prob mat: 0%)",
-        "_bsDelta": -23,
+        "reasoning": "Rendement: base 100 → -1 = 99 (En stagflation, le TEC10 risque de rester élevé (>4.35%) réduisant la probabilité du coupon conditionnel malgré la barrière basse) | Coupon 6.8%, protégé | Barr.coupon 4.35% | Mat espérée: ~1.2a (prob mat: 0%)",
+        "_bsDelta": -22,
         "_bs": {
-          "score": 77,
+          "score": 78,
           "probCoupon": 92.5,
           "probExit": 68,
-          "rendementNet": 6.24,
-          "couponEffectif": 6.24,
+          "rendementNet": 6.29,
+          "couponEffectif": 6.29,
           "perteEsperee": 0,
           "vols": [],
           "matEsperee": 4,
           "isRate": true,
-          "historicalBasis": "692 obs (2004-11-03→2026-04-23)",
+          "historicalBasis": "692 obs (2004-11-03→2026-04-28)",
           "rateAlias": "tec10_fr",
-          "currentRate": 3.75,
+          "currentRate": 3.78,
           "trigger": 4.35
         }
       },
       "underlyingQuality": {
-        "score": 77,
+        "score": 75,
         "base": 76,
-        "delta": 1,
-        "reasoning": "Qualité: base 76 → +1 = 77 (Taux long terme favorisés en stagflation, TEC10 immunisé contre risques sectoriels equity avec beta quasi-nul)"
+        "delta": -1,
+        "reasoning": "Qualité: base 76 → -1 = 75 (Produit sur taux en pleine stagflation avec Brent à $105 et PCE à 2.8%, le TEC10 subira une pression haussière défavorable)"
       },
       "portfolioFit": {
         "score": 55,
         "base": 80,
         "delta": 1,
-        "reasoning": "Fit: base 80 → +1 = 81 (Produit de taux idéal en portefeuille stagflationnaire pour diversifier hors actions avec rendement attractif)"
+        "reasoning": "Fit: base 80 → +1 = 81 (En stagflation avec VIX à 22, un capital garanti à 6.8% conditionnel offre une protection appréciable vs actions/HY)"
       },
       "riskPremium": {
         "score": 77,
         "base": 73,
         "delta": -1,
-        "reasoning": "Capital garanti: spread 6.8% - CAT 2.5% - illiq 0.7% = 3.5%"
+        "reasoning": "Capital garanti: spread 6.8% - CAT 2.5% - illiq 0.7% = 3.6%"
       }
     },
-    "verdict": "Produit exceptionnellement adapté au régime stagflationnaire avec TEC10 actuellement à 3.50-4.00% offrant une marge confortable vs barrière 4.35%. Le coupon 6.75% sur capital garanti est remarquable dans ce contexte de taux élevés persistants. L'autocall à 20.25% (6.75%×3) est atteignable en 3 ans si les taux restent modérément hauts. Structure idéale pour capturer la prime de taux sans risque equity en environnement inflationniste.",
+    "verdict": "Ce produit capital garanti offre un coupon attractif de 6.8% mais conditionnel au TEC10 < 4.35%, peu probable en stagflation où les taux longs restent élevés. Avec le Brent à $105 et une inflation persistante à 2.8%, la Fed reste paralysée et le TEC10 devrait dépasser la barrière, annulant les coupons. Le capital garanti protège en cas de stress mais l'investisseur risque 10 ans à 0% de rendement.",
     "keyRisks": [
-      "Baisse brutale des taux sous 4.35% réduisant les coupons à zéro",
-      "Blocage 10 ans sans coupon si TEC10 chute durablement sous barrière"
+      "TEC10 reste >4.35% en stagflation = 0% coupon pendant des années",
+      "Opportunité manquée vs TIPS ou obligations court terme en contexte inflationniste"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 20.25,
-        "return_eur": 20250,
-        "probability": 0.35,
-        "duration_years": 3
+        "return_pct": 8.16,
+        "return_eur": 9792,
+        "probability": 0.15,
+        "duration_years": 1.2
       },
       "base": {
-        "return_pct": 6.75,
-        "return_eur": 40500,
-        "probability": 0.4,
-        "duration_years": 6
+        "return_pct": 2.27,
+        "return_eur": 6800,
+        "probability": 0.25,
+        "duration_years": 3
       },
       "stress": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.2,
+        "probability": 0.45,
         "duration_years": 10
       },
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.05,
+        "probability": 0.15,
         "duration_years": 10
       }
     },
@@ -236,16 +238,16 @@
       "label": "A [74-92]"
     },
     "metadata": {
-      "gradedAt": "2026-04-24T08:20:27.213Z",
-      "durationMs": 21370,
+      "gradedAt": "2026-04-29T14:07:27.909Z",
+      "durationMs": 22290,
       "aiUsed": true,
       "version": "7.1",
       "productType": "capital_garanti",
       "marketDataAvailable": false,
       "catBenchmark": 2.8,
       "catSource": "allocator-confirmed",
-      "couponAnnualized": 6.75,
-      "couponRaw": 6.75,
+      "couponAnnualized": 6.8,
+      "couponRaw": 6.8,
       "couponMultiplier": 1,
       "couponFrequency": "annuel",
       "isInPortfolio": false,
@@ -260,8 +262,8 @@
       "baseScore": 83,
       "baseGrade": "A",
       "adjustments": {
-        "p1": 1,
-        "p2": 1,
+        "p1": -1,
+        "p2": -1,
         "p3": 1,
         "p4": -1
       },
@@ -279,15 +281,15 @@
       "hasDecrement": false,
       "decrementDrag": 0,
       "structureType": "capital_garanti",
-      "bsRendementNet": 6.24,
+      "bsRendementNet": 6.29,
       "bsProbCoupon": 92.5,
       "bsPerteEsperee": 0,
       "bsVols": [],
       "bsMatEsperee": 4,
       "isRateHistorical": true,
-      "historicalBasis": "692 obs (2004-11-03→2026-04-23)",
+      "historicalBasis": "692 obs (2004-11-03→2026-04-28)",
       "rateAlias": "tec10_fr",
-      "currentRate": 3.75,
+      "currentRate": 3.78,
       "rateTrigger": 4.35,
       "probExit": 68,
       "issuerCreditPenalty": 1,
@@ -321,7 +323,5 @@
         "desc": "Taux spike puis chutent → volatilité, incertitude coupon"
       }
     }
-  },
-  "_couponProbability": 92.5,
-  "_bsRendementNet": 6.24
+  }
 }
