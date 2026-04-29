@@ -57,25 +57,6 @@
     "_bankId": "swiss-life"
   },
   {
-    "name": "TARN TEC 10 - CIC 7,30% 10Y",
-    "type": "conditionnel",
-    "coupon": 7.3,
-    "prob": 0.925,
-    "duration": 10,
-    "guaranteedYears": 0,
-    "autocallTarget": 21.9,
-    "autocallYears": 3,
-    "amount": 1000000,
-    "risk": "Faible",
-    "detail": "Crédit Industriel et Commercial · Trigger 4.35% · Capital garanti 100%",
-    "color": "#7C3AED",
-    "source": "structboard",
-    "emetteur": "Crédit Industriel et Commercial",
-    "trigger": 4.35,
-    "_productId": "sp_mocm3fp2_bfn0u",
-    "_bankId": "cic"
-  },
-  {
     "name": "TARN TEC 10 - CIC 6,75% 10Y",
     "type": "conditionnel",
     "coupon": 6.75,
