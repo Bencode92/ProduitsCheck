@@ -17,7 +17,7 @@
   "maturity": "10 ans",
   "maturityYears": 10,
   "coupon": {
-    "rate": 7.3,
+    "rate": 7.5,
     "rateIfCalled": 21.9,
     "rateIfMaturity": 7.3,
     "type": "conditionnel",
