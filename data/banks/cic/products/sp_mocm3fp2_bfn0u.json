@@ -146,33 +146,35 @@
   "envelope": "",
   "guaranteedYears": 0,
   "autocallCumulTarget": 21.9,
+  "_couponProbability": 92.5,
+  "_bsRendementNet": 6.94,
   "grading": {
-    "grade": "B",
-    "score": 74,
+    "grade": "A",
+    "score": 75,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 86,
+        "score": 87,
         "base": 100,
         "delta": 0,
-        "reasoning": "Rendement: base 100 → +1 = 100 (TEC10 à 4.35% historiquement élevé avec Fed on hold et inflation sticky à 2.8%, probabilité très forte de coupons dans ce contexte de taux élevés) | Coupon 7.3%, protégé | Barr.coupon 4.35% | Mat espérée: ~1.2a (prob mat: 0%)",
-        "_bsDelta": -19,
+        "reasoning": "Rendement: base 100 → -1 = 99 (En stagflation, le TEC10 (taux 10 ans) tend à monter avec l'inflation persistante, réduisant la probabilité d'atteindre le seuil de coupon à 4.35%) | Coupon 7.5%, protégé | Barr.coupon 4.35% | Mat espérée: ~1.2a (prob mat: 0%)",
+        "_bsDelta": -18,
         "_bs": {
-          "score": 81,
+          "score": 82,
           "probCoupon": 92.5,
           "probExit": 68,
-          "rendementNet": 6.75,
-          "couponEffectif": 6.75,
+          "rendementNet": 6.94,
+          "couponEffectif": 6.94,
           "perteEsperee": 0,
           "vols": [],
           "matEsperee": 4,
           "isRate": true,
-          "historicalBasis": "692 obs (2004-11-03→2026-04-23)",
+          "historicalBasis": "692 obs (2004-11-03→2026-04-28)",
           "rateAlias": "tec10_fr",
-          "currentRate": 3.75,
+          "currentRate": 3.78,
           "trigger": 4.35
         }
       },
@@ -180,50 +182,51 @@
         "score": 75,
         "base": 76,
         "delta": -1,
-        "reasoning": "Qualité: base 76 → -1 = 75 (Sous-jacent taux en régime stagflationnaire avec risque de hausse Fed si inflation persiste, volatilité potentielle sur les taux longs)"
+        "reasoning": "Qualité: base 76 → -1 = 75 (Produit sur taux en stagflation défavorable : hausse des taux longs probable avec PCE 2.8% et Brent >$105, contexte négatif pour un TARN sur TEC10)"
       },
       "portfolioFit": {
         "score": 55,
         "base": 80,
-        "delta": 1,
-        "reasoning": "Fit: base 80 → +1 = 81 (Produit taux pertinent en stagflation pour capturer les taux élevés actuels, diversification vs actions concentrées sur energy/utilities)"
+        "delta": 0,
+        "reasoning": "Fit: base 80"
       },
       "riskPremium": {
-        "score": 79,
-        "base": 80,
-        "delta": -1,
-        "reasoning": "Capital garanti: spread 7.3% - CAT 2.5% - illiq 0.7% = 4.1%"
+        "score": 81,
+        "base": 82,
+        "delta": 0,
+        "reasoning": "Prime: base 82 | 7.5% vs CAT 2.8% (spread 4.7%)"
       }
     },
-    "verdict": "Produit capital garanti captant efficacement le niveau élevé du TEC10 (4.35%) en contexte stagflationnaire, avec coupon attractif de 7.3% annualisé. La protection du capital élimine le risque de perte en cas de hausse brutale des taux, mais la structure TARN limitera le potentiel si les taux restent durablement élevés. Avec la Fed paralysée entre inflation à 2.8% et risque récession, les taux longs devraient rester élevés favorisant les coupons réguliers.",
+    "verdict": "Score ajusté à 76/100 (-10pts). En stagflation avec Brent à $105 et inflation persistante (PCE 2.8%), le TEC10 risque de monter au-delà de 4.35%, compromettant les coupons. Le capital garanti protège mais l'autocall à 21.9% semble irréaliste, impliquant potentiellement 10 ans bloqués à 0% de rendement. La structure TARN limite le gain total à ~14.6% même en cas de baisse durable des taux.",
     "keyRisks": [
-      "Risque de hausse brutale Fed si inflation dépasse 3% avec pétrole à $99",
-      "Structure TARN plafonne les gains si taux restent élevés pendant 10 ans"
+      "Taux bloqués à 0% pendant 10 ans si TEC10 reste >4.35% en stagflation",
+      "Autocall quasi-impossible (seuil 21.9%) = capital immobilisé longtemps",
+      "TARN capé à 14.6% limite fortement l'upside même si les taux baissent"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 8.8,
-        "return_eur": 8800,
-        "probability": 0.3,
-        "duration_years": 1
+        "return_pct": 14.6,
+        "return_eur": 14600,
+        "probability": 0.15,
+        "duration_years": 2
       },
       "base": {
         "return_pct": 7.3,
-        "return_eur": 36500,
-        "probability": 0.45,
-        "duration_years": 5
+        "return_eur": 7300,
+        "probability": 0.3,
+        "duration_years": 1
       },
       "stress": {
-        "return_pct": 3.5,
-        "return_eur": 10500,
-        "probability": 0.2,
-        "duration_years": 3
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.4,
+        "duration_years": 10
       },
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.05,
+        "probability": 0.15,
         "duration_years": 10
       }
     },
@@ -236,16 +239,16 @@
       "label": "A [76-94]"
     },
     "metadata": {
-      "gradedAt": "2026-04-24T07:52:20.882Z",
-      "durationMs": 21879,
+      "gradedAt": "2026-04-29T14:08:45.909Z",
+      "durationMs": 22446,
       "aiUsed": true,
       "version": "7.1",
       "productType": "capital_garanti",
       "marketDataAvailable": false,
       "catBenchmark": 2.8,
       "catSource": "allocator-confirmed",
-      "couponAnnualized": 7.3,
-      "couponRaw": 7.3,
+      "couponAnnualized": 7.5,
+      "couponRaw": 7.5,
       "couponMultiplier": 1,
       "couponFrequency": "annuel",
       "isInPortfolio": false,
@@ -257,13 +260,13 @@
       "maxMaturity": 10,
       "probReachMaturity": 0,
       "maxBeta": null,
-      "baseScore": 85,
+      "baseScore": 86,
       "baseGrade": "A",
       "adjustments": {
-        "p1": 1,
+        "p1": -1,
         "p2": -1,
-        "p3": 1,
-        "p4": -1
+        "p3": 0,
+        "p4": 0
       },
       "barrier_sigma": null,
       "barrier_sigma_label": null,
@@ -279,15 +282,15 @@
       "hasDecrement": false,
       "decrementDrag": 0,
       "structureType": "capital_garanti",
-      "bsRendementNet": 6.75,
+      "bsRendementNet": 6.94,
       "bsProbCoupon": 92.5,
       "bsPerteEsperee": 0,
       "bsVols": [],
       "bsMatEsperee": 4,
       "isRateHistorical": true,
-      "historicalBasis": "692 obs (2004-11-03→2026-04-23)",
+      "historicalBasis": "692 obs (2004-11-03→2026-04-28)",
       "rateAlias": "tec10_fr",
-      "currentRate": 3.75,
+      "currentRate": 3.78,
       "rateTrigger": 4.35,
       "probExit": 68,
       "issuerCreditPenalty": 1,
@@ -301,27 +304,25 @@
     },
     "regimeScenarios": {
       "current": {
-        "score": 74,
-        "grade": "B",
+        "score": 75,
+        "grade": "A",
         "label": "Actuel (stagflation)",
         "desc": "Taux élevés, BCE hawkish → coupon sous pression"
       },
       "bull": {
-        "score": 79,
+        "score": 80,
         "grade": "A",
         "label": "Bull / Risk-on",
         "delta": 5,
         "desc": "Taux baissent → coupon plus probable, call risk monte"
       },
       "crash": {
-        "score": 68,
+        "score": 69,
         "grade": "B",
         "label": "Crash / Récession",
         "delta": -6,
         "desc": "Taux spike puis chutent → volatilité, incertitude coupon"
       }
     }
-  },
-  "_couponProbability": 92.5,
-  "_bsRendementNet": 6.75
+  }
 }
