@@ -125,9 +125,14 @@
   "aiCategoryColor": "#06D6A0",
   "aiOpinion": "Produit défensif avec protection totale du capital et coupon attractif de 7%, mais probabilité d'activation autocall très faible avec un seuil à 21% seulement. Le profil risque/rendement est déséquilibré car la barrière autocall trop basse limite fortement les chances de gain anticipé malgré la sécurité du capital.",
   "aiAnalyzedAt": "2026-04-20T16:42:42.652Z",
+  "_couponProbability": 92,
+  "_bsRendementNet": 6.44,
+  "envelope": "",
+  "guaranteedYears": 0,
+  "autocallCumulTarget": 21,
   "grading": {
-    "grade": "B",
-    "score": 71,
+    "grade": "A",
+    "score": 75,
     "killCriteria": {
       "triggered": false,
       "reasons": []
@@ -137,7 +142,7 @@
         "score": 84,
         "base": 100,
         "delta": 0,
-        "reasoning": "Rendement: base 100 → -1 = 99 (En stagflation, les taux longs (TEC10) sont volatils et peuvent dépasser 4.1%, réduisant la probabilité du coupon conditionnel) | Coupon 7%, protégé | Barr.coupon 4.1% | Mat espérée: ~1.2a (prob mat: 0%)",
+        "reasoning": "Rendement: base 100 → +1 = 100 (TEC10 à 4.5% avec barrière coupon à 4.5% garantit 100% de probabilité de coupon en stagflation où les taux restent élevés) | Coupon 7%, protégé | Barr.coupon 4.5% | Mat espérée: ~1.2a (prob mat: 0%)",
         "_bsDelta": -21,
         "_bs": {
           "score": 79,
@@ -149,23 +154,23 @@
           "vols": [],
           "matEsperee": 4,
           "isRate": true,
-          "historicalBasis": "695 obs (2004-09-06→2026-04-16)",
-          "rateAlias": "oat_fr_10y",
-          "currentRate": 3.075,
+          "historicalBasis": "692 obs (2004-11-03→2026-04-28)",
+          "rateAlias": "tec10_fr",
+          "currentRate": 3.78,
           "trigger": 4.1
         }
       },
       "underlyingQuality": {
-        "score": 75,
+        "score": 77,
         "base": 76,
-        "delta": -1,
-        "reasoning": "Qualité: base 76 → -1 = 75 (Le TEC10 est sensible à l'inflation persistante (PCE 2.8%) et la courbe pentifiée (+54bps) suggère des pressions haussières sur les taux longs)"
+        "delta": 1,
+        "reasoning": "Qualité: base 76 → +1 = 77 (Produit de taux idéal en stagflation: bénéficie directement des taux élevés (3.64% actuels) que la Fed maintient face à l'inflation persistante)"
       },
       "portfolioFit": {
         "score": 46,
         "base": 60,
         "delta": 1,
-        "reasoning": "Fit: base 60 → +1 = 61 (En stagflation avec taux en hausse, un produit sur TEC10 avec capital garanti offre une protection pertinente)"
+        "reasoning": "Fit: base 60 → +1 = 61 (Excellent hedge contre l'inflation avec coupon 7% garanti tant que TEC10 ≥ 4.5%, pertinent avec breakeven 5Y à 2.63%)"
       },
       "riskPremium": {
         "score": 78,
@@ -174,35 +179,35 @@
         "reasoning": "Capital garanti: spread 7.0% - CAT 2.5% - illiq 0.7% = 3.8%"
       }
     },
-    "verdict": "Produit capital garanti adapté au contexte stagflationniste mais avec un risque élevé sur le coupon conditionnel. Le TEC10 actuel proche de la barrière (4.1%) et l'inflation persistante (PCE 2.8%) menacent la régularité des coupons. La maturité espérée de 1.2 an est trompeuse car la probabilité d'autocall est quasi-nulle avec un seuil à 21%. Score ajusté: 78/100 (B+), produit défensif mais rendement incertain.",
+    "verdict": "Produit exceptionnel en stagflation: capital garanti + coupon 7% quasi-certain avec TEC10 actuellement bien au-dessus de la barrière 4.5%. La Fed piégée par l'inflation à 2.8% garantit des taux élevés prolongés, maximisant la probabilité de coupons. L'autocall à 21% est peu probable mais offre une sortie bonus si les taux explosent. Score ajusté: 95/100 grâce à l'alignement parfait avec le régime macro actuel.",
     "keyRisks": [
-      "Taux TEC10 peut facilement dépasser 4.1% en stagflation, annulant les coupons",
-      "Autocall quasi-impossible (seuil 21%), blocage probable jusqu'à maturité"
+      "Risque de baisse brutale des taux si récession sévère (TEC10 < 4.5%)",
+      "Opportunité manquée si les taux montent fortement au-delà du coupon fixé à 7%"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 7,
         "return_eur": 7000,
-        "probability": 0.2,
+        "probability": 0.85,
         "duration_years": 1
       },
       "base": {
-        "return_pct": 3.5,
-        "return_eur": 35000,
-        "probability": 0.4,
+        "return_pct": 7,
+        "return_eur": 70000,
+        "probability": 0.1,
         "duration_years": 10
       },
       "stress": {
-        "return_pct": 0,
-        "return_eur": 0,
-        "probability": 0.3,
+        "return_pct": 3,
+        "return_eur": 30000,
+        "probability": 0.04,
         "duration_years": 10
       },
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.1,
+        "probability": 0.01,
         "duration_years": 10
       }
     },
@@ -215,8 +220,8 @@
       "label": "A [71-89]"
     },
     "metadata": {
-      "gradedAt": "2026-04-20T16:43:01.446Z",
-      "durationMs": 20537,
+      "gradedAt": "2026-04-29T13:53:49.330Z",
+      "durationMs": 20861,
       "aiUsed": true,
       "version": "7.1",
       "productType": "capital_garanti",
@@ -230,7 +235,7 @@
       "isInPortfolio": false,
       "hasBarrier": false,
       "barrierPct": 0,
-      "barrierCouponPct": 4.1,
+      "barrierCouponPct": 4.5,
       "couponProbability": 92,
       "expectedMaturity": 4,
       "maxMaturity": 10,
@@ -239,8 +244,8 @@
       "baseScore": 80,
       "baseGrade": "A",
       "adjustments": {
-        "p1": -1,
-        "p2": -1,
+        "p1": 1,
+        "p2": 1,
         "p3": 1,
         "p4": 0
       },
@@ -264,46 +269,42 @@
       "bsVols": [],
       "bsMatEsperee": 4,
       "isRateHistorical": true,
-      "historicalBasis": "695 obs (2004-09-06→2026-04-16)",
-      "rateAlias": "oat_fr_10y",
-      "currentRate": 3.075,
+      "historicalBasis": "692 obs (2004-11-03→2026-04-28)",
+      "rateAlias": "tec10_fr",
+      "currentRate": 3.78,
       "rateTrigger": 4.1,
       "probExit": 67,
       "issuerCreditPenalty": 1,
       "issuerCDS": 60,
       "v6Weights": {
-        "p1": 0.25,
-        "p2": 0.2,
-        "p3": 0.25,
-        "p4": 0.3
-      }
+        "p1": 0.35,
+        "p2": 0.25,
+        "p3": 0.15,
+        "p4": 0.25
+      },
+      "envelopeMode": "swiss-life"
     },
     "regimeScenarios": {
       "current": {
-        "score": 71,
-        "grade": "B",
+        "score": 75,
+        "grade": "A",
         "label": "Actuel (stagflation)",
         "desc": "Taux élevés, BCE hawkish → coupon sous pression"
       },
       "bull": {
-        "score": 76,
+        "score": 77,
         "grade": "A",
         "label": "Bull / Risk-on",
-        "delta": 5,
+        "delta": 2,
         "desc": "Taux baissent → coupon plus probable, call risk monte"
       },
       "crash": {
         "score": 65,
         "grade": "B",
         "label": "Crash / Récession",
-        "delta": -6,
+        "delta": -10,
         "desc": "Taux spike puis chutent → volatilité, incertitude coupon"
       }
     }
-  },
-  "_couponProbability": 92,
-  "_bsRendementNet": 6.44,
-  "envelope": "",
-  "guaranteedYears": 0,
-  "autocallCumulTarget": 21
+  }
 }
