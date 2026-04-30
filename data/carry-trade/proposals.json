@@ -38,5 +38,25 @@
     "paymentTiming": "periodic",
     "_productId": "sp_mocn3omp_4lofx",
     "_bankId": "cic"
+  },
+  {
+    "name": "SL - TARN TEC10 10 ans",
+    "type": "conditionnel",
+    "coupon": 7,
+    "prob": 0.92,
+    "duration": 10,
+    "guaranteedYears": 0,
+    "autocallTarget": 21,
+    "autocallYears": 3,
+    "amount": 1000000,
+    "risk": "Faible",
+    "detail": "Swiss Life Banque Privée · Trigger 4.1% · Capital garanti 100%",
+    "color": "#7C3AED",
+    "source": "structboard",
+    "emetteur": "Swiss Life Banque Privée",
+    "trigger": 4.1,
+    "paymentTiming": "periodic",
+    "_productId": "sp_mo7faysh_qtyge",
+    "_bankId": "swiss-life"
   }
 ]
