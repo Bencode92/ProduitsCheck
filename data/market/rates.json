@@ -1,6 +1,6 @@
 {
   "source": "ECB + Banque de France (TEC) + Twelve Data",
-  "fetched_at": "2026-04-30T18:13:01.487919+00:00",
+  "fetched_at": "2026-05-01T08:52:56.823735+00:00",
   "yields": {
     "oat_fr_10y": {
       "current": 3.143,
@@ -11204,16 +11204,16 @@
       "description": "Rendement zone euro AAA 5 ans"
     },
     "euribor_3m": {
-      "current": 2.109,
-      "date": "2026-03",
-      "high_1y": 2.249,
+      "current": 2.175,
+      "date": "2026-04",
+      "high_1y": 2.175,
       "low_1y": 1.984,
-      "avg_1y": 2.052,
-      "observations": 315,
+      "avg_1y": 2.046,
+      "observations": 316,
       "vol_annualized_bps": 50.8,
-      "vol_annualized_pct": 24.1,
+      "vol_annualized_pct": 23.3,
       "direction": "stable",
-      "change_3m_bps": 0.8,
+      "change_3m_bps": 5.9,
       "history": [
         {
           "date": "2000-01",
@@ -11882,22 +11882,26 @@
         {
           "date": "2026-03",
           "value": 2.109
+        },
+        {
+          "date": "2026-04",
+          "value": 2.175
         }
       ],
       "name": "Euribor 3M",
       "description": "Taux interbancaire euro 3 mois (moyenne mensuelle)"
     },
     "euribor_6m": {
-      "current": 2.322,
-      "date": "2026-03",
-      "high_1y": 2.322,
+      "current": 2.454,
+      "date": "2026-04",
+      "high_1y": 2.454,
       "low_1y": 2.05,
-      "avg_1y": 2.132,
-      "observations": 315,
+      "avg_1y": 2.153,
+      "observations": 316,
       "vol_annualized_bps": 51.6,
-      "vol_annualized_pct": 22.2,
-      "direction": "stable",
-      "change_3m_bps": 7.5,
+      "vol_annualized_pct": 21.0,
+      "direction": "rising",
+      "change_3m_bps": 17.1,
       "history": [
         {
           "date": "2000-01",
@@ -12566,22 +12570,26 @@
         {
           "date": "2026-03",
           "value": 2.322
+        },
+        {
+          "date": "2026-04",
+          "value": 2.454
         }
       ],
       "name": "Euribor 6M",
       "description": "Taux interbancaire euro 6 mois (moyenne mensuelle)"
     },
     "euribor_12m": {
-      "current": 2.565,
-      "date": "2026-03",
-      "high_1y": 2.565,
+      "current": 2.747,
+      "date": "2026-04",
+      "high_1y": 2.747,
       "low_1y": 2.079,
-      "avg_1y": 2.198,
-      "observations": 315,
-      "vol_annualized_bps": 56.1,
-      "vol_annualized_pct": 21.9,
-      "direction": "stable",
-      "change_3m_bps": 12.0,
+      "avg_1y": 2.248,
+      "observations": 316,
+      "vol_annualized_bps": 56.2,
+      "vol_annualized_pct": 20.4,
+      "direction": "rising",
+      "change_3m_bps": 26.8,
       "history": [
         {
           "date": "2000-01",
@@ -13250,6 +13258,10 @@
         {
           "date": "2026-03",
           "value": 2.565
+        },
+        {
+          "date": "2026-04",
+          "value": 2.747
         }
       ],
       "name": "Euribor 12M",
@@ -24405,13 +24417,13 @@
       "name": "ECB Main Refinancing Rate",
       "description": "Taux directeur BCE",
       "current": 2.15,
-      "date": "2026-04-30"
+      "date": "2026-05-01"
     },
     "ecb_deposit_rate": {
       "name": "ECB Deposit Facility Rate",
       "description": "Taux de dépôt BCE",
       "current": 2.0,
-      "date": "2026-04-30"
+      "date": "2026-05-01"
     }
   },
   "yield_curve": {
