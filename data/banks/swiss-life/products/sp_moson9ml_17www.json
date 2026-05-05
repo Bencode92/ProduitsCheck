@@ -311,5 +311,193 @@
   "aiCategoryColor": "#3B82F6",
   "aiOpinion": "Produit offrant un rendement attractif de 7% annuel avec effet mémoire, mais exposé au risque significatif d'un seul sous-jacent (Rheinmetall) sans protection du capital. La barrière basse à 38% et le seuil d'autocall élevé à 96% créent un profil risque/rendement déséquilibré, particulièrement risqué sur une maturité de 6 ans.",
   "aiAnalyzedAt": "2026-05-05T13:47:22.747Z",
-  "envelope": ""
+  "envelope": "",
+  "grading": {
+    "grade": "D",
+    "score": 44,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 41,
+        "base": 31,
+        "delta": 0,
+        "reasoning": "Rendement: base 31 → -9 = 22 (En stagflation, RHM (DD 33.66%, vol 40.26%) subira une pression accrue sur ses marges malgré son statut défense, réduisant la probabilité des coupons avec une barrière à 70%.) | Coupon 3.5%, barrière 38% | Barr.coupon 70% | Mat espérée: ~1.5a (prob mat: 0%)",
+        "_bsDelta": 10,
+        "_bs": {
+          "score": 41,
+          "probCoupon": 89.4,
+          "rendementNet": 1.05,
+          "perteEsperee": 1.75,
+          "couponEffectif": 3.5,
+          "vols": [
+            40.26
+          ],
+          "matEsperee": 1.5,
+          "isBasket": false
+        }
+      },
+      "underlyingQuality": {
+        "score": 65,
+        "base": 70,
+        "delta": -5,
+        "reasoning": "Qualité: base 70 → -5 = 65 (Beta faible (0.66) protège partiellement, mais le secteur industrials en territoire négatif (-1.63%) et le choc pétrolier comprimant les marges pénalisent RHM.) | Worst: RHEINMETALL AG B:50"
+      },
+      "portfolioFit": {
+        "score": 40,
+        "base": 80,
+        "delta": -9,
+        "reasoning": "Fit: base 80 → -9 = 71 (En régime stagflation avec VIX élevé (22) et choc pétrolier, un produit à barrière capital 38% sur un titre volatil (40.26%) est inapproprié pour tout profil prudent.)"
+      },
+      "riskPremium": {
+        "score": 30,
+        "base": 0,
+        "delta": 0,
+        "reasoning": "Capital garanti: spread 3.5% - CAT 2.5% - illiq 0.5% = 0.5%"
+      }
+    },
+    "verdict": "Score ajusté à 28/100 (E). En stagflation avec Brent à $110, ce Phoenix sur Rheinmetall (vol 40.26%, DD -33.66%) présente un risque excessif malgré le coupon de 3.5% annualisé. La barrière capital à 38% offre peu de protection dans un contexte où les industriels reculent (-1.63%) et où un choc pétrolier persistant comprime les marges. La probabilité d'autocall rapide est compromise avec le seuil à 96% alors que RHM est déjà en drawdown significatif.",
+    "keyRisks": [
+      "Choc pétrolier second ordre pouvant déclencher une correction equity de 10-15% impactant RHM",
+      "Barrière capital à 38% insuffisante face à la volatilité de 40.26% en contexte stagflationniste",
+      "Barrière à 0.98σ (Danger) — vol 40.26%"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 3.5,
+        "return_eur": 3500,
+        "probability": 0.15,
+        "duration_years": 1
+      },
+      "base": {
+        "return_pct": 1.75,
+        "return_eur": 5250,
+        "probability": 0.3,
+        "duration_years": 3
+      },
+      "stress": {
+        "return_pct": -20,
+        "return_eur": -20000,
+        "probability": 0.35,
+        "duration_years": 6
+      },
+      "worst": {
+        "return_pct": -62,
+        "return_eur": -62000,
+        "probability": 0.2,
+        "duration_years": 6
+      }
+    },
+    "confidenceInterval": {
+      "low": 29,
+      "high": 45,
+      "halfWidth": 8,
+      "gradeStable": false,
+      "gradeRange": "D-C",
+      "label": "D [29-45]"
+    },
+    "metadata": {
+      "gradedAt": "2026-05-05T13:47:55.426Z",
+      "durationMs": 24640,
+      "aiUsed": true,
+      "version": "7.1",
+      "productType": "autocall",
+      "marketDataAvailable": true,
+      "catBenchmark": 2.8,
+      "catSource": "allocator-confirmed",
+      "couponAnnualized": 3.5,
+      "couponRaw": 3.5,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": true,
+      "barrierPct": 38,
+      "barrierCouponPct": 70,
+      "couponProbability": 89.4,
+      "expectedMaturity": 1.5,
+      "maxMaturity": 6,
+      "probReachMaturity": 0,
+      "maxBeta": 0.66,
+      "baseScore": 43,
+      "baseGrade": "D",
+      "adjustments": {
+        "p1": -9,
+        "p2": -5,
+        "p3": -9,
+        "p4": 0
+      },
+      "barrier_sigma": 0.98,
+      "barrier_sigma_label": "Danger",
+      "barrier_sigma_danger": true,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Rappelable 12M",
+      "ci_low": 29,
+      "ci_high": 45,
+      "ci_label": "D [29-45]",
+      "issuer_rating": "A+",
+      "issuer_tier": "IG",
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "autocall",
+      "bsRendementNet": 1.05,
+      "bsProbCoupon": 89.4,
+      "bsPerteEsperee": 1.75,
+      "bsVols": [
+        40.26
+      ],
+      "bsMatEsperee": 1.5,
+      "isBasket": false,
+      "issuerCreditPenalty": 1,
+      "issuerCDS": 60,
+      "v6Weights": {
+        "p1": 0.35,
+        "p2": 0.25,
+        "p3": 0.15,
+        "p4": 0.25
+      },
+      "envelopeMode": "swiss-life",
+      "stockData": [
+        {
+          "name": "RHEINMETALL AG",
+          "ticker": "RHM",
+          "sector": "Industries",
+          "perf_ytd": -11.07,
+          "perf_1y": -14.68,
+          "volatility_3y": 40.26,
+          "max_drawdown_3y": 33.66,
+          "buffett_score": 50,
+          "quality_score": 63,
+          "buffett_grade": "C"
+        }
+      ]
+    },
+    "regimeScenarios": {
+      "current": {
+        "score": 44,
+        "grade": "D",
+        "label": "Actuel (stagflation)",
+        "desc": "Régime actuel → volatilité modérée"
+      },
+      "bull": {
+        "score": 48,
+        "grade": "C",
+        "label": "Bull / Risk-on",
+        "delta": 4,
+        "desc": "Marchés haussiers → prob coupon monte, barrière safe"
+      },
+      "crash": {
+        "score": 33,
+        "grade": "D",
+        "label": "Crash / Récession",
+        "delta": -11,
+        "desc": "Marchés baissiers → barrière menacée, vol en hausse"
+      }
+    }
+  },
+  "_couponProbability": 89.4,
+  "_bsRendementNet": 1.05
 }
