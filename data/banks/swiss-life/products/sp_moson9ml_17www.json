@@ -6,7 +6,9 @@
   "guarantor": "",
   "guarantorRating": {
     "moodys": "A1",
-    "sp": "A+"
+    "sp": "A+",
+    "fitch": "A+",
+    "asOfDate": "2026-04-27"
   },
   "underlyings": [
     "RHEINMETALL AG"
@@ -17,17 +19,16 @@
   "maturityYears": 6,
   "coupon": {
     "rate": 3.5,
-    "rateIfCalled": null,
-    "rateIfMaturity": null,
-    "type": "conditionnel",
     "frequency": "semestriel",
-    "trigger": 70,
+    "annualized": true,
+    "type": "conditionnel",
     "memory": true,
-    "paymentTiming": "periodic"
+    "paymentTiming": "periodic",
+    "trigger": 70
   },
   "participationRate": null,
   "guaranteedYears": 0,
-  "autocallCumulTarget": null,
+  "autocallCumulTarget": 96,
   "commissions": 1.99,
   "isin": "XS3341093212",
   "minInvestment": 1000,
@@ -45,36 +46,43 @@
     "frequency": "semestriel",
     "startSemester": 2,
     "stepDown": true,
-    "stepDownPct": 2
+    "stepDownPct": 2,
+    "hasAutocall": true,
+    "enabled": true
   },
-  "decrementPct": null,
-  "actualDividendYield": null,
-  "mechanism": "À chaque semestre, coupon conditionnel de 3,50% versé si l'action RHEINMETALL AG ≥ 70% de son niveau initial, avec effet mémoire. Remboursement automatique anticipé possible du semestre 2 au semestre 11 avec seuil dégressif (96% au S2, puis -2% par semestre jusqu'à 78% au S11). Protection du capital à l'échéance si l'action reste ≥ 38% du niveau initial, sinon remboursement proportionnel à la performance de l'action.",
+  "mechanism": "Phoenix Mémoire FAST semestriel sur action Rheinmetall AG. Coupon conditionnel 3,50% par semestre versé si l'action ≥ 70% du Niveau Initial à chaque date de constatation, avec effet mémoire (rattrapage des coupons non versés précédemment). Remboursement automatique anticipé activé du semestre 2 au semestre 11 si l'action ≥ Seuil Dégressif (96% au S2, baissant linéairement de 2% par semestre jusqu'à 78% au S11). À l'échéance (semestre 12), si action ≥ 70% : capital + coupon mémoire ; si action ≥ 38% mais < 70% : capital initial uniquement (TRA min -1%) ; si action < 38% : remboursement proportionnel à la valeur finale (perte en capital partielle ou totale).",
   "risks": [
-    "Risque de perte en capital partielle ou totale",
-    "Risque de crédit émetteur",
-    "Risque de liquidité",
-    "Risque de mise en résolution",
-    "Risque de fluctuation de prix",
-    "Risque lié à l'inflation"
+    "Risque de perte en capital partielle ou totale en cours de vie et à l'échéance",
+    "Risque de crédit Émetteur Barclays Bank PLC",
+    "Risque de mise en résolution (bail-in BRRD)",
+    "Risque de liquidité (revente avant échéance à prix marché)",
+    "Risque de fluctuation du prix du produit (volatilité, taux, primes risque)",
+    "Risque lié à l'inflation (rendement réel potentiellement négatif)",
+    "Risque de plafonnement des gains (TRA net max 6,01%)",
+    "Risque de concentration sur action unique (single-stock)",
+    "Risque géopolitique sur secteur défense",
+    "Risque de non-versement des dividendes Rheinmetall (capturés par l'émetteur)"
   ],
-  "summary": "Produit Phoenix avec effet mémoire indexé sur l'action RHEINMETALL AG, offrant un coupon conditionnel semestriel de 3,50% si l'action reste au-dessus de 70% de son niveau initial, avec possibilité de remboursement anticipé automatique avec seuil dégressif et protection du capital à l'échéance à partir de 38% du niveau initial.",
+  "summary": "Produit structuré Phoenix Mémoire FAST semestriel indexé à l'action RHEINMETALL AG (défense allemande). Coupon conditionnel semestriel 3,50% (= 7%/an) si action ≥ 70% du Niveau Initial avec effet mémoire. Autocall semestriel possible du S2 au S11 sur seuil dégressif 96% → 78%. Capital protégé à l'échéance si action ≥ 38%, sinon perte proportionnelle. Maturité 6 ans, émetteur Barclays Bank PLC (A1/A+/A+). TRA net max 6,01%, pire cas TRA -17,63%/an.",
   "aiParsed": {
     "name": "SL - PHOENIX MÉMOIRE FAST SEMESTRIEL RHEINMETALL JUIN 2026",
-    "isin": "XS3341093212",
+    "type": "autocall",
     "structureType": "autocall",
     "emitter": "Barclays Bank PLC",
     "guarantor": "",
     "guarantorRating": {
       "moodys": "A1",
-      "sp": "A+"
+      "sp": "A+",
+      "fitch": "A+",
+      "asOfDate": "2026-04-27"
     },
     "underlyings": [
       "RHEINMETALL AG"
     ],
     "underlyingType": "single-stock",
+    "underlyingDescription": "Entreprise allemande spécialisée défense, automobile et systèmes industriels. Fondée 1889, basée Düsseldorf. ~31 900 collaborateurs, CA ~9,9 Mds€ (2025). Tickers: RHM GY (Bloomberg), RHMG.DE (Refinitiv), ISIN sous-jacent DE0007030009.",
     "currency": "EUR",
-    "maturity": "28 juin 2032",
+    "maturity": "6 ans",
     "maturityYears": 6,
     "coupon": {
       "rate": 3.5,
@@ -83,19 +91,31 @@
       "type": "conditionnel",
       "frequency": "semestriel",
       "trigger": 70,
+      "triggerType": "percentage_of_initial",
       "memory": true,
-      "paymentTiming": "periodic"
+      "paymentTiming": "periodic",
+      "annualizedRate": 7,
+      "totalSemesters": 12,
+      "couponObservationStart": 1,
+      "couponObservationEnd": 12
     },
     "participationRate": null,
     "guaranteedYears": 0,
     "autocallCumulTarget": null,
     "commissions": 1.99,
+    "commissionsType": "annual_max_distribution",
+    "isin": "XS3341093212",
+    "minInvestment": 1000,
+    "nominalValue": 1000,
+    "issuancePrice": 100,
     "capitalProtection": {
       "protected": false,
       "level": null,
       "barrier": 38,
       "barrierCoupon": 70,
-      "barrierType": "europeenne"
+      "barrierType": "europeenne",
+      "observationDate": "final_only",
+      "lossType": "proportional_below_barrier"
     },
     "earlyRedemption": {
       "possible": true,
@@ -103,25 +123,177 @@
       "trigger": 96,
       "frequency": "semestriel",
       "startSemester": 2,
+      "endSemester": 11,
+      "totalAutocallWindows": 10,
       "stepDown": true,
       "stepDownPct": 2,
-      "firstCallDate": null,
-      "callSchedule": []
+      "finalTrigger": 78,
+      "stepDownSchedule": {
+        "S2": 96,
+        "S3": 94,
+        "S4": 92,
+        "S5": 90,
+        "S6": 88,
+        "S7": 86,
+        "S8": 84,
+        "S9": 82,
+        "S10": 80,
+        "S11": 78
+      }
     },
     "decrementPct": null,
     "actualDividendYield": null,
-    "minInvestment": 1000,
-    "mechanism": "À chaque semestre, coupon conditionnel de 3,50% versé si l'action RHEINMETALL AG ≥ 70% de son niveau initial, avec effet mémoire. Remboursement automatique anticipé possible du semestre 2 au semestre 11 avec seuil dégressif (96% au S2, puis -2% par semestre jusqu'à 78% au S11). Protection du capital à l'échéance si l'action reste ≥ 38% du niveau initial, sinon remboursement proportionnel à la performance de l'action.",
-    "risks": [
-      "Risque de perte en capital partielle ou totale",
-      "Risque de crédit émetteur",
-      "Risque de liquidité",
-      "Risque de mise en résolution",
-      "Risque de fluctuation de prix",
-      "Risque lié à l'inflation"
+    "performance": {
+      "tra_max_net": 6.01,
+      "tra_min_capital_preserved_net": -1,
+      "tra_worst_case_net": -17.63,
+      "tra_favorable_scenario_brochure": 5.87,
+      "tra_median_scenario_brochure": 2.5,
+      "feeAssumptionUsed": 1,
+      "feeAssumptionType": "annual_management_or_custody",
+      "scenarios": {
+        "favorable": {
+          "description": "Action fortement haussière à court terme - Autocall S2",
+          "actionLevel": 120,
+          "couponsReceived": 7,
+          "redemption": 103.5,
+          "tra_net": 5.87,
+          "comparison_direct_action_tra": 18.28
+        },
+        "median": {
+          "description": "Action baissière à long terme - Capital préservé maturité",
+          "actionLevel": 50,
+          "couponsReceived": 21,
+          "redemption": 100,
+          "tra_net": 2.5,
+          "comparison_direct_action_tra": -11.75
+        },
+        "defavorable": {
+          "description": "Action fortement baissière - Sous barrière 38%",
+          "actionLevel": 33,
+          "couponsReceived": 0,
+          "redemption": 33,
+          "tra_net": -17.63
+        }
+      }
+    },
+    "subscriptionDates": {
+      "issuanceDate": "2026-06-26",
+      "initialFixingDate": "2026-06-26",
+      "finalFixingDate": "2032-06-28",
+      "finalRedemptionDate": "2032-07-05",
+      "semesterFixingDates": [
+        "2026-12-28",
+        "2027-06-28",
+        "2027-12-27",
+        "2028-06-26",
+        "2028-12-27",
+        "2029-06-26",
+        "2029-12-27",
+        "2030-06-26",
+        "2030-12-27",
+        "2031-06-26",
+        "2031-12-29",
+        "2032-06-28"
+      ],
+      "paymentDateOffset": "5 jours ouvrés après date de constatation"
+    },
+    "secondaryMarket": {
+      "available": true,
+      "frequency": "quotidien",
+      "spreadMax": 1,
+      "spreadType": "percentage_bid_ask",
+      "marketMaker": "Barclays Bank PLC",
+      "doubleValuation": "Refinitiv (indépendant, bi-mensuel)",
+      "publicationVenues": [
+        "Bloomberg",
+        "Refinitiv",
+        "Six Telekurs"
+      ]
+    },
+    "issuerSubstitution": {
+      "allowed": true,
+      "consentRequired": false,
+      "minRatingRequirement": "égale ou supérieure à émetteur"
+    },
+    "eligibility": [
+      "compte-titres ordinaire",
+      "assurance-vie unités de compte",
+      "contrat de capitalisation",
+      "PER individuel"
     ],
-    "summary": "Produit Phoenix avec effet mémoire indexé sur l'action RHEINMETALL AG, offrant un coupon conditionnel semestriel de 3,50% si l'action reste au-dessus de 70% de son niveau initial, avec possibilité de remboursement anticipé automatique avec seuil dégressif et protection du capital à l'échéance à partir de 38% du niveau initial.",
-    "_parsingAlerts": []
+    "exclusions": [
+      "US persons (Regulation S)"
+    ],
+    "mechanism": "Phoenix Mémoire FAST semestriel sur action Rheinmetall AG. Coupon conditionnel 3,50% par semestre versé si l'action ≥ 70% du Niveau Initial à chaque date de constatation, avec effet mémoire (rattrapage des coupons non versés précédemment). Remboursement automatique anticipé activé du semestre 2 au semestre 11 si l'action ≥ Seuil Dégressif (96% au S2, baissant linéairement de 2% par semestre jusqu'à 78% au S11). À l'échéance (semestre 12), si action ≥ 70% : capital + coupon mémoire ; si action ≥ 38% mais < 70% : capital initial uniquement (TRA min -1%) ; si action < 38% : remboursement proportionnel à la valeur finale (perte en capital partielle ou totale).",
+    "risks": [
+      "Risque de perte en capital partielle ou totale en cours de vie et à l'échéance",
+      "Risque de crédit Émetteur Barclays Bank PLC",
+      "Risque de mise en résolution (bail-in BRRD)",
+      "Risque de liquidité (revente avant échéance à prix marché)",
+      "Risque de fluctuation du prix du produit (volatilité, taux, primes risque)",
+      "Risque lié à l'inflation (rendement réel potentiellement négatif)",
+      "Risque de plafonnement des gains (TRA net max 6,01%)",
+      "Risque de concentration sur action unique (single-stock)",
+      "Risque géopolitique sur secteur défense",
+      "Risque de non-versement des dividendes Rheinmetall (capturés par l'émetteur)"
+    ],
+    "summary": "Produit structuré Phoenix Mémoire FAST semestriel indexé à l'action RHEINMETALL AG (défense allemande). Coupon conditionnel semestriel 3,50% (= 7%/an) si action ≥ 70% du Niveau Initial avec effet mémoire. Autocall semestriel possible du S2 au S11 sur seuil dégressif 96% → 78%. Capital protégé à l'échéance si action ≥ 38%, sinon perte proportionnelle. Maturité 6 ans, émetteur Barclays Bank PLC (A1/A+/A+). TRA net max 6,01%, pire cas TRA -17,63%/an.",
+    "investmentProfile": {
+      "riskLevel": "élevé",
+      "suitableFor": [
+        "diversification patrimoniale",
+        "exposition thématique défense Europe",
+        "investisseur compréhension produits structurés"
+      ],
+      "notSuitableFor": [
+        "trésorerie d'entreprise nécessitant capital garanti",
+        "épargne de précaution",
+        "horizon < 6 ans non flexible",
+        "investisseur recherchant rendement plafonné stable"
+      ],
+      "recommendedSizing": "instrument de diversification, ne doit pas constituer l'intégralité d'un portefeuille",
+      "horizonRecommended": "6 ans (hors autocall anticipé possible 1-5,5 ans)"
+    },
+    "regulatory": {
+      "jurisdiction": "droit anglais",
+      "prospectus": "Base Prospectus Barclays approuvé Banque Centrale Irlande",
+      "approvedBy": "Banque Centrale d'Irlande",
+      "notifiedTo": "AMF (passeport européen)",
+      "mifidCategory": "client non professionnel",
+      "documentationDate": "2026-04-27"
+    },
+    "distributor": {
+      "name": "SwissLife Banque Privée",
+      "address": "7, place Vendôme, 75001 Paris",
+      "establishmentCode": "11238 Q",
+      "rcs": "B 382 490 001 Paris"
+    },
+    "sourceFile": "Brochure PHOENIX MEMOIRE FAST SEMESTRIEL RHEINMETALL JUIN 2026.pdf",
+    "_parsingMetadata": {
+      "parsedDate": "2026-05-05",
+      "parserVersion": "structboard-v2",
+      "completeness": "100%",
+      "fieldsAdded": [
+        "guarantorRating.fitch",
+        "earlyRedemption.endSemester",
+        "earlyRedemption.totalAutocallWindows",
+        "earlyRedemption.finalTrigger",
+        "earlyRedemption.stepDownSchedule",
+        "performance.tra_max_net",
+        "performance.tra_min_capital_preserved_net",
+        "performance.tra_worst_case_net",
+        "performance.scenarios",
+        "subscriptionDates.semesterFixingDates",
+        "secondaryMarket.spreadMax",
+        "secondaryMarket.doubleValuation",
+        "issuerSubstitution",
+        "underlyingDescription",
+        "investmentProfile",
+        "regulatory",
+        "distributor"
+      ]
+    }
   },
   "sourceFile": "Brochure PHOENIX MEMOIRE FAST SEMESTRIEL RHEINMETALL JUIN 2026.pdf",
   "investedAmount": 0,
@@ -132,5 +304,12 @@
   "conversation": [],
   "conversationSummary": null,
   "decision": null,
-  "decisionReason": null
+  "decisionReason": null,
+  "_freqFixApplied": true,
+  "aiCategory": "phoenix-mono",
+  "aiCategoryLabel": "🎯 Phoenix Mono-actif",
+  "aiCategoryColor": "#3B82F6",
+  "aiOpinion": "Produit offrant un rendement attractif de 7% annuel avec effet mémoire, mais exposé au risque significatif d'un seul sous-jacent (Rheinmetall) sans protection du capital. La barrière basse à 38% et le seuil d'autocall élevé à 96% créent un profil risque/rendement déséquilibré, particulièrement risqué sur une maturité de 6 ans.",
+  "aiAnalyzedAt": "2026-05-05T13:47:22.747Z",
+  "envelope": ""
 }
