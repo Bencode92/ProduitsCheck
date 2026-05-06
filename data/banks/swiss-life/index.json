@@ -1,7 +1,7 @@
 {
   "bankId": "swiss-life",
   "bankName": "Swiss Life",
-  "lastUpdated": "2026-05-05T13:47:15.453Z",
+  "lastUpdated": "2026-05-06T07:59:47.071Z",
   "products": [
     {
       "id": "sp_mnd8hjkx_40efj",
@@ -90,6 +90,14 @@
       "status": "analyzing",
       "score": null,
       "receivedDate": "2026-05-05"
+    },
+    {
+      "id": "sp_motro9kv_xvj2j",
+      "name": "SL - ATHENA FAST SANOFI JUIN 2026",
+      "type": "autocall",
+      "status": "analyzing",
+      "score": null,
+      "receivedDate": "2026-05-06"
     }
   ]
 }
