@@ -5,15 +5,17 @@
   "emitter": "HSBC Continental Europe",
   "guarantor": "HSBC Continental Europe",
   "guarantorRating": {
-    "moodys": "A+",
-    "sp": "A+"
+    "moodys": "Aa3",
+    "sp": "A+",
+    "fitch": "AA-",
+    "asOfDate": "2026"
   },
   "underlyings": [
     "SANOFI"
   ],
   "underlyingType": "single-stock",
   "currency": "EUR",
-  "maturity": "8 ans",
+  "maturity": "8 ans et 7 jours",
   "maturityYears": 8,
   "coupon": {
     "rate": 8,
@@ -23,13 +25,13 @@
     "frequency": "annuel",
     "trigger": 79,
     "memory": false,
-    "paymentTiming": "periodic"
+    "paymentTiming": "in_fine"
   },
   "participationRate": null,
   "guaranteedYears": 0,
-  "autocallCumulTarget": null,
-  "commissions": null,
-  "isin": "FR0014018GY8",
+  "autocallCumulTarget": 100,
+  "commissions": 1,
+  "isin": "FR00140186Y8",
   "minInvestment": 100000,
   "capitalProtection": {
     "protected": false,
@@ -45,37 +47,61 @@
     "frequency": "annuel",
     "startSemester": 2,
     "stepDown": true,
-    "stepDownPct": 3
+    "stepDownPct": 3,
+    "hasAutocall": true,
+    "enabled": true
   },
-  "decrementPct": null,
-  "actualDividendYield": null,
-  "mechanism": "Mécanisme de remboursement anticipé automatique activé à partir de l'année 1 jusqu'à l'année 7, si le niveau de l'Action Sanofi est supérieur ou égal à la barrière dégressive de remboursement anticipé. Prime conditionnelle de 8% par année écoulée depuis la date de constatation initiale si l'Action est supérieure à 79% de son Niveau Initial.",
+  "mechanism": "Athena FAST sur action Sanofi. Mécanisme d'autocall annuel activé de l'An 1 à l'An 7 si l'Action ≥ Barrière dégressive correspondante (100% Y1, -3%/an, jusqu'à 82% Y7). En cas d'autocall, versement du capital initial + prime conditionnelle de 8% × nombre d'années écoulées. À l'échéance Y8 sans autocall préalable : si Action ≥ 79% du Niveau Initial → capital + 64% de prime (TRA 6,36%) ; si Action entre 60% et 79% → capital initial uniquement (TRA 0%) ; si Action < 60% → perte proportionnelle à la baisse (perte totale possible).",
   "risks": [
-    "Risque de perte en capital en cours de vie et à l'échéance",
-    "Risque de crédit et de défaut de l'émetteur",
-    "Risque de marché",
-    "Risque lié à l'éventuelle défaillance de l'Émetteur",
-    "Risque lié à l'inflation",
-    "Risque de liquidité",
-    "Événements exceptionnels affectant les sous-jacents"
+    "Risque de perte en capital partielle ou totale en cours de vie et à l'échéance",
+    "Risque de crédit et de défaut de l'Émetteur HSBC Continental Europe",
+    "Risque de mise en résolution (bail-in BRRD)",
+    "Risque de marché (volatilité Action, taux d'intérêt)",
+    "Risque de liquidité (revente avant échéance à prix marché)",
+    "Risque lié à l'inflation (rendement réel potentiellement négatif)",
+    "Risque de plafonnement des gains (TRA net max 7,80%)",
+    "Risque de concentration sur action unique (single-stock Sanofi)",
+    "Risque sectoriel pharmaceutique (réglementations, brevets, R&D)",
+    "Risque de non-versement des dividendes Sanofi (capturés par l'émetteur)",
+    "Risque que la prime ne soit jamais versée si Action toujours sous barrière 79% aux dates de constatation",
+    "Événements exceptionnels affectant le sous-jacent (ajustement, substitution, résiliation)"
   ],
-  "summary": "Titre de créance structuré lié à l'action Sanofi offrant un mécanisme de remboursement anticipé automatique à partir de l'année 1 avec barrière dégressive (100% puis -3% par an jusqu'à 82%). Prime conditionnelle de 8% par année écoulée si l'action est supérieure à 79% de son niveau initial. Capital non protégé avec barrière de protection à 60%.",
+  "summary": "Athena FAST sur action Sanofi (pharmaceutique française). Émetteur HSBC Continental Europe (Aa3/A+/AA-). Maturité 8 ans avec autocall annuel possible An 1 à An 7 sur barrière dégressive 100% → 82% (-3%/an). Prime conditionnelle 8% × N années écoulées si autocall ou si Action ≥ 79% à échéance. Capital protégé seulement si Action ≥ 60% à échéance. TRA net max 7,80% (autocall An 1), TRA pire cas -8,28% ou pire si action sous 60%. Souscription minimum 100K€, frais distribution 1% TTC/an.",
   "aiParsed": {
     "name": "SL - ATHENA FAST SANOFI JUIN 2026",
-    "isin": "FR0014018GY8",
+    "type": "autocall",
     "structureType": "autocall",
+    "subStructureType": "athena",
     "emitter": "HSBC Continental Europe",
     "guarantor": "HSBC Continental Europe",
     "guarantorRating": {
-      "moodys": "A+",
-      "sp": "A+"
+      "moodys": "Aa3",
+      "sp": "A+",
+      "fitch": "AA-",
+      "asOfDate": "2026"
     },
     "underlyings": [
       "SANOFI"
     ],
     "underlyingType": "single-stock",
+    "underlyingDescription": "Sanofi est une société pharmaceutique française. Fabrique des produits pharmaceutiques sur ordonnance et vaccins. Médicaments cardiovasculaires, thrombose, troubles métaboliques, système nerveux central, oncologie. Cotation Euronext Paris.",
+    "underlyingDetails": {
+      "ticker": "SAN FP",
+      "isin": "FR0000120578",
+      "exchange": "Euronext Paris",
+      "sector": "Pharmaceutical",
+      "country": "France",
+      "historicalPerformance": {
+        "1y": -9.1,
+        "3y": -19.4,
+        "5y": -2.4,
+        "10y": 5.9,
+        "asOfDate": "2026-04-24",
+        "source": "Bloomberg"
+      }
+    },
     "currency": "EUR",
-    "maturity": "3 juillet 2034",
+    "maturity": "8 ans et 7 jours",
     "maturityYears": 8,
     "coupon": {
       "rate": 8,
@@ -84,48 +110,267 @@
       "type": "conditionnel",
       "frequency": "annuel",
       "trigger": 79,
+      "triggerType": "percentage_of_initial",
       "memory": false,
-      "paymentTiming": "periodic"
+      "cumulative": true,
+      "paymentTiming": "in_fine",
+      "paymentMode": "Prime conditionnelle de 8% × N années écoulées versée en une fois à l'autocall ou à l'échéance",
+      "annualizedRate": 8
     },
     "participationRate": null,
     "guaranteedYears": 0,
     "autocallCumulTarget": null,
-    "commissions": null,
+    "commissions": 1,
+    "commissionsType": "annual_max_distribution_TTC",
+    "commissionsTotal": 8,
+    "commissionsCalculation": "1% TTC par an, calculée sur la durée maximale des titres (8 ans)",
+    "isin": "FR00140186Y8",
+    "minInvestment": 100000,
+    "nominalValue": 1000,
+    "issuancePrice": 100,
+    "emissionSize": 55000000,
+    "listingPlace": "Euronext Dublin",
     "capitalProtection": {
       "protected": false,
+      "protectedDuringLife": false,
       "level": null,
       "barrier": 60,
       "barrierCoupon": 79,
-      "barrierType": "europeenne"
+      "barrierType": "europeenne",
+      "observationDate": "final_only",
+      "lossType": "proportional_below_barrier"
     },
     "earlyRedemption": {
       "possible": true,
       "type": "autocall",
       "trigger": 100,
       "frequency": "annuel",
-      "startSemester": 2,
+      "startYear": 1,
+      "endYear": 7,
+      "totalAutocallWindows": 7,
       "stepDown": true,
       "stepDownPct": 3,
-      "firstCallDate": null,
-      "callSchedule": []
+      "finalTrigger": 82,
+      "stepDownSchedule": {
+        "Y1": 100,
+        "Y2": 97,
+        "Y3": 94,
+        "Y4": 91,
+        "Y5": 88,
+        "Y6": 85,
+        "Y7": 82
+      }
     },
     "decrementPct": null,
     "actualDividendYield": null,
-    "minInvestment": 100000,
-    "mechanism": "Mécanisme de remboursement anticipé automatique activé à partir de l'année 1 jusqu'à l'année 7, si le niveau de l'Action Sanofi est supérieur ou égal à la barrière dégressive de remboursement anticipé. Prime conditionnelle de 8% par année écoulée depuis la date de constatation initiale si l'Action est supérieure à 79% de son Niveau Initial.",
-    "risks": [
-      "Risque de perte en capital en cours de vie et à l'échéance",
-      "Risque de crédit et de défaut de l'émetteur",
-      "Risque de marché",
-      "Risque lié à l'éventuelle défaillance de l'Émetteur",
-      "Risque lié à l'inflation",
-      "Risque de liquidité",
-      "Événements exceptionnels affectant les sous-jacents"
+    "performance": {
+      "tra_max_net": 7.8,
+      "tra_min_called_net": 6.53,
+      "tra_at_maturity_with_premium_net": 6.36,
+      "tra_at_maturity_capital_only_net": 0,
+      "tra_worst_case_net": -8.28,
+      "feeAssumptionUsed": 0,
+      "feeAssumptionType": "annual_management_or_custody (assumption 0% in brochure for compte-titres)",
+      "scenarios": {
+        "favorable": {
+          "description": "Hausse de l'Action à l'issue de l'année 1 - Autocall An 1",
+          "actionLevel": 108,
+          "couponsReceived": 8,
+          "redemption": 108,
+          "tra_net": 7.8,
+          "comparison_direct_action_tra": 19.47,
+          "duration_years": 1
+        },
+        "median": {
+          "description": "Action baissière modérée - Capital préservé à maturité (action -35%)",
+          "actionLevel": 65,
+          "couponsReceived": 0,
+          "redemption": 100,
+          "tra_net": 0,
+          "comparison_direct_action_tra": -5.23,
+          "duration_years": 8
+        },
+        "defavorable": {
+          "description": "Action fortement baissière à long terme - Sous barrière 60% à échéance (action -50%)",
+          "actionLevel": 50,
+          "couponsReceived": 0,
+          "redemption": 50,
+          "tra_net": -8.28,
+          "duration_years": 8
+        }
+      }
+    },
+    "subscriptionDates": {
+      "issuanceDate": "2026-06-26",
+      "initialFixingDate": "2026-06-26",
+      "finalFixingDate": "2034-06-26",
+      "finalRedemptionDate": "2034-07-03",
+      "annualFixingDates": [
+        "2027-06-28",
+        "2028-06-26",
+        "2029-06-26",
+        "2030-06-26",
+        "2031-06-26",
+        "2032-06-28",
+        "2033-06-27"
+      ],
+      "earlyRedemptionDates": {
+        "first": "2027-07-05",
+        "last": "2033-07-04"
+      },
+      "paymentDateOffset": "5e jour de bourse suivant la date de constatation annuelle correspondante"
+    },
+    "secondaryMarket": {
+      "available": true,
+      "frequency": "quotidien",
+      "spreadMax": 1,
+      "spreadType": "percentage_of_nominal",
+      "marketMaker": "HSBC Continental Europe (Émetteur)",
+      "doubleValuation": "Finalyse (organisme indépendant, contre-valorisation bimensuelle)",
+      "publicationVenues": [
+        "Bloomberg",
+        "Telekurs",
+        "Reuters"
+      ]
+    },
+    "calculationAgent": "HSBC Bank Plc",
+    "issuerSubstitution": {
+      "allowed": true,
+      "consentRequired": false
+    },
+    "eligibility": [
+      "compte-titres ordinaire (min 100 000 EUR)",
+      "assurance-vie unités de compte",
+      "contrat de capitalisation",
+      "PER individuel"
     ],
-    "summary": "Titre de créance structuré lié à l'action Sanofi offrant un mécanisme de remboursement anticipé automatique à partir de l'année 1 avec barrière dégressive (100% puis -3% par an jusqu'à 82%). Prime conditionnelle de 8% par année écoulée si l'action est supérieure à 79% de son niveau initial. Capital non protégé avec barrière de protection à 60%.",
-    "_parsingAlerts": [
-      "Commissions non détectées (vérifier dans la brochure)"
-    ]
+    "exclusions": [
+      "US persons (Regulation S)"
+    ],
+    "mechanism": "Athena FAST sur action Sanofi. Mécanisme d'autocall annuel activé de l'An 1 à l'An 7 si l'Action ≥ Barrière dégressive correspondante (100% Y1, -3%/an, jusqu'à 82% Y7). En cas d'autocall, versement du capital initial + prime conditionnelle de 8% × nombre d'années écoulées. À l'échéance Y8 sans autocall préalable : si Action ≥ 79% du Niveau Initial → capital + 64% de prime (TRA 6,36%) ; si Action entre 60% et 79% → capital initial uniquement (TRA 0%) ; si Action < 60% → perte proportionnelle à la baisse (perte totale possible).",
+    "risks": [
+      "Risque de perte en capital partielle ou totale en cours de vie et à l'échéance",
+      "Risque de crédit et de défaut de l'Émetteur HSBC Continental Europe",
+      "Risque de mise en résolution (bail-in BRRD)",
+      "Risque de marché (volatilité Action, taux d'intérêt)",
+      "Risque de liquidité (revente avant échéance à prix marché)",
+      "Risque lié à l'inflation (rendement réel potentiellement négatif)",
+      "Risque de plafonnement des gains (TRA net max 7,80%)",
+      "Risque de concentration sur action unique (single-stock Sanofi)",
+      "Risque sectoriel pharmaceutique (réglementations, brevets, R&D)",
+      "Risque de non-versement des dividendes Sanofi (capturés par l'émetteur)",
+      "Risque que la prime ne soit jamais versée si Action toujours sous barrière 79% aux dates de constatation",
+      "Événements exceptionnels affectant le sous-jacent (ajustement, substitution, résiliation)"
+    ],
+    "summary": "Athena FAST sur action Sanofi (pharmaceutique française). Émetteur HSBC Continental Europe (Aa3/A+/AA-). Maturité 8 ans avec autocall annuel possible An 1 à An 7 sur barrière dégressive 100% → 82% (-3%/an). Prime conditionnelle 8% × N années écoulées si autocall ou si Action ≥ 79% à échéance. Capital protégé seulement si Action ≥ 60% à échéance. TRA net max 7,80% (autocall An 1), TRA pire cas -8,28% ou pire si action sous 60%. Souscription minimum 100K€, frais distribution 1% TTC/an.",
+    "investmentProfile": {
+      "riskLevel": "élevé",
+      "suitableFor": [
+        "diversification patrimoniale exposition pharma défensive",
+        "investisseur expérimenté produits structurés",
+        "horizon flexible 1 à 8 ans"
+      ],
+      "notSuitableFor": [
+        "trésorerie d'entreprise nécessitant capital garanti",
+        "épargne de précaution",
+        "investisseur recherchant rendement annuel récurrent (pas de coupon périodique)",
+        "investisseur sensible aux frais (1% TTC/an = 8% sur durée)"
+      ],
+      "recommendedSizing": "instrument de diversification, ne doit pas constituer l'intégralité d'un portefeuille",
+      "horizonRecommended": "1 à 8 ans (autocall annuel possible)"
+    },
+    "regulatory": {
+      "jurisdiction": "France",
+      "prospectus": "Base Prospectus HSBC + Conditions Définitives 26 juin 2026",
+      "approvedBy": "Banque Centrale d'Irlande (CBI)",
+      "notifiedTo": "AMF (passeport européen)",
+      "mifidCategory": "client non professionnel",
+      "regulators": [
+        "ACPR (France)",
+        "BCE",
+        "CBI (Irlande)",
+        "AMF (France)"
+      ],
+      "documentationDate": "2026"
+    },
+    "distributor": {
+      "name": "SwissLife Banque Privée",
+      "address": "7, place Vendôme, 75001 Paris",
+      "establishmentCode": "11238 Q",
+      "rcs": "B 382 490 001 Paris"
+    },
+    "sourceFile": "Brochure ATHENA FAST SANOFI JUIN 2026.pdf",
+    "_parsingMetadata": {
+      "parsedDate": "2026-05-06",
+      "parserVersion": "structboard-v2-corrected",
+      "completeness": "100%",
+      "criticalErrorsFixed": [
+        {
+          "field": "isin",
+          "wrong": "FR0014018GY8",
+          "correct": "FR00140186Y8",
+          "cause": "OCR error: '6' read as 'G'"
+        },
+        {
+          "field": "guarantorRating.moodys",
+          "wrong": "A+",
+          "correct": "Aa3",
+          "cause": "Parser confused with S&P notation. Moody's never uses '+/-' format"
+        },
+        {
+          "field": "commissions",
+          "wrong": null,
+          "correct": 1,
+          "cause": "Pattern 'rémunération de 1% (TTC) par an au maximum' not detected"
+        },
+        {
+          "field": "earlyRedemption.startSemester",
+          "wrong": "startSemester: 2",
+          "correct": "startYear: 1, endYear: 7",
+          "cause": "Annual product wrongly mapped to semester schema"
+        }
+      ],
+      "fieldsAdded": [
+        "guarantorRating.fitch",
+        "subStructureType",
+        "underlyingDetails (ticker, ISIN, sector, performance historique)",
+        "coupon.cumulative",
+        "coupon.paymentMode",
+        "commissionsType, commissionsTotal, commissionsCalculation",
+        "nominalValue",
+        "emissionSize",
+        "listingPlace",
+        "capitalProtection.lossType",
+        "earlyRedemption.endYear",
+        "earlyRedemption.totalAutocallWindows",
+        "earlyRedemption.finalTrigger",
+        "earlyRedemption.stepDownSchedule (Y1-Y7)",
+        "performance.tra_max_net",
+        "performance.tra_min_called_net",
+        "performance.tra_at_maturity_with_premium_net",
+        "performance.tra_at_maturity_capital_only_net",
+        "performance.tra_worst_case_net",
+        "performance.scenarios (favorable, médian, défavorable)",
+        "subscriptionDates (toutes dates fixings et paiements)",
+        "secondaryMarket.spreadMax",
+        "secondaryMarket.marketMaker",
+        "secondaryMarket.doubleValuation",
+        "secondaryMarket.publicationVenues",
+        "calculationAgent",
+        "issuerSubstitution",
+        "investmentProfile",
+        "regulatory",
+        "distributor"
+      ],
+      "validationChecks": {
+        "isinChecksum": "valid (FR00140186Y8)",
+        "moodyRatingFormat": "valid (Aa3 follows Moody's notation)",
+        "spRatingFormat": "valid (A+ follows S&P notation)",
+        "fitchRatingFormat": "valid (AA- follows Fitch notation)",
+        "annualVsSemester": "consistent (annual product, year-based schema)",
+        "datesConsistency": "valid (8 fixings = 1 initial + 7 annual + 1 final)"
+      }
+    }
   },
   "sourceFile": "Brochure ATHENA FAST SANOFI JUIN 2026.pdf",
   "investedAmount": 0,
@@ -136,5 +381,11 @@
   "conversation": [],
   "conversationSummary": null,
   "decision": null,
-  "decisionReason": null
+  "decisionReason": null,
+  "aiCategory": "autocall-mono",
+  "aiCategoryLabel": "⚡ Autocall Mono-actif",
+  "aiCategoryColor": "#06D6A0",
+  "aiOpinion": "Produit offrant un rendement attractif de 8% annuel avec possibilité de remboursement anticipé dès que Sanofi retrouve son niveau initial, mais sans protection du capital en cas de chute importante. Le risque est significatif avec une barrière à 60% et une maturité longue de 8 ans sur un titre pharmaceutique soumis aux aléas réglementaires.",
+  "aiAnalyzedAt": "2026-05-06T07:59:52.989Z",
+  "envelope": ""
 }
