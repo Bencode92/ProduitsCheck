@@ -1,33 +1,33 @@
 {
-  "timestamp": "2026-05-11T10:54:58.800408",
+  "timestamp": "2026-05-12T10:24:03.619433",
   "version": "1.0.0",
   "model": "claude-opus-4-6",
   "market_data_input": {
-    "date": "2026-05-11",
-    "brent_usd": 103.7,
-    "brent_usd_avg5d": 103.98007199999999,
-    "gold_usd": 4664.23121,
-    "silver_usd": 80.47307,
+    "date": "2026-05-12",
+    "brent_usd": 107.01,
+    "brent_usd_avg5d": 103.40705599999998,
+    "gold_usd": 4699.88296,
+    "silver_usd": 84.1149,
     "vix": 22.0,
     "fed_funds_rate": 3.63,
     "fed_funds_rate_delta_6m": 0.0,
     "cpi_yoy_pct": 2.4,
     "cpi_index": 330.293,
     "ig_spread_bps": 135.0,
-    "hy_spread_bps": 279.0,
-    "us_10y_yield": 4.41,
-    "us_2y_yield": 3.92,
-    "yield_curve_2s10s": 49.0,
-    "breakeven_5y": 2.62,
-    "sp500_level": 7398.93,
-    "sp500_change_1d_pct": 2.334816019651132,
-    "hyg_change_1d_pct": 0.09992505620784198,
-    "lqd_change_1d_pct": 0.5524861878453118,
-    "trade_weighted_usd": 118.3926,
-    "eurusd": 1.17721,
-    "nasdaq_change_1d_pct": 2.34408,
-    "xlu_perf_1d_pct": -0.88651977,
-    "xle_perf_1d_pct": -0.44682752,
+    "hy_spread_bps": 281.0,
+    "us_10y_yield": 4.38,
+    "us_2y_yield": 3.9,
+    "yield_curve_2s10s": 48.0,
+    "breakeven_5y": 2.67,
+    "sp500_level": 7412.84,
+    "sp500_change_1d_pct": 2.9453876332326514,
+    "hyg_change_1d_pct": 0.22556390977444465,
+    "lqd_change_1d_pct": 0.6281755196304913,
+    "trade_weighted_usd": 118.0392,
+    "eurusd": 1.17472,
+    "nasdaq_change_1d_pct": 0.28963874,
+    "xlu_perf_1d_pct": 0.93917298,
+    "xle_perf_1d_pct": 2.63913,
     "cpi_core_mom_pct": 0.2,
     "pce_yoy_pct": 3.5,
     "vix_trend": "Stable",
@@ -35,37 +35,38 @@
     "_stress_flags": [
       "energy_shock"
     ],
-    "gold_price": 4666.26738,
+    "gold_price": 4702.20691,
     "gold_ath_120d": 5330.94854,
-    "gold_drawdown_from_ath_pct": 12.468346955755834,
+    "gold_drawdown_from_ath_pct": 11.794179315038003,
     "radar_regime": "neutral",
     "radar_confidence": 0.88,
-    "favored_sectors": "energy, information-technology, materials, utilities, industrials",
+    "favored_sectors": "utilities, energy, information-technology, materials, industrials",
     "avoided_sectors": "healthcare, financials",
-    "favored_regions": "turkey, asie, israel, brazil",
-    "avoided_regions": "india",
-    "key_trends": "Secteur leader: energy (+24.6% YTD) | Région leader: south-korea (+81.8% YTD) | 3 secteur(s) en refroidissement (3M ≤ -2.0%) | 52W leader: information-technology (+60.8% sur 12 mois) | 6M leader: energy (+24.4% sur 6 mois)",
-    "risks": "Secteurs en difficulté: communication-services, healthcare, financials | Régions en difficulté: india | 3 secteurs avec 6M négatif (momentum moyen-terme dégradé)",
-    "sector_momentum_summary": "energy(favored,b=0.02,d=-0.46%), materials(favored,b=0.78,d=0.37%), industrials(favored,b=0.95,d=-0.46%), consumer-discretionary(neutral,b=1.24,d=0.28%), information-technology(favored,b=1.47,d=2.74%), communication-services(neutral,b=1.21,d=-0.84%), real-estate(favored,b=0.43,d=0.06%), consumer-staples(neutral,b=0.24,d=0.42%), utilities(favored,b=0.36,d=-0.16%), healthcare(avoided,b=0.58,d=-0.84%), financials(avoided,b=0.93,d=-0.5%)"
+    "favored_regions": "turkey, asie, israel, china",
+    "avoided_regions": "india, argentina",
+    "key_trends": "Secteur leader: utilities (+28.1% YTD) | Région leader: south-korea (+95.6% YTD) | 3 secteur(s) en refroidissement (3M ≤ -2.0%) | 52W leader: utilities (+55.2% sur 12 mois) | 6M leader: utilities (+24.5% sur 6 mois)",
+    "risks": "Secteurs en difficulté: healthcare, financials, communication-services | Régions en difficulté: argentina, india | 3 secteurs avec 6M négatif (momentum moyen-terme dégradé)",
+    "sector_momentum_summary": "information-technology(favored,b=1.48,d=0.68%), industrials(favored,b=0.95,d=1.1%), materials(favored,b=0.78,d=1.35%), consumer-staples(neutral,b=0.24,d=-0.97%), healthcare(avoided,b=0.58,d=-0.53%), energy(favored,b=0.01,d=2.43%), utilities(favored,b=0.76,d=0.72%), consumer-discretionary(neutral,b=1.24,d=-0.54%), financials(avoided,b=0.92,d=-0.16%), communication-services(neutral,b=1.2,d=-1.55%), real-estate(favored,b=0.43,d=0.11%)"
   },
   "ai_response": {
     "regime": "stagflation",
     "regime_confidence": 4,
-    "regime_rationale": "Brent à $104 alimente une inflation persistante (PCE 3.5% bien au-dessus du target, breakeven 5Y à 2.62%) tandis que la Fed reste en pause (0 cut en 6m) avec des taux restrictifs à 3.63%. Le VIX à 22 et les spreads IG/HY modérés montrent un marché pas encore en panique mais sous tension, typique d'un régime stagflationniste naissant.",
+    "regime_rationale": "Brent à $107 alimentant une inflation persistante (PCE 3.5% bien au-dessus du target, breakeven 5Y à 2.67%), tandis que la Fed reste en pause (0 delta 6m) avec un VIX à 22 signalant un stress modéré. La courbe 2s10s positive à 48bps avec des taux élevés et un pétrole >$100 crée un environnement stagflationniste classique où la croissance ralentit sous le poids des coûts énergétiques.",
     "adjustments": [
       {
         "type": "thematic_cap_delta",
-        "action": "Surpondérer energy/oil — Brent >$100 et leader sectoriel YTD",
+        "action": "Surpondérer energy/oil pour capturer le supercycle pétrole >$100",
         "params": {
           "theme": "energy_oil",
           "delta_pct": 4
         },
         "profiles": [
           "Agressif",
-          "Modéré"
+          "Modéré",
+          "Stable"
         ],
         "conviction": 5,
-        "rationale": "Brent à $104, energy +24.6% YTD, couverture naturelle contre l'inflation pétrolière et momentum RADAR confirmé."
+        "rationale": "Brent $107 avec momentum XLE +2.6% daily, energy est le hedge naturel contre la stagflation et le seul secteur qui bénéficie directement de l'inflation importée."
       },
       {
         "type": "thematic_cap_delta",
@@ -79,13 +80,13 @@
           "Modéré"
         ],
         "conviction": 3,
-        "rationale": "Semi/AI sont des actifs long-duration implicite; PCE 3.5% + Fed en pause = taux élevés plus longtemps, compression des multiples growth."
+        "rationale": "Semi/AI sont des actifs long-duration implicite; avec le 10Y à 4.38% et la Fed bloquée par l'inflation PCE 3.5%, le coût du capital reste élevé et pèse sur les multiples growth."
       },
       {
-        "type": "thematic_cap_delta",
-        "action": "Renforcer precious metals — hedge inflation + gold en correction",
+        "type": "mandatory_hedge_delta",
+        "action": "Renforcer gold malgré le drawdown de 12% — hedge stagflation essentiel",
         "params": {
-          "theme": "precious_metals",
+          "hedge": "gold",
           "delta_pct": 3
         },
         "profiles": [
@@ -94,11 +95,11 @@
           "Stable"
         ],
         "conviction": 4,
-        "rationale": "Gold en drawdown -12.5% depuis ATH offre un point d'entrée attractif alors que l'inflation PCE reste à 3.5% et le dollar s'affaiblit (DTWEXBGS 118 < 125)."
+        "rationale": "Gold à -12% de l'ATH offre un point d'entrée attractif dans un régime stagflationniste; l'or protège contre l'érosion du pouvoir d'achat quand la Fed ne peut pas monter (PCE 3.5% mais croissance fragile)."
       },
       {
         "type": "thematic_cap_delta",
-        "action": "Renforcer dividend_value — défensif en stagflation",
+        "action": "Renforcer dividend_value — surperformance en stagflation",
         "params": {
           "theme": "dividend_value",
           "delta_pct": 3
@@ -108,26 +109,11 @@
           "Stable"
         ],
         "conviction": 4,
-        "rationale": "Les valeurs dividendes/value surperforment en stagflation grâce à leur pricing power et duration courte implicite."
-      },
-      {
-        "type": "mandatory_hedge_delta",
-        "action": "Renforcer gold comme hedge inflation/géopolitique",
-        "params": {
-          "hedge": "gold",
-          "delta_pct": 2
-        },
-        "profiles": [
-          "Agressif",
-          "Modéré",
-          "Stable"
-        ],
-        "conviction": 4,
-        "rationale": "Drawdown -12.5% = opportunité de renforcement; dollar faible + inflation persistante + risque géopolitique (pétrole >$100) soutiennent l'or."
+        "rationale": "Utilities leader YTD +28% et 52W +55% confirme la rotation vers le rendement défensif; les dividendes offrent un coussin réel quand l'inflation érode les rendements nominaux."
       },
       {
         "type": "bond_preference",
-        "action": "Basculer vers TIPS + duration courte, éviter HY",
+        "action": "TIPS obligatoires + duration courte — inflation réelle non compensée",
         "params": {
           "action": "prefer_tips",
           "max_dur": 4.0,
@@ -141,11 +127,11 @@
           "Stable"
         ],
         "conviction": 5,
-        "rationale": "PCE 3.5% + breakeven 5Y 2.62% = inflation sous-pricée par le marché; TIPS protègent le pouvoir d'achat, duration courte limite le risque si la Fed doit resserrer."
+        "rationale": "PCE 3.5% vs breakeven 5Y 2.67% = l'inflation réelle dépasse les anticipations de marché de ~80bps, rendant les TIPS sous-évalués et les nominaux vulnérables à une repricing."
       },
       {
         "type": "bond_floor_delta",
-        "action": "Relever le floor obligataire pour Stable et Modéré",
+        "action": "Augmenter le floor obligataire pour Stable et Modéré — protection défensive",
         "params": {
           "delta_pct": 3
         },
@@ -154,23 +140,39 @@
           "Stable"
         ],
         "conviction": 3,
-        "rationale": "En stagflation, augmenter la poche bonds (TIPS/treasury court) réduit le beta equity tout en captant du rendement réel positif."
+        "rationale": "Avec 77% equity en Modéré et 63% en Stable, les portefeuilles sont trop exposés au risque equity dans un régime où la croissance ralentit sous le choc pétrolier."
       },
       {
-        "type": "cash_tactical",
-        "action": "Augmenter le cash tactique — VIX 22 + incertitude macro",
-        "params": {},
+        "type": "thematic_cap_delta",
+        "action": "Réduire healthcare — momentum dégradé et secteur avoided par RADAR",
+        "params": {
+          "theme": "healthcare",
+          "delta_pct": -2
+        },
         "profiles": [
           "Agressif",
-          "Modéré",
-          "Stable"
+          "Modéré"
         ],
         "conviction": 3,
-        "rationale": "VIX à 22 avec Brent >$100 crée un risque de spike; le cash tactique offre l'option d'acheter un dip si le marché corrige sur un choc pétrolier ou un pivot Fed hawkish."
+        "rationale": "Healthcare en difficulté sur tous les horizons momentum (RADAR avoided, daily -0.53%), et le secteur défensif est supplanté par utilities dans ce cycle."
+      },
+      {
+        "type": "thematic_cap_delta",
+        "action": "Renforcer precious_metals — silver $84 confirme le supercycle métaux",
+        "params": {
+          "theme": "precious_metals",
+          "delta_pct": 2
+        },
+        "profiles": [
+          "Agressif",
+          "Modéré"
+        ],
+        "conviction": 4,
+        "rationale": "Silver à $84 (niveaux historiquement extrêmes) + materials favored par RADAR confirment un supercycle commodities cohérent avec la stagflation et la dédollarisation progressive."
       }
     ],
     "bond_strategy": {
-      "regime_summary": "Stagflation = TIPS obligatoires pour protéger le rendement réel, duration courte (<4y) car la Fed pourrait être forcée de resserrer si PCE ne baisse pas, éviter HY car les spreads à 279bps ne rémunèrent pas le risque de défaut en ralentissement.",
+      "regime_summary": "TIPS surpondérés car PCE 3.5% dépasse les breakevens de 80bps; duration courte <4y pour limiter le risque de repricing si la Fed est forcée de remonter; avoid HY (spreads 281bps trop serrés pour le risque stagflationniste).",
       "prefer_tips": true,
       "prefer_treasury": true,
       "avoid_hy": true,
@@ -180,59 +182,61 @@
       "max_duration_moderate": 5.0
     },
     "cash_allocation": {
-      "Agressif": 5,
-      "Modéré": 7,
-      "Stable": 5,
-      "rationale": "VIX 22 + Brent >$100 + PCE 3.5% = probabilité non-négligeable de choc (spike pétrolier, surprise hawkish Fed); cash = option d'achat sur la volatilité future, mais limité car T-bills à ~4% sont du cash productif déjà en portefeuille."
+      "Agressif": 4,
+      "Modéré": 5,
+      "Stable": 3,
+      "rationale": "Cash modéré comme option d'achat sur la volatilité: VIX 22 en hausse potentielle si le choc pétrolier s'aggrave, mais pas excessif car l'inflation à 3.5% PCE érode le cash non investi — les T-bills GBIL/CLTL déjà en portefeuille servent de cash productif."
     },
-    "_cash_guidance": "MINIMUM CASH: Agressif 2% si VIX>20 (option d'achat sur la vol), Modéré 3%, Stable 0% (T-bills = cash productif). Le cash est une POSITION, pas une absence de position.",
     "crypto_allocation": {
       "Agressif": 3,
       "Modéré": 1,
       "Stable": 0,
-      "rationale": "Crypto = risk asset pur; en stagflation avec VIX 22, réduire l'exposition mais ne pas éliminer pour Agressif car le S&P monte +2.3% aujourd'hui (momentum court terme positif)."
+      "rationale": "Crypto réduit en stagflation — corrélé risk assets avec beta élevé, mais maintenu en Agressif comme hedge alternatif contre la dédollarisation (USD DTWEXBGS 118 = zone neutre-faible)."
     },
     "warnings": [
-      "RISQUE #1: Brent >$100 peut déclencher un choc d'offre secondaire si tensions géopolitiques s'aggravent → spike VIX vers 30+, surveiller $110 comme seuil critique",
-      "RISQUE #2: PCE 3.5% vs CPI 2.4% = divergence inhabituelle; si PCE ne converge pas vers le bas, la Fed pourrait être forcée de remonter les taux → repricing violent des actifs duration",
-      "RISQUE #3: HY spreads à 279bps sont historiquement serrés pour un régime stagflationniste — risque de repricing brutal si les défauts montent avec le ralentissement",
-      "RISQUE #4: Rally equity du jour (+2.3% S&P) pourrait être un bear market rally lié à l'accord commercial US-Chine; ne pas confondre soulagement tactique et changement de régime",
-      "RISQUE #5: Gold en drawdown -12.5% malgré inflation élevée = possible liquidation forcée ou rotation; si gold casse $4200, le hedge ne fonctionne plus"
+      "RISQUE #1 — Choc pétrolier phase 2: Brent $107 avec avg 5j $103 montre une accélération haussière; un passage >$115 forcerait la Fed à choisir entre récession et inflation incontrôlée",
+      "RISQUE #2 — HY spreads trop serrés (281bps) pour un régime stagflationniste: le marché crédit n'a pas pricé le risque de ralentissement, un repricing brutal vers 400-500bps est possible",
+      "RISQUE #3 — Fed piégée: PCE 3.5% interdit les baisses, mais le choc pétrolier freine la croissance — risque de policy error dans les deux sens",
+      "RISQUE #4 — S&P +2.9% daily = rally de short squeeze potentiel, pas de changement fondamental; un retournement violent est possible si le pétrole continue de monter",
+      "RISQUE #5 — Gold drawdown 12% pourrait s'aggraver si le dollar se renforce sur un flight-to-safety; surveiller DTWEXBGS >125 comme signal d'alerte"
     ],
     "market_interpretation": {
-      "_doc": "Champs interprétatifs dérivés des données brutes. L'AI déduit ce que les API ne fournissent pas.",
-      "geopolitical_risk": "Brent >$100 signale des tensions d'approvisionnement significatives (probablement Moyen-Orient/OPEC+); combiné au VIX 22, le marché price un risque géopolitique modéré mais pas encore de crise ouverte.",
+      "geopolitical_risk": "Brent $107 signale un choc d'offre géopolitique majeur (probable escalade Moyen-Orient ou sanctions renforcées); le spread Brent spot vs avg 5j (+3.5%) indique une accélération récente du risque.",
       "fed_stance": "hawkish_hold",
       "prob_hike_next_fomc_pct": 15,
-      "sentiment_estimate": "greed",
-      "dollar_assessment": "weak"
+      "sentiment_estimate": "neutral",
+      "dollar_assessment": "neutral"
     }
   },
   "adjustments_output": {
     "thematic_cap_deltas": {
       "energy_oil": {
         "Agressif": 4,
-        "Modéré": 4
+        "Modéré": 4,
+        "Stable": 4
       },
       "semi": {
         "Agressif": -3,
         "Modéré": -3
       },
-      "precious_metals": {
-        "Agressif": 3,
-        "Modéré": 3,
-        "Stable": 3
-      },
       "dividend_value": {
         "Modéré": 3,
         "Stable": 3
+      },
+      "healthcare": {
+        "Agressif": -2,
+        "Modéré": -2
+      },
+      "precious_metals": {
+        "Agressif": 2,
+        "Modéré": 2
       }
     },
     "hedge_deltas": {
       "gold": {
-        "Agressif": 2,
-        "Modéré": 2,
-        "Stable": 2
+        "Agressif": 3,
+        "Modéré": 3,
+        "Stable": 3
       }
     },
     "bond_preferences": [
@@ -304,11 +308,11 @@
       "Stable": 3
     },
     "cash_tactical": {
-      "Agressif": 5,
-      "Modéré": 7,
-      "Stable": 5
+      "Agressif": 4,
+      "Modéré": 5,
+      "Stable": 3
     },
-    "cash_tactical_rationale": "VIX 22 + Brent >$100 + PCE 3.5% = probabilité non-négligeable de choc (spike pétrolier, surprise hawkish Fed); cash = option d'achat sur la volatilité future, mais limité car T-bills à ~4% sont du cash productif déjà en portefeuille.",
+    "cash_tactical_rationale": "Cash modéré comme option d'achat sur la volatilité: VIX 22 en hausse potentielle si le choc pétrolier s'aggrave, mais pas excessif car l'inflation à 3.5% PCE érode le cash non investi — les T-bills GBIL/CLTL déjà en portefeuille servent de cash productif.",
     "crypto_allocation": {
       "Agressif": 3,
       "Modéré": 1,
@@ -317,14 +321,14 @@
     "ai_regime": "stagflation",
     "ai_regime_confidence": 4,
     "ai_warnings": [
-      "RISQUE #1: Brent >$100 peut déclencher un choc d'offre secondaire si tensions géopolitiques s'aggravent → spike VIX vers 30+, surveiller $110 comme seuil critique",
-      "RISQUE #2: PCE 3.5% vs CPI 2.4% = divergence inhabituelle; si PCE ne converge pas vers le bas, la Fed pourrait être forcée de remonter les taux → repricing violent des actifs duration",
-      "RISQUE #3: HY spreads à 279bps sont historiquement serrés pour un régime stagflationniste — risque de repricing brutal si les défauts montent avec le ralentissement",
-      "RISQUE #4: Rally equity du jour (+2.3% S&P) pourrait être un bear market rally lié à l'accord commercial US-Chine; ne pas confondre soulagement tactique et changement de régime",
-      "RISQUE #5: Gold en drawdown -12.5% malgré inflation élevée = possible liquidation forcée ou rotation; si gold casse $4200, le hedge ne fonctionne plus"
+      "RISQUE #1 — Choc pétrolier phase 2: Brent $107 avec avg 5j $103 montre une accélération haussière; un passage >$115 forcerait la Fed à choisir entre récession et inflation incontrôlée",
+      "RISQUE #2 — HY spreads trop serrés (281bps) pour un régime stagflationniste: le marché crédit n'a pas pricé le risque de ralentissement, un repricing brutal vers 400-500bps est possible",
+      "RISQUE #3 — Fed piégée: PCE 3.5% interdit les baisses, mais le choc pétrolier freine la croissance — risque de policy error dans les deux sens",
+      "RISQUE #4 — S&P +2.9% daily = rally de short squeeze potentiel, pas de changement fondamental; un retournement violent est possible si le pétrole continue de monter",
+      "RISQUE #5 — Gold drawdown 12% pourrait s'aggraver si le dollar se renforce sur un flight-to-safety; surveiller DTWEXBGS >125 comme signal d'alerte"
     ],
     "ai_bond_strategy": {
-      "regime_summary": "Stagflation = TIPS obligatoires pour protéger le rendement réel, duration courte (<4y) car la Fed pourrait être forcée de resserrer si PCE ne baisse pas, éviter HY car les spreads à 279bps ne rémunèrent pas le risque de défaut en ralentissement.",
+      "regime_summary": "TIPS surpondérés car PCE 3.5% dépasse les breakevens de 80bps; duration courte <4y pour limiter le risque de repricing si la Fed est forcée de remonter; avoid HY (spreads 281bps trop serrés pour le risque stagflationniste).",
       "prefer_tips": true,
       "prefer_treasury": true,
       "avoid_hy": true,
@@ -335,17 +339,16 @@
     }
   },
   "regime": "stagflation",
-  "regime_rationale": "Brent à $104 alimente une inflation persistante (PCE 3.5% bien au-dessus du target, breakeven 5Y à 2.62%) tandis que la Fed reste en pause (0 cut en 6m) avec des taux restrictifs à 3.63%. Le VIX à 22 et les spreads IG/HY modérés montrent un marché pas encore en panique mais sous tension, typique d'un régime stagflationniste naissant.",
+  "regime_rationale": "Brent à $107 alimentant une inflation persistante (PCE 3.5% bien au-dessus du target, breakeven 5Y à 2.67%), tandis que la Fed reste en pause (0 delta 6m) avec un VIX à 22 signalant un stress modéré. La courbe 2s10s positive à 48bps avec des taux élevés et un pétrole >$100 crée un environnement stagflationniste classique où la croissance ralentit sous le poids des coûts énergétiques.",
   "market_interpretation": {
-    "_doc": "Champs interprétatifs dérivés des données brutes. L'AI déduit ce que les API ne fournissent pas.",
-    "geopolitical_risk": "Brent >$100 signale des tensions d'approvisionnement significatives (probablement Moyen-Orient/OPEC+); combiné au VIX 22, le marché price un risque géopolitique modéré mais pas encore de crise ouverte.",
+    "geopolitical_risk": "Brent $107 signale un choc d'offre géopolitique majeur (probable escalade Moyen-Orient ou sanctions renforcées); le spread Brent spot vs avg 5j (+3.5%) indique une accélération récente du risque.",
     "fed_stance": "hawkish_hold",
     "prob_hike_next_fomc_pct": 15,
-    "sentiment_estimate": "greed",
-    "dollar_assessment": "weak"
+    "sentiment_estimate": "neutral",
+    "dollar_assessment": "neutral"
   },
   "bond_strategy_full": {
-    "regime_summary": "Stagflation = TIPS obligatoires pour protéger le rendement réel, duration courte (<4y) car la Fed pourrait être forcée de resserrer si PCE ne baisse pas, éviter HY car les spreads à 279bps ne rémunèrent pas le risque de défaut en ralentissement.",
+    "regime_summary": "TIPS surpondérés car PCE 3.5% dépasse les breakevens de 80bps; duration courte <4y pour limiter le risque de repricing si la Fed est forcée de remonter; avoid HY (spreads 281bps trop serrés pour le risque stagflationniste).",
     "prefer_tips": true,
     "prefer_treasury": true,
     "avoid_hy": true,
@@ -355,10 +358,10 @@
     "max_duration_moderate": 5.0
   },
   "warnings": [
-    "RISQUE #1: Brent >$100 peut déclencher un choc d'offre secondaire si tensions géopolitiques s'aggravent → spike VIX vers 30+, surveiller $110 comme seuil critique",
-    "RISQUE #2: PCE 3.5% vs CPI 2.4% = divergence inhabituelle; si PCE ne converge pas vers le bas, la Fed pourrait être forcée de remonter les taux → repricing violent des actifs duration",
-    "RISQUE #3: HY spreads à 279bps sont historiquement serrés pour un régime stagflationniste — risque de repricing brutal si les défauts montent avec le ralentissement",
-    "RISQUE #4: Rally equity du jour (+2.3% S&P) pourrait être un bear market rally lié à l'accord commercial US-Chine; ne pas confondre soulagement tactique et changement de régime",
-    "RISQUE #5: Gold en drawdown -12.5% malgré inflation élevée = possible liquidation forcée ou rotation; si gold casse $4200, le hedge ne fonctionne plus"
+    "RISQUE #1 — Choc pétrolier phase 2: Brent $107 avec avg 5j $103 montre une accélération haussière; un passage >$115 forcerait la Fed à choisir entre récession et inflation incontrôlée",
+    "RISQUE #2 — HY spreads trop serrés (281bps) pour un régime stagflationniste: le marché crédit n'a pas pricé le risque de ralentissement, un repricing brutal vers 400-500bps est possible",
+    "RISQUE #3 — Fed piégée: PCE 3.5% interdit les baisses, mais le choc pétrolier freine la croissance — risque de policy error dans les deux sens",
+    "RISQUE #4 — S&P +2.9% daily = rally de short squeeze potentiel, pas de changement fondamental; un retournement violent est possible si le pétrole continue de monter",
+    "RISQUE #5 — Gold drawdown 12% pourrait s'aggraver si le dollar se renforce sur un flight-to-safety; surveiller DTWEXBGS >125 comme signal d'alerte"
   ]
 }
