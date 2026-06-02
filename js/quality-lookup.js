@@ -1,259 +1,395 @@
 // ═══════════════════════════════════════════════════════════════════════════════
 // STRUCTBOARD — Quality Lookup
-// Recherche éclair de la qualité d'un sous-jacent (Buffett / Quality) sans brochure.
-// Saisir un ou plusieurs titres (ticker ou nom, séparés par virgule ou retour ligne)
-// → score Buffett + Quality + verdict, avec mise en avant du "worst-of" pour un panier.
-// Source : data/market/stocks_europe.json + stocks_us.json (mêmes données que le grader).
+// Recherche éclair de la qualité d'un sous-jacent sans ouvrir de brochure.
+//   • Actions  → score Buffett + Quality + métriques colorées (vert/orange/rouge).
+//   • ETF / indices sectoriels (ex. « Eurostoxx Banks ») → analyse perf + risque,
+//     sans Buffett (pas pertinent pour un panier sectoriel).
+// Sources locales (mêmes données que le grader) :
+//   data/market/stocks_europe.json · stocks_us.json · sectors.json · markets.json
+//   data/underlying-map.json (indices larges)
 // ═══════════════════════════════════════════════════════════════════════════════
 (function () {
-  var _stocks = null;   // cache plat EU+US
-  var _loading = null;
-  var _debounce = null;
+  var _stocks = null, _etfs = null, _indexMap = null;
+  var _loading = null, _debounce = null;
 
-  // ── Chargement des données (réutilise les fichiers déjà servis à l'app) ──────────
-  function loadStocks() {
-    if (_stocks) return Promise.resolve(_stocks);
+  // ── Chargement ────────────────────────────────────────────────────────────────
+  function getJSON(url) { return fetch(url).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }); }
+
+  function loadData() {
+    if (_stocks) return Promise.resolve();
     if (_loading) return _loading;
     _loading = Promise.all([
-      fetch('data/market/stocks_europe.json').then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
-      fetch('data/market/stocks_us.json').then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
+      getJSON('data/market/stocks_europe.json'),
+      getJSON('data/market/stocks_us.json'),
+      getJSON('data/market/sectors.json'),
+      getJSON('data/market/markets.json'),
+      getJSON('data/underlying-map.json')
     ]).then(function (res) {
       var eu = (res[0] && res[0].stocks) ? res[0].stocks : [];
       var us = (res[1] && res[1].stocks) ? res[1].stocks : [];
-      eu.forEach(function (s) { s._qlRegion = 'EU'; });
-      us.forEach(function (s) { s._qlRegion = 'US'; });
+      eu.forEach(function (s) { s._region = 'EU'; });
+      us.forEach(function (s) { s._region = 'US'; });
       _stocks = eu.concat(us);
-      return _stocks;
+
+      _etfs = [];
+      var sec = (res[2] && res[2].sectors) ? res[2].sectors : {};
+      Object.keys(sec).forEach(function (k) {
+        (sec[k] || []).forEach(function (e) {
+          var fam = e.indexFamily || '';
+          // identité « secteur » : on retire le préfixe de famille (STOXX Europe 600, S&P 500…)
+          // pour ne pas confondre « S&P 500 » (indice large) et un ETF sectoriel S&P 500.
+          var secText = [e.sector_en, e.sector_fr, (e.indexName || '').split(fam).join(' ')].filter(Boolean).join(' ');
+          _etfs.push({
+            kind: 'etf', symbol: e.symbol, name: e.name,
+            display: e.display_fr || e.indexName || e.name,
+            indexName: e.indexName, family: fam, secText: secText,
+            sector_fr: e.sector_fr, sector_en: e.sector_en, region: e.region,
+            value: e.value_num, ytd: e.ytd_num, m3: e.m3_num, m6: e.m6_num, w52: e.w52_num,
+            vol_3y: e.vol_3y, beta: e.beta, trend: e.trend
+          });
+        });
+      });
+      var idx = (res[3] && res[3].indices) ? res[3].indices : {};
+      Object.keys(idx).forEach(function (region) {
+        (idx[region] || []).forEach(function (e) {
+          _etfs.push({
+            kind: 'index', symbol: e.symbol, name: e.index_name,
+            display: e.index_name, country: e.country, region: region,
+            family: '', secText: [e.index_name, e.country].filter(Boolean).join(' '),
+            value: e.value_num, ytd: e.ytd_num, m3: e.m3_num, m6: e.m6_num, w52: e.w52_num,
+            trend: e.trend
+          });
+        });
+      });
+      _indexMap = (res[4] && res[4].indices) ? res[4].indices : {};
     });
     return _loading;
   }
 
-  // ── Utilitaires ─────────────────────────────────────────────────────────────────
+  // ── Normalisation / synonymes ───────────────────────────────────────────────────
   function strip(s) {
     if (typeof _stripAccents === 'function') return _stripAccents(s);
     return (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '');
   }
-  function bestScore(s) {
-    if (typeof _bestBuffett === 'function') return _bestBuffett(s);
-    if (s.buffett_score != null) return s.buffett_score;
-    if (s.quality_score != null) return s.quality_score;
-    return null;
+  function norm(s) { return strip((s || '').toLowerCase()).replace(/[^a-z0-9&\s]/g, ' ').replace(/\s+/g, ' ').trim(); }
+
+  // Mappe un mot FR/indice vers le vocabulaire anglais des noms d'ETF
+  var SYN = {
+    eurostoxx: 'stoxx', estoxx: 'stoxx', euro: '', europe: '', european: '',
+    banques: 'banks', banque: 'banks', bancaire: 'banks',
+    assurances: 'insurance', assurance: 'insurance',
+    telecoms: 'telecommunications', telecom: 'telecommunications', telecommunication: 'telecommunications',
+    sante: 'health', pharma: 'pharmaceuticals', pharmaceutiques: 'pharmaceuticals', biotech: 'biotechnology',
+    technologie: 'technology', techno: 'technology', tech: 'technology',
+    semi: 'semiconductor', semiconducteurs: 'semiconductor', semiconducteur: 'semiconductor',
+    immobilier: 'real', immo: 'real',
+    petrole: 'oil', petroles: 'oil', energie: 'energy', energies: 'energy', gaz: 'gas',
+    automobiles: 'auto', automobile: 'auto', autos: 'auto', voitures: 'auto',
+    chimie: 'chemicals', chimiques: 'chemicals',
+    industriels: 'industrials', industrie: 'industrials',
+    distribution: 'retail', alimentation: 'food', boissons: 'beverages',
+    services: 'financial', financiers: 'financial', financier: 'financial', financials: 'financial',
+    utilities: 'utilities', 'publics': 'utilities',
+    cybersecurite: 'cybersecurity', voyages: 'travel', loisirs: 'leisure'
+  };
+  function qWords(token) {
+    return norm(token).split(' ').map(function (w) { return SYN.hasOwnProperty(w) ? SYN[w] : w; })
+      .filter(function (w) { return w && w.length >= 3; });
   }
 
-  // Matching tolérant : ticker exact → alias → nom exact → contient → 1er mot.
-  function match(query, all) {
-    var q = (query || '').trim();
-    if (!q) return null;
-    var qa = strip(q.toUpperCase());
-    var qaBare = qa.replace(/\.[A-Z]{1,3}$/, ''); // retire le suffixe d'échange : MC.PA → MC, ASML.AS → ASML
-    var alias = (typeof _resolveAlias === 'function') ? (_resolveAlias(q) || '').toUpperCase() : '';
-
-    var byTicker = all.find(function (x) {
-      var t = (x.ticker || '').toUpperCase();
-      return t === qa || t === qaBare || (alias && t === alias);
+  // ── Matching ETF / indice (par recouvrement de mots) ─────────────────────────────
+  function bestEtf(token) {
+    var words = qWords(token);
+    if (!words.length) return { score: 0 };
+    var best = { score: 0 };
+    _etfs.forEach(function (e) {
+      var secBlob = norm(e.secText || '');
+      var fullBlob = norm([e.symbol, e.family].join(' ')) + ' ' + secBlob;
+      var hitFull = words.filter(function (w) { return fullBlob.indexOf(w) >= 0; }).length;
+      var hitSec = words.filter(function (w) { return secBlob.indexOf(w) >= 0; }).length;
+      // un match valable doit toucher l'identité « secteur », pas seulement le préfixe de famille
+      if (hitSec === 0) return;
+      var score = hitFull / words.length;
+      // tie-break : on privilégie les ETF européens / familles STOXX (sous-jacents les plus fréquents)
+      var bonus = (e.region === 'EU' || /stoxx/i.test(e.family || '') || /stoxx/i.test(e.indexName || '')) ? 0.05 : 0;
+      var v = score + bonus;
+      if (v > (best._rank || 0)) best = { score: score, _rank: v, item: e };
     });
+    return best;
+  }
+
+  // ── Matching action (ticker / nom) ───────────────────────────────────────────────
+  function matchStock(token) {
+    var qa = strip(token.toUpperCase());
+    var bare = qa.replace(/\.[A-Z]{1,3}$/, '');
+    var byTicker = _stocks.find(function (x) { var t = (x.ticker || '').toUpperCase(); return t === qa || t === bare; });
     if (byTicker) return byTicker;
-
-    var exact = all.find(function (x) {
-      return strip((x.name || '').toUpperCase()) === qa || strip((x.name_api || '').toUpperCase()) === qa;
-    });
+    var exact = _stocks.find(function (x) { return strip((x.name || '').toUpperCase()) === qa || strip((x.name_api || '').toUpperCase()) === qa; });
     if (exact) return exact;
-
-    var contains = all.filter(function (x) {
-      var n = strip((x.name || '').toUpperCase());
-      var na = strip((x.name_api || '').toUpperCase());
+    var contains = _stocks.filter(function (x) {
+      var n = strip((x.name || '').toUpperCase()), na = strip((x.name_api || '').toUpperCase());
       return n.indexOf(qa) >= 0 || na.indexOf(qa) >= 0;
     });
-    if (contains.length) {
-      contains.sort(function (a, b) {
-        return strip((a.name || '').toUpperCase()).indexOf(qa) - strip((b.name || '').toUpperCase()).indexOf(qa);
-      });
-      return contains[0];
-    }
-
+    if (contains.length) { contains.sort(function (a, b) { return strip((a.name || '').toUpperCase()).indexOf(qa) - strip((b.name || '').toUpperCase()).indexOf(qa); }); return contains[0]; }
     var fw = qa.split(/\s+/)[0];
-    if (fw.length >= 4) {
-      var f = all.find(function (x) {
-        return strip((x.name || '').toUpperCase()).indexOf(fw) >= 0
-          || strip((x.name_api || '').toUpperCase()).indexOf(fw) >= 0;
-      });
-      if (f) return f;
-    }
+    if (fw.length >= 4) { var f = _stocks.find(function (x) { return strip((x.name || '').toUpperCase()).indexOf(fw) >= 0 || strip((x.name_api || '').toUpperCase()).indexOf(fw) >= 0; }); if (f) return f; }
     return null;
   }
 
-  // ── Échelle couleur / verdict ─────────────────────────────────────────────────────
-  function scoreColor(v) {
-    if (v == null) return '#94A3B8';
-    if (v >= 70) return 'var(--green)';
-    if (v >= 55) return 'var(--cyan)';
-    if (v >= 40) return 'var(--orange)';
-    return 'var(--red)';
+  function matchIndexMap(token) {
+    var nm = norm(token);
+    if (!_indexMap || !nm) return null;
+    var hit = _indexMap[nm];
+    if (!hit) { var ks = Object.keys(_indexMap); for (var i = 0; i < ks.length; i++) { if (nm.indexOf(ks[i]) >= 0 || ks[i].indexOf(nm) >= 0) { hit = _indexMap[ks[i]]; break; } } }
+    if (!hit) return null;
+    var out = { kind: 'index', symbol: hit.proxy, name: hit.name, display: hit.name, vol_3y: hit.default_vol, beta: hit.default_beta, _estimated: true };
+    // Enrichit avec la perf réelle de markets.json si le proxy y figure
+    var live = _etfs.find(function (e) { return (e.symbol || '').toUpperCase() === (hit.proxy || '').toUpperCase(); });
+    if (live) { out.ytd = live.ytd; out.m3 = live.m3; out.m6 = live.m6; out.w52 = live.w52; out.value = live.value; if (live.vol_3y != null) { out.vol_3y = live.vol_3y; out._estimated = false; } }
+    return out;
   }
+
+  // Résolution unifiée d'un token → action | ETF | indice | null
+  function resolve(token) {
+    var T = token.trim();
+    var U = strip(T.toUpperCase());
+    var bare = U.replace(/\.[A-Z]{1,3}$/, '');
+    var symEtf = _etfs.find(function (e) { return (e.symbol || '').toUpperCase() === U || (e.symbol || '').toUpperCase() === bare; });
+    if (symEtf) return { q: T, item: symEtf };
+    var tickStock = _stocks.find(function (s) { var t = (s.ticker || '').toUpperCase(); return t === U || t === bare; });
+    if (tickStock) return { q: T, item: tickStock };
+    // ETF sectoriel STOXX 600 (Banks, Tech, Santé…) : données riches, prioritaire
+    var e = bestEtf(T);
+    if (e.score >= 0.6) return { q: T, item: e.item };
+    // Indices larges curatés (Eurostoxx 50, CAC 40, S&P 500…)
+    var im = matchIndexMap(T);
+    if (im) return { q: T, item: im };
+    var s = matchStock(T);
+    if (s) return { q: T, item: s };
+    if (e.score >= 0.4) return { q: T, item: e.item };
+    return { q: T, item: null };
+  }
+
+  // ── Couleurs / verdict ───────────────────────────────────────────────────────────
+  function scoreColor(v) { if (v == null) return '#94A3B8'; if (v >= 70) return '#059669'; if (v >= 55) return '#0891B2'; if (v >= 40) return '#D97706'; return '#DC2626'; }
+  function bestScore(s) { if (typeof _bestBuffett === 'function') return _bestBuffett(s); if (s.buffett_score != null) return s.buffett_score; if (s.quality_score != null) return s.quality_score; return null; }
   function verdict(s) {
     var b = bestScore(s);
-    if (b == null) return { label: 'N/A', color: '#94A3B8', bg: 'rgba(148,163,184,0.10)' };
-    if (b >= 65) return { label: 'QUALITÉ ✓', color: 'var(--green)', bg: 'var(--green-dim)' };
-    if (b >= 50) return { label: 'CORRECT', color: 'var(--cyan)', bg: 'var(--cyan-dim)' };
-    if (b >= 35) return { label: 'MOYEN', color: 'var(--orange)', bg: 'var(--orange-dim)' };
-    return { label: 'FRAGILE', color: 'var(--red)', bg: 'var(--red-dim)' };
-  }
-  function pctColor(v) {
-    if (v == null) return '#94A3B8';
-    return v >= 0 ? 'var(--green)' : 'var(--red)';
+    if (b == null) return { label: 'N/A', c: '#94A3B8', bg: 'rgba(148,163,184,.10)' };
+    if (b >= 65) return { label: 'QUALITÉ', c: '#059669', bg: 'rgba(5,150,105,.10)' };
+    if (b >= 50) return { label: 'CORRECT', c: '#0891B2', bg: 'rgba(8,145,178,.10)' };
+    if (b >= 35) return { label: 'MOYEN', c: '#D97706', bg: 'rgba(217,119,6,.10)' };
+    return { label: 'FRAGILE', c: '#DC2626', bg: 'rgba(220,38,38,.08)' };
   }
 
-  // ── Rendu d'un chip métrique ──────────────────────────────────────────────────────
-  function metric(label, value, opts) {
-    opts = opts || {};
-    var disp, color = 'var(--text-bright)';
-    if (value == null || (typeof value === 'number' && isNaN(value))) { disp = '—'; color = '#94A3B8'; }
-    else if (opts.pct) { disp = (value >= 0 ? '+' : '') + value.toFixed(1) + '%'; color = pctColor(value); }
-    else if (opts.suffix) { disp = value + opts.suffix; }
-    else { disp = value; }
-    return '<div style="display:flex;flex-direction:column;gap:1px">'
-      + '<span style="font-size:9px;text-transform:uppercase;letter-spacing:.6px;color:var(--text-muted);font-weight:600">' + label + '</span>'
-      + '<span style="font-family:var(--mono);font-size:12px;font-weight:600;color:' + color + '">' + disp + '</span>'
-      + '</div>';
+  // Ton d'une métrique selon sa qualité → pastille colorée
+  var TONE = {
+    good: { bg: 'rgba(5,150,105,.08)', bd: 'rgba(5,150,105,.25)', fg: '#047857' },
+    ok: { bg: '#F1F5F9', bd: '#E2E8F0', fg: '#334155' },
+    warn: { bg: 'rgba(217,119,6,.08)', bd: 'rgba(217,119,6,.25)', fg: '#B45309' },
+    bad: { bg: 'rgba(220,38,38,.07)', bd: 'rgba(220,38,38,.22)', fg: '#B91C1C' },
+    pos: { bg: 'rgba(5,150,105,.08)', bd: 'rgba(5,150,105,.22)', fg: '#047857' },
+    neg: { bg: 'rgba(220,38,38,.07)', bd: 'rgba(220,38,38,.20)', fg: '#B91C1C' },
+    info: { bg: '#F1F5F9', bd: '#E2E8F0', fg: '#475569' }
+  };
+  function band(v, hiGood, t) { // t = [seuilBon, seuilMoyen], hiGood = plus c'est haut mieux c'est
+    if (v == null || isNaN(v)) return 'info';
+    if (hiGood) return v >= t[0] ? 'good' : v >= t[1] ? 'ok' : 'bad';
+    return v <= t[0] ? 'good' : v <= t[1] ? 'ok' : 'warn';
   }
 
-  // ── Carte d'une action ────────────────────────────────────────────────────────────
-  function scoreBadge(label, score, grade) {
+  // ── Pastille métrique ─────────────────────────────────────────────────────────────
+  function pill(label, value, fmt, tone) {
+    var disp;
+    if (value == null || (typeof value === 'number' && isNaN(value))) { disp = '—'; tone = 'info'; }
+    else if (fmt === 'pct') disp = (value >= 0 ? '+' : '') + (Math.round(value * 10) / 10) + '%';
+    else if (fmt === '%') disp = (Math.round(value * 100) / 100) + '%';
+    else if (fmt === 'x') disp = (Math.round(value * 100) / 100);
+    else disp = value;
+    var c = TONE[tone] || TONE.info;
+    return '<div style="background:' + c.bg + ';border:1px solid ' + c.bd + ';border-radius:7px;padding:5px 9px;display:flex;flex-direction:column;gap:1px;min-width:62px">'
+      + '<span style="font-size:8.5px;text-transform:uppercase;letter-spacing:.5px;color:#64748B;font-weight:700">' + label + '</span>'
+      + '<span style="font-family:var(--mono);font-size:12.5px;font-weight:700;color:' + c.fg + '">' + disp + '</span></div>';
+  }
+  function group(title, pills) {
+    return '<div style="margin-top:12px">'
+      + '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:#94A3B8;margin-bottom:6px">' + title + '</div>'
+      + '<div style="display:flex;flex-wrap:wrap;gap:7px">' + pills.join('') + '</div></div>';
+  }
+
+  // ── Tuile de score (action) ────────────────────────────────────────────────────────
+  function scoreTile(label, score, grade) {
     var c = scoreColor(score);
-    return '<div style="text-align:center;min-width:62px">'
-      + '<div style="font-size:9px;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);font-weight:700;margin-bottom:2px">' + label + '</div>'
-      + '<div style="font-family:var(--mono);font-size:26px;font-weight:700;line-height:1;color:' + c + '">' + (score != null ? score : '—') + '</div>'
-      + '<div style="font-size:10px;color:' + c + ';font-weight:700">' + (grade || '') + '</div>'
-      + '</div>';
+    return '<div style="text-align:center;min-width:58px;background:' + c + '14;border:1px solid ' + c + '33;border-radius:9px;padding:6px 4px">'
+      + '<div style="font-size:8.5px;text-transform:uppercase;letter-spacing:.6px;color:#64748B;font-weight:700">' + label + '</div>'
+      + '<div style="font-family:var(--mono);font-size:25px;font-weight:800;line-height:1.05;color:' + c + '">' + (score != null ? score : '—') + '</div>'
+      + (grade ? '<div style="font-size:10px;color:' + c + ';font-weight:800">' + grade + '</div>' : '') + '</div>';
   }
 
-  function criteriaLine(s) {
+  function criteria(s) {
     if (!Array.isArray(s.buffett_criteria) || !s.buffett_criteria.length) return '';
     var passed = s.buffett_criteria.filter(function (c) { return c.passed; }).length;
-    var total = s.buffett_criteria.length;
     var dots = s.buffett_criteria.map(function (c) {
-      var col = c.passed ? 'var(--green)' : 'var(--red)';
-      var nm = (c.name || '').replace(/_/g, ' ');
-      return '<span title="' + nm + (c.detail ? ' — ' + c.detail : '') + '" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:' + col + ';margin-right:3px;cursor:help"></span>';
+      var col = c.passed ? '#059669' : '#DC2626';
+      return '<span title="' + (c.name || '').replace(/_/g, ' ') + (c.detail ? ' — ' + c.detail : '') + '" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:' + col + ';margin-right:3px;cursor:help"></span>';
     }).join('');
-    return '<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px">'
-      + '<span style="font-size:10px;color:var(--text-muted);font-weight:600">Critères Buffett ' + passed + '/' + total + '</span>'
-      + '<span>' + dots + '</span></div>';
+    return '<div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px">'
+      + '<span style="font-size:10px;color:#64748B;font-weight:600">Critères Buffett ' + passed + '/' + s.buffett_criteria.length + '</span>' + dots + '</div>';
   }
 
-  function card(query, s, isWorst) {
-    if (!s) {
-      return '<div class="ql-card" style="border:1px solid var(--red);background:var(--red-dim);border-radius:var(--radius);padding:14px 16px">'
-        + '<div style="font-weight:600;color:var(--red);font-size:13px">« ' + query +' » introuvable</div>'
-        + '<div style="font-size:11px;color:var(--text-muted);margin-top:4px">Essayez le ticker exact (ex. <span style="font-family:var(--mono)">MC.PA</span>, <span style="font-family:var(--mono)">ASML</span>) ou le nom complet.</div>'
-        + '</div>';
-    }
+  // ── Carte ACTION ───────────────────────────────────────────────────────────────────
+  function stockCard(q, s, worst) {
     var v = verdict(s);
-    var border = isWorst ? '2px solid var(--orange)' : '1px solid var(--border)';
-    var flag = s._qlRegion === 'US' ? '🇺🇸' : '🇪🇺';
-    return '<div class="ql-card" style="border:' + border + ';background:var(--bg-card);border-radius:var(--radius);padding:16px;box-shadow:0 1px 3px rgba(0,0,0,0.04)">'
-      + (isWorst ? '<div style="font-size:9px;font-weight:700;color:var(--orange);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">⚠ Worst-of (contraignant)</div>' : '')
-      + '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">'
-      +   '<div style="min-width:0">'
-      +     '<div style="font-weight:700;font-size:14px;color:var(--text-bright);line-height:1.2">' + flag + ' ' + (s.name || s.ticker) + '</div>'
-      +     '<div style="font-size:11px;color:var(--text-muted);margin-top:2px">'
-      +       '<span style="font-family:var(--mono)">' + (s.ticker || '') + '</span>'
-      +       (s.sector ? ' · ' + s.sector : '') + (s.country ? ' · ' + s.country : '') + '</div>'
-      +   '</div>'
-      +   '<div style="display:flex;gap:14px;align-items:flex-start;flex-shrink:0">'
-      +     scoreBadge('Buffett', s.buffett_score, s.buffett_grade)
-      +     scoreBadge('Quality', s.quality_score, s.quality_grade)
-      +     '<div style="align-self:center"><span style="display:inline-block;font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;color:' + v.color + ';background:' + v.bg + ';border:1px solid ' + v.color + '">' + v.label + '</span></div>'
-      +   '</div>'
-      + '</div>'
-      + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:10px;margin-top:14px">'
-      +   metric('ROE', s.roe, { suffix: '%' })
-      +   metric('ROIC', s.roic, { suffix: '%' })
-      +   metric('D/E', s.de_ratio)
-      +   metric('Marge nette', s.net_margin, { suffix: '%' })
-      +   metric('Vol 3A', s.volatility_3y, { suffix: '%' })
-      +   metric('Max DD 3A', s.max_drawdown_3y != null ? -Math.abs(s.max_drawdown_3y) : null, { suffix: '%' })
-      +   metric('Beta', s.beta)
-      +   metric('PER', s.pe_ratio)
-      +   metric('Perf YTD', s.perf_ytd, { pct: true })
-      +   metric('Perf 1A', s.perf_1y, { pct: true })
-      +   metric('FCF yield', s.fcf_yield, { suffix: '%' })
-      +   metric('Div yield', s.dividend_yield, { suffix: '%' })
-      + '</div>'
-      + criteriaLine(s)
-      + '</div>';
+    var flag = s._region === 'US' ? '🇺🇸' : '🇪🇺';
+    var dd = s.max_drawdown_3y != null ? -Math.abs(s.max_drawdown_3y) : null;
+    return cardShell(worst,
+      header(flag + ' ' + (s.name || s.ticker), s.ticker, [s.sector, s.country].filter(Boolean).join(' · '),
+        scoreTile('Buffett', s.buffett_score, s.buffett_grade)
+        + scoreTile('Quality', s.quality_score, s.quality_grade)
+        + verdictPill(v.label, v.c, v.bg))
+      + group('Rentabilité', [
+          pill('ROE', s.roe, '%', band(s.roe, true, [15, 8])),
+          pill('ROIC', s.roic, '%', band(s.roic, true, [12, 7])),
+          pill('Marge nette', s.net_margin, '%', band(s.net_margin, true, [15, 7]))
+        ])
+      + group('Solidité / risque', [
+          pill('D/E', s.de_ratio, 'x', band(s.de_ratio, false, [0.5, 1.5])),
+          pill('Vol 3A', s.volatility_3y, '%', band(s.volatility_3y, false, [22, 32])),
+          pill('Max DD 3A', dd, '%', band(dd != null ? Math.abs(dd) : null, false, [25, 40])),
+          pill('Beta', s.beta, 'x', band(s.beta, false, [0.9, 1.2]))
+        ])
+      + group('Valorisation & performance', [
+          pill('PER', (s.pe_ratio != null && s.pe_ratio > 0) ? s.pe_ratio : null, 'x', band((s.pe_ratio != null && s.pe_ratio > 0) ? s.pe_ratio : null, false, [18, 28])),
+          pill('FCF yield', s.fcf_yield, '%', band(s.fcf_yield, true, [4, 2])),
+          pill('Div yield', s.dividend_yield, '%', 'info'),
+          pill('Perf YTD', s.perf_ytd, 'pct', s.perf_ytd == null ? 'info' : s.perf_ytd >= 0 ? 'pos' : 'neg'),
+          pill('Perf 1A', s.perf_1y, 'pct', s.perf_1y == null ? 'info' : s.perf_1y >= 0 ? 'pos' : 'neg')
+        ])
+      + criteria(s));
   }
 
-  // ── Rendu de la liste de résultats ────────────────────────────────────────────────
+  // ── Carte ETF / INDICE ─────────────────────────────────────────────────────────────
+  function etfCard(q, e, worst) {
+    var typeLabel = e.kind === 'index' ? 'Indice' : 'ETF sectoriel';
+    var sub = [e.indexName || e.name, e.country, e.region && e.region !== 'EU' && e.region !== e.country ? e.region : null].filter(Boolean).join(' · ');
+    var perfPills = [
+      pill('Perf YTD', e.ytd, 'pct', e.ytd == null ? 'info' : e.ytd >= 0 ? 'pos' : 'neg'),
+      pill('3 mois', e.m3, 'pct', e.m3 == null ? 'info' : e.m3 >= 0 ? 'pos' : 'neg'),
+      pill('6 mois', e.m6, 'pct', e.m6 == null ? 'info' : e.m6 >= 0 ? 'pos' : 'neg'),
+      pill('52 sem.', e.w52, 'pct', e.w52 == null ? 'info' : e.w52 >= 0 ? 'pos' : 'neg')
+    ];
+    var riskPills = [
+      pill('Vol 3A', e.vol_3y, '%', band(e.vol_3y, false, [18, 28])),
+      pill('Beta', e.beta, 'x', band(e.beta, false, [0.9, 1.2])),
+      pill('Niveau', e.value, 'x', 'info')
+    ];
+    var note = '<div style="margin-top:10px;font-size:11px;color:#64748B;line-height:1.5">'
+      + '📊 <strong>' + typeLabel + '</strong> — pas de score Buffett (panier diversifié). '
+      + 'Ce qui compte : <strong>volatilité</strong>' + (e.vol_3y != null ? ' (' + e.vol_3y + '% → ' + (e.vol_3y <= 20 ? 'modérée' : e.vol_3y <= 30 ? 'élevée' : 'très élevée') + ')' : '')
+      + ' et <strong>momentum</strong>' + (e.ytd != null ? ' (' + (e.ytd >= 0 ? '+' : '') + (Math.round(e.ytd * 10) / 10) + '% YTD)' : '') + '.'
+      + (e._estimated ? ' <em>(vol/beta estimés)</em>' : '') + '</div>';
+    return cardShell(worst,
+      header('📊 ' + (e.display || e.name), e.symbol, typeLabel + (sub ? ' · ' + sub : ''),
+        analysePill())
+      + group('Performance', perfPills)
+      + group('Risque', riskPills)
+      + note);
+  }
+
+  function notFoundCard(q) {
+    return '<div style="border:1px solid #FCA5A5;background:rgba(220,38,38,.05);border-radius:var(--radius);padding:14px 16px">'
+      + '<div style="font-weight:700;color:#DC2626;font-size:13px">« ' + q + ' » introuvable</div>'
+      + '<div style="font-size:11px;color:#64748B;margin-top:4px">Essayez le ticker (<span style="font-family:var(--mono)">ASML</span>, <span style="font-family:var(--mono)">MC.PA</span>), le nom complet, ou un secteur (<span style="font-family:var(--mono)">Eurostoxx Banks</span>, <span style="font-family:var(--mono)">Tech</span>, <span style="font-family:var(--mono)">Santé</span>).</div></div>';
+  }
+
+  // ── Briques UI ─────────────────────────────────────────────────────────────────────
+  function cardShell(worst, inner) {
+    var bd = worst ? '2px solid #D97706' : '1px solid var(--border)';
+    return '<div style="border:' + bd + ';background:#fff;border-radius:11px;padding:16px 18px;box-shadow:0 1px 4px rgba(0,0,0,.05)">'
+      + (worst ? '<div style="font-size:9px;font-weight:800;color:#D97706;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">⚠ Worst-of — sous-jacent contraignant</div>' : '')
+      + inner + '</div>';
+  }
+  function header(title, ticker, sub, right) {
+    return '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap">'
+      + '<div style="min-width:0;flex:1">'
+      +   '<div style="font-weight:700;font-size:15px;color:#0F172A;line-height:1.2">' + title + '</div>'
+      +   '<div style="font-size:11px;color:#64748B;margin-top:3px;display:flex;align-items:center;gap:7px;flex-wrap:wrap">'
+      +     (ticker ? '<span style="font-family:var(--mono);background:#F1F5F9;border:1px solid #E2E8F0;border-radius:4px;padding:1px 6px;font-size:10px;color:#334155;font-weight:600">' + ticker + '</span>' : '')
+      +     '<span>' + (sub || '') + '</span></div></div>'
+      + '<div style="display:flex;gap:8px;align-items:center;flex-shrink:0">' + right + '</div></div>';
+  }
+  function verdictPill(label, c, bg) {
+    return '<span style="align-self:center;font-size:10px;font-weight:800;padding:5px 12px;border-radius:20px;color:' + c + ';background:' + bg + ';border:1px solid ' + c + '55;letter-spacing:.5px">' + label + '</span>';
+  }
+  function analysePill() {
+    return '<span style="align-self:center;font-size:10px;font-weight:800;padding:5px 12px;border-radius:20px;color:#7C3AED;background:rgba(124,58,237,.08);border:1px solid #7C3AED55;letter-spacing:.5px">ANALYSE</span>';
+  }
+
+  // ── Synthèse + rendu liste ──────────────────────────────────────────────────────────
   function renderResults() {
     var input = document.getElementById('ql-input');
     var out = document.getElementById('ql-results');
     if (!input || !out) return;
     var tokens = input.value.split(/[,\n;]+/).map(function (t) { return t.trim(); }).filter(Boolean);
     if (!tokens.length) {
-      out.innerHTML = '<div style="text-align:center;color:var(--text-muted);font-size:12px;padding:40px 0">Saisissez un ou plusieurs titres ci-dessus pour voir leur qualité.</div>';
+      out.innerHTML = '<div style="text-align:center;color:#94A3B8;font-size:12px;padding:36px 0">Saisissez un ou plusieurs sous-jacents ci-dessus.</div>';
       return;
     }
-    loadStocks().then(function (all) {
-      var resolved = tokens.map(function (q) { return { q: q, s: match(q, all) }; });
-      var found = resolved.filter(function (r) { return r.s; });
+    loadData().then(function () {
+      var resolved = tokens.map(resolve);
+      var stocks = resolved.filter(function (r) { return r.item && (r.item.buffett_score != null || r.item.quality_score != null); });
       var worst = null;
-      if (found.length > 1) {
-        worst = found.reduce(function (w, r) {
-          var bs = bestScore(r.s), bw = bestScore(w.s);
-          if (bw == null) return r;
-          if (bs == null) return w;
-          return bs < bw ? r : w;
-        });
-      }
+      if (stocks.length > 1) worst = stocks.reduce(function (w, r) { var a = bestScore(r.item), b = bestScore(w.item); if (b == null) return r; if (a == null) return w; return a < b ? r : w; });
 
       var html = '';
-      // Bandeau synthèse panier
-      if (found.length > 1) {
-        var scores = found.map(function (r) { return bestScore(r.s); }).filter(function (x) { return x != null; });
-        var avg = scores.length ? Math.round(scores.reduce(function (a, b) { return a + b; }, 0) / scores.length) : null;
-        var wv = verdict(worst.s);
-        html += '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px">'
-          + '<div class="stat-card" style="flex:1;min-width:150px;padding:12px 16px"><div class="stat-label">Worst-of</div>'
-          +   '<div class="stat-value" style="color:' + scoreColor(bestScore(worst.s)) + '">' + bestScore(worst.s) + '</div>'
-          +   '<div class="stat-sub">' + (worst.s.name || worst.s.ticker) + ' · ' + wv.label + '</div></div>'
-          + '<div class="stat-card" style="flex:1;min-width:150px;padding:12px 16px"><div class="stat-label">Moyenne panier</div>'
-          +   '<div class="stat-value" style="color:' + scoreColor(avg) + '">' + (avg != null ? avg : '—') + '</div>'
-          +   '<div class="stat-sub">' + found.length + '/' + tokens.length + ' titres reconnus</div></div>'
+      if (stocks.length > 1) {
+        var scs = stocks.map(function (r) { return bestScore(r.item); }).filter(function (x) { return x != null; });
+        var avg = scs.length ? Math.round(scs.reduce(function (a, b) { return a + b; }, 0) / scs.length) : null;
+        var nEtf = resolved.filter(function (r) { return r.item && r.item.kind; }).length;
+        html += '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px">'
+          + statCard('Worst-of', bestScore(worst.item), (worst.item.name || worst.item.ticker) + ' · ' + verdict(worst.item).label)
+          + statCard('Moyenne panier', avg, stocks.length + ' action' + (stocks.length > 1 ? 's' : '') + (nEtf ? ' + ' + nEtf + ' ETF/indice' : ''))
           + '</div>'
-          + '<div style="font-size:11px;color:var(--text-muted);margin-bottom:12px">💡 Pour un produit <strong>worst-of</strong>, c\'est le titre le plus faible qui détermine le risque réel.</div>';
+          + '<div style="font-size:11px;color:#64748B;margin-bottom:14px">💡 Sur un produit <strong>worst-of</strong>, le titre le plus faible porte le risque réel.</div>';
       }
-
-      html += '<div style="display:flex;flex-direction:column;gap:12px">'
-        + resolved.map(function (r) { return card(r.q, r.s, worst && r === worst); }).join('')
-        + '</div>';
+      html += '<div style="display:flex;flex-direction:column;gap:12px">' + resolved.map(function (r) {
+        if (!r.item) return notFoundCard(r.q);
+        if (r.item.kind) return etfCard(r.q, r.item, false);
+        return stockCard(r.q, r.item, worst && r === worst);
+      }).join('') + '</div>';
       out.innerHTML = html;
     });
   }
-
-  function onInput() {
-    clearTimeout(_debounce);
-    _debounce = setTimeout(renderResults, 220);
+  function statCard(label, value, sub) {
+    var c = scoreColor(value);
+    return '<div style="flex:1;min-width:160px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:13px 16px;box-shadow:0 1px 3px rgba(0,0,0,.04)">'
+      + '<div style="font-size:9.5px;text-transform:uppercase;letter-spacing:1px;color:#64748B;font-weight:700">' + label + '</div>'
+      + '<div style="font-family:var(--mono);font-size:24px;font-weight:800;color:' + c + ';line-height:1.1;margin-top:2px">' + (value != null ? value : '—') + '</div>'
+      + '<div style="font-size:11px;color:#475569;margin-top:2px">' + sub + '</div></div>';
   }
 
-  // ── Vue principale ────────────────────────────────────────────────────────────────
-  function renderQualityLookup(container) {
-    container.innerHTML =
-      '<div style="max-width:980px;margin:0 auto">'
-      + '<div class="section" style="margin-bottom:20px">'
-      +   '<div class="section-header"><div class="section-title"><span class="dot" style="background:var(--accent)"></span>🔎 Quality — qualité d\'un sous-jacent</div></div>'
-      +   '<div style="font-size:12px;color:var(--text-muted);margin-bottom:12px">Saisissez un ou plusieurs titres (ticker ou nom, séparés par virgule ou retour à la ligne). Score <strong>Buffett</strong> et <strong>Quality</strong> instantanés — sans ouvrir de brochure.</div>'
-      +   '<textarea id="ql-input" rows="2" placeholder="ex. ASML, MC.PA, TotalEnergies, Nvidia" '
-      +     'style="width:100%;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-family:var(--mono);font-size:13px;color:var(--text);resize:vertical;outline:none"></textarea>'
-      + '</div>'
-      + '<div id="ql-results"></div>'
-      + '</div>';
+  function onInput() { clearTimeout(_debounce); _debounce = setTimeout(renderResults, 200); }
+  function fillExample(txt) { var i = document.getElementById('ql-input'); if (i) { i.value = txt; i.focus(); renderResults(); } }
+  window._qlFill = fillExample;
 
+  // ── Vue ─────────────────────────────────────────────────────────────────────────────
+  function renderQualityLookup(container) {
+    var ex = ['ASML, LVMH, TotalEnergies', 'Eurostoxx Banks', 'Nvidia, Tech', 'CAC 40'];
+    container.innerHTML =
+      '<div style="max-width:920px;margin:0 auto">'
+      + '<div class="section" style="margin-bottom:18px">'
+      +   '<div class="section-header"><div class="section-title"><span class="dot" style="background:var(--accent)"></span>🔎 Quality — qualité d\'un sous-jacent</div></div>'
+      +   '<div style="font-size:12px;color:#64748B;margin-bottom:10px">Tapez un ou plusieurs sous-jacents (ticker, nom, ou secteur). Score <strong>Buffett</strong>/<strong>Quality</strong> pour les actions, analyse <strong>perf + risque</strong> pour les ETF/indices — sans brochure.</div>'
+      +   '<textarea id="ql-input" rows="2" placeholder="ex. ASML, MC.PA, Eurostoxx Banks, Nvidia" style="width:100%;background:#F1F5F9;border:1px solid var(--border);border-radius:7px;padding:10px 12px;font-family:var(--mono);font-size:13px;color:var(--text);resize:vertical;outline:none"></textarea>'
+      +   '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:9px">'
+      +     ex.map(function (t) { return '<button onclick="_qlFill(\'' + t.replace(/'/g, "\\'") + '\')" style="font-size:10.5px;color:#475569;background:#F8FAFF;border:1px solid #E2E8F0;border-radius:14px;padding:4px 11px;cursor:pointer">' + t + '</button>'; }).join('')
+      +   '</div>'
+      + '</div>'
+      + '<div id="ql-results"></div></div>';
     var input = document.getElementById('ql-input');
     input.addEventListener('input', onInput);
     input.focus();
-    // Précharge les données pour une première saisie instantanée
-    loadStocks();
+    loadData();
     renderResults();
   }
 
