@@ -74,6 +74,7 @@
       <button class="nav-tab" data-view="analytics" onclick="switchMainView('analytics')">📊 Analytique</button>
       <span class="nav-sep"></span>
       <button class="nav-tab" data-view="parser" onclick="switchMainView('parser')">📄 Analyseur</button>
+      <button class="nav-tab" data-view="quality" onclick="switchMainView('quality')">🔎 Quality</button>
       <button class="nav-tab" data-view="allocator" onclick="switchMainView('allocator')">⚡ Allocateur</button>
     </div>
     <div class="topbar-actions">
@@ -159,6 +160,8 @@
   <!-- Barrier distance + comparison view (post-grading features) -->
   <script src="js/barrier-distance-patch.js?v=20260402ak"></script>
   <script src="js/comparison-view.js?v=20260402ak"></script>
+  <!-- Quality Lookup — recherche éclair qualité sous-jacent (Buffett/Quality) -->
+  <script src="js/quality-lookup.js?v=20260602a"></script>
   <script>
     function switchMainView(view) {
       document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
@@ -166,6 +169,7 @@
       if (view === 'cat') { app.setState({ view: 'cat' }); renderCAT(document.getElementById('main-content')); }
       else if (view === 'analytics') { app.setState({ view: 'analytics' }); renderAnalytics(document.getElementById('main-content')); }
       else if (view === 'parser') { app.setState({ view: 'parser' }); renderBrochureParser(document.getElementById('main-content')); }
+      else if (view === 'quality') { app.setState({ view: 'quality' }); renderQualityLookup(document.getElementById('main-content')); }
       else if (view === 'allocator') { app.setState({ view: 'allocator' }); renderUnifiedAllocator(document.getElementById('main-content')); }
       else if (view === 'market') { app.setState({ view: 'market' }); renderMarketDashboard(document.getElementById('main-content')); }
       else if (view === 'carry') { app.setState({ view: 'carry' }); renderCarrySimulator(document.getElementById('main-content')); }
