@@ -30,6 +30,21 @@ function renderDashboard(container, state) {
     </div>`;
 }
 
+// Bandeau frais/net sous la grille d'une carte produit (style pastille Quality)
+function _cardFeeStrip(product) {
+  if (!product.coupon?.rate) return '';
+  const ny = scoring.getNetYield(product);
+  const drag = ny.dragPct;
+  const netColor = ny.netAfterFees > 0 ? 'var(--green)' : 'var(--red)';
+  const dragColor = drag >= 0.5 ? 'var(--red)' : drag >= 0.25 ? 'var(--orange)' : 'var(--text-muted)';
+  const chip = ny.feesDocumented
+    ? `<span style="color:${dragColor};font-size:10px;font-weight:600">frais −${drag.toFixed(2).replace('.',',')} pt/an</span>`
+    : `<span style="color:var(--orange);font-size:10px;font-weight:600">⚠ frais à renseigner</span>`;
+  return `<div style="display:flex;align-items:center;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:11px">
+    <span style="color:var(--text-muted)">Net IS+frais</span>
+    <span style="font-family:var(--mono);font-weight:700;color:${netColor}">${formatPct(ny.netAfterFees)}</span>${chip}</div>`;
+}
+
 function renderProductCard(product, context) {
   const bank = BANKS.find(b => b.id === product.bankId); const bankName = bank?.name || product.bankId || '—'; const bankColor = bank?.color || 'var(--text-muted)';
   const typeName = PRODUCT_TYPES.find(t => t.id === product.type)?.name || product.type || '—';
@@ -45,6 +60,7 @@ function renderProductCard(product, context) {
       <div class="product-card-field"><span class="label">Barrière</span><span class="value ${product.capitalProtection?.barrier&&product.capitalProtection.barrier<70?'red':''}">${product.capitalProtection?.barrier ? product.capitalProtection.barrier+'%' : '—'}</span></div>
       <div class="product-card-field"><span class="label">Maturité</span><span class="value">${product.maturity||'—'}</span></div>
     </div>
+    ${_cardFeeStrip(product)}
     <div class="product-card-footer">${scoreHTML}${statusBadge}</div></div>`;
 }
 

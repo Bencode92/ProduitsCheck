@@ -12,6 +12,7 @@
     years: 5,
     taxRate: 25,
     loanType: 'both', // 'inFine', 'amortissable', 'both'
+    structMargin: 0, // marge de structuration estimée (%), déduite du spread net (amortie)
     loanFees: 1000,
     monthlyPayment: 17924.29, // SG real amortization schedule
     totalInterestAmort: 75457, // SG real total interest (amortissable)
@@ -373,7 +374,7 @@
     // ─── Loan params ──────
     html += '<div style="background:' + BG.section + ';border:1px solid ' + BG.border + ';border-radius:var(--radius-sm);padding:16px;margin-bottom:16px">';
     html += '<div style="font-size:12px;font-weight:700;color:#2563EB;margin-bottom:12px">💰 EMPRUNT DE TRÉSORERIE</div>';
-    html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px">';
+    html += '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:16px">';
     html += '<div><label style="font-size:10px;color:' + BG.textMuted + ';display:block;margin-bottom:4px">Montant (€)</label>';
     html += '<input type="number" id="carry-amount" value="' + _state.amount + '" step="100000" style="width:100%;padding:10px;border:1px solid ' + BG.border + ';border-radius:6px;background:' + BG.input + ';color:' + BG.text + ';font-family:var(--mono);font-size:15px"></div>';
     html += '<div><label style="font-size:10px;color:' + BG.textMuted + ';display:block;margin-bottom:4px">Taux fixe (%)</label>';
@@ -386,6 +387,8 @@
     html += '<option value="inFine"' + (_state.loanType === 'inFine' ? ' selected' : '') + '>In Fine uniquement</option>';
     html += '<option value="amortissable"' + (_state.loanType === 'amortissable' ? ' selected' : '') + '>Amortissable uniquement</option>';
     html += '</select></div>';
+    html += '<div><label style="font-size:10px;color:' + BG.textMuted + ';display:block;margin-bottom:4px">Marge structureur (%)</label>';
+    html += '<input type="number" id="carry-structmargin" value="' + (_state.structMargin || 0) + '" step="0.1" min="0" title="Marge de structuration estimée, déduite du spread net (amortie sur la durée)" style="width:100%;padding:10px;border:1px solid ' + BG.border + ';border-radius:6px;background:' + BG.input + ';color:' + BG.text + ';font-family:var(--mono);font-size:15px"></div>';
     html += '</div>';
     var annualCostIF = Math.round(_state.amount * _state.rate / 100);
     var totalCostIF = annualCostIF * _state.years;
@@ -736,13 +739,16 @@
       var roiWorst = kpiWorst.totalNetAfterTax / _state.amount * 100 / _state.years;
       var roiBest = kpiBest.totalNetAfterTax / _state.amount * 100 / _state.years;
       var spreadBrut = kpiExp.totalRevenue / _state.amount / _state.years * 100 - _state.rate;
+      // Spread net-net : on déduit la marge de structuration amortie sur la durée
+      var structDrag = _state.years > 0 ? (_state.structMargin || 0) / _state.years : 0;
+      var spreadNet = spreadBrut - structDrag;
 
       html += '<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:20px">';
       [
         ['RENDEMENT NET/AN', _pct(roiAnnual) + '%', roiAnnual >= 0 ? '#059669' : '#DC2626', 'Après IS 25%'],
         ['ROI TOTAL ' + _state.years + 'A', _pct(roiTotal) + '%', roiTotal >= 0 ? '#059669' : '#DC2626', _fmt(kpiExp.totalNetAfterTax) + '€ net'],
         ['NET ESPÉRÉ/AN', _fmt(kpiExp.avgPerYear) + '€', kpiExp.avgPerYear >= 0 ? '#059669' : '#DC2626', 'Après intérêts + IS'],
-        ['SPREAD NET', '+' + _pct(spreadBrut) + '%', '#0891B2', 'Coupon moyen - taux emprunt'],
+        ['SPREAD NET', '+' + _pct(spreadNet) + '%', '#0891B2', structDrag > 0 ? 'vs emprunt, net marge -' + _pct(structDrag) + '%/an' : 'Coupon moyen - taux emprunt'],
         ['PIRE CAS/AN', _pct(roiWorst) + '%', roiWorst >= 0 ? '#059669' : '#DC2626', _fmt(kpiWorst.avgPerYear) + '€/an'],
         ['RISQUE ÉMETTEUR', '-' + _fmt(issuerLoss) + '€', '#DC2626', 'PD ' + (_state.years) + 'Y A+ · Recovery 40%']
       ].forEach(function(kpi) {
@@ -1067,6 +1073,7 @@
     _state.rate = parseFloat(document.getElementById('carry-rate')?.value) || 3.10;
     _state.years = parseInt(document.getElementById('carry-years')?.value) || 10;
     _state.loanType = document.getElementById('carry-loantype')?.value || 'both';
+    _state.structMargin = parseFloat(document.getElementById('carry-structmargin')?.value) || 0;
 
     var scenarios = _generateScenarios(_state.products, _state.amount);
     _state.result = { scenarios: scenarios };
