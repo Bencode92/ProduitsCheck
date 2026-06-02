@@ -107,10 +107,49 @@ class ScoringEngine {
     return null;
   }
 
+  // ── Frais & rendement net (helpers canoniques, réutilisés dans toutes les vues) ──────
+  // Frais normalisés d'un produit, en %. `documented` = true si au moins un frais est saisi.
+  // `commissions` (legacy) = marge de structuration upfront. fees.{structuring,custodyAnnual,exit}.
+  getProductFees(p) {
+    const f = (p && p.fees) || {};
+    let struct = parseFloat(f.structuring);
+    if (isNaN(struct)) struct = parseFloat(p && p.commissions);
+    const custody = parseFloat(f.custodyAnnual);
+    const exit = parseFloat(f.exit);
+    const documented = !isNaN(struct) || !isNaN(custody) || !isNaN(exit);
+    return { structuring: isNaN(struct) ? 0 : struct, custodyAnnual: isNaN(custody) ? 0 : custody, exit: isNaN(exit) ? 0 : exit, documented };
+  }
+  // Drag de frais en %/an : marge upfront amortie sur la maturité + droits de garde annuels.
+  getFeeDrag(p) {
+    const fees = this.getProductFees(p);
+    let yrs = parseFloat(p && p.maturityYears);
+    if (isNaN(yrs) || yrs <= 0) yrs = 5;
+    return { dragPct: fees.structuring / yrs + fees.custodyAnnual, documented: fees.documented, fees, years: yrs };
+  }
+  // Rendement d'un produit : brut, net d'IS (hors frais), net d'IS ET de frais.
+  getNetYield(p) {
+    let gross = parseFloat(p && p.coupon && p.coupon.rate);
+    if (isNaN(gross)) gross = 0;
+    const drag = this.getFeeDrag(p);
+    const netExFees = gross * (1 - 0.25);
+    return { gross, netExFees, netAfterFees: netExFees - drag.dragPct, dragPct: drag.dragPct, feesDocumented: drag.documented };
+  }
+
   getPortfolioStats(portfolio) {
-    if (!portfolio || portfolio.length === 0) return { total: 0, nominal: 0, avgCoupon: 0, banks: 0, underlyings: 0, types: 0, concentrations: [] };
+    if (!portfolio || portfolio.length === 0) return { total: 0, nominal: 0, avgCoupon: 0, weightedCoupon: 0, netExFees: 0, netAfterFees: 0, feeDrag: 0, feesDocumentedPct: 0, banks: 0, underlyings: 0, types: 0, concentrations: [] };
     const nominal = portfolio.reduce((s, p) => s + (parseFloat(p.investedAmount) || 0), 0);
     const avgCoupon = portfolio.reduce((s, p) => s + (parseFloat(p.coupon?.rate) || 0), 0) / portfolio.length;
+    // Rendements pondérés par l'encours (le vrai chiffre de pilotage)
+    let wGross = 0, wNetEx = 0, wNetAfter = 0, wDrag = 0, feesDocAmt = 0;
+    portfolio.forEach(p => {
+      const a = parseFloat(p.investedAmount) || 0;
+      const ny = this.getNetYield(p);
+      wGross += ny.gross * a; wNetEx += ny.netExFees * a; wNetAfter += ny.netAfterFees * a; wDrag += ny.dragPct * a;
+      if (ny.feesDocumented) feesDocAmt += a;
+    });
+    const den = nominal || 1;
+    const weightedCoupon = wGross / den, netExFees = wNetEx / den, netAfterFees = wNetAfter / den, feeDrag = wDrag / den;
+    const feesDocumentedPct = nominal > 0 ? feesDocAmt / nominal * 100 : 0;
     const concentrations = [];
     const countBy = (arr, key) => { const c = {}; arr.forEach(p => { c[p[key]] = (c[p[key]] || 0) + 1; }); return c; };
     Object.entries(countBy(portfolio, 'bankId')).forEach(([id, count]) => {
@@ -121,7 +160,7 @@ class ScoringEngine {
       const pct = (count / portfolio.length) * 100;
       if (pct > 30) { const f = UNDERLYINGS.find(u => u.id === id); concentrations.push({ type: 'underlying', name: f ? f.name : id, pct: Math.round(pct), level: pct > 50 ? 'danger' : 'warning' }); }
     });
-    return { total: portfolio.length, nominal, avgCoupon, banks: new Set(portfolio.map(p => p.bankId)).size, underlyings: new Set(portfolio.map(p => p.underlyingType)).size, types: new Set(portfolio.map(p => p.type)).size, concentrations };
+    return { total: portfolio.length, nominal, avgCoupon, weightedCoupon, netExFees, netAfterFees, feeDrag, feesDocumentedPct, banks: new Set(portfolio.map(p => p.bankId)).size, underlyings: new Set(portfolio.map(p => p.underlyingType)).size, types: new Set(portfolio.map(p => p.type)).size, concentrations };
   }
 }
 

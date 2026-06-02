@@ -14,7 +14,7 @@ function renderDashboard(container, state) {
     <div class="stats-row">
       <div class="stat-card blue"><div class="stat-label">Portefeuille</div><div class="stat-value">${stats.total}</div><div class="stat-sub">produits actifs</div></div>
       <div class="stat-card green"><div class="stat-label">Nominal Total</div><div class="stat-value">${formatNumber(stats.nominal)}€</div><div class="stat-sub">${stats.banks} contreparties</div></div>
-      <div class="stat-card orange"><div class="stat-label">Coupon Moyen</div><div class="stat-value">${stats.avgCoupon ? formatPct(stats.avgCoupon) : '—'}</div><div class="stat-sub">pondération égale</div></div>
+      <div class="stat-card orange"><div class="stat-label">Rdt Net Pondéré</div><div class="stat-value">${stats.nominal ? formatPct(stats.netAfterFees) : '—'}</div><div class="stat-sub">${stats.nominal ? `${formatPct(stats.netExFees)} hors frais · ${formatPct(stats.weightedCoupon)} brut${stats.feesDocumentedPct < 80 ? ` · <span style="color:var(--orange);font-weight:600">⚠ frais ${Math.round(stats.feesDocumentedPct)}%</span>` : ''}` : 'net IS + frais, pondéré'}</div></div>
       <div class="stat-card purple"><div class="stat-label">Propositions</div><div class="stat-value">${pendingCount}</div><div class="stat-sub">${allProposalsCount} total reçues</div></div>
       <div class="stat-card cyan"><div class="stat-label">Sous-jacents</div><div class="stat-value">${stats.underlyings}</div><div class="stat-sub">${stats.types} types de structure</div></div>
     </div>

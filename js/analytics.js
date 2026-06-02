@@ -162,6 +162,19 @@ async function renderAnalytics(container) {
   // ─── Compute per-entity breakdown ───
   const IS_RATE = 0.25;
   const netYieldTotal = Math.round(annualYieldTotal * (1 - IS_RATE));
+  // Drag de frais (marge upfront amortie + droits de garde) sur les produits structurés
+  let feeDragTotal = 0, feesDocAmt = 0;
+  products.forEach(p => {
+    const a = parseFloat(p.investedAmount) || 0;
+    if (typeof scoring !== 'undefined' && scoring.getFeeDrag) {
+      const d = scoring.getFeeDrag(p);
+      feeDragTotal += a * d.dragPct / 100;
+      if (d.documented) feesDocAmt += a;
+    }
+  });
+  const netAfterFeesTotal = Math.round(netYieldTotal - feeDragTotal);
+  const feesDocPct = totalStructured > 0 ? feesDocAmt / totalStructured * 100 : 0;
+  const netAfterFeesPct = totalAll > 0 ? (netAfterFeesTotal / totalAll * 100) : 0;
   const entities = _computeEntityBreakdown(products, catDeposits);
   const fgdr = _computeFGDRExposure(products, catDeposits);
   const events = _computeNextEvents(products, catDeposits);
@@ -177,7 +190,7 @@ async function renderAnalytics(container) {
     <div class="stats-row" style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px">
       <div class="stat-card blue"><div class="stat-label">Total Investi</div><div class="stat-value">${formatNumber(totalAll)}€</div><div class="stat-sub">Structurés: ${formatNumber(totalStructured)}€ · CAT: ${formatNumber(totalCAT)}€</div></div>
       <div class="stat-card green"><div class="stat-label">Rendement Annuel Brut</div><div class="stat-value">${formatNumber(annualYieldTotal)}€</div><div class="stat-sub">Structurés: ${formatNumber(annualYieldStructured)}€ · CAT: ${formatNumber(annualYieldCAT)}€</div></div>
-      <div class="stat-card" style="border-left:3px solid #06D6A0"><div class="stat-label">Rendement Net IS (25%)</div><div class="stat-value" style="color:#06D6A0">${formatNumber(netYieldTotal)}€</div><div class="stat-sub">${avgYield > 0 ? (avgYield * (1 - IS_RATE)).toFixed(2).replace('.',',') : '0'}% net · ${avgYield.toFixed(2).replace('.',',')}% brut</div></div>
+      <div class="stat-card" style="border-left:3px solid #06D6A0"><div class="stat-label">Rendement Net (IS + frais)</div><div class="stat-value" style="color:#06D6A0">${formatNumber(netAfterFeesTotal)}€</div><div class="stat-sub">${netAfterFeesPct.toFixed(2).replace('.',',')}% net · ${formatNumber(netYieldTotal)}€ hors frais${feesDocPct < 80 ? ` · <span style="color:#D97706;font-weight:600">⚠ frais ${Math.round(feesDocPct)}%</span>` : ''}</div></div>
       <div class="stat-card" style="border-left:3px solid #8338EC"><div class="stat-label">Duration Moyenne</div><div class="stat-value">${avgDuration.toFixed(1)} ans</div><div class="stat-sub">${products.length + catDeposits.length} placements</div></div>
       <div class="stat-card" style="border-left:3px solid ${fgdr.alert ? '#EF233C' : '#06D6A0'}"><div class="stat-label">Couverture FGDR</div><div class="stat-value">${fgdr.coveredPct}%</div><div class="stat-sub">${fgdr.alert ? '⚠ ' + fgdr.alertCount + ' dépassement(s)' : '✓ Couvert'}</div></div>
     </div>

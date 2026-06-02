@@ -156,7 +156,6 @@ window.showEditModal = function() {
         '<div class="form-field"><label>Fréquence paiement</label><select id="fe-coupon-freq">' + freqOptions + '</select></div>' +
         '<div class="form-field"><label>Coupon mémoire</label><select id="fe-coupon-memory"><option value="false"' + (!couponMemory ? ' selected' : '') + '>Non</option><option value="true"' + (couponMemory ? ' selected' : '') + '>Oui — rattrapage</option></select></div>' +
         '<div class="form-field"><label>Années garanties</label><input id="fe-guaranteed-years" type="number" value="' + (p.guaranteedYears || 0) + '" placeholder="Ex: 2 (An 1-2 sans condition)"></div>' +
-        '<div class="form-field"><label>Commissions (%)</label><input id="fe-commissions" type="number" step="0.01" value="' + ((p.commissions || '') + '') + '" placeholder="Ex: 1.30"></div>' +
         '</div>' +
 
         // ─── Section 3: Protection Capital ───
@@ -165,6 +164,15 @@ window.showEditModal = function() {
         '<div class="form-field"><label>Barrière capital (%)</label><input id="fe-barrier" type="number" step="0.1" value="' + barrier + '" placeholder="Ex: 60"></div>' +
         '<div class="form-field"><label>Barrière coupon (%) <span style="font-size:9px;color:var(--text-dim)">digitale</span></label><input id="fe-barrier-coupon" type="number" step="0.1" value="' + barrierCoupon + '" placeholder="Ex: 100"></div>' +
         '<div class="form-field"><label>Protection capital (%)</label><input id="fe-protection" type="number" step="0.1" value="' + protection + '"></div>' +
+        '</div>' +
+
+        // ─── Section 3b: Frais ───
+        '<div style="font-size:10px;font-weight:700;color:#0891B2;margin:20px 0 8px;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border);padding-bottom:4px">💸 Frais</div>' +
+        '<div class="form-grid">' +
+        '<div class="form-field"><label>Marge struct. / commission (%) <span style="font-size:9px;color:var(--text-dim)">upfront</span></label><input id="fe-commissions" type="number" step="0.01" value="' + ((p.commissions != null ? p.commissions : ((p.fees || {}).structuring != null ? p.fees.structuring : '')) + '') + '" placeholder="Ex: 1.50"></div>' +
+        '<div class="form-field"><label>Droits de garde (%/an)</label><input id="fe-custody" type="number" step="0.01" value="' + (((p.fees || {}).custodyAnnual != null ? p.fees.custodyAnnual : '') + '') + '" placeholder="Ex: 0.20"></div>' +
+        '<div class="form-field"><label>Frais de sortie / soulte (%)</label><input id="fe-exit" type="number" step="0.01" value="' + (((p.fees || {}).exit != null ? p.fees.exit : '') + '') + '" placeholder="Ex: 1.00"></div>' +
+        '<div class="form-field full"><div style="font-size:10px;color:var(--text-dim);background:var(--cyan-dim,rgba(8,145,178,0.06));border-radius:var(--radius-sm);padding:7px 10px">💡 La marge de structuration (écart prix d\'émission / valeur réelle) est rarement communiquée — saisis ton estimation. Elle est amortie sur la maturité dans le rendement net.</div></div>' +
         '</div>' +
 
         // ─── Section 4: Remboursement anticipé (masqué pour les produits simples) ───
@@ -407,6 +415,15 @@ window.handleEditSave = async function() {
     if (gYears !== '' && gYears !== null) p.guaranteedYears = parseInt(gYears);
     var commVal = document.getElementById('fe-commissions')?.value;
     if (commVal !== '' && commVal !== null) p.commissions = parseFloat(commVal);
+    // Frais : droits de garde + sortie/soulte → p.fees
+    var custodyVal = document.getElementById('fe-custody')?.value;
+    var exitVal = document.getElementById('fe-exit')?.value;
+    if ((custodyVal !== '' && custodyVal !== null) || (exitVal !== '' && exitVal !== null) || (commVal !== '' && commVal !== null)) {
+        p.fees = p.fees || {};
+        if (commVal !== '' && commVal !== null) p.fees.structuring = parseFloat(commVal);
+        if (custodyVal !== '' && custodyVal !== null) p.fees.custodyAnnual = parseFloat(custodyVal);
+        if (exitVal !== '' && exitVal !== null) p.fees.exit = parseFloat(exitVal);
+    }
 
     if (p.coupon.type === 'participation' && newCoupon !== '') {
         p.participationRate = parseFloat(newCoupon);
