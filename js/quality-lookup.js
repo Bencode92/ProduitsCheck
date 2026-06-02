@@ -40,7 +40,7 @@
           // pour ne pas confondre « S&P 500 » (indice large) et un ETF sectoriel S&P 500.
           var secText = [e.sector_en, e.sector_fr, (e.indexName || '').split(fam).join(' ')].filter(Boolean).join(' ');
           _etfs.push({
-            kind: 'etf', symbol: e.symbol, name: e.name,
+            kind: 'etf', symbol: e.symbol, name: e.name, group: k,
             display: e.display_fr || e.indexName || e.name,
             indexName: e.indexName, family: fam, secText: secText,
             sector_fr: e.sector_fr, sector_en: e.sector_en, region: e.region,
@@ -111,7 +111,7 @@
       if (hitSec === 0) return;
       var score = hitFull / words.length;
       // tie-break : on privilégie les ETF européens / familles STOXX (sous-jacents les plus fréquents)
-      var bonus = (e.region === 'EU' || /stoxx/i.test(e.family || '') || /stoxx/i.test(e.indexName || '')) ? 0.05 : 0;
+      var bonus = (/^eu/i.test(e.region || '') || /stoxx/i.test(e.family || '') || /stoxx/i.test(e.indexName || '')) ? 0.05 : 0;
       var v = score + bonus;
       if (v > (best._rank || 0)) best = { score: score, _rank: v, item: e };
     });
@@ -226,6 +226,47 @@
       + (grade ? '<div style="font-size:10px;color:' + c + ';font-weight:800">' + grade + '</div>' : '') + '</div>';
   }
 
+  // ── Contexte secteur : situe l'action dans son secteur européen ─────────────────────
+  var SECTOR_MAP = {
+    'industrials': 'industrials', 'financial services': 'financials', 'finance': 'financials',
+    'technology': 'information-technology', 'healthcare': 'healthcare',
+    'consumer cyclical': 'consumer-discretionary', 'consumer defensive': 'consumer-staples',
+    'utilities': 'utilities', 'basic materials': 'materials', 'real estate': 'real-estate',
+    'communication services': 'communication-services', 'energy': 'energy'
+  };
+  function sectorTrend(groupKey, prefRegion) {
+    var grp = _etfs.filter(function (e) { return e.group === groupKey; });
+    var want = prefRegion === 'US' ? function (e) { return e.region === 'US'; } : function (e) { return e.region === 'Europe' || e.region === 'EU'; };
+    var pref = grp.filter(want);
+    var use = pref.length ? pref : grp;
+    if (!use.length) return null;
+    function avg(f) { var v = use.map(f).filter(function (x) { return x != null && !isNaN(x); }); return v.length ? v.reduce(function (a, b) { return a + b; }, 0) / v.length : null; }
+    return { ytd: avg(function (e) { return e.ytd; }), vol: avg(function (e) { return e.vol_3y; }), zone: (pref.length ? (prefRegion === 'US' ? 'US' : 'Europe') : 'monde') };
+  }
+  function sectorContext(s) {
+    var gk = SECTOR_MAP[(s.sector_api || '').toLowerCase()];
+    var t = gk ? sectorTrend(gk, s._region) : null;
+    var bits = [s.sector, s.industry].filter(Boolean).map(function (x, i) {
+      return '<span style="' + (i === 0 ? 'color:#334155;font-weight:600' : 'color:#64748B') + '">' + x + '</span>';
+    }).join('<span style="color:#CBD5E1"> · </span>');
+    var trendHtml = '';
+    if (t && t.ytd != null) {
+      var tc = t.ytd >= 0 ? '#047857' : '#B91C1C';
+      var cmp = '';
+      if (s.perf_ytd != null) {
+        var d = Math.round((s.perf_ytd - t.ytd) * 10) / 10;
+        cmp = Math.abs(d) < 1 ? ' — en ligne avec le secteur'
+          : d > 0 ? ' — <span style="color:#047857;font-weight:600">surperforme de ' + d + ' pts</span>'
+          : ' — <span style="color:#B91C1C;font-weight:600">sous-performe de ' + Math.abs(d) + ' pts</span>';
+      }
+      trendHtml = '<div style="margin-top:4px;color:#64748B">Tendance secteur ' + t.zone + ' : '
+        + '<span style="color:' + tc + ';font-weight:700">' + (t.ytd >= 0 ? '+' : '') + (Math.round(t.ytd * 10) / 10) + '% YTD</span>'
+        + (t.vol != null ? ' · vol ~' + Math.round(t.vol) + '%' : '') + cmp + '</div>';
+    }
+    return '<div style="margin-top:11px;background:#F8FAFF;border:1px solid #E2E8F0;border-radius:8px;padding:8px 11px;font-size:11px;line-height:1.5">'
+      + '<span style="color:#94A3B8">🌐 </span>' + bits + trendHtml + '</div>';
+  }
+
   function criteria(s) {
     if (!Array.isArray(s.buffett_criteria) || !s.buffett_criteria.length) return '';
     var passed = s.buffett_criteria.filter(function (c) { return c.passed; }).length;
@@ -243,10 +284,11 @@
     var flag = s._region === 'US' ? '🇺🇸' : '🇪🇺';
     var dd = s.max_drawdown_3y != null ? -Math.abs(s.max_drawdown_3y) : null;
     return cardShell(worst,
-      header(flag + ' ' + (s.name || s.ticker), s.ticker, [s.sector, s.country].filter(Boolean).join(' · '),
+      header(flag + ' ' + (s.name || s.ticker), s.ticker, s.country || '',
         scoreTile('Buffett', s.buffett_score, s.buffett_grade)
         + scoreTile('Quality', s.quality_score, s.quality_grade)
         + verdictPill(v.label, v.c, v.bg))
+      + sectorContext(s)
       + group('Rentabilité', [
           pill('ROE', s.roe, '%', band(s.roe, true, [15, 8])),
           pill('ROIC', s.roic, '%', band(s.roic, true, [12, 7])),
@@ -368,7 +410,86 @@
       + '<div style="font-size:11px;color:#475569;margin-top:2px">' + sub + '</div></div>';
   }
 
-  function onInput() { clearTimeout(_debounce); _debounce = setTimeout(renderResults, 200); }
+  // ── Autocomplétion (liste déroulante) ───────────────────────────────────────────────
+  var _sug = [], _sugI = -1;
+  function currentToken(ta) {
+    var v = ta.value, pos = ta.selectionStart;
+    var start = Math.max(v.lastIndexOf(',', pos - 1), v.lastIndexOf(';', pos - 1), v.lastIndexOf('\n', pos - 1)) + 1;
+    var ends = [v.indexOf(',', pos), v.indexOf(';', pos), v.indexOf('\n', pos)].filter(function (i) { return i >= 0; });
+    var end = ends.length ? Math.min.apply(null, ends) : v.length;
+    return { start: start, end: end, text: v.slice(start, end).trim() };
+  }
+  function buildSuggestions(q) {
+    var qa = strip((q || '').toUpperCase()).trim();
+    if (qa.length < 1 || !_stocks) return [];
+    var items = [];
+    _stocks.forEach(function (s) {
+      var t = (s.ticker || '').toUpperCase(), n = strip((s.name || '').toUpperCase());
+      var r = -1;
+      if (t === qa) r = 0; else if (t.indexOf(qa) === 0) r = 1; else if (n.indexOf(qa) === 0) r = 2; else if (n.indexOf(qa) >= 0) r = 3;
+      if (r >= 0) items.push({ rank: r, kind: 'stock', label: s.name, ticker: s.ticker, sub: [s.sector_api, s.country].filter(Boolean).join(' · '), insert: s.ticker, score: bestScore(s), region: s._region });
+    });
+    var seen = {};
+    _etfs.forEach(function (e) {
+      if (seen[e.symbol]) return;
+      var sym = (e.symbol || '').toUpperCase(), d = strip((e.display || e.name || '').toUpperCase()), sf = strip((e.sector_fr || '').toUpperCase()), se = strip((e.sector_en || '').toUpperCase());
+      var r = -1;
+      if (sym === qa) r = 0; else if (sym.indexOf(qa) === 0) r = 1; else if (sf.indexOf(qa) === 0 || se.indexOf(qa) === 0 || d.indexOf(qa) === 0) r = 2; else if (d.indexOf(qa) >= 0 || sf.indexOf(qa) >= 0 || se.indexOf(qa) >= 0) r = 3;
+      if (r >= 0) { seen[e.symbol] = 1; items.push({ rank: r + 0.5, kind: e.kind, label: e.display || e.name, ticker: e.symbol, sub: e.kind === 'index' ? 'Indice' : 'ETF sectoriel', insert: e.symbol, region: e.region }); }
+    });
+    items.sort(function (a, b) { return a.rank - b.rank || a.label.length - b.label.length; });
+    return items.slice(0, 8);
+  }
+  function renderSuggest(items) {
+    var box = document.getElementById('ql-suggest');
+    if (!box) return;
+    _sug = items; _sugI = -1;
+    if (!items.length) { box.style.display = 'none'; box.innerHTML = ''; return; }
+    box.innerHTML = items.map(function (it, i) {
+      var icon = it.kind === 'stock' ? (it.region === 'US' ? '🇺🇸' : '🇪🇺') : '📊';
+      var right = it.kind === 'stock'
+        ? (it.score != null ? '<span style="font-family:var(--mono);font-weight:700;font-size:11px;color:' + scoreColor(it.score) + '">' + it.score + '</span>' : '')
+        : '<span style="font-size:9px;color:#7C3AED;font-weight:700">' + it.sub + '</span>';
+      return '<div class="ql-sug" data-i="' + i + '" onmousedown="_qlPick(event,' + i + ')" '
+        + 'style="display:flex;align-items:center;gap:8px;padding:7px 11px;cursor:pointer;border-bottom:1px solid #F1F5F9">'
+        + '<span style="flex-shrink:0">' + icon + '</span>'
+        + '<span style="font-family:var(--mono);font-size:10px;font-weight:700;color:#334155;background:#F1F5F9;border-radius:4px;padding:1px 5px;flex-shrink:0">' + it.ticker + '</span>'
+        + '<span style="font-weight:600;font-size:12px;color:#0F172A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1">' + it.label + '</span>'
+        + (it.kind === 'stock' ? '<span style="font-size:10px;color:#94A3B8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px">' + it.sub + '</span>' : '')
+        + right + '</div>';
+    }).join('');
+    box.style.display = 'block';
+  }
+  function highlight() {
+    var box = document.getElementById('ql-suggest'); if (!box) return;
+    Array.prototype.forEach.call(box.children, function (el, i) { el.style.background = i === _sugI ? '#EFF6FF' : '#fff'; });
+  }
+  function pick(i) {
+    var it = _sug[i]; if (!it) return;
+    var ta = document.getElementById('ql-input'); var tok = currentToken(ta);
+    var before = ta.value.slice(0, tok.start), after = ta.value.slice(tok.end).replace(/^[\s,;]+/, '');
+    ta.value = before + it.insert + ', ' + after;
+    var caret = (before + it.insert + ', ').length;
+    ta.focus(); ta.setSelectionRange(caret, caret);
+    var box = document.getElementById('ql-suggest'); if (box) box.style.display = 'none';
+    renderResults();
+  }
+  window._qlPick = function (ev, i) { if (ev) ev.preventDefault(); pick(i); };
+
+  function onInput() {
+    clearTimeout(_debounce); _debounce = setTimeout(renderResults, 200);
+    var ta = document.getElementById('ql-input');
+    loadData().then(function () { renderSuggest(buildSuggestions(currentToken(ta).text)); });
+  }
+  function onKeydown(ev) {
+    var box = document.getElementById('ql-suggest');
+    var open = box && box.style.display === 'block' && _sug.length;
+    if (!open) return;
+    if (ev.key === 'ArrowDown') { ev.preventDefault(); _sugI = (_sugI + 1) % _sug.length; highlight(); }
+    else if (ev.key === 'ArrowUp') { ev.preventDefault(); _sugI = (_sugI - 1 + _sug.length) % _sug.length; highlight(); }
+    else if (ev.key === 'Enter') { if (_sugI >= 0) { ev.preventDefault(); pick(_sugI); } }
+    else if (ev.key === 'Escape') { box.style.display = 'none'; }
+  }
   function fillExample(txt) { var i = document.getElementById('ql-input'); if (i) { i.value = txt; i.focus(); renderResults(); } }
   window._qlFill = fillExample;
 
@@ -380,7 +501,10 @@
       + '<div class="section" style="margin-bottom:18px">'
       +   '<div class="section-header"><div class="section-title"><span class="dot" style="background:var(--accent)"></span>🔎 Quality — qualité d\'un sous-jacent</div></div>'
       +   '<div style="font-size:12px;color:#64748B;margin-bottom:10px">Tapez un ou plusieurs sous-jacents (ticker, nom, ou secteur). Score <strong>Buffett</strong>/<strong>Quality</strong> pour les actions, analyse <strong>perf + risque</strong> pour les ETF/indices — sans brochure.</div>'
-      +   '<textarea id="ql-input" rows="2" placeholder="ex. ASML, MC.PA, Eurostoxx Banks, Nvidia" style="width:100%;background:#F1F5F9;border:1px solid var(--border);border-radius:7px;padding:10px 12px;font-family:var(--mono);font-size:13px;color:var(--text);resize:vertical;outline:none"></textarea>'
+      +   '<div style="position:relative">'
+      +     '<textarea id="ql-input" rows="2" autocomplete="off" placeholder="ex. ASML, MC.PA, Eurostoxx Banks, Nvidia" style="width:100%;background:#F1F5F9;border:1px solid var(--border);border-radius:7px;padding:10px 12px;font-family:var(--mono);font-size:13px;color:var(--text);resize:vertical;outline:none"></textarea>'
+      +     '<div id="ql-suggest" style="display:none;position:absolute;left:0;right:0;top:100%;margin-top:3px;background:#fff;border:1px solid var(--border);border-radius:8px;box-shadow:0 8px 28px rgba(15,23,42,.14);z-index:60;max-height:300px;overflow:auto"></div>'
+      +   '</div>'
       +   '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:9px">'
       +     ex.map(function (t) { return '<button onclick="_qlFill(\'' + t.replace(/'/g, "\\'") + '\')" style="font-size:10.5px;color:#475569;background:#F8FAFF;border:1px solid #E2E8F0;border-radius:14px;padding:4px 11px;cursor:pointer">' + t + '</button>'; }).join('')
       +   '</div>'
@@ -388,6 +512,8 @@
       + '<div id="ql-results"></div></div>';
     var input = document.getElementById('ql-input');
     input.addEventListener('input', onInput);
+    input.addEventListener('keydown', onKeydown);
+    input.addEventListener('blur', function () { setTimeout(function () { var b = document.getElementById('ql-suggest'); if (b) b.style.display = 'none'; }, 150); });
     input.focus();
     loadData();
     renderResults();
