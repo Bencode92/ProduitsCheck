@@ -56,12 +56,19 @@ function renderDashboard(container, state) {
   const stats = scoring.getPortfolioStats(state.portfolio);
   const allProposalsCount = Object.values(state.proposals).reduce((s, arr) => s + arr.length, 0);
   const pendingCount = Object.values(state.proposals).reduce((s, arr) => s + arr.filter(p => !['rejected','subscribed'].includes(p.status)).length, 0);
+  // Liquidités mobilisables (produits classés cash) + prochaine échéance
+  const cashAvail = state.portfolio.reduce((s, p) => s + ((p.grading && p.grading.grade === '-') ? (parseFloat(p.investedAmount) || 0) : 0), 0);
+  const _now = new Date();
+  let _nextDate = null;
+  state.portfolio.forEach(p => { const d = p.maturityDate ? new Date(p.maturityDate) : null; if (d && !isNaN(d) && d > _now && (!_nextDate || d < _nextDate)) _nextDate = d; });
+  const nextDays = _nextDate ? Math.round((_nextDate - _now) / 864e5) : null;
+  const nextSub = _nextDate ? _nextDate.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: '2-digit' }) : 'aucune';
   container.innerHTML = `
     ${renderExecCockpit()}
     <div class="stats-row">
       <div class="stat-card blue"><div class="stat-label">Portefeuille</div><div class="stat-value">${stats.total}</div><div class="stat-sub">produits actifs</div></div>
-      <div class="stat-card green"><div class="stat-label">Nominal Total</div><div class="stat-value">${formatNumber(stats.nominal)}€</div><div class="stat-sub">${stats.banks} contreparties</div></div>
-      <div class="stat-card orange"><div class="stat-label">Rdt Net Pondéré</div><div class="stat-value">${stats.nominal ? formatPct(stats.netAfterFees) : '—'}</div><div class="stat-sub">${stats.nominal ? `${formatPct(stats.netExFees)} hors frais · ${formatPct(stats.weightedCoupon)} brut${stats.feesDocumentedPct < 80 ? ` · <span style="color:var(--orange);font-weight:600">⚠ frais ${Math.round(stats.feesDocumentedPct)}%</span>` : ''}` : 'net IS + frais, pondéré'}</div></div>
+      <div class="stat-card green"><div class="stat-label">Liquidités à investir</div><div class="stat-value">${formatNumber(cashAvail)}€</div><div class="stat-sub">cash mobilisable</div></div>
+      <div class="stat-card orange"><div class="stat-label">Prochaine échéance</div><div class="stat-value">${nextDays != null ? nextDays + ' j' : '—'}</div><div class="stat-sub">${nextSub}</div></div>
       <div class="stat-card purple"><div class="stat-label">Propositions</div><div class="stat-value">${pendingCount}</div><div class="stat-sub">${allProposalsCount} total reçues</div></div>
       <div class="stat-card cyan"><div class="stat-label">Sous-jacents</div><div class="stat-value">${stats.underlyings}</div><div class="stat-sub">${stats.types} types de structure</div></div>
     </div>

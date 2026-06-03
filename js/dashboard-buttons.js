@@ -202,7 +202,7 @@ function _renderPortfolioSummaryTable(state) {
     var portfolio = state.portfolio || [];
     if (portfolio.length === 0) return '';
 
-    var totalInvested = 0, totalReturn = 0, couponsOK = 0, couponsTotal = 0;
+    var totalInvested = 0, totalReturn = 0, totalNetReturn = 0, couponsOK = 0, couponsTotal = 0;
     var rows = [];
 
     portfolio.forEach(function(p) {
@@ -227,8 +227,11 @@ function _renderPortfolioSummaryTable(state) {
 
         var effectiveReturn = annualReturn;
         if (tracking && !tracking.couponOK && !(p.coupon && p.coupon.memory)) effectiveReturn = 0;
+        // Net de frais et d'IS (cohérent avec le cockpit) : coupon×0,75 − drag de frais
+        var feeDrag = (typeof scoring !== 'undefined' && scoring.getFeeDrag) ? scoring.getFeeDrag(p).dragPct : 0;
+        var netAnnual = (effectiveReturn === 0) ? 0 : Math.round(amount * (coupon * 0.75 - feeDrag) / 100);
         totalInvested += amount;
-        if (grade !== '-') totalReturn += effectiveReturn;
+        if (grade !== '-') { totalReturn += effectiveReturn; totalNetReturn += netAnnual; }
 
         var variationHtml;
         if (tracking) {
@@ -253,13 +256,14 @@ function _renderPortfolioSummaryTable(state) {
     });
 
     var avgRate = totalInvested > 0 ? (totalReturn / totalInvested * 100) : 0;
+    var avgNetRate = totalInvested > 0 ? (totalNetReturn / totalInvested * 100) : 0;
     var lostCoupons = couponsTotal - couponsOK;
 
     // ── Summary cards ──
     var html = '<div style="margin:20px 0;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden" data-section="portfolio-summary">';
     html += '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border)">';
     html += '<div style="background:var(--bg-card);padding:14px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px">INVESTI</div><div style="font-size:22px;font-weight:800;color:var(--text-bright);font-family:var(--mono);margin-top:4px">' + formatNumber(totalInvested) + '\u20ac</div></div>';
-    html += '<div style="background:var(--bg-card);padding:14px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px">RENDEMENT/AN</div><div style="font-size:22px;font-weight:800;color:var(--green);font-family:var(--mono);margin-top:4px">' + formatNumber(totalReturn) + '\u20ac</div><div style="font-size:10px;color:var(--text-dim)">' + avgRate.toFixed(2) + '% moy.</div></div>';
+    html += '<div style="background:var(--bg-card);padding:14px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px">RENDEMENT NET/AN</div><div style="font-size:22px;font-weight:800;color:var(--green);font-family:var(--mono);margin-top:4px">' + formatNumber(totalNetReturn) + '\u20ac</div><div style="font-size:10px;color:var(--text-dim)">' + avgNetRate.toFixed(2) + '% net \u00b7 ' + formatNumber(totalReturn) + '\u20ac brut</div></div>';
     html += '<div style="background:var(--bg-card);padding:14px;text-align:center"><div style="font-size:9px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px">COUPONS</div><div style="font-size:22px;font-weight:800;color:' + (lostCoupons > 0 ? 'var(--orange)' : 'var(--green)') + ';font-family:var(--mono);margin-top:4px">' + couponsOK + '/' + couponsTotal + '</div>' + (lostCoupons > 0 ? '<div style="font-size:10px;color:var(--orange)">' + lostCoupons + ' perdu' + (lostCoupons > 1 ? 's' : '') + '</div>' : '') + '</div>';
     var banks = {}; rows.forEach(function(r) { if (r.bankName) banks[r.bankName] = (banks[r.bankName] || 0) + 1; });
     var bankCount = Object.keys(banks).length; var topBank = Object.entries(banks).sort(function(a, b) { return b[1] - a[1]; })[0];
@@ -279,7 +283,7 @@ function _renderPortfolioSummaryTable(state) {
     html += '<th style="' + th + '">ENVELOPPE</th>';
     html += '<th style="' + th + ';text-align:right">MONTANT</th>';
     html += '<th style="' + th + '">TAUX</th>';
-    html += '<th style="' + th + ';text-align:right">RDT/AN</th>';
+    html += '<th style="' + th + ';text-align:right">RDT brut/an</th>';
     html += '<th style="' + th + '">VARIATION</th>';
     html += '<th style="' + th + '">MARGE</th>';
     html += '<th style="' + th + '">PROCHAINE DATE</th>';
