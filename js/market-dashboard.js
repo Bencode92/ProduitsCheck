@@ -67,6 +67,33 @@
     html += '<div style="font-size:10px;color:' + BG.textDim + ';padding:4px 10px;background:' + BG.row1 + ';border-radius:4px">Dernière MAJ : ' + fetchDate + ' · Source : ECB + Twelve Data + IA</div>';
     html += '</div>';
 
+    // ═══ VERDICT DU JOUR : synthèse 5 secondes ═══
+    (function() {
+      var vSpread = Math.round((curve.spread_2_10 || 0) * 100);
+      var vTec = tec10.current || 3.10;
+      var vHy = md.hy_spread_bps || 0;
+      var vVix = md.vix || 0;
+      var normal = curve.shape === 'normal';
+      var light, title, color, bg;
+      if (!normal || vSpread < 0) { light = '🔴'; title = 'Défavorable aux structurés de taux'; color = '#DC2626'; bg = '#FEF2F2'; }
+      else if (vSpread < 30 || (vHy && vHy > 450) || (vVix && vVix > 25)) { light = '🟠'; title = 'Favorable sous conditions — vigilance'; color = '#D97706'; bg = '#FFFBEB'; }
+      else { light = '🟢'; title = 'Favorable aux structurés de taux capital garanti'; color = '#059669'; bg = '#ECFDF5'; }
+      var chips = [];
+      chips.push((normal ? '🟢' : '🔴') + ' Courbe ' + (normal ? 'normale' : 'inversée') + ' (' + (vSpread >= 0 ? '+' : '') + vSpread + 'bp 2s10s)');
+      chips.push((vTec >= 2.8 ? '🟢' : '🟠') + ' TEC10 ' + vTec.toFixed(2) + '% ' + (vTec >= 2.8 ? '(budget option correct)' : '(bas)'));
+      if (vHy) chips.push((vHy > 450 ? '🟠' : '🟢') + ' HY spread ' + vHy + 'bp');
+      if (vVix) chips.push((vVix > 25 ? '🟠' : '🟢') + ' VIX ' + vVix.toFixed(0));
+      if (ai.regime && ai.regime !== 'unknown') chips.push('🌍 Régime ' + ai.regime);
+      html += '<div style="background:' + bg + ';border:1px solid ' + color + '55;border-left:5px solid ' + color + ';border-radius:10px;padding:13px 16px;margin-bottom:20px">';
+      html += '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
+      html += '<span style="font-size:20px">' + light + '</span>';
+      html += '<span style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:' + color + '">Verdict du jour</span>';
+      html += '<span style="font-size:14px;font-weight:700;color:#0F172A">' + title + '</span></div>';
+      html += '<div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:9px">';
+      chips.forEach(function(c) { html += '<span style="font-size:10.5px;background:#FFFFFF;border:1px solid ' + color + '33;border-radius:14px;padding:3px 10px;color:#334155">' + c + '</span>'; });
+      html += '</div></div>';
+    })();
+
     // ═══ SECTION 1: TAUX SOUVERAINS (cliquables) ═══
     html += '<div style="font-size:14px;font-weight:700;color:' + BG.text + ';margin-bottom:4px">🏛️ Taux souverains EUR (zone euro AAA)</div>';
     html += '<div style="font-size:11px;color:' + BG.textDim + ';margin-bottom:10px">Cliquez sur un taux pour voir l\'analyse détaillée et l\'historique</div>';
@@ -163,8 +190,8 @@
     html += '<div style="background:' + BG.section + ';border:1px solid ' + BG.border + ';border-radius:8px;margin-bottom:20px">';
     html += '<div onclick="var c=document.getElementById(\'mkt-gauges-body\');c.style.display=c.style.display===\'none\'?\'\':\'none\';this.querySelector(\'span\').textContent=c.style.display===\'none\'?\'▶ Afficher\':\'▼ Masquer\'" style="padding:14px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center">';
     html += '<div style="font-size:13px;font-weight:700;color:#2563EB">🎯 Jauges produits — Position vs triggers du portefeuille</div>';
-    html += '<span style="font-size:10px;color:#64748B">▶ Afficher</span></div>';
-    html += '<div id="mkt-gauges-body" style="display:none;padding:0 16px 16px">';
+    html += '<span style="font-size:10px;color:#64748B">▼ Masquer</span></div>';
+    html += '<div id="mkt-gauges-body" style="display:block;padding:0 16px 16px">';
 
     // Helper: render a gauge bar
     function _gauge(label, currentVal, min, max, zones, unit) {
@@ -214,40 +241,51 @@
       return g;
     }
 
-    // Dynamic gauges from portfolio
-    html += '<div style="font-size:10px;color:#64748B;margin-bottom:10px">Produits de votre portefeuille avec triggers sur les taux actuels :</div>';
-
-    // TARN TEC10 (from portfolio: sp_mmxjeznm — trigger 4.40%)
-    html += _gauge('📌 TARN TEC 10 Décembre 2035 B — coupon 6% si TEC10 ≤ 4.40%', tec10Val, 0, 5.5, [
-      { from: 0, to: 3.50, color: '#059669', label: 'CONFORT' },
-      { from: 3.50, to: 4.00, color: '#D97706', label: 'OK' },
-      { from: 4.00, to: 4.40, color: '#F59E0B', label: 'ATTENTION' },
-      { from: 4.40, to: 5.50, color: '#DC2626', label: 'HORS COUPON', trigger: 4.40, direction: 'below', triggerLabel: 'Trigger TARN 4.40%' }
-    ]);
-
-    // Phoenix BNP (from portfolio: sp_mmxib83f — trigger coupon 77%, barrier 60%)
-    // This is a stock trigger, show vs 100% reference
-    html += _gauge('📌 Phoenix Mémoire BNP — coupon 7.5% si BNP ≥ 77% du strike', 100, 40, 120, [
-      { from: 40, to: 60, color: '#DC2626', label: 'PERTE CAPITAL', trigger: 60, direction: 'above', triggerLabel: 'Barrière capital 60%' },
-      { from: 60, to: 77, color: '#F59E0B', label: 'PAS DE COUPON' },
-      { from: 77, to: 100, color: '#059669', label: 'COUPON VERSÉ', trigger: 77, direction: 'above', triggerLabel: 'Trigger coupon 77%' },
-      { from: 100, to: 120, color: '#0891B2', label: 'AUTOCALL' }
-    ], '%');
-
-    // Oxygène (from portfolio: sp_mmxhg4us — trigger coupon 68%, barrier 60%)
-    html += _gauge('📌 Oxygène Mars 2026 — coupon 7% si panier ≥ 68% du strike', 100, 40, 120, [
-      { from: 40, to: 60, color: '#DC2626', label: 'PERTE CAPITAL', trigger: 60, direction: 'above', triggerLabel: 'Barrière capital 60%' },
-      { from: 60, to: 68, color: '#F59E0B', label: 'CAPITAL OK / PAS DE COUPON' },
-      { from: 68, to: 100, color: '#059669', label: 'COUPON VERSÉ', trigger: 68, direction: 'above', triggerLabel: 'Trigger coupon 68%' },
-      { from: 100, to: 120, color: '#0891B2', label: 'AUTOCALL' }
-    ], '%');
-
-    // Athena ENI (from portfolio: sp_mmxgwg72 — trigger 100%, capital garanti)
-    html += _gauge('📌 Athena Privilège ENI — coupon 5.7% si ENI ≥ 100% du strike', 100, 50, 130, [
-      { from: 50, to: 100, color: '#F59E0B', label: 'PAS DE COUPON (capital garanti)' },
-      { from: 100, to: 130, color: '#059669', label: 'COUPON + AUTOCALL', trigger: 100, direction: 'above', triggerLabel: 'Trigger 100%' }
-    ], '%');
-
+    // ── Jauges pilotées par le PORTEFEUILLE RÉEL ──────────────────────────────────────
+    var _pf = (window.app && app.state && app.state.portfolio) ? app.state.portfolio : [];
+    function _rateRef(p) {
+      var t = ((p.name || '') + ' ' + (((p.coupon || {}).triggerDetail) || '')).toLowerCase();
+      if (/euribor/.test(t)) return { val: eur3mVal, label: 'Euribor 3M' };
+      if (/oat 5|5 ans|cms/.test(t)) return { val: (oat5y.current || 2.70), label: 'OAT 5Y' };
+      return { val: tec10Val, label: 'TEC10' };
+    }
+    var _gHtml = '', _shown = 0, _noLevel = 0;
+    _pf.forEach(function(p) {
+      var name = (p.name || 'Produit structuré').slice(0, 50);
+      var coupTxt = (p.coupon && p.coupon.rate) ? ' — coupon ' + p.coupon.rate + '%' : '';
+      // Produit de TAUX : coupon si taux ≤ trigger
+      if ((/rate|taux/i.test(p.underlyingType || '')) && p.coupon && p.coupon.trigger) {
+        var ref = _rateRef(p);
+        var trig = parseFloat(p.coupon.trigger);
+        var maxR = Math.max(5.5, trig + 1, ref.val + 1);
+        _gHtml += _gauge('📌 ' + name + coupTxt + ' si ' + ref.label + ' ≤ ' + trig + '%', ref.val, 0, maxR, [
+          { from: 0, to: trig * 0.85, color: '#059669', label: 'CONFORT' },
+          { from: trig * 0.85, to: trig, color: '#D97706', label: 'OK' },
+          { from: trig, to: maxR, color: '#DC2626', label: 'HORS COUPON', trigger: trig, direction: 'below', triggerLabel: 'Trigger ' + trig + '%' }
+        ]);
+        _shown++; return;
+      }
+      // Produit EQUITY : barrière capital (+ barrière coupon)
+      var bar = parseFloat(p.capitalProtection && p.capitalProtection.barrier);
+      if (!isNaN(bar) && bar > 0) {
+        var cBar = parseFloat(p.capitalProtection && p.capitalProtection.barrierCoupon);
+        var coupTrig = (!isNaN(cBar) && cBar > 0) ? cBar : bar;
+        var lvl = parseFloat(p.tracking && p.tracking.level);
+        var hasLvl = !isNaN(lvl); if (!hasLvl) { lvl = 100; _noLevel++; }
+        var lo = Math.min(40, bar - 10);
+        var zones = [{ from: lo, to: bar, color: '#DC2626', label: 'PERTE CAPITAL', trigger: bar, direction: 'above', triggerLabel: 'Barrière ' + bar + '%' }];
+        if (coupTrig > bar) zones.push({ from: bar, to: coupTrig, color: '#F59E0B', label: 'PAS DE COUPON' });
+        zones.push({ from: coupTrig, to: 100, color: '#059669', label: 'COUPON', trigger: coupTrig, direction: 'above', triggerLabel: 'Coupon ≥ ' + coupTrig + '%' });
+        zones.push({ from: 100, to: 120, color: '#0891B2', label: 'AUTOCALL' });
+        _gHtml += _gauge('📌 ' + name + coupTxt + (hasLvl ? '' : ' — ⚠ niveau non saisi'), lvl, lo, 120, zones, '%');
+        _shown++; return;
+      }
+    });
+    if (_shown === 0) {
+      _gHtml = '<div style="padding:20px;text-align:center;color:#64748B;font-size:12px">Aucun produit avec trigger exploitable.<br>Renseigne la barrière (equity) ou le seuil de coupon (taux) via l\'édition produit.</div>';
+    }
+    html += '<div style="font-size:10px;color:#64748B;margin-bottom:10px">' + _shown + ' produit(s) de votre portefeuille · position actuelle vs triggers' + (_noLevel > 0 ? ' · ⚠ ' + _noLevel + ' sans niveau saisi (affiché à 100%)' : '') + '</div>';
+    html += _gHtml;
     html += '</div></div>';
 
     // ═══ SECTION 4b: PRODUITS TAUX BROCHURE (scan auto) ═══
