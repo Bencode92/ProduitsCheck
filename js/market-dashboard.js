@@ -91,6 +91,17 @@
       html += '<span style="font-size:14px;font-weight:700;color:#0F172A">' + title + '</span></div>';
       html += '<div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:9px">';
       chips.forEach(function(c) { html += '<span style="font-size:10.5px;background:#FFFFFF;border:1px solid ' + color + '33;border-radius:14px;padding:3px 10px;color:#334155">' + c + '</span>'; });
+      html += '</div>';
+      // ── Pourquoi : les deux leviers de coupon (taux vs vol) ──
+      var budget5 = Math.round((1 - 1 / Math.pow(1 + (oat5y.current || 2.70) / 100, 5)) * 1000) / 10;
+      var budget10 = Math.round((1 - 1 / Math.pow(1 + vTec / 100, 10)) * 1000) / 10;
+      html += '<div style="margin-top:10px;padding-top:9px;border-top:1px solid ' + color + '22;font-size:11px;color:#475569">';
+      html += '💰 <span style="color:#64748B">Budget option (financé par les taux) :</span> <strong style="color:#0F172A">' + budget5.toFixed(1).replace('.', ',') + '% à 5 ans · ' + budget10.toFixed(1).replace('.', ',') + '% à 10 ans</strong> <span style="color:#64748B">du nominal → finance les coupons, capital garanti</span>';
+      html += '</div>';
+      html += '<div style="margin-top:7px;display:flex;gap:8px;flex-wrap:wrap;font-size:10.5px">';
+      html += '<span style="background:#ECFDF5;border:1px solid #05966933;border-radius:12px;padding:3px 10px;color:#047857"><strong>Levier taux ↑</strong> → budget option ↑ <strong>sans risque capital</strong></span>';
+      var volWarn = vVix > 25;
+      html += '<span style="background:' + (volWarn ? '#FFFBEB' : '#F1F5F9') + ';border:1px solid ' + (volWarn ? '#D9770633' : '#CBD5E1') + ';border-radius:12px;padding:3px 10px;color:' + (volWarn ? '#B45309' : '#475569') + '"><strong>Levier vol</strong>' + (vVix ? ' (VIX ' + vVix.toFixed(0) + ')' : '') + ' → coupon actions ↑ <strong>en échange de risque</strong></span>';
       html += '</div></div>';
     })();
 
