@@ -119,11 +119,22 @@ class ScoringEngine {
     const documented = !isNaN(struct) || !isNaN(custody) || !isNaN(exit);
     return { structuring: isNaN(struct) ? 0 : struct, custodyAnnual: isNaN(custody) ? 0 : custody, exit: isNaN(exit) ? 0 : exit, documented };
   }
-  // Drag de frais en %/an : marge upfront amortie sur la maturité + droits de garde annuels.
+  // Maturité ESPÉRÉE (tient compte de l'autocall) pour amortir la marge upfront.
+  // Un autocall rappelle souvent bien avant la maturité max → la marge se répartit
+  // sur moins d'années → drag réel plus élevé.
+  _effectiveMaturity(p) {
+    const em = p && p.grading && p.grading.metadata && parseFloat(p.grading.metadata.expectedMaturity);
+    if (em && em > 0) return em;
+    if (typeof _estimateExpectedMaturity === 'function') {
+      try { const r = _estimateExpectedMaturity(p); if (r && r.expected > 0) return r.expected; } catch (e) {}
+    }
+    const mm = parseFloat(p && p.maturityYears);
+    return (!isNaN(mm) && mm > 0) ? mm : 5;
+  }
+  // Drag de frais en %/an : marge upfront amortie sur la maturité espérée + droits de garde.
   getFeeDrag(p) {
     const fees = this.getProductFees(p);
-    let yrs = parseFloat(p && p.maturityYears);
-    if (isNaN(yrs) || yrs <= 0) yrs = 5;
+    const yrs = this._effectiveMaturity(p);
     return { dragPct: fees.structuring / yrs + fees.custodyAnnual, documented: fees.documented, fees, years: yrs };
   }
   // Rendement d'un produit : brut, net d'IS (hors frais), net d'IS ET de frais.
