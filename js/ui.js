@@ -6,11 +6,58 @@
 function renderApp(state) { const main = document.getElementById('main-content'); if (!main) return; switch(state.view) { case 'dashboard': renderDashboard(main,state); break; case 'product-sheet': renderProductSheet(main,state); break; case 'chat': renderChat(main,state); break; } }
 
 // ═══ DASHBOARD ═══
+// ── Cockpit exécutif : bandeau de synthèse 5 secondes, réutilisé en tête des 3 vues ──
+function renderExecCockpit(opts) {
+  opts = opts || {};
+  const portfolio = (typeof app !== 'undefined' && app.state && app.state.portfolio) ? app.state.portfolio : [];
+  if (!portfolio.length) return '';
+  const stats = scoring.getPortfolioStats(portfolio);
+  // Duration pondérée
+  let durNum = 0, durDen = 0;
+  portfolio.forEach(p => { const a = parseFloat(p.investedAmount) || 0; const y = parseFloat(p.maturityYears) || 0; if (a > 0 && y > 0) { durNum += a * y; durDen += a; } });
+  const duration = durDen ? durNum / durDen : 0;
+  const feeCostYr = stats.nominal * stats.feeDrag / 100;
+  // Marge barrière la plus tendue (distance niveau actuel ↔ barrière)
+  let tightest = null;
+  portfolio.forEach(p => { const lvl = parseFloat(p.tracking?.level); const bar = parseFloat(p.capitalProtection?.barrier); if (!isNaN(lvl) && !isNaN(bar) && bar > 0) { const m = lvl - bar; if (tightest === null || m < tightest) tightest = m; } });
+  // Top risque (clignotant)
+  let risk = { label: 'RAS', color: 'var(--green)', danger: false };
+  const danger = stats.concentrations.find(c => c.level === 'danger');
+  const warn = stats.concentrations.find(c => c.level === 'warning');
+  if (danger) risk = { label: 'Concentration ' + danger.name + ' ' + danger.pct + '%', color: 'var(--red)', danger: true };
+  else if (tightest !== null && tightest < 10) risk = { label: 'Barrière tendue ' + tightest.toFixed(0) + ' pts', color: 'var(--red)', danger: true };
+  else if (warn) risk = { label: 'Concentration ' + warn.name + ' ' + warn.pct + '%', color: 'var(--orange)', danger: false };
+  else if (stats.feesDocumentedPct < 50) risk = { label: 'Frais à documenter (' + Math.round(stats.feesDocumentedPct) + '%)', color: 'var(--orange)', danger: false };
+
+  const tile = (label, value, sub, color) =>
+    `<div style="flex:1;min-width:130px;padding:0 16px;border-left:1px solid var(--border)">
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted)">${label}</div>
+      <div style="font-family:var(--mono);font-size:21px;font-weight:800;color:${color || 'var(--text-bright)'};line-height:1.15;margin-top:2px">${value}</div>
+      <div style="font-size:10px;color:var(--text-dim);margin-top:1px">${sub}</div>
+    </div>`;
+  const dot = risk.danger ? '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + risk.color + ';margin-right:5px;animation:qlpulse 1.2s ease-in-out infinite"></span>' : '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + risk.color + ';margin-right:5px"></span>';
+
+  return `<style>@keyframes qlpulse{0%,100%{opacity:1}50%{opacity:.25}}</style>
+    <div style="display:flex;align-items:stretch;flex-wrap:wrap;gap:8px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 6px;margin-bottom:16px;box-shadow:var(--shadow)">
+      <div style="display:flex;align-items:center;padding:0 14px 0 12px;font-size:11px;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;border-left:0">🎯 Cockpit</div>
+      ${tile('AUM', formatNumber(stats.nominal) + '€', stats.banks + ' contreparties', 'var(--text-bright)')}
+      ${tile('Rdt net pondéré', formatPct(stats.netAfterFees), formatPct(stats.weightedCoupon) + ' brut · net IS+frais', stats.netAfterFees > 0 ? 'var(--green)' : 'var(--red)')}
+      ${tile('Duration moy.', duration.toFixed(1) + ' a', stats.total + ' lignes', 'var(--purple)')}
+      ${tile('Coût frais / an', '−' + formatNumber(Math.round(feeCostYr)) + '€', stats.feesDocumentedPct < 80 ? '⚠ frais ' + Math.round(stats.feesDocumentedPct) + '%' : 'documenté', feeCostYr > 0 ? 'var(--orange)' : 'var(--text-dim)')}
+      <div style="flex:1.3;min-width:150px;padding:0 16px;border-left:1px solid var(--border)">
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted)">Top risque</div>
+        <div style="font-size:13px;font-weight:700;color:${risk.color};line-height:1.25;margin-top:4px">${dot}${risk.label}</div>
+      </div>
+    </div>`;
+}
+window.renderExecCockpit = renderExecCockpit;
+
 function renderDashboard(container, state) {
   const stats = scoring.getPortfolioStats(state.portfolio);
   const allProposalsCount = Object.values(state.proposals).reduce((s, arr) => s + arr.length, 0);
   const pendingCount = Object.values(state.proposals).reduce((s, arr) => s + arr.filter(p => !['rejected','subscribed'].includes(p.status)).length, 0);
   container.innerHTML = `
+    ${renderExecCockpit()}
     <div class="stats-row">
       <div class="stat-card blue"><div class="stat-label">Portefeuille</div><div class="stat-value">${stats.total}</div><div class="stat-sub">produits actifs</div></div>
       <div class="stat-card green"><div class="stat-label">Nominal Total</div><div class="stat-value">${formatNumber(stats.nominal)}€</div><div class="stat-sub">${stats.banks} contreparties</div></div>

@@ -368,7 +368,7 @@
 
   // ═══ RENDER — FORM ═════════════════════════════════════════
   function _renderForm(container) {
-    var html = '<div class="section" style="' + WRAP_STYLE + '">';
+    var html = (typeof renderExecCockpit === 'function' ? renderExecCockpit() : '') + '<div class="section" style="' + WRAP_STYLE + '">';
     html += '<div class="section-header" style="border-color:' + BG.border + '"><div class="section-title" style="color:' + BG.text + '"><span class="dot" style="background:#2563EB"></span>🏦 Simulateur Carry Trade — Prêt SG Equipéa</div></div>';
 
     // ─── Loan params ──────
@@ -705,7 +705,7 @@
   // ═══ RENDER — RESULTS ══════════════════════════════════════
   function _renderResult(container) {
     var r = _state.result;
-    var html = '<div class="section" style="' + WRAP_STYLE + '">';
+    var html = (typeof renderExecCockpit === 'function' ? renderExecCockpit() : '') + '<div class="section" style="' + WRAP_STYLE + '">';
     html += '<div class="section-header" style="border-color:' + BG.border + '"><div class="section-title" style="color:' + BG.text + '"><span class="dot" style="background:#2563EB"></span>🏦 Carry Trade — P&L & Scénarios</div>';
     html += '<button class="btn sm" style="background:' + BG.section + ';border-color:' + BG.border + ';color:' + BG.text + '" onclick="_carryReset()">← Modifier</button></div>';
 

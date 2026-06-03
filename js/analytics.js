@@ -187,6 +187,7 @@ async function renderAnalytics(container) {
   const avgDuration = durDen > 0 ? durNum / durDen : 0;
 
   container.innerHTML = `
+    ${typeof renderExecCockpit === 'function' ? renderExecCockpit() : ''}
     <div class="stats-row" style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px">
       <div class="stat-card blue"><div class="stat-label">Total Investi</div><div class="stat-value">${formatNumber(totalAll)}€</div><div class="stat-sub">Structurés: ${formatNumber(totalStructured)}€ · CAT: ${formatNumber(totalCAT)}€</div></div>
       <div class="stat-card green"><div class="stat-label">Rendement Annuel Brut</div><div class="stat-value">${formatNumber(annualYieldTotal)}€</div><div class="stat-sub">Structurés: ${formatNumber(annualYieldStructured)}€ · CAT: ${formatNumber(annualYieldCAT)}€</div></div>
