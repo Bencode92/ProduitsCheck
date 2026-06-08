@@ -101,6 +101,15 @@
     '- DISPERSION: participationRate, nombre de paires',
     '- TOUS: isin (code ISIN si trouvé), commissions (% TTC si mentionné)',
     '',
+    'SI LE DOCUMENT EST UN KID / DIC PRIIPs (titres "Informations clés", "Indicateur de risque",',
+    '"Scénarios de performance", "Quels sont les coûts ?", "Réduction du rendement / RIY") :',
+    '- sri : indicateur de risque synthétique, entier 1 à 7',
+    '- costEntry : coûts d\'entrée en % (one-off)',
+    '- costExit : coûts de sortie en %',
+    '- costOngoing : coûts récurrents/de gestion en %/an',
+    '- riy : Réduction du Rendement (Reduction in Yield) en %/an à la période de détention recommandée',
+    '- scenarios : rendements en % à la période recommandée → {stress, defavorable, median (=intermédiaire/modéré), favorable}',
+    '',
     'Réponds UNIQUEMENT avec le JSON. AUCUN texte. AUCUN markdown.',
     '',
     '{"name":"","isin":"","structureType":"","emitter":"","guarantor":"","guarantorRating":{"moodys":"","sp":""},',
@@ -109,7 +118,9 @@
     '"participationRate":null,"guaranteedYears":0,"autocallCumulTarget":null,"commissions":null,',
     '"capitalProtection":{"protected":false,"level":null,"barrier":null,"barrierCoupon":null,"barrierType":"europeenne"},',
     '"earlyRedemption":{"possible":false,"type":"","trigger":null,"frequency":"","startSemester":null,"stepDown":false,"stepDownPct":null,"firstCallDate":null,"callSchedule":[]},',
-    '"decrementPct":null,"actualDividendYield":null,"minInvestment":null,"mechanism":"","risks":[],"summary":""}'
+    '"decrementPct":null,"actualDividendYield":null,"minInvestment":null,',
+    '"sri":null,"riy":null,"costEntry":null,"costExit":null,"costOngoing":null,"scenarios":{"stress":null,"defavorable":null,"median":null,"favorable":null},',
+    '"mechanism":"","risks":[],"summary":""}'
   ].join('\n');
 
   var STRUCT_OPTS = [
@@ -205,6 +216,18 @@
     var c = data.coupon || {};
     var cp = data.capitalProtection || {};
     var er = data.earlyRedemption || {};
+
+    // ── Mapping KID PRIIPs : coûts standardisés → commissions/fees (champ 🔴 résolu) ──
+    var _num = function(x) { var n = parseFloat(x); return isNaN(n) ? null : n; };
+    var _ce = _num(data.costEntry), _cx = _num(data.costExit), _co = _num(data.costOngoing);
+    if (_ce != null || _cx != null || _co != null) {
+      data.fees = data.fees || {};
+      if (_ce != null) data.fees.structuring = _ce;
+      if (_cx != null) data.fees.exit = _cx;
+      if (_co != null) data.fees.custodyAnnual = _co;
+      // commissions (marge upfront utilisée par le scoring) ← coût d'entrée KID si non déjà saisi
+      if ((data.commissions == null || data.commissions === '') && _ce != null) data.commissions = _ce;
+    }
 
     data.underlyings = _normalizeStringArray(data.underlyings);
     data.risks = _normalizeStringArray(data.risks);
@@ -530,6 +553,9 @@
       guaranteedYears: _fv('bp-guaranteedyears', _data.guaranteedYears || 0),
       autocallCumulTarget: _fv('bp-autocallcumul', _data.autocallCumulTarget),
       commissions: _fv('bp-commissions', _data.commissions),
+      fees: _data.fees || null,
+      sri: _data.sri != null ? _data.sri : null,
+      riy: _data.riy != null ? _data.riy : null,
       isin: _fv('bp-isin', _data.isin || ''),
       minInvestment: _fv('bp-mininvest', _data.minInvestment),
       capitalProtection: {
@@ -552,7 +578,7 @@
       actualDividendYield: _fv('bp-divyield', _data.actualDividendYield),
       mechanism: _fv('bp-mechanism', _data.mechanism || ''),
       risks: (_fv('bp-risks', (_data.risks || []).join(' · ')) || '').split('·').map(function(s) { return s.trim(); }).filter(Boolean),
-      summary: _data.summary || '', aiParsed: _data, sourceFile: _fileName,
+      summary: _data.summary || '', scenarios: _data.scenarios || null, aiParsed: _data, sourceFile: _fileName,
       rangeAccrual: st === 'range_accrual' ? {
         lowerBound: parseFloat(String(_gv('bp-ra-lower')).replace(',', '.')) || (_data.rangeAccrual && _data.rangeAccrual.lowerBound) || null,
         upperBound: parseFloat(String(_gv('bp-ra-upper')).replace(',', '.')) || (_data.rangeAccrual && _data.rangeAccrual.upperBound) || null,
