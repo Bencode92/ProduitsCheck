@@ -140,11 +140,20 @@
         "date": "2026-03-24",
         "level": 94.07,
         "year": 1
+      },
+      {
+        "date": "2026-06-08",
+        "level": 3.75,
+        "ref": "TEC10"
       }
     ],
-    "level": 94.07,
-    "date": "2026-03-24",
-    "note": ""
+    "level": 3.75,
+    "date": "2026-06-08",
+    "note": "auto-taux (TEC10)",
+    "refLabel": "TEC10",
+    "trigger": 4.4,
+    "marginToTrigger": 0.65,
+    "couponOK": true
   },
   "envelope": "cameleons",
   "maturityYears": 10,
