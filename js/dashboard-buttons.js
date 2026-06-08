@@ -359,6 +359,13 @@ function _renderPortfolioSummaryTable(state) {
                 container.querySelectorAll('.section-header').forEach(function(header) {
                     var title = header.querySelector('.section-title'); if (!title) return;
                     var t = title.textContent || '';
+                    if (t.indexOf('Portefeuille') >= 0 && !header.querySelector('.btn-track-rates') && typeof window.refreshRateTracking === 'function') {
+                        var tbtn = document.createElement('button'); tbtn.className = 'btn btn-track-rates'; tbtn.style.cssText = 'margin-right:8px;white-space:nowrap';
+                        tbtn.innerHTML = '📈 Suivi taux'; tbtn.title = 'Met à jour le niveau des produits de taux (TEC10/Euribor) vs leur trigger';
+                        tbtn.onclick = function() { window.refreshRateTracking(); };
+                        var rref = header.querySelector('.btn.primary') || header.querySelector('.btn');
+                        if (rref) header.insertBefore(tbtn, rref); else header.appendChild(tbtn);
+                    }
                     if (t.indexOf('Portefeuille') >= 0 && !header.querySelector('.btn-regrade-all')) {
                         if (typeof window.batchReGradeAll === 'function') {
                             var pf = (state.portfolio || []).filter(function(p) { return !p.grading || p.grading.grade !== '-'; });
