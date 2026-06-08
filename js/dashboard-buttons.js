@@ -359,6 +359,13 @@ function _renderPortfolioSummaryTable(state) {
                 container.querySelectorAll('.section-header').forEach(function(header) {
                     var title = header.querySelector('.section-title'); if (!title) return;
                     var t = title.textContent || '';
+                    if (t.indexOf('Portefeuille') >= 0 && !header.querySelector('.btn-bulk-del') && typeof window.openBulkDelete === 'function') {
+                        var dbtn = document.createElement('button'); dbtn.className = 'btn btn-bulk-del'; dbtn.style.cssText = 'margin-right:8px;white-space:nowrap';
+                        dbtn.innerHTML = '🗑️ Supprimer en lot'; dbtn.title = 'Sélectionner plusieurs produits et les supprimer d\'un coup';
+                        dbtn.onclick = function() { window.openBulkDelete(); };
+                        var dref = header.querySelector('.btn.primary') || header.querySelector('.btn');
+                        if (dref) header.insertBefore(dbtn, dref); else header.appendChild(dbtn);
+                    }
                     if (t.indexOf('Portefeuille') >= 0 && !header.querySelector('.btn-track-rates') && typeof window.refreshRateTracking === 'function') {
                         var tbtn = document.createElement('button'); tbtn.className = 'btn btn-track-rates'; tbtn.style.cssText = 'margin-right:8px;white-space:nowrap';
                         tbtn.innerHTML = '📈 Suivi taux'; tbtn.title = 'Met à jour le niveau des produits de taux (TEC10/Euribor) vs leur trigger';

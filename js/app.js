@@ -138,6 +138,27 @@ class StructBoard {
     showToast('Proposition supprim\u00e9e', 'success');
   }
 
+  // Suppression en lot : une seule \u00e9criture par store / par banque (au lieu de N).
+  // items: [{ id, bankId, scope: 'portfolio' | 'proposal' }]
+  async bulkDelete(items) {
+    if (!items || !items.length) return;
+    const pfIds = new Set(items.filter(i => i.scope === 'portfolio').map(i => i.id));
+    const propByBank = {};
+    items.filter(i => i.scope === 'proposal').forEach(i => { (propByBank[i.bankId] = propByBank[i.bankId] || new Set()).add(i.id); });
+    if (pfIds.size) {
+      this.state.portfolio = this.state.portfolio.filter(p => !pfIds.has(p.id));
+      await github.writeFile(`${CONFIG.DATA_PATH}/portfolio.json`, this.state.portfolio, `[StructBoard] Retrait lot (${pfIds.size})`);
+    }
+    for (const bank of Object.keys(propByBank)) {
+      const ids = propByBank[bank];
+      if (!this.state.proposals[bank]) continue;
+      this.state.proposals[bank] = this.state.proposals[bank].filter(p => !ids.has(p.id));
+      if (this.state.proposals[bank].length === 0) delete this.state.proposals[bank];
+      await this._saveBankIndex(bank);
+    }
+    this.setState({ portfolio: [...this.state.portfolio], proposals: { ...this.state.proposals } });
+  }
+
   async handlePDFUpload(file, bankId) {
     this.setState({ loading: true });
     try {
