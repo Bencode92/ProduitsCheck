@@ -1,0 +1,239 @@
+{
+  "id": "sp_mq5em9hj_lgwhm",
+  "name": "Autocall Airbag EuroStoxx Banks Juin 2030",
+  "type": "autocall",
+  "structureType": "autocall",
+  "emitter": "Crédit Industriel et Commercial",
+  "guarantor": "",
+  "guarantorRating": {
+    "moodys": "A1",
+    "sp": "A+",
+    "fitch": "AA-"
+  },
+  "underlyings": [
+    "EuroStoxx Banks"
+  ],
+  "underlyingType": "single-index",
+  "currency": "EUR",
+  "maturity": "4 ans",
+  "maturityYears": 4,
+  "coupon": {
+    "rate": 12.25,
+    "rateIfCalled": null,
+    "rateIfMaturity": null,
+    "type": "conditionnel",
+    "frequency": "annuel",
+    "trigger": 100,
+    "memory": true,
+    "paymentTiming": "periodic"
+  },
+  "participationRate": null,
+  "capitalProtection": {
+    "protected": false,
+    "level": null,
+    "barrier": 60,
+    "barrierCoupon": 100,
+    "barrierType": "europeenne",
+    "guaranteeType": "barriere"
+  },
+  "earlyRedemption": {
+    "possible": true,
+    "type": "autocall",
+    "trigger": 100,
+    "frequency": "annuel",
+    "startSemester": 1,
+    "stepDown": false,
+    "stepDownPct": null
+  },
+  "decrementPct": null,
+  "actualDividendYield": null,
+  "mechanism": "Autocall avec mécanisme airbag. Remboursement automatique anticipé possible chaque année à partir de juin 2027 si l'indice ≥ 100% du niveau initial avec coupon de 12,25% par année écoulée. À l'échéance: coupon de 49% si indice ≥ 80%, remboursement intégral si indice ≥ 60%, sinon perte proportionnelle à la baisse.",
+  "risks": [
+    "Risque de perte partielle ou totale en capital",
+    "Risque de marché",
+    "Risque de crédit émetteur",
+    "Risque de liquidité",
+    "Plafonnement des gains",
+    "Performance calculée hors dividendes",
+    "Risque d'inflation"
+  ],
+  "summary": "Produit autocall de 4 ans sur l'indice EuroStoxx Banks offrant un coupon conditionnel de 12,25% par an avec remboursement anticipé automatique possible dès la 2ème année si l'indice est au-dessus de son niveau initial. Capital partiellement protégé avec barrière à 60%.",
+  "aiParsed": {
+    "name": "Autocall Airbag EuroStoxx Banks Juin 2030",
+    "type": "autocall",
+    "structureType": "autocall",
+    "emitter": "Crédit Industriel et Commercial",
+    "guarantor": "",
+    "guarantorRating": {
+      "moodys": "A1",
+      "sp": "A+",
+      "fitch": "AA-"
+    },
+    "underlyings": [
+      "EuroStoxx Banks"
+    ],
+    "underlyingType": "single-index",
+    "currency": "EUR",
+    "maturity": "4 ans",
+    "maturityYears": 4,
+    "maturityDate": "2030-06-24",
+    "strikeDate": "2026-06-22",
+    "coupon": {
+      "rate": 12.25,
+      "rateIfCalled": null,
+      "rateIfMaturity": null,
+      "type": "conditionnel",
+      "frequency": "annuel",
+      "trigger": 100,
+      "memory": true,
+      "paymentTiming": "periodic"
+    },
+    "participationRate": null,
+    "guaranteedYears": 0,
+    "autocallCumulTarget": null,
+    "commissions": 1.3,
+    "fees": null,
+    "sri": null,
+    "riy": null,
+    "isin": "XS3394803897",
+    "minInvestment": 100000,
+    "capitalProtection": {
+      "protected": false,
+      "level": null,
+      "barrier": 60,
+      "barrierCoupon": 100,
+      "barrierType": "europeenne",
+      "guaranteeType": "barriere"
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "autocall",
+      "trigger": 100,
+      "frequency": "annuel",
+      "startSemester": 1,
+      "stepDown": false,
+      "stepDownPct": null
+    },
+    "decrementPct": null,
+    "actualDividendYield": null,
+    "mechanism": "Autocall avec mécanisme airbag. Remboursement automatique anticipé possible chaque année à partir de juin 2027 si l'indice ≥ 100% du niveau initial avec coupon de 12,25% par année écoulée. À l'échéance: coupon de 49% si indice ≥ 80%, remboursement intégral si indice ≥ 60%, sinon perte proportionnelle à la baisse.",
+    "risks": [
+      "Risque de perte partielle ou totale en capital",
+      "Risque de marché",
+      "Risque de crédit émetteur",
+      "Risque de liquidité",
+      "Plafonnement des gains",
+      "Performance calculée hors dividendes",
+      "Risque d'inflation"
+    ],
+    "summary": "Produit autocall de 4 ans sur l'indice EuroStoxx Banks offrant un coupon conditionnel de 12,25% par an avec remboursement anticipé automatique possible dès la 2ème année si l'indice est au-dessus de son niveau initial. Capital partiellement protégé avec barrière à 60%.",
+    "scenarios": {
+      "stress": null,
+      "defavorable": null,
+      "median": null,
+      "favorable": null
+    },
+    "aiParsed": {
+      "name": "Autocall Airbag EuroStoxx Banks Juin 2030",
+      "isin": "XS3394803897",
+      "structureType": "autocall",
+      "emitter": "Crédit Industriel et Commercial",
+      "guarantor": "",
+      "guarantorRating": {
+        "moodys": "A1",
+        "sp": "A+",
+        "fitch": "AA-"
+      },
+      "underlyings": [
+        "EuroStoxx Banks"
+      ],
+      "underlyingType": "single-index",
+      "currency": "EUR",
+      "maturity": "4 ans",
+      "maturityYears": 4,
+      "maturityDate": "2030-06-24",
+      "strikeDate": "2026-06-22",
+      "coupon": {
+        "rate": 12.25,
+        "rateIfCalled": null,
+        "rateIfMaturity": null,
+        "type": "conditionnel",
+        "frequency": "annuel",
+        "trigger": 100,
+        "memory": true,
+        "paymentTiming": "periodic"
+      },
+      "participationRate": null,
+      "guaranteedYears": 0,
+      "autocallCumulTarget": null,
+      "commissions": 1.3,
+      "capitalProtection": {
+        "protected": false,
+        "level": null,
+        "barrier": 60,
+        "barrierCoupon": 100,
+        "barrierType": "europeenne",
+        "guaranteeType": "barriere"
+      },
+      "earlyRedemption": {
+        "possible": true,
+        "type": "autocall",
+        "trigger": 100,
+        "frequency": "annuel",
+        "startSemester": 2,
+        "stepDown": false,
+        "stepDownPct": null,
+        "firstCallDate": "2027-06-22",
+        "callSchedule": [
+          {
+            "date": "2027-06-22",
+            "amount": 112.25
+          },
+          {
+            "date": "2028-06-22",
+            "amount": 124.5
+          },
+          {
+            "date": "2029-06-22",
+            "amount": 136.75
+          }
+        ]
+      },
+      "decrementPct": null,
+      "actualDividendYield": null,
+      "minInvestment": 100000,
+      "sri": null,
+      "riy": null,
+      "costEntry": null,
+      "costExit": null,
+      "costOngoing": null,
+      "scenarios": {
+        "stress": null,
+        "defavorable": null,
+        "median": null,
+        "favorable": null
+      },
+      "mechanism": "Autocall avec mécanisme airbag. Remboursement automatique anticipé possible chaque année à partir de juin 2027 si l'indice ≥ 100% du niveau initial avec coupon de 12,25% par année écoulée. À l'échéance: coupon de 49% si indice ≥ 80%, remboursement intégral si indice ≥ 60%, sinon perte proportionnelle à la baisse.",
+      "risks": [
+        "Risque de perte partielle ou totale en capital",
+        "Risque de marché",
+        "Risque de crédit émetteur",
+        "Risque de liquidité",
+        "Plafonnement des gains",
+        "Performance calculée hors dividendes",
+        "Risque d'inflation"
+      ],
+      "summary": "Produit autocall de 4 ans sur l'indice EuroStoxx Banks offrant un coupon conditionnel de 12,25% par an avec remboursement anticipé automatique possible dès la 2ème année si l'indice est au-dessus de son niveau initial. Capital partiellement protégé avec barrière à 60%.",
+      "_parsingAlerts": []
+    },
+    "sourceFile": "Brochure Autocall Airbag Euro Stoxx Banks Juin 2030 XS3394803897.pdf"
+  },
+  "sourceFile": "JSON import",
+  "bankId": "cic",
+  "status": "analyzing",
+  "receivedDate": "2026-06-08",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null
+}
