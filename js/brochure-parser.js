@@ -645,10 +645,13 @@
     var product = _buildProduct(); if (!product) return;
     product.investedAmount = parseFloat(_investedAmount) || 0;
     try { var saved = await app.addProposal(_selectedBank, product);
-      // Store PDF in localStorage for later viewing
+      // Stockage PDF : localStorage (rapide) + GitHub (durable, multi-appareils)
       if (_pdfBase64 && saved && saved.id) {
-        try { localStorage.setItem('pdf_' + saved.id, _pdfBase64); console.log('[BrochureParser] PDF stored for product ' + saved.id); }
-        catch(e) { console.warn('[BrochureParser] Could not store PDF (too large?):', e.message); }
+        try { localStorage.setItem('pdf_' + saved.id, _pdfBase64); } catch(e) { console.warn('[BrochureParser] localStorage PDF KO (quota?):', e.message); }
+        try {
+          var pdfOk = await app.savePdf(saved.bankId || _selectedBank, saved.id, _pdfBase64, _fileName);
+          if (pdfOk) { saved.pdfStored = true; saved.pdfPath = CONFIG.DATA_PATH + '/banks/' + (saved.bankId || _selectedBank) + '/pdfs/' + saved.id + '.json'; await app._saveProductFile(saved.bankId || _selectedBank, saved); }
+        } catch(e) { console.warn('[BrochureParser] PDF durable KO:', e.message); }
       }
       showToast('✅ ' + (product.name || 'Produit') + ' ajouté !', 'success');
       if (typeof analyzeProposal === 'function') analyzeProposal(saved).catch(function() {});

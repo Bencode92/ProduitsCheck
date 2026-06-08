@@ -60,8 +60,30 @@ class StructBoard {
     showToast('Produit retir\u00e9', 'success');
   }
 
+  _productKey(p) {
+    const isin = p.isin || (p.aiParsed && p.aiParsed.isin);
+    if (isin) return 'isin:' + String(isin).toUpperCase().replace(/[^A-Z0-9]/g, '');
+    const n = (p.name || '').toLowerCase().replace(/\s+/g, ' ').trim();
+    return n ? 'name:' + n : null;
+  }
+
   async addProposal(bankId, product) {
     if (!this.state.proposals[bankId]) this.state.proposals[bankId] = [];
+    const _key = this._productKey(product);
+    const _existing = _key ? this.state.proposals[bankId].find(p => this._productKey(p) === _key) : null;
+    if (_existing) {
+      const merged = { ..._existing, ...product, id: _existing.id, bankId,
+        status: _existing.status || 'analyzing', receivedDate: _existing.receivedDate,
+        conversation: _existing.conversation || [], conversationSummary: _existing.conversationSummary || null,
+        decision: _existing.decision || null, decisionReason: _existing.decisionReason || null };
+      const _idx = this.state.proposals[bankId].findIndex(p => p.id === _existing.id);
+      this.state.proposals[bankId][_idx] = merged;
+      await this._saveBankIndex(bankId);
+      await this._saveProductFile(bankId, merged);
+      this.setState({ proposals: { ...this.state.proposals } });
+      showToast('Produit déjà présent — mis à jour (doublon évité)', 'info');
+      return merged;
+    }
     const proposal = { ...product, id: product.id || this._uid(), bankId, status: 'analyzing', receivedDate: new Date().toISOString().split('T')[0], conversation: [], conversationSummary: null, decision: null, decisionReason: null };
     // Legacy scoring removed — grading v6.3 (ProposalGrader.grade) is the only scoring system
     this.state.proposals[bankId].push(proposal);
@@ -122,7 +144,7 @@ class StructBoard {
         risks: parsed.risks || [],
         // V2.2: rawText 10K
         rawText: rawText.substring(0, 10000),
-        aiParsed: parsed, aiSummary: summary, sourceFile: file.name,
+        aiParsed: parsed, aiSummary: summary, sourceFile: file.name, isin: parsed.isin || null,
         // V2.1: Structure fields
         structureType: parsed.structureType || '',
         participationRate: parsed.participationRate || null,
@@ -201,6 +223,24 @@ class StructBoard {
   async _saveProductFile(bankId, product) {
     if (!product || !product.id) return;
     await github.writeFile(`${CONFIG.DATA_PATH}/banks/${bankId}/products/${product.id}.json`, product, `[StructBoard] Save ${product.id}`);
+  }
+
+  // Stockage DURABLE du PDF (base64) sur GitHub → récupérable depuis n'importe quel appareil.
+  async savePdf(bankId, id, base64, sourceFile) {
+    if (!id || !base64) return false;
+    try {
+      await github.writeFile(`${CONFIG.DATA_PATH}/banks/${bankId || 'misc'}/pdfs/${id}.json`,
+        { id, sourceFile: sourceFile || null, savedAt: new Date().toISOString(), pdf: base64 },
+        `[StructBoard] PDF ${id}`);
+      console.log('[savePdf] PDF durable enregistré: ' + id);
+      return true;
+    } catch (e) { console.warn('[savePdf] échec:', e.message); return false; }
+  }
+  // Récupère le PDF : localStorage d'abord (rapide), sinon GitHub (durable).
+  async getPdf(bankId, id) {
+    try { const ls = localStorage.getItem('pdf_' + id); if (ls) return ls; } catch (e) {}
+    try { const f = await github.readFile(`${CONFIG.DATA_PATH}/banks/${bankId || 'misc'}/pdfs/${id}.json`); if (f && f.pdf) return f.pdf; } catch (e) {}
+    return null;
   }
 
   openProduct(product) { this.setState({ view: 'product-sheet', currentProduct: product }); this.render(); }

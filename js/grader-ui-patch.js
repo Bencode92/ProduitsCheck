@@ -10,18 +10,19 @@
     if (typeof GRADING_CONFIG !== 'undefined' && GRADING_CONFIG.killCriteria) { delete GRADING_CONFIG.killCriteria.maxIssuerConcentration; }
 
     // ─── View Brochure PDF ───
-    window.viewBrochurePDF = function() {
+    window.viewBrochurePDF = async function() {
         var p = app.state.currentProduct;
         if (!p) return;
-        var pdf = null;
-        try { pdf = localStorage.getItem('pdf_' + p.id); } catch(e) {}
+        // localStorage (rapide) puis GitHub (durable, multi-appareils)
+        var pdf = (app.getPdf) ? await app.getPdf(p.bankId, p.id) : null;
+        if (!pdf) { try { pdf = localStorage.getItem('pdf_' + p.id); } catch(e) {} }
         if (pdf) {
             var blob = new Blob([Uint8Array.from(atob(pdf), function(c) { return c.charCodeAt(0); })], { type: 'application/pdf' });
             var url = URL.createObjectURL(blob);
             window.open(url, '_blank');
             setTimeout(function() { URL.revokeObjectURL(url); }, 60000);
         } else if (p.sourceFile && p.sourceFile !== 'JSON import') {
-            showToast('PDF non disponible — re-parsez la brochure pour stocker le PDF', 'info');
+            showToast('PDF non disponible — re-parsez la brochure pour le stocker durablement', 'info');
         } else {
             showToast('Aucune brochure associée', 'info');
         }
