@@ -242,6 +242,21 @@
       data.capitalProtection = cp;
     }
 
+    // Autocall : normaliser startSemester en INDEX D'OBSERVATION (le grader compare obs < startSemester).
+    // Un autocall ANNUEL rappelable dès l'an 1 doit avoir startSemester = 1, pas 2 (confusion semestre/année).
+    if (er.possible && er.firstCallDate && data.strikeDate) {
+      try {
+        var _freq = ((data.coupon && data.coupon.frequency) || er.frequency || 'annuel').toLowerCase();
+        var _opy = _freq.indexOf('trimestr') >= 0 ? 4 : _freq.indexOf('semestr') >= 0 ? 2 : 1;
+        var _yrs = (new Date(er.firstCallDate) - new Date(data.strikeDate)) / (365.25 * 24 * 3600 * 1000);
+        if (_yrs > 0.1) {
+          var _idx = Math.max(1, Math.round(_yrs * _opy));
+          var _maxIdx = (data.maturityYears || 10) * _opy;
+          if (_idx <= _maxIdx) { er.startSemester = _idx; data.earlyRedemption = er; }
+        }
+      } catch (e) {}
+    }
+
     data.underlyings = _normalizeStringArray(data.underlyings);
     data.risks = _normalizeStringArray(data.risks);
 
