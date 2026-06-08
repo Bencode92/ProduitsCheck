@@ -1,0 +1,229 @@
+{
+  "id": "sp_mq579fp6_rgfut",
+  "name": "Digitale WO BNP Sanofi Juin 2029",
+  "type": "digitale_memoire",
+  "structureType": "digitale_memoire",
+  "emitter": "Crédit Industriel et Commercial",
+  "guarantor": "",
+  "guarantorRating": {
+    "moodys": "A1",
+    "sp": "A+",
+    "fitch": "AA-"
+  },
+  "underlyings": [
+    "BNP Paribas",
+    "Sanofi"
+  ],
+  "underlyingType": "worst-of",
+  "currency": "EUR",
+  "maturity": "3 ans",
+  "maturityYears": 3,
+  "coupon": {
+    "rate": 7.2,
+    "rateIfCalled": null,
+    "rateIfMaturity": null,
+    "type": "conditionnel",
+    "frequency": "annuel",
+    "trigger": 100,
+    "memory": true,
+    "paymentTiming": "periodic"
+  },
+  "participationRate": null,
+  "capitalProtection": {
+    "protected": true,
+    "level": 100,
+    "barrier": null,
+    "barrierCoupon": 100,
+    "barrierType": "europeenne",
+    "guaranteeType": "formule"
+  },
+  "earlyRedemption": {
+    "possible": false,
+    "type": "none",
+    "trigger": null,
+    "frequency": "annuel",
+    "startSemester": null,
+    "stepDown": false,
+    "stepDownPct": null
+  },
+  "decrementPct": null,
+  "actualDividendYield": null,
+  "mechanism": "Produit digital avec coupon conditionnel de 7,20% par an si le sous-jacent ayant le moins performé reste au-dessus de son niveau initial (100%). Les coupons non versés sont mémorisés. Capital garanti à l'échéance peu importe l'évolution du marché.",
+  "risks": [
+    "Risque de perte partielle ou totale en capital en cours de vie",
+    "Plafonnement des gains à 7,20% par an",
+    "Exposition au risque de crédit de l'émetteur",
+    "Pas de bénéfice des dividendes des sous-jacents",
+    "Risque de liquidité",
+    "Risque d'inflation"
+  ],
+  "summary": "EMTN de 3 ans sur un panier worst-of (BNP Paribas et Sanofi) offrant un coupon conditionnel de 7,20% par an avec mémoire si le sous-jacent le moins performant reste au-dessus de son niveau initial. Capital garanti à l'échéance.",
+  "aiParsed": {
+    "name": "Digitale WO BNP Sanofi Juin 2029",
+    "type": "digitale_memoire",
+    "structureType": "digitale_memoire",
+    "emitter": "Crédit Industriel et Commercial",
+    "guarantor": "",
+    "guarantorRating": {
+      "moodys": "A1",
+      "sp": "A+",
+      "fitch": "AA-"
+    },
+    "underlyings": [
+      "BNP Paribas",
+      "Sanofi"
+    ],
+    "underlyingType": "worst-of",
+    "currency": "EUR",
+    "maturity": "3 ans",
+    "maturityYears": 3,
+    "maturityDate": "2029-06-29",
+    "strikeDate": "2026-06-29",
+    "coupon": {
+      "rate": 7.2,
+      "rateIfCalled": null,
+      "rateIfMaturity": null,
+      "type": "conditionnel",
+      "frequency": "annuel",
+      "trigger": 100,
+      "memory": true,
+      "paymentTiming": "periodic"
+    },
+    "participationRate": null,
+    "guaranteedYears": 0,
+    "autocallCumulTarget": null,
+    "commissions": 1.2,
+    "fees": null,
+    "sri": null,
+    "riy": null,
+    "isin": "XS3402657772",
+    "minInvestment": 100000,
+    "capitalProtection": {
+      "protected": true,
+      "level": 100,
+      "barrier": null,
+      "barrierCoupon": 100,
+      "barrierType": "europeenne",
+      "guaranteeType": "formule"
+    },
+    "earlyRedemption": {
+      "possible": false,
+      "type": "none",
+      "trigger": null,
+      "frequency": "annuel",
+      "startSemester": null,
+      "stepDown": false,
+      "stepDownPct": null
+    },
+    "decrementPct": null,
+    "actualDividendYield": null,
+    "mechanism": "Produit digital avec coupon conditionnel de 7,20% par an si le sous-jacent ayant le moins performé reste au-dessus de son niveau initial (100%). Les coupons non versés sont mémorisés. Capital garanti à l'échéance peu importe l'évolution du marché.",
+    "risks": [
+      "Risque de perte partielle ou totale en capital en cours de vie",
+      "Plafonnement des gains à 7,20% par an",
+      "Exposition au risque de crédit de l'émetteur",
+      "Pas de bénéfice des dividendes des sous-jacents",
+      "Risque de liquidité",
+      "Risque d'inflation"
+    ],
+    "summary": "EMTN de 3 ans sur un panier worst-of (BNP Paribas et Sanofi) offrant un coupon conditionnel de 7,20% par an avec mémoire si le sous-jacent le moins performant reste au-dessus de son niveau initial. Capital garanti à l'échéance.",
+    "scenarios": {
+      "stress": null,
+      "defavorable": null,
+      "median": null,
+      "favorable": null
+    },
+    "aiParsed": {
+      "name": "Digitale WO BNP Sanofi Juin 2029",
+      "isin": "XS3402657772",
+      "structureType": "digitale_memoire",
+      "emitter": "Crédit Industriel et Commercial",
+      "guarantor": "",
+      "guarantorRating": {
+        "moodys": "A1",
+        "sp": "A+",
+        "fitch": "AA-"
+      },
+      "underlyings": [
+        "BNP Paribas",
+        "Sanofi"
+      ],
+      "underlyingType": "worst-of",
+      "currency": "EUR",
+      "maturity": "3 ans",
+      "maturityYears": 3,
+      "maturityDate": "2029-06-29",
+      "strikeDate": "2026-06-29",
+      "coupon": {
+        "rate": 7.2,
+        "rateIfCalled": null,
+        "rateIfMaturity": null,
+        "type": "conditionnel",
+        "frequency": "annuel",
+        "trigger": 100,
+        "memory": true,
+        "paymentTiming": "periodic"
+      },
+      "participationRate": null,
+      "guaranteedYears": 0,
+      "autocallCumulTarget": null,
+      "commissions": 1.2,
+      "capitalProtection": {
+        "protected": true,
+        "level": 100,
+        "barrier": null,
+        "barrierCoupon": 100,
+        "barrierType": "europeenne",
+        "guaranteeType": "formule"
+      },
+      "earlyRedemption": {
+        "possible": false,
+        "type": "",
+        "trigger": null,
+        "frequency": "",
+        "startSemester": null,
+        "stepDown": false,
+        "stepDownPct": null,
+        "firstCallDate": null,
+        "callSchedule": []
+      },
+      "decrementPct": null,
+      "actualDividendYield": null,
+      "minInvestment": 100000,
+      "sri": null,
+      "riy": null,
+      "costEntry": null,
+      "costExit": null,
+      "costOngoing": null,
+      "scenarios": {
+        "stress": null,
+        "defavorable": null,
+        "median": null,
+        "favorable": null
+      },
+      "mechanism": "Produit digital avec coupon conditionnel de 7,20% par an si le sous-jacent ayant le moins performé reste au-dessus de son niveau initial (100%). Les coupons non versés sont mémorisés. Capital garanti à l'échéance peu importe l'évolution du marché.",
+      "risks": [
+        "Risque de perte partielle ou totale en capital en cours de vie",
+        "Plafonnement des gains à 7,20% par an",
+        "Exposition au risque de crédit de l'émetteur",
+        "Pas de bénéfice des dividendes des sous-jacents",
+        "Risque de liquidité",
+        "Risque d'inflation"
+      ],
+      "summary": "EMTN de 3 ans sur un panier worst-of (BNP Paribas et Sanofi) offrant un coupon conditionnel de 7,20% par an avec mémoire si le sous-jacent le moins performant reste au-dessus de son niveau initial. Capital garanti à l'échéance.",
+      "type": "digitale_memoire",
+      "_parsingAlerts": [
+        "🛡️ Capital protégé à l’échéance par la formule — NON garanti : risque de crédit émetteur (EMTN, bail-in). Le seul risque sur le capital = l’émetteur. Vérifier la ligne « Garantie en capital » du KID."
+      ]
+    },
+    "sourceFile": "Brochure Gigitale WO BNP Sanofi juin 29.pdf"
+  },
+  "sourceFile": "JSON import",
+  "bankId": "cic",
+  "status": "analyzing",
+  "receivedDate": "2026-06-08",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null
+}
