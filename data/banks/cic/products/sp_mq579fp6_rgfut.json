@@ -243,19 +243,19 @@
         "score": 59,
         "base": 82,
         "delta": -5,
-        "reasoning": "Rendement: base 82 → -5 = 77 (Barrière à 100% en stagflation avec VIX à 22 réduit la probabilité de toucher systématiquement le coupon, surtout avec BNP (financials sector évité) à DD -23.69%) | Coupon 7.2%, protégé | Barr.coupon 100%"
+        "reasoning": "Rendement: base 82 → -5 = 77 (Barrière à 100% en stagflation avec VIX à 22 et volatilités élevées (26-29%) rend le coupon très incertain, surtout avec BNP en secteur évité) | Coupon 7.2%, protégé | Barr.coupon 100%"
       },
       "underlyingQuality": {
         "score": 67,
         "base": 72,
         "delta": -5,
-        "reasoning": "Qualité: base 72 → -5 = 67 (BNP dans le secteur financials explicitement évité en stagflation, Sanofi (healthcare) neutre mais sous pression avec beta proche de 1) | Worst: BNP Paribas B:60"
+        "reasoning": "Qualité: base 72 → -5 = 67 (BNP (worst performer) en financials secteur ÉVITÉ en stagflation, beta >1 amplifie les baisses, healthcare neutre pour Sanofi n'offre pas de protection) | Worst: BNP Paribas B:60"
       },
       "portfolioFit": {
         "score": 60,
         "base": 80,
-        "delta": 0,
-        "reasoning": "Fit: base 80"
+        "delta": 5,
+        "reasoning": "Fit: base 80 → +5 = 85 (Capital garanti offre une protection précieuse en régime stagflationnaire avec risques de récession dans 6-12 mois selon la courbe 2s10s)"
       },
       "riskPremium": {
         "score": 76,
@@ -264,49 +264,50 @@
         "reasoning": "Capital garanti: spread 7.2% - CAT 2.5% - illiq 0.3% = 4.4%"
       }
     },
-    "verdict": "Produit peu attractif en stagflation : le worst-of sur BNP (financials évité, DD -23.69%) avec barrière coupon à 100% réduit drastiquement la probabilité de percevoir le coupon de 7.2%. Le capital garanti limite les pertes mais avec un spread émetteur de seulement 16 points et le Brent à $94 alimentant l'inflation, le couple rendement/risque est défavorable. Score final ajusté : 48/100 (ÉVITER).",
+    "verdict": "Produit à capital garanti offrant 7.2% annuel MAIS avec barrière coupon à 100% très risquée en stagflation. BNP (worst-of) appartient aux financials, secteur ÉVITÉ selon l'analyse MI, avec un beta >1 qui amplifie la volatilité dans un contexte de VIX à 22. La probabilité réelle de toucher les coupons est faible avec des volatilités de 26-29% et des drawdowns déjà importants (-20 à -24%). Score ajusté de 48/100 reflète un produit peu attractif malgré la garantie du capital.",
     "keyRisks": [
-      "BNP dans secteur financials évité avec DD -23.69% compromet les coupons",
-      "Barrière 100% trop exigeante en régime stagflationniste avec VIX à 22"
+      "Barrière coupon à 100% quasi-impossible à maintenir avec volatilités 26-29% en stagflation",
+      "BNP en secteur financials ÉVITÉ avec beta 1.03 amplifiant les baisses",
+      "Courbe 2s10s pentifiée signale récession dans 6-12 mois selon historique"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 7.2,
+        "return_pct": 21.6,
         "return_eur": 21600,
         "probability": 0.15,
         "duration_years": 3
       },
       "base": {
-        "return_pct": 2.4,
-        "return_eur": 7200,
-        "probability": 0.35,
-        "duration_years": 3
-      },
-      "stress": {
         "return_pct": 0,
         "return_eur": 0,
         "probability": 0.4,
         "duration_years": 3
       },
+      "stress": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.3,
+        "duration_years": 3
+      },
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.1,
+        "probability": 0.15,
         "duration_years": 3
       }
     },
     "confidenceInterval": {
-      "low": 52,
-      "high": 66,
+      "low": 53,
+      "high": 67,
       "halfWidth": 7,
       "gradeStable": false,
       "gradeRange": "C-B",
-      "label": "C [52-66]"
+      "label": "B [53-67]"
     },
     "metadata": {
-      "gradedAt": "2026-06-08T12:41:53.019Z",
-      "durationMs": 21184,
+      "gradedAt": "2026-06-08T13:25:10.845Z",
+      "durationMs": 23214,
       "aiUsed": true,
       "version": "7.1",
       "productType": "autocall",
@@ -330,7 +331,7 @@
       "adjustments": {
         "p1": -5,
         "p2": -5,
-        "p3": 0,
+        "p3": 5,
         "p4": -5
       },
       "barrier_sigma": null,
@@ -339,9 +340,9 @@
       "liquidity_level": "L4",
       "liquidity_score": 10,
       "liquidity_label": "Illiquide",
-      "ci_low": 52,
-      "ci_high": 66,
-      "ci_label": "C [52-66]",
+      "ci_low": 53,
+      "ci_high": 67,
+      "ci_label": "B [53-67]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
@@ -354,7 +355,7 @@
         "p4": 0.3
       },
       "inputHash": "g1bed44d",
-      "gradeT0": "2026-06-08T12:41:53.019Z",
+      "gradeT0": "2026-06-08T13:25:10.845Z",
       "trackingLevelAt0": null,
       "stockData": [
         {
