@@ -513,6 +513,12 @@
     if (!data.commissions) alerts.push('Commissions non détectées (vérifier dans la brochure)');
     if (!data.isin) alerts.push('Code ISIN non détecté');
 
+    // Clarification capital : ne pas confondre « protégé à l'échéance » et « garanti »
+    if (cp.protected === true || parseFloat(cp.level) >= 100) {
+      if (cp.guaranteeType === 'garantie') alerts.push('✅ Capital garanti (garantie externe)');
+      else alerts.push('🛡️ Capital protégé à l’échéance par la formule — NON garanti : risque de crédit émetteur (EMTN, bail-in). Le seul risque sur le capital = l’émetteur. Vérifier la ligne « Garantie en capital » du KID.');
+    }
+
     // Type inconnu
     if (!st || st === 'other' || st === 'autre') {
       alerts.push('🔴 TYPE DE PRODUIT NON RECONNU — vérifiez manuellement le type de structure');
