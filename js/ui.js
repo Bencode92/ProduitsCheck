@@ -470,6 +470,13 @@ function _renderInvestorMetrics(p) {
       vol = Math.max.apply(null, p.grading.metadata.bsVols);
     }
 
+    // Worst-of : la condition porte sur le sous-jacent le MOINS performant → tous doivent tenir.
+    // Prob conjointe < prob d'une seule. Exposant effectif = 1 + (n-1)(1-ρ) (copule à un facteur).
+    var nUnd = (p.underlyings || []).filter(Boolean).length || 1;
+    var isWorstOf = nUnd > 1 && (p.underlyingType === 'worst-of' || p.underlyingType === 'basket' || /worst/i.test(p.underlyingType || ''));
+    var rhoWO = 0.5; // corrélation supposée entre sous-jacents
+    var woExp = isWorstOf ? 1 + (nUnd - 1) * (1 - rhoWO) : 1;
+
     // Compute prob autocall at each observation date
     var totalObs2 = Math.floor(matYears * obsPerYear);
     var probSurvival = 1.0;
@@ -488,10 +495,11 @@ function _renderInvestorMetrics(p) {
       if (er.stepDown && er.stepDownPct) {
         adjTrigger = Math.max(70, triggerAC - (er.stepDownPct * (obs - (er.startSemester || 2))));
       }
-      // BS prob of being above trigger at time T
+      // BS prob qu'UNE action soit ≥ trigger à T, puis ajustement worst-of (toutes doivent tenir)
       var sigma = vol / 100;
       var d2 = (Math.log(100 / adjTrigger) + (0.02 - sigma * sigma / 2) * T) / (sigma * Math.sqrt(T));
-      var probAbove = _normcdfApprox(d2);
+      var probAboveSingle = _normcdfApprox(d2);
+      var probAbove = isWorstOf ? Math.pow(probAboveSingle, woExp) : probAboveSingle;
       var probCallThisObs;
       if (hasAutocallProb) { probCallThisObs = probSurvival * probAbove; cumulProb += probCallThisObs; probSurvival *= (1 - probAbove); }
       else { probCallThisObs = probAbove; } // digital sans rappel : prob de COUPON cette année, pas de redemption → survie inchangée
@@ -564,7 +572,8 @@ function _renderInvestorMetrics(p) {
       html += '🧠 <strong>Effet mémoire</strong> : les coupons non versés sont accumulés et versés dès que la condition est remplie. Sur ' + totalObs2 + ' observations, la probabilité de ne JAMAIS recevoir de coupon est de ' + Math.round((hasAutocallProb ? probReachMaturity : probNoCoupon) * 100) + '%.</div>';
     }
 
-    html += '<div style="font-size:10px;color:#94A3B8;margin-top:4px">Vol implicite : ' + vol.toFixed(1) + '% · ' + (hasAutocallProb ? 'Trigger autocall : ' : 'Seuil coupon : ') + triggerAC + '%' + (er.stepDown ? ' (step-down -' + er.stepDownPct + '%/sem)' : '') + '</div>';
+    html += '<div style="font-size:10px;color:#94A3B8;margin-top:4px">Vol implicite : ' + vol.toFixed(1) + '% · ' + (hasAutocallProb ? 'Trigger autocall : ' : 'Seuil coupon : ') + triggerAC + '%' + (er.stepDown ? ' (step-down -' + er.stepDownPct + '%/sem)' : '') + (isWorstOf ? ' · <strong>Worst-of ' + nUnd + ' sous-jacents</strong> (corr. ~' + Math.round(rhoWO * 100) + '% → les ' + nUnd + ' doivent tenir)' : '') + '</div>';
+    if (isWorstOf) html += '<div style="font-size:9px;color:#94A3B8;margin-top:2px;font-style:italic">Prob conjointe (worst-of) ≈ prob d\'une seule^' + woExp.toFixed(2) + '. Les « Scénarios régime » ci-dessus ajoutent en plus la vue macro.</div>';
 
     // ─── Détail coupon & remboursement ───
     var nominal = parseFloat(p.investedAmount) || parseFloat(p.minInvestment) || 100000;
