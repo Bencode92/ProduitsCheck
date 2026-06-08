@@ -900,11 +900,20 @@
           "date": "2026-04-20",
           "level": 95.85,
           "year": 1
+        },
+        {
+          "date": "2026-06-08",
+          "level": 3.75,
+          "ref": "TEC10"
         }
       ],
-      "level": 95.85,
-      "date": "2026-04-20",
-      "note": ""
+      "level": 3.75,
+      "date": "2026-06-08",
+      "note": "auto-taux (TEC10)",
+      "refLabel": "TEC10",
+      "trigger": 4.4,
+      "marginToTrigger": 0.65,
+      "couponOK": true
     },
     "envelope": "cameleons",
     "maturityYears": 10,
@@ -1419,7 +1428,23 @@
     },
     "investedAmount": 200000,
     "addedDate": "2026-04-20",
-    "entity": "cameleons"
+    "entity": "cameleons",
+    "tracking": {
+      "history": [
+        {
+          "date": "2026-06-08",
+          "level": 3.75,
+          "ref": "TEC10"
+        }
+      ],
+      "level": 3.75,
+      "refLabel": "TEC10",
+      "trigger": 4.6,
+      "marginToTrigger": 0.85,
+      "couponOK": true,
+      "date": "2026-06-08",
+      "note": "auto-taux (TEC10)"
+    }
   },
   {
     "name": "SOLUTION COURT TERME BOOSTÉE SUR PANIER D'ACTIONS (ByCam)",
