@@ -225,5 +225,185 @@
   "conversation": [],
   "conversationSummary": null,
   "decision": null,
-  "decisionReason": null
+  "decisionReason": null,
+  "aiCategory": "capital-protege",
+  "aiCategoryLabel": "🛡️ Capital Protégé",
+  "aiCategoryColor": "#4CAF50",
+  "aiOpinion": "Produit attractif offrant un rendement potentiel de 7.2% annuel avec protection totale du capital, idéal pour les investisseurs prudents. Le mécanisme de mémoire sur deux valeurs de qualité (BNP/Sanofi) optimise les chances de versement des coupons, mais la performance reste liée à l'évolution de ces deux titres sur 3 ans.",
+  "aiAnalyzedAt": "2026-06-08T12:41:26.185Z",
+  "grading": {
+    "grade": "B",
+    "score": 66,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 59,
+        "base": 82,
+        "delta": -5,
+        "reasoning": "Rendement: base 82 → -5 = 77 (Barrière à 100% en stagflation avec VIX à 22 réduit la probabilité de toucher systématiquement le coupon, surtout avec BNP (financials sector évité) à DD -23.69%) | Coupon 7.2%, protégé | Barr.coupon 100%"
+      },
+      "underlyingQuality": {
+        "score": 67,
+        "base": 72,
+        "delta": -5,
+        "reasoning": "Qualité: base 72 → -5 = 67 (BNP dans le secteur financials explicitement évité en stagflation, Sanofi (healthcare) neutre mais sous pression avec beta proche de 1) | Worst: BNP Paribas B:60"
+      },
+      "portfolioFit": {
+        "score": 60,
+        "base": 80,
+        "delta": 0,
+        "reasoning": "Fit: base 80"
+      },
+      "riskPremium": {
+        "score": 76,
+        "base": 16,
+        "delta": -5,
+        "reasoning": "Capital garanti: spread 7.2% - CAT 2.5% - illiq 0.3% = 4.4%"
+      }
+    },
+    "verdict": "Produit peu attractif en stagflation : le worst-of sur BNP (financials évité, DD -23.69%) avec barrière coupon à 100% réduit drastiquement la probabilité de percevoir le coupon de 7.2%. Le capital garanti limite les pertes mais avec un spread émetteur de seulement 16 points et le Brent à $94 alimentant l'inflation, le couple rendement/risque est défavorable. Score final ajusté : 48/100 (ÉVITER).",
+    "keyRisks": [
+      "BNP dans secteur financials évité avec DD -23.69% compromet les coupons",
+      "Barrière 100% trop exigeante en régime stagflationniste avec VIX à 22"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 7.2,
+        "return_eur": 21600,
+        "probability": 0.15,
+        "duration_years": 3
+      },
+      "base": {
+        "return_pct": 2.4,
+        "return_eur": 7200,
+        "probability": 0.35,
+        "duration_years": 3
+      },
+      "stress": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.4,
+        "duration_years": 3
+      },
+      "worst": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.1,
+        "duration_years": 3
+      }
+    },
+    "confidenceInterval": {
+      "low": 52,
+      "high": 66,
+      "halfWidth": 7,
+      "gradeStable": false,
+      "gradeRange": "C-B",
+      "label": "C [52-66]"
+    },
+    "metadata": {
+      "gradedAt": "2026-06-08T12:41:53.019Z",
+      "durationMs": 21184,
+      "aiUsed": true,
+      "version": "7.1",
+      "productType": "autocall",
+      "marketDataAvailable": true,
+      "catBenchmark": 2.8,
+      "catSource": "allocator-confirmed",
+      "couponAnnualized": 7.2,
+      "couponRaw": 7.2,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": false,
+      "barrierPct": 0,
+      "barrierCouponPct": 100,
+      "couponProbability": null,
+      "expectedMaturity": 3,
+      "maxMaturity": 3,
+      "maxBeta": 1.03,
+      "baseScore": 63,
+      "baseGrade": "B",
+      "adjustments": {
+        "p1": -5,
+        "p2": -5,
+        "p3": 0,
+        "p4": -5
+      },
+      "barrier_sigma": null,
+      "barrier_sigma_label": null,
+      "barrier_sigma_danger": null,
+      "liquidity_level": "L4",
+      "liquidity_score": 10,
+      "liquidity_label": "Illiquide",
+      "ci_low": 52,
+      "ci_high": 66,
+      "ci_label": "C [52-66]",
+      "issuer_rating": "A+",
+      "issuer_tier": "IG",
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "digitale_memoire",
+      "v6Weights": {
+        "p1": 0.25,
+        "p2": 0.2,
+        "p3": 0.25,
+        "p4": 0.3
+      },
+      "inputHash": "g1bed44d",
+      "gradeT0": "2026-06-08T12:41:53.019Z",
+      "trackingLevelAt0": null,
+      "stockData": [
+        {
+          "name": "BNP Paribas",
+          "ticker": "BNP",
+          "sector": "Finance",
+          "perf_ytd": 16.31,
+          "perf_1y": 19.72,
+          "volatility_3y": 26,
+          "max_drawdown_3y": 23.69,
+          "buffett_score": 60,
+          "quality_score": 66,
+          "buffett_grade": "B"
+        },
+        {
+          "name": "Sanofi",
+          "ticker": "SAN",
+          "sector": "Finance",
+          "perf_ytd": 6.53,
+          "perf_1y": 51.46,
+          "volatility_3y": 29,
+          "max_drawdown_3y": 20.79,
+          "buffett_score": 60,
+          "quality_score": 71,
+          "buffett_grade": "B"
+        }
+      ]
+    },
+    "regimeScenarios": {
+      "current": {
+        "score": 66,
+        "grade": "B",
+        "label": "Actuel (stagflation)",
+        "desc": "Régime actuel → volatilité modérée"
+      },
+      "bull": {
+        "score": 71,
+        "grade": "B",
+        "label": "Bull / Risk-on",
+        "delta": 5,
+        "desc": "Marchés haussiers → prob coupon monte, barrière safe"
+      },
+      "crash": {
+        "score": 60,
+        "grade": "B",
+        "label": "Crash / Récession",
+        "delta": -6,
+        "desc": "Marchés baissiers → barrière menacée, vol en hausse"
+      }
+    }
+  }
 }
