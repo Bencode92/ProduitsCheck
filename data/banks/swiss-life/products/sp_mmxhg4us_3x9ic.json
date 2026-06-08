@@ -160,87 +160,103 @@
   "structureType": "basket",
   "grading": {
     "grade": "C",
-    "score": 53,
+    "score": 57,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 55,
+        "score": 69,
         "base": 57,
-        "delta": -2,
-        "reasoning": "Rendement: base 57 → -2 = 55 (En stagflation avec 3/5 sous-jacents dans le secteur financier évité et volatilités élevées (BMPS 36.9%), la probabilité de toucher le coupon 7% diminue fortement) | Coupon 7%, protégé | Mat espérée: ~5.5a (prob mat: 27%)"
+        "delta": 0,
+        "reasoning": "Rendement: base 57 → -2 = 55 (En stagflation avec VIX à 22 et basket éq. sur 5 SJ dont 2 banques dans un secteur évité, la probabilité de toucher le coupon 7% est fortement réduite) | Coupon 7%, protégé | Mat espérée: ~5.5a (prob mat: 27%) | Basket +30pts (vol÷0.77)",
+        "_bsDelta": 12,
+        "_bs": {
+          "score": 69,
+          "probCoupon": 80.5,
+          "rendementNet": 5.63,
+          "perteEsperee": 0,
+          "couponEffectif": 7,
+          "vols": [
+            29.34,
+            19.07,
+            22,
+            30.48,
+            33.97
+          ],
+          "matEsperee": 5.5,
+          "isBasket": true
+        }
       },
       "underlyingQuality": {
-        "score": 50,
-        "base": 52,
+        "score": 63,
+        "base": 41,
         "delta": -2,
-        "reasoning": "Qualité: base 52 → -2 = 50 (60% des sous-jacents (BMPS, UCG, ENEL) dans des secteurs évités en stagflation, avec des betas élevés (0.9-1.03) amplifiant la baisse) | Worst: Novo Nordisk A B:35"
+        "reasoning": "Qualité: base 41 → -2 = 39 (Exposition critique aux financials (UCG, BPE) secteur explicitement évité en stagflation, avec beta moyen 0.76 offrant peu de protection) | Worst: Enel SpA B:17 | Basket équipondéré 5 actifs: P2 +24pts (diversification)"
       },
       "portfolioFit": {
-        "score": 70,
+        "score": 55,
         "base": 70,
         "delta": 0,
         "reasoning": "En portefeuille"
       },
       "riskPremium": {
-        "score": 53,
-        "base": 55,
+        "score": 46,
+        "base": 50,
         "delta": -2,
-        "reasoning": "Prime: base 55 → -2 = 53 (Spread de 200bps insuffisant pour compenser le risque worst-of à 5 sous-jacents en régime stagflationniste avec VIX à 22) | 7% vs CAT 2.5% (spread 4.5%)"
+        "reasoning": "Capital garanti: spread 7.0% - CAT 2.5% - illiq 0.7% = 3.8%"
       }
     },
-    "verdict": "Produit très risqué en contexte de stagflation avec 60% des sous-jacents dans le secteur financier évité par le marché. La probabilité de coupon à 7% est fortement compromise avec des volatilités élevées (BMPS 36.9%, UCG 30%) et un worst-of à 5 sous-jacents. Le capital garanti offre une protection mais la maturité espérée de 5.5 ans pourrait s'étendre à 10 ans, immobilisant 30 000€ avec peu de rendement. Score final ajusté: 40 (D), produit à éviter dans ce contexte macro.",
+    "verdict": "Produit très risqué en stagflation avec 40% d'exposition au secteur financier évité (UCG beta 1.06, BPE) et un worst-of sur 5 sous-jacents. La probabilité de maturité à 10 ans est élevée (73%) avec seulement 27% de chances d'autocall, limitant fortement le rendement espéré malgré le coupon 7%. Le capital garanti est le seul point positif mais ne compense pas l'exposition sectorielle défavorable avec Brent à $94 et risque de hausse des taux Fed.",
     "keyRisks": [
-      "Exposition massive au secteur financier (60%) en période de stress et stagflation",
-      "Risque de blocage prolongé jusqu'à 10 ans sans coupon si les banques italiennes restent sous pression",
-      "Choc pétrolier imminent (Brent >$103) pourrait aggraver la performance des financières européennes"
+      "Exposition 40% aux banques (UCG, BPE) en secteur évité avec risque de stress crédit HY spreads 275bps",
+      "Probabilité 73% d'aller à maturité 10 ans avec frais implicites élevés réduisant le rendement réel"
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 7,
-        "return_eur": 10500,
+        "return_eur": 2100,
         "probability": 0.15,
-        "duration_years": 5
+        "duration_years": 1
       },
       "base": {
-        "return_pct": 2,
-        "return_eur": 6000,
-        "probability": 0.4,
-        "duration_years": 10
+        "return_pct": 3.5,
+        "return_eur": 5775,
+        "probability": 0.35,
+        "duration_years": 5.5
       },
       "stress": {
-        "return_pct": 0,
-        "return_eur": 0,
+        "return_pct": 1,
+        "return_eur": 3000,
         "probability": 0.35,
         "duration_years": 10
       },
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.1,
+        "probability": 0.15,
         "duration_years": 10
       }
     },
     "confidenceInterval": {
-      "low": 42,
-      "high": 64,
+      "low": 36,
+      "high": 58,
       "halfWidth": 11,
       "gradeStable": false,
-      "gradeRange": "D-B",
-      "label": "C [42-64]"
+      "gradeRange": "D-C",
+      "label": "C [36-58]"
     },
     "metadata": {
-      "gradedAt": "2026-03-31T13:20:04.819Z",
-      "durationMs": 23284,
+      "gradedAt": "2026-06-08T09:57:33.500Z",
+      "durationMs": 23608,
       "aiUsed": true,
-      "version": "5.2",
+      "version": "7.1",
       "productType": "autocall",
       "marketDataAvailable": true,
-      "catBenchmark": 2.5,
-      "catSource": "fallback-2026",
+      "catBenchmark": 2.8,
+      "catSource": "allocator-confirmed",
       "couponAnnualized": 7,
       "couponRaw": 7,
       "couponMultiplier": 1,
@@ -249,12 +265,12 @@
       "hasBarrier": false,
       "barrierPct": 60,
       "barrierCouponPct": null,
-      "couponProbability": null,
+      "couponProbability": 80.5,
       "expectedMaturity": 5.5,
       "maxMaturity": 10,
       "probReachMaturity": 27,
-      "maxBeta": 1.03,
-      "baseScore": 55,
+      "maxBeta": 1.06,
+      "baseScore": 49,
       "baseGrade": "C",
       "adjustments": {
         "p1": -2,
@@ -267,15 +283,121 @@
       "barrier_sigma_danger": null,
       "liquidity_level": "L3",
       "liquidity_score": 40,
-      "liquidity_label": "Rappelable 10M",
-      "ci_low": 42,
-      "ci_high": 64,
-      "ci_label": "C [42-64]",
+      "liquidity_label": "Rappelable 7M",
+      "ci_low": 36,
+      "ci_high": 58,
+      "ci_label": "C [36-58]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
       "decrementDrag": 0,
-      "structureType": "basket"
-    }
-  }
+      "structureType": "basket",
+      "bsRendementNet": 5.63,
+      "bsProbCoupon": 80.5,
+      "bsPerteEsperee": 0,
+      "bsVols": [
+        29.34,
+        19.07,
+        22,
+        30.48,
+        33.97
+      ],
+      "bsMatEsperee": 5.5,
+      "isBasket": true,
+      "issuerCreditPenalty": 1,
+      "issuerCDS": 60,
+      "v6Weights": {
+        "p1": 0.25,
+        "p2": 0.2,
+        "p3": 0.25,
+        "p4": 0.3
+      },
+      "inputHash": "g1f7hb2m",
+      "gradeT0": "2026-06-08T09:57:33.500Z",
+      "trackingLevelAt0": null,
+      "stockData": [
+        {
+          "name": "Banca Monte dei Paschi di Siena SpA",
+          "ticker": "BPE",
+          "sector": "Finance",
+          "perf_ytd": null,
+          "perf_1y": 0,
+          "volatility_3y": 25.07,
+          "max_drawdown_3y": 37.5,
+          "buffett_score": 40,
+          "quality_score": 68,
+          "buffett_grade": "C"
+        },
+        {
+          "name": "Enel SpA",
+          "ticker": "ENEL",
+          "sector": "Services publics",
+          "perf_ytd": 8.24,
+          "perf_1y": 18.36,
+          "volatility_3y": 19.07,
+          "max_drawdown_3y": 16.27,
+          "buffett_score": 17,
+          "quality_score": 29,
+          "buffett_grade": "D"
+        },
+        {
+          "name": "Novo Nordisk A",
+          "ticker": "NOVO NORDISK A",
+          "sector": "Commodity",
+          "volatility_3y": 22.74,
+          "max_drawdown_3y": -19.21
+        },
+        {
+          "name": "UniCredit SpA",
+          "ticker": "UCG",
+          "sector": "Finance",
+          "perf_ytd": 4.87,
+          "perf_1y": 29.51,
+          "volatility_3y": 30.48,
+          "max_drawdown_3y": 24.12,
+          "buffett_score": 80,
+          "quality_score": 75,
+          "buffett_grade": "A"
+        },
+        {
+          "name": "Veolia Environnement SA",
+          "ticker": "VIE",
+          "sector": "Services publics",
+          "perf_ytd": 16.35,
+          "perf_1y": 15,
+          "volatility_3y": 19.54,
+          "max_drawdown_3y": 16.28,
+          "buffett_score": 50,
+          "quality_score": 54,
+          "buffett_grade": "C"
+        }
+      ]
+    },
+    "regimeScenarios": {
+      "current": {
+        "score": 57,
+        "grade": "C",
+        "label": "Actuel (stagflation)",
+        "desc": "Régime actuel → volatilité modérée"
+      },
+      "bull": {
+        "score": 63,
+        "grade": "B",
+        "label": "Bull / Risk-on",
+        "delta": 6,
+        "desc": "Marchés haussiers → prob coupon monte, barrière safe"
+      },
+      "crash": {
+        "score": 52,
+        "grade": "C",
+        "label": "Crash / Récession",
+        "delta": -5,
+        "desc": "Marchés baissiers → barrière menacée, vol en hausse"
+      }
+    },
+    "_isBasket": true,
+    "_basketInfo": "Panier équipondéré 5 actions"
+  },
+  "_couponProbability": 80.5,
+  "_bsRendementNet": 5.63
 }
