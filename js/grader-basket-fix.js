@@ -254,6 +254,15 @@
 
         var coupon = norm.coupon || 0;
         if (typeof coupon === 'object') coupon = coupon.rate || 0;
+        // Coupon CONDITIONNEL (digital / mémoire / barrière coupon) → pondérer par la proba de le toucher.
+        // Sinon on compte un coupon « illusoire » comme acquis et la prime vs CAT est surévaluée.
+        var _ct = norm.couponType || (product.coupon && product.coupon.type) || '';
+        var _cond = /conditionnel|digital|memoire/i.test(_ct) || (parseFloat(norm.barrierCoupon) > 0);
+        var couponProb = 1;
+        if (_cond && typeof _estimateCouponProb === 'function') {
+            try { var _cp = _estimateCouponProb(norm); if (_cp != null) { if (_cp > 1) _cp = _cp / 100; if (_cp >= 0 && _cp <= 1) couponProb = _cp; } } catch(e) {}
+        }
+        var effCoupon = coupon * couponProb;
         var catRate = 2.5;
         try {
             if (typeof _mktCache !== 'undefined' && _mktCache && _mktCache._catRate) {
@@ -261,7 +270,7 @@
             }
         } catch(e) {}
 
-        var spread = coupon - catRate;
+        var spread = effCoupon - catRate;
         var mat = norm.maturityYears || 5;
         var illiqPremium = 0.3 + 0.05 * Math.max(0, mat - 2);
         var effectiveSpread = spread - illiqPremium;
@@ -278,7 +287,7 @@
         if (newP4 > oldScore) {
             p4.score = newP4;
             if (p4.reasoning) {
-                p4.reasoning = 'Capital garanti: spread ' + coupon.toFixed(1) + '% - CAT ' + catRate + '% - illiq ' + illiqPremium.toFixed(1) + '% = ' + effectiveSpread.toFixed(1) + '%';
+                p4.reasoning = 'Capital garanti: ' + (couponProb < 1 ? 'coupon espéré ' + effCoupon.toFixed(1) + '% (' + coupon.toFixed(1) + '%×' + Math.round(couponProb * 100) + '% proba)' : 'coupon ' + coupon.toFixed(1) + '%') + ' - CAT ' + catRate + '% - illiq ' + illiqPremium.toFixed(1) + '% = ' + effectiveSpread.toFixed(1) + '%';
             }
             _recalcTotal(result);
             console.log('[basket-fix] Capital garanti P4: ' + oldScore + ' → ' + newP4 + ' (spread ' + effectiveSpread.toFixed(1) + '%)');

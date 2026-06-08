@@ -960,7 +960,7 @@
     function _gradeInputHash(p) {
       var cp = p.capitalProtection || {}, c = p.coupon || {}, er = p.earlyRedemption || {};
       var unds = (p.underlyings || []).map(function(u) { return typeof u === 'string' ? u : (u && (u.name || u.ticker) || ''); }).join('|');
-      var parts = ['v7.1', c.rate, c.trigger, c.type, c.frequency, c.memory, cp.barrier, cp.barrierCoupon, cp.protected, cp.level, er.trigger, er.stepDown, er.stepDownPct, p.maturityYears, p.underlyingType, p.structureType, p.type, p.isin, p.participationRate, p.decrementPct, p.bankId, unds, p.commissions, JSON.stringify(p.fees || null)];
+      var parts = ['v7.2', c.rate, c.trigger, c.type, c.frequency, c.memory, cp.barrier, cp.barrierCoupon, cp.protected, cp.level, er.trigger, er.stepDown, er.stepDownPct, p.maturityYears, p.underlyingType, p.structureType, p.type, p.isin, p.participationRate, p.decrementPct, p.bankId, unds, p.commissions, JSON.stringify(p.fees || null)];
       var s = parts.join('~'), h = 5381;
       for (var i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0;
       return 'g' + (h >>> 0).toString(36);
