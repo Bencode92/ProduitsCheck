@@ -67,8 +67,32 @@ class StructBoard {
     return n ? 'name:' + n : null;
   }
 
+  // Incohérences DURES (contradictions logiques / produit non évaluable) → on bloque, on n'alerte pas.
+  // Les simples champs manquants (ISIN, commissions…) restent de simples alertes ailleurs.
+  _hardBlocks(p) {
+    const v = [], cp = p.capitalProtection || {}, c = p.coupon || {};
+    const barrier = parseFloat(cp.barrier);
+    const protectedCap = cp.protected === true || parseFloat(cp.level) >= 100;
+    if (protectedCap && !isNaN(barrier) && barrier > 0 && barrier < 100) v.push('Capital annoncé garanti mais barrière ' + barrier + '% < 100% (contradiction)');
+    const hasReturn = (c.rate != null && c.rate !== '') || (p.participationRate != null && p.participationRate !== '');
+    if (!hasReturn) v.push('Ni coupon ni participation — produit non évaluable');
+    if (!p.maturityYears) v.push('Maturité absente — produit non évaluable');
+    const conditional = c.type === 'conditionnel' || (c.trigger != null && c.trigger !== '');
+    const hasCondition = (c.trigger != null && c.trigger !== '') || (cp.barrierCoupon != null && cp.barrierCoupon !== '') || (!isNaN(barrier) && barrier > 0);
+    if (conditional && !hasCondition) v.push('Coupon conditionnel sans seuil ni barrière — condition non évaluable');
+    return v;
+  }
+
   async addProposal(bankId, product) {
     if (!this.state.proposals[bankId]) this.state.proposals[bankId] = [];
+    // Blocage dur sur incohérences logiques (sauf override explicite product._allowIncoherent)
+    const _blocks = this._hardBlocks(product);
+    if (_blocks.length && !product._allowIncoherent) {
+      showToast('Bloqué : ' + _blocks[0], 'error');
+      const e = new Error('Incohérences dures : ' + _blocks.join(' ; '));
+      e._hardBlocks = _blocks;
+      throw e;
+    }
     const _key = this._productKey(product);
     const _existing = _key ? this.state.proposals[bankId].find(p => this._productKey(p) === _key) : null;
     if (_existing) {

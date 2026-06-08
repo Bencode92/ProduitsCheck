@@ -954,11 +954,29 @@
     // Save reference to base grade (v5.2)
     var _baseGrade = ProposalGrader.grade;
 
+    // Empreinte déterministe des champs qui déterminent la note. Sert à GELER le grade :
+    // une fois calculé, il ne rebouge plus tant que le produit n'a pas changé (l'IA, non
+    // déterministe, n'altère donc pas la note d'un run à l'autre — gouvernance/auditabilité).
+    function _gradeInputHash(p) {
+      var cp = p.capitalProtection || {}, c = p.coupon || {}, er = p.earlyRedemption || {};
+      var unds = (p.underlyings || []).map(function(u) { return typeof u === 'string' ? u : (u && (u.name || u.ticker) || ''); }).join('|');
+      var parts = ['v7.1', c.rate, c.trigger, c.type, c.frequency, c.memory, cp.barrier, cp.barrierCoupon, cp.protected, cp.level, er.trigger, er.stepDown, er.stepDownPct, p.maturityYears, p.underlyingType, p.structureType, p.type, p.isin, p.participationRate, p.decrementPct, p.bankId, unds, p.commissions, JSON.stringify(p.fees || null)];
+      var s = parts.join('~'), h = 5381;
+      for (var i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0;
+      return 'g' + (h >>> 0).toString(36);
+    }
+    window._gradeInputHash = _gradeInputHash;
+
     // Override with consolidated pipeline
     ProposalGrader.grade = async function(product) {
+      // Step 0: gel — si déjà noté pour cette version exacte du produit, on renvoie la note figée
+      var _hash = _gradeInputHash(product);
+      if (!product._forceRegrade && product.grading && product.grading.metadata && product.grading.metadata.inputHash === _hash) {
+        return product.grading;
+      }
       // Step 1: Call base grader (normalize, collect context, P1-P4 heuristic, Claude IA)
       var result = await _baseGrade.call(ProposalGrader, product);
-      if (!result || !result.pillars || result.grade === '-') return result;
+      if (!result || !result.pillars || result.grade === '-') { if (result && result.metadata) result.metadata.inputHash = _hash; return result; }
 
       // Step 2: Apply post-processing patches (in the correct order)
 
@@ -1075,6 +1093,7 @@
       if (result.metadata) {
         result.metadata.v6Weights = V7_WEIGHTS;
         result.metadata.version = '7.1';
+        result.metadata.inputHash = _hash; // empreinte de gel : la note ne rebougera plus pour ce produit
         if (_isSwissLifeEnvelope(product)) {
           result.metadata.envelopeMode = 'swiss-life';
           result.metadata.v6Weights = _w;
