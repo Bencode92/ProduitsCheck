@@ -315,5 +315,21 @@
     }
   },
   "_couponProbability": 98,
-  "_bsRendementNet": 4.51
+  "_bsRendementNet": 4.51,
+  "tracking": {
+    "history": [
+      {
+        "date": "2026-06-08",
+        "level": 3.75,
+        "ref": "TEC10"
+      }
+    ],
+    "level": 3.75,
+    "refLabel": "TEC10",
+    "trigger": 4.4,
+    "marginToTrigger": 0.65,
+    "couponOK": true,
+    "date": "2026-06-08",
+    "note": "auto-taux (TEC10)"
+  }
 }
