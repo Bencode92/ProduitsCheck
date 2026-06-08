@@ -386,6 +386,13 @@ function _renderPortfolioSummaryTable(state) {
                             }
                         }
                     }
+                    if (t.indexOf('Propositions') >= 0 && !header.querySelector('.btn-bulk-del') && typeof window.openBulkDelete === 'function') {
+                        var pdbtn = document.createElement('button'); pdbtn.className = 'btn btn-bulk-del'; pdbtn.style.cssText = 'margin-right:8px;white-space:nowrap';
+                        pdbtn.innerHTML = '🗑️ Supprimer en lot'; pdbtn.title = 'Sélectionner plusieurs produits et les supprimer d\'un coup';
+                        pdbtn.onclick = function() { window.openBulkDelete(); };
+                        var pdref = header.querySelector('.btn.primary') || header.querySelector('.btn');
+                        if (pdref) header.insertBefore(pdbtn, pdref); else header.appendChild(pdbtn);
+                    }
                     if (t.indexOf('Propositions') >= 0 && !header.querySelector('.btn-grade-all')) {
                         var ungraded = Object.values(state.proposals || {}).flat().filter(function(p) { return !p.grading; });
                         if (ungraded.length > 0 && typeof ProposalGrader !== 'undefined') {
