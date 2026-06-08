@@ -633,8 +633,10 @@ function _renderInvestorMetrics(p) {
       html += '🛡️ <strong>Protection partielle</strong> — Capital protégé si le sous-jacent ne baisse pas de plus de ' + (100 - barrier) + '% sur ' + matYears + ' ans (barrière à ' + barrier + '%). ';
       html += 'Si barrière touchée → perte proportionnelle à la baisse (ex: sous-jacent à 50% → perte de 50% soit -' + formatNumber(nominal * 0.5) + '€).</div>';
     } else if (isProtected) {
-      html += '<div style="padding:8px;background:#ECFDF5;border:1px solid #6EE7B7;border-radius:6px;font-size:11px;color:#065F46;margin-bottom:6px">';
-      html += '✅ <strong>Capital 100% garanti</strong> à l\'échéance.</div>';
+      var _gtt = (p.capitalProtection && p.capitalProtection.guaranteeType) === 'garantie';
+      html += '<div style="padding:8px;background:' + (_gtt ? '#ECFDF5' : '#FFF7ED') + ';border:1px solid ' + (_gtt ? '#6EE7B7' : '#FDBA74') + ';border-radius:6px;font-size:11px;color:' + (_gtt ? '#065F46' : '#92400E') + ';margin-bottom:6px">';
+      html += _gtt ? '✅ <strong>Capital 100% garanti</strong> à l\'échéance (garantie externe).</div>'
+                   : '🛡️ <strong>Capital protégé à 100% à l\'échéance</strong> par la formule — soumis au risque de crédit émetteur (pas une garantie).</div>';
     }
 
     html += '</div>';
