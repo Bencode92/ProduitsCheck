@@ -1,46 +1,35 @@
 {
   "bankId": "swiss-life",
   "bankName": "Swiss Life",
-  "lastUpdated": "2026-06-08T09:14:56.275Z",
+  "lastUpdated": "2026-06-08T09:41:18.053Z",
   "products": [
-    {
-      "id": "sp_mmxgwg72_2ec84",
-      "name": "SL - ATHENA PRIVILEGE ENI DECEMBRE 2025",
-      "type": "autocall",
-      "status": "active",
-      "score": 54,
-      "receivedDate": "2026-03-19"
-    },
     {
       "id": "sp_mmxh3jcm_zxdaa",
       "name": "Bond 12M un compartiment de Swiss Life Funds (LUX) (EUR) R - Cap",
       "type": "autre",
       "status": "active",
-      "score": null,
-      "receivedDate": "2026-03-19"
+      "score": null
     },
     {
       "id": "sp_mmxhg4us_3x9ic",
       "name": "Oxygène Objectif Mars 2026",
       "type": "autocall",
       "status": "active",
-      "score": 53,
-      "receivedDate": "2026-03-19"
+      "score": null
     },
     {
       "id": "sp_mmxib83f_9qosf",
       "name": "SL - PHOENIX MEMOIRE TRIMESTRIEL BNP JANVIER 2026",
       "type": "autocall",
       "status": "active",
-      "score": 71,
-      "receivedDate": "2026-03-19"
+      "score": null
     },
     {
       "id": "sp_mnc8gbos_lxguy",
       "name": "Income Euro Selection",
       "type": "autre",
       "status": "analyzing",
-      "score": 26,
+      "score": 1,
       "receivedDate": "2026-03-29"
     },
     {
@@ -48,7 +37,7 @@
       "name": "SL – PHOENIX MEMOIRE SEMESTRIEL RICHEMONT AVRIL 2026",
       "type": "autocall",
       "status": "analyzing",
-      "score": 62,
+      "score": 24,
       "receivedDate": "2026-03-30"
     },
     {
@@ -56,7 +45,7 @@
       "name": "SL - ATHENA PRIVILEGE INTESA SANPAOLO MAI 2026",
       "type": "autocall",
       "status": "analyzing",
-      "score": 66,
+      "score": 18,
       "receivedDate": "2026-03-30"
     },
     {
@@ -64,7 +53,7 @@
       "name": "SL - ATHENA PRIVILEGE INTESA SANPAOLO MAI 2026",
       "type": "autocall",
       "status": "analyzing",
-      "score": 47,
+      "score": 43,
       "receivedDate": "2026-03-30"
     },
     {
@@ -72,7 +61,7 @@
       "name": "SL – PHOENIX MEMOIRE SEMESTRIEL RICHEMONT AVRIL 2026",
       "type": "autocall",
       "status": "analyzing",
-      "score": 43,
+      "score": 24,
       "receivedDate": "2026-03-30"
     },
     {
@@ -80,7 +69,7 @@
       "name": "SL - PHOENIX MEMOIRE FAST SEMESTRIEL ASML AVRIL 2026",
       "type": "autocall",
       "status": "analyzing",
-      "score": 29,
+      "score": 49,
       "receivedDate": "2026-03-30"
     },
     {
@@ -88,7 +77,7 @@
       "name": "OBJECTIF MAI 2026",
       "type": "autocall",
       "status": "analyzing",
-      "score": 50,
+      "score": 4,
       "receivedDate": "2026-03-30"
     },
     {
@@ -96,7 +85,7 @@
       "name": "Oxygene Objectif Mai 2026",
       "type": "autocall",
       "status": "analyzing",
-      "score": 52,
+      "score": 4,
       "receivedDate": "2026-03-30"
     },
     {
@@ -104,7 +93,7 @@
       "name": "SL - Athena Fast Semestriel Saint Gobain Mai 2026",
       "type": "autocall",
       "status": "analyzing",
-      "score": 47,
+      "score": null,
       "receivedDate": "2026-04-20"
     },
     {
@@ -112,7 +101,7 @@
       "name": "Oxygene Objectif Mai 2026",
       "type": "basket",
       "status": "analyzing",
-      "score": 42,
+      "score": null,
       "receivedDate": "2026-04-20"
     },
     {
@@ -120,7 +109,7 @@
       "name": "SL - TARN TEC10 10 ans",
       "type": "capital_garanti",
       "status": "analyzing",
-      "score": 75,
+      "score": null,
       "receivedDate": "2026-04-20"
     },
     {
@@ -128,7 +117,7 @@
       "name": "SL - Range Accrual CMS10Y 10 ans",
       "type": "range-accrual",
       "status": "analyzing",
-      "score": 70,
+      "score": null,
       "receivedDate": "2026-04-20"
     },
     {
@@ -136,7 +125,7 @@
       "name": "SL - Range Accrual Euribor 12M 10 ans",
       "type": "range-accrual",
       "status": "analyzing",
-      "score": 67,
+      "score": null,
       "receivedDate": "2026-04-20"
     },
     {
@@ -144,7 +133,7 @@
       "name": "SL - ATHENA SEMESTRIEL LVMH JUIN 2026",
       "type": "autocall",
       "status": "analyzing",
-      "score": 39,
+      "score": null,
       "receivedDate": "2026-04-21"
     },
     {
@@ -152,7 +141,7 @@
       "name": "SL – PHOENIX MEMOIRE FAST SEMESTRIEL ASML AVRIL 2026",
       "type": "autocall",
       "status": "analyzing",
-      "score": 41,
+      "score": null,
       "receivedDate": "2026-04-21"
     },
     {
@@ -160,7 +149,7 @@
       "name": "SL - PHOENIX MÉMOIRE FAST SEMESTRIEL RHEINMETALL JUIN 2026",
       "type": "autocall",
       "status": "analyzing",
-      "score": 44,
+      "score": null,
       "receivedDate": "2026-05-05"
     },
     {
@@ -168,7 +157,7 @@
       "name": "SL - ATHENA FAST SANOFI JUIN 2026",
       "type": "autocall",
       "status": "analyzing",
-      "score": 52,
+      "score": null,
       "receivedDate": "2026-05-06"
     }
   ]
