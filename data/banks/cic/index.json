@@ -1,7 +1,7 @@
 {
   "bankId": "cic",
   "bankName": "CIC",
-  "lastUpdated": "2026-06-08T09:52:06.181Z",
+  "lastUpdated": "2026-06-08T12:41:19.290Z",
   "products": [
     {
       "id": "sp_mnd7pep1_5gh0t",
@@ -42,6 +42,14 @@
       "status": "active",
       "score": null,
       "receivedDate": "2026-04-09"
+    },
+    {
+      "id": "sp_mq579fp6_rgfut",
+      "name": "Digitale WO BNP Sanofi Juin 2029",
+      "type": "digitale_memoire",
+      "status": "analyzing",
+      "score": null,
+      "receivedDate": "2026-06-08"
     }
   ]
 }
