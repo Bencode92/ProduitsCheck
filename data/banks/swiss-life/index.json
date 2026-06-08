@@ -1,8 +1,15 @@
 {
   "bankId": "swiss-life",
   "bankName": "Swiss Life",
-  "lastUpdated": "2026-06-08T09:41:32.048Z",
+  "lastUpdated": "2026-06-08T09:42:14.333Z",
   "products": [
+    {
+      "id": "sp_mmxh3jcm_zxdaa",
+      "name": "Bond 12M un compartiment de Swiss Life Funds (LUX) (EUR) R - Cap",
+      "type": "autre",
+      "status": "active",
+      "score": null
+    },
     {
       "id": "sp_mmxhg4us_3x9ic",
       "name": "Oxygène Objectif Mars 2026",
