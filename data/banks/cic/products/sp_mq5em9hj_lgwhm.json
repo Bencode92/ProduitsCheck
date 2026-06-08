@@ -235,5 +235,195 @@
   "conversation": [],
   "conversationSummary": null,
   "decision": null,
-  "decisionReason": null
+  "decisionReason": null,
+  "aiCategory": "autocall-mono",
+  "aiCategoryLabel": "⚡ Autocall Mono-actif",
+  "aiCategoryColor": "#06D6A0",
+  "aiOpinion": "Produit offrant un rendement attractif de 12,25% annuel avec mécanisme d'autocall, mais exposition concentrée sur le secteur bancaire européen volatil. Risque élevé sans protection du capital avec barrière à 60%, particulièrement sensible aux crises financières sectorielles.",
+  "aiAnalyzedAt": "2026-06-08T16:07:21.028Z",
+  "grading": {
+    "grade": "C",
+    "score": 51,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 76,
+        "base": 51,
+        "delta": 0,
+        "reasoning": "Rendement: base 51 → -10 = 41 (Barrière coupon à 100% très exigeante en stagflation avec VIX élevé à 22, probabilité de toucher les coupons fortement réduite) | Coupon 12.25%, barrière 60% | Barr.coupon 100% | Mat espérée: ~2a (prob mat: 11%)",
+        "_bsDelta": 20,
+        "_bs": {
+          "score": 71,
+          "probCoupon": 67.2,
+          "rendementNet": 6.03,
+          "perteEsperee": 2.19,
+          "couponEffectif": 12.25,
+          "vols": [
+            20.85
+          ],
+          "matEsperee": 2,
+          "isBasket": false
+        }
+      },
+      "underlyingQuality": {
+        "score": 42,
+        "base": 57,
+        "delta": -15,
+        "reasoning": "Qualité: base 57 → -15 = 42 (Secteur financier explicitement ÉVITÉ en stagflation, beta élevé 1.15, drawdown -15.95% avec risque de récession dans 6-12 mois selon courbe 2s10s) | Worst: EuroStoxx Banks B:35"
+      },
+      "portfolioFit": {
+        "score": 58,
+        "base": 80,
+        "delta": -5,
+        "reasoning": "Fit: base 80 → -5 = 75 (Surexposition sectorielle dangereuse sur financials en régime défavorable, diversification insuffisante)"
+      },
+      "riskPremium": {
+        "score": 30,
+        "base": 27,
+        "delta": -10,
+        "reasoning": "Capital garanti: coupon espéré 6.9% (12.3%×56% proba) - CAT 2.5% - illiq 0.4% = 4.0%"
+      }
+    },
+    "verdict": "Produit TRÈS RISQUÉ avec un timing catastrophique : exposition 100% au secteur bancaire européen (beta 1.15) explicitement évité en stagflation, avec barrière coupon irréaliste à 100%. Le coupon annualisé de 12.25% ne compense pas le risque avec probabilité de maturité anticipée de seulement 11% et drawdown actuel de -15.95%. La courbe 2s10s pentifiée à +41bps signale une récession probable dans 6-12 mois qui impacterait durement les banques.",
+    "keyRisks": [
+      "Exposition 100% secteur financier ÉVITÉ avec beta 1.15 en stagflation",
+      "Barrière coupon 100% quasi-impossible à maintenir avec VIX à 22",
+      "Récession probable (signal 2s10s) = NPL en hausse pour les banques"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 12.25,
+        "return_eur": 12250,
+        "probability": 0.15,
+        "duration_years": 1
+      },
+      "base": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.4,
+        "duration_years": 4
+      },
+      "stress": {
+        "return_pct": -2.5,
+        "return_eur": -10000,
+        "probability": 0.3,
+        "duration_years": 4
+      },
+      "worst": {
+        "return_pct": -10,
+        "return_eur": -40000,
+        "probability": 0.15,
+        "duration_years": 4
+      }
+    },
+    "confidenceInterval": {
+      "low": 32,
+      "high": 52,
+      "halfWidth": 10,
+      "gradeStable": false,
+      "gradeRange": "D-C",
+      "label": "D [32-52]"
+    },
+    "metadata": {
+      "gradedAt": "2026-06-08T16:07:44.206Z",
+      "durationMs": 22305,
+      "aiUsed": true,
+      "version": "7.1",
+      "productType": "autocall",
+      "marketDataAvailable": true,
+      "catBenchmark": 2.8,
+      "catSource": "allocator-confirmed",
+      "couponAnnualized": 12.25,
+      "couponRaw": 12.25,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": true,
+      "barrierPct": 60,
+      "barrierCouponPct": 100,
+      "couponProbability": 67.2,
+      "expectedMaturity": 2,
+      "maxMaturity": 4,
+      "probReachMaturity": 11,
+      "maxBeta": 1.15,
+      "baseScore": 52,
+      "baseGrade": "C",
+      "adjustments": {
+        "p1": -10,
+        "p2": -15,
+        "p3": -5,
+        "p4": -10
+      },
+      "barrier_sigma": 1.23,
+      "barrier_sigma_label": "Attention",
+      "barrier_sigma_danger": false,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Rappelable 12M",
+      "ci_low": 32,
+      "ci_high": 52,
+      "ci_label": "D [32-52]",
+      "issuer_rating": "A+",
+      "issuer_tier": "IG",
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "autocall",
+      "bsRendementNet": 6.03,
+      "bsProbCoupon": 67.2,
+      "bsPerteEsperee": 2.19,
+      "bsVols": [
+        20.85
+      ],
+      "bsMatEsperee": 2,
+      "isBasket": false,
+      "v6Weights": {
+        "p1": 0.25,
+        "p2": 0.2,
+        "p3": 0.25,
+        "p4": 0.3
+      },
+      "inputHash": "g23vn2r",
+      "gradeT0": "2026-06-08T16:07:44.206Z",
+      "trackingLevelAt0": null,
+      "stockData": [
+        {
+          "name": "EuroStoxx Banks",
+          "ticker": "EUFN",
+          "sector": "Index",
+          "perf_ytd": 1.36,
+          "perf_1y": 19.4,
+          "volatility_3y": 20.85,
+          "max_drawdown_3y": -15.95
+        }
+      ]
+    },
+    "regimeScenarios": {
+      "current": {
+        "score": 51,
+        "grade": "C",
+        "label": "Actuel (stagflation)",
+        "desc": "Régime actuel → volatilité modérée"
+      },
+      "bull": {
+        "score": 56,
+        "grade": "C",
+        "label": "Bull / Risk-on",
+        "delta": 5,
+        "desc": "Marchés haussiers → prob coupon monte, barrière safe"
+      },
+      "crash": {
+        "score": 42,
+        "grade": "D",
+        "label": "Crash / Récession",
+        "delta": -9,
+        "desc": "Marchés baissiers → barrière menacée, vol en hausse"
+      }
+    }
+  },
+  "_couponProbability": 67.2,
+  "_bsRendementNet": 6.03
 }
