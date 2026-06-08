@@ -68,7 +68,7 @@ function _computeMargeBarriere(p, tracking) {
     var isProtected = p.capitalProtection?.protected === true || p.capitalProtection?.protected === 'true';
     var grade = (p.grading && p.grading.grade) || '?';
     if (grade === '-') return { html: '<span style="color:#94A3B8;font-size:10px">\u2014</span>', value: 999 };
-    if (isProtected && barrier === 0) return { html: '<span style="color:var(--green);font-weight:600;font-size:10px">\u2705 Prot\u00e9g\u00e9</span>', value: 999 };
+    if (isProtected && barrier === 0) { var _gt = (p.capitalProtection && p.capitalProtection.guaranteeType) === 'garantie'; return { html: '<span title="' + (_gt ? 'Capital garanti (garantie externe)' : 'Capital prot\u00e9g\u00e9 \u00e0 l\'\u00e9ch\u00e9ance \u2014 risque de cr\u00e9dit \u00e9metteur (pas une garantie)') + '" style="color:' + (_gt ? 'var(--green)' : 'var(--orange)') + ';font-weight:600;font-size:10px">' + (_gt ? '\u2705 Garanti' : '\ud83d\udee1\ufe0f Prot\u00e9g\u00e9 \u00e9ch.') + '</span>', value: 999 }; }
     if (barrier === 0) return { html: '<span style="color:var(--text-dim);font-size:10px">\u2014</span>', value: 999 };
     if (!tracking) return { html: '<span style="color:var(--text-dim);font-size:10px">' + (100 - barrier) + '%</span>', value: 100 - barrier };
     var marge = tracking.level - barrier;

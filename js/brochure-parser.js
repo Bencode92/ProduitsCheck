@@ -73,9 +73,12 @@
     '',
     'CAPITAL:',
     '- "Protection du capital : Non" → protected=false',
-    '- "capital garanti" / "garantie en capital à l\'échéance" → protected=true, level=100',
+    '- "capital garanti" / "garantie en capital à l\'échéance" / "remboursement intégral du capital à l\'échéance" → protected=true, level=100',
     '- Barrière capital = seuil de PERTE (ex: 60% → perte si SJ < 60%)',
     '- "baisse de plus de X%" → barrière = 100-X',
+    '- capitalProtection.guaranteeType : "garantie" si VRAIE garantie externe ; "formule" si capital protégé/remboursé à l\'échéance MAIS soumis au risque de crédit émetteur (cas EMTN — la ligne "Garantie en capital" dit souvent "Pas de garantie") ; "barriere" si capital à risque sous une barrière. Indice : un EMTN avec "protection à l\'échéance" + risque émetteur = "formule", PAS "garantie".',
+    '- maturityDate : date d\'échéance au format AAAA-MM-JJ si trouvée. strikeDate : Date de Constatation Initiale (AAAA-MM-JJ).',
+    '- guarantorRating.fitch : note Fitch si présente (en plus de moodys/sp).',
     '',
     'AUTOCALL:',
     '- "95% dès le semestre 4 puis -2.50%" → trigger=95, startSemester=4, stepDown=true, stepDownPct=2.5',
@@ -112,11 +115,11 @@
     '',
     'Réponds UNIQUEMENT avec le JSON. AUCUN texte. AUCUN markdown.',
     '',
-    '{"name":"","isin":"","structureType":"","emitter":"","guarantor":"","guarantorRating":{"moodys":"","sp":""},',
-    '"underlyings":[],"underlyingType":"","currency":"EUR","maturity":"","maturityYears":0,',
+    '{"name":"","isin":"","structureType":"","emitter":"","guarantor":"","guarantorRating":{"moodys":"","sp":"","fitch":""},',
+    '"underlyings":[],"underlyingType":"","currency":"EUR","maturity":"","maturityYears":0,"maturityDate":null,"strikeDate":null,',
     '"coupon":{"rate":0,"rateIfCalled":null,"rateIfMaturity":null,"type":"","frequency":"","trigger":null,"memory":false,"paymentTiming":""},',
     '"participationRate":null,"guaranteedYears":0,"autocallCumulTarget":null,"commissions":null,',
-    '"capitalProtection":{"protected":false,"level":null,"barrier":null,"barrierCoupon":null,"barrierType":"europeenne"},',
+    '"capitalProtection":{"protected":false,"level":null,"barrier":null,"barrierCoupon":null,"barrierType":"europeenne","guaranteeType":null},',
     '"earlyRedemption":{"possible":false,"type":"","trigger":null,"frequency":"","startSemester":null,"stepDown":false,"stepDownPct":null,"firstCallDate":null,"callSchedule":[]},',
     '"decrementPct":null,"actualDividendYield":null,"minInvestment":null,',
     '"sri":null,"riy":null,"costEntry":null,"costExit":null,"costOngoing":null,"scenarios":{"stress":null,"defavorable":null,"median":null,"favorable":null},',
@@ -227,6 +230,16 @@
       if (_co != null) data.fees.custodyAnnual = _co;
       // commissions (marge upfront utilisée par le scoring) ← coût d'entrée KID si non déjà saisi
       if ((data.commissions == null || data.commissions === '') && _ce != null) data.commissions = _ce;
+    }
+
+    // Type de protection : ne pas survendre « garanti ». Par défaut, un capital protégé à
+    // l'échéance reste soumis au risque de crédit émetteur (EMTN) → 'formule', pas 'garantie'.
+    if (!cp.guaranteeType) {
+      var bar = parseFloat(cp.barrier);
+      if (cp.protected === true || parseFloat(cp.level) >= 100) cp.guaranteeType = 'formule';
+      else if (!isNaN(bar) && bar > 0) cp.guaranteeType = 'barriere';
+      else cp.guaranteeType = 'aucune';
+      data.capitalProtection = cp;
     }
 
     data.underlyings = _normalizeStringArray(data.underlyings);
@@ -539,6 +552,7 @@
       underlyingType: _fv('bp-undtype', _data.underlyingType || 'single-index'),
       currency: _fv('bp-currency', _data.currency || 'EUR'),
       maturity: years + ' ans', maturityYears: years,
+      maturityDate: _data.maturityDate || null, strikeDate: _data.strikeDate || null,
       coupon: {
         rate: _fv('bp-rate', dc.rate),
         rateIfCalled: _fv('bp-rateIfCalled', dc.rateIfCalled),
@@ -563,7 +577,8 @@
         level: capProtected ? (_fv('bp-caplevel', dcp.level || 100)) : null,
         barrier: _fv('bp-barrier', dcp.barrier),
         barrierCoupon: _fv('bp-barriercoupon', dcp.barrierCoupon),
-        barrierType: dcp.barrierType || 'europeenne'
+        barrierType: dcp.barrierType || 'europeenne',
+        guaranteeType: dcp.guaranteeType || null
       },
       earlyRedemption: {
         possible: _fv('bp-erpossible', der.possible || false),
