@@ -334,5 +334,21 @@
     }
   },
   "_couponProbability": 22.2,
-  "_bsRendementNet": 1.15
+  "_bsRendementNet": 1.15,
+  "tracking": {
+    "history": [
+      {
+        "date": "2026-06-08",
+        "level": 2.226,
+        "ref": "Euribor 3M"
+      }
+    ],
+    "level": 2.226,
+    "refLabel": "Euribor 3M",
+    "trigger": 3.5,
+    "marginToTrigger": 1.27,
+    "couponOK": true,
+    "date": "2026-06-08",
+    "note": "auto-taux (Euribor 3M)"
+  }
 }
