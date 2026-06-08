@@ -1094,6 +1094,10 @@
         result.metadata.v6Weights = V7_WEIGHTS;
         result.metadata.version = '7.1';
         result.metadata.inputHash = _hash; // empreinte de gel : la note ne rebougera plus pour ce produit
+        // Snapshot t0 pour la validation forward (cf. docs/VALIDATION-GRADES-PROTOCOLE.md) :
+        // fige la référence au moment de la note, pour pouvoir mesurer le réalisé plus tard.
+        if (result.metadata.gradeT0 == null) result.metadata.gradeT0 = result.metadata.gradedAt || null;
+        if (result.metadata.trackingLevelAt0 == null) result.metadata.trackingLevelAt0 = (product.tracking && product.tracking.level != null) ? product.tracking.level : null;
         if (_isSwissLifeEnvelope(product)) {
           result.metadata.envelopeMode = 'swiss-life';
           result.metadata.v6Weights = _w;
