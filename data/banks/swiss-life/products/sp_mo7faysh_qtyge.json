@@ -306,5 +306,21 @@
         "desc": "Taux spike puis chutent → volatilité, incertitude coupon"
       }
     }
+  },
+  "tracking": {
+    "history": [
+      {
+        "date": "2026-06-08",
+        "level": 3.75,
+        "ref": "TEC10"
+      }
+    ],
+    "level": 3.75,
+    "refLabel": "TEC10",
+    "trigger": 4.1,
+    "marginToTrigger": 0.35,
+    "couponOK": true,
+    "date": "2026-06-08",
+    "note": "auto-taux (TEC10)"
   }
 }
