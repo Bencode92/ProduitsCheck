@@ -332,8 +332,14 @@ function _renderInvestorMetrics(p) {
   html += '<div style="padding:12px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;border-left:3px solid ' + pLossColor + '">';
   html += '<div style="font-size:11px;font-weight:700;color:#475569">RISQUE EN CAPITAL</div>';
   if (pLoss === 0) {
-    html += '<div style="font-family:var(--mono);font-size:20px;font-weight:800;color:#059669;margin:4px 0">0%</div>';
-    html += '<div style="font-size:11px;color:#059669">Capital garanti 100% à échéance</div>';
+    var _trueGuar = (p.capitalProtection && p.capitalProtection.guaranteeType) === 'garantie';
+    if (_trueGuar) {
+      html += '<div style="font-family:var(--mono);font-size:20px;font-weight:800;color:#059669;margin:4px 0">0%</div>';
+      html += '<div style="font-size:11px;color:#059669">Capital garanti 100% à l\'échéance (garantie externe)</div>';
+    } else {
+      html += '<div style="font-family:var(--mono);font-size:20px;font-weight:800;color:#D97706;margin:4px 0">0% <span style="font-size:11px;font-weight:600">marché</span></div>';
+      html += '<div style="font-size:11px;color:#475569">Capital protégé à l\'échéance par la formule — <strong style="color:#D97706">exposé au risque de crédit émetteur</strong> (pas une garantie)</div>';
+    }
   } else {
     html += '<div style="font-family:var(--mono);font-size:20px;font-weight:800;color:' + pLossColor + ';margin:4px 0">' + pLoss + '%</div>';
     html += '<div style="font-size:11px;color:#475569">Probabilité de perte en capital<br>Perte moyenne si perte : -' + lossGivenLoss + '% · Perte attendue : -' + expectedLoss + '%</div>';
@@ -486,17 +492,18 @@ function _renderInvestorMetrics(p) {
       var sigma = vol / 100;
       var d2 = (Math.log(100 / adjTrigger) + (0.02 - sigma * sigma / 2) * T) / (sigma * Math.sqrt(T));
       var probAbove = _normcdfApprox(d2);
-      var probCallThisObs = probSurvival * probAbove;
-      cumulProb += probCallThisObs;
-      probSurvival *= (1 - probAbove);
+      var probCallThisObs;
+      if (hasAutocallProb) { probCallThisObs = probSurvival * probAbove; cumulProb += probCallThisObs; probSurvival *= (1 - probAbove); }
+      else { probCallThisObs = probAbove; } // digital sans rappel : prob de COUPON cette année, pas de redemption → survie inchangée
 
       autocallProbs.push({ obs: obs, year: T, trigger: adjTrigger, probCall: probCallThisObs, probCumul: cumulProb, probSurvival: probSurvival });
     }
 
-    var probReachMaturity = probSurvival;
-    var expectedMat = 0;
-    autocallProbs.forEach(function(ap) { expectedMat += ap.probCall * ap.year; });
-    expectedMat += probReachMaturity * matYears;
+    // Digital sans rappel : le produit va toujours à l'échéance ; on mesure le coupon, pas l'autocall.
+    var probReachMaturity = hasAutocallProb ? probSurvival : 1.0;
+    var expectedMat = matYears;
+    if (hasAutocallProb) { expectedMat = 0; autocallProbs.forEach(function(ap) { expectedMat += ap.probCall * ap.year; }); expectedMat += probReachMaturity * matYears; }
+    var probNoCoupon = 1; autocallProbs.forEach(function(ap) { probNoCoupon *= (1 - ap.probCall); }); // prob de ne JAMAIS toucher de coupon
 
     // Prob de coupon (au moins un coupon versé sur la durée avec mémoire)
     var probAtLeastOneCoupon = hasMemory ? (1 - Math.pow(1 - autocallProbs[0].probCall, totalObs2)) : (autocallProbs.length > 0 ? autocallProbs[0].probCall / (autocallProbs[0].probSurvival || 1) : 0.5);
@@ -509,20 +516,21 @@ function _renderInvestorMetrics(p) {
     }
 
     html += '<div style="padding:14px;background:#F0F9FF;border:1px solid #BAE6FD;border-radius:8px;margin-bottom:8px">';
-    html += '<div style="font-size:12px;font-weight:700;color:#0369A1;margin-bottom:10px">📊 Probabilités détaillées — Autocall & Coupon</div>';
+    html += '<div style="font-size:12px;font-weight:700;color:#0369A1;margin-bottom:10px">📊 Probabilités détaillées — ' + (hasAutocallProb ? 'Autocall & Coupon' : 'Coupon (digital, sans rappel)') + '</div>';
 
     // Summary KPIs
     html += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px">';
     html += '<div style="padding:10px;background:white;border-radius:6px;text-align:center;border:1px solid #E2E8F0">';
-    html += '<div style="font-size:10px;color:#475569">Maturité espérée</div>';
-    html += '<div style="font-family:var(--mono);font-size:18px;font-weight:800;color:#7C3AED">' + expectedMat.toFixed(1) + ' ans</div>';
-    html += '<div style="font-size:10px;color:#475569">sur ' + matYears + ' max</div></div>';
+    html += '<div style="font-size:10px;color:#475569">' + (hasAutocallProb ? 'Maturité espérée' : 'Durée') + '</div>';
+    html += '<div style="font-family:var(--mono);font-size:18px;font-weight:800;color:#7C3AED">' + (hasAutocallProb ? expectedMat.toFixed(1) : matYears) + ' ans</div>';
+    html += '<div style="font-size:10px;color:#475569">' + (hasAutocallProb ? 'sur ' + matYears + ' max' : 'fixe — pas de rappel') + '</div></div>';
 
     html += '<div style="padding:10px;background:white;border-radius:6px;text-align:center;border:1px solid #E2E8F0">';
-    html += '<div style="font-size:10px;color:#475569">Prob autocall < 3 ans</div>';
+    html += '<div style="font-size:10px;color:#475569">' + (hasAutocallProb ? 'Prob autocall < 3 ans' : 'Prob ≥1 coupon') + '</div>';
     var probBefore3 = 0;
     autocallProbs.forEach(function(ap) { if (ap.year <= 3) probBefore3 = ap.probCumul; });
-    html += '<div style="font-family:var(--mono);font-size:18px;font-weight:800;color:#059669">' + Math.round(probBefore3 * 100) + '%</div></div>';
+    var _kpi2 = hasAutocallProb ? Math.round(probBefore3 * 100) : Math.round((1 - probNoCoupon) * 100);
+    html += '<div style="font-family:var(--mono);font-size:18px;font-weight:800;color:#059669">' + _kpi2 + '%</div></div>';
 
     html += '<div style="padding:10px;background:white;border-radius:6px;text-align:center;border:1px solid #E2E8F0">';
     html += '<div style="font-size:10px;color:#475569">Prob atteindre maturité</div>';
@@ -533,30 +541,30 @@ function _renderInvestorMetrics(p) {
     html += '<div style="font-family:var(--mono);font-size:18px;font-weight:800;color:' + (probLoss < 5 ? '#059669' : probLoss < 15 ? '#D97706' : '#DC2626') + '">' + probLoss + '%</div></div>';
     html += '</div>';
 
-    // Autocall timeline
-    html += '<div style="font-size:11px;font-weight:600;color:#475569;margin-bottom:6px">Probabilité d\'autocall par date d\'observation :</div>';
+    // Timeline par observation
+    html += '<div style="font-size:11px;font-weight:600;color:#475569;margin-bottom:6px">' + (hasAutocallProb ? 'Probabilité d\'autocall par date d\'observation :' : 'Probabilité de toucher le coupon par observation :') + '</div>';
     html += '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">';
     autocallProbs.forEach(function(ap) {
       if (ap.probCall <= 0) return;
       var pct = Math.round(ap.probCall * 100);
       var cumPct = Math.round(ap.probCumul * 100);
       var label = obsPerYear >= 2 ? 'S' + ap.obs : 'An ' + ap.obs;
-      var bg = cumPct >= 70 ? '#ECFDF5' : cumPct >= 40 ? '#FFF7ED' : '#F8FAFC';
-      var color = cumPct >= 70 ? '#059669' : cumPct >= 40 ? '#D97706' : '#475569';
+      var bg = pct >= 70 ? '#ECFDF5' : pct >= 40 ? '#FFF7ED' : '#F8FAFC';
+      var color = pct >= 70 ? '#059669' : pct >= 40 ? '#D97706' : '#475569';
       html += '<div style="padding:4px 8px;background:' + bg + ';border:1px solid #E2E8F0;border-radius:4px;text-align:center;min-width:50px">';
       html += '<div style="font-size:9px;color:#94A3B8">' + label + '</div>';
       html += '<div style="font-size:12px;font-weight:700;color:' + color + '">' + pct + '%</div>';
-      html += '<div style="font-size:9px;color:#94A3B8">cum. ' + cumPct + '%</div>';
+      html += (hasAutocallProb ? '<div style="font-size:9px;color:#94A3B8">cum. ' + cumPct + '%</div>' : '');
       html += '</div>';
     });
     html += '</div>';
 
     if (hasMemory) {
       html += '<div style="padding:6px 10px;background:#ECFDF5;border:1px solid #6EE7B7;border-radius:4px;font-size:10px;color:#065F46;margin-bottom:4px">';
-      html += '🧠 <strong>Effet mémoire</strong> : les coupons non versés sont accumulés et versés dès que la condition est remplie. Sur ' + totalObs2 + ' observations, la probabilité de ne JAMAIS recevoir de coupon est de ' + Math.round(probReachMaturity * 100) + '%.</div>';
+      html += '🧠 <strong>Effet mémoire</strong> : les coupons non versés sont accumulés et versés dès que la condition est remplie. Sur ' + totalObs2 + ' observations, la probabilité de ne JAMAIS recevoir de coupon est de ' + Math.round((hasAutocallProb ? probReachMaturity : probNoCoupon) * 100) + '%.</div>';
     }
 
-    html += '<div style="font-size:10px;color:#94A3B8;margin-top:4px">Vol implicite : ' + vol.toFixed(1) + '% · Trigger autocall : ' + triggerAC + '%' + (er.stepDown ? ' (step-down -' + er.stepDownPct + '%/sem)' : '') + '</div>';
+    html += '<div style="font-size:10px;color:#94A3B8;margin-top:4px">Vol implicite : ' + vol.toFixed(1) + '% · ' + (hasAutocallProb ? 'Trigger autocall : ' : 'Seuil coupon : ') + triggerAC + '%' + (er.stepDown ? ' (step-down -' + er.stepDownPct + '%/sem)' : '') + '</div>';
 
     // ─── Détail coupon & remboursement ───
     var nominal = parseFloat(p.investedAmount) || parseFloat(p.minInvestment) || 100000;

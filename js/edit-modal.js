@@ -323,6 +323,13 @@ window.handleJSONImport = function() {
                 if (json.earlyRedemption.firstCallDate) p.earlyRedemption.firstCallDate = json.earlyRedemption.firstCallDate;
             }
             if (json.maturityYears) p.maturityYears = json.maturityYears;
+            if (json.maturityDate) p.maturityDate = json.maturityDate;
+            if (json.strikeDate) p.strikeDate = json.strikeDate;
+            if (json.guarantorRating) p.guarantorRating = json.guarantorRating;
+            if (json.capitalProtection && json.capitalProtection.guaranteeType) { if (!p.capitalProtection) p.capitalProtection = {}; p.capitalProtection.guaranteeType = json.capitalProtection.guaranteeType; }
+            if (json.fees) p.fees = json.fees;
+            if (json.sri != null) p.sri = json.sri;
+            if (json.riy != null) p.riy = json.riy;
             p.aiParsed = json;
             console.log('[EditModal V2.0] Product enriched with ALL JSON data');
         }
