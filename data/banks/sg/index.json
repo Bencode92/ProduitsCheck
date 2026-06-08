@@ -1,14 +1,46 @@
 {
   "bankId": "sg",
   "bankName": "Société Générale",
-  "lastUpdated": "2026-04-20T15:05:52.184Z",
+  "lastUpdated": "2026-06-08T09:14:56.279Z",
   "products": [
     {
-      "id": "sp_mnddjla9_k0729",
+      "id": "sp_mmxlydbl_xf7dk",
+      "name": "iShares NASDAQ US Biotechnology UCITS ETF USD Accu",
+      "type": "autre",
+      "status": "archived",
+      "score": null,
+      "receivedDate": "2026-03-19"
+    },
+    {
+      "id": "sp_mn4cdgbe_ltmf4",
       "name": "NOTE TAUX FIXE CALLABLE BONUS PAIEMENT À MATURITÉ",
-      "type": "taux-fixe",
+      "type": "capital-protege",
       "status": "analyzing",
-      "score": 100,
+      "score": 51,
+      "receivedDate": "2026-03-24"
+    },
+    {
+      "id": "sp_mn8rt0zi_qm8jd",
+      "name": "ATHENA SUR INDICE SOLACTIVE GOLD MINERS À DÉCRÉMENT 2",
+      "type": "autocall",
+      "status": "analyzing",
+      "score": 63,
+      "receivedDate": "2026-03-27"
+    },
+    {
+      "id": "sp_mn8tra0s_xx6xs",
+      "name": "Solution Court Terme Boostée sur Panier d'Actions 3",
+      "type": "autre",
+      "status": "analyzing",
+      "score": 65,
+      "receivedDate": "2026-03-27"
+    },
+    {
+      "id": "sp_mncziezm_9igz5",
+      "name": "ATHENA SUR INDICE SOLACTIVE GOLD MINERS À DÉCRÉMENT",
+      "type": "autocall",
+      "status": "analyzing",
+      "score": 79,
       "receivedDate": "2026-03-30"
     },
     {
@@ -16,7 +48,7 @@
       "name": "SOLUTION COURT TERME BOOSTÉE SUR PANIER D'ACTIONS",
       "type": "dispersion",
       "status": "subscribed",
-      "score": null,
+      "score": 68,
       "receivedDate": "2026-04-19"
     },
     {
@@ -24,7 +56,23 @@
       "name": "ATHENA SUR INDICE SOLACTIVE GOLD MINERS À DÉCRÉMENT",
       "type": "autocall",
       "status": "analyzing",
-      "score": null,
+      "score": 33,
+      "receivedDate": "2026-04-19"
+    },
+    {
+      "id": "sp_mo7bumy6_q989o",
+      "name": "SOLUTION COURT TERME BOOSTÉE SUR PANIER D'ACTIONS (ByCam)",
+      "type": "dispersion",
+      "status": "active",
+      "score": 70,
+      "receivedDate": "2026-04-19"
+    },
+    {
+      "id": "sp_mo7buop6_9lluc",
+      "name": "SOLUTION COURT TERME BOOSTÉE SUR PANIER D'ACTIONS (Cam.)",
+      "type": "dispersion",
+      "status": "active",
+      "score": 68,
       "receivedDate": "2026-04-19"
     }
   ]
