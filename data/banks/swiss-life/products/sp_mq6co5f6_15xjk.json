@@ -1,0 +1,241 @@
+{
+  "id": "sp_mq6co5f6_15xjk",
+  "name": "Objectif Août 2026",
+  "type": "autocall",
+  "structureType": "autocall",
+  "emitter": "Natixis Structured Issuance SA",
+  "guarantor": "Natixis S.A.",
+  "guarantorRating": {
+    "moodys": "A2",
+    "sp": "A+",
+    "fitch": "A+"
+  },
+  "underlyings": [
+    "Banco Bilbao Vizcaya Argentaria SA",
+    "Renault SA",
+    "Rheinmetall AG",
+    "Siemens Energy AG",
+    "UniCredit SpA"
+  ],
+  "underlyingType": "basket",
+  "currency": "EUR",
+  "maturity": "8 ans",
+  "maturityYears": 8,
+  "coupon": {
+    "rate": 9.55,
+    "rateIfCalled": null,
+    "rateIfMaturity": null,
+    "type": "conditionnel",
+    "frequency": "annuel",
+    "trigger": 100,
+    "memory": false,
+    "paymentTiming": "periodic"
+  },
+  "participationRate": null,
+  "capitalProtection": {
+    "protected": false,
+    "level": null,
+    "barrier": 60,
+    "barrierCoupon": 100,
+    "barrierType": "europeenne",
+    "guaranteeType": "barriere"
+  },
+  "earlyRedemption": {
+    "possible": true,
+    "type": "autocall",
+    "trigger": 100,
+    "frequency": "annuel",
+    "startSemester": 2,
+    "stepDown": false,
+    "stepDownPct": null
+  },
+  "decrementPct": null,
+  "actualDividendYield": null,
+  "mechanism": "Remboursement automatique anticipé de l'année 1 à 7 si le niveau du panier équipondéré est supérieur ou égal à son niveau de référence initial, avec un gain de 9,55% par année écoulée. À l'échéance, protection du capital si le niveau est supérieur ou égal à 60% du niveau initial, sinon perte en capital proportionnelle à la baisse du panier.",
+  "risks": [
+    "Risque de perte en capital",
+    "Risque de perte en capital lié au sous-jacent",
+    "Risque lié à l'éventuelle ouverture d'une procédure de résolution ou de faillite",
+    "Risque de volatilité, risque de liquidité",
+    "Risques liés à certains événements affectant les sous-jacents"
+  ],
+  "summary": "Titre de créance complexe de 8 ans adossé à un panier équipondéré de 5 actions européennes. Mécanisme de remboursement automatique anticipé possible de l'année 1 à 7 avec gain de 9,55% par année écoulée si le panier est au-dessus de son niveau initial. Capital à risque sous la barrière de 60% à l'échéance.",
+  "aiParsed": {
+    "name": "Objectif Août 2026",
+    "type": "autocall",
+    "structureType": "autocall",
+    "emitter": "Natixis Structured Issuance SA",
+    "guarantor": "Natixis S.A.",
+    "guarantorRating": {
+      "moodys": "A2",
+      "sp": "A+",
+      "fitch": "A+"
+    },
+    "underlyings": [
+      "Banco Bilbao Vizcaya Argentaria SA",
+      "Renault SA",
+      "Rheinmetall AG",
+      "Siemens Energy AG",
+      "UniCredit SpA"
+    ],
+    "underlyingType": "basket",
+    "currency": "EUR",
+    "maturity": "8 ans",
+    "maturityYears": 8,
+    "maturityDate": "2034-08-14",
+    "strikeDate": "2026-08-07",
+    "coupon": {
+      "rate": 9.55,
+      "rateIfCalled": null,
+      "rateIfMaturity": null,
+      "type": "conditionnel",
+      "frequency": "annuel",
+      "trigger": 100,
+      "memory": false,
+      "paymentTiming": "periodic"
+    },
+    "participationRate": null,
+    "guaranteedYears": 0,
+    "autocallCumulTarget": null,
+    "commissions": 8,
+    "fees": {
+      "custodyAnnual": 0.5,
+      "structuring": 8
+    },
+    "sri": null,
+    "riy": null,
+    "isin": "FR0014018G04",
+    "minInvestment": 1000,
+    "capitalProtection": {
+      "protected": false,
+      "level": null,
+      "barrier": 60,
+      "barrierCoupon": 100,
+      "barrierType": "europeenne",
+      "guaranteeType": "barriere"
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "autocall",
+      "trigger": 100,
+      "frequency": "annuel",
+      "startSemester": 2,
+      "stepDown": false,
+      "stepDownPct": null
+    },
+    "decrementPct": null,
+    "actualDividendYield": null,
+    "mechanism": "Remboursement automatique anticipé de l'année 1 à 7 si le niveau du panier équipondéré est supérieur ou égal à son niveau de référence initial, avec un gain de 9,55% par année écoulée. À l'échéance, protection du capital si le niveau est supérieur ou égal à 60% du niveau initial, sinon perte en capital proportionnelle à la baisse du panier.",
+    "risks": [
+      "Risque de perte en capital",
+      "Risque de perte en capital lié au sous-jacent",
+      "Risque lié à l'éventuelle ouverture d'une procédure de résolution ou de faillite",
+      "Risque de volatilité, risque de liquidité",
+      "Risques liés à certains événements affectant les sous-jacents"
+    ],
+    "summary": "Titre de créance complexe de 8 ans adossé à un panier équipondéré de 5 actions européennes. Mécanisme de remboursement automatique anticipé possible de l'année 1 à 7 avec gain de 9,55% par année écoulée si le panier est au-dessus de son niveau initial. Capital à risque sous la barrière de 60% à l'échéance.",
+    "scenarios": {
+      "stress": null,
+      "defavorable": null,
+      "median": null,
+      "favorable": null
+    },
+    "aiParsed": {
+      "name": "Objectif Août 2026",
+      "isin": "FR0014018G04",
+      "structureType": "autocall",
+      "emitter": "Natixis Structured Issuance SA",
+      "guarantor": "Natixis S.A.",
+      "guarantorRating": {
+        "moodys": "A2",
+        "sp": "A+",
+        "fitch": "A+"
+      },
+      "underlyings": [
+        "Banco Bilbao Vizcaya Argentaria SA",
+        "Renault SA",
+        "Rheinmetall AG",
+        "Siemens Energy AG",
+        "UniCredit SpA"
+      ],
+      "underlyingType": "basket",
+      "currency": "EUR",
+      "maturity": "8 ans",
+      "maturityYears": 8,
+      "maturityDate": "2034-08-14",
+      "strikeDate": "2026-08-07",
+      "coupon": {
+        "rate": 9.55,
+        "rateIfCalled": null,
+        "rateIfMaturity": null,
+        "type": "conditionnel",
+        "frequency": "annuel",
+        "trigger": 100,
+        "memory": false,
+        "paymentTiming": "periodic"
+      },
+      "participationRate": null,
+      "guaranteedYears": 0,
+      "autocallCumulTarget": null,
+      "commissions": 8,
+      "commissionAnnualOverLife": true,
+      "commissionRecurringAnnual": 0.5,
+      "capitalProtection": {
+        "protected": false,
+        "level": null,
+        "barrier": 60,
+        "barrierCoupon": 100,
+        "barrierType": "europeenne",
+        "guaranteeType": "barriere"
+      },
+      "earlyRedemption": {
+        "possible": true,
+        "type": "autocall",
+        "trigger": 100,
+        "frequency": "annuel",
+        "startSemester": 2,
+        "stepDown": false,
+        "stepDownPct": null,
+        "firstCallDate": null,
+        "callSchedule": []
+      },
+      "decrementPct": null,
+      "actualDividendYield": null,
+      "minInvestment": 1000,
+      "sri": null,
+      "riy": null,
+      "costEntry": null,
+      "costExit": null,
+      "costOngoing": null,
+      "scenarios": {
+        "stress": null,
+        "defavorable": null,
+        "median": null,
+        "favorable": null
+      },
+      "mechanism": "Remboursement automatique anticipé de l'année 1 à 7 si le niveau du panier équipondéré est supérieur ou égal à son niveau de référence initial, avec un gain de 9,55% par année écoulée. À l'échéance, protection du capital si le niveau est supérieur ou égal à 60% du niveau initial, sinon perte en capital proportionnelle à la baisse du panier.",
+      "risks": [
+        "Risque de perte en capital",
+        "Risque de perte en capital lié au sous-jacent",
+        "Risque lié à l'éventuelle ouverture d'une procédure de résolution ou de faillite",
+        "Risque de volatilité, risque de liquidité",
+        "Risques liés à certains événements affectant les sous-jacents"
+      ],
+      "summary": "Titre de créance complexe de 8 ans adossé à un panier équipondéré de 5 actions européennes. Mécanisme de remboursement automatique anticipé possible de l'année 1 à 7 avec gain de 9,55% par année écoulée si le panier est au-dessus de son niveau initial. Capital à risque sous la barrière de 60% à l'échéance.",
+      "fees": {
+        "custodyAnnual": 0.5,
+        "structuring": 8
+      },
+      "_parsingAlerts": []
+    },
+    "sourceFile": "Brochure OBJECTIF AOUT 2026.pdf"
+  },
+  "sourceFile": "JSON import",
+  "bankId": "swiss-life",
+  "status": "analyzing",
+  "receivedDate": "2026-06-09",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null
+}
