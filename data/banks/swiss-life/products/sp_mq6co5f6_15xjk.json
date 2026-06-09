@@ -237,5 +237,257 @@
   "conversation": [],
   "conversationSummary": null,
   "decision": null,
-  "decisionReason": null
+  "decisionReason": null,
+  "aiCategory": "autocall-multi",
+  "aiCategoryLabel": "⚡ Autocall Multi-actifs",
+  "aiCategoryColor": "#2EC4B6",
+  "aiOpinion": "Ce produit offre un rendement attractif de 9,55% annuel avec possibilité de remboursement anticipé, mais présente un risque élevé sans protection du capital sur 5 sous-jacents européens diversifiés. La barrière à 60% offre une marge de sécurité raisonnable, mais l'exposition à des secteurs cycliques comme l'automobile et l'énergie augmente la volatilité.",
+  "aiAnalyzedAt": "2026-06-09T08:00:36.492Z",
+  "grading": {
+    "grade": "D",
+    "score": 35,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 40,
+        "base": 20,
+        "delta": 0,
+        "reasoning": "Rendement: base 20 → -7 = 13 (Barrière coupon à 100% très exigeante en stagflation avec 2 SJ à DD>40% et ENR ultra-volatile (vol 61%, DD 72%)) | Coupon 9.55%, barrière 60% | Barr.coupon 100% | Mat espérée: ~4.9a (prob mat: 33%) | Basket +30pts (vol÷0.77)",
+        "_bsDelta": 20,
+        "_bs": {
+          "score": 40,
+          "probCoupon": 47.5,
+          "rendementNet": 0.89,
+          "perteEsperee": 3.64,
+          "couponEffectif": 9.55,
+          "vols": [
+            28.34,
+            31.98,
+            41.24,
+            29.34,
+            30.48
+          ],
+          "matEsperee": 4.9,
+          "isBasket": true
+        }
+      },
+      "underlyingQuality": {
+        "score": 57,
+        "base": 36,
+        "delta": -7,
+        "reasoning": "Qualité: base 36 → -7 = 29 (2 financières (BBVA/UCG) dans secteur évité en stagflation + ENR beta 1.6 très sensible aux chocs macro avec pétrole à $94) | Worst: Renault SA B:40 | Basket équipondéré 5 actifs: P2 +28pts (diversification)"
+      },
+      "portfolioFit": {
+        "score": 43,
+        "base": 62,
+        "delta": -5,
+        "reasoning": "Fit: base 62 → -5 = 57 (Diversification sectorielle correcte mais surexposition financières (40%) inadaptée au régime stagflationniste actuel)"
+      },
+      "riskPremium": {
+        "score": 9,
+        "base": 5,
+        "delta": 0,
+        "reasoning": "Prime: base 5 | 9.55% vs CAT 2.8% (spread 6.8%) | Illiq. premium +1.6% (-8pts)"
+      }
+    },
+    "verdict": "Produit inadapté au régime STAGFLATION actuel avec 40% d'exposition aux financières (secteur évité) et un worst-of RNO à -49.7% du strike. La barrière coupon à 100% rend improbable le versement régulier avec ENR hyper-volatile (61.44%) et beta 1.6 dans un contexte de pétrole à $94. Score final de 14/100 reflète un risque-rendement défavorable avec forte probabilité de subir la maturité complète sans coupons.",
+    "keyRisks": [
+      "ENR (énergie) : volatilité 61% + beta 1.6 = amplification extrême des chocs pétroliers en stagflation",
+      "40% financières (BBVA/UCG) dans secteur explicitement évité par le régime macro actuel",
+      "RNO déjà à -50% du strike avec risque d'activation barrière capital à 60% si stress macro",
+      "Barrière à 0.29σ (Critique) — vol 61.44%"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 9.55,
+        "return_eur": 9550,
+        "probability": 0.15,
+        "duration_years": 1
+      },
+      "base": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.4,
+        "duration_years": 8
+      },
+      "stress": {
+        "return_pct": -15,
+        "return_eur": -15000,
+        "probability": 0.3,
+        "duration_years": 8
+      },
+      "worst": {
+        "return_pct": -40,
+        "return_eur": -40000,
+        "probability": 0.15,
+        "duration_years": 8
+      }
+    },
+    "confidenceInterval": {
+      "low": 12,
+      "high": 36,
+      "halfWidth": 12,
+      "gradeStable": false,
+      "gradeRange": "F-D",
+      "label": "F [12-36]"
+    },
+    "metadata": {
+      "gradedAt": "2026-06-09T08:01:03.135Z",
+      "durationMs": 24740,
+      "aiUsed": true,
+      "version": "7.1",
+      "productType": "autocall",
+      "marketDataAvailable": true,
+      "catBenchmark": 2.8,
+      "catSource": "allocator-confirmed",
+      "couponAnnualized": 9.55,
+      "couponRaw": 9.55,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": true,
+      "barrierPct": 60,
+      "barrierCouponPct": 100,
+      "couponProbability": 47.5,
+      "expectedMaturity": 4.9,
+      "maxMaturity": 8,
+      "probReachMaturity": 33,
+      "maxBeta": 1.6,
+      "baseScore": 29,
+      "baseGrade": "D",
+      "adjustments": {
+        "p1": -7,
+        "p2": -7,
+        "p3": -5,
+        "p4": 0
+      },
+      "barrier_sigma": 0.29,
+      "barrier_sigma_label": "Critique",
+      "barrier_sigma_danger": true,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Rappelable 12M",
+      "ci_low": 12,
+      "ci_high": 36,
+      "ci_label": "F [12-36]",
+      "issuer_rating": "A+",
+      "issuer_tier": "IG",
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "autocall",
+      "bsRendementNet": 0.89,
+      "bsProbCoupon": 47.5,
+      "bsPerteEsperee": 3.64,
+      "bsVols": [
+        28.34,
+        31.98,
+        41.24,
+        29.34,
+        30.48
+      ],
+      "bsMatEsperee": 4.9,
+      "isBasket": true,
+      "issuerCreditPenalty": 1,
+      "issuerCDS": 60,
+      "v6Weights": {
+        "p1": 0.25,
+        "p2": 0.2,
+        "p3": 0.25,
+        "p4": 0.3
+      },
+      "inputHash": "gjv84s7",
+      "gradeT0": "2026-06-09T08:01:03.135Z",
+      "trackingLevelAt0": null,
+      "stockData": [
+        {
+          "name": "Banco Bilbao Vizcaya Argentaria SA",
+          "ticker": "BBVA",
+          "sector": "Finance",
+          "perf_ytd": -2,
+          "perf_1y": 48.3,
+          "volatility_3y": 28.34,
+          "max_drawdown_3y": 23.28,
+          "buffett_score": 83,
+          "quality_score": 73,
+          "buffett_grade": "A"
+        },
+        {
+          "name": "Renault SA",
+          "ticker": "RNO",
+          "sector": "Biens de consommation cycliques",
+          "perf_ytd": -23.35,
+          "perf_1y": -37.51,
+          "volatility_3y": 31.98,
+          "max_drawdown_3y": 49.7,
+          "buffett_score": 40,
+          "quality_score": 47,
+          "buffett_grade": "C"
+        },
+        {
+          "name": "Rheinmetall AG",
+          "ticker": "RHM",
+          "sector": "Industries",
+          "perf_ytd": -23.75,
+          "perf_1y": -36.76,
+          "volatility_3y": 41.24,
+          "max_drawdown_3y": 43.68,
+          "buffett_score": 50,
+          "quality_score": 66,
+          "buffett_grade": "C"
+        },
+        {
+          "name": "Siemens Energy AG",
+          "ticker": "ENR",
+          "sector": "Industries",
+          "perf_ytd": 32.46,
+          "perf_1y": 80.16,
+          "volatility_3y": 61.44,
+          "max_drawdown_3y": 71.81,
+          "buffett_score": 40,
+          "quality_score": 45,
+          "buffett_grade": "C"
+        },
+        {
+          "name": "UniCredit SpA",
+          "ticker": "UCG",
+          "sector": "Finance",
+          "perf_ytd": 4.87,
+          "perf_1y": 29.51,
+          "volatility_3y": 30.48,
+          "max_drawdown_3y": 24.12,
+          "buffett_score": 80,
+          "quality_score": 75,
+          "buffett_grade": "A"
+        }
+      ]
+    },
+    "regimeScenarios": {
+      "current": {
+        "score": 35,
+        "grade": "D",
+        "label": "Actuel (stagflation)",
+        "desc": "Régime actuel → volatilité modérée"
+      },
+      "bull": {
+        "score": 40,
+        "grade": "D",
+        "label": "Bull / Risk-on",
+        "delta": 5,
+        "desc": "Marchés haussiers → prob coupon monte, barrière safe"
+      },
+      "crash": {
+        "score": 27,
+        "grade": "D",
+        "label": "Crash / Récession",
+        "delta": -8,
+        "desc": "Marchés baissiers → barrière menacée, vol en hausse"
+      }
+    }
+  },
+  "_couponProbability": 47.5,
+  "_bsRendementNet": 0.89
 }
