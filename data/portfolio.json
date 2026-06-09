@@ -600,7 +600,18 @@
       "_basketInfo": "Panier équipondéré 5 actions"
     },
     "_couponProbability": 80.5,
-    "_bsRendementNet": 5.63
+    "_bsRendementNet": 5.63,
+    "tracking": {
+      "history": [
+        {
+          "date": "2026-06-09",
+          "level": 102,
+          "year": 1
+        }
+      ],
+      "level": 102,
+      "date": "2026-06-09"
+    }
   },
   {
     "id": "sp_mmxib83f_9qosf",
