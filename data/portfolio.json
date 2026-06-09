@@ -2984,7 +2984,6 @@
     "capitalProtection": {
       "protected": true,
       "level": 100,
-      "barrier": null,
       "barrierCoupon": 100,
       "barrierType": "europeenne",
       "guaranteeType": "formule"
@@ -2996,10 +2995,10 @@
       "frequency": "annuel",
       "startSemester": 1,
       "stepDown": false,
-      "stepDownPct": null
+      "stepDownPct": null,
+      "hasAutocall": true,
+      "enabled": true
     },
-    "decrementPct": null,
-    "actualDividendYield": null,
     "mechanism": "Remboursement automatique anticipé si l'action ENI S.p.A. clôture à un niveau supérieur ou égal à 100% de son niveau initial à une date de constatation annuelle, avec gain de 5,7% par année écoulée. Protection du capital à l'échéance.",
     "risks": [
       "risque de perte en capital en cours de vie",
@@ -3370,6 +3369,9 @@
       ],
       "level": 102.8,
       "date": "2026-06-09"
-    }
+    },
+    "envelope": "cameleons",
+    "guaranteedYears": 0,
+    "autocallCumulTarget": 100
   }
 ]
