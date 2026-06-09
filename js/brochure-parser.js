@@ -103,6 +103,7 @@
     '- RANGE ACCRUAL: rangeAccrual.lowerBound, rangeAccrual.upperBound, rangeAccrual.reference',
     '- DISPERSION: participationRate, nombre de paires',
     '- TOUS: isin (code ISIN si trouvé), commissions (% TTC si mentionné)',
+    'COMMISSIONS — IMPORTANT : si la commission de distribution est exprimée « X% ANNUEL ... sur la durée de vie maximale » (ou « par an sur la durée »), mets commissions=X ET commissionAnnualOverLife=true (le total upfront = X × maturité sera calculé ensuite). Si une commission RÉCURRENTE séparée « Y% annuel » existe en plus, mets commissionRecurringAnnual=Y. Ne confonds pas « X% annuel sur N ans » (= N×X au total) avec « X% une seule fois ».',
     '',
     'SI LE DOCUMENT EST UN KID / DIC PRIIPs (titres "Informations clés", "Indicateur de risque",',
     '"Scénarios de performance", "Quels sont les coûts ?", "Réduction du rendement / RIY") :',
@@ -118,7 +119,7 @@
     '{"name":"","isin":"","structureType":"","emitter":"","guarantor":"","guarantorRating":{"moodys":"","sp":"","fitch":""},',
     '"underlyings":[],"underlyingType":"","currency":"EUR","maturity":"","maturityYears":0,"maturityDate":null,"strikeDate":null,',
     '"coupon":{"rate":0,"rateIfCalled":null,"rateIfMaturity":null,"type":"","frequency":"","trigger":null,"memory":false,"paymentTiming":""},',
-    '"participationRate":null,"guaranteedYears":0,"autocallCumulTarget":null,"commissions":null,',
+    '"participationRate":null,"guaranteedYears":0,"autocallCumulTarget":null,"commissions":null,"commissionAnnualOverLife":false,"commissionRecurringAnnual":null,',
     '"capitalProtection":{"protected":false,"level":null,"barrier":null,"barrierCoupon":null,"barrierType":"europeenne","guaranteeType":null},',
     '"earlyRedemption":{"possible":false,"type":"","trigger":null,"frequency":"","startSemester":null,"stepDown":false,"stepDownPct":null,"firstCallDate":null,"callSchedule":[]},',
     '"decrementPct":null,"actualDividendYield":null,"minInvestment":null,',
@@ -230,6 +231,21 @@
       if (_co != null) data.fees.custodyAnnual = _co;
       // commissions (marge upfront utilisée par le scoring) ← coût d'entrée KID si non déjà saisi
       if ((data.commissions == null || data.commissions === '') && _ce != null) data.commissions = _ce;
+    }
+
+    // Commission « X% ANNUEL sur la durée de vie maximale » → coût UPFRONT total = X × maturité.
+    // (ex. Natixis/Swiss Life : 1,00%/an × 8 ans = 8% upfront, pas 1%). + récurrente → droits de garde.
+    if (data.commissionAnnualOverLife === true && data.commissions != null && parseFloat(data.maturityYears) > 0) {
+      data.commissions = Math.round(parseFloat(data.commissions) * parseFloat(data.maturityYears) * 100) / 100;
+    }
+    if (data.commissionRecurringAnnual != null && data.commissionRecurringAnnual !== '') {
+      data.fees = data.fees || {};
+      if (data.fees.custodyAnnual == null) data.fees.custodyAnnual = parseFloat(data.commissionRecurringAnnual);
+    }
+    // La commission (marge upfront) alimente fees.structuring pour le calcul du net.
+    if (data.commissions != null && data.commissions !== '') {
+      data.fees = data.fees || {};
+      if (data.fees.structuring == null) data.fees.structuring = parseFloat(data.commissions);
     }
 
     // Type de protection : ne pas survendre « garanti ». Par défaut, un capital protégé à
