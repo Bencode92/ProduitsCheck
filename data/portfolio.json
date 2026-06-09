@@ -3161,6 +3161,194 @@
     "bankId": "",
     "investedAmount": 30000,
     "addedDate": "2026-06-09",
-    "status": "active"
+    "status": "active",
+    "grading": {
+      "grade": "D",
+      "score": 43,
+      "killCriteria": {
+        "triggered": false,
+        "reasons": []
+      },
+      "pillars": {
+        "adjustedReturn": {
+          "score": 51,
+          "base": 62,
+          "delta": 0,
+          "reasoning": "Rendement: base 62 → -1 = 61 (Autocall à 100% en stagflation avec VIX à 22 réduit drastiquement la probabilité de rappel anticipé, maturité espérée de 2.3a trop optimiste) | Coupon 5.7%, protégé | Barr.coupon 100% | Mat espérée: ~2.3a (prob mat: 0%)",
+          "_bsDelta": -10,
+          "_bs": {
+            "score": 52,
+            "probCoupon": 49.3,
+            "rendementNet": 2.81,
+            "perteEsperee": 0,
+            "couponEffectif": 5.7,
+            "vols": [
+              21.39
+            ],
+            "matEsperee": 2.3,
+            "isBasket": false
+          }
+        },
+        "underlyingQuality": {
+          "score": 51,
+          "base": 50,
+          "delta": 1,
+          "reasoning": "Qualité: base 50 → +1 = 51 (ENI dans secteur energy FAVORISÉ en stagflation (Brent $94), beta défensif 0.49 idéal dans ce régime, fondamentaux solides) | Worst: ENI S.p.A. B:33"
+        },
+        "portfolioFit": {
+          "score": 55,
+          "base": 70,
+          "delta": 1,
+          "reasoning": "En portefeuille"
+        },
+        "riskPremium": {
+          "score": 16,
+          "base": 7,
+          "delta": 0,
+          "reasoning": "Capital garanti: coupon espéré 2.9% (5.7%×50% proba) - CAT 2.5% - illiq 0.8% = -0.4%"
+        }
+      },
+      "verdict": "Produit défensif adapté au régime STAGFLATIONNAIRE actuel avec ENI bénéficiant directement du Brent à $94 (secteur energy favorisé). Le capital garanti offre une protection totale mais l'autocall à 100% sera très difficile à atteindre avec VIX à 22, impliquant probablement une détention jusqu'à maturité (12 ans). Le coupon de 5.7% reste attractif vs obligations IG à 135bps, mais l'illiquidité sur une période aussi longue est le principal défaut.",
+      "keyRisks": [
+        "Blocage probable sur 12 ans avec autocall à 100% irréaliste en stagflation",
+        "Risque géopolitique si Brent dépasse $110 pourrait paradoxalement pénaliser ENI (rationnements/taxes exceptionnelles)"
+      ],
+      "negotiationPoints": [],
+      "scenarios": {
+        "optimistic": {
+          "return_pct": 5.7,
+          "return_eur": 6840,
+          "probability": 0.15,
+          "duration_years": 2
+        },
+        "base": {
+          "return_pct": 5.7,
+          "return_eur": 20520,
+          "probability": 0.5,
+          "duration_years": 6
+        },
+        "stress": {
+          "return_pct": 5.7,
+          "return_eur": 20520,
+          "probability": 0.25,
+          "duration_years": 12
+        },
+        "worst": {
+          "return_pct": 0,
+          "return_eur": 0,
+          "probability": 0.1,
+          "duration_years": 12
+        }
+      },
+      "confidenceInterval": {
+        "low": 34,
+        "high": 48,
+        "halfWidth": 7,
+        "gradeStable": false,
+        "gradeRange": "D-C",
+        "label": "D [34-48]"
+      },
+      "metadata": {
+        "gradedAt": "2026-06-09T07:37:52.596Z",
+        "durationMs": 22220,
+        "aiUsed": true,
+        "version": "7.1",
+        "productType": "autocall",
+        "marketDataAvailable": true,
+        "catBenchmark": 2.8,
+        "catSource": "allocator-confirmed",
+        "couponAnnualized": 5.7,
+        "couponRaw": 5.7,
+        "couponMultiplier": 1,
+        "couponFrequency": "annuel",
+        "isInPortfolio": true,
+        "hasBarrier": false,
+        "barrierPct": 0,
+        "barrierCouponPct": 100,
+        "couponProbability": 49.3,
+        "expectedMaturity": 2.3,
+        "maxMaturity": 12,
+        "probReachMaturity": 0,
+        "maxBeta": 0.49,
+        "baseScore": 41,
+        "baseGrade": "D",
+        "adjustments": {
+          "p1": -1,
+          "p2": 1,
+          "p3": 1,
+          "p4": 0
+        },
+        "barrier_sigma": null,
+        "barrier_sigma_label": null,
+        "barrier_sigma_danger": null,
+        "liquidity_level": "L3",
+        "liquidity_score": 40,
+        "liquidity_label": "Rappelable 12M",
+        "ci_low": 34,
+        "ci_high": 48,
+        "ci_label": "D [34-48]",
+        "issuer_rating": null,
+        "issuer_tier": null,
+        "hasDecrement": false,
+        "decrementDrag": 0,
+        "structureType": "autocall",
+        "bsRendementNet": 2.81,
+        "bsProbCoupon": 49.3,
+        "bsPerteEsperee": 0,
+        "bsVols": [
+          21.39
+        ],
+        "bsMatEsperee": 2.3,
+        "isBasket": false,
+        "v6Weights": {
+          "p1": 0.35,
+          "p2": 0.25,
+          "p3": 0.15,
+          "p4": 0.25
+        },
+        "inputHash": "gcj4o92",
+        "gradeT0": "2026-06-09T07:37:52.596Z",
+        "trackingLevelAt0": null,
+        "envelopeMode": "swiss-life",
+        "stockData": [
+          {
+            "name": "ENI S.p.A.",
+            "ticker": "ENI",
+            "sector": "Energie",
+            "perf_ytd": 44.26,
+            "perf_1y": 75.46,
+            "volatility_3y": 21.39,
+            "max_drawdown_3y": 26.78,
+            "buffett_score": 33,
+            "quality_score": 25,
+            "buffett_grade": "D"
+          }
+        ]
+      },
+      "regimeScenarios": {
+        "current": {
+          "score": 43,
+          "grade": "D",
+          "label": "Actuel (stagflation)",
+          "desc": "Régime actuel → volatilité modérée"
+        },
+        "bull": {
+          "score": 47,
+          "grade": "C",
+          "label": "Bull / Risk-on",
+          "delta": 4,
+          "desc": "Marchés haussiers → prob coupon monte, barrière safe"
+        },
+        "crash": {
+          "score": 36,
+          "grade": "D",
+          "label": "Crash / Récession",
+          "delta": -7,
+          "desc": "Marchés baissiers → barrière menacée, vol en hausse"
+        }
+      }
+    },
+    "_couponProbability": 49.3,
+    "_bsRendementNet": 2.81
   }
 ]
