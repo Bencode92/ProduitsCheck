@@ -260,16 +260,25 @@
 
     // Autocall : normaliser startSemester en INDEX D'OBSERVATION (le grader compare obs < startSemester).
     // Un autocall ANNUEL rappelable dès l'an 1 doit avoir startSemester = 1, pas 2 (confusion semestre/année).
-    if (er.possible && er.firstCallDate && data.strikeDate) {
+    if (er.possible) {
       try {
         var _freq = ((data.coupon && data.coupon.frequency) || er.frequency || 'annuel').toLowerCase();
         var _opy = _freq.indexOf('trimestr') >= 0 ? 4 : _freq.indexOf('semestr') >= 0 ? 2 : 1;
-        var _yrs = (new Date(er.firstCallDate) - new Date(data.strikeDate)) / (365.25 * 24 * 3600 * 1000);
-        if (_yrs > 0.1) {
-          var _idx = Math.max(1, Math.round(_yrs * _opy));
-          var _maxIdx = (data.maturityYears || 10) * _opy;
-          if (_idx <= _maxIdx) { er.startSemester = _idx; data.earlyRedemption = er; }
+        // 1) Source la plus fiable : la date du 1er rappel (firstCallDate ou 1ère ligne du callSchedule)
+        var _fcd = er.firstCallDate || (Array.isArray(er.callSchedule) && er.callSchedule[0] && er.callSchedule[0].date) || null;
+        if (_fcd && data.strikeDate) {
+          var _yrs = (new Date(_fcd) - new Date(data.strikeDate)) / (365.25 * 24 * 3600 * 1000);
+          if (_yrs > 0.1) {
+            var _idx = Math.max(1, Math.round(_yrs * _opy));
+            if (_idx <= (data.maturityYears || 10) * _opy) er.startSemester = _idx;
+          }
+        } else if (_opy === 1) {
+          // 2) Pas de date : autocall ANNUEL → rappelable dès l'an 1 par défaut (cas dominant).
+          // Évite que la confusion semestre/année fasse sauter l'autocall de l'an 1.
+          er.startSemester = 1;
+          data._startCallAssumedYr1 = true; // pour une alerte de vérif ajoutée plus bas
         }
+        data.earlyRedemption = er;
       } catch (e) {}
     }
 
@@ -543,6 +552,8 @@
     }
     if (!data.commissions) alerts.push('Commissions non détectées (vérifier dans la brochure)');
     if (!data.isin) alerts.push('Code ISIN non détecté');
+    if (data._startCallAssumedYr1) alerts.push('ℹ️ Autocall : 1er rappel supposé à l’an 1 (date non extraite) — vérifie s’il y a une période de non-call.');
+    if (data.commissionAnnualOverLife) alerts.push('💸 Commission « ' + (parseFloat(data.commissions) / (data.maturityYears || 1)).toFixed(2).replace('.', ',') + '%/an × ' + data.maturityYears + ' ans » = ' + data.commissions + '% upfront (estimation). Le chiffre exact = RIY du KID.');
 
     // Clarification capital : ne pas confondre « protégé à l'échéance » et « garanti »
     if (cp.protected === true || parseFloat(cp.level) >= 100) {
