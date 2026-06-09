@@ -2940,5 +2940,227 @@
     "envelope": "cameleons",
     "entity": "cameleons",
     "addedDate": "2026-04-20"
+  },
+  {
+    "id": "sp_mq6bu3ht_oqnil",
+    "name": "SL - ATHENA PRIVILEGE ENI DECEMBRE 2025",
+    "type": "autocall",
+    "structureType": "autocall",
+    "emitter": "Goldman Sachs Finance Corp International Ltd",
+    "guarantor": "The Goldman Sachs Group, Inc.",
+    "guarantorRating": {
+      "moodys": "A2",
+      "sp": "BBB+",
+      "fitch": "A"
+    },
+    "underlyings": [
+      "ENI S.p.A."
+    ],
+    "underlyingType": "single-stock",
+    "currency": "EUR",
+    "maturity": "12 ans",
+    "maturityYears": 12,
+    "coupon": {
+      "rate": 5.7,
+      "rateIfCalled": null,
+      "rateIfMaturity": null,
+      "type": "conditionnel",
+      "frequency": "annuel",
+      "trigger": 100,
+      "memory": false,
+      "paymentTiming": "periodic"
+    },
+    "participationRate": null,
+    "capitalProtection": {
+      "protected": true,
+      "level": 100,
+      "barrier": null,
+      "barrierCoupon": 100,
+      "barrierType": "europeenne",
+      "guaranteeType": "formule"
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "autocall",
+      "trigger": 100,
+      "frequency": "annuel",
+      "startSemester": 1,
+      "stepDown": false,
+      "stepDownPct": null
+    },
+    "decrementPct": null,
+    "actualDividendYield": null,
+    "mechanism": "Remboursement automatique anticipé si l'action ENI S.p.A. clôture à un niveau supérieur ou égal à 100% de son niveau initial à une date de constatation annuelle, avec gain de 5,7% par année écoulée. Protection du capital à l'échéance.",
+    "risks": [
+      "risque de perte en capital en cours de vie",
+      "risque de crédit émetteur/garant",
+      "risque de marché",
+      "risque de liquidité",
+      "risque lié aux événements extraordinaires",
+      "plafonnement des gains"
+    ],
+    "summary": "Titre de créance autocall sur action ENI S.p.A. avec protection du capital à l'échéance et remboursement anticipé possible dès la première année si l'action est au-dessus de son niveau initial, offrant un gain de 5,7% par année écoulée plafonné à 5,56% de rendement annuel maximum.",
+    "aiParsed": {
+      "name": "SL - ATHENA PRIVILEGE ENI DECEMBRE 2025",
+      "type": "autocall",
+      "structureType": "autocall",
+      "emitter": "Goldman Sachs Finance Corp International Ltd",
+      "guarantor": "The Goldman Sachs Group, Inc.",
+      "guarantorRating": {
+        "moodys": "A2",
+        "sp": "BBB+",
+        "fitch": "A"
+      },
+      "underlyings": [
+        "ENI S.p.A."
+      ],
+      "underlyingType": "single-stock",
+      "currency": "EUR",
+      "maturity": "12 ans",
+      "maturityYears": 12,
+      "maturityDate": "2037-12-21",
+      "strikeDate": "2025-12-12",
+      "coupon": {
+        "rate": 5.7,
+        "rateIfCalled": null,
+        "rateIfMaturity": null,
+        "type": "conditionnel",
+        "frequency": "annuel",
+        "trigger": 100,
+        "memory": false,
+        "paymentTiming": "periodic"
+      },
+      "participationRate": null,
+      "guaranteedYears": 0,
+      "autocallCumulTarget": null,
+      "commissions": 0.5,
+      "fees": null,
+      "sri": null,
+      "riy": null,
+      "isin": "XS3033822241",
+      "minInvestment": 1000,
+      "capitalProtection": {
+        "protected": true,
+        "level": 100,
+        "barrier": null,
+        "barrierCoupon": 100,
+        "barrierType": "europeenne",
+        "guaranteeType": "formule"
+      },
+      "earlyRedemption": {
+        "possible": true,
+        "type": "autocall",
+        "trigger": 100,
+        "frequency": "annuel",
+        "startSemester": 1,
+        "stepDown": false,
+        "stepDownPct": null
+      },
+      "decrementPct": null,
+      "actualDividendYield": null,
+      "mechanism": "Remboursement automatique anticipé si l'action ENI S.p.A. clôture à un niveau supérieur ou égal à 100% de son niveau initial à une date de constatation annuelle, avec gain de 5,7% par année écoulée. Protection du capital à l'échéance.",
+      "risks": [
+        "risque de perte en capital en cours de vie",
+        "risque de crédit émetteur/garant",
+        "risque de marché",
+        "risque de liquidité",
+        "risque lié aux événements extraordinaires",
+        "plafonnement des gains"
+      ],
+      "summary": "Titre de créance autocall sur action ENI S.p.A. avec protection du capital à l'échéance et remboursement anticipé possible dès la première année si l'action est au-dessus de son niveau initial, offrant un gain de 5,7% par année écoulée plafonné à 5,56% de rendement annuel maximum.",
+      "scenarios": {
+        "stress": null,
+        "defavorable": null,
+        "median": null,
+        "favorable": null
+      },
+      "aiParsed": {
+        "name": "SL - ATHENA PRIVILEGE ENI DECEMBRE 2025",
+        "isin": "XS3033822241",
+        "structureType": "autocall",
+        "emitter": "Goldman Sachs Finance Corp International Ltd",
+        "guarantor": "The Goldman Sachs Group, Inc.",
+        "guarantorRating": {
+          "moodys": "A2",
+          "sp": "BBB+",
+          "fitch": "A"
+        },
+        "underlyings": [
+          "ENI S.p.A."
+        ],
+        "underlyingType": "single-stock",
+        "currency": "EUR",
+        "maturity": "12 ans",
+        "maturityYears": 12,
+        "maturityDate": "2037-12-21",
+        "strikeDate": "2025-12-12",
+        "coupon": {
+          "rate": 5.7,
+          "rateIfCalled": null,
+          "rateIfMaturity": null,
+          "type": "conditionnel",
+          "frequency": "annuel",
+          "trigger": 100,
+          "memory": false,
+          "paymentTiming": "periodic"
+        },
+        "participationRate": null,
+        "guaranteedYears": 0,
+        "autocallCumulTarget": null,
+        "commissions": 0.5,
+        "capitalProtection": {
+          "protected": true,
+          "level": 100,
+          "barrier": null,
+          "barrierCoupon": 100,
+          "barrierType": "europeenne",
+          "guaranteeType": "formule"
+        },
+        "earlyRedemption": {
+          "possible": true,
+          "type": "autocall",
+          "trigger": 100,
+          "frequency": "annuel",
+          "startSemester": 1,
+          "stepDown": false,
+          "stepDownPct": null,
+          "firstCallDate": "2026-12-14",
+          "callSchedule": []
+        },
+        "decrementPct": null,
+        "actualDividendYield": null,
+        "minInvestment": 1000,
+        "sri": null,
+        "riy": null,
+        "costEntry": null,
+        "costExit": null,
+        "costOngoing": null,
+        "scenarios": {
+          "stress": null,
+          "defavorable": null,
+          "median": null,
+          "favorable": null
+        },
+        "mechanism": "Remboursement automatique anticipé si l'action ENI S.p.A. clôture à un niveau supérieur ou égal à 100% de son niveau initial à une date de constatation annuelle, avec gain de 5,7% par année écoulée. Protection du capital à l'échéance.",
+        "risks": [
+          "risque de perte en capital en cours de vie",
+          "risque de crédit émetteur/garant",
+          "risque de marché",
+          "risque de liquidité",
+          "risque lié aux événements extraordinaires",
+          "plafonnement des gains"
+        ],
+        "summary": "Titre de créance autocall sur action ENI S.p.A. avec protection du capital à l'échéance et remboursement anticipé possible dès la première année si l'action est au-dessus de son niveau initial, offrant un gain de 5,7% par année écoulée plafonné à 5,56% de rendement annuel maximum.",
+        "_parsingAlerts": [
+          "🛡️ Capital protégé à l’échéance par la formule — NON garanti : risque de crédit émetteur (EMTN, bail-in). Le seul risque sur le capital = l’émetteur. Vérifier la ligne « Garantie en capital » du KID."
+        ]
+      },
+      "sourceFile": "Brochure ATHENA PRIVILEGE ENI DECEMBRE 2025 (3).pdf"
+    },
+    "sourceFile": "JSON import",
+    "bankId": "",
+    "investedAmount": 30000,
+    "addedDate": "2026-06-09",
+    "status": "active"
   }
 ]
