@@ -225,6 +225,7 @@ function renderProductSheet(container, state) {
           ${barrier && barrier < 70 ? `<div class="fiche-alert warn">⚠️ Barrière basse (${barrier}%)</div>` : ''}</div></div>
         <div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">⏩</span><span class="fiche-section-title">Remboursement Anticipé</span></div><div class="fiche-section-body">
           <div class="fiche-info-box ${hasAutocall ? 'purple' : 'neutral'}"><div class="fiche-info-box-title">${hasAutocall ? '✓ Rappel anticipé possible' : '✕ Pas de remboursement anticipé'}</div><div class="fiche-info-box-text">${p.earlyRedemption?.type ? `<strong>Type:</strong> ${p.earlyRedemption.type}` : ''}${p.earlyRedemption?.trigger ? ` · <strong>Seuil:</strong> ${p.earlyRedemption.trigger}%` : ''}${p.earlyRedemption?.frequency ? ` · <strong>Fréquence:</strong> ${p.earlyRedemption.frequency}` : ''}${p.earlyRedemption?.stepDown === true || p.earlyRedemption?.stepDown === 'true' ? `<br><strong>Step-down:</strong> Oui — ${p.earlyRedemption.stepDownDetail || 'seuil dégressif'}` : ''}</div></div>${_renderCallSchedule(p)}</div></div>
+        ${_renderFeesNet(p) ? `<div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">💸</span><span class="fiche-section-title">Frais &amp; Rendement net</span></div><div class="fiche-section-body">${_renderFeesNet(p)}</div></div>` : ''}
         <div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">📈</span><span class="fiche-section-title">Métriques Investisseur</span></div><div class="fiche-section-body">
           ${_renderInvestorMetrics(p)}
         </div></div>
@@ -284,6 +285,52 @@ function renderScoreWidget(score) {
 }
 
 // ─── Investor Metrics: MtM, P(loss), spread vs OAT, proba coupon ──────
+// 💸 Frais & Rendement net — ce que le produit donne vraiment, marge déduite.
+function _renderFeesNet(p) {
+  var coupon = p.coupon || {};
+  var couponRate = (typeof coupon === 'object' ? coupon.rate : coupon) || 0;
+  if (!couponRate || typeof scoring === 'undefined' || !scoring.getNetYield) return '';
+  var ny = scoring.getNetYield(p);
+  var fd = scoring.getFeeDrag(p);
+  var fees = fd.fees || {};
+  var matEsp = fd.years;
+  var structAnnual = (fees.structuring || 0) / (matEsp || 1);
+  var custody = fees.custodyAnnual || 0;
+  var net = ny.netAfterFees;                       // net d'IS et de frais (si coupon touché)
+  // Coupon conditionnel → rendement ESPÉRÉ (proba-pondéré) = le vrai chiffre
+  var isCond = coupon.type === 'conditionnel' || (coupon.trigger != null && coupon.trigger !== '');
+  var cprob = (p.grading && p.grading.metadata && p.grading.metadata.couponProbability != null) ? p.grading.metadata.couponProbability / 100 : null;
+  var espereNet = (isCond && cprob != null) ? (ny.gross * cprob * (1 - 0.25) - fd.dragPct) : null;
+  var pc = function (v) { return (v >= 0 ? '+' : '') + v.toFixed(2).replace('.', ',') + '%'; };
+  var netCol = net > 0 ? '#059669' : '#DC2626';
+
+  var h = '<div style="padding:14px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;margin-bottom:8px">';
+  h += '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">';
+  h += '<span style="font-size:11px;font-weight:700;color:#92400E">💸 RENDEMENT NET DE FRAIS & IS</span>';
+  h += '<span style="font-family:var(--mono);font-size:24px;font-weight:800;color:' + netCol + '">' + pc(net) + '/an</span></div>';
+  // Cascade
+  h += '<div style="font-size:12px;color:#475569;line-height:1.8">';
+  h += 'Coupon brut : <strong>' + pc(ny.gross) + '/an</strong><br>';
+  h += '<span style="color:#B45309">− Frais : commission ' + (fees.structuring || 0).toFixed(2).replace('.', ',') + '% amortie sur ~' + (matEsp || 1).toFixed(1) + ' an' + ((matEsp || 1) >= 2 ? 's' : '') + ' = <strong>−' + structAnnual.toFixed(2).replace('.', ',') + '%/an</strong>' + (custody > 0 ? ' (+ garde ' + custody.toFixed(2).replace('.', ',') + '%/an)' : '') + '</span><br>';
+  h += '<span style="color:#B45309">− IS 25%</span><br>';
+  h += '= <strong style="color:' + netCol + '">Net ' + pc(net) + '/an</strong> <span style="color:#94A3B8;font-size:11px">(si coupon touché)</span>';
+  h += '</div>';
+  // Espéré (le vrai pour un conditionnel)
+  if (espereNet != null) {
+    var espCol = espereNet > 0 ? '#059669' : '#DC2626';
+    h += '<div style="margin-top:10px;padding:9px 11px;background:#fff;border:1px solid #FDE68A;border-radius:6px;font-size:12px">';
+    h += '⚠️ Coupon <strong>conditionnel</strong> (proba ~' + Math.round(cprob * 100) + '%) → <strong>Rendement ESPÉRÉ net : <span style="color:' + espCol + '">' + pc(espereNet) + '/an</span></strong><br><span style="font-size:10.5px;color:#64748B">C\'est le vrai rendement attendu, pas le coupon affiché.</span></div>';
+  }
+  // Caveat qualité des frais
+  if (!fd.documented) {
+    h += '<div style="margin-top:6px;font-size:10px;color:#D97706">⚠ Frais non renseignés — net = brut. Saisis la marge (KID) pour un net fiable.</div>';
+  } else {
+    h += '<div style="margin-top:6px;font-size:10px;color:#94A3B8">Frais = commission de distribution. La marge de structuration réelle (KID / RIY) peut être supérieure.</div>';
+  }
+  h += '</div>';
+  return h;
+}
+
 function _renderInvestorMetrics(p) {
   var coupon = p.coupon || {};
   var cp = p.capitalProtection || {};
