@@ -111,11 +111,18 @@ class ScoringEngine {
   // Frais normalisés d'un produit, en %. `documented` = true si au moins un frais est saisi.
   // `commissions` (legacy) = marge de structuration upfront. fees.{structuring,custodyAnnual,exit}.
   getProductFees(p) {
-    const f = (p && p.fees) || {};
+    // Frais : on lit le produit, mais on retombe sur aiParsed (toujours rempli à l'import JSON)
+    // pour ne jamais afficher « 0% / non renseigné » alors que la brochure documente la marge.
+    const ai = (p && p.aiParsed) || {};
+    const aiFees = ai.fees || {};
+    const f = (p && p.fees) || aiFees || {};
     let struct = parseFloat(f.structuring);
-    if (isNaN(struct)) struct = parseFloat(p && p.commissions);
-    const custody = parseFloat(f.custodyAnnual);
-    const exit = parseFloat(f.exit);
+    if (isNaN(struct)) struct = parseFloat(aiFees.structuring);
+    if (isNaN(struct)) struct = parseFloat(p && p.commissions != null ? p.commissions : ai.commissions);
+    let custody = parseFloat(f.custodyAnnual);
+    if (isNaN(custody)) custody = parseFloat(aiFees.custodyAnnual);
+    let exit = parseFloat(f.exit);
+    if (isNaN(exit)) exit = parseFloat(aiFees.exit);
     const documented = !isNaN(struct) || !isNaN(custody) || !isNaN(exit);
     return { structuring: isNaN(struct) ? 0 : struct, custodyAnnual: isNaN(custody) ? 0 : custody, exit: isNaN(exit) ? 0 : exit, documented };
   }
