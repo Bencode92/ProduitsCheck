@@ -242,10 +242,19 @@
         try { norm = ProposalGrader.normalize(product); } catch(e) { return; }
         if (!norm) return;
 
-        var isCapGaranteed = norm.capitalProtection ||
+        // Capital GARANTI = protégé ET sans barrière. Un produit à barrière (capital à RISQUE)
+        // n'est pas capital garanti : ne pas lui appliquer le P4 "capital garanti" (sinon il ignore
+        // la perte attendue et le reasoning contredit le score).
+        var _aiCp = (product.aiParsed && product.aiParsed.capitalProtection) || {};
+        var _protected = norm.capitalProtection === true ||
             (result.metadata.productType === 'capital_garanti') ||
-            (product.capitalProtected) ||
-            (product.aiParsed && product.aiParsed.capitalProtection);
+            (product.capitalProtected === true) ||
+            (_aiCp.protected === true) ||
+            (parseFloat(_aiCp.level) >= 100);
+        var _hasBarrier = parseFloat(norm.barrier) > 0 ||
+            (product.capitalProtection && parseFloat(product.capitalProtection.barrier) > 0) ||
+            (parseFloat(_aiCp.barrier) > 0);
+        var isCapGaranteed = _protected && !_hasBarrier;
 
         if (!isCapGaranteed) return;
 
