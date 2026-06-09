@@ -315,11 +315,46 @@ function _renderFeesNet(p) {
   h += '<span style="color:#B45309">− IS 25%</span><br>';
   h += '= <strong style="color:' + netCol + '">Net ' + pc(net) + '/an</strong> <span style="color:#94A3B8;font-size:11px">(si coupon touché)</span>';
   h += '</div>';
-  // Espéré (le vrai pour un conditionnel)
+  // Espéré (le vrai pour un conditionnel) — DÉTAIL DU CALCUL ligne à ligne
   if (espereNet != null) {
     var espCol = espereNet > 0 ? '#059669' : '#DC2626';
-    h += '<div style="margin-top:10px;padding:9px 11px;background:#fff;border:1px solid #FDE68A;border-radius:6px;font-size:12px">';
-    h += '⚠️ Coupon <strong>conditionnel</strong> (proba ~' + Math.round(cprob * 100) + '%) → <strong>Rendement ESPÉRÉ net : <span style="color:' + espCol + '">' + pc(espereNet) + '/an</span></strong><br><span style="font-size:10.5px;color:#64748B">C\'est le vrai rendement attendu, pas le coupon affiché.</span></div>';
+    var couponEspere = ny.gross * cprob;            // coupon × proba
+    var couponEspereNet = couponEspere * 0.75;      // × (1 − IS)
+    var probSrc = (p.grading && p.grading.metadata && p.grading.metadata.couponProbMethod) || 'Black-Scholes P(panier ≥ seuil)';
+    var nUnd = Array.isArray(p.underlyings) ? p.underlyings.length : 0;
+    var isWO = /worst|pire|moins/i.test((p.basketType || (p.coupon && p.coupon.basketType) || '') + '') || (nUnd > 1 && !/equipond|basket|panier|moyen/i.test((p.basketType || '') + ''));
+    // ligne mono alignée : libellé à gauche, opérande + valeur à droite
+    var row = function (lbl, op, val, valCol, note) {
+      return '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:1px 0">'
+        + '<span style="color:#475569">' + lbl + (note ? ' <span style="font-size:9.5px;color:#94A3B8">' + note + '</span>' : '') + '</span>'
+        + '<span style="font-family:var(--mono);white-space:nowrap"><span style="color:#94A3B8">' + (op || '') + '</span> <strong style="color:' + (valCol || '#334155') + '">' + val + '</strong></span></div>';
+    };
+    var rule = '<div style="border-top:1px solid #E2E8F0;margin:3px 0"></div>';
+    h += '<div style="margin-top:10px;padding:11px 13px;background:#fff;border:1px solid #FDE68A;border-radius:6px;font-size:12px">';
+    h += '<div style="font-size:10.5px;font-weight:700;color:#92400E;margin-bottom:6px">🧮 DÉTAIL DU CALCUL — RENDEMENT ESPÉRÉ NET</div>';
+    h += row('Coupon brut', '', pc(ny.gross) + '/an');
+    h += row('Proba de coupon', '×', Math.round(cprob * 100) + '%', '#B45309', '— ' + probSrc + (isWO ? ', worst-of ' + nUnd : ''));
+    h += rule;
+    h += row('= Coupon espéré', '', pc(couponEspere) + '/an');
+    h += row('Impôt (IS)', '×', '0,75', '#B45309', '— (1 − 25%)');
+    h += rule;
+    h += row('= Coupon espéré net', '', pc(couponEspereNet) + '/an');
+    h += row('Frais', '−', pc(fd.dragPct).replace('+', '') + '/an', '#B45309', '— ' + (fees.structuring || 0).toFixed(1).replace('.', ',') + '% ÷ ' + (matEsp || 1).toFixed(1).replace('.', ',') + ' ans' + (custody > 0 ? ' + ' + custody.toFixed(2).replace('.', ',') + '% garde' : ''));
+    h += rule;
+    h += '<div style="display:flex;justify-content:space-between;align-items:baseline;padding-top:2px">'
+      + '<span style="font-weight:700;color:#334155">= Rendement ESPÉRÉ net</span>'
+      + '<span style="font-family:var(--mono);font-size:15px;font-weight:800;color:' + espCol + '">' + pc(espereNet) + '/an</span></div>';
+    // Comparaison CAT — même source que le grader (_mktCache._catRate) pour rester cohérent
+    var catRate = 2.8;
+    try {
+      if (typeof _mktCache !== 'undefined' && _mktCache && _mktCache._catRate) catRate = _mktCache._catRate;
+      else if (p.grading && p.grading.metadata && p.grading.metadata.catRate) catRate = p.grading.metadata.catRate;
+    } catch (e) {}
+    var vsCat = espereNet - catRate;
+    h += '<div style="margin-top:7px;padding-top:6px;border-top:1px dashed #E2E8F0;font-size:11px;color:' + (vsCat >= 0 ? '#059669' : '#DC2626') + '">'
+      + (vsCat >= 0 ? '✓ ' : '✗ ') + 'vs CAT ' + catRate.toFixed(1).replace('.', ',') + '% → <strong>' + (vsCat >= 0 ? '+' : '') + vsCat.toFixed(2).replace('.', ',') + ' pt' + (Math.abs(vsCat) >= 2 ? 's' : '') + '</strong>' + (vsCat < 0 ? ' — moins qu\'un dépôt à terme, pour un risque actions' : '') + '</div>';
+    h += '<div style="margin-top:5px;font-size:10px;color:#64748B">C\'est le vrai rendement attendu, pas le coupon affiché.' + (isWO ? ' Panier <strong>worst-of</strong> : la proba réelle que <em>tous</em> les sous-jacents tiennent est inférieure → espéré probablement plus bas.' : '') + '</div>';
+    h += '</div>';
   }
   // Caveat qualité des frais
   if (!fd.documented) {
