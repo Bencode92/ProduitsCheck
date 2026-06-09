@@ -395,6 +395,11 @@
         "date": "2026-06-08",
         "level": 3.75,
         "ref": "TEC10"
+      },
+      {
+        "date": "2026-06-09",
+        "level": 3.75,
+        "ref": "TEC10"
       }
     ],
     "level": 3.75,
@@ -402,7 +407,7 @@
     "trigger": 4.6,
     "marginToTrigger": 0.85,
     "couponOK": true,
-    "date": "2026-06-08",
+    "date": "2026-06-09",
     "note": "auto-taux (TEC10)"
   }
 }
