@@ -3349,6 +3349,17 @@
       }
     },
     "_couponProbability": 49.3,
-    "_bsRendementNet": 2.81
+    "_bsRendementNet": 2.81,
+    "tracking": {
+      "history": [
+        {
+          "date": "2026-06-09",
+          "level": 102.8,
+          "year": 1
+        }
+      ],
+      "level": 102.8,
+      "date": "2026-06-09"
+    }
   }
 ]
