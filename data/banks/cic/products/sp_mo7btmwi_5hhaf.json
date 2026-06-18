@@ -409,5 +409,10 @@
     "couponOK": true,
     "date": "2026-06-09",
     "note": "auto-taux (TEC10)"
-  }
+  },
+  "strikePrice": 37.821,
+  "_strikePriceDate": "2026-04-20",
+  "_strikePriceSource": "twelve_data:WISE",
+  "_strikePriceOpen": 37.34,
+  "_strikePriceRequested": "2026-04-20"
 }
