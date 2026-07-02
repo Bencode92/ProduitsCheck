@@ -108,7 +108,7 @@ async function runBankScan() {
       var res = await fetch(CONFIG.AI_ENDPOINT, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514', max_tokens: 4000,
+          model: 'claude-sonnet-4-5', max_tokens: 4000,
           tools: [{ type: 'web_search_20250305', name: 'web_search' }],
           messages: [{ role: 'user', content: prompt }]
         }),
@@ -126,7 +126,7 @@ async function runBankScan() {
         var res2 = await fetch(CONFIG.AI_ENDPOINT, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            model: 'claude-sonnet-4-20250514', max_tokens: 4000,
+            model: 'claude-sonnet-4-5', max_tokens: 4000,
             messages: [{ role: 'user', content: prompt + '\nUtilise tes connaissances. Mets confidence=low si potentiellement obsolète.' }]
           }),
         });

@@ -129,7 +129,7 @@ RÈGLES CRITIQUES pour rateSchedule:
 
     const res = await fetch(CONFIG.AI_ENDPOINT, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 3000, messages: [{ role: 'user', content: prompt }] }),
+      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 3000, messages: [{ role: 'user', content: prompt }] }),
     });
     if (!res.ok) throw new Error('Erreur IA: ' + res.status);
     const data = await res.json();

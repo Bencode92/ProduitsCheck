@@ -90,7 +90,7 @@ function repairJSON(str) {
 const MAX_TOKENS = 8192;
 
 function _getAIModel() {
-  return (typeof CONFIG !== 'undefined' && CONFIG.AI_MODEL) ? CONFIG.AI_MODEL : 'claude-opus-4-20250514';
+  return (typeof CONFIG !== 'undefined' && CONFIG.AI_MODEL) ? CONFIG.AI_MODEL : 'claude-opus-4-8';
 }
 
 class AIParser {

@@ -702,7 +702,7 @@
         r.onload = function() { res(r.result.split(',')[1]); }; r.onerror = function() { rej(new Error('Lecture échouée')); }; r.readAsDataURL(file); });
       _pdfBase64 = base64;
       var resp = await fetch(CONFIG.AI_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 3000, system: PARSER_PROMPT,
+        body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 3000, system: PARSER_PROMPT,
           messages: [{ role: 'user', content: [
             { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } },
             { type: 'text', text: _preCategory

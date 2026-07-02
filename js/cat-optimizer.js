@@ -619,7 +619,7 @@ FORMAT:
 - ✅ **N contrats** à garder | 🔄 **N** à arbitrer
 - Max 200 mots`;
 
-  const res=await fetch(CONFIG.AI_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,messages:[{role:'user',content:prompt}]})});
+  const res=await fetch(CONFIG.AI_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:1500,messages:[{role:'user',content:prompt}]})});
   if(!res.ok)throw new Error('IA: '+res.status);
   const data=await res.json();
   return data.content?.map(b=>b.text||'').join('\n')||'';

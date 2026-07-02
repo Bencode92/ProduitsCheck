@@ -20,7 +20,7 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    model: 'claude-opus-4-20250514',
+                    model: 'claude-opus-4-8',
                     max_tokens: 1500,
                     system: _buildSystemPrompt(ctx.isInPortfolio, productType),
                     messages: [{ role: 'user', content: _buildUserPrompt(ctx, base, productType) }]
