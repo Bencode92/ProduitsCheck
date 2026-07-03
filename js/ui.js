@@ -75,27 +75,119 @@ function renderDashboard(container, state) {
     ${stats.concentrations.length > 0 ? `<div class="alert-bar"><span>⚠️</span><span>Concentrations: ${stats.concentrations.map(c=>`<strong>${c.name}</strong> (${c.pct}%)`).join(', ')}</span></div>` : ''}
     <div class="section">
       <div class="section-header"><div class="section-title"><span class="dot" style="background:var(--accent)"></span>Mon Portefeuille</div><button class="btn primary" onclick="showAddPortfolioModal()">+ Ajouter un produit</button></div>
-      ${state.portfolio.length === 0 ? `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">Aucun produit en portefeuille</div><div class="empty-sub">Ajoutez votre premier produit structuré</div></div>` : `<div class="portfolio-grid">${state.portfolio.map(p => renderProductCard(p,'portfolio')).join('')}</div>`}
+      ${state.portfolio.length ? _sbControls() : ''}
+      ${state.portfolio.length === 0 ? `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">Aucun produit en portefeuille</div><div class="empty-sub">Ajoutez votre premier produit structuré</div></div>` : `<div class="portfolio-grid">${_sbApply(state.portfolio).map(p => renderProductCard(p,'portfolio')).join('')}</div>`}
     </div>
     <div class="section">
-      <div class="section-header"><div class="section-title"><span class="dot" style="background:var(--orange)"></span>Propositions par Banque</div><button class="btn primary" onclick="showAddProposalModal()">+ Nouvelle proposition</button></div>
-      <div class="banks-container">${renderBankSections(state)}</div>
+      <div class="section-header"><div class="section-title"><span class="dot" style="background:var(--orange)"></span>Propositions${_sbActive() ? ' — vue à plat (tri actif)' : ' par Banque'}</div><button class="btn primary" onclick="showAddProposalModal()">+ Nouvelle proposition</button></div>
+      ${!state.portfolio.length && Object.keys(state.proposals).length ? _sbControls() : ''}
+      ${_sbActive()
+        ? `<div class="portfolio-grid">${_sbApply(Object.values(state.proposals).reduce((a,b)=>a.concat(b),[])).map(p => renderProductCard(p,'proposal')).join('')}</div>`
+        : `<div class="banks-container">${renderBankSections(state)}</div>`}
       ${Object.keys(state.proposals).length === 0 ? `<div class="empty-state"><div class="empty-icon">📨</div><div class="empty-text">Aucune proposition</div><div class="empty-sub">Ajoutez les offres des banques</div></div>` : ''}
     </div>`;
 }
 
-// Bandeau frais/net sous la grille d'une carte produit (style pastille Quality)
+// ═══ StructBoard quick-wins : badges de risque, tri/filtre, négociation ═══
+var _GRADE_RANK = { A: 0, B: 1, C: 2, D: 3, F: 4 };
+function _gradeRank(g) { return _GRADE_RANK[g] != null ? _GRADE_RANK[g] : 9; }
+
+// Drapeaux de risque en badge sur la carte (données déjà calculées ailleurs)
+function _cardRiskBadges(p) {
+  var b = [];
+  var cp = p.capitalProtection || {};
+  var ny = (typeof scoring !== 'undefined' && scoring.getNetYield) ? scoring.getNetYield(p) : {};
+  var mk = function (t, danger) { b.push([t, danger ? '#B91C1C' : '#B45309', danger ? '#FEE2E2' : '#FEF3C7']); };
+  if (cp.guaranteeType === 'garantie') b.push(['✓ Garanti', '#047857', '#D1FAE5']);
+  else if (cp.protected === true || cp.protected === 'true' || cp.guaranteeType === 'formule') b.push(['🛡 Protégé éch.', '#B45309', '#FEF3C7']);
+  else if (cp.barrier || cp.protected === false) mk('⚠ Capital risqué', true);
+  var bar = parseFloat(cp.barrier);
+  if (!isNaN(bar) && bar > 0 && bar <= 60) mk('Barr. ' + bar + '%', true);
+  var dec = parseFloat(p.decrementPct != null ? p.decrementPct : (p.aiParsed && p.aiParsed.decrementPct));
+  if (!isNaN(dec) && dec > 0) mk('📉 Décr. ' + String(dec).replace('.', ',') + '%', true);
+  var isIC = (typeof window._isIssuerCallable === 'function' && window._isIssuerCallable(p)) || (p.earlyRedemption && p.earlyRedemption.atIssuerDiscretion === true);
+  if (isIC) mk('⚖ Call émetteur', false);
+  var m = ny.embeddedMargin || 0;
+  if (m >= 8) mk('💸 Marge ' + m.toFixed(1).replace('.', ',') + '%', true);
+  else if (m >= 4) mk('💸 Marge ' + m.toFixed(1).replace('.', ',') + '%', false);
+  if (p.underlyingHistorySimulated === true || (p.aiParsed && p.aiParsed.underlyingHistorySimulated === true)) mk('🚩 Indice simulé', true);
+  if (!b.length) return '';
+  return '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px">' + b.slice(0, 5).map(function (x) {
+    return '<span style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:5px;color:' + x[1] + ';background:' + x[2] + '">' + x[0] + '</span>';
+  }).join('') + '</div>';
+}
+
+// ── Tri / filtre de la liste (état global + contrôles) ──
+window._sbSort = window._sbSort || 'default';
+window._sbFilter = window._sbFilter || 'all';
+function _sbSet(k, v) { if (k === 'sort') window._sbSort = v; else window._sbFilter = v; if (window.app && app.render) app.render(); }
+function _sbSortValue(p, key) {
+  var g = p.grading || {};
+  var ny = (typeof scoring !== 'undefined' && scoring.getNetYield) ? scoring.getNetYield(p) : {};
+  switch (key) {
+    case 'grade': return _gradeRank(g.grade);
+    case 'net': return -((ny.netEconomic != null) ? ny.netEconomic : -999);
+    case 'margin': return -(ny.embeddedMargin || 0);
+    case 'barrier': return parseFloat((p.capitalProtection || {}).barrier) || 999;
+    case 'maturity': return parseFloat(p.maturityYears) || 999;
+    case 'coupon': return -(parseFloat(p.coupon && p.coupon.rate) || 0);
+    default: return 0;
+  }
+}
+function _sbFilterMatch(p, f) {
+  if (f === 'all') return true;
+  var g = p.grading || {}, cp = p.capitalProtection || {};
+  var ny = (typeof scoring !== 'undefined' && scoring.getNetYield) ? scoring.getNetYield(p) : {};
+  if (f === 'weak') return ['D', 'F'].indexOf(g.grade) >= 0;
+  if (f === 'unprotected') return cp.protected !== true && cp.guaranteeType !== 'garantie';
+  if (f === 'decrement') return parseFloat(p.decrementPct) > 0;
+  if (f === 'highmargin') return (ny.embeddedMargin || 0) >= 5;
+  return true;
+}
+function _sbApply(list) {
+  var f = window._sbFilter || 'all', s = window._sbSort || 'default';
+  var out = (list || []).filter(function (p) { return _sbFilterMatch(p, f); });
+  if (s !== 'default') out = out.slice().sort(function (a, b) { return _sbSortValue(a, s) - _sbSortValue(b, s); });
+  return out;
+}
+function _sbActive() { return (window._sbSort && window._sbSort !== 'default') || (window._sbFilter && window._sbFilter !== 'all'); }
+function _sbControls() {
+  var s = window._sbSort || 'default', f = window._sbFilter || 'all';
+  var o = function (v, l) { return '<option value="' + v + '"' + (s === v ? ' selected' : '') + '>' + l + '</option>'; };
+  var chip = function (v, l) {
+    var on = f === v;
+    return '<button onclick="_sbSet(\'filter\',\'' + v + '\')" style="font-size:10px;padding:2px 8px;border-radius:6px;cursor:pointer;border:1px solid ' + (on ? 'var(--accent)' : 'var(--border)') + ';background:' + (on ? 'rgba(37,99,235,.12)' : 'transparent') + ';color:' + (on ? 'var(--accent)' : 'var(--text-muted)') + ';font-weight:' + (on ? '700' : '500') + '">' + l + '</button>';
+  };
+  return '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:4px 0 12px">'
+    + '<span style="font-size:10px;color:var(--text-dim);font-weight:700">TRIER</span>'
+    + '<select onchange="_sbSet(\'sort\',this.value)" style="font-size:11px;padding:3px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-family:var(--font)">'
+    + o('default', 'Ordre d\'ajout') + o('grade', 'Grade (meilleur)') + o('net', 'Rendement net éco') + o('margin', 'Marge embarquée') + o('barrier', 'Barrière (+ risquée)') + o('maturity', 'Maturité') + o('coupon', 'Coupon')
+    + '</select>'
+    + '<span style="font-size:10px;color:var(--text-dim);font-weight:700;margin-left:6px">FILTRER</span>'
+    + chip('all', 'Tous') + chip('weak', 'D-F') + chip('unprotected', 'Capital risqué') + chip('decrement', 'Décrément') + chip('highmargin', 'Marge ≥5%')
+    + '</div>';
+}
+
+// Points de négociation (déjà calculés par l'IA, jamais affichés jusqu'ici)
+function _renderNegotiation(p) {
+  var np = p.grading && p.grading.negotiationPoints;
+  if (!np || !np.length) return '';
+  return '<div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">🤝</span><span class="fiche-section-title">Points de négociation</span></div><div class="fiche-section-body"><div class="fiche-risks">'
+    + np.map(function (n) { return '<div class="fiche-risk"><span class="fiche-risk-icon" style="color:var(--accent)">→</span><span>' + (typeof n === 'string' ? n : (n.point || n.text || '')) + '</span></div>'; }).join('')
+    + '</div></div></div>';
+}
+
+// Bandeau frais/net sous la grille d'une carte produit
 function _cardFeeStrip(product) {
   if (!product.coupon?.rate) return '';
   const ny = scoring.getNetYield(product);
-  const drag = ny.dragPct;
+  const margin = ny.embeddedMargin || 0;
   const netColor = ny.netAfterFees > 0 ? 'var(--green)' : 'var(--red)';
-  const dragColor = drag >= 0.5 ? 'var(--red)' : drag >= 0.25 ? 'var(--orange)' : 'var(--text-muted)';
-  const chip = ny.feesDocumented
-    ? `<span style="color:${dragColor};font-size:10px;font-weight:600">frais −${drag.toFixed(2).replace('.',',')} pt/an</span>`
-    : `<span style="color:var(--orange);font-size:10px;font-weight:600">⚠ frais à renseigner</span>`;
+  const chip = margin > 0
+    ? `<span style="color:${margin >= 8 ? 'var(--red)' : 'var(--orange)'};font-size:10px;font-weight:600">marge ${margin.toFixed(1).replace('.', ',')}%</span>`
+    : (ny.feesDocumented ? '' : `<span style="color:var(--orange);font-size:10px;font-weight:600">⚠ frais ?</span>`);
   return `<div style="display:flex;align-items:center;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:11px">
-    <span style="color:var(--text-muted)">Net IS+frais</span>
+    <span style="color:var(--text-muted)">Net reçu</span>
     <span style="font-family:var(--mono);font-weight:700;color:${netColor}">${formatPct(ny.netAfterFees)}</span>${chip}</div>`;
 }
 
@@ -115,6 +207,7 @@ function renderProductCard(product, context) {
       <div class="product-card-field"><span class="label">Maturité</span><span class="value">${product.maturity||'—'}</span></div>
     </div>
     ${_cardFeeStrip(product)}
+    ${_cardRiskBadges(product)}
     <div class="product-card-footer">${scoreHTML}${statusBadge}</div></div>`;
 }
 
@@ -247,6 +340,7 @@ function renderProductSheet(container, state) {
         <div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">⚠️</span><span class="fiche-section-title">Points d'Attention</span></div><div class="fiche-section-body"><div class="fiche-risks">
           ${p.risks.map(r => `<div class="fiche-risk"><span class="fiche-risk-icon">▸</span><span>${r}</span></div>`).join('')}
         </div></div></div>` : ''}
+        ${_renderNegotiation(p)}
         ${p.conversationSummary ? `<div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">📝</span><span class="fiche-section-title">Résumé Discussion</span></div><div class="fiche-section-body"><div class="fiche-ai-summary">${formatAISummary(p.conversationSummary)}</div>${p.decision ? `<div class="fiche-alert ${p.decision === 'subscribed' ? 'success' : 'warn'}">Décision: <strong>${PROPOSAL_STATUS[p.decision]?.label || p.decision}</strong></div>` : ''}</div></div>` : ''}
       </div>
       <div class="sheet-sidebar">
