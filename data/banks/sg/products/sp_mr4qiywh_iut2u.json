@@ -330,5 +330,185 @@
   "conversation": [],
   "conversationSummary": null,
   "decision": null,
-  "decisionReason": null
+  "decisionReason": null,
+  "aiCategory": "autocall-mono",
+  "aiCategoryLabel": "⚡ Autocall Mono-actif",
+  "aiCategoryColor": "#06D6A0",
+  "aiOpinion": "Produit offrant un rendement attractif de 8% annuel sur un secteur technologique porteur, mais avec une barrière basse à 60% qui expose fortement le capital en cas de correction sectorielle. L'absence de protection du capital et la concentration sur un seul indice thématique volatile constituent des risques significatifs pour cette maturité de 5+ ans.",
+  "aiAnalyzedAt": "2026-07-03T09:32:39.479Z",
+  "grading": {
+    "grade": "C",
+    "score": 48,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 47,
+        "base": 56,
+        "delta": 0,
+        "reasoning": "Rendement: base 56 → +5 = 61 (Autocall seuil 100% sur indice tech/robotics à momentum fort (+47% 52W) favorise un remboursement anticipé et le versement des coupons de 8% dès la première année.) | Coupon 8%, barrière 60% | Mat espérée: ~2.2a (prob mat: 7%)",
+        "_bsDelta": -9,
+        "_bs": {
+          "score": 47,
+          "probCoupon": 50.1,
+          "rendementNet": 1.99,
+          "perteEsperee": 2.02,
+          "couponEffectif": 8,
+          "vols": [
+            20.06
+          ],
+          "matEsperee": 2.2,
+          "isBasket": false
+        }
+      },
+      "underlyingQuality": {
+        "score": 59,
+        "base": 54,
+        "delta": 5,
+        "reasoning": "Qualité: base 54 → +5 = 59 (Sous-jacent Robotics/Industrial Innovation combine information-technology et industrials, deux secteurs favorisés en régime neutral, ce qui soutient les fondamentaux malgré la valorisation tendue.)"
+      },
+      "portfolioFit": {
+        "score": 58,
+        "base": 80,
+        "delta": -3,
+        "reasoning": "Fit: base 80 → -3 = 77 (Beta 1.45 et concentration tech extrême rendent ce produit inadapté à un profil Stable déjà sous-obligé (79% equity), aggravant le risque directionnel du portefeuille.)"
+      },
+      "riskPremium": {
+        "score": 34,
+        "base": 75,
+        "delta": -4,
+        "reasoning": "Prime: base 75 → -4 = 71 (Le coupon de 8% paraît généreux mais rémunère surtout la forte volatilité tech (beta 1.45) et la barrière 60% sur maturité longue de 5.3 ans, donc spread partiellement trompeur.) | 8% vs CAT 2.9% (spread 5.1%) | Illiq. premium +1.3% (-7pts)"
+      }
+    },
+    "verdict": "En régime NEUTRAL (VIX 22, Fed en pause), ce produit taux fixe callable offre 8% annualisé sur un indice Robotics/Tech situé dans les secteurs favorisés (IT +47.2% 52W, industrials), ce qui augmente la probabilité d'autocall rapide (~2.2 ans espérés). Cependant le beta 1.45 et la divergence CPI/PCE (2.4% vs 4.07%) créent un risque de repricing brutal si la Fed reprend les hausses, amplifié par la concentration tech. La barrière capital 60% non protégée sur 5.32 ans expose à des pertes significatives en cas de retournement du momentum. Score ajusté cohérent avec un profil dynamique, mais clairement trop agressif pour un investisseur Stable.",
+    "keyRisks": [
+      "Retournement du momentum tech (beta 1.45) déclenché par un mauvais earnings Q3 ou un repricing des taux si PCE 4.07% se confirme, pouvant franchir la barrière 60%.",
+      "Non-autocall prolongeant la détention jusqu'à 5.32 ans avec capital non protégé, exposant à un drawdown majeur sur un indice concentré et volatil."
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 8,
+        "return_eur": 8000,
+        "probability": 0.4,
+        "duration_years": 1
+      },
+      "base": {
+        "return_pct": 17.6,
+        "return_eur": 17600,
+        "probability": 0.3,
+        "duration_years": 2.2
+      },
+      "stress": {
+        "return_pct": 42.6,
+        "return_eur": 42600,
+        "probability": 0.15,
+        "duration_years": 5.32
+      },
+      "worst": {
+        "return_pct": -45,
+        "return_eur": -45000,
+        "probability": 0.15,
+        "duration_years": 5.32
+      }
+    },
+    "confidenceInterval": {
+      "low": 54,
+      "high": 78,
+      "halfWidth": 12,
+      "gradeStable": false,
+      "gradeRange": "C-A",
+      "label": "B [54-78]"
+    },
+    "metadata": {
+      "gradedAt": "2026-07-03T09:32:59.041Z",
+      "durationMs": 15013,
+      "aiUsed": true,
+      "version": "7.1",
+      "productType": "rate",
+      "marketDataAvailable": false,
+      "catBenchmark": 2.9,
+      "catSource": "allocator-confirmed",
+      "couponAnnualized": 8,
+      "couponRaw": 8,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": true,
+      "barrierPct": 60,
+      "barrierCouponPct": null,
+      "couponProbability": 50.1,
+      "expectedMaturity": 2.2,
+      "maxMaturity": 5.32,
+      "probReachMaturity": 7,
+      "maxBeta": null,
+      "baseScore": 65,
+      "baseGrade": "B",
+      "adjustments": {
+        "p1": 5,
+        "p2": 5,
+        "p3": -3,
+        "p4": -4
+      },
+      "barrier_sigma": null,
+      "barrier_sigma_label": null,
+      "barrier_sigma_danger": null,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Rappelable 12M",
+      "ci_low": 54,
+      "ci_high": 78,
+      "ci_label": "B [54-78]",
+      "issuer_rating": "A",
+      "issuer_tier": "IG",
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "autocall",
+      "bsRendementNet": 1.99,
+      "bsProbCoupon": 50.1,
+      "bsPerteEsperee": 2.02,
+      "bsVols": [
+        20.06
+      ],
+      "bsMatEsperee": 2.2,
+      "isBasket": false,
+      "issuerCreditPenalty": 1,
+      "issuerCDS": 70,
+      "v6Weights": {
+        "p1": 0.25,
+        "p2": 0.2,
+        "p3": 0.25,
+        "p4": 0.3
+      },
+      "inputHash": "gaku26g",
+      "gradeT0": "2026-07-03T09:32:59.041Z",
+      "trackingLevelAt0": null
+    },
+    "regimeScenarios": {
+      "current": {
+        "score": 48,
+        "grade": "C",
+        "label": "Actuel (neutral)",
+        "desc": "Régime actuel → volatilité modérée"
+      },
+      "bull": {
+        "score": 54,
+        "grade": "C",
+        "label": "Bull / Risk-on",
+        "delta": 6,
+        "desc": "Marchés haussiers → prob coupon monte, barrière safe"
+      },
+      "crash": {
+        "score": 39,
+        "grade": "D",
+        "label": "Crash / Récession",
+        "delta": -9,
+        "desc": "Marchés baissiers → barrière menacée, vol en hausse"
+      }
+    }
+  },
+  "_couponProbability": 50.1,
+  "_bsRendementNet": 1.99
 }
