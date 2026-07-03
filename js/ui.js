@@ -177,6 +177,107 @@ function _renderNegotiation(p) {
     + '</div></div></div>';
 }
 
+// ═══ Bloc « Comprendre le produit » — tête de fiche, tout regroupé pour décider ═══
+function _renderUnderstand(p) {
+  if (typeof scoring === 'undefined' || !scoring.getNetYield) return '';
+  var coupon = p.coupon || {};
+  var couponRate = (typeof coupon === 'object' ? coupon.rate : coupon) || 0;
+  if (!couponRate) return '';
+  var ny = scoring.getNetYield(p);
+  var fd = scoring.getFeeDrag(p);
+  var cp = p.capitalProtection || {};
+  var md = (p.grading && p.grading.metadata) || {};
+  var er = p.earlyRedemption || {};
+  var nominal = parseFloat(p.investedAmount) || 100000;
+  var barrier = parseFloat(cp.barrier);
+  var protectedMat = cp.guaranteeType === 'garantie' || cp.guaranteeType === 'formule' || cp.protected === true || cp.protected === 'true';
+  var garanti = cp.guaranteeType === 'garantie';
+  var cprob = (md.couponProbability != null) ? md.couponProbability : null;
+  var margin = ny.embeddedMargin || 0;
+  var isIC = (typeof window._isIssuerCallable === 'function' && window._isIssuerCallable(p)) || er.atIssuerDiscretion === true;
+  var sj = (p.underlyings && p.underlyings.length) ? p.underlyings[0] : 'le sous-jacent';
+  var catRate = 2.8; try { if (typeof _mktCache !== 'undefined' && _mktCache && _mktCache._catRate) catRate = _mktCache._catRate; else if (md.catRate) catRate = md.catRate; } catch (e) {}
+  var eur = function (v) { return formatNumber(Math.round(v)) + '€'; };
+  var pc = function (v) { return (v >= 0 ? '+' : '') + v.toFixed(2).replace('.', ',') + '%'; };
+  var f1 = function (v) { return v.toFixed(1).replace('.', ','); };
+
+  // Rendement espéré économique (proba-pondéré, net de frais + marge) = le vrai chiffre
+  var espereEco = (cprob != null) ? (couponRate * (cprob / 100) * 0.75 - fd.economicDragPct) : (ny.netEconomic != null ? ny.netEconomic : null);
+  var netRecu = ny.netAfterFees;
+
+  // ── Le pari en une phrase ──
+  var pari;
+  if (isIC) pari = 'Tu prêtes à la banque. Elle te rembourse <strong>quand ça L\'arrange</strong> (prime ~' + f1(couponRate) + '%/an). Ton capital est protégé à l\'échéance — mais le rendement dépend d\'elle, pas de toi.';
+  else if (protectedMat) pari = 'Ton capital est protégé à l\'échéance. Tu touches le coupon si <strong>' + sj + '</strong> tient ses conditions. Rendement plafonné.';
+  else if (!isNaN(barrier)) pari = 'Tu paries que <strong>' + sj + '</strong> ne s\'effondre pas de plus de <strong>' + (100 - barrier) + '%</strong>. S\'il tient → coupon ' + f1(couponRate) + '%/an ; s\'il chute sous ce seuil → tu encaisses toute la baisse.';
+  else pari = 'Coupon ' + f1(couponRate) + '%/an conditionné à <strong>' + sj + '</strong>.';
+
+  // ── 3 scénarios chiffrés ──
+  var favAmount = nominal * (1 + couponRate / 100);
+  var rows = [];
+  rows.push(['#065F46', '#ECFDF5', '✅ Favorable' + (cprob != null ? ' (proba ~' + Math.round(cprob) + '%)' : ''),
+    (isIC ? 'La banque te rappelle tôt' : sj + ' ≥ son seuil') + ' → capital + coupon',
+    eur(favAmount), 'soit ' + pc(netRecu) + '/an net']);
+  rows.push(['#92400E', '#FFFBEB', '⚖️ Médian (capital seul)',
+    (protectedMat ? 'À l\'échéance sans rappel' : sj + ' baisse un peu (au-dessus de la barrière), pas de coupon') + ' → capital rendu',
+    eur(nominal), 'soit ' + pc(-(fd.dragPct || 0) - 1) + '/an net (frais)']);
+  if (!protectedMat && !isNaN(barrier) && barrier > 0) {
+    var dropEx = Math.min(90, (100 - barrier) + 10);
+    var defAmount = nominal * (100 - dropEx) / 100;
+    rows.push(['#991B1B', '#FEF2F2', '❌ Défavorable',
+      sj + ' finit sous −' + (100 - barrier) + '% (barrière touchée) → perte = toute la baisse. Ex : −' + dropEx + '%',
+      eur(defAmount), 'perte de ' + eur(nominal - defAmount)]);
+  } else {
+    rows.push(['#065F46', '#ECFDF5', '🛡️ Défavorable',
+      (garanti ? 'Capital garanti' : 'Capital protégé à l\'échéance (sauf défaut émetteur)') + ' → tu récupères ta mise',
+      eur(nominal), garanti ? 'aucune perte' : 'perte seulement si la banque fait défaut']);
+  }
+
+  var h = '<div style="padding:16px;background:linear-gradient(135deg,#F0F9FF,#FFFBEB);border:1px solid #BAE6FD;border-radius:10px;margin-bottom:8px">';
+  h += '<div style="font-size:13px;font-weight:800;color:#0C4A6E;margin-bottom:6px">🎓 Comprendre le produit <span style="font-weight:400;color:#64748B;font-size:11px">— exemple sur ' + eur(nominal) + '</span></div>';
+  h += '<div style="font-size:12px;color:#334155;line-height:1.55;margin-bottom:12px">' + pari + '</div>';
+
+  // scénarios
+  h += '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px">';
+  rows.forEach(function (r) {
+    h += '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:' + r[1] + ';border-radius:7px">'
+      + '<div style="flex:1;min-width:0"><div style="font-size:11.5px;font-weight:700;color:' + r[0] + '">' + r[2] + '</div>'
+      + '<div style="font-size:10.5px;color:#475569;line-height:1.4">' + r[3] + '</div></div>'
+      + '<div style="text-align:right;white-space:nowrap"><div style="font-family:var(--mono);font-size:14px;font-weight:800;color:' + r[0] + '">' + r[4] + '</div>'
+      + '<div style="font-size:9.5px;color:#64748B">' + r[5] + '</div></div></div>';
+  });
+  h += '</div>';
+
+  // rendement + comparaisons
+  var espCol = (espereEco != null && espereEco >= catRate) ? '#059669' : '#DC2626';
+  h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:11px">';
+  // vs direct
+  var vsDirect = protectedMat
+    ? 'Tu <strong>plafonnes</strong> ta hausse (~' + f1(couponRate) + '%/an max), mais ton capital est <strong>protégé</strong> à l\'échéance. En direct : 100% de la hausse ET de la baisse.'
+    : 'Tu <strong>plafonnes</strong> ta hausse (~' + f1(couponRate) + '%/an), et tu es <strong>protégé jusqu\'à −' + (isNaN(barrier) ? '?' : (100 - barrier)) + '%</strong>. Au-delà : même perte qu\'en direct. En direct : toute la hausse, toute la baisse.';
+  h += '<div style="padding:9px 11px;background:#fff;border:1px solid #E2E8F0;border-radius:7px">'
+    + '<div style="font-weight:700;color:#334155;margin-bottom:2px">📊 vs acheter ' + sj + ' en direct</div>'
+    + '<div style="color:#475569;line-height:1.4">' + vsDirect + '</div></div>';
+  // vs CAT
+  var vsCatPts = (espereEco != null) ? (espereEco - catRate) : null;
+  h += '<div style="padding:9px 11px;background:#fff;border:1px solid #E2E8F0;border-radius:7px">'
+    + '<div style="font-weight:700;color:#334155;margin-bottom:2px">🏦 vs CAT ' + f1(catRate) + '% (sans risque)</div>'
+    + '<div style="color:#475569;line-height:1.4">Rendement <strong>espéré net</strong> : <strong style="color:' + espCol + '">' + (espereEco != null ? pc(espereEco) + '/an' : '—') + '</strong>'
+    + (vsCatPts != null ? ' → <strong style="color:' + espCol + '">' + (vsCatPts >= 0 ? '+' : '') + f1(vsCatPts) + ' pt</strong> vs CAT' : '')
+    + '. Le CAT ne bloque rien et ne risque rien.</div></div>';
+  h += '</div>';
+
+  // ligne de synthèse frais + marge
+  h += '<div style="margin-top:10px;padding-top:9px;border-top:1px dashed #CBD5E1;font-size:10.5px;color:#64748B">'
+    + '💸 <strong>Si ça marche</strong> : tu touches <strong style="color:#059669">' + pc(netRecu) + '/an</strong> net d\'IS.'
+    + (margin > 0 ? ' Mais tu paies <strong style="color:#B45309">' + f1(margin) + '% de marge embarquée</strong> (le produit vaut ~' + f1(100 - margin) + '% à l\'émission).' : '')
+    + (cprob != null ? ' Proba de toucher le coupon : <strong>~' + Math.round(cprob) + '%</strong>.' : '')
+    + ' Détail complet dans « Frais &amp; Rendement net » ci-dessous.</div>';
+
+  h += '</div>';
+  return h;
+}
+
 // Bandeau frais/net sous la grille d'une carte produit
 function _cardFeeStrip(product) {
   if (!product.coupon?.rate) return '';
@@ -310,6 +411,7 @@ function renderProductSheet(container, state) {
 
     <div class="sheet-layout">
       <div class="sheet-main">
+        ${_renderUnderstand(p)}
         ${p.aiSummary ? `<div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">🤖</span><span class="fiche-section-title">Résumé IA</span></div><div class="fiche-section-body"><div class="fiche-ai-summary">${formatAISummary(p.aiSummary)}</div></div></div>` : ''}
         <div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">💰</span><span class="fiche-section-title">Mécanisme des Coupons</span></div><div class="fiche-section-body">
           <div class="fiche-info-box ${couponRate && couponRate >= 5 ? 'green' : 'blue'}"><div class="fiche-info-box-title">Coupon ${p.coupon?.type || ''} — ${couponRate ? formatPct(couponRate) : 'N/A'}</div><div class="fiche-info-box-text">${p.coupon?.frequency ? `<strong>Fréquence:</strong> ${p.coupon.frequency}` : ''}${p.coupon?.trigger ? ` · <strong>Seuil:</strong> ${p.coupon.trigger}% du niveau initial` : ''}${hasMem ? ' · <strong>Effet mémoire:</strong> Oui' : ''}</div></div></div></div>
