@@ -239,6 +239,8 @@
   "aiCategoryColor": "#4CAF50",
   "aiOpinion": "Produit très défensif offrant capital garanti à 100% sur 8.27 ans avec un coupon fixe de 0.5417% annuel, soit ~4.5% cumulé sur la durée totale. Rendement faible mais sécurisé, adapté aux profils très conservateurs, toutefois l'autocall reste flou et le rendement peine à compenser l'inflation sur une aussi longue maturité.",
   "aiAnalyzedAt": "2026-07-03T08:47:38.979Z",
+  "_couponProbability": 50.5,
+  "_bsRendementNet": 0.27,
   "grading": {
     "grade": "D",
     "score": 43,
@@ -251,7 +253,7 @@
         "score": 37,
         "base": 19,
         "delta": 0,
-        "reasoning": "Rendement: base 19 → -1 = 18 (Coupon conditionnel dérisoire (0.542% annualisé) et prob de maturité à 2% avec autocall seuil 100% en régime neutral hésitant réduisent la probabilité de coupon réel.) | Coupon 0.542%, protégé | Mat espérée: ~2.3a (prob mat: 2%)",
+        "reasoning": "Rendement: base 19 → -1 = 18 (Coupon conditionnel très faible (0.542% annualisé) avec autocall seuil 100% en régime neutral hésitant, probabilité de déclenchement rapide modérée sur 8.27a.) | Coupon 0.542%, protégé | Mat espérée: ~2.3a (prob mat: 2%)",
         "_bsDelta": 18,
         "_bs": {
           "score": 37,
@@ -270,53 +272,53 @@
         "score": 80,
         "base": 79,
         "delta": 1,
-        "reasoning": "Qualité: base 79 → +1 = 80 (Euro Stoxx 50 diversifié (beta 0.89) dans un régime neutral sans secteur évité dominant, mais la divergence CPI/PCE et le risque de repricing des taux limitent le bonus.) | Worst: Euro Stoxx 50 B:77"
+        "reasoning": "Qualité: base 79 → +1 = 80 (Euro Stoxx 50 diversifié zone euro (beta 0.89), régime NEUTRAL sans stress directionnel fort, mais divergence CPI/PCE critique limite l'optimisme.) | Worst: Euro Stoxx 50 B:77"
       },
       "portfolioFit": {
         "score": 55,
         "base": 80,
         "delta": 1,
-        "reasoning": "Fit: base 80 → +1 = 81 (Capital garanti pertinent pour un profil Stable actuellement sur-exposé aux actions (78.6%), ce produit ajoute un socle défensif utile.)"
+        "reasoning": "Fit: base 80 → +1 = 81 (Capital garanti pertinent pour rééquilibrer un portefeuille Stable sous-obligé (78.6% equity) — apporte du bond floor sécuritaire.)"
       },
       "riskPremium": {
         "score": 14,
         "base": 0,
-        "delta": -1,
+        "delta": 0,
         "reasoning": "Capital garanti: coupon 0.5% - CAT 2.5% - illiq 0.6% = -2.6%"
       }
     },
-    "verdict": "En régime NEUTRAL avec un VIX à 22 et une divergence CPI/PCE critique (167bps), ce produit à capital garanti offre une sécurité bienvenue pour un profil Stable trop agressif (78.6% equity). Cependant, le coupon conditionnel de 0.542% annualisé est dérisoire et la maturité espérée réelle (~2.3a) contraste avec une échéance maximale de 8.27 ans qui immobilise le capital sans rendement garanti. Avec seulement 2% de probabilité de maturité et un autocall exigeant un retour au niveau initial (seuil 100%), le scénario le plus probable est un capital rendu nu après plusieurs années sans coupon. Un fonds monétaire ou des TIPS offriraient un meilleur couple rendement/liquidité.",
+    "verdict": "En régime NEUTRAL (VIX 22, confiance 3/5), ce produit à CAPITAL GARANTI offre une sécurité totale du nominal mais un coupon conditionnel dérisoire de 0.542% annualisé sur une maturité de 8.27 ans. Le sous-jacent Euro Stoxx 50 (vol 19.37%, beta 0.89) est solide mais le seuil autocall à 100% avec probabilité de maturité de seulement 2% signale un immobilisation probable du capital sans rendement significatif. La divergence critique CPI 2.4% vs PCE 4.07% crée un risque de repricing brutal des taux qui érode le coût d'opportunité de ce produit. Adapté uniquement pour sécuriser du capital dans un profil Stable, mais le rendement réel après inflation PCE 4.07% serait largement négatif.",
     "keyRisks": [
-      "Coupon conditionnel très faible (0.542%) souvent non versé si l'Euro Stoxx 50 n'atteint pas le seuil, avec risque de coût d'opportunité sur 8 ans",
-      "Repricing brutal des taux longs (breakeven 5Y 2.26% vs PCE 4.07%) rendant ce produit à capital garanti mais rendement quasi-nul très peu attractif face aux obligations"
+      "Coût d'opportunité massif: capital immobilisé jusqu'à 8.27a avec coupon conditionnel 0.542% très inférieur à l'inflation PCE 4.07% — rendement réel négatif garanti",
+      "Risque de repricing des taux si PCE ne converge pas vers CPI (écart 167bps), rendant le produit encore moins attractif face à des obligations souveraines à taux relevés"
     ],
     "negotiationPoints": [
-      "Relever le coupon conditionnel ou abaisser le seuil d'autocall sous 100%",
-      "Négocier une fenêtre de sortie anticipée pour réduire le risque d'immobilisation 8 ans"
+      "Négocier un plancher de coupon garanti minimum même sans franchissement de barrière",
+      "Demander un abaissement du seuil autocall sous 100% pour augmenter la probabilité de déclenchement"
     ],
     "scenarios": {
       "optimistic": {
-        "return_pct": 1.6,
-        "return_eur": 1626,
-        "probability": 0.2,
-        "duration_years": 3
+        "return_pct": 0.54,
+        "return_eur": 542,
+        "probability": 0.3,
+        "duration_years": 1
       },
       "base": {
-        "return_pct": 0.5,
-        "return_eur": 542,
+        "return_pct": 1.6,
+        "return_eur": 1626,
         "probability": 0.35,
-        "duration_years": 6
+        "duration_years": 3
       },
       "stress": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.3,
+        "probability": 0.25,
         "duration_years": 8
       },
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.15,
+        "probability": 0.1,
         "duration_years": 8
       }
     },
@@ -329,8 +331,8 @@
       "label": "D [35-49]"
     },
     "metadata": {
-      "gradedAt": "2026-07-03T08:48:00.022Z",
-      "durationMs": 16570,
+      "gradedAt": "2026-07-03T09:21:10.014Z",
+      "durationMs": 15082,
       "aiUsed": true,
       "version": "7.1",
       "productType": "capital_garanti",
@@ -356,7 +358,7 @@
         "p1": -1,
         "p2": 1,
         "p3": 1,
-        "p4": -1
+        "p4": 0
       },
       "barrier_sigma": null,
       "barrier_sigma_label": null,
@@ -389,7 +391,7 @@
         "p4": 0.3
       },
       "inputHash": "g1qhr72u",
-      "gradeT0": "2026-07-03T08:48:00.022Z",
+      "gradeT0": "2026-07-03T09:21:10.014Z",
       "trackingLevelAt0": null,
       "stockData": [
         {
@@ -428,7 +430,5 @@
         "desc": "Marchés baissiers → barrière menacée, vol en hausse"
       }
     }
-  },
-  "_couponProbability": 50.5,
-  "_bsRendementNet": 0.27
+  }
 }
