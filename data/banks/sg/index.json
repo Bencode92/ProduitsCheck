@@ -1,7 +1,7 @@
 {
   "bankId": "sg",
   "bankName": "Société Générale",
-  "lastUpdated": "2026-07-03T09:32:32.945Z",
+  "lastUpdated": "2026-07-03T10:35:48.688Z",
   "products": [
     {
       "id": "sp_mmxlydbl_xf7dk",
@@ -69,6 +69,14 @@
     {
       "id": "sp_mr4qiywh_iut2u",
       "name": "ROBOTICS & TECH SELECTION",
+      "type": "autocall",
+      "status": "analyzing",
+      "score": null,
+      "receivedDate": "2026-07-03"
+    },
+    {
+      "id": "sp_mr4ssbps_te6xi",
+      "name": "LIVINGSTONE RENDEMENT",
       "type": "autocall",
       "status": "analyzing",
       "score": null,
