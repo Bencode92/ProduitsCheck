@@ -138,19 +138,42 @@ class ScoringEngine {
     const mm = parseFloat(p && p.maturityYears);
     return (!isNaN(mm) && mm > 0) ? mm : 5;
   }
-  // Drag de frais en %/an : marge upfront amortie sur la maturité espérée + droits de garde.
+  // Drag de frais. On distingue :
+  //  • la MARGE EMBARQUÉE (commission de structuration/distribution « incluse dans le prix ») :
+  //    elle ne réduit PAS le payoff contractuel — tu reçois la formule quoi qu'il arrive — mais
+  //    tu SURPAYES le produit (sa juste valeur à l'émission ≈ 100% − marge).
+  //  • les droits de GARDE (récurrents) : eux amputent réellement le rendement REÇU.
+  // → dragPct = ce qui ampute le reçu (garde). economicDragPct = reçu + marge amortie (vue "bonne affaire").
   getFeeDrag(p) {
     const fees = this.getProductFees(p);
     const yrs = this._effectiveMaturity(p);
-    return { dragPct: fees.structuring / yrs + fees.custodyAnnual, documented: fees.documented, fees, years: yrs };
+    const received = fees.custodyAnnual;                                   // garde (%/an) — ampute le reçu
+    const embeddedMargin = fees.structuring;                              // marge embarquée totale (%)
+    const marginAnnualized = yrs > 0 ? embeddedMargin / yrs : embeddedMargin; // coût d'opportunité annualisé
+    return {
+      dragPct: received,                          // drag sur le rendement REÇU (garde)
+      marginAnnualized,                           // marge embarquée annualisée
+      embeddedMargin,                             // marge embarquée totale (surcoût)
+      economicDragPct: received + marginAnnualized, // drag "valeur économique" (reçu + marge)
+      documented: fees.documented, fees, years: yrs
+    };
   }
-  // Rendement d'un produit : brut, net d'IS (hors frais), net d'IS ET de frais.
+  // Rendement d'un produit : brut, net d'IS, net REÇU (si coupon touché), net ÉCONOMIQUE (marge incluse).
   getNetYield(p) {
     let gross = parseFloat(p && p.coupon && p.coupon.rate);
     if (isNaN(gross)) gross = 0;
     const drag = this.getFeeDrag(p);
     const netExFees = gross * (1 - 0.25);
-    return { gross, netExFees, netAfterFees: netExFees - drag.dragPct, dragPct: drag.dragPct, feesDocumented: drag.documented };
+    return {
+      gross, netExFees,
+      netAfterFees: netExFees - drag.dragPct,           // ce que tu REÇOIS (IS + garde, PAS la marge embarquée)
+      netEconomic: netExFees - drag.economicDragPct,    // vue valeur économique (marge embarquée amortie incluse)
+      dragPct: drag.dragPct,
+      marginAnnualized: drag.marginAnnualized,
+      embeddedMargin: drag.embeddedMargin,
+      economicDragPct: drag.economicDragPct,
+      feesDocumented: drag.documented
+    };
   }
 
   getPortfolioStats(portfolio) {
@@ -158,15 +181,17 @@ class ScoringEngine {
     const nominal = portfolio.reduce((s, p) => s + (parseFloat(p.investedAmount) || 0), 0);
     const avgCoupon = portfolio.reduce((s, p) => s + (parseFloat(p.coupon?.rate) || 0), 0) / portfolio.length;
     // Rendements pondérés par l'encours (le vrai chiffre de pilotage)
-    let wGross = 0, wNetEx = 0, wNetAfter = 0, wDrag = 0, feesDocAmt = 0;
+    let wGross = 0, wNetEx = 0, wNetAfter = 0, wDrag = 0, wMargin = 0, feesDocAmt = 0;
     portfolio.forEach(p => {
       const a = parseFloat(p.investedAmount) || 0;
       const ny = this.getNetYield(p);
-      wGross += ny.gross * a; wNetEx += ny.netExFees * a; wNetAfter += ny.netAfterFees * a; wDrag += ny.dragPct * a;
+      // Pilotage portefeuille : vue ÉCONOMIQUE (marge embarquée amortie incluse) = conservateur.
+      wGross += ny.gross * a; wNetEx += ny.netExFees * a; wNetAfter += ny.netEconomic * a; wDrag += ny.economicDragPct * a;
+      wMargin += (ny.embeddedMargin || 0) * a;
       if (ny.feesDocumented) feesDocAmt += a;
     });
     const den = nominal || 1;
-    const weightedCoupon = wGross / den, netExFees = wNetEx / den, netAfterFees = wNetAfter / den, feeDrag = wDrag / den;
+    const weightedCoupon = wGross / den, netExFees = wNetEx / den, netAfterFees = wNetAfter / den, feeDrag = wDrag / den, weightedMargin = wMargin / den;
     const feesDocumentedPct = nominal > 0 ? feesDocAmt / nominal * 100 : 0;
     const concentrations = [];
     const countBy = (arr, key) => { const c = {}; arr.forEach(p => { c[p[key]] = (c[p[key]] || 0) + 1; }); return c; };
@@ -178,7 +203,7 @@ class ScoringEngine {
       const pct = (count / portfolio.length) * 100;
       if (pct > 30) { const f = UNDERLYINGS.find(u => u.id === id); concentrations.push({ type: 'underlying', name: f ? f.name : id, pct: Math.round(pct), level: pct > 50 ? 'danger' : 'warning' }); }
     });
-    return { total: portfolio.length, nominal, avgCoupon, weightedCoupon, netExFees, netAfterFees, feeDrag, feesDocumentedPct, banks: new Set(portfolio.map(p => p.bankId)).size, underlyings: new Set(portfolio.map(p => p.underlyingType)).size, types: new Set(portfolio.map(p => p.type)).size, concentrations };
+    return { total: portfolio.length, nominal, avgCoupon, weightedCoupon, netExFees, netAfterFees, feeDrag, weightedMargin, feesDocumentedPct, banks: new Set(portfolio.map(p => p.bankId)).size, underlyings: new Set(portfolio.map(p => p.underlyingType)).size, types: new Set(portfolio.map(p => p.type)).size, concentrations };
   }
 }
 

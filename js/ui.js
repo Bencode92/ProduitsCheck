@@ -294,36 +294,48 @@ function _renderFeesNet(p) {
   var fd = scoring.getFeeDrag(p);
   var fees = fd.fees || {};
   var matEsp = fd.years;
-  var structAnnual = (fees.structuring || 0) / (matEsp || 1);
   var custody = fees.custodyAnnual || 0;
-  var net = ny.netAfterFees;                       // net d'IS et de frais (si coupon touché)
-  // Coupon conditionnel → rendement ESPÉRÉ (proba-pondéré) = le vrai chiffre
+  var margin = ny.embeddedMargin || 0;             // marge embarquée totale (incluse dans le prix)
+  var marginAnnual = ny.marginAnnualized || 0;     // marge annualisée (surcoût implicite)
+  var netRecu = ny.netAfterFees;                   // NET REÇU (si coupon touché) : coupon − garde − IS
   var isCond = coupon.type === 'conditionnel' || (coupon.trigger != null && coupon.trigger !== '');
   var cprob = (p.grading && p.grading.metadata && p.grading.metadata.couponProbability != null) ? p.grading.metadata.couponProbability / 100 : null;
-  var espereNet = (isCond && cprob != null) ? (ny.gross * cprob * (1 - 0.25) - fd.dragPct) : null;
   var pc = function (v) { return (v >= 0 ? '+' : '') + v.toFixed(2).replace('.', ',') + '%'; };
-  var netCol = net > 0 ? '#059669' : '#DC2626';
+  var f1 = function (v) { return v.toFixed(1).replace('.', ','); };
+  var f2 = function (v) { return v.toFixed(2).replace('.', ','); };
+  var netCol = netRecu > 0 ? '#059669' : '#DC2626';
+  var isOverLife = !!(p.commissionAnnualOverLife || (p.aiParsed && p.aiParsed.commissionAnnualOverLife));
 
   var h = '<div style="padding:14px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;margin-bottom:8px">';
+  // ── 1. NET REÇU (payoff contractuel, si coupon touché) — la marge n'ampute PAS ce chiffre ──
   h += '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">';
-  h += '<span style="font-size:11px;font-weight:700;color:#92400E">💸 RENDEMENT NET DE FRAIS & IS</span>';
-  h += '<span style="font-family:var(--mono);font-size:24px;font-weight:800;color:' + netCol + '">' + pc(net) + '/an</span></div>';
-  // Cascade
+  h += '<span style="font-size:11px;font-weight:700;color:#92400E">💸 NET REÇU (si coupon touché)</span>';
+  h += '<span style="font-family:var(--mono);font-size:24px;font-weight:800;color:' + netCol + '">' + pc(netRecu) + '/an</span></div>';
   h += '<div style="font-size:12px;color:#475569;line-height:1.8">';
   h += 'Coupon brut : <strong>' + pc(ny.gross) + '/an</strong><br>';
-  h += '<span style="color:#B45309">− Frais : commission ' + (fees.structuring || 0).toFixed(2).replace('.', ',') + '% amortie sur ~' + (matEsp || 1).toFixed(1) + ' an' + ((matEsp || 1) >= 2 ? 's' : '') + ' = <strong>−' + structAnnual.toFixed(2).replace('.', ',') + '%/an</strong>' + (custody > 0 ? ' (+ garde ' + custody.toFixed(2).replace('.', ',') + '%/an)' : '') + '</span><br>';
+  if (custody > 0) h += '<span style="color:#B45309">− Droits de garde ' + f2(custody) + '%/an</span><br>';
   h += '<span style="color:#B45309">− IS 25%</span><br>';
-  h += '= <strong style="color:' + netCol + '">Net ' + pc(net) + '/an</strong> <span style="color:#94A3B8;font-size:11px">(si coupon touché)</span>';
+  h += '= <strong style="color:' + netCol + '">Net reçu ' + pc(netRecu) + '/an</strong> <span style="color:#94A3B8;font-size:11px">— le payoff contractuel : la marge embarquée n\'ampute PAS ce que tu touches</span>';
   h += '</div>';
-  // Espéré (le vrai pour un conditionnel) — DÉTAIL DU CALCUL ligne à ligne
-  if (espereNet != null) {
-    var espCol = espereNet > 0 ? '#059669' : '#DC2626';
-    var couponEspere = ny.gross * cprob;            // coupon × proba
-    var couponEspereNet = couponEspere * 0.75;      // × (1 − IS)
-    var probSrc = (p.grading && p.grading.metadata && p.grading.metadata.couponProbMethod) || 'Black-Scholes P(panier ≥ seuil)';
+
+  // ── 2. MARGE EMBARQUÉE : tu ne la « paies » pas sur le coupon, mais tu SURPAYES le produit ──
+  if (margin > 0) {
+    var fairVal = Math.max(0, 100 - margin);
+    h += '<div style="margin-top:10px;padding:9px 11px;background:#FEF3C7;border:1px solid #FCD34D;border-radius:6px;font-size:11.5px;color:#78350F">';
+    h += '⚠️ <strong>Marge embarquée : ' + f2(margin) + '%</strong> incluse dans le prix' + (isOverLife ? ' (≈ ' + f2(marginAnnual) + '%/an × ' + f1(matEsp || 1) + ' ans)' : '') + '.<br>';
+    h += '<span style="color:#92400E">Tu paies <strong>100%</strong> pour un produit valant ≈ <strong>' + f1(fairVal) + '%</strong> à l\'émission → surcoût implicite ≈ <strong>' + f2(marginAnnual) + '%/an</strong>. Un produit équitable offrirait un coupon plus élevé.</span>';
+    h += '</div>';
+  }
+
+  // ── 3. RENDEMENT ESPÉRÉ NET — vue « bonne affaire ? » : proba de coupon + surcoût de marge ──
+  if (isCond && cprob != null) {
+    var couponEspere = ny.gross * cprob;
+    var couponEspereNet = couponEspere * 0.75;
+    var espereEco = couponEspereNet - fd.economicDragPct;   // − garde − marge amortie
+    var espCol = espereEco > 0 ? '#059669' : '#DC2626';
+    var probSrc = (p.grading && p.grading.metadata && p.grading.metadata.couponProbMethod) || 'Black-Scholes P(≥ seuil)';
     var nUnd = Array.isArray(p.underlyings) ? p.underlyings.length : 0;
-    var isWO = /worst|pire|moins/i.test((p.basketType || (p.coupon && p.coupon.basketType) || '') + '') || (nUnd > 1 && !/equipond|basket|panier|moyen/i.test((p.basketType || '') + ''));
-    // ligne mono alignée : libellé à gauche, opérande + valeur à droite
+    var isWO = /worst|pire|moins/i.test((p.basketType || '') + '') || (nUnd > 1 && !/equipond|basket|panier|moyen|index|indice/i.test((p.basketType || p.underlyingType || '') + ''));
     var row = function (lbl, op, val, valCol, note) {
       return '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:1px 0">'
         + '<span style="color:#475569">' + lbl + (note ? ' <span style="font-size:9.5px;color:#94A3B8">' + note + '</span>' : '') + '</span>'
@@ -331,7 +343,7 @@ function _renderFeesNet(p) {
     };
     var rule = '<div style="border-top:1px solid #E2E8F0;margin:3px 0"></div>';
     h += '<div style="margin-top:10px;padding:11px 13px;background:#fff;border:1px solid #FDE68A;border-radius:6px;font-size:12px">';
-    h += '<div style="font-size:10.5px;font-weight:700;color:#92400E;margin-bottom:6px">🧮 DÉTAIL DU CALCUL — RENDEMENT ESPÉRÉ NET</div>';
+    h += '<div style="font-size:10.5px;font-weight:700;color:#92400E;margin-bottom:6px">🧮 RENDEMENT ESPÉRÉ NET <span style="font-weight:400;color:#94A3B8">(valeur économique : proba + surcoût de marge)</span></div>';
     h += row('Coupon brut', '', pc(ny.gross) + '/an');
     h += row('Proba de coupon', '×', Math.round(cprob * 100) + '%', '#B45309', '— ' + probSrc + (isWO ? ', worst-of ' + nUnd : ''));
     h += rule;
@@ -339,28 +351,29 @@ function _renderFeesNet(p) {
     h += row('Impôt (IS)', '×', '0,75', '#B45309', '— (1 − 25%)');
     h += rule;
     h += row('= Coupon espéré net', '', pc(couponEspereNet) + '/an');
-    h += row('Frais', '−', pc(fd.dragPct).replace('+', '') + '/an', '#B45309', '— ' + (fees.structuring || 0).toFixed(1).replace('.', ',') + '% ÷ ' + (matEsp || 1).toFixed(1).replace('.', ',') + ' ans' + (custody > 0 ? ' + ' + custody.toFixed(2).replace('.', ',') + '% garde' : ''));
+    if (custody > 0) h += row('Droits de garde', '−', f2(custody) + '%/an', '#B45309');
+    if (margin > 0) h += row('Surcoût marge', '−', f2(marginAnnual) + '%/an', '#B45309', '— ' + f1(margin) + '% ÷ ' + f1(matEsp || 1) + ' ans (tu surpayes)');
     h += rule;
     h += '<div style="display:flex;justify-content:space-between;align-items:baseline;padding-top:2px">'
       + '<span style="font-weight:700;color:#334155">= Rendement ESPÉRÉ net</span>'
-      + '<span style="font-family:var(--mono);font-size:15px;font-weight:800;color:' + espCol + '">' + pc(espereNet) + '/an</span></div>';
-    // Comparaison CAT — même source que le grader (_mktCache._catRate) pour rester cohérent
+      + '<span style="font-family:var(--mono);font-size:15px;font-weight:800;color:' + espCol + '">' + pc(espereEco) + '/an</span></div>';
+    // Comparaison CAT — même source que le grader (_mktCache._catRate)
     var catRate = 2.8;
     try {
       if (typeof _mktCache !== 'undefined' && _mktCache && _mktCache._catRate) catRate = _mktCache._catRate;
       else if (p.grading && p.grading.metadata && p.grading.metadata.catRate) catRate = p.grading.metadata.catRate;
     } catch (e) {}
-    var vsCat = espereNet - catRate;
+    var vsCat = espereEco - catRate;
     h += '<div style="margin-top:7px;padding-top:6px;border-top:1px dashed #E2E8F0;font-size:11px;color:' + (vsCat >= 0 ? '#059669' : '#DC2626') + '">'
-      + (vsCat >= 0 ? '✓ ' : '✗ ') + 'vs CAT ' + catRate.toFixed(1).replace('.', ',') + '% → <strong>' + (vsCat >= 0 ? '+' : '') + vsCat.toFixed(2).replace('.', ',') + ' pt' + (Math.abs(vsCat) >= 2 ? 's' : '') + '</strong>' + (vsCat < 0 ? ' — moins qu\'un dépôt à terme, pour un risque actions' : '') + '</div>';
-    h += '<div style="margin-top:5px;font-size:10px;color:#64748B">C\'est le vrai rendement attendu, pas le coupon affiché.' + (isWO ? ' Panier <strong>worst-of</strong> : la proba réelle que <em>tous</em> les sous-jacents tiennent est inférieure → espéré probablement plus bas.' : '') + '</div>';
+      + (vsCat >= 0 ? '✓ ' : '✗ ') + 'vs CAT ' + f1(catRate) + '% → <strong>' + (vsCat >= 0 ? '+' : '') + f2(vsCat) + ' pt' + (Math.abs(vsCat) >= 2 ? 's' : '') + '</strong>' + (vsCat < 0 ? ' — sous le dépôt à terme, pour un risque actions' : '') + '</div>';
+    h += '<div style="margin-top:5px;font-size:10px;color:#64748B">Deux chiffres à ne pas confondre : <strong>' + pc(netRecu) + '</strong> = ce que tu touches SI ça marche ; <strong>' + pc(espereEco) + '</strong> = la valeur attendue (proba de coupon' + (margin > 0 ? ' + marge que tu surpayes' : '') + ').' + (isWO ? ' Panier <strong>worst-of</strong> : proba réelle plus basse → espéré probablement inférieur.' : '') + '</div>';
     h += '</div>';
   }
   // Caveat qualité des frais
   if (!fd.documented) {
-    h += '<div style="margin-top:6px;font-size:10px;color:#D97706">⚠ Frais non renseignés — net = brut. Saisis la marge (KID) pour un net fiable.</div>';
+    h += '<div style="margin-top:6px;font-size:10px;color:#D97706">⚠ Frais non renseignés. Saisis la marge (KID) pour un net fiable.</div>';
   } else {
-    h += '<div style="margin-top:6px;font-size:10px;color:#94A3B8">Frais = commission de distribution. La marge de structuration réelle (KID / RIY) peut être supérieure.</div>';
+    h += '<div style="margin-top:6px;font-size:10px;color:#94A3B8">Marge = commission de distribution (incluse dans le prix). Le RIY du KID donne le coût total exact.</div>';
   }
   h += '</div>';
   return h;
