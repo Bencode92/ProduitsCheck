@@ -233,5 +233,202 @@
   "conversation": [],
   "conversationSummary": null,
   "decision": null,
-  "decisionReason": null
+  "decisionReason": null,
+  "aiCategory": "capital-protege",
+  "aiCategoryLabel": "🛡️ Capital Protégé",
+  "aiCategoryColor": "#4CAF50",
+  "aiOpinion": "Produit très défensif offrant capital garanti à 100% sur 8.27 ans avec un coupon fixe de 0.5417% annuel, soit ~4.5% cumulé sur la durée totale. Rendement faible mais sécurisé, adapté aux profils très conservateurs, toutefois l'autocall reste flou et le rendement peine à compenser l'inflation sur une aussi longue maturité.",
+  "aiAnalyzedAt": "2026-07-03T08:47:38.979Z",
+  "grading": {
+    "grade": "D",
+    "score": 43,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 37,
+        "base": 19,
+        "delta": 0,
+        "reasoning": "Rendement: base 19 → -1 = 18 (Coupon conditionnel dérisoire (0.542% annualisé) et prob de maturité à 2% avec autocall seuil 100% en régime neutral hésitant réduisent la probabilité de coupon réel.) | Coupon 0.542%, protégé | Mat espérée: ~2.3a (prob mat: 2%)",
+        "_bsDelta": 18,
+        "_bs": {
+          "score": 37,
+          "probCoupon": 50.5,
+          "rendementNet": 0.27,
+          "perteEsperee": 0,
+          "couponEffectif": 0.54,
+          "vols": [
+            19.51
+          ],
+          "matEsperee": 2.3,
+          "isBasket": false
+        }
+      },
+      "underlyingQuality": {
+        "score": 80,
+        "base": 79,
+        "delta": 1,
+        "reasoning": "Qualité: base 79 → +1 = 80 (Euro Stoxx 50 diversifié (beta 0.89) dans un régime neutral sans secteur évité dominant, mais la divergence CPI/PCE et le risque de repricing des taux limitent le bonus.) | Worst: Euro Stoxx 50 B:77"
+      },
+      "portfolioFit": {
+        "score": 55,
+        "base": 80,
+        "delta": 1,
+        "reasoning": "Fit: base 80 → +1 = 81 (Capital garanti pertinent pour un profil Stable actuellement sur-exposé aux actions (78.6%), ce produit ajoute un socle défensif utile.)"
+      },
+      "riskPremium": {
+        "score": 14,
+        "base": 0,
+        "delta": -1,
+        "reasoning": "Capital garanti: coupon 0.5% - CAT 2.5% - illiq 0.6% = -2.6%"
+      }
+    },
+    "verdict": "En régime NEUTRAL avec un VIX à 22 et une divergence CPI/PCE critique (167bps), ce produit à capital garanti offre une sécurité bienvenue pour un profil Stable trop agressif (78.6% equity). Cependant, le coupon conditionnel de 0.542% annualisé est dérisoire et la maturité espérée réelle (~2.3a) contraste avec une échéance maximale de 8.27 ans qui immobilise le capital sans rendement garanti. Avec seulement 2% de probabilité de maturité et un autocall exigeant un retour au niveau initial (seuil 100%), le scénario le plus probable est un capital rendu nu après plusieurs années sans coupon. Un fonds monétaire ou des TIPS offriraient un meilleur couple rendement/liquidité.",
+    "keyRisks": [
+      "Coupon conditionnel très faible (0.542%) souvent non versé si l'Euro Stoxx 50 n'atteint pas le seuil, avec risque de coût d'opportunité sur 8 ans",
+      "Repricing brutal des taux longs (breakeven 5Y 2.26% vs PCE 4.07%) rendant ce produit à capital garanti mais rendement quasi-nul très peu attractif face aux obligations"
+    ],
+    "negotiationPoints": [
+      "Relever le coupon conditionnel ou abaisser le seuil d'autocall sous 100%",
+      "Négocier une fenêtre de sortie anticipée pour réduire le risque d'immobilisation 8 ans"
+    ],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 1.6,
+        "return_eur": 1626,
+        "probability": 0.2,
+        "duration_years": 3
+      },
+      "base": {
+        "return_pct": 0.5,
+        "return_eur": 542,
+        "probability": 0.35,
+        "duration_years": 6
+      },
+      "stress": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.3,
+        "duration_years": 8
+      },
+      "worst": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.15,
+        "duration_years": 8
+      }
+    },
+    "confidenceInterval": {
+      "low": 35,
+      "high": 49,
+      "halfWidth": 7,
+      "gradeStable": false,
+      "gradeRange": "D-C",
+      "label": "D [35-49]"
+    },
+    "metadata": {
+      "gradedAt": "2026-07-03T08:48:00.022Z",
+      "durationMs": 16570,
+      "aiUsed": true,
+      "version": "7.1",
+      "productType": "capital_garanti",
+      "marketDataAvailable": true,
+      "catBenchmark": 2.9,
+      "catSource": "allocator-confirmed",
+      "couponAnnualized": 0.542,
+      "couponRaw": 0.5417,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": false,
+      "barrierPct": 0,
+      "barrierCouponPct": null,
+      "couponProbability": 50.5,
+      "expectedMaturity": 2.3,
+      "maxMaturity": 8.27,
+      "probReachMaturity": 2,
+      "maxBeta": 0.89,
+      "baseScore": 41,
+      "baseGrade": "D",
+      "adjustments": {
+        "p1": -1,
+        "p2": 1,
+        "p3": 1,
+        "p4": -1
+      },
+      "barrier_sigma": null,
+      "barrier_sigma_label": null,
+      "barrier_sigma_danger": null,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Rappelable 12M",
+      "ci_low": 35,
+      "ci_high": 49,
+      "ci_label": "D [35-49]",
+      "issuer_rating": "A",
+      "issuer_tier": "IG",
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "capital_garanti",
+      "bsRendementNet": 0.27,
+      "bsProbCoupon": 50.5,
+      "bsPerteEsperee": 0,
+      "bsVols": [
+        19.51
+      ],
+      "bsMatEsperee": 2.3,
+      "isBasket": false,
+      "issuerCreditPenalty": 1,
+      "issuerCDS": 70,
+      "v6Weights": {
+        "p1": 0.25,
+        "p2": 0.2,
+        "p3": 0.25,
+        "p4": 0.3
+      },
+      "inputHash": "g1qhr72u",
+      "gradeT0": "2026-07-03T08:48:00.022Z",
+      "trackingLevelAt0": null,
+      "stockData": [
+        {
+          "name": "Euro Stoxx 50",
+          "ticker": "ENX",
+          "sector": "Finance",
+          "perf_ytd": 10.08,
+          "perf_1y": -3.69,
+          "volatility_3y": 19.37,
+          "max_drawdown_3y": 25.7,
+          "buffett_score": 77,
+          "quality_score": 64,
+          "buffett_grade": "B"
+        }
+      ]
+    },
+    "regimeScenarios": {
+      "current": {
+        "score": 43,
+        "grade": "D",
+        "label": "Actuel (neutral)",
+        "desc": "Régime actuel → volatilité modérée"
+      },
+      "bull": {
+        "score": 49,
+        "grade": "C",
+        "label": "Bull / Risk-on",
+        "delta": 6,
+        "desc": "Marchés haussiers → prob coupon monte, barrière safe"
+      },
+      "crash": {
+        "score": 37,
+        "grade": "D",
+        "label": "Crash / Récession",
+        "delta": -6,
+        "desc": "Marchés baissiers → barrière menacée, vol en hausse"
+      }
+    }
+  },
+  "_couponProbability": 50.5,
+  "_bsRendementNet": 0.27
 }
