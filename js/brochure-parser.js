@@ -282,6 +282,21 @@
       } catch (e) {}
     }
 
+    // Callable AU GRÉ DE L'ÉMETTEUR : classe à part. Le rappel n'est PAS un autocall à seuil ;
+    // c'est une option de la BANQUE (elle rappelle quand ça l'arrange → plafonne ta hausse, ou
+    // en cas de baisse de taux). Le grader ne doit pas le noter comme un bonus autocall.
+    try {
+      var _mechTxt = ((data.mechanism || '') + ' ' + (data.summary || '')).toLowerCase();
+      var _discretion = /gr[eé] de l['’ ]?[eé]metteur|discr[eé]tion de l['’ ]?[eé]metteur|option of the issuer|issuer['’]?s?\s+(sole\s+)?discretion/.test(_mechTxt);
+      if (er.possible && String(er.type).toLowerCase() === 'callable' && (_discretion || er.atIssuerDiscretion === true)) {
+        er.atIssuerDiscretion = true;
+        er.investorFavorable = false;
+        data.earlyRedemption = er;
+        data.subType = data.subType || 'callable_issuer_discretion';
+        data._callableIssuerDiscretion = true;
+      }
+    } catch (e) {}
+
     data.underlyings = _normalizeStringArray(data.underlyings);
     data.risks = _normalizeStringArray(data.risks);
 
@@ -529,9 +544,16 @@
 
     // Validation par type
     if (st === 'capital_garanti' || st === 'tarn') {
-      if (!data.guaranteedYears) alerts.push('⚠️ TARN : Années garanties non détectées (combien d\'années sans condition ?)');
-      if (!data.autocallCumulTarget && er.possible) alerts.push('⚠️ TARN : Autocall cumul target non détecté (seuil de cumul pour remboursement)');
+      // Les alertes TARN ne valent que pour un VRAI TARN (cumul de coupons) — pas pour un
+      // capital protégé à participation ni un callable au gré de l'émetteur (faux positifs).
+      var _looksTarn = /tarn|target accrual|cumul/i.test((data.name || '') + ' ' + (data.mechanism || '') + ' ' + (data.summary || '')) || data.autocallCumulTarget != null || (data.guaranteedYears || 0) > 0;
+      var _notTarn = (parseFloat(data.participationRate) > 0) || er.atIssuerDiscretion === true || data._callableIssuerDiscretion === true;
+      if (_looksTarn && !_notTarn) {
+        if (!data.guaranteedYears) alerts.push('⚠️ TARN : Années garanties non détectées (combien d\'années sans condition ?)');
+        if (!data.autocallCumulTarget && er.possible) alerts.push('⚠️ TARN : Autocall cumul target non détecté (seuil de cumul pour remboursement)');
+      }
       if (!cp.barrierCoupon && c.type === 'conditionnel') alerts.push('⚠️ Barrière coupon non détectée (seuil pour recevoir le coupon)');
+      if (data._callableIssuerDiscretion) alerts.push('⚠️ Rappel au gré de l\'ÉMETTEUR (pas un autocall) : l\'optionalité du rappel est côté banque — plafonne ta hausse / risque de réinvestissement. Rendement de rappel NON fiable.');
     }
     if (st === 'autocall' || st === 'phoenix_memoire') {
       if (!cp.barrier && !cp.protected) alerts.push('⚠️ Barrière capital non détectée');
