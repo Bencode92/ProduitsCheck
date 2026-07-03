@@ -1,0 +1,392 @@
+{
+  "id": "sp_mr4ssbps_te6xi",
+  "name": "LIVINGSTONE RENDEMENT",
+  "type": "autocall",
+  "structureType": "autocall",
+  "emitter": "SG Issuer",
+  "guarantor": "Société Générale",
+  "guarantorRating": {
+    "moodys": "A1",
+    "sp": "A",
+    "fitch": ""
+  },
+  "underlyings": [
+    "Fonds DNCA Equity Selection"
+  ],
+  "underlyingType": "fund",
+  "currency": "EUR",
+  "maturity": "10.33 ans",
+  "maturityYears": 10.33,
+  "coupon": {
+    "rate": 7,
+    "rateIfCalled": 7,
+    "rateIfMaturity": 7,
+    "type": "conditionnel",
+    "frequency": "annuel",
+    "trigger": 80,
+    "memory": true,
+    "paymentTiming": "periodic",
+    "traabGrossMax": 6.94,
+    "traabNetMax": 5.87,
+    "_note": "Coupon conditionnel 7%/an à MÉMOIRE, versé si Performance ≥ -20% (seuil 80% du Niveau Initial). Aucun coupon garanti. Plafonné (TRAA brut max 6,94% / net 5,87%)."
+  },
+  "participationRate": null,
+  "capitalProtection": {
+    "protected": false,
+    "level": null,
+    "barrier": 50,
+    "barrierCoupon": 80,
+    "barrierType": "europeenne",
+    "guaranteeType": "barriere"
+  },
+  "earlyRedemption": {
+    "possible": true,
+    "type": "autocall",
+    "trigger": 100,
+    "frequency": "annuel",
+    "startSemester": 1,
+    "stepDown": false,
+    "stepDownPct": null,
+    "firstCallDate": "2027-10-28",
+    "callSchedule": [
+      {
+        "date": "2027-10-28",
+        "trigger": 100
+      },
+      {
+        "date": "2028-10-30",
+        "trigger": 100
+      },
+      {
+        "date": "2029-10-29",
+        "trigger": 100
+      },
+      {
+        "date": "2030-10-28",
+        "trigger": 100
+      },
+      {
+        "date": "2031-10-28",
+        "trigger": 100
+      },
+      {
+        "date": "2032-10-28",
+        "trigger": 100
+      },
+      {
+        "date": "2033-10-28",
+        "trigger": 100
+      },
+      {
+        "date": "2034-10-30",
+        "trigger": 100
+      },
+      {
+        "date": "2035-10-29",
+        "trigger": 100
+      }
+    ]
+  },
+  "decrementPct": 3.5,
+  "actualDividendYield": null,
+  "mechanism": "Autocall à coupon conditionnel 7%/an à MÉMOIRE sur le Fonds DNCA Equity Selection. Remboursement anticipé automatique aux années 1 à 9 si Performance (Niveau Moyen Annuel vs Niveau Initial) ≥ 0% (seuil 100%) : capital + 7% + coupons mémoire non versés. Coupon 7% versé (années 1 à 10) si Performance ≥ -20% (seuil 80%), avec récupération des coupons mémoire. À l'échéance (an 10) : si Perf ≥ -20% capital + coupons ; si -50% ≤ Perf < -20% capital seul (TRAA net -1,00%) ; si Perf < -50% perte en capital = intégralité de la baisse du Fonds (perte totale possible). ATTENTION : le Fonds retranche un forfait de 5 €/an > dividendes réels → décrément structurel ~3,5%/an qui abaisse la proba d'autocall et augmente le risque de perte. Gains plafonnés (TRAA brut max 6,94% / net 5,87%).",
+  "risks": [
+    "DÉCRÉMENT CACHÉ : le Fonds DNCA retranche un forfait de 5 €/an, historiquement > aux dividendes réels → sous-performance structurelle ≈ 3,5%/an, accélérée en marché baissier (abaisse la proba d'autocall, augmente le risque de perte à l'échéance)",
+    "Sous-jacent = fonds MAISON SG/DNCA (SICAV SOLYS), gestion active, sans track-record long — performance dépend fortement du gestionnaire",
+    "Pas de protection du capital : au-delà de -50% à l'échéance, perte = intégralité de la baisse du Fonds (perte totale possible)",
+    "Gains plafonnés (TRAA brut max 6,94% / net 5,87%)",
+    "Marge embarquée 10,33% (1%/an × 10,33 ans) incluse dans le prix",
+    "Risque de crédit / bail-in sur Société Générale (garant)",
+    "Aucun coupon versé si le Fonds reste sous -20% (seuil 80%) — possible sur longue période baissière",
+    "Durée jusqu'à 10 ans 3 mois 27 jours, non connue à l'avance ; blocage long, ticket 100 000 €",
+    "Risque de liquidité : marché secondaire assuré par Société Générale uniquement (fourchette ≤ 1%)",
+    "Sensibilité élevée du remboursement autour du seuil de -50% à l'échéance",
+    "Conflit d'intérêts : SG est à la fois garant, agent de calcul ET gestionnaire du fonds sous-jacent (via SG IS)",
+    "Risque lié à l'inflation (produit 10 ans)"
+  ],
+  "summary": "LIVINGSTONE RENDEMENT est un autocall SG de 10 ans sur le Fonds DNCA Equity Selection (fonds maison SG/DNCA, actions Europe). Coupon conditionnel 7%/an à MÉMOIRE si le Fonds ≥ 80% du niveau initial (Perf ≥ -20%). Autocall automatique années 1 à 9 si le Fonds ≥ 100%. Capital protégé jusqu'à -50% à l'échéance ; au-delà, perte = toute la baisse (perte totale possible). PIÈGE : le Fonds retranche un forfait de 5 €/an supérieur aux dividendes réels → décrément structurel ~3,5%/an qui joue contre l'autocall et amplifie les baisses. Gains plafonnés (net max 5,87%/an). Marge embarquée 10,33% upfront. Risque de crédit SG. Ticket minimum 100 000 EUR. Conflit d'intérêts SG garant/agent de calcul/gérant du fonds.",
+  "aiParsed": {
+    "name": "LIVINGSTONE RENDEMENT",
+    "type": "autocall",
+    "structureType": "autocall",
+    "emitter": "SG Issuer",
+    "guarantor": "Société Générale",
+    "guarantorRating": {
+      "moodys": "A1",
+      "sp": "A",
+      "fitch": ""
+    },
+    "underlyings": [
+      "Fonds DNCA Equity Selection"
+    ],
+    "underlyingType": "fund",
+    "underlyingIsin": "LU3284409037",
+    "underlyingIsProprietaryFund": true,
+    "underlyingDecrementNote": "Prélèvement forfaitaire de 5 €/an par part (NAV 88,50 € au 13/05/2026) — historiquement SUPÉRIEUR aux dividendes réels (~1,90 €) → sous-performance structurelle ≈ 3,5%/an, accélérée en marché baissier.",
+    "currency": "EUR",
+    "maturity": "10.33 ans",
+    "maturityYears": 10.33,
+    "maturityDate": "2036-10-28",
+    "strikeDate": "2026-10-08",
+    "coupon": {
+      "rate": 7,
+      "rateIfCalled": 7,
+      "rateIfMaturity": 7,
+      "type": "conditionnel",
+      "frequency": "annuel",
+      "trigger": 80,
+      "memory": true,
+      "paymentTiming": "periodic",
+      "traabGrossMax": 6.94,
+      "traabNetMax": 5.87,
+      "_note": "Coupon conditionnel 7%/an à MÉMOIRE, versé si Performance ≥ -20% (seuil 80% du Niveau Initial). Aucun coupon garanti. Plafonné (TRAA brut max 6,94% / net 5,87%)."
+    },
+    "participationRate": null,
+    "guaranteedYears": 0,
+    "autocallCumulTarget": null,
+    "commissions": 10.33,
+    "commissionAnnualOverLife": true,
+    "commissionRecurringAnnual": null,
+    "fees": {
+      "structuring": 10.33
+    },
+    "sri": null,
+    "riy": null,
+    "isin": "FR0014018NL6",
+    "minInvestment": 100000,
+    "issuePrice": 99.7,
+    "capitalProtection": {
+      "protected": false,
+      "level": null,
+      "barrier": 50,
+      "barrierCoupon": 80,
+      "barrierType": "europeenne",
+      "guaranteeType": "barriere"
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "autocall",
+      "trigger": 100,
+      "frequency": "annuel",
+      "startSemester": 1,
+      "stepDown": false,
+      "stepDownPct": null,
+      "firstCallDate": "2027-10-28",
+      "callSchedule": [
+        {
+          "date": "2027-10-28",
+          "trigger": 100
+        },
+        {
+          "date": "2028-10-30",
+          "trigger": 100
+        },
+        {
+          "date": "2029-10-29",
+          "trigger": 100
+        },
+        {
+          "date": "2030-10-28",
+          "trigger": 100
+        },
+        {
+          "date": "2031-10-28",
+          "trigger": 100
+        },
+        {
+          "date": "2032-10-28",
+          "trigger": 100
+        },
+        {
+          "date": "2033-10-28",
+          "trigger": 100
+        },
+        {
+          "date": "2034-10-30",
+          "trigger": 100
+        },
+        {
+          "date": "2035-10-29",
+          "trigger": 100
+        }
+      ]
+    },
+    "decrementPct": 3.5,
+    "actualDividendYield": null,
+    "mechanism": "Autocall à coupon conditionnel 7%/an à MÉMOIRE sur le Fonds DNCA Equity Selection. Remboursement anticipé automatique aux années 1 à 9 si Performance (Niveau Moyen Annuel vs Niveau Initial) ≥ 0% (seuil 100%) : capital + 7% + coupons mémoire non versés. Coupon 7% versé (années 1 à 10) si Performance ≥ -20% (seuil 80%), avec récupération des coupons mémoire. À l'échéance (an 10) : si Perf ≥ -20% capital + coupons ; si -50% ≤ Perf < -20% capital seul (TRAA net -1,00%) ; si Perf < -50% perte en capital = intégralité de la baisse du Fonds (perte totale possible). ATTENTION : le Fonds retranche un forfait de 5 €/an > dividendes réels → décrément structurel ~3,5%/an qui abaisse la proba d'autocall et augmente le risque de perte. Gains plafonnés (TRAA brut max 6,94% / net 5,87%).",
+    "risks": [
+      "DÉCRÉMENT CACHÉ : le Fonds DNCA retranche un forfait de 5 €/an, historiquement > aux dividendes réels → sous-performance structurelle ≈ 3,5%/an, accélérée en marché baissier (abaisse la proba d'autocall, augmente le risque de perte à l'échéance)",
+      "Sous-jacent = fonds MAISON SG/DNCA (SICAV SOLYS), gestion active, sans track-record long — performance dépend fortement du gestionnaire",
+      "Pas de protection du capital : au-delà de -50% à l'échéance, perte = intégralité de la baisse du Fonds (perte totale possible)",
+      "Gains plafonnés (TRAA brut max 6,94% / net 5,87%)",
+      "Marge embarquée 10,33% (1%/an × 10,33 ans) incluse dans le prix",
+      "Risque de crédit / bail-in sur Société Générale (garant)",
+      "Aucun coupon versé si le Fonds reste sous -20% (seuil 80%) — possible sur longue période baissière",
+      "Durée jusqu'à 10 ans 3 mois 27 jours, non connue à l'avance ; blocage long, ticket 100 000 €",
+      "Risque de liquidité : marché secondaire assuré par Société Générale uniquement (fourchette ≤ 1%)",
+      "Sensibilité élevée du remboursement autour du seuil de -50% à l'échéance",
+      "Conflit d'intérêts : SG est à la fois garant, agent de calcul ET gestionnaire du fonds sous-jacent (via SG IS)",
+      "Risque lié à l'inflation (produit 10 ans)"
+    ],
+    "summary": "LIVINGSTONE RENDEMENT est un autocall SG de 10 ans sur le Fonds DNCA Equity Selection (fonds maison SG/DNCA, actions Europe). Coupon conditionnel 7%/an à MÉMOIRE si le Fonds ≥ 80% du niveau initial (Perf ≥ -20%). Autocall automatique années 1 à 9 si le Fonds ≥ 100%. Capital protégé jusqu'à -50% à l'échéance ; au-delà, perte = toute la baisse (perte totale possible). PIÈGE : le Fonds retranche un forfait de 5 €/an supérieur aux dividendes réels → décrément structurel ~3,5%/an qui joue contre l'autocall et amplifie les baisses. Gains plafonnés (net max 5,87%/an). Marge embarquée 10,33% upfront. Risque de crédit SG. Ticket minimum 100 000 EUR. Conflit d'intérêts SG garant/agent de calcul/gérant du fonds.",
+    "scenarios": {
+      "stress": null,
+      "defavorable": null,
+      "median": null,
+      "favorable": null
+    },
+    "netAnnuelParScenario": {
+      "favorable_call_A1": 5.56,
+      "favorable_max": 5.87,
+      "median_perf_moins35_capital_seul": 0.45,
+      "defavorable_perf_moins60": -9.62,
+      "_note": "TRAA NET/an (net des 1%/an de garde), chiffres de la brochure p.9. Le décrément ~3,5%/an rend les scénarios favorables moins probables qu'un autocall classique."
+    },
+    "aiParsed": {
+      "name": "LIVINGSTONE RENDEMENT",
+      "isin": "FR0014018NL6",
+      "structureType": "autocall",
+      "emitter": "SG Issuer",
+      "guarantor": "Société Générale",
+      "guarantorRating": {
+        "moodys": "A1",
+        "sp": "A",
+        "fitch": ""
+      },
+      "underlyings": [
+        "Fonds DNCA Equity Selection"
+      ],
+      "underlyingType": "fund",
+      "underlyingIsin": "LU3284409037",
+      "underlyingIsProprietaryFund": true,
+      "currency": "EUR",
+      "maturity": "10 ans, 3 mois et 27 jours",
+      "maturityYears": 10.33,
+      "maturityDate": "2036-10-28",
+      "strikeDate": "2026-10-08",
+      "coupon": {
+        "rate": 7,
+        "rateIfCalled": 7,
+        "rateIfMaturity": 7,
+        "type": "conditionnel",
+        "frequency": "annuel",
+        "trigger": 80,
+        "memory": true,
+        "paymentTiming": "periodic",
+        "traabGrossMax": 6.94,
+        "traabNetMax": 5.87
+      },
+      "participationRate": null,
+      "guaranteedYears": 0,
+      "autocallCumulTarget": null,
+      "commissions": 10.33,
+      "commissionAnnualOverLife": true,
+      "commissionRecurringAnnual": null,
+      "capitalProtection": {
+        "protected": false,
+        "level": null,
+        "barrier": 50,
+        "barrierCoupon": 80,
+        "barrierType": "europeenne",
+        "guaranteeType": "barriere"
+      },
+      "earlyRedemption": {
+        "possible": true,
+        "type": "autocall",
+        "trigger": 100,
+        "frequency": "annuel",
+        "startSemester": 1,
+        "stepDown": false,
+        "stepDownPct": null,
+        "firstCallDate": "2027-10-28",
+        "callSchedule": [
+          {
+            "date": "2027-10-28",
+            "trigger": 100
+          },
+          {
+            "date": "2028-10-30",
+            "trigger": 100
+          },
+          {
+            "date": "2029-10-29",
+            "trigger": 100
+          },
+          {
+            "date": "2030-10-28",
+            "trigger": 100
+          },
+          {
+            "date": "2031-10-28",
+            "trigger": 100
+          },
+          {
+            "date": "2032-10-28",
+            "trigger": 100
+          },
+          {
+            "date": "2033-10-28",
+            "trigger": 100
+          },
+          {
+            "date": "2034-10-30",
+            "trigger": 100
+          },
+          {
+            "date": "2035-10-29",
+            "trigger": 100
+          }
+        ]
+      },
+      "decrementPct": 3.5,
+      "actualDividendYield": null,
+      "minInvestment": 100000,
+      "issuePrice": 99.7,
+      "sri": null,
+      "riy": null,
+      "costEntry": null,
+      "costExit": null,
+      "costOngoing": null,
+      "scenarios": {
+        "stress": null,
+        "defavorable": null,
+        "median": null,
+        "favorable": null
+      },
+      "mechanism": "Autocall à coupon conditionnel 7%/an à mémoire sur le Fonds DNCA Equity Selection. Autocall années 1 à 9 si Perf ≥ 0% (seuil 100%) : capital + 7% + coupons mémoire. Coupon 7% versé (années 1 à 10) si Perf ≥ -20% (seuil 80%). Échéance : capital si Perf ≥ -50%, sinon perte = toute la baisse du Fonds. Le Fonds retranche un forfait de 5 €/an > dividendes réels → décrément structurel ~3,5%/an. Gains plafonnés (TRAA brut max 6,94%).",
+      "risks": [
+        "DÉCRÉMENT CACHÉ : forfait 5 €/an du Fonds > dividendes réels → sous-performance ~3,5%/an, accélérée en baisse",
+        "Sous-jacent = fonds maison SG/DNCA, sans track-record long",
+        "Pas de protection du capital : perte totale possible au-delà de -50%",
+        "Gains plafonnés (TRAA brut max 6,94%)",
+        "Marge embarquée 10,33% incluse dans le prix",
+        "Risque de crédit / bail-in Société Générale",
+        "Aucun coupon si le Fonds reste sous -20%",
+        "Blocage jusqu'à 10 ans, ticket 100 000 €",
+        "Conflit d'intérêts : SG garant + agent de calcul + gérant du fonds",
+        "Risque lié à l'inflation"
+      ],
+      "summary": "Autocall SG 10 ans sur le Fonds DNCA Equity Selection (fonds maison). Coupon conditionnel 7%/an à mémoire si Fonds ≥ 80%. Autocall années 1 à 9 si Fonds ≥ 100%. Capital protégé jusqu'à -50%, au-delà perte totale possible. PIÈGE : forfait 5 €/an > dividendes → décrément ~3,5%/an contre l'autocall. Gains plafonnés (net max 5,87%). Marge 10,33% upfront. Ticket 100 000 EUR.",
+      "fees": {
+        "structuring": 10.33
+      },
+      "_parsingAlerts": [
+        "🚩 DÉCRÉMENT CACHÉ : le Fonds DNCA retranche un forfait de 5 €/an, historiquement > aux dividendes réels (~1,90 €) → sous-performance structurelle ≈ 3,5%/an (p.10). Abaisse la proba d'autocall, amplifie les baisses. decrementPct = 3.5.",
+        "ℹ️ Aucun coupon garanti (guaranteedYears = 0) : les 7% sont TOUS conditionnels (Perf ≥ -20%).",
+        "🛡️ PAS de protection du capital : barrière 50% européenne (constatée à l'échéance). Au-delà de -50%, perte = toute la baisse du Fonds (perte totale possible).",
+        "💸 Commission « 1,00%/an × 10,33 ans » = 10,33% upfront, incluse dans le prix d'achat. Chiffre exact = RIY du KID (kid.sgmarkets.com).",
+        "⚠️ Conflit d'intérêts : SG est garant, agent de calcul ET gérant du fonds sous-jacent (via SG IS).",
+        "💰 Ticket minimum 100 000 EUR (offre réservée investisseurs qualifiés, dispensée de prospectus)."
+      ]
+    },
+    "sourceFile": "Brochure LIVINGSTONE RENDEMENT (1).pdf"
+  },
+  "sourceFile": "JSON import",
+  "bankId": "sg",
+  "status": "analyzing",
+  "receivedDate": "2026-07-03",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null
+}
