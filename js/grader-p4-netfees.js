@@ -27,6 +27,14 @@
 
             var md = result.metadata || {};
             var cprob = (md.couponProbability != null) ? md.couponProbability / 100 : null;
+            // Fallback : si la proba de coupon n'est pas dans les metadata, on l'estime (même
+            // source que le grader/panneau) pour ne pas sortir en silence.
+            if (cprob == null && typeof window._estimateCouponProb === 'function') {
+                try {
+                    var est = window._estimateCouponProb(product);
+                    if (typeof est === 'number' && isFinite(est) && est > 0) cprob = est > 1 ? est / 100 : est;
+                } catch (e) {}
+            }
             if (cprob == null || cprob <= 0) return result;   // pas de proba → on ne touche pas
 
             var coupon = parseFloat(product.coupon && product.coupon.rate);
