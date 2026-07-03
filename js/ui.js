@@ -74,7 +74,7 @@ function renderDashboard(container, state) {
     </div>
     ${stats.concentrations.length > 0 ? `<div class="alert-bar"><span>⚠️</span><span>Concentrations: ${stats.concentrations.map(c=>`<strong>${c.name}</strong> (${c.pct}%)`).join(', ')}</span></div>` : ''}
     <div class="section">
-      <div class="section-header"><div class="section-title"><span class="dot" style="background:var(--accent)"></span>Mon Portefeuille</div><button class="btn primary" onclick="showAddPortfolioModal()">+ Ajouter un produit</button></div>
+      <div class="section-header"><div class="section-title"><span class="dot" style="background:var(--accent)"></span>Mon Portefeuille</div><div style="display:flex;gap:6px">${(state.portfolio.length + Object.keys(state.proposals).length) ? `<button class="btn sm" onclick="showProductComparison()">📊 Comparer</button>` : ''}<button class="btn primary" onclick="showAddPortfolioModal()">+ Ajouter un produit</button></div></div>
       ${state.portfolio.length ? _sbControls() : ''}
       ${state.portfolio.length === 0 ? `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">Aucun produit en portefeuille</div><div class="empty-sub">Ajoutez votre premier produit structuré</div></div>` : `<div class="portfolio-grid">${_sbApply(state.portfolio).map(p => renderProductCard(p,'portfolio')).join('')}</div>`}
     </div>
