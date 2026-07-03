@@ -1,0 +1,334 @@
+{
+  "id": "sp_mr4qiywh_iut2u",
+  "name": "ROBOTICS & TECH SELECTION",
+  "type": "autocall",
+  "structureType": "autocall",
+  "emitter": "SG Issuer",
+  "guarantor": "Société Générale",
+  "guarantorRating": {
+    "moodys": "A1",
+    "sp": "A",
+    "fitch": ""
+  },
+  "underlyings": [
+    "Solactive Robotics and Industrial Innovation Selection Index PR"
+  ],
+  "underlyingType": "single-index",
+  "currency": "EUR",
+  "maturity": "5.32 ans",
+  "maturityYears": 5.32,
+  "coupon": {
+    "rate": 8,
+    "rateIfCalled": 8,
+    "rateIfMaturity": 8,
+    "type": "fixe",
+    "frequency": "annuel",
+    "trigger": 100,
+    "memory": false,
+    "paymentTiming": "at_redemption",
+    "cumulative": true,
+    "traabGrossMax": 7.57,
+    "traabNetMax": 6.49,
+    "_note": "Gain FIXE de 8% par année écoulée, versé en lump à l'autocall (ou à l'échéance si Perf ≥ 0). Cumulatif : 108/116/124/132/140% selon l'année. Seuil = 100% du Niveau Initial (Performance ≥ 0%). Plafonné (TRAA brut max 7,57%)."
+  },
+  "participationRate": null,
+  "capitalProtection": {
+    "protected": false,
+    "level": null,
+    "barrier": 60,
+    "barrierCoupon": null,
+    "barrierType": "europeenne",
+    "guaranteeType": "barriere"
+  },
+  "earlyRedemption": {
+    "possible": true,
+    "type": "autocall",
+    "trigger": 100,
+    "frequency": "annuel",
+    "startSemester": 1,
+    "stepDown": false,
+    "stepDownPct": null,
+    "firstCallDate": "2027-10-28",
+    "callSchedule": [
+      {
+        "date": "2027-10-28",
+        "amount": 108
+      },
+      {
+        "date": "2028-10-30",
+        "amount": 116
+      },
+      {
+        "date": "2029-10-29",
+        "amount": 124
+      },
+      {
+        "date": "2030-10-28",
+        "amount": 132
+      }
+    ]
+  },
+  "decrementPct": null,
+  "actualDividendYield": null,
+  "mechanism": "À l'issue des années 1 à 4, si la Performance de l'Indice (Niveau Moyen Annuel vs Niveau Initial) est ≥ 0% (seuil 100%), remboursement anticipé automatique : capital + 8% par année écoulée (108/116/124/132%). À l'échéance (an 5), si Performance ≥ 0% : capital + 40% (140%, TRAA brut 6,88% / net 5,81%). Si -40% ≤ Performance < 0% : capital seul (TRAA brut 0% / net -1,00%). Si Performance < -40% : perte en capital égale à l'intégralité de la baisse de l'Indice (Valeur Finale), perte totale possible. Gain plafonné (TRAA brut max 7,57% / net 6,49%). Niveau Initial = moyenne 5 jours ouvrés post-08/10/2026 ; Niveaux Moyens = moyenne 10 jours ouvrés avant chaque observation.",
+  "risks": [
+    "Indice sous-jacent NEUF (lancé le 18/09/2025) : historique quasi entièrement SIMULÉ/backtesté — aucun track-record réel, risque d'indice optimisé a posteriori",
+    "Panier ultra-concentré semi-conducteurs / tech (NVIDIA, AMD, Micron, Marvell, STMicro, ASML, Tesla) au sommet d'un cycle — très volatil",
+    "Pas de protection du capital : au-delà de -40% à l'échéance, perte égale à toute la baisse de l'Indice (perte totale possible)",
+    "Gains plafonnés (TRAA brut max 7,57%) : forte hausse de l'indice non captée (asymétrie upside coupé / downside gardé)",
+    "Risque de crédit / bail-in sur Société Générale (garant)",
+    "Dividendes non réinvestis (indice Price Return) : performance inférieure à un indice dividendes réinvestis",
+    "Exposition au taux de change EUR/USD (composantes US converties en EUR)",
+    "Sensibilité forte du remboursement autour du seuil de -40%",
+    "Risque de liquidité (revente avant échéance : perte possible partielle ou totale)",
+    "Risque lié à l'inflation",
+    "Durée non connue à l'avance (1 an 3 mois 27 jours à 5 ans 3 mois 27 jours)"
+  ],
+  "summary": "ROBOTICS & TECH SELECTION est un autocall SG de 5,32 ans max sur l'indice Solactive Robotics and Industrial Innovation Selection Index PR (panier de 10 actions mondiales robotique/semi-conducteurs, équipondérées, dividendes non réinvestis). ATTENTION : indice lancé le 18/09/2025, historique quasi entièrement SIMULÉ. Remboursement anticipé automatique dès l'an 1 si Performance ≥ 0% (seuil 100%), avec gain fixe cumulatif de 8%/an (108/116/124/132/140%). À l'échéance si Perf ≥ 0% : capital +40% (net 5,81%/an). Si -40% ≤ Perf < 0% : capital seul (net -1%/an). Si Perf < -40% : perte égale à toute la baisse de l'Indice (perte totale possible). Pas de protection du capital, barrière 60% européenne (constatée à l'échéance). Gains plafonnés (TRAA net max 6,49%). Risque de crédit SG. Commission 1%/an sur durée totale = 5,32% upfront. Ticket minimum 100 000 EUR (réservé investisseurs qualifiés).",
+  "aiParsed": {
+    "name": "ROBOTICS & TECH SELECTION",
+    "type": "autocall",
+    "structureType": "autocall",
+    "emitter": "SG Issuer",
+    "guarantor": "Société Générale",
+    "guarantorRating": {
+      "moodys": "A1",
+      "sp": "A",
+      "fitch": ""
+    },
+    "underlyings": [
+      "Solactive Robotics and Industrial Innovation Selection Index PR"
+    ],
+    "underlyingType": "single-index",
+    "underlyingIsin": "DE000SL0R7A9",
+    "underlyingLaunchDate": "2025-09-18",
+    "underlyingHistorySimulated": true,
+    "currency": "EUR",
+    "maturity": "5.32 ans",
+    "maturityYears": 5.32,
+    "maturityDate": "2031-10-28",
+    "strikeDate": "2026-10-08",
+    "coupon": {
+      "rate": 8,
+      "rateIfCalled": 8,
+      "rateIfMaturity": 8,
+      "type": "fixe",
+      "frequency": "annuel",
+      "trigger": 100,
+      "memory": false,
+      "paymentTiming": "at_redemption",
+      "cumulative": true,
+      "traabGrossMax": 7.57,
+      "traabNetMax": 6.49,
+      "_note": "Gain FIXE de 8% par année écoulée, versé en lump à l'autocall (ou à l'échéance si Perf ≥ 0). Cumulatif : 108/116/124/132/140% selon l'année. Seuil = 100% du Niveau Initial (Performance ≥ 0%). Plafonné (TRAA brut max 7,57%)."
+    },
+    "participationRate": null,
+    "guaranteedYears": 0,
+    "autocallCumulTarget": null,
+    "commissions": 5.32,
+    "commissionAnnualOverLife": true,
+    "commissionRecurringAnnual": null,
+    "fees": {
+      "structuring": 5.32
+    },
+    "sri": null,
+    "riy": null,
+    "isin": "FR0014018NM4",
+    "minInvestment": 100000,
+    "issuePrice": 99.7,
+    "capitalProtection": {
+      "protected": false,
+      "level": null,
+      "barrier": 60,
+      "barrierCoupon": null,
+      "barrierType": "europeenne",
+      "guaranteeType": "barriere"
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "autocall",
+      "trigger": 100,
+      "frequency": "annuel",
+      "startSemester": 1,
+      "stepDown": false,
+      "stepDownPct": null,
+      "firstCallDate": "2027-10-28",
+      "callSchedule": [
+        {
+          "date": "2027-10-28",
+          "amount": 108
+        },
+        {
+          "date": "2028-10-30",
+          "amount": 116
+        },
+        {
+          "date": "2029-10-29",
+          "amount": 124
+        },
+        {
+          "date": "2030-10-28",
+          "amount": 132
+        }
+      ]
+    },
+    "decrementPct": null,
+    "actualDividendYield": null,
+    "mechanism": "À l'issue des années 1 à 4, si la Performance de l'Indice (Niveau Moyen Annuel vs Niveau Initial) est ≥ 0% (seuil 100%), remboursement anticipé automatique : capital + 8% par année écoulée (108/116/124/132%). À l'échéance (an 5), si Performance ≥ 0% : capital + 40% (140%, TRAA brut 6,88% / net 5,81%). Si -40% ≤ Performance < 0% : capital seul (TRAA brut 0% / net -1,00%). Si Performance < -40% : perte en capital égale à l'intégralité de la baisse de l'Indice (Valeur Finale), perte totale possible. Gain plafonné (TRAA brut max 7,57% / net 6,49%). Niveau Initial = moyenne 5 jours ouvrés post-08/10/2026 ; Niveaux Moyens = moyenne 10 jours ouvrés avant chaque observation.",
+    "risks": [
+      "Indice sous-jacent NEUF (lancé le 18/09/2025) : historique quasi entièrement SIMULÉ/backtesté — aucun track-record réel, risque d'indice optimisé a posteriori",
+      "Panier ultra-concentré semi-conducteurs / tech (NVIDIA, AMD, Micron, Marvell, STMicro, ASML, Tesla) au sommet d'un cycle — très volatil",
+      "Pas de protection du capital : au-delà de -40% à l'échéance, perte égale à toute la baisse de l'Indice (perte totale possible)",
+      "Gains plafonnés (TRAA brut max 7,57%) : forte hausse de l'indice non captée (asymétrie upside coupé / downside gardé)",
+      "Risque de crédit / bail-in sur Société Générale (garant)",
+      "Dividendes non réinvestis (indice Price Return) : performance inférieure à un indice dividendes réinvestis",
+      "Exposition au taux de change EUR/USD (composantes US converties en EUR)",
+      "Sensibilité forte du remboursement autour du seuil de -40%",
+      "Risque de liquidité (revente avant échéance : perte possible partielle ou totale)",
+      "Risque lié à l'inflation",
+      "Durée non connue à l'avance (1 an 3 mois 27 jours à 5 ans 3 mois 27 jours)"
+    ],
+    "summary": "ROBOTICS & TECH SELECTION est un autocall SG de 5,32 ans max sur l'indice Solactive Robotics and Industrial Innovation Selection Index PR (panier de 10 actions mondiales robotique/semi-conducteurs, équipondérées, dividendes non réinvestis). ATTENTION : indice lancé le 18/09/2025, historique quasi entièrement SIMULÉ. Remboursement anticipé automatique dès l'an 1 si Performance ≥ 0% (seuil 100%), avec gain fixe cumulatif de 8%/an (108/116/124/132/140%). À l'échéance si Perf ≥ 0% : capital +40% (net 5,81%/an). Si -40% ≤ Perf < 0% : capital seul (net -1%/an). Si Perf < -40% : perte égale à toute la baisse de l'Indice (perte totale possible). Pas de protection du capital, barrière 60% européenne (constatée à l'échéance). Gains plafonnés (TRAA net max 6,49%). Risque de crédit SG. Commission 1%/an sur durée totale = 5,32% upfront. Ticket minimum 100 000 EUR (réservé investisseurs qualifiés).",
+    "scenarios": {
+      "stress": null,
+      "defavorable": null,
+      "median": null,
+      "favorable": null
+    },
+    "netAnnuelParScenario": {
+      "favorable_call_A1": 6.49,
+      "favorable_echeance_A5": 5.81,
+      "median_capital_seul": -1,
+      "defavorable_indice_moins50": -13.68,
+      "_note": "TRAA NET/an (net des 1%/an de frais), chiffres de la brochure p.6/9. Au-delà de -40% la perte suit toute la baisse de l'indice."
+    },
+    "aiParsed": {
+      "name": "ROBOTICS & TECH SELECTION",
+      "isin": "FR0014018NM4",
+      "structureType": "autocall",
+      "emitter": "SG Issuer",
+      "guarantor": "Société Générale",
+      "guarantorRating": {
+        "moodys": "A1",
+        "sp": "A",
+        "fitch": ""
+      },
+      "underlyings": [
+        "Solactive Robotics and Industrial Innovation Selection Index PR"
+      ],
+      "underlyingType": "single-index",
+      "underlyingIsin": "DE000SL0R7A9",
+      "underlyingLaunchDate": "2025-09-18",
+      "underlyingHistorySimulated": true,
+      "currency": "EUR",
+      "maturity": "5 ans, 3 mois et 27 jours",
+      "maturityYears": 5.32,
+      "maturityDate": "2031-10-28",
+      "strikeDate": "2026-10-08",
+      "coupon": {
+        "rate": 8,
+        "rateIfCalled": 8,
+        "rateIfMaturity": 8,
+        "type": "fixe",
+        "frequency": "annuel",
+        "trigger": 100,
+        "memory": false,
+        "paymentTiming": "at_redemption",
+        "cumulative": true,
+        "traabGrossMax": 7.57,
+        "traabNetMax": 6.49
+      },
+      "participationRate": null,
+      "guaranteedYears": 0,
+      "autocallCumulTarget": null,
+      "commissions": 5.32,
+      "commissionAnnualOverLife": true,
+      "commissionRecurringAnnual": null,
+      "capitalProtection": {
+        "protected": false,
+        "level": null,
+        "barrier": 60,
+        "barrierCoupon": null,
+        "barrierType": "europeenne",
+        "guaranteeType": "barriere"
+      },
+      "earlyRedemption": {
+        "possible": true,
+        "type": "autocall",
+        "trigger": 100,
+        "frequency": "annuel",
+        "startSemester": 1,
+        "stepDown": false,
+        "stepDownPct": null,
+        "firstCallDate": "2027-10-28",
+        "callSchedule": [
+          {
+            "date": "2027-10-28",
+            "amount": 108
+          },
+          {
+            "date": "2028-10-30",
+            "amount": 116
+          },
+          {
+            "date": "2029-10-29",
+            "amount": 124
+          },
+          {
+            "date": "2030-10-28",
+            "amount": 132
+          }
+        ]
+      },
+      "decrementPct": null,
+      "actualDividendYield": null,
+      "minInvestment": 100000,
+      "issuePrice": 99.7,
+      "sri": null,
+      "riy": null,
+      "costEntry": null,
+      "costExit": null,
+      "costOngoing": null,
+      "scenarios": {
+        "stress": null,
+        "defavorable": null,
+        "median": null,
+        "favorable": null
+      },
+      "mechanism": "À l'issue des années 1 à 4, si la Performance de l'Indice (Niveau Moyen Annuel vs Niveau Initial) est ≥ 0% (seuil 100%), remboursement anticipé automatique : capital + 8% par année écoulée (108/116/124/132%). À l'échéance (an 5), si Performance ≥ 0% : capital + 40% (140%, TRAA brut 6,88% / net 5,81%). Si -40% ≤ Performance < 0% : capital seul (TRAA brut 0% / net -1,00%). Si Performance < -40% : perte en capital égale à l'intégralité de la baisse de l'Indice (Valeur Finale), perte totale possible. Gain plafonné (TRAA brut max 7,57% / net 6,49%).",
+      "risks": [
+        "Indice sous-jacent NEUF (lancé le 18/09/2025), historique quasi entièrement SIMULÉ — aucun track-record réel",
+        "Panier ultra-concentré semi-conducteurs / tech, très volatil",
+        "Pas de protection du capital : perte totale possible au-delà de -40%",
+        "Gains plafonnés (TRAA brut max 7,57%)",
+        "Risque de crédit / bail-in Société Générale",
+        "Dividendes non réinvestis (indice PR)",
+        "Exposition EUR/USD",
+        "Sensibilité forte autour du seuil de -40%",
+        "Risque de liquidité",
+        "Risque lié à l'inflation",
+        "Durée non connue à l'avance"
+      ],
+      "summary": "Autocall SG 5,32 ans sur l'indice Solactive Robotics (10 actions robotique/semi-conducteurs équipondérées, dividendes non réinvestis). Indice lancé 18/09/2025, historique SIMULÉ. Autocall dès l'an 1 si Perf ≥ 0% (seuil 100%), gain fixe cumulatif 8%/an (108→140%). Échéance : capital +40% si Perf ≥ 0% ; capital seul si -40% ≤ Perf < 0% (net -1%/an) ; perte = toute la baisse si Perf < -40% (perte totale possible). Pas de protection, barrière 60% européenne. Gains plafonnés (net max 6,49%). Commission 5,32% upfront. Ticket min 100 000 EUR.",
+      "fees": {
+        "structuring": 5.32
+      },
+      "_parsingAlerts": [
+        "🚩 Indice sous-jacent NEUF (lancé le 18/09/2025) : historique quasi entièrement SIMULÉ/backtesté — aucun track-record réel, prudence sur la « performance passée ».",
+        "🎯 Autocall : seuil 100% du Niveau Initial (Performance ≥ 0%), observations annuelles A1→A4. Gain fixe cumulatif 8%/an.",
+        "🛡️ PAS de protection du capital : barrière 60% européenne (constatée à l'échéance). Au-delà de -40%, perte = toute la baisse de l'indice (perte totale possible).",
+        "💸 Commission « 1,00%/an × 5,32 ans » = 5,32% upfront, incluse dans le prix d'achat. Chiffre exact = RIY du KID (kid.sgmarkets.com).",
+        "💰 Ticket minimum 100 000 EUR (offre réservée aux investisseurs qualifiés, dispensée de prospectus)."
+      ]
+    },
+    "sourceFile": "Brochure ROBOTICS & TECH SELECTION (2) (1).pdf"
+  },
+  "sourceFile": "JSON import",
+  "bankId": "sg",
+  "status": "analyzing",
+  "receivedDate": "2026-07-03",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null
+}
