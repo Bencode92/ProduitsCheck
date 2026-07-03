@@ -1,0 +1,237 @@
+{
+  "id": "sp_mr4ox32n_6y2mu",
+  "name": "EUROSTOXX PERFORMANCE",
+  "type": "capital_garanti",
+  "structureType": "capital_garanti",
+  "emitter": "SG Issuer",
+  "guarantor": "Société Générale",
+  "guarantorRating": {
+    "moodys": "A1",
+    "sp": "A",
+    "fitch": ""
+  },
+  "underlyings": [
+    "Euro Stoxx 50"
+  ],
+  "underlyingType": "single-index",
+  "currency": "EUR",
+  "maturity": "8.27 ans",
+  "maturityYears": 8.27,
+  "coupon": {
+    "rate": 0.5417,
+    "rateIfCalled": 0.5417,
+    "rateIfMaturity": 0,
+    "type": "fixe",
+    "frequency": "annuel",
+    "trigger": null,
+    "memory": false,
+    "paymentTiming": "at_redemption"
+  },
+  "participationRate": 150,
+  "capitalProtection": {
+    "protected": true,
+    "level": 100,
+    "barrier": null,
+    "barrierCoupon": null,
+    "barrierType": "europeenne",
+    "guaranteeType": "formule"
+  },
+  "earlyRedemption": {
+    "possible": true,
+    "type": "callable",
+    "trigger": null,
+    "frequency": "annuel",
+    "startSemester": 1,
+    "stepDown": false,
+    "stepDownPct": null,
+    "firstCallDate": "2027-10-18"
+  },
+  "decrementPct": null,
+  "actualDividendYield": null,
+  "mechanism": "Capital protégé à l'échéance. Remboursement anticipé callable au gré de l'émetteur dès le mois 12, avec gain mensuel de 0,5417% par mois écoulé (TRAAB max 6,34%). À l'échéance, si Niveau Final ≥ Niveau Initial : capital + hausse × 1,50 (participation). Si Niveau Final < Niveau Initial : remboursement du capital uniquement.",
+  "risks": [
+    "Risque de crédit sur Société Générale",
+    "Risque de marché",
+    "Risque de liquidité",
+    "Risque de perte en capital en cours de vie",
+    "Risque de réinvestissement en cas de call anticipé",
+    "Risque lié à l'inflation"
+  ],
+  "summary": "Produit structuré à capital protégé à l'échéance, indexé sur l'Euro Stoxx 50 (dividendes non réinvestis). L'émetteur peut rappeler le produit mensuellement dès le mois 12, versant alors un gain mensuel de 0,5417% par mois écoulé (max 6,34% annualisé). À l'échéance, si l'indice est au-dessus de son niveau initial, l'investisseur reçoit le capital majoré de 1,5 fois la hausse. Sinon, seul le capital est remboursé. Durée : 8,27 ans. Commission : 1% annuel sur la durée totale. Investissement min : 1 000 EUR.",
+  "aiParsed": {
+    "name": "EUROSTOXX PERFORMANCE",
+    "type": "capital_garanti",
+    "structureType": "capital_garanti",
+    "emitter": "SG Issuer",
+    "guarantor": "Société Générale",
+    "guarantorRating": {
+      "moodys": "A1",
+      "sp": "A",
+      "fitch": ""
+    },
+    "underlyings": [
+      "Euro Stoxx 50"
+    ],
+    "underlyingType": "single-index",
+    "currency": "EUR",
+    "maturity": "8.27 ans",
+    "maturityYears": 8.27,
+    "maturityDate": "2034-10-16",
+    "strikeDate": "2026-10-08",
+    "coupon": {
+      "rate": 0.5417,
+      "rateIfCalled": 0.5417,
+      "rateIfMaturity": 0,
+      "type": "fixe",
+      "frequency": "annuel",
+      "trigger": null,
+      "memory": false,
+      "paymentTiming": "at_redemption"
+    },
+    "participationRate": 150,
+    "guaranteedYears": 0,
+    "autocallCumulTarget": null,
+    "commissions": 8.27,
+    "fees": {
+      "structuring": 8.27
+    },
+    "sri": null,
+    "riy": null,
+    "isin": "FR0014018NK8",
+    "minInvestment": 1000,
+    "capitalProtection": {
+      "protected": true,
+      "level": 100,
+      "barrier": null,
+      "barrierCoupon": null,
+      "barrierType": "europeenne",
+      "guaranteeType": "formule"
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "callable",
+      "trigger": null,
+      "frequency": "annuel",
+      "startSemester": 1,
+      "stepDown": false,
+      "stepDownPct": null,
+      "firstCallDate": "2027-10-18"
+    },
+    "decrementPct": null,
+    "actualDividendYield": null,
+    "mechanism": "Capital protégé à l'échéance. Remboursement anticipé callable au gré de l'émetteur dès le mois 12, avec gain mensuel de 0,5417% par mois écoulé (TRAAB max 6,34%). À l'échéance, si Niveau Final ≥ Niveau Initial : capital + hausse × 1,50 (participation). Si Niveau Final < Niveau Initial : remboursement du capital uniquement.",
+    "risks": [
+      "Risque de crédit sur Société Générale",
+      "Risque de marché",
+      "Risque de liquidité",
+      "Risque de perte en capital en cours de vie",
+      "Risque de réinvestissement en cas de call anticipé",
+      "Risque lié à l'inflation"
+    ],
+    "summary": "Produit structuré à capital protégé à l'échéance, indexé sur l'Euro Stoxx 50 (dividendes non réinvestis). L'émetteur peut rappeler le produit mensuellement dès le mois 12, versant alors un gain mensuel de 0,5417% par mois écoulé (max 6,34% annualisé). À l'échéance, si l'indice est au-dessus de son niveau initial, l'investisseur reçoit le capital majoré de 1,5 fois la hausse. Sinon, seul le capital est remboursé. Durée : 8,27 ans. Commission : 1% annuel sur la durée totale. Investissement min : 1 000 EUR.",
+    "scenarios": {
+      "stress": null,
+      "defavorable": null,
+      "median": null,
+      "favorable": null
+    },
+    "aiParsed": {
+      "name": "EUROSTOXX PERFORMANCE",
+      "isin": "FR0014018NK8",
+      "structureType": "capital_garanti",
+      "emitter": "SG Issuer",
+      "guarantor": "Société Générale",
+      "guarantorRating": {
+        "moodys": "A1",
+        "sp": "A",
+        "fitch": ""
+      },
+      "underlyings": [
+        "Euro Stoxx 50"
+      ],
+      "underlyingType": "single-index",
+      "currency": "EUR",
+      "maturity": "8 ans, 3 mois et 15 jours",
+      "maturityYears": 8.27,
+      "maturityDate": "2034-10-16",
+      "strikeDate": "2026-10-08",
+      "coupon": {
+        "rate": 0.5417,
+        "rateIfCalled": 0.5417,
+        "rateIfMaturity": 0,
+        "type": "fixe",
+        "frequency": "mensuel",
+        "trigger": null,
+        "memory": false,
+        "paymentTiming": "at_redemption"
+      },
+      "participationRate": 150,
+      "guaranteedYears": 0,
+      "autocallCumulTarget": null,
+      "commissions": 8.27,
+      "commissionAnnualOverLife": true,
+      "commissionRecurringAnnual": null,
+      "capitalProtection": {
+        "protected": true,
+        "level": 100,
+        "barrier": null,
+        "barrierCoupon": null,
+        "barrierType": "europeenne",
+        "guaranteeType": "formule"
+      },
+      "earlyRedemption": {
+        "possible": true,
+        "type": "callable",
+        "trigger": null,
+        "frequency": "mensuel",
+        "startSemester": 1,
+        "stepDown": false,
+        "stepDownPct": null,
+        "firstCallDate": "2027-10-18",
+        "callSchedule": []
+      },
+      "decrementPct": null,
+      "actualDividendYield": null,
+      "minInvestment": 1000,
+      "sri": null,
+      "riy": null,
+      "costEntry": null,
+      "costExit": null,
+      "costOngoing": null,
+      "scenarios": {
+        "stress": null,
+        "defavorable": null,
+        "median": null,
+        "favorable": null
+      },
+      "mechanism": "Capital protégé à l'échéance. Remboursement anticipé callable au gré de l'émetteur dès le mois 12, avec gain mensuel de 0,5417% par mois écoulé (TRAAB max 6,34%). À l'échéance, si Niveau Final ≥ Niveau Initial : capital + hausse × 1,50 (participation). Si Niveau Final < Niveau Initial : remboursement du capital uniquement.",
+      "risks": [
+        "Risque de crédit sur Société Générale",
+        "Risque de marché",
+        "Risque de liquidité",
+        "Risque de perte en capital en cours de vie",
+        "Risque de réinvestissement en cas de call anticipé",
+        "Risque lié à l'inflation"
+      ],
+      "summary": "Produit structuré à capital protégé à l'échéance, indexé sur l'Euro Stoxx 50 (dividendes non réinvestis). L'émetteur peut rappeler le produit mensuellement dès le mois 12, versant alors un gain mensuel de 0,5417% par mois écoulé (max 6,34% annualisé). À l'échéance, si l'indice est au-dessus de son niveau initial, l'investisseur reçoit le capital majoré de 1,5 fois la hausse. Sinon, seul le capital est remboursé. Durée : 8,27 ans. Commission : 1% annuel sur la durée totale. Investissement min : 1 000 EUR.",
+      "fees": {
+        "structuring": 8.27
+      },
+      "_parsingAlerts": [
+        "⚠️ TARN : Années garanties non détectées (combien d'années sans condition ?)",
+        "⚠️ TARN : Autocall cumul target non détecté (seuil de cumul pour remboursement)",
+        "💸 Commission « 1,00%/an × 8.27 ans » = 8.27% upfront (estimation). Le chiffre exact = RIY du KID.",
+        "🛡️ Capital protégé à l’échéance par la formule — NON garanti : risque de crédit émetteur (EMTN, bail-in). Le seul risque sur le capital = l’émetteur. Vérifier la ligne « Garantie en capital » du KID."
+      ]
+    },
+    "sourceFile": "Brochure EUROSTOXX PERFORMANCE.pdf"
+  },
+  "sourceFile": "JSON import",
+  "bankId": "sg",
+  "status": "analyzing",
+  "receivedDate": "2026-07-03",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null
+}
