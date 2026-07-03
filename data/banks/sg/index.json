@@ -1,7 +1,7 @@
 {
   "bankId": "sg",
   "bankName": "Société Générale",
-  "lastUpdated": "2026-07-03T08:47:32.304Z",
+  "lastUpdated": "2026-07-03T09:32:32.945Z",
   "products": [
     {
       "id": "sp_mmxlydbl_xf7dk",
@@ -62,6 +62,14 @@
       "id": "sp_mr4ox32n_6y2mu",
       "name": "EUROSTOXX PERFORMANCE",
       "type": "capital_garanti",
+      "status": "analyzing",
+      "score": null,
+      "receivedDate": "2026-07-03"
+    },
+    {
+      "id": "sp_mr4qiywh_iut2u",
+      "name": "ROBOTICS & TECH SELECTION",
+      "type": "autocall",
       "status": "analyzing",
       "score": null,
       "receivedDate": "2026-07-03"
