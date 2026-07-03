@@ -388,5 +388,189 @@
   "conversation": [],
   "conversationSummary": null,
   "decision": null,
-  "decisionReason": null
+  "decisionReason": null,
+  "aiCategory": "autocall-mono",
+  "aiCategoryLabel": "⚡ Autocall Mono-actif",
+  "aiCategoryColor": "#06D6A0",
+  "aiOpinion": "Produit offrant un rendement attractif de 7% mais avec une durée très longue (10 ans) et une absence totale de protection du capital. Le risque est amplifié par un sous-jacent unique (fonds actions) et une barrière à 50% relativement basse, exposant l'investisseur à des pertes potentiellement importantes en cas de baisse durable.",
+  "aiAnalyzedAt": "2026-07-03T10:35:55.072Z",
+  "grading": {
+    "grade": "D",
+    "score": 34,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 53,
+        "base": 40,
+        "delta": 0,
+        "reasoning": "Rendement: base 40 → -5 = 35 (Barrière coupon à 80% sur un fonds actions diversifié avec décrément 3.5% qui érode structurellement la performance, réduisant la probabilité réelle de coupon en régime neutre hésitant.) | Coupon 7%, barrière 50% | Barr.coupon 80% | Mat espérée: ~2.3a (prob mat: 1%)",
+        "_bsDelta": 8,
+        "_bs": {
+          "score": 48,
+          "probCoupon": 89.3,
+          "rendementNet": 2.12,
+          "perteEsperee": 0.64,
+          "couponEffectif": 7,
+          "vols": [
+            20.06
+          ],
+          "matEsperee": 2.3,
+          "isBasket": false
+        }
+      },
+      "underlyingQuality": {
+        "score": 32,
+        "base": 35,
+        "delta": -3,
+        "reasoning": "Qualité: base 35 → -3 = 32 (Fonds DNCA Equity Selection est un panier diversifié (pas mono-secteur évité), mais le régime NEUTRAL sans direction claire et la divergence CPI/PCE critique créent une incertitude défavorable.)"
+      },
+      "portfolioFit": {
+        "score": 45,
+        "base": 80,
+        "delta": 0,
+        "reasoning": "Fit: base 80"
+      },
+      "riskPremium": {
+        "score": 9,
+        "base": 0,
+        "delta": -5,
+        "reasoning": "Prime: base 0 → -5 = 0 (Le décrément de 3.5% est un frein caché majeur non compensé par le coupon affiché : la performance réelle du SJ est amputée mécaniquement chaque année, rendant le rendement moins attractif qu'il n'y paraît.) | 7% vs CAT 2.9% (spread 4.1%) | Illiq. premium +1.8% (-9pts)"
+      }
+    },
+    "verdict": "Produit de rendement autocall sur fonds DNCA Equity Selection avec coupon annualisé de 7% et barrières confortables (80% coupon, 50% capital), mais lourdement pénalisé par un décrément de 3.5% qui érode structurellement la valeur du sous-jacent. En régime NEUTRAL avec VIX à 22 et une divergence CPI/PCE critique (2.4% vs 4.07%), l'incertitude directionnelle et le risque de repricing brutal des taux longs justifient la prudence. La maturité effective espérée (~2.3a) avec autocall à 100% offre un profil raisonnable, mais le capital non protégé sous barrière 50% expose à des pertes lourdes en cas de correction. Score final ajusté autour de 27-30 (D), un produit à rendement séduisant mais grevé par ses coûts cachés.",
+    "keyRisks": [
+      "Décrément 3.5% qui rogne mécaniquement la performance du sous-jacent chaque année, rendant l'autocall à 100% plus difficile à atteindre qu'il n'y paraît.",
+      "Capital non protégé sous barrière 50% : en cas de repricing brutal des taux (breakeven 5Y à 2.26% vs PCE 4.07%) ou reprise des hausses Fed, risque de perte en capital significative.",
+      "Maturité longue (10.33a) si l'autocall ne se déclenche pas, avec exposition prolongée aux actions dans un marché sans direction claire."
+    ],
+    "negotiationPoints": [
+      "Négocier une réduction ou suppression du décrément 3.5% qui est le principal frein à la performance.",
+      "Demander un relèvement du coupon pour compenser l'érosion du décrément."
+    ],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 7,
+        "return_eur": 7000,
+        "probability": 0.3,
+        "duration_years": 1
+      },
+      "base": {
+        "return_pct": 14,
+        "return_eur": 14000,
+        "probability": 0.35,
+        "duration_years": 2.3
+      },
+      "stress": {
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.2,
+        "duration_years": 6
+      },
+      "worst": {
+        "return_pct": -40,
+        "return_eur": -40000,
+        "probability": 0.15,
+        "duration_years": 10
+      }
+    },
+    "confidenceInterval": {
+      "low": 23,
+      "high": 47,
+      "halfWidth": 12,
+      "gradeStable": false,
+      "gradeRange": "F-C",
+      "label": "D [23-47]"
+    },
+    "metadata": {
+      "gradedAt": "2026-07-03T10:36:13.712Z",
+      "durationMs": 17324,
+      "aiUsed": true,
+      "version": "7.1",
+      "productType": "autocall",
+      "marketDataAvailable": false,
+      "catBenchmark": 2.9,
+      "catSource": "allocator-confirmed",
+      "couponAnnualized": 7,
+      "couponRaw": 7,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": true,
+      "barrierPct": 50,
+      "barrierCouponPct": 80,
+      "couponProbability": 89.3,
+      "expectedMaturity": 2.3,
+      "maxMaturity": 10.33,
+      "probReachMaturity": 1,
+      "maxBeta": null,
+      "baseScore": 37,
+      "baseGrade": "D",
+      "adjustments": {
+        "p1": -5,
+        "p2": -3,
+        "p3": 0,
+        "p4": -5
+      },
+      "barrier_sigma": null,
+      "barrier_sigma_label": null,
+      "barrier_sigma_danger": null,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Rappelable 12M",
+      "ci_low": 23,
+      "ci_high": 47,
+      "ci_label": "D [23-47]",
+      "issuer_rating": "A",
+      "issuer_tier": "IG",
+      "hasDecrement": true,
+      "decrementDrag": 3.5,
+      "structureType": "autocall",
+      "bsRendementNet": 2.12,
+      "bsProbCoupon": 89.3,
+      "bsPerteEsperee": 0.64,
+      "bsVols": [
+        20.06
+      ],
+      "bsMatEsperee": 2.3,
+      "isBasket": false,
+      "issuerCreditPenalty": 1,
+      "issuerCDS": 70,
+      "v6Weights": {
+        "p1": 0.25,
+        "p2": 0.2,
+        "p3": 0.25,
+        "p4": 0.3
+      },
+      "inputHash": "g17h3z8u",
+      "gradeT0": "2026-07-03T10:36:13.712Z",
+      "trackingLevelAt0": null
+    },
+    "regimeScenarios": {
+      "current": {
+        "score": 34,
+        "grade": "D",
+        "label": "Actuel (neutral)",
+        "desc": "Régime actuel → volatilité modérée"
+      },
+      "bull": {
+        "score": 39,
+        "grade": "D",
+        "label": "Bull / Risk-on",
+        "delta": 5,
+        "desc": "Marchés haussiers → prob coupon monte, barrière safe"
+      },
+      "crash": {
+        "score": 26,
+        "grade": "D",
+        "label": "Crash / Récession",
+        "delta": -8,
+        "desc": "Marchés baissiers → barrière menacée, vol en hausse"
+      }
+    }
+  },
+  "_couponProbability": 89.3,
+  "_bsRendementNet": 2.12
 }
