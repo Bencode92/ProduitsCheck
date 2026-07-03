@@ -149,5 +149,192 @@
   "_strikePriceDate": "2026-03-19",
   "_strikePriceSource": "twelve_data:QQQ",
   "_strikePriceOpen": 589.51,
-  "_strikePriceRequested": "2026-03-19"
+  "_strikePriceRequested": "2026-03-19",
+  "structureType": "autocall",
+  "grading": {
+    "grade": "D",
+    "score": 32,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 35,
+        "base": 0,
+        "delta": 0,
+        "reasoning": "Rendement: base 0 | Coupon 0%",
+        "_bsDelta": 35,
+        "_bs": {
+          "score": 35,
+          "probCoupon": 48.6,
+          "rendementNet": 0,
+          "perteEsperee": 0,
+          "couponEffectif": 0,
+          "vols": [
+            21.87
+          ],
+          "matEsperee": 5,
+          "isBasket": false
+        }
+      },
+      "underlyingQuality": {
+        "score": 52,
+        "base": 55,
+        "delta": -3,
+        "reasoning": "Qualité: base 55 → -3 = 52 (Le secteur biotech/healthcare est neutre dans le régime NEUTRAL mais la divergence CPI/PCE et un possible repricing des taux longs pèsent sur les valeurs de croissance à duration longue.) | Worst: NASDAQ Biotechnology Index B:67"
+      },
+      "portfolioFit": {
+        "score": 50,
+        "base": 80,
+        "delta": 0,
+        "reasoning": "Fit: base 80"
+      },
+      "riskPremium": {
+        "score": 0,
+        "base": 0,
+        "delta": 0,
+        "reasoning": "Prime: base 0 | 0% vs CAT 2.9% (spread -2.9%) | Illiq. premium +1.3% (-7pts)"
+      }
+    },
+    "verdict": "Ce produit n'est PAS un structuré à coupon mais un ETF actions biotech de capitalisation (iShares NASDAQ US Biotech) — le scoring 'taux fixe callable' ne s'applique pas. En régime NEUTRAL avec VIX à 22, le NASDAQ Biotech présente une vol de 23.5% et un drawdown récent de 23.9%, ce qui traduit une classe d'actifs volatile et sans protection du capital. La divergence critique CPI 2.4% vs PCE 4.07% menace les valeurs de croissance à duration longue comme la biotech si la Fed reprend ses hausses. Sur un nominal de 50 000€, l'investisseur assume un risque actions total (beta 0.98) sans aucun filet de sécurité, inadapté à un profil Stable déjà surexposé aux actions.",
+    "keyRisks": [
+      "Absence totale de protection du capital : perte potentielle intégrale suivant la performance de l'indice biotech (vol 23.5%, DD historique 23.9%)",
+      "Repricing des taux longs si le PCE (4.07%) est le vrai signal inflation : impact fort sur les valeurs de croissance à duration longue comme la biotech"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 18,
+        "return_eur": 9000,
+        "probability": 0.25,
+        "duration_years": 2
+      },
+      "base": {
+        "return_pct": 7,
+        "return_eur": 3500,
+        "probability": 0.35,
+        "duration_years": 2
+      },
+      "stress": {
+        "return_pct": -12,
+        "return_eur": -6000,
+        "probability": 0.25,
+        "duration_years": 2
+      },
+      "worst": {
+        "return_pct": -30,
+        "return_eur": -15000,
+        "probability": 0.15,
+        "duration_years": 2
+      }
+    },
+    "confidenceInterval": {
+      "low": 21,
+      "high": 37,
+      "halfWidth": 8,
+      "gradeStable": false,
+      "gradeRange": "F-D",
+      "label": "D [21-37]"
+    },
+    "metadata": {
+      "gradedAt": "2026-07-03T09:20:38.635Z",
+      "durationMs": 13171,
+      "aiUsed": true,
+      "version": "7.1",
+      "productType": "rate",
+      "marketDataAvailable": true,
+      "catBenchmark": 2.9,
+      "catSource": "allocator-confirmed",
+      "couponAnnualized": 0,
+      "couponRaw": 0,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": false,
+      "barrierPct": 0,
+      "barrierCouponPct": null,
+      "couponProbability": 48.6,
+      "expectedMaturity": 5,
+      "maxMaturity": 0,
+      "maxBeta": 0.98,
+      "baseScore": 30,
+      "baseGrade": "D",
+      "adjustments": {
+        "p1": 0,
+        "p2": -3,
+        "p3": 0,
+        "p4": 0
+      },
+      "barrier_sigma": null,
+      "barrier_sigma_label": null,
+      "barrier_sigma_danger": null,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Rappelable 9M",
+      "ci_low": 21,
+      "ci_high": 37,
+      "ci_label": "D [21-37]",
+      "issuer_rating": "A",
+      "issuer_tier": "IG",
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "autocall",
+      "bsRendementNet": 0,
+      "bsProbCoupon": 48.6,
+      "bsPerteEsperee": 0,
+      "bsVols": [
+        21.87
+      ],
+      "bsMatEsperee": 5,
+      "isBasket": false,
+      "v6Weights": {
+        "p1": 0.25,
+        "p2": 0.2,
+        "p3": 0.25,
+        "p4": 0.3
+      },
+      "inputHash": "gdgf3zg",
+      "gradeT0": "2026-07-03T09:20:38.635Z",
+      "trackingLevelAt0": null,
+      "stockData": [
+        {
+          "name": "NASDAQ Biotechnology Index",
+          "ticker": "NDAQ",
+          "sector": "Finance",
+          "perf_ytd": -14.83,
+          "perf_1y": -7.48,
+          "volatility_3y": 23.48,
+          "max_drawdown_3y": 23.9,
+          "buffett_score": 67,
+          "quality_score": 60,
+          "buffett_grade": "B"
+        }
+      ]
+    },
+    "regimeScenarios": {
+      "current": {
+        "score": 32,
+        "grade": "D",
+        "label": "Actuel (neutral)",
+        "desc": "Régime actuel → volatilité modérée"
+      },
+      "bull": {
+        "score": 37,
+        "grade": "D",
+        "label": "Bull / Risk-on",
+        "delta": 5,
+        "desc": "Marchés haussiers → prob coupon monte, barrière safe"
+      },
+      "crash": {
+        "score": 26,
+        "grade": "D",
+        "label": "Crash / Récession",
+        "delta": -6,
+        "desc": "Marchés baissiers → barrière menacée, vol en hausse"
+      }
+    }
+  },
+  "_couponProbability": 48.6,
+  "_bsRendementNet": 0
 }
