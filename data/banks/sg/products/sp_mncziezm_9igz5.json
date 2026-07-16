@@ -178,87 +178,103 @@
   },
   "_freqFixApplied": true,
   "grading": {
-    "grade": "A",
-    "score": 79,
+    "grade": "D",
+    "score": 42,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 96,
+        "score": 61,
         "base": 91,
-        "delta": 5,
-        "reasoning": "Rendement: base 91 → +5 = 96 (Régime stagflationniste favorable aux matières premières dont l'or, probabilité de coupon élevée avec barrière à 60%) | Coupon 8.36%, protégé | Barr.coupon 60% | Mat espérée: ~2.5a (prob mat: 1%)"
+        "delta": 0,
+        "reasoning": "Rendement: base 91 → -3 = 88 (Barrière coupon à 60% très protectrice mais la vol extrême (41.55%) et le beta 1.71 des gold miners rendent le seuil moins garanti qu'il n'y paraît malgré le step-down favorable.) | Coupon 8.36%, protégé | Barr.coupon 60% | Mat espérée: ~2.5a (prob mat: 1%)",
+        "_bsDelta": -35,
+        "_bs": {
+          "score": 56,
+          "probCoupon": 89.2,
+          "rendementNet": 3.42,
+          "perteEsperee": 0,
+          "couponEffectif": 8.36,
+          "vols": [
+            41.55
+          ],
+          "matEsperee": 2.5,
+          "isBasket": false
+        }
       },
       "underlyingQuality": {
-        "score": 54,
-        "base": 49,
-        "delta": 5,
-        "reasoning": "Qualité: base 49 → +5 = 54 (Contexte stagflationniste très favorable aux minières aurifères (hedge inflation), beta défensif 0.53) | Worst: Indice Solactive GDX EUR AR 5% B:35"
+        "score": 46,
+        "base": 42,
+        "delta": 4,
+        "reasoning": "Qualité: base 42 → +4 = 46 (Le secteur materials/gold est favorisé par le régime NEUTRAL avec biais inflationniste (PCE à 4.07%), et le gold en drawdown de 16.8% offre un point d'entrée relativement décoté.) | Worst: Indice Solactive GDX EUR AR 5% B:35"
       },
       "portfolioFit": {
-        "score": 85,
+        "score": 60,
         "base": 80,
         "delta": 5,
-        "reasoning": "Fit: base 80 → +5 = 85 (Diversification exceptionnelle en stagflation, l'or surperforme historiquement dans ce régime)"
+        "reasoning": "Fit: base 80 → +5 = 85 (Capital garanti + exposition or apporte une décorrélation précieuse aux portefeuilles alertés comme 100% equity sans obligations.)"
       },
       "riskPremium": {
-        "score": 80,
-        "base": 36,
+        "score": 9,
+        "base": 29,
         "delta": -5,
-        "reasoning": "Capital garanti: spread 8.4% - CAT 2.5% - illiq 0.5% = 5.4% | Illiq. premium +1.3% (-7pts)"
+        "reasoning": "Prime vs CAT (net de frais, cohérent avec le panneau) : coupon espéré 8,0% (9,0% × proba 89%) = 8,0% vs CAT 2,8% → spread +5,23%."
       }
     },
-    "verdict": "Produit particulièrement adapté au régime stagflationniste actuel avec une exposition aux minières aurifères via l'indice GDX, offrant 8.36% annualisé avec capital garanti. Le contexte macro (Brent >$100, PCE élevé, VIX 22) favorise l'or comme hedge inflation, renforçant la probabilité de coupons malgré la volatilité élevée de 38.92%. La protection du capital à 50% combinée à la garantie offre une sécurité appréciable dans un environnement incertain.",
+    "verdict": "Produit Athena sur gold miners avec capital GARANTI à maturité, ce qui plafonne fortement le risque de perte en capital — atout majeur dans un régime NEUTRAL à VIX 22 en hausse et alertes de stress crédit naissant. Le coupon annualisé de 8.36% avec barrière à 60% est attractif compte tenu de la protection, mais le décrément punitif de 5% (vs div réel 0.97%) impose un handicap structurel de ~4%/an au sous-jacent, réduisant les chances d'autocall rapide. Les gold miners (beta 1.71, vol 41.55%) sont un secteur favorisé par le contexte inflationniste (PCE 4.07% persistant), mais le gold est déjà en drawdown de 16.8% avec un support technique menacé à $3800-3900. Bilan équilibré: risque capital neutralisé, mais performance dépendante d'un rebond des minières face au drag du décrément.",
     "keyRisks": [
-      "Volatilité élevée du secteur minier (38.92%) peut retarder l'autocall",
-      "Décrément 5% érode la performance dans la durée si non-autocall"
+      "Décrément de 5% (drag ~4%/an net du dividende réel de 0.97%) qui pénalise mécaniquement le niveau du sous-jacent et retarde les chances d'autocall.",
+      "Volatilité extrême des gold miners (41.55%, beta 1.71) combinée à un support technique fragile sur l'or — cassure sous $3800 risque de capitulation et de coupons manqués."
     ],
-    "negotiationPoints": [],
+    "negotiationPoints": [
+      "Négocier une réduction du taux de décrément de 5% à 3% pour limiter le drag structurel.",
+      "Demander une barrière coupon plus basse (50%) pour sécuriser davantage le versement du coupon face à la vol élevée."
+    ],
     "scenarios": {
       "optimistic": {
         "return_pct": 8.36,
         "return_eur": 8360,
-        "probability": 0.35,
+        "probability": 0.3,
         "duration_years": 1
       },
       "base": {
         "return_pct": 20.9,
         "return_eur": 20900,
-        "probability": 0.4,
+        "probability": 0.35,
         "duration_years": 2.5
       },
       "stress": {
-        "return_pct": 0,
-        "return_eur": 0,
+        "return_pct": 8.36,
+        "return_eur": 8360,
         "probability": 0.2,
         "duration_years": 5
       },
       "worst": {
         "return_pct": 0,
         "return_eur": 0,
-        "probability": 0.05,
+        "probability": 0.15,
         "duration_years": 5
       }
     },
     "confidenceInterval": {
-      "low": 59,
-      "high": 75,
+      "low": 53,
+      "high": 69,
       "halfWidth": 8,
       "gradeStable": false,
-      "gradeRange": "C-A",
-      "label": "B [59-75]"
+      "gradeRange": "C-B",
+      "label": "B [53-69]"
     },
     "metadata": {
-      "gradedAt": "2026-03-30T09:28:14.960Z",
-      "durationMs": 18590,
+      "gradedAt": "2026-07-16T06:35:16.543Z",
+      "durationMs": 19056,
       "aiUsed": true,
-      "version": "5.2",
+      "version": "7.1",
       "productType": "autocall",
       "marketDataAvailable": true,
-      "catBenchmark": 2.5,
-      "catSource": "fallback-2026",
+      "catBenchmark": 3.3,
+      "catSource": "allocator-confirmed",
       "couponAnnualized": 8.36,
       "couponRaw": 9,
       "couponMultiplier": 1,
@@ -267,16 +283,16 @@
       "hasBarrier": false,
       "barrierPct": 50,
       "barrierCouponPct": 60,
-      "couponProbability": null,
+      "couponProbability": 89.2,
       "expectedMaturity": 2.5,
       "maxMaturity": 5,
       "probReachMaturity": 1,
-      "maxBeta": 0.53,
-      "baseScore": 65,
+      "maxBeta": 1.71,
+      "baseScore": 61,
       "baseGrade": "B",
       "adjustments": {
-        "p1": 5,
-        "p2": 5,
+        "p1": -3,
+        "p2": 4,
         "p3": 5,
         "p4": -5
       },
@@ -286,25 +302,69 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 59,
-      "ci_high": 75,
-      "ci_label": "B [59-75]",
+      "ci_low": 53,
+      "ci_high": 69,
+      "ci_label": "B [53-69]",
       "issuer_rating": "A",
       "issuer_tier": "IG",
       "hasDecrement": true,
       "decrementDrag": 4.03,
       "structureType": "autocall",
+      "bsRendementNet": 3.42,
+      "bsProbCoupon": 89.2,
+      "bsPerteEsperee": 0,
+      "bsVols": [
+        41.55
+      ],
+      "bsMatEsperee": 2.5,
+      "isBasket": false,
+      "issuerCreditPenalty": 1,
+      "issuerCDS": 70,
+      "v6Weights": {
+        "p1": 0.25,
+        "p2": 0.2,
+        "p3": 0.25,
+        "p4": 0.3
+      },
+      "inputHash": "g1h1m7jb",
+      "gradeT0": "2026-07-16T06:35:16.543Z",
+      "trackingLevelAt0": null,
+      "p4NetFeesApplied": true,
       "stockData": [
         {
           "name": "Indice Solactive GDX EUR AR 5%",
           "ticker": "GDX",
           "sector": "Index",
-          "perf_ytd": 0.07,
-          "perf_1y": 87.48,
-          "volatility_3y": 38.92,
-          "max_drawdown_3y": -30.84
+          "perf_ytd": -13.19,
+          "perf_1y": 44.17,
+          "volatility_3y": 41.55,
+          "max_drawdown_3y": -36.66
         }
       ]
+    },
+    "regimeScenarios": {
+      "current": {
+        "score": 42,
+        "grade": "D",
+        "label": "Actuel (neutral)",
+        "desc": "Régime actuel → volatilité modérée"
+      },
+      "bull": {
+        "score": 48,
+        "grade": "C",
+        "label": "Bull / Risk-on",
+        "delta": 6,
+        "desc": "Marchés haussiers → prob coupon monte, barrière safe"
+      },
+      "crash": {
+        "score": 37,
+        "grade": "D",
+        "label": "Crash / Récession",
+        "delta": -5,
+        "desc": "Marchés baissiers → barrière menacée, vol en hausse"
+      }
     }
-  }
+  },
+  "_couponProbability": 89.2,
+  "_bsRendementNet": 3.42
 }
