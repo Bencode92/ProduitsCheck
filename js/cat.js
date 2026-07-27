@@ -179,6 +179,86 @@ RÈGLES CRITIQUES pour rateSchedule:
     return{totalAmount,reserve,allocated,remaining:Math.round(available),allocations,totalInterest:Math.round(totalInterest),weightedRate:Math.round(weightedRate*100)/100,horizonMonths};
   }
   _estimateRate(m){if(m<=1)return 2.5;if(m<=3)return 2.8;if(m<=6)return 3.0;if(m<=12)return 3.2;if(m<=24)return 3.0;return 2.8;}
+
+  // Meilleurs taux NON périmés pour une durée cible (± tolérance), hors parts sociales, triés.
+  _bestRateForDuration(months, tolMonths) {
+    const tol = tolMonths || 6;
+    const isExp = (typeof _isRateExpired === 'function') ? _isRateExpired : function(){ return false; };
+    return (this.rates.rates || [])
+      .filter(r => (parseFloat(r.rate) || 0) > 0 && (r.productType || 'cat') !== 'parts-sociales' && !isExp(r))
+      .filter(r => Math.abs((r.durationMonths || 0) - months) <= tol)
+      .sort((a, b) => b.rate - a.rate);
+  }
+
+  // LADDERING — répartit le cash en échelons annuels pour LISSER les échéances :
+  // liquidité qui revient chaque année + diversification du point d'entrée de taux
+  // (on ne mise pas tout au même moment du cycle). Respecte le FGDR par banque en
+  // tenant compte des dépôts EXISTANTS (option entity). Comble les trous du calendrier.
+  buildLadder(totalAmount, options = {}) {
+    const reserve = options.liquidityReserve || this.objectives.liquidityReserve || 0;
+    const maxPerBank = options.maxPerBank || this.objectives.maxPerBank || 100000;
+    const horizon = options.horizonMonths || 60;
+    const entity = options.entity || null;
+    const available = (parseFloat(totalAmount) || 0) - reserve;
+    if (available < 1000) return { error: 'Montant insuffisant après réserve.', allocations: [] };
+
+    // Échelons annuels 12, 24, … jusqu'à l'horizon
+    const rungs = [];
+    for (let m = 12; m <= horizon; m += 12) rungs.push(m);
+    if (rungs.length === 0) rungs.push(horizon);
+
+    // Exposition existante par banque (pour ne pas dépasser le FGDR combiné)
+    const bankExposure = {};
+    this.deposits.filter(d => d.status === 'active' && (!entity || d.entity === entity || d.entityName === entity))
+      .forEach(d => { bankExposure[d.bankId] = (bankExposure[d.bankId] || 0) + (parseFloat(d.amount) || 0); });
+
+    const perRung = available / rungs.length;
+    const allocations = [], warnings = [];
+    let placed = 0;
+    rungs.forEach(months => {
+      let need = Math.min(perRung, available - placed);
+      if (need < 1000) return;
+      const rates = this._bestRateForDuration(months, 6);
+      if (rates.length === 0) {
+        const est = this._estimateRate(months);
+        allocations.push({ months, amount: Math.round(need), bankId: 'generic', bankName: 'Taux estimé', rate: est, estimated: true, interest: Math.round(need * est / 100 * months / 12) });
+        placed += need; warnings.push('Aucun taux saisi à ~' + (months / 12) + ' an(s) — estimation ' + est + '% utilisée.');
+        return;
+      }
+      for (const ri of rates) {
+        if (need < 1000) break;
+        const room = Math.max(0, maxPerBank - (bankExposure[ri.bankId] || 0));
+        let amt = Math.min(need, room);
+        if (amt < 1000) continue;
+        amt = Math.round(amt);
+        allocations.push({ months, amount: amt, bankId: ri.bankId, bankName: ri.bankName, rate: ri.rate, interest: Math.round(amt * ri.rate / 100 * months / 12) });
+        bankExposure[ri.bankId] = (bankExposure[ri.bankId] || 0) + amt; need -= amt; placed += amt;
+      }
+      if (need >= 1000) { // banques FGDR-pleines : on place au meilleur taux mais on le signale
+        const ri = rates[0], amt = Math.round(need);
+        allocations.push({ months, amount: amt, bankId: ri.bankId, bankName: ri.bankName, rate: ri.rate, overFgdr: true, interest: Math.round(amt * ri.rate / 100 * months / 12) });
+        bankExposure[ri.bankId] = (bankExposure[ri.bankId] || 0) + amt; need -= amt; placed += amt;
+        warnings.push('Échelon ' + (months / 12) + ' an(s) : ' + formatNumber(amt) + '€ placé au-delà du FGDR (banques pleines).');
+      }
+    });
+
+    // Calendrier combiné existant + échelle, par année, + trous dans l'horizon
+    const yNow = new Date().getFullYear(), calYear = {};
+    this.deposits.filter(d => d.status === 'active' && d.maturityDate).forEach(d => {
+      const y = new Date(d.maturityDate).getFullYear();
+      if (!calYear[y]) calYear[y] = { existing: 0, ladder: 0 };
+      calYear[y].existing += parseFloat(d.amount) || 0;
+    });
+    allocations.forEach(a => { const y = yNow + Math.round(a.months / 12); if (!calYear[y]) calYear[y] = { existing: 0, ladder: 0 }; calYear[y].ladder += a.amount; });
+    const calendar = Object.entries(calYear).map(([y, v]) => ({ year: +y, existing: v.existing, ladder: v.ladder, total: v.existing + v.ladder })).sort((a, b) => a.year - b.year);
+    const gaps = [];
+    for (let y = yNow + 1; y <= yNow + Math.round(horizon / 12); y++) { const c = calYear[y]; if (!c || (c.existing + c.ladder) === 0) gaps.push(y); }
+
+    const allocated = allocations.reduce((s, a) => s + a.amount, 0);
+    const totalInterest = allocations.reduce((s, a) => s + (a.interest || 0), 0);
+    const weightedRate = allocated > 0 ? allocations.reduce((s, a) => s + a.rate * a.amount, 0) / allocated : 0;
+    return { totalAmount: parseFloat(totalAmount) || 0, reserve, available: Math.round(available), allocated, remaining: Math.round(available - placed), rungs, allocations, calendar, gaps, warnings, totalInterest: Math.round(totalInterest), weightedRate: Math.round(weightedRate * 100) / 100 };
+  }
 }
 
 const catManager = new CATManager();
@@ -197,7 +277,7 @@ function renderCAT(container) {
     </div>
     ${stats.fgdrAlerts.length>0?`<div class="alert-bar"><span>⚠️</span><span>Alerte FGDR: ${stats.fgdrAlerts.map(([,v])=>`<strong>${v.name}</strong> (${formatNumber(v.total)}€)`).join(', ')}</span></div>`:''}
     <div class="section"><div class="section-header"><div class="section-title"><span class="dot" style="background:var(--green)"></span>Mes Placements</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" onclick="showCATObjectivesModal()">🎯 Objectifs</button><button class="btn" onclick="showCATRatesModal()">📊 Taux marché</button><button class="btn ai-glow" onclick="showCATSimulator()">⚡ Optimiser</button><button class="btn primary" onclick="showAddPlacementModal()">+ Nouveau placement</button></div></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" onclick="showCATObjectivesModal()">🎯 Objectifs</button><button class="btn" onclick="showCATRatesModal()">📊 Taux marché</button><button class="btn" onclick="showCATLadder()">🪜 Échelle</button><button class="btn ai-glow" onclick="showCATSimulator()">⚡ Optimiser</button><button class="btn primary" onclick="showAddPlacementModal()">+ Nouveau placement</button></div></div>
       ${catManager.deposits.filter(d=>d.status==='active').length===0?`<div class="empty-state"><div class="empty-icon">🏦</div><div class="empty-text">Aucun placement enregistré</div><div class="empty-sub">Ajoutez vos CAT et Parts Sociales</div></div>`:renderPlacementsByBank(stats)}</div>
     ${timeline.length>0?`<div class="section"><div class="section-header"><div class="section-title"><span class="dot" style="background:var(--orange)"></span>Échéancier</div></div><div class="cat-timeline">${timeline.map(m=>`<div class="cat-timeline-item"><div class="cat-timeline-month">${m.month}</div><div class="cat-timeline-bar" style="width:${Math.min(100,(m.total/Math.max(stats.totalInvested,1))*300)}%"><span class="cat-timeline-amount">${formatNumber(m.total)}€</span></div><div class="cat-timeline-count">${m.deposits.length} placement${m.deposits.length>1?'s':''}</div></div>`).join('')}</div></div>`:''}`;
 }
@@ -343,5 +423,33 @@ function showCATRatesModal(){const modal=document.getElementById('modal');const 
 function renderRatesList(){if(catManager.rates.rates.length===0)return'<div style="color:var(--text-dim);font-size:12px">Aucun taux</div>';return[...catManager.rates.rates].sort((a,b)=>a.durationMonths-b.durationMonths||b.rate-a.rate).map(r=>{const ti=r.productType==='parts-sociales'?'🤝':'🏦';return`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px"><span>${ti} ${r.bankName} · ${r.durationMonths} mois</span><span style="color:var(--green);font-family:var(--mono)">${r.rate}%</span></div>`;}).join('');}
 async function addMarketRate(){const bankId=document.getElementById('rate-bank').value;const bank=BANKS.find(b=>b.id===bankId);const rate=document.getElementById('rate-value').value;if(!rate){showToast('Taux requis','error');return;}catManager.addRate(bankId,bank?.name||bankId,parseInt(document.getElementById('rate-duration').value),rate,document.getElementById('rate-type').value);await catManager.saveRates();document.getElementById('rates-list').innerHTML=renderRatesList();document.getElementById('rate-value').value='';showToast('Taux ajouté','success');}
 
+// ═══ LADDERING (échelle de maturités) ═══════════════════════
+function showCATLadder(){
+  const modal=document.getElementById('modal');const obj=catManager.objectives||{};
+  const cash=(parseFloat(obj.cashByCam)||0)+(parseFloat(obj.cashCameleons)||0);
+  const defAmt=cash>0?cash:catManager.deposits.filter(d=>d.status==='active').reduce((s,d)=>s+(parseFloat(d.amount)||0),0);
+  modal.innerHTML=`<div class="modal-overlay" onclick="closeModal()"><div class="modal-content modal-large" onclick="event.stopPropagation()"><h2 class="modal-title">🪜 Échelle de maturités (laddering)</h2><p style="color:var(--text-muted);font-size:12px;margin-bottom:16px">Répartit le cash en échelons annuels : une partie revient chaque année (liquidité) et le point d'entrée de taux est diversifié. Respecte le FGDR en tenant compte de tes dépôts existants, et cherche à combler les trous d'échéance.</p><div class="form-grid"><div class="form-field"><label>Montant à placer (€)</label><input id="lad-amount" type="number" value="${defAmt||''}" placeholder="300000"></div><div class="form-field"><label>Réserve liquidité (€)</label><input id="lad-reserve" type="number" value="${obj.liquidityReserve||0}"></div><div class="form-field"><label>Plafond FGDR/banque (€)</label><input id="lad-max" type="number" value="${obj.maxPerBank||100000}"></div><div class="form-field"><label>Entité</label><select id="lad-entity"><option value="">Toutes</option><option value="bycam">ByCam</option><option value="cameleons">Caméleons</option></select></div><div class="form-field"><label>Horizon</label><select id="lad-horizon"><option value="36">3 ans</option><option value="48">4 ans</option><option value="60" selected>5 ans</option></select></div></div><button class="btn ai-glow lg" style="width:100%;margin-top:16px" onclick="runLadder()">🪜 Construire l'échelle</button><div id="ladder-results" style="margin-top:20px"></div><div class="modal-actions"><button class="btn" onclick="closeModal()">Fermer</button></div></div></div>`;
+  modal.classList.add('visible');
+}
+function runLadder(){
+  const r=catManager.buildLadder(parseFloat(document.getElementById('lad-amount').value)||0,{liquidityReserve:parseFloat(document.getElementById('lad-reserve').value)||0,maxPerBank:parseFloat(document.getElementById('lad-max').value)||100000,entity:document.getElementById('lad-entity').value||null,horizonMonths:parseInt(document.getElementById('lad-horizon').value)||60});
+  renderLadderResult(r);
+}
+function renderLadderResult(r){
+  const c=document.getElementById('ladder-results');if(!c)return;
+  if(r.error){c.innerHTML=`<div class="alert-bar"><span>⚠️</span>${r.error}</div>`;return;}
+  const EX='#1baf7a',LAD='#2a78d6';
+  const byRung={};r.allocations.forEach(a=>{(byRung[a.months]=byRung[a.months]||[]).push(a);});
+  const maxYear=Math.max(1,...r.calendar.map(y=>y.total));
+  let h=`<div class="stats-row" style="margin-bottom:16px"><div class="stat-card blue"><div class="stat-label">Placé (échelle)</div><div class="stat-value">${formatNumber(r.allocated)}€</div><div class="stat-sub">${r.rungs.length} échelons annuels</div></div><div class="stat-card green"><div class="stat-label">Taux pondéré</div><div class="stat-value">${formatPct(r.weightedRate)}</div><div class="stat-sub">Intérêts cumulés +${formatNumber(r.totalInterest)}€</div></div><div class="stat-card orange"><div class="stat-label">Non placé</div><div class="stat-value">${formatNumber(r.remaining)}€</div><div class="stat-sub">Réserve ${formatNumber(r.reserve)}€</div></div></div>`;
+  if(r.warnings&&r.warnings.length)h+=`<div class="alert-bar" style="margin-bottom:12px"><span>⚠️</span><span>${r.warnings.join(' · ')}</span></div>`;
+  h+=`<div style="font-size:12px;font-weight:700;margin:8px 0 6px">📅 Calendrier des échéances (existant + échelle)</div><div style="display:flex;gap:16px;font-size:10px;color:var(--text-muted);margin-bottom:8px"><span><span style="display:inline-block;width:9px;height:9px;background:${EX};border-radius:2px"></span> Existant</span><span><span style="display:inline-block;width:9px;height:9px;background:${LAD};border-radius:2px"></span> Nouvelle échelle</span></div>`;
+  h+=r.calendar.map(y=>`<div style="display:flex;align-items:center;gap:10px;margin-bottom:5px;font-size:11px"><div style="width:44px;font-family:var(--mono);color:var(--text-muted)">${y.year}</div><div style="flex:1;display:flex;height:18px;background:var(--bg-elevated);border-radius:4px;overflow:hidden"><div style="width:${y.existing/maxYear*100}%;background:${EX}"></div><div style="width:${y.ladder/maxYear*100}%;background:${LAD}"></div></div><div style="width:90px;text-align:right;font-family:var(--mono)">${formatNumber(y.total)}€</div></div>`).join('');
+  if(r.gaps&&r.gaps.length)h+=`<div style="font-size:11px;color:var(--orange);margin-top:6px">Trous de maturité restants : ${r.gaps.join(', ')} — aucune échéance ces années-là.</div>`;
+  else h+=`<div style="font-size:11px;color:var(--green);margin-top:6px">✓ Échéances lissées sur tout l'horizon, pas de trou.</div>`;
+  h+=`<div style="font-size:12px;font-weight:700;margin:16px 0 6px">🪜 Détail de l'échelle</div>`;
+  h+=Object.keys(byRung).sort((a,b)=>a-b).map(m=>{const list=byRung[m];const tot=list.reduce((s,a)=>s+a.amount,0);const yr=m/12;return `<div style="margin-bottom:10px"><div style="font-size:11px;color:var(--text-muted);margin-bottom:3px">Échelon ${yr} an${yr>1?'s':''} — ${formatNumber(tot)}€</div>`+list.map(a=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--bg-elevated);border-radius:var(--radius-sm);margin-bottom:3px;font-size:12px"><div><strong style="color:var(--text-bright)">${a.bankName}</strong>${a.estimated?' <span style="color:var(--orange);font-size:10px">taux estimé</span>':''}${a.overFgdr?' <span style="color:var(--red);font-size:10px">&gt; FGDR</span>':''}</div><div style="display:flex;gap:14px"><span style="font-family:var(--mono)">${formatNumber(a.amount)}€</span><span style="color:var(--green);font-family:var(--mono)">${a.rate}%</span></div></div>`).join('')+`</div>`;}).join('');
+  c.innerHTML=h;
+}
 function showCATSimulator(){const modal=document.getElementById('modal');const ct=catManager.deposits.filter(d=>d.status==='active').reduce((s,d)=>s+(parseFloat(d.amount)||0),0);modal.innerHTML=`<div class="modal-overlay" onclick="closeModal()"><div class="modal-content modal-large" onclick="event.stopPropagation()"><h2 class="modal-title">⚡ Optimiseur de Rendement</h2><p style="color:var(--text-muted);font-size:12px;margin-bottom:16px">Répartition optimale selon les taux du marché et le plafond FGDR.</p><div class="form-grid"><div class="form-field"><label>Montant à placer (€)</label><input id="sim-amount" type="number" value="${ct||''}" placeholder="200000"></div><div class="form-field"><label>Réserve liquidité (€)</label><input id="sim-reserve" type="number" value="${catManager.objectives.liquidityReserve}" placeholder="0"></div><div class="form-field"><label>Plafond FGDR/banque (€)</label><input id="sim-max" type="number" value="${catManager.objectives.maxPerBank}" placeholder="100000"></div><div class="form-field"><label>Horizon max</label><select id="sim-horizon"><option value="12">12 mois</option><option value="24">24 mois</option><option value="36" selected>36 mois</option><option value="60">60 mois</option></select></div></div><button class="btn ai-glow lg" style="width:100%;margin-top:16px" onclick="runSimulation()">🚀 Optimiser</button><div id="sim-results" style="margin-top:20px"></div><div class="modal-actions"><button class="btn" onclick="closeModal()">Fermer</button></div></div></div>`;modal.classList.add('visible');}
 function runSimulation(){const result=catManager.simulate(parseFloat(document.getElementById('sim-amount').value)||0,{liquidityReserve:parseFloat(document.getElementById('sim-reserve').value)||0,maxPerBank:parseFloat(document.getElementById('sim-max').value)||100000,horizonMonths:parseInt(document.getElementById('sim-horizon').value)||36});const c=document.getElementById('sim-results');if(result.error){c.innerHTML=`<div class="alert-bar"><span>⚠️</span>${result.error}</div>`;return;}c.innerHTML=`<div class="stats-row" style="margin-bottom:16px"><div class="stat-card green"><div class="stat-label">Rendement</div><div class="stat-value">+${formatNumber(result.totalInterest)}€</div></div><div class="stat-card blue"><div class="stat-label">Taux Pondéré</div><div class="stat-value">${formatPct(result.weightedRate)}</div></div><div class="stat-card orange"><div class="stat-label">Placé</div><div class="stat-value">${formatNumber(result.allocated)}€</div></div></div>${result.allocations.map(a=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--bg-elevated);border-radius:var(--radius-sm);margin-bottom:4px;font-size:12px"><div><strong style="color:var(--text-bright)">${a.bankName}</strong> · ${a.durationMonths} mois</div><div style="display:flex;gap:14px"><span style="font-family:var(--mono)">${formatNumber(a.amount)}€</span><span style="color:var(--green);font-family:var(--mono)">${a.rate}%</span><span style="color:var(--text-muted)">→ +${formatNumber(a.interest)}€</span></div></div>`).join('')}`;}
