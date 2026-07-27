@@ -2,7 +2,11 @@
 // STRUCTBOARD — Analytique & Simulations (V2 — smart annualization)
 // ═══════════════════════════════════════════════════════════════
 
-const CHART_COLORS = ['#3B82F6','#06D6A0','#FF006E','#FFBE0B','#8338EC','#E07A5F','#00B4D8','#D62828','#7209B7','#4361EE','#F77F00','#2EC4B6'];
+// Palette catégorielle VALIDÉE (dataviz : CVD-safe, ordre fixe — une couleur = une identité,
+// jamais cyclée au hasard). Relief assuré par labels/légendes directs.
+const CHART_COLORS = ['#2a78d6','#eb6834','#1baf7a','#eda100','#e87ba4','#008300','#4a3aa7','#e34948'];
+// Rôles sémantiques réutilisés partout : Structuré = bleu, CAT/PS = aqua.
+const VIZ = { structured: '#2a78d6', cat: '#1baf7a', ink: '#0b0b0b', inkSoft: '#52514e', muted: '#898781' };
 
 function getPortfolioData() {
   const products = app.state.portfolio || [];
@@ -167,6 +171,7 @@ async function renderAnalytics(container) {
   const fgdr = _computeFGDRExposure(products, catDeposits);
   const events = _computeNextEvents(products, catDeposits);
   const sensitivity = _computeRateSensitivity(products);
+  const cumul10 = projectCashflows(10).reduce((s, f) => s + f.total, 0);
 
   // ─── Duration moyenne pondérée ───
   let durNum = 0, durDen = 0;
@@ -190,9 +195,22 @@ async function renderAnalytics(container) {
     ${_renderRateSensitivity(sensitivity)}
     ${_renderMaturityTimeline(products, catDeposits)}
     ${_renderStressTest(products, catDeposits)}
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
-      <div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">📊</span><span class="fiche-section-title">Rendement Annuel par Produit</span></div><div class="fiche-section-body"><canvas id="chart-yield" height="160"></canvas></div></div>
-      <div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">📈</span><span class="fiche-section-title">Projection Flux de Trésorerie (10 ans)</span></div><div class="fiche-section-body"><canvas id="chart-cashflow" height="160"></canvas></div></div>
+    <div class="fiche-section" style="margin-bottom:12px">
+      <div class="fiche-section-header"><span class="fiche-section-icon">📊</span><span class="fiche-section-title">Rendement Annuel par Produit</span>
+        <span style="margin-left:auto;display:flex;gap:14px;font-size:11px;color:${VIZ.inkSoft};align-items:center">
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:${VIZ.structured};display:inline-block"></span>Structuré</span>
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:${VIZ.cat};display:inline-block"></span>CAT / PS</span>
+        </span>
+      </div>
+      <div class="fiche-section-body"><div id="yield-wrap" style="position:relative;height:300px"><canvas id="chart-yield"></canvas></div></div>
+    </div>
+    <div class="fiche-section" style="margin-bottom:12px">
+      <div class="fiche-section-header"><span class="fiche-section-icon">📈</span><span class="fiche-section-title">Projection Flux de Trésorerie (10 ans)</span>
+        <span style="margin-left:auto;font-size:12px;color:${VIZ.inkSoft}">Cumul 10 ans&nbsp;: <strong style="color:${VIZ.ink};font-size:14px">${formatNumber(cumul10)}€</strong></span>
+      </div>
+      <div class="fiche-section-body"><div style="position:relative;height:230px"><canvas id="chart-cashflow"></canvas></div>
+        <div style="font-size:10.5px;color:${VIZ.muted};margin-top:6px">Hypothèse : chaque produit à taux plein jusqu'à sa maturité (n'intègre ni autocall ni probabilité de coupon) → vue optimiste.</div>
+      </div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">
       <div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">🏦</span><span class="fiche-section-title">Par Banque</span></div><div class="fiche-section-body"><canvas id="chart-bank" height="150"></canvas></div></div>
@@ -880,7 +898,31 @@ function _renderStressTest(products, catDeposits) {
 
 // ═══ CHART RENDERING ════════════════════════════════════════
 
-const chartDefaults = { color: '#94A3B8', borderColor: 'rgba(148,163,184,0.1)', font: { family: 'Inter, system-ui, sans-serif', size: 11 } };
+const chartDefaults = { color: '#898781', borderColor: '#e1e0d9', font: { family: 'system-ui, -apple-system, "Segoe UI", sans-serif', size: 11 } };
+
+// Légende de donut affichant directement le % (l'info principale, sans survol).
+function _donutPctLabels(chart) {
+  const ds = chart.data.datasets[0];
+  const total = ds.data.reduce((s, v) => s + v, 0) || 1;
+  return chart.data.labels.map((lbl, i) => ({
+    text: lbl + ' — ' + Math.round(ds.data[i] / total * 100) + '%',
+    fillStyle: ds.backgroundColor[i], strokeStyle: ds.backgroundColor[i], lineWidth: 0, index: i
+  }));
+}
+// Total affiché au centre du donut.
+const _centerTotal = {
+  id: 'centerTotal',
+  afterDraw(chart) {
+    if (chart.config.type !== 'doughnut') return;
+    const ds = chart.data.datasets[0]; const total = ds.data.reduce((s, v) => s + v, 0);
+    const a = chart.chartArea; if (!a) return;
+    const c = chart.ctx; c.save();
+    c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.fillStyle = '#0b0b0b'; c.font = '700 14px system-ui, sans-serif';
+    c.fillText(formatNumber(total) + '€', (a.left + a.right) / 2, (a.top + a.bottom) / 2);
+    c.restore();
+  }
+};
 
 function renderAllCharts() {
   if (typeof Chart === 'undefined') return;
@@ -893,39 +935,81 @@ function renderAllCharts() {
 function renderYieldChart() {
   const ctx = document.getElementById('chart-yield'); if (!ctx) return;
   const { products, catDeposits } = getPortfolioData();
+  // Barres HORIZONTALES, triées par rendement décroissant, couleur par NATURE (Structuré/CAT).
   const items = [
-    ...products.map(p => ({ name: (p.name||'Produit').substring(0,20), yield: calcProductAnnualYield(p) })),
-    ...catDeposits.map(d => ({ name: (d.productName||'CAT').substring(0,20), yield: Math.round((parseFloat(d.amount)||0)*_getCurrentCATRate(d)/100) })),
-  ].filter(i => i.yield > 0);
-  new Chart(ctx, { type: 'bar', data: { labels: items.map(i => i.name), datasets: [{ label: 'Rendement annuel (€)', data: items.map(i => i.yield), backgroundColor: items.map((_,i) => CHART_COLORS[i%CHART_COLORS.length]+'CC'), borderRadius: 6, borderSkipped: false }] },
-    options: { responsive: true, plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => formatNumber(c.raw)+'€/an' } } }, scales: { y: { grid: { color: chartDefaults.borderColor }, ticks: { callback: v => formatNumber(v)+'€' } }, x: { grid: { display: false } } } } });
+    ...products.map(p => ({ name: (p.name || 'Produit'), yield: calcProductAnnualYield(p), isCat: false })),
+    ...catDeposits.map(d => ({ name: (d.productName || 'CAT'), yield: Math.round((parseFloat(d.amount) || 0) * _getCurrentCATRate(d) / 100), isCat: true })),
+  ].filter(i => i.yield > 0).sort((a, b) => b.yield - a.yield);
+  const wrap = document.getElementById('yield-wrap');
+  if (wrap) wrap.style.height = Math.max(220, items.length * 26 + 24) + 'px';
+  const labels = items.map(i => i.name.length > 36 ? i.name.slice(0, 35) + '…' : i.name);
+  new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: [{
+      label: 'Rendement annuel',
+      data: items.map(i => i.yield),
+      backgroundColor: items.map(i => i.isCat ? VIZ.cat : VIZ.structured),
+      borderRadius: 4, borderSkipped: false, barThickness: 15
+    }] },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      layout: { padding: { right: 58 } },
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: c => formatNumber(c.raw) + '€/an · ' + (items[c.dataIndex].isCat ? 'CAT / PS' : 'Structuré') } }
+      },
+      scales: {
+        x: { grid: { color: chartDefaults.borderColor }, ticks: { callback: v => formatNumber(v) + '€', color: VIZ.muted } },
+        y: { grid: { display: false }, ticks: { color: VIZ.inkSoft, font: { size: 11 } } }
+      }
+    },
+    plugins: [{
+      id: 'yieldValueLabels',
+      afterDatasetsDraw(chart) {
+        const c = chart.ctx; const meta = chart.getDatasetMeta(0);
+        c.save(); c.font = '600 11px system-ui, sans-serif'; c.fillStyle = VIZ.inkSoft; c.textBaseline = 'middle';
+        meta.data.forEach((bar, i) => { c.fillText(formatNumber(items[i].yield) + '€', bar.x + 6, bar.y); });
+        c.restore();
+      }
+    }]
+  });
 }
 function renderCashflowChart() {
   const ctx = document.getElementById('chart-cashflow'); if (!ctx) return;
-  const flows = projectCashflows(10); let cumul = 0;
-  const cumulData = flows.map(f => { cumul += f.total; return cumul; });
+  const flows = projectCashflows(10);
+  // Un seul axe (jamais de double échelle) : barres empilées Structuré + CAT par année.
   new Chart(ctx, { type: 'bar', data: { labels: flows.map(f => f.year.toString()), datasets: [
-    { label: 'Structurés', data: flows.map(f => f.structured), backgroundColor: '#3B82F6CC', borderRadius: 4, stack: 'stack' },
-    { label: 'CAT/PS', data: flows.map(f => f.cat), backgroundColor: '#06D6A0CC', borderRadius: 4, stack: 'stack' },
-    { label: 'Cumulé', data: cumulData, type: 'line', borderColor: '#FFBE0B', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 3, pointBackgroundColor: '#FFBE0B', yAxisID: 'y1' }
-  ] }, options: { responsive: true, plugins: { tooltip: { callbacks: { label: c => c.dataset.label+': '+formatNumber(c.raw)+'€' } } },
-    scales: { y: { stacked: true, grid: { color: chartDefaults.borderColor }, ticks: { callback: v => formatNumber(v)+'€' } }, y1: { position: 'right', grid: { display: false }, ticks: { callback: v => formatNumber(v)+'€' } }, x: { stacked: true, grid: { display: false } } } } });
+    { label: 'Structurés', data: flows.map(f => f.structured), backgroundColor: VIZ.structured, borderRadius: 3, stack: 'stack', barPercentage: 0.72 },
+    { label: 'CAT / PS', data: flows.map(f => f.cat), backgroundColor: VIZ.cat, borderRadius: 3, stack: 'stack', barPercentage: 0.72 }
+  ] }, options: { responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top', align: 'end', labels: { boxWidth: 12, boxHeight: 12, padding: 12, color: VIZ.inkSoft, font: { size: 11 } } },
+      tooltip: { callbacks: { label: c => c.dataset.label + ': ' + formatNumber(c.raw) + '€', footer: its => 'Total : ' + formatNumber(its.reduce((s, i) => s + i.raw, 0)) + '€' } } },
+    scales: { y: { stacked: true, grid: { color: chartDefaults.borderColor }, ticks: { callback: v => formatNumber(v) + '€', color: VIZ.muted } }, x: { stacked: true, grid: { display: false }, ticks: { color: VIZ.muted } } } } });
+}
+// Options communes aux donuts : légende avec %, total au centre, tooltip € + %.
+function _donutOptions() {
+  return { responsive: true, cutout: '62%',
+    plugins: {
+      tooltip: { callbacks: { label: c => { const t = c.dataset.data.reduce((s, v) => s + v, 0) || 1; return c.label + ' : ' + formatNumber(c.raw) + '€ (' + Math.round(c.raw / t * 100) + '%)'; } } },
+      legend: { position: 'right', labels: { boxWidth: 11, boxHeight: 11, padding: 7, color: VIZ.inkSoft, font: { size: 11 }, generateLabels: _donutPctLabels } }
+    } };
 }
 function renderBankPieChart() {
   const ctx = document.getElementById('chart-bank'); if (!ctx) return; const data = getDistributionByBank();
-  new Chart(ctx, { type: 'doughnut', data: { labels: data.map(d => d.name), datasets: [{ data: data.map(d => d.value), backgroundColor: data.map((_,i) => CHART_COLORS[i%CHART_COLORS.length]), borderWidth: 0 }] },
-    options: { responsive: true, cutout: '55%', plugins: { tooltip: { callbacks: { label: c => c.label+': '+formatNumber(c.raw)+'€' } }, legend: { position: 'right', labels: { boxWidth: 12, padding: 8 } } } } });
+  new Chart(ctx, { type: 'doughnut', data: { labels: data.map(d => d.name), datasets: [{ data: data.map(d => d.value), backgroundColor: data.map((_,i) => CHART_COLORS[i%CHART_COLORS.length]), borderColor: '#fcfcfb', borderWidth: 2 }] },
+    options: _donutOptions(), plugins: [_centerTotal] });
 }
 function renderTypePieChart() {
   const ctx = document.getElementById('chart-type'); if (!ctx) return; const data = getDistributionByType();
-  new Chart(ctx, { type: 'doughnut', data: { labels: data.map(d => d.name), datasets: [{ data: data.map(d => d.value), backgroundColor: data.map((_,i) => CHART_COLORS[(i+3)%CHART_COLORS.length]), borderWidth: 0 }] },
-    options: { responsive: true, cutout: '55%', plugins: { tooltip: { callbacks: { label: c => c.label+': '+formatNumber(c.raw)+'€' } }, legend: { position: 'right', labels: { boxWidth: 12, padding: 8 } } } } });
+  new Chart(ctx, { type: 'doughnut', data: { labels: data.map(d => d.name), datasets: [{ data: data.map(d => d.value), backgroundColor: data.map((_,i) => CHART_COLORS[i%CHART_COLORS.length]), borderColor: '#fcfcfb', borderWidth: 2 }] },
+    options: _donutOptions(), plugins: [_centerTotal] });
 }
 function renderEntityPieChart() {
   const ctx = document.getElementById('chart-entity'); if (!ctx) return; const data = getDistributionByEntity();
-  const colors = data.map(d => { const ent = MY_ENTITIES.find(e => e.name === d.name); return ent?.color || '#64748B'; });
-  new Chart(ctx, { type: 'doughnut', data: { labels: data.map(d => d.name), datasets: [{ data: data.map(d => d.value), backgroundColor: colors, borderWidth: 0 }] },
-    options: { responsive: true, cutout: '55%', plugins: { tooltip: { callbacks: { label: c => c.label+': '+formatNumber(c.raw)+'€' } }, legend: { position: 'right', labels: { boxWidth: 12, padding: 8 } } } } });
+  // L'entité garde SA couleur de marque (couleur = identité de l'entité, pas son rang).
+  const colors = data.map((d, i) => { const ent = MY_ENTITIES.find(e => e.name === d.name); return ent?.color || CHART_COLORS[i % CHART_COLORS.length]; });
+  new Chart(ctx, { type: 'doughnut', data: { labels: data.map(d => d.name), datasets: [{ data: data.map(d => d.value), backgroundColor: colors, borderColor: '#fcfcfb', borderWidth: 2 }] },
+    options: _donutOptions(), plugins: [_centerTotal] });
 }
 function renderMaturityChart() {
   const ctx = document.getElementById('chart-maturity'); if (!ctx) return; const data = getMaturityProfile();
