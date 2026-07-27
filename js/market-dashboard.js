@@ -40,6 +40,26 @@
       '<div style="font-size:11px;color:' + BG.textDim + ';line-height:1.4">' + sub + '</div></div>';
   }
 
+  // Meilleur CAT disponible = repère sans risque pour la trésorerie. Taux via la source
+  // unique window._getCATBenchmark() (cohérente avec le grader) ; détail banque/durée lu
+  // dans catManager (offre confirmée au meilleur taux).
+  function _bestCAT() {
+    var rate = 0, bank = '', dur = null;
+    try { if (typeof window._getCATBenchmark === 'function') rate = parseFloat(window._getCATBenchmark()) || 0; } catch (e) {}
+    try {
+      if (typeof catManager !== 'undefined' && catManager.rates && Array.isArray(catManager.rates.rates)) {
+        var best = null;
+        catManager.rates.rates.forEach(function(r) {
+          if (r.source === 'web scan') return;
+          var v = parseFloat(r.rate) || 0; if (v <= 0) return;
+          if (!best || v > best.v) best = { v: v, bank: r.bank || r.banque || '', dur: r.durationMonths || r.duration || null };
+        });
+        if (best) { if (!rate) rate = best.v; bank = best.bank; dur = best.dur; }
+      }
+    } catch (e) {}
+    return { rate: rate, bank: bank, dur: dur };
+  }
+
   function _render(container) {
     var r = _data.rates || {};
     var mi = _data.mi || {};
@@ -171,6 +191,29 @@
     html += '<span style="font-family:var(--mono);font-size:14px;font-weight:800;color:' + (curve.shape === 'normal' ? '#059669' : '#DC2626') + '">' + (curve.shape === 'normal' ? 'Normale ↗' : 'Inversée ↘') + '</span></div>';
     html += '<div style="font-size:10px;color:' + BG.textDim + '">Spread 2s10s : +' + Math.round((curve.spread_2_10 || 0.57) * 100) + 'bp · ' + (curve.shape === 'normal' ? 'Favorable aux structurés' : 'Défavorable') + '</div>';
     html += '</div></div>';
+
+    // ═══ REPÈRE TRÉSORERIE : le meilleur CAT (sans risque) — le taux à battre ═══
+    (function() {
+      var cat = _bestCAT();
+      if (!cat.rate) return;
+      var tecv = tec10.current || 0;
+      var vsTec = tecv ? (cat.rate - tecv) : null;
+      var detail = [];
+      if (cat.bank) detail.push(cat.bank);
+      if (cat.dur) detail.push(cat.dur % 12 === 0 ? (cat.dur / 12) + ' ans' : cat.dur + ' mois');
+      var catStr = cat.rate.toFixed(2).replace('.', ',');
+      html += '<div style="background:#ECFDF5;border:1px solid #05966955;border-left:5px solid #059669;border-radius:10px;padding:13px 16px;margin-bottom:20px">';
+      html += '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">';
+      html += '<span style="font-size:18px">🎯</span>';
+      html += '<div><div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:#047857">Repère trésorerie — taux sans risque à battre</div>';
+      html += '<div style="font-size:13px;color:#0F172A;margin-top:2px">Meilleur CAT : <strong style="font-family:var(--mono);font-size:16px;color:#059669">' + catStr + '%</strong>' + (detail.length ? ' <span style="color:#64748B;font-size:11px">(' + detail.join(' · ') + ')</span>' : '') + ' · garanti FGDR ≤ 100k€/banque</div></div>';
+      if (vsTec !== null) {
+        html += '<span style="margin-left:auto;font-size:11px;background:#FFFFFF;border:1px solid #05966933;border-radius:14px;padding:4px 11px;color:#334155">CAT vs TEC10 ' + tecv.toFixed(2) + '% : <strong style="color:' + (vsTec >= 0 ? '#059669' : '#DC2626') + '">' + (vsTec >= 0 ? '+' : '') + Math.round(vsTec * 100) + ' pb</strong></span>';
+      }
+      html += '</div>';
+      html += '<div style="margin-top:8px;font-size:11px;color:#475569">Tout structuré doit offrir une <strong>prime suffisante au-dessus de ' + catStr + '%</strong> pour rémunérer son risque en capital et son illiquidité. En-dessous, le CAT gagne.</div>';
+      html += '</div>';
+    })();
 
     // ═══ SECTION 2: TAUX DIRECTEURS + MONÉTAIRE ═══
     html += '<div style="font-size:14px;font-weight:700;color:' + BG.text + ';margin-bottom:12px">🏦 Taux directeurs BCE & marché monétaire</div>';
