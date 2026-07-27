@@ -55,32 +55,19 @@ function _getCurrentCATRate(deposit) {
 // Si coupon = 3.5% semestriel → annualisé = 3.5 × 2 = 7%
 // Si coupon = 0.5% mensuel → annualisé = 0.5 × 12 = 6%
 // Si coupon = 7% annuel → reste 7%
+// Délègue à la SOURCE UNIQUE (scoring.annualizedCoupon) pour que l'Analytique et le
+// Cockpit/comparateur affichent rigoureusement le même rendement. Fallback local si
+// le moteur scoring n'est pas encore chargé.
 function getAnnualizedRate(p) {
+  if (typeof scoring !== 'undefined' && scoring.annualizedCoupon) {
+    return scoring.annualizedCoupon(p);
+  }
   const rate = parseFloat(p.coupon?.rate) || 0;
   if (rate === 0) return 0;
   const freq = (p.coupon?.frequency || '').toLowerCase().trim();
-
-  // Detect multiplier from frequency
-  if (freq.includes('trimestr') || freq.includes('quarter') || freq === 'trimestriel') {
-    return rate * 4;
-  }
-  if (freq.includes('semestr') || freq.includes('semi')) {
-    return rate * 2;
-  }
-  if (freq.includes('mensuel') || freq.includes('month')) {
-    return rate * 12;
-  }
-
-  // Heuristic: if rate is very low (< 3%) and frequency mentions "trim" or type includes "memoire"
-  // it's likely a per-period rate, not annual
-  if (rate <= 3 && (p.coupon?.type || '').toLowerCase().includes('memoire')) {
-    // Check if "trimestriel" appears anywhere in the product data
-    const productText = JSON.stringify(p).toLowerCase();
-    if (productText.includes('trimestr')) return rate * 4;
-    if (productText.includes('semestr')) return rate * 2;
-  }
-
-  // Default: assume annual
+  if (freq.includes('trimestr') || freq.includes('quarter')) return rate * 4;
+  if (freq.includes('semestr') || freq.includes('semi')) return rate * 2;
+  if (freq.includes('mensuel') || freq.includes('month')) return rate * 12;
   return rate;
 }
 
@@ -162,13 +149,14 @@ async function renderAnalytics(container) {
   // ─── Compute per-entity breakdown ───
   const IS_RATE = 0.25;
   const netYieldTotal = Math.round(annualYieldTotal * (1 - IS_RATE));
-  // Drag de frais (marge upfront amortie + droits de garde) sur les produits structurés
+  // Drag de frais = droits de garde + marge embarquée amortie (vue ÉCONOMIQUE, identique
+  // au Cockpit → les deux chiffres de rendement net concordent enfin).
   let feeDragTotal = 0, feesDocAmt = 0;
   products.forEach(p => {
     const a = parseFloat(p.investedAmount) || 0;
     if (typeof scoring !== 'undefined' && scoring.getFeeDrag) {
       const d = scoring.getFeeDrag(p);
-      feeDragTotal += a * d.dragPct / 100;
+      feeDragTotal += a * d.economicDragPct / 100;
       if (d.documented) feesDocAmt += a;
     }
   });
@@ -190,8 +178,8 @@ async function renderAnalytics(container) {
     ${typeof renderExecCockpit === 'function' ? renderExecCockpit() : ''}
     <div class="stats-row" style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px">
       <div class="stat-card blue"><div class="stat-label">Total Investi</div><div class="stat-value">${formatNumber(totalAll)}€</div><div class="stat-sub">Structurés: ${formatNumber(totalStructured)}€ · CAT: ${formatNumber(totalCAT)}€</div></div>
-      <div class="stat-card green"><div class="stat-label">Rendement Annuel Brut</div><div class="stat-value">${formatNumber(annualYieldTotal)}€</div><div class="stat-sub">Structurés: ${formatNumber(annualYieldStructured)}€ · CAT: ${formatNumber(annualYieldCAT)}€</div></div>
-      <div class="stat-card" style="border-left:3px solid #06D6A0"><div class="stat-label">Rendement Net (IS + frais)</div><div class="stat-value" style="color:#06D6A0">${formatNumber(netAfterFeesTotal)}€</div><div class="stat-sub">${netAfterFeesPct.toFixed(2).replace('.',',')}% net · ${formatNumber(netYieldTotal)}€ hors frais${feesDocPct < 80 ? ` · <span style="color:#D97706;font-weight:600">⚠ frais ${Math.round(feesDocPct)}%</span>` : ''}</div></div>
+      <div class="stat-card green"><div class="stat-label">Rendement Annuel Brut</div><div class="stat-value">${formatNumber(annualYieldTotal)}€</div><div class="stat-sub">Coupon annualisé, si tous coupons versés · Struct.: ${formatNumber(annualYieldStructured)}€ · CAT: ${formatNumber(annualYieldCAT)}€</div></div>
+      <div class="stat-card" style="border-left:3px solid #06D6A0"><div class="stat-label">Rendement Net (IS + garde + marge)</div><div class="stat-value" style="color:#06D6A0">${formatNumber(netAfterFeesTotal)}€</div><div class="stat-sub">${netAfterFeesPct.toFixed(2).replace('.',',')}% net · ${formatNumber(netYieldTotal)}€ hors frais${feesDocPct < 80 ? ` · <span style="color:#D97706;font-weight:600">⚠ frais ${Math.round(feesDocPct)}%</span>` : ''}</div></div>
       <div class="stat-card" style="border-left:3px solid #8338EC"><div class="stat-label">Duration Moyenne</div><div class="stat-value">${avgDuration.toFixed(1)} ans</div><div class="stat-sub">${products.length + catDeposits.length} placements</div></div>
       <div class="stat-card" style="border-left:3px solid ${fgdr.alert ? '#EF233C' : '#06D6A0'}"><div class="stat-label">Couverture FGDR</div><div class="stat-value">${fgdr.coveredPct}%</div><div class="stat-sub">${fgdr.alert ? '⚠ ' + fgdr.alertCount + ' dépassement(s)' : '✓ Couvert'}</div></div>
     </div>
@@ -907,7 +895,7 @@ function renderYieldChart() {
   const { products, catDeposits } = getPortfolioData();
   const items = [
     ...products.map(p => ({ name: (p.name||'Produit').substring(0,20), yield: calcProductAnnualYield(p) })),
-    ...catDeposits.map(d => ({ name: (d.productName||'CAT').substring(0,20), yield: Math.round((parseFloat(d.amount)||0)*(parseFloat(d.rate)||0)/100) })),
+    ...catDeposits.map(d => ({ name: (d.productName||'CAT').substring(0,20), yield: Math.round((parseFloat(d.amount)||0)*_getCurrentCATRate(d)/100) })),
   ].filter(i => i.yield > 0);
   new Chart(ctx, { type: 'bar', data: { labels: items.map(i => i.name), datasets: [{ label: 'Rendement annuel (€)', data: items.map(i => i.yield), backgroundColor: items.map((_,i) => CHART_COLORS[i%CHART_COLORS.length]+'CC'), borderRadius: 6, borderSkipped: false }] },
     options: { responsive: true, plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => formatNumber(c.raw)+'€/an' } } }, scales: { y: { grid: { color: chartDefaults.borderColor }, ticks: { callback: v => formatNumber(v)+'€' } }, x: { grid: { display: false } } } } });

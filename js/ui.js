@@ -130,7 +130,7 @@ function _sbSortValue(p, key) {
     case 'margin': return -(ny.embeddedMargin || 0);
     case 'barrier': return parseFloat((p.capitalProtection || {}).barrier) || 999;
     case 'maturity': return parseFloat(p.maturityYears) || 999;
-    case 'coupon': return -(parseFloat(p.coupon && p.coupon.rate) || 0);
+    case 'coupon': return -((typeof scoring !== 'undefined' && scoring.annualizedCoupon) ? scoring.annualizedCoupon(p) : (parseFloat(p.coupon && p.coupon.rate) || 0));
     default: return 0;
   }
 }

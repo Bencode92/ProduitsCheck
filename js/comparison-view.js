@@ -42,7 +42,7 @@
       p: p, source: item.source, name: p.name || 'Produit', bank: p.bankId || '',
       grade: g.grade || '?', gradeRank: { A: 0, B: 1, C: 2, D: 3, F: 4 }[g.grade] != null ? { A: 0, B: 1, C: 2, D: 3, F: 4 }[g.grade] : 9,
       score: g.score || 0,
-      coupon: parseFloat(p.coupon && p.coupon.rate) || 0,
+      coupon: (typeof scoring !== 'undefined' && scoring.annualizedCoupon) ? scoring.annualizedCoupon(p) : (parseFloat(p.coupon && p.coupon.rate) || 0),
       netRecu: (ny.netAfterFees != null) ? ny.netAfterFees : null,
       netEco: (ny.netEconomic != null) ? ny.netEconomic : null,
       margin: ny.embeddedMargin || 0,
@@ -58,7 +58,7 @@
   // Colonnes : key, label, accessor, format, higherBetter (pour best/worst), align
   var COLS = [
     { key: 'grade', label: 'Grade', get: function (m) { return m.gradeRank; }, better: 'low' },
-    { key: 'coupon', label: 'Coupon', get: function (m) { return m.coupon; }, fmt: function (m) { return m.coupon ? _num(m.coupon) + '%' : '—'; }, better: 'high' },
+    { key: 'coupon', label: 'Coupon/an', get: function (m) { return m.coupon; }, fmt: function (m) { return m.coupon ? _num(m.coupon) + '%' : '—'; }, better: 'high' },
     { key: 'netRecu', label: 'Net reçu/an', get: function (m) { return m.netRecu; }, fmt: function (m) { return _pct(m.netRecu); }, better: 'high', hl: true },
     { key: 'netEco', label: 'Net ÉCO/an', get: function (m) { return m.netEco; }, fmt: function (m) { return _pct(m.netEco); }, better: 'high', hl: true, strong: true },
     { key: 'margin', label: 'Marge emb.', get: function (m) { return m.margin; }, fmt: function (m) { return m.margin ? _num(m.margin) + '%' : '—'; }, better: 'low', hl: true },

@@ -50,6 +50,9 @@
     var policy = r.policy_rates || {};
     var curve = r.yield_curve || {};
 
+    // TEC10 : on préfère le TEC10 réel (Banque de France) ; à défaut, proxy OAT 10 ans AAA
+    // (~70 bp d'écart possible) — la source est affichée explicitement pour ne pas les confondre.
+    var tec10Real = !!(yields.tec10_fr && yields.tec10_fr.current != null);
     var tec10 = yields.tec10_fr || yields.oat_fr_10y || {};
     var oat5y = yields.oat_fr_5y || {};
     var oat2y = yields.oat_fr_2y || {};
@@ -66,6 +69,22 @@
     var fetchDate = r.fetched_at ? new Date(r.fetched_at).toLocaleString('fr-FR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '—';
     html += '<div style="font-size:10px;color:' + BG.textDim + ';padding:4px 10px;background:' + BG.row1 + ';border-radius:4px">Dernière MAJ : ' + fetchDate + ' · Source : ECB + Twelve Data + IA</div>';
     html += '</div>';
+
+    // ═══ ALERTE FRAÎCHEUR : les décisions ne doivent pas reposer sur des données périmées ═══
+    (function() {
+      var ts = r.fetched_at || (mi && mi.timestamp) || (md && md.timestamp);
+      if (!ts) return;
+      var ageDays = Math.floor((new Date() - new Date(ts)) / 864e5);
+      if (isNaN(ageDays) || ageDays < 0) return;
+      // Sync auto = 2×/jour en semaine. Au-delà de 4 jours (week-ends absorbés), la synchro est probablement interrompue.
+      if (ageDays >= 4) {
+        html += '<div style="background:#FEF2F2;border:1px solid #DC2626;border-left:5px solid #DC2626;border-radius:10px;padding:12px 15px;margin-bottom:18px;display:flex;align-items:center;gap:11px">';
+        html += '<span style="font-size:19px">⚠️</span>';
+        html += '<div style="font-size:12.5px;color:#7F1D1D;line-height:1.45"><strong>Données de marché périmées — ' + ageDays + ' jours.</strong> ';
+        html += 'Dernière synchronisation le ' + new Date(ts).toLocaleDateString('fr-FR') + '. La mise à jour automatique semble interrompue : ';
+        html += 'les taux et indicateurs ci-dessous <strong>peuvent ne plus refléter le marché</strong>. À vérifier avant toute décision d\'allocation.</div></div>';
+      }
+    })();
 
     // ═══ VERDICT DU JOUR : synthèse 5 secondes ═══
     (function() {
@@ -113,8 +132,8 @@
     var eur12m = yields.euribor_12m || {};
 
     var rateCards = [
-      { id: 'tec10_fr', label: 'TEC10 (OAT 10 ans)', data: tec10, color: '#0891B2',
-        desc: 'Taux d\'État français 10 ans (Banque de France). Référence pour les TARN et produits structurés taux longs.',
+      { id: tec10Real ? 'tec10_fr' : 'oat_fr_10y', label: tec10Real ? 'TEC10 (Banque de France)' : 'OAT 10 ans (proxy AAA)', data: tec10, color: '#0891B2',
+        desc: tec10Real ? 'Taux d\'État français 10 ans (Banque de France). Référence pour les TARN et produits structurés taux longs.' : '⚠ TEC10 réel indisponible — proxy rendement souverain AAA zone euro (écart possible ~70 bp vs TEC10 BdF).',
         sub: 'Vol ' + (tec10.vol_annualized_bps || 18) + 'bp · ' + (tec10.direction || 'stable') + ' · Range ' + (tec10.low_1y || '?') + '-' + (tec10.high_1y || '?') },
       { id: 'oat_fr_5y', label: 'OAT 5 ans', data: oat5y, color: '#2563EB',
         desc: 'Taux souverain à 5 ans. Sert au calcul du budget option des produits structurés 5 ans.',

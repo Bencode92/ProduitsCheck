@@ -107,6 +107,37 @@ class ScoringEngine {
     return null;
   }
 
+  // ── Coupon annualisé (SOURCE UNIQUE d'annualisation) ────────────────────────────────
+  // Le coupon est stocké PAR PÉRIODE (le parser n'annualise jamais) : 3,5% semestriel = 7%/an,
+  // 1,88% trimestriel = 7,52%/an. Ce helper est LA convention réutilisée partout (cockpit,
+  // carte Net, comparateur, analytique) pour qu'un seul et même chiffre s'affiche.
+  // frequency = annuel / in_fine / à maturité / na → déjà annualisé, on renvoie tel quel.
+  annualizedCoupon(p) {
+    // 1) Si le grader a déjà calculé le coupon annualisé (avec sanity-cap), on le RÉUTILISE →
+    //    le rendement affiché colle exactement à la note (cohérence display ↔ grading).
+    var meta = p && p.grading && p.grading.metadata;
+    if (meta && meta.couponAnnualized != null) {
+      var ga = parseFloat(meta.couponAnnualized);
+      if (!isNaN(ga) && ga > 0) return ga;
+    }
+    // 2) Sinon (produit non encore noté) : annualisation par la fréquence.
+    var c = (p && p.coupon) || {};
+    var rate = parseFloat(typeof c === 'object' ? c.rate : c);
+    if (isNaN(rate) || rate === 0) return 0;
+    var freq = ((c.frequency || '') + '').toLowerCase().trim();
+    if (freq.indexOf('trimestr') >= 0 || freq.indexOf('quarter') >= 0) return rate * 4;
+    if (freq.indexOf('semestr') >= 0 || freq.indexOf('semi') >= 0) return rate * 2;
+    if (freq.indexOf('mensuel') >= 0 || freq.indexOf('month') >= 0) return rate * 12;
+    // Garde-fou : coupon mémoire à taux faible sans fréquence explicite mais libellé "trimestriel"
+    if (rate <= 3 && ((c.type || '') + '').toLowerCase().indexOf('memoire') >= 0) {
+      var txt = '';
+      try { txt = JSON.stringify(p).toLowerCase(); } catch (e) {}
+      if (txt.indexOf('trimestr') >= 0) return rate * 4;
+      if (txt.indexOf('semestr') >= 0) return rate * 2;
+    }
+    return rate;
+  }
+
   // ── Frais & rendement net (helpers canoniques, réutilisés dans toutes les vues) ──────
   // Frais normalisés d'un produit, en %. `documented` = true si au moins un frais est saisi.
   // `commissions` (legacy) = marge de structuration upfront. fees.{structuring,custodyAnnual,exit}.
@@ -160,7 +191,8 @@ class ScoringEngine {
   }
   // Rendement d'un produit : brut, net d'IS, net REÇU (si coupon touché), net ÉCONOMIQUE (marge incluse).
   getNetYield(p) {
-    let gross = parseFloat(p && p.coupon && p.coupon.rate);
+    // gross = coupon ANNUALISÉ (source unique) : un 3,5% semestriel compte pour 7%/an.
+    let gross = this.annualizedCoupon(p);
     if (isNaN(gross)) gross = 0;
     const drag = this.getFeeDrag(p);
     const netExFees = gross * (1 - 0.25);
@@ -179,7 +211,7 @@ class ScoringEngine {
   getPortfolioStats(portfolio) {
     if (!portfolio || portfolio.length === 0) return { total: 0, nominal: 0, avgCoupon: 0, weightedCoupon: 0, netExFees: 0, netAfterFees: 0, feeDrag: 0, feesDocumentedPct: 0, banks: 0, underlyings: 0, types: 0, concentrations: [] };
     const nominal = portfolio.reduce((s, p) => s + (parseFloat(p.investedAmount) || 0), 0);
-    const avgCoupon = portfolio.reduce((s, p) => s + (parseFloat(p.coupon?.rate) || 0), 0) / portfolio.length;
+    const avgCoupon = portfolio.reduce((s, p) => s + this.annualizedCoupon(p), 0) / portfolio.length;
     // Rendements pondérés par l'encours (le vrai chiffre de pilotage)
     let wGross = 0, wNetEx = 0, wNetAfter = 0, wDrag = 0, wMargin = 0, feesDocAmt = 0;
     portfolio.forEach(p => {
