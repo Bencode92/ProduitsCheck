@@ -212,11 +212,32 @@ RÈGLES CRITIQUES pour rateSchedule:
     this.deposits.filter(d => d.status === 'active' && (!entity || d.entity === entity || d.entityName === entity))
       .forEach(d => { bankExposure[d.bankId] = (bankExposure[d.bankId] || 0) + (parseFloat(d.amount) || 0); });
 
-    const perRung = available / rungs.length;
+    // Calendrier EXISTANT par année (sert à pondérer les échelons : lisser + combler les trous)
+    const yNow = new Date().getFullYear(), calYear = {};
+    this.deposits.filter(d => d.status === 'active' && d.maturityDate).forEach(d => {
+      const y = new Date(d.maturityDate).getFullYear();
+      if (!calYear[y]) calYear[y] = { existing: 0, ladder: 0 };
+      calYear[y].existing += parseFloat(d.amount) || 0;
+    });
+    // Pondération des échelons = (1) GAP : plus de cash là où il manque des échéances
+    // (on vise un niveau d'échéance homogène par année) ; (2) TAUX : léger biais (±15 %)
+    // vers les maturités les mieux rémunérées (on suit la courbe des taux).
+    const rungYear = m => yNow + Math.round(m / 12);
+    const existAt = m => (calYear[rungYear(m)] ? calYear[rungYear(m)].existing : 0);
+    const rungRate = {}; rungs.forEach(m => { const rs = this._bestRateForDuration(m, 6); rungRate[m] = rs.length ? rs[0].rate : this._estimateRate(m); });
+    const targetLevel = (rungs.reduce((s, m) => s + existAt(m), 0) + available) / rungs.length;
+    const deficits = rungs.map(m => Math.max(0, targetLevel - existAt(m)));
+    const sumDef = deficits.reduce((a, b) => a + b, 0);
+    let weights = sumDef > 0 ? deficits.map(d => d / sumDef) : rungs.map(() => 1 / rungs.length);
+    const avgRate = (rungs.reduce((s, m) => s + rungRate[m], 0) / rungs.length) || 1;
+    weights = weights.map((w, i) => w * (1 + 0.15 * ((rungRate[rungs[i]] - avgRate) / avgRate)));
+    const sumW = weights.reduce((a, b) => a + b, 0) || 1;
+    const target = {}; rungs.forEach((m, i) => { target[m] = available * weights[i] / sumW; });
+
     const allocations = [], warnings = [];
     let placed = 0;
     rungs.forEach(months => {
-      let need = Math.min(perRung, available - placed);
+      let need = Math.min(target[months] || 0, available - placed);
       if (need < 1000) return;
       const rates = this._bestRateForDuration(months, 6);
       if (rates.length === 0) {
@@ -242,14 +263,8 @@ RÈGLES CRITIQUES pour rateSchedule:
       }
     });
 
-    // Calendrier combiné existant + échelle, par année, + trous dans l'horizon
-    const yNow = new Date().getFullYear(), calYear = {};
-    this.deposits.filter(d => d.status === 'active' && d.maturityDate).forEach(d => {
-      const y = new Date(d.maturityDate).getFullYear();
-      if (!calYear[y]) calYear[y] = { existing: 0, ladder: 0 };
-      calYear[y].existing += parseFloat(d.amount) || 0;
-    });
-    allocations.forEach(a => { const y = yNow + Math.round(a.months / 12); if (!calYear[y]) calYear[y] = { existing: 0, ladder: 0 }; calYear[y].ladder += a.amount; });
+    // Calendrier combiné : on ajoute l'échelle au calendrier existant déjà calculé plus haut.
+    allocations.forEach(a => { const y = rungYear(a.months); if (!calYear[y]) calYear[y] = { existing: 0, ladder: 0 }; calYear[y].ladder += a.amount; });
     const calendar = Object.entries(calYear).map(([y, v]) => ({ year: +y, existing: v.existing, ladder: v.ladder, total: v.existing + v.ladder })).sort((a, b) => a.year - b.year);
     const gaps = [];
     for (let y = yNow + 1; y <= yNow + Math.round(horizon / 12); y++) { const c = calYear[y]; if (!c || (c.existing + c.ladder) === 0) gaps.push(y); }
