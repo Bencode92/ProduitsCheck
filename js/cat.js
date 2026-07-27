@@ -147,7 +147,7 @@ RÈGLES CRITIQUES pour rateSchedule:
   // ─── Taux du marché ───────────────────────────────────────
   addRate(bankId, bankName, durationMonths, rate, productType, date) {
     this.rates.rates = this.rates.rates.filter(r => !(r.bankId === bankId && r.durationMonths === durationMonths && r.productType === productType));
-    this.rates.rates.push({ bankId, bankName, durationMonths, rate: parseFloat(rate), productType: productType || 'cat', date: date || new Date().toISOString().split('T')[0] });
+    this.rates.rates.push({ bankId, bankName, durationMonths, rate: parseFloat(rate), productType: productType || 'cat', date: date || new Date().toISOString().split('T')[0], source: 'confirmed' });
     this.rates.lastUpdated = new Date().toISOString();
   }
   getBestRates(durationMonths, productType) { return this.rates.rates.filter(r => r.durationMonths === durationMonths && (!productType || r.productType === productType)).sort((a, b) => b.rate - a.rate); }
@@ -159,7 +159,10 @@ RÈGLES CRITIQUES pour rateSchedule:
     const byBank={}; active.forEach(d=>{if(!byBank[d.bankId])byBank[d.bankId]={name:d.bankName||d.bankId,total:0,count:0,cats:0,ps:0};byBank[d.bankId].total+=parseFloat(d.amount)||0;byBank[d.bankId].count++;if(d.productType==='parts-sociales')byBank[d.bankId].ps++;else byBank[d.bankId].cats++;});
     const now=new Date(),in12m=new Date();in12m.setMonth(in12m.getMonth()+12);
     const upcoming=active.filter(d=>d.maturityDate&&new Date(d.maturityDate)>=now&&new Date(d.maturityDate)<=in12m).sort((a,b)=>new Date(a.maturityDate)-new Date(b.maturityDate));
-    const fgdrAlerts=Object.entries(byBank).filter(([,v])=>v.total>this.objectives.maxPerBank);
+    // FGDR : la garantie est par déposant (entité juridique) × banque — on agrège par entité+banque,
+    // pas par banque seule (sinon ByCam + Caméleons dans la même banque déclenchent une fausse alerte).
+    const byEntityBank={}; active.forEach(d=>{const ent=d.entityName||d.entity||'Non assigné';const key=(d.entity||d.entityName||'na')+'|'+d.bankId;if(!byEntityBank[key])byEntityBank[key]={name:(d.bankName||d.bankId)+' — '+ent,total:0};byEntityBank[key].total+=parseFloat(d.amount)||0;});
+    const fgdrAlerts=Object.entries(byEntityBank).filter(([,v])=>v.total>this.objectives.maxPerBank);
     return {totalDeposits:active.length,catCount:cats.length,psCount:ps.length,totalInvested,totalInterest,weightedRate,byBank,upcoming,fgdrAlerts,catTotal:cats.reduce((s,d)=>s+(parseFloat(d.amount)||0),0),psTotal:ps.reduce((s,d)=>s+(parseFloat(d.amount)||0),0)};
   }
   getMaturityTimeline() { const active=this.deposits.filter(d=>d.status==='active'&&d.maturityDate); const months={}; active.forEach(d=>{const key=d.maturityDate.substring(0,7);if(!months[key])months[key]={month:key,total:0,deposits:[]};months[key].total+=parseFloat(d.amount)||0;months[key].deposits.push(d);}); return Object.values(months).sort((a,b)=>a.month.localeCompare(b.month)); }
