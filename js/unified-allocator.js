@@ -380,7 +380,7 @@
   // CAT deposits are NOT candidates — they ARE the reserve.
   // Only structured products are candidates for new allocation.
   // For horizons where no structured fits, cash stays in existing CAT.
-  function _bestForHorizon(horizon, structCandidates, allocated, refRate, miFactor, issuerExposure) {
+  function _bestForHorizon(horizon, structCandidates, allocated, refRate, miFactor, issuerExposure, allowBarrier) {
     var maxMonths = horizon.maxMonths;
     var candidates = [];
     // refRate = the rate to beat (best CAT rate or source contract rate)
@@ -392,7 +392,7 @@
     // v2.1 Règle 6: reject if issuer already > 30% of total patrimoine
     structCandidates.forEach(function(s) {
       if (allocated[s.id]) return;
-      if (s.maturityMonths <= maxMonths && s.capitalGaranti && s.rdtNet != null && s.rdtNet > 0) {
+      if (s.maturityMonths <= maxMonths && (s.capitalGaranti || allowBarrier) && s.rdtNet != null && s.rdtNet > 0) {
         // Règle 6: issuer concentration check
         if (issuerExposure) {
           var issuerName = _normBank(s.bankName);
@@ -403,6 +403,9 @@
           }
         }
         var minSpread = _spreadByDuration(s.maturityMonths) * (miFactor || 1.0);
+        // Capital NON garanti (barrière) : prime de risque supplémentaire exigée (+1,5 pt).
+        // N'apparaît que pour les entités autorisées au risque (ByCam), et seulement si la prime paie.
+        if (!s.capitalGaranti) minSpread += 1.5;
         if (s.rdtNet < refRate + minSpread) return; // doesn't beat ref enough
         candidates.push({
           id: s.id,
@@ -484,7 +487,7 @@
       var budget = tr.amount;
       if (budget <= 0) { results.push({ horizon: tr.horizon, amount: 0, allocated: 0, remaining: 0, allocations: [] }); return; }
 
-      var candidates = _bestForHorizon(tr.horizon, structCandidates, allocated, bestCatRate, miFactor, issuerExposure);
+      var candidates = _bestForHorizon(tr.horizon, structCandidates, allocated, bestCatRate, miFactor, issuerExposure, entityKey === 'bycam');
       var allocs = [];
       var remaining = budget;
       // Max 30% of total entity cash per product (diversification)
