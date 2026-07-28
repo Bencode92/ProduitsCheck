@@ -49,8 +49,9 @@ async function saveCATObjectivesV2() {
 function _pfRow(p) {
   p = p || {};
   const ent = p.entity || 'bycam';
-  return `<div class="pf-row" style="display:grid;grid-template-columns:1.1fr 1.6fr 1fr 1fr auto;gap:6px;margin-bottom:6px;align-items:end">
+  return `<div class="pf-row" style="display:grid;grid-template-columns:1fr 1.2fr 1.4fr 0.9fr 0.9fr auto;gap:6px;margin-bottom:6px;align-items:end">
     <div class="form-field" style="margin:0"><label style="font-size:9px">Entité</label><select class="pf-entity"><option value="bycam"${ent === 'bycam' ? ' selected' : ''}>🏢 ByCam</option><option value="cameleons"${ent === 'cameleons' ? ' selected' : ''}>🦎 Caméléons</option></select></div>
+    <div class="form-field" style="margin:0"><label style="font-size:9px">Banque / Courtier</label><input class="pf-bank" value="${(p.bank || '').replace(/"/g, '&quot;')}" placeholder="Boursorama, SG…"></div>
     <div class="form-field" style="margin:0"><label style="font-size:9px">Nom</label><input class="pf-name" value="${(p.name || '').replace(/"/g, '&quot;')}" placeholder="PEA / CTO / ETF World"></div>
     <div class="form-field" style="margin:0"><label style="font-size:9px">Montant (€)</label><input class="pf-amount" type="number" value="${p.amount || ''}" placeholder="100000"></div>
     <div class="form-field" style="margin:0"><label style="font-size:9px">Rdt annualisé % <span style="color:var(--text-dim)">(banque)</span></label><input class="pf-rate" type="number" step="0.01" value="${p.rate || ''}" placeholder="7"></div>
@@ -75,6 +76,7 @@ async function savePortfolios() {
   const rows = [...document.querySelectorAll('#pf-rows .pf-row')];
   const portfolios = rows.map(r => ({
     entity: r.querySelector('.pf-entity').value,
+    bank: r.querySelector('.pf-bank').value.trim(),
     name: r.querySelector('.pf-name').value.trim(),
     amount: parseFloat(r.querySelector('.pf-amount').value) || 0,
     rate: parseFloat(r.querySelector('.pf-rate').value) || 0
