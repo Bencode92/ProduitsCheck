@@ -36,11 +36,53 @@ async function saveCATObjectivesV2() {
     maxPerBank: parseFloat(document.getElementById('obj-maxbank').value) || 100000,
     targetRate: parseFloat(document.getElementById('obj-target-rate').value) || 0,
     notes: document.getElementById('obj-notes').value,
+    portfolios: catManager.objectives.portfolios || [],   // poche investissements — préservée
   };
   closeModal();
   await catManager.saveObjectives();
   showToast('Objectifs sauvegardés', 'success');
   app.setState({ view: 'cat' });
+  renderCAT(document.getElementById('main-content'));
+}
+
+// ═══ Poche PORTEFEUILLES / INVESTISSEMENTS (saisie manuelle) ═══
+function _pfRow(p) {
+  p = p || {};
+  const ent = p.entity || 'bycam';
+  return `<div class="pf-row" style="display:grid;grid-template-columns:1.1fr 1.6fr 1fr 1fr auto;gap:6px;margin-bottom:6px;align-items:end">
+    <div class="form-field" style="margin:0"><label style="font-size:9px">Entité</label><select class="pf-entity"><option value="bycam"${ent === 'bycam' ? ' selected' : ''}>🏢 ByCam</option><option value="cameleons"${ent === 'cameleons' ? ' selected' : ''}>🦎 Caméléons</option></select></div>
+    <div class="form-field" style="margin:0"><label style="font-size:9px">Nom</label><input class="pf-name" value="${(p.name || '').replace(/"/g, '&quot;')}" placeholder="PEA / CTO / ETF World"></div>
+    <div class="form-field" style="margin:0"><label style="font-size:9px">Montant (€)</label><input class="pf-amount" type="number" value="${p.amount || ''}" placeholder="100000"></div>
+    <div class="form-field" style="margin:0"><label style="font-size:9px">Rdt annualisé % <span style="color:var(--text-dim)">(banque)</span></label><input class="pf-rate" type="number" step="0.01" value="${p.rate || ''}" placeholder="7"></div>
+    <button class="btn sm danger" type="button" onclick="this.closest('.pf-row').remove()" style="margin-bottom:2px">✕</button>
+  </div>`;
+}
+function addPortfolioRow() { document.getElementById('pf-rows').insertAdjacentHTML('beforeend', _pfRow({})); }
+function showPortfoliosModal() {
+  const obj = catManager.objectives || {};
+  const list = Array.isArray(obj.portfolios) ? obj.portfolios : [];
+  const modal = document.getElementById('modal');
+  modal.innerHTML = `<div class="modal-overlay" onclick="closeModal()"><div class="modal-content modal-large" onclick="event.stopPropagation()">
+    <h2 class="modal-title">💼 Portefeuilles / Investissements</h2>
+    <p style="color:var(--text-muted);font-size:12px;margin-bottom:12px">Saisis tes portefeuilles (actions/ETF) avec le <strong>rendement annualisé annoncé par la banque</strong>. Ils entrent dans le patrimoine global et le rendement consolidé, par entité.</p>
+    <div id="pf-rows">${(list.length ? list : [{}]).map(p => _pfRow(p)).join('')}</div>
+    <button class="btn ghost sm" type="button" style="width:100%;margin-top:8px" onclick="addPortfolioRow()">+ Ajouter un portefeuille</button>
+    <div class="modal-actions"><button class="btn" onclick="closeModal()">Annuler</button><button class="btn primary" onclick="savePortfolios()">Enregistrer</button></div>
+  </div></div>`;
+  modal.classList.add('visible');
+}
+async function savePortfolios() {
+  const rows = [...document.querySelectorAll('#pf-rows .pf-row')];
+  const portfolios = rows.map(r => ({
+    entity: r.querySelector('.pf-entity').value,
+    name: r.querySelector('.pf-name').value.trim(),
+    amount: parseFloat(r.querySelector('.pf-amount').value) || 0,
+    rate: parseFloat(r.querySelector('.pf-rate').value) || 0
+  })).filter(p => p.amount > 0);
+  catManager.objectives = Object.assign({}, catManager.objectives, { portfolios });
+  closeModal();
+  await catManager.saveObjectives();
+  showToast('Portefeuilles enregistrés', 'success');
   renderCAT(document.getElementById('main-content'));
 }
 
@@ -94,11 +136,23 @@ renderCAT = function(container) {
   const portfolio = (app.state?.portfolio || []).filter(p => !p.archived);
   const structuredNominal = portfolio.reduce((s, p) => s + (parseFloat(p.investedAmount) || 0), 0);
 
+  // ─── Patrimoine GLOBAL : CAT + Structuré + Portefeuilles (poche investissements manuelle) ───
+  const pfList = Array.isArray(obj.portfolios) ? obj.portfolios : [];
+  const pfTotal = pfList.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0);
+  const pfInterest = pfList.reduce((s, p) => s + (parseFloat(p.amount) || 0) * (parseFloat(p.rate) || 0) / 100, 0);
+  let structYieldPct = 0;
+  try { if (typeof scoring !== 'undefined' && scoring.getPortfolioStats) structYieldPct = scoring.getPortfolioStats(portfolio).weightedCoupon || 0; } catch (e) {}
+  const structInterest = structuredNominal * structYieldPct / 100;
+  const patrimoine = stats.totalInvested + structuredNominal + pfTotal;
+  const globalInterest = annualInterest + structInterest + pfInterest;
+  const globalRate = patrimoine > 0 ? globalInterest / patrimoine * 100 : 0;
+  const objTarget = parseFloat(obj.targetRate) || 0;
+
   let dashHTML = `
     <div style="background:linear-gradient(135deg,var(--bg-elevated),var(--bg-card));border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
         <div style="font-size:15px;font-weight:700;color:var(--text-bright)">💰 TRÉSORERIE</div>
-        <div style="display:flex;gap:8px"><button class="btn sm" onclick="showCATObjectivesModal()" style="font-size:11px">🎯 Objectifs</button></div>
+        <div style="display:flex;gap:8px"><button class="btn sm" onclick="showPortfoliosModal()" style="font-size:11px">💼 Portefeuilles</button><button class="btn sm" onclick="showCATObjectivesModal()" style="font-size:11px">🎯 Objectifs</button></div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);border-radius:var(--radius-sm);overflow:hidden">
         <div style="background:var(--bg-card);padding:14px 16px;text-align:center"><div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">Trésorerie totale</div><div style="font-size:22px;font-weight:800;color:var(--text-bright);font-family:var(--mono)">${formatNumber(totalTreasury)}€</div><div style="font-size:10px;color:var(--text-dim);margin-top:2px">${stats.totalDeposits} plac. · ${nbBanks} banque${nbBanks > 1 ? 's' : ''}</div></div>
@@ -125,6 +179,27 @@ renderCAT = function(container) {
         ${placable > 0 ? '<span style="color:var(--cyan)">■ À placer ' + formatNumber(placable) + '€</span>' : ''}
       </div>` : ''}
     </div>`;
+
+  // ═══ PATRIMOINE GLOBAL : consolidation CAT + Structuré + Portefeuille + rendement vs objectif ═══
+  if (patrimoine > 0) {
+    dashHTML += `<div style="background:linear-gradient(135deg,var(--bg-elevated),var(--bg-card));border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+        <div style="font-size:13px;font-weight:700;color:var(--text-bright)">🌐 PATRIMOINE GLOBAL <span style="font-weight:400;color:var(--text-dim);font-size:11px">CAT + Structuré + Portefeuille</span></div>
+        <div style="font-size:22px;font-weight:800;color:var(--text-bright);font-family:var(--mono)">${formatNumber(patrimoine)}€</div>
+      </div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:6px;font-size:11px">
+        <span style="color:var(--green)">■ CAT ${formatNumber(stats.totalInvested)}€</span>
+        <span style="color:var(--purple)">■ Structuré ${formatNumber(structuredNominal)}€${structYieldPct > 0 ? ' (' + structYieldPct.toFixed(1).replace('.', ',') + '%)' : ''}</span>
+        <span style="color:var(--cyan)">■ Portefeuille ${formatNumber(pfTotal)}€${pfList.length ? ' (' + pfList.length + ')' : ' — clique 💼'}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">
+        <div><div style="font-size:10px;text-transform:uppercase;color:var(--text-muted)">Rendement global (brut annualisé)</div>
+          <div style="font-size:20px;font-weight:800;color:var(--green);font-family:var(--mono)">${globalRate.toFixed(2).replace('.', ',')}% <span style="font-size:12px;color:var(--text-dim)">+${formatNumber(Math.round(globalInterest))}€/an</span></div></div>
+        ${objTarget > 0 ? `<div style="text-align:right"><div style="font-size:10px;text-transform:uppercase;color:var(--text-muted)">vs objectif ${objTarget.toFixed(2).replace('.', ',')}%</div>
+          <div style="font-size:16px;font-weight:700;font-family:var(--mono);color:${globalRate >= objTarget ? 'var(--green)' : 'var(--orange)'}">${globalRate >= objTarget ? '✓ atteint (+' : '⚠ manque '}${Math.abs(globalRate - objTarget).toFixed(2).replace('.', ',')} pt${globalRate >= objTarget ? ')' : ''}</div></div>` : `<div style="font-size:11px;color:var(--text-dim)">Fixe un objectif de rendement dans 🎯</div>`}
+      </div>
+    </div>`;
+  }
 
   // ═══ Liquidity banner → uses switchMainView('dashboard') which is the Produits Structurés tab ═══
   if (placable > 0) {
