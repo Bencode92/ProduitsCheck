@@ -6,5 +6,14 @@
   "cashCameleons": 0,
   "maxPerBank": 100000,
   "targetRate": 0,
-  "notes": ""
+  "notes": "",
+  "portfolios": [
+    {
+      "entity": "bycam",
+      "bank": "swiss-life",
+      "name": "AV",
+      "amount": 33000,
+      "rate": 6
+    }
+  ]
 }
