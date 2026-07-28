@@ -260,7 +260,8 @@
         if (p.status === 'rejected' || p.status === 'subscribed') return;
         if (!p.grading || !p.grading.grade || p.grading.grade === '?' || p.grading.grade === '-') return;
         // Quality gate: only grades A and B are eligible for allocation
-        if (p.grading.grade !== 'A' && p.grading.grade !== 'B') return;
+        // A/B/C entrent dans le pool ; C est ensuite réservé à ByCam (grading plus souple) dans _bestForHorizon. D/F exclus.
+        if (!({ A: 1, B: 1, C: 1 })[p.grading.grade]) return;
         var cp = p.capitalProtection || {};
         var isCapGaranti = cp.protected === true || (p.structureType || '').indexOf('capital_garanti') >= 0 || (p.structureType || '').indexOf('dispersion') >= 0 || (p.structureType || '').indexOf('taux_fixe') >= 0;
         var rdtNet = p._bsRendementNet || (p.grading.metadata && p.grading.metadata.bsRendementNet) || p._ratesRendementNet || null;
@@ -393,6 +394,9 @@
     structCandidates.forEach(function(s) {
       if (allocated[s.id]) return;
       if (s.maturityMonths <= maxMonths && (s.capitalGaranti || allowBarrier) && s.rdtNet != null && s.rdtNet > 0) {
+        // Grading plus souple pour ByCam : un grade C n'est éligible que pour une entité risque-tolérante.
+        // Caméléons reste A/B. La note du produit n'est pas modifiée — seul le seuil d'acceptation change.
+        if (s.grade === 'C' && !allowBarrier) return;
         // Règle 6: issuer concentration check
         if (issuerExposure) {
           var issuerName = _normBank(s.bankName);
