@@ -131,6 +131,37 @@ function getMaturityProfile() {
   return Object.entries(map).map(([year, v]) => ({ year: parseInt(year), ...v, total: v.structured + v.cat })).sort((a,b) => a.year - b.year);
 }
 
+// ═══ PATRIMOINE GLOBAL : CAT + Structuré + Portefeuilles (poche manuelle) ═══
+function _renderPortfoliosSection(totalStructured, totalCAT, structInterest, catInterest) {
+  var pf = (typeof catManager !== 'undefined' && catManager.objectives && Array.isArray(catManager.objectives.portfolios)) ? catManager.objectives.portfolios : [];
+  var pfTotal = pf.reduce(function (s, p) { return s + (parseFloat(p.amount) || 0); }, 0);
+  var pfInterest = pf.reduce(function (s, p) { return s + (parseFloat(p.amount) || 0) * (parseFloat(p.rate) || 0) / 100; }, 0);
+  var patrimoine = totalStructured + totalCAT + pfTotal;
+  var globalInterest = structInterest + catInterest + pfInterest;
+  var globalRate = patrimoine > 0 ? globalInterest / patrimoine * 100 : 0;
+  var target = (typeof catManager !== 'undefined' && catManager.objectives && parseFloat(catManager.objectives.targetRate)) || 0;
+  var fmt = function (n) { return formatNumber(Math.round(n)); };
+  var bankName = function (id) { try { var b = (typeof BANKS !== 'undefined' ? BANKS : []).find(function (x) { return x.id === id; }); return b ? b.name : (id || '—'); } catch (e) { return id || '—'; } };
+  var entName = function (e) { return e === 'bycam' ? '🏢 ByCam' : e === 'cameleons' ? '🦎 Caméléons' : (e || '—'); };
+  var rows = pf.map(function (p) {
+    var amt = parseFloat(p.amount) || 0, rate = parseFloat(p.rate) || 0;
+    return '<tr style="border-top:1px solid #E2E8F0"><td style="padding:6px 8px">' + entName(p.entity) + '</td><td style="padding:6px 8px">' + bankName(p.bank) + '</td><td style="padding:6px 8px">' + (p.name || '—') + '</td><td style="padding:6px 8px;text-align:right;font-family:var(--mono)">' + fmt(amt) + '€</td><td style="padding:6px 8px;text-align:right;font-family:var(--mono)">' + rate.toFixed(2).replace('.', ',') + '%</td><td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:#06D6A0">+' + fmt(amt * rate / 100) + '€</td></tr>';
+  }).join('');
+  var h = '<div class="fiche-section" style="margin-bottom:12px"><div class="fiche-section-header"><span class="fiche-section-icon">🌐</span><span class="fiche-section-title">Patrimoine global — CAT + Structuré + Portefeuille</span><span style="margin-left:auto;font-family:var(--mono);font-weight:800;font-size:16px">' + fmt(patrimoine) + '€</span></div><div class="fiche-section-body">';
+  h += '<div style="display:flex;flex-wrap:wrap;gap:16px;align-items:baseline;margin-bottom:10px">';
+  h += '<span style="color:#64748B;font-size:12px">CAT <strong>' + fmt(totalCAT) + '€</strong> · Structuré <strong>' + fmt(totalStructured) + '€</strong> · Portefeuille <strong>' + fmt(pfTotal) + '€</strong></span>';
+  h += '<span style="margin-left:auto;font-size:13px">Rendement global (brut annualisé) : <strong style="color:#06D6A0;font-size:16px">' + globalRate.toFixed(2).replace('.', ',') + '%</strong> <span style="color:#94A3B8">+' + fmt(globalInterest) + '€/an</span></span>';
+  if (target > 0) h += '<span style="font-size:12px;color:' + (globalRate >= target ? '#059669' : '#D97706') + '">vs objectif ' + target.toFixed(2).replace('.', ',') + '% → ' + (globalRate >= target ? '✓ +' : '⚠ manque ') + Math.abs(globalRate - target).toFixed(2).replace('.', ',') + ' pt</span>';
+  h += '</div>';
+  if (pf.length) {
+    h += '<table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="color:#64748B;text-align:left"><th style="padding:4px 8px">Entité</th><th style="padding:4px 8px">Banque</th><th style="padding:4px 8px">Nom</th><th style="padding:4px 8px;text-align:right">Montant</th><th style="padding:4px 8px;text-align:right">Rdt %</th><th style="padding:4px 8px;text-align:right">Rdt/an</th></tr></thead><tbody>' + rows + '</tbody></table>';
+  } else {
+    h += '<div style="font-size:12px;color:#94A3B8">Aucun portefeuille saisi. Onglet Trésorerie (CAT) → bouton 💼 Portefeuilles.</div>';
+  }
+  h += '</div></div>';
+  return h;
+}
+
 // ═══ RENDER ANALYTICS VIEW ══════════════════════════════════
 
 async function renderAnalytics(container) {
@@ -189,6 +220,7 @@ async function renderAnalytics(container) {
       <div class="stat-card" style="border-left:3px solid ${fgdr.alert ? '#EF233C' : '#06D6A0'}"><div class="stat-label">Couverture FGDR</div><div class="stat-value">${fgdr.coveredPct}%</div><div class="stat-sub">${fgdr.alert ? '⚠ ' + fgdr.alertCount + ' dépassement(s)' : '✓ Couvert'}</div></div>
     </div>
 
+    ${_renderPortfoliosSection(totalStructured, totalCAT, annualYieldStructured, annualYieldCAT)}
     ${_renderEntityTables(entities, IS_RATE)}
     ${_renderFGDRSection(fgdr)}
     ${_renderNextEvents(events)}
