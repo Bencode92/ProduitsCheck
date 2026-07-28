@@ -141,24 +141,12 @@ function _renderPortfoliosSection(totalStructured, totalCAT, structInterest, cat
   var globalRate = patrimoine > 0 ? globalInterest / patrimoine * 100 : 0;
   var target = (typeof catManager !== 'undefined' && catManager.objectives && parseFloat(catManager.objectives.targetRate)) || 0;
   var fmt = function (n) { return formatNumber(Math.round(n)); };
-  var bankName = function (id) { try { var b = (typeof BANKS !== 'undefined' ? BANKS : []).find(function (x) { return x.id === id; }); return b ? b.name : (id || '—'); } catch (e) { return id || '—'; } };
-  var entName = function (e) { return e === 'bycam' ? '🏢 ByCam' : e === 'cameleons' ? '🦎 Caméléons' : (e || '—'); };
-  var rows = pf.map(function (p) {
-    var amt = parseFloat(p.amount) || 0, rate = parseFloat(p.rate) || 0;
-    return '<tr style="border-top:1px solid #E2E8F0"><td style="padding:6px 8px">' + entName(p.entity) + '</td><td style="padding:6px 8px">' + bankName(p.bank) + '</td><td style="padding:6px 8px">' + (p.name || '—') + '</td><td style="padding:6px 8px;text-align:right;font-family:var(--mono)">' + fmt(amt) + '€</td><td style="padding:6px 8px;text-align:right;font-family:var(--mono)">' + rate.toFixed(2).replace('.', ',') + '%</td><td style="padding:6px 8px;text-align:right;font-family:var(--mono);color:#06D6A0">+' + fmt(amt * rate / 100) + '€</td></tr>';
-  }).join('');
-  var h = '<div class="fiche-section" style="margin-bottom:12px"><div class="fiche-section-header"><span class="fiche-section-icon">🌐</span><span class="fiche-section-title">Patrimoine global — CAT + Structuré + Portefeuille</span><span style="margin-left:auto;font-family:var(--mono);font-weight:800;font-size:16px">' + fmt(patrimoine) + '€</span></div><div class="fiche-section-body">';
-  h += '<div style="display:flex;flex-wrap:wrap;gap:16px;align-items:baseline;margin-bottom:10px">';
-  h += '<span style="color:#64748B;font-size:12px">CAT <strong>' + fmt(totalCAT) + '€</strong> · Structuré <strong>' + fmt(totalStructured) + '€</strong> · Portefeuille <strong>' + fmt(pfTotal) + '€</strong></span>';
-  h += '<span style="margin-left:auto;font-size:13px">Rendement global (brut annualisé) : <strong style="color:#06D6A0;font-size:16px">' + globalRate.toFixed(2).replace('.', ',') + '%</strong> <span style="color:#94A3B8">+' + fmt(globalInterest) + '€/an</span></span>';
-  if (target > 0) h += '<span style="font-size:12px;color:' + (globalRate >= target ? '#059669' : '#D97706') + '">vs objectif ' + target.toFixed(2).replace('.', ',') + '% → ' + (globalRate >= target ? '✓ +' : '⚠ manque ') + Math.abs(globalRate - target).toFixed(2).replace('.', ',') + ' pt</span>';
-  h += '</div>';
-  if (pf.length) {
-    h += '<table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="color:#64748B;text-align:left"><th style="padding:4px 8px">Entité</th><th style="padding:4px 8px">Banque</th><th style="padding:4px 8px">Nom</th><th style="padding:4px 8px;text-align:right">Montant</th><th style="padding:4px 8px;text-align:right">Rdt %</th><th style="padding:4px 8px;text-align:right">Rdt/an</th></tr></thead><tbody>' + rows + '</tbody></table>';
-  } else {
-    h += '<div style="font-size:12px;color:#94A3B8">Aucun portefeuille saisi. Onglet Trésorerie (CAT) → bouton 💼 Portefeuilles.</div>';
-  }
-  h += '</div></div>';
+  var h ='<div class="fiche-section" style="margin-bottom:12px"><div class="fiche-section-header"><span class="fiche-section-icon">🌐</span><span class="fiche-section-title">Rendement global du patrimoine</span><span style="margin-left:auto;font-family:var(--mono);font-weight:800;font-size:16px">' + fmt(patrimoine) + '€</span></div><div class="fiche-section-body">';
+  h += '<div style="display:flex;flex-wrap:wrap;gap:16px;align-items:baseline">';
+  h += '<span style="font-size:14px">Rendement global (brut annualisé) : <strong style="color:#06D6A0;font-size:18px">' + globalRate.toFixed(2).replace('.', ',') + '%</strong> <span style="color:#94A3B8;font-size:12px">+' + fmt(globalInterest) + '€/an sur CAT + Structuré + Portefeuille</span></span>';
+  if (target > 0) h += '<span style="margin-left:auto;font-size:13px;font-weight:600;color:' + (globalRate >= target ? '#059669' : '#D97706') + '">vs objectif ' + target.toFixed(2).replace('.', ',') + '% → ' + (globalRate >= target ? '✓ atteint (+' : '⚠ manque ') + Math.abs(globalRate - target).toFixed(2).replace('.', ',') + ' pt' + (globalRate >= target ? ')' : '') + '</span>';
+  else h += '<span style="margin-left:auto;font-size:11px;color:#94A3B8">Fixe un objectif de rendement dans 🎯 (onglet CAT)</span>';
+  h += '</div></div></div>';
   return h;
 }
 
@@ -174,11 +162,15 @@ async function renderAnalytics(container) {
   const { products, catDeposits } = getPortfolioData();
   const totalStructured = products.reduce((s,p) => s + (parseFloat(p.investedAmount)||0), 0);
   const totalCAT = catDeposits.reduce((s,d) => s + (parseFloat(d.amount)||0), 0);
-  const totalAll = totalStructured + totalCAT;
+  // Portefeuilles (poche investissements manuelle) — intégrés au patrimoine ET au rendement
+  const pfListA = (typeof catManager !== 'undefined' && catManager.objectives && Array.isArray(catManager.objectives.portfolios)) ? catManager.objectives.portfolios : [];
+  const pfTotal = pfListA.reduce((s,p) => s + (parseFloat(p.amount)||0), 0);
+  const pfInterest = Math.round(pfListA.reduce((s,p) => s + (parseFloat(p.amount)||0) * (parseFloat(p.rate)||0) / 100, 0));
+  const totalAll = totalStructured + totalCAT + pfTotal;
   const annualYieldStructured = products.reduce((s,p) => s + calcProductAnnualYield(p), 0);
   // Compute CAT annual yield using CURRENT progressive rate (not average)
   const annualYieldCAT = catDeposits.reduce((s,d) => s + Math.round((parseFloat(d.amount)||0) * _getCurrentCATRate(d) / 100), 0);
-  const annualYieldTotal = annualYieldStructured + annualYieldCAT;
+  const annualYieldTotal = annualYieldStructured + annualYieldCAT + pfInterest;
   const avgYield = totalAll > 0 ? (annualYieldTotal / totalAll * 100) : 0;
 
   // ─── Compute per-entity breakdown ───
@@ -198,7 +190,7 @@ async function renderAnalytics(container) {
   const netAfterFeesTotal = Math.round(netYieldTotal - feeDragTotal);
   const feesDocPct = totalStructured > 0 ? feesDocAmt / totalStructured * 100 : 0;
   const netAfterFeesPct = totalAll > 0 ? (netAfterFeesTotal / totalAll * 100) : 0;
-  const entities = _computeEntityBreakdown(products, catDeposits);
+  const entities = _computeEntityBreakdown(products, catDeposits, pfListA);
   const fgdr = _computeFGDRExposure(products, catDeposits);
   const events = _computeNextEvents(products, catDeposits);
   const sensitivity = _computeRateSensitivity(products);
@@ -213,8 +205,8 @@ async function renderAnalytics(container) {
   container.innerHTML = `
     ${typeof renderExecCockpit === 'function' ? renderExecCockpit() : ''}
     <div class="stats-row" style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px">
-      <div class="stat-card blue"><div class="stat-label">Total Investi</div><div class="stat-value">${formatNumber(totalAll)}€</div><div class="stat-sub">Structurés: ${formatNumber(totalStructured)}€ · CAT: ${formatNumber(totalCAT)}€</div></div>
-      <div class="stat-card green"><div class="stat-label">Rendement Annuel Brut</div><div class="stat-value">${formatNumber(annualYieldTotal)}€</div><div class="stat-sub">Coupon annualisé, si tous coupons versés · Struct.: ${formatNumber(annualYieldStructured)}€ · CAT: ${formatNumber(annualYieldCAT)}€</div></div>
+      <div class="stat-card blue"><div class="stat-label">Total Investi</div><div class="stat-value">${formatNumber(totalAll)}€</div><div class="stat-sub">Struct.: ${formatNumber(totalStructured)}€ · CAT: ${formatNumber(totalCAT)}€${pfTotal > 0 ? ' · Portef.: ' + formatNumber(pfTotal) + '€' : ''}</div></div>
+      <div class="stat-card green"><div class="stat-label">Rendement Annuel Brut</div><div class="stat-value">${formatNumber(annualYieldTotal)}€</div><div class="stat-sub">Annualisé · Struct.: ${formatNumber(annualYieldStructured)}€ · CAT: ${formatNumber(annualYieldCAT)}€${pfInterest > 0 ? ' · Portef.: ' + formatNumber(pfInterest) + '€' : ''}</div></div>
       <div class="stat-card" style="border-left:3px solid #06D6A0"><div class="stat-label">Rendement Net (IS + garde + marge)</div><div class="stat-value" style="color:#06D6A0">${formatNumber(netAfterFeesTotal)}€</div><div class="stat-sub">${netAfterFeesPct.toFixed(2).replace('.',',')}% net · ${formatNumber(netYieldTotal)}€ hors frais${feesDocPct < 80 ? ` · <span style="color:#D97706;font-weight:600">⚠ frais ${Math.round(feesDocPct)}%</span>` : ''}</div></div>
       <div class="stat-card" style="border-left:3px solid #8338EC"><div class="stat-label">Duration Moyenne</div><div class="stat-value">${avgDuration.toFixed(1)} ans</div><div class="stat-sub">${products.length + catDeposits.length} placements</div></div>
       <div class="stat-card" style="border-left:3px solid ${fgdr.alert ? '#EF233C' : '#06D6A0'}"><div class="stat-label">Couverture FGDR</div><div class="stat-value">${fgdr.coveredPct}%</div><div class="stat-sub">${fgdr.alert ? '⚠ ' + fgdr.alertCount + ' dépassement(s)' : '✓ Couvert'}</div></div>
@@ -254,22 +246,28 @@ async function renderAnalytics(container) {
 }
 
 // ═══ ENTITY BREAKDOWN ═══════════════════════════════════════
-function _computeEntityBreakdown(products, catDeposits) {
+function _computeEntityBreakdown(products, catDeposits, portfolios) {
   var entities = {};
+  function _ent(ent) { if (!entities[ent]) entities[ent] = { products: [], catDeposits: [], portfolios: [], totalInvested: 0, totalYield: 0 }; return entities[ent]; }
   products.forEach(function(p) {
-    var ent = p.envelope || p.entity || 'non_assigne';
-    if (!entities[ent]) entities[ent] = { products: [], catDeposits: [], totalInvested: 0, totalYield: 0 };
-    entities[ent].products.push(p);
-    entities[ent].totalInvested += parseFloat(p.investedAmount) || 0;
-    entities[ent].totalYield += calcProductAnnualYield(p);
+    var e = _ent(p.envelope || p.entity || 'non_assigne');
+    e.products.push(p);
+    e.totalInvested += parseFloat(p.investedAmount) || 0;
+    e.totalYield += calcProductAnnualYield(p);
   });
   catDeposits.forEach(function(d) {
-    var ent = d.entity || (d.entityName === 'Caméleons' ? 'cameleons' : d.entityName === 'ByCam' ? 'bycam' : 'non_assigne');
-    if (!entities[ent]) entities[ent] = { products: [], catDeposits: [], totalInvested: 0, totalYield: 0 };
-    entities[ent].catDeposits.push(d);
+    var e = _ent(d.entity || (d.entityName === 'Caméleons' ? 'cameleons' : d.entityName === 'ByCam' ? 'bycam' : 'non_assigne'));
+    e.catDeposits.push(d);
     var amt = parseFloat(d.amount) || 0;
-    entities[ent].totalInvested += amt;
-    entities[ent].totalYield += Math.round(amt * _getCurrentCATRate(d) / 100);
+    e.totalInvested += amt;
+    e.totalYield += Math.round(amt * _getCurrentCATRate(d) / 100);
+  });
+  (portfolios || []).forEach(function(p) {
+    var e = _ent(p.entity || 'non_assigne');
+    e.portfolios.push(p);
+    var amt = parseFloat(p.amount) || 0;
+    e.totalInvested += amt;
+    e.totalYield += Math.round(amt * (parseFloat(p.rate) || 0) / 100);
   });
   return entities;
 }
@@ -329,6 +327,18 @@ function _renderEntityTables(entities, isRate) {
       h += '<td style="padding:4px 6px">🏦 ' + (d.productName || 'CAT').substring(0, 30) + '</td>';
       h += '<td style="padding:4px 6px;text-align:right;font-family:var(--mono)">' + fmt(amt) + '€</td>';
       h += '<td style="padding:4px 6px;text-align:right;color:var(--orange)">' + rate.toFixed(2) + '%</td>';
+      h += '<td style="padding:4px 6px;text-align:right;font-family:var(--mono);color:var(--green)">+' + fmt(yld) + '€</td>';
+      h += '<td style="padding:4px 6px;text-align:right;font-family:var(--mono);color:#06D6A0">+' + fmt(Math.round(yld * (1 - isRate))) + '€</td>';
+      h += '</tr>';
+    });
+    (e.portfolios || []).forEach(function(p) {
+      var amt = parseFloat(p.amount) || 0;
+      var rate = parseFloat(p.rate) || 0;
+      var yld = Math.round(amt * rate / 100);
+      h += '<tr style="border-bottom:1px solid var(--border)">';
+      h += '<td style="padding:4px 6px">💼 ' + (p.name || 'Portefeuille').substring(0, 30) + '</td>';
+      h += '<td style="padding:4px 6px;text-align:right;font-family:var(--mono)">' + fmt(amt) + '€</td>';
+      h += '<td style="padding:4px 6px;text-align:right;color:var(--cyan)">' + rate.toFixed(2) + '%</td>';
       h += '<td style="padding:4px 6px;text-align:right;font-family:var(--mono);color:var(--green)">+' + fmt(yld) + '€</td>';
       h += '<td style="padding:4px 6px;text-align:right;font-family:var(--mono);color:#06D6A0">+' + fmt(Math.round(yld * (1 - isRate))) + '€</td>';
       h += '</tr>';
