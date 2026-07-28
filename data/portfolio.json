@@ -28,7 +28,6 @@
       "protected": false,
       "level": 0,
       "type": "aucune",
-      "barrier": null,
       "barrierType": null,
       "barrierObservation": null,
       "inLifeRisk": "Aucune garantie de capital - possibilité de perdre une partie ou la totalité de l'investissement"
@@ -38,7 +37,7 @@
       "type": "none",
       "trigger": null,
       "triggerDetail": "Rachat possible chaque jour sur demande",
-      "frequency": "quotidien",
+      "frequency": "annuel",
       "startYear": null,
       "stepDown": false,
       "stepDownDetail": null,
@@ -140,7 +139,7 @@
     },
     "aiSummary": "## 1. DESCRIPTION\nFonds OPCVM luxembourgeois émis par Swiss Life Asset Managers investissant dans des titres de créance à taux fixe et variable, instruments du marché monétaire libellés en euros. Durée indéterminée avec possibilité de rachat quotidien, visant un rendement adéquat sur période glissante de 12 mois.\n\n## 2. RENDEMENT & COUPONS\nAucun taux de coupon garanti - rendement dépend de la performance du portefeuille obligataire sous-jacent. Objectif : rendement \"adéquat\" sur 12 mois glissants sans précision de seuil ni de plafonnement. Distribution non spécifiée, version capitalisation.\n\n## 3. PROTECTION DU CAPITAL\n**AUCUNE PROTECTION** - Capital non garanti avec possibilité de perdre une partie ou la totalité de l'investissement. Pas de barrière de protection ni de mécanisme de sauvegarde du capital initial.\n\n## 4. REMBOURSEMENT ANTICIPÉ\nRachat possible **quotidiennement** sur simple demande - pas de mécanisme d'autocall. Liquidité quotidienne sans contrainte de durée minimum ni de seuil de déclenchement automatique.\n\n## 5. SCÉNARIOS\n**Favorable:** Rendement annuel de +0,5% - pour 10 000 EUR investis = 10 050 EUR après 1 an\n**Médian:** Rendement annuel de -5,0% - pour 10 000 EUR investis = 9 500 EUR après 1 an  \n**Défavorable:** Rendement annuel de -10,8% - pour 10 000 EUR investis = 8 920 EUR après 1 an\n\n## 6. POINTS D'ATTENTION\n• **Perte en capital** : Aucune garantie, possibilité de perdre jusqu'à 100% de l'investissement\n• **Risque de crédit** : Exposition directe à la solvabilité des émetteurs obligataires du portefeuille\n• **Performance décevante** : Scénario médian à -5% annuel montre la volatilité possible\n• **Absence de coupon garanti** : Rendement entièrement dépendant des conditions de marché\n• **Risque de change résiduel** malgré la couverture annoncée",
     "sourceFile": "Swiss Life (LUX) Bond 12M R EUR Acc.pdf",
-    "investedAmount": 109000,
+    "investedAmount": 79000,
     "addedDate": "2026-03-19",
     "status": "active",
     "bankName": "Swiss Life",
@@ -197,7 +196,8 @@
       }
     },
     "envelope": "cameleons",
-    "structureType": "autocall"
+    "structureType": "autocall",
+    "guaranteedYears": 0
   },
   {
     "id": "sp_mmxhg4us_3x9ic",
