@@ -1077,6 +1077,13 @@
       var p4 = result.pillars.riskPremium.score;
       var _w = _isSwissLifeEnvelope(product) ? V7_WEIGHTS_SL : V7_WEIGHTS;
       var total = Math.round(p1 * _w.p1 + p2 * _w.p2 + p3 * _w.p3 + p4 * _w.p4);
+      // PLAFOND DE RISQUE : capital NON protégé + barrière en zone "Danger" → pas de note "Bon" (B).
+      // Tu peux perdre une grosse part du capital ; la prime et le fit ne doivent pas le maquiller.
+      var _md = result.metadata || {};
+      if (_md.hasBarrier && _md.barrier_sigma_danger && total > 55) {
+        total = 55;
+        if (result.keyRisks && result.keyRisks.push) result.keyRisks.push('Note plafonnée (C) : capital non protégé + barrière en zone danger — perte en capital possible.');
+      }
       result.score = total;
       result.grade = total >= 75 ? 'A' : total >= 60 ? 'B' : total >= 45 ? 'C' : total >= 25 ? 'D' : 'F';
 
