@@ -48,10 +48,12 @@
     return 0.5 * (1.0 + sign * y);
   }
 
-  function _probAbove(trigger, volPct, T, rPct) {
-    var sigma = volPct / 100, r = (rPct || 0) / 100;
+  function _probAbove(trigger, volPct, T, rPct, qPct) {
+    var sigma = volPct / 100, r = (rPct || 0) / 100, q = (qPct || 0) / 100;
     T = Math.max(0.25, T);
-    var d2 = (Math.log(100 / trigger) + (r - sigma * sigma / 2) * T) / (sigma * Math.sqrt(T));
+    // Dérive = r − q : le dividende (et le décrément) abaisse le forward du sous-jacent
+    // (fwd = S·e^{(r−q)T}) → P(≥ seuil) plus juste, moins optimiste sur les actions à dividende.
+    var d2 = (Math.log(100 / trigger) + (r - q - sigma * sigma / 2) * T) / (sigma * Math.sqrt(T));
     return _normcdf(d2);
   }
 
@@ -454,7 +456,7 @@
     } else if (er.possible && er.type === 'callable') {
       // Callable: emitter decides, typically calls when rates drop
       // Higher current rate vs historical → less likely to be called
-      if (current > fullAvg) probExit = 0.3; // rates above average → low call probability
+      if (current > wAvg) probExit = 0.3; // rates above average → low call probability
       else probExit = 0.6; // rates below average → higher call probability
     }
 
@@ -568,6 +570,7 @@
 
     var vols = _resolveVols(unds, undType);
     var r = RISK_FREE_RATE; // €STR for BS diffusion, not CAT benchmark
+    var qDivDec = (div || 0) + (dec || 0); // dividende + décrément → drift r−q (forward abaissé)
     var probCoupon, couponEffectif, perteEsperee;
 
     // Get real correlation if available (from stock-analysis-platform data)
@@ -587,11 +590,11 @@
       couponEffectif = dispBase;
     } else if (isBasket && vols.length > 1) {
       var bVol = _basketVol(vols, corrUsed);
-      probCoupon = _probAbove(triggerCoupon, bVol, matEsperee, r);
+      probCoupon = _probAbove(triggerCoupon, bVol, matEsperee, r, qDivDec);
       couponEffectif = annRate;
     } else if (isWorstOf && vols.length > 1) {
       // Gaussian copula approximation for worst-of
-      var probs = vols.map(function(v) { return _probAbove(triggerCoupon, v, matEsperee, r); });
+      var probs = vols.map(function(v) { return _probAbove(triggerCoupon, v, matEsperee, r, qDivDec); });
       var rho = realCorr || 0.40;
       probCoupon = _worstOfCopula(probs, rho);
       // Stress scenario: also compute at rho=0.85 for crash correlation
@@ -599,7 +602,7 @@
       couponEffectif = annRate;
     } else {
       var vol = vols.length > 0 ? Math.max.apply(null, vols) : 25;
-      probCoupon = _probAbove(triggerCoupon, vol, matEsperee, r);
+      probCoupon = _probAbove(triggerCoupon, vol, matEsperee, r, qDivDec);
       couponEffectif = annRate;
     }
 
