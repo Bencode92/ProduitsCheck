@@ -316,7 +316,7 @@
   "_bsRendementNet": 3.37,
   "grading": {
     "grade": "B",
-    "score": 66,
+    "score": 67,
     "killCriteria": {
       "triggered": false,
       "reasons": []
@@ -326,7 +326,7 @@
         "score": 55,
         "base": 51,
         "delta": 0,
-        "reasoning": "Rendement: base 51 | Coupon 7%, barrière 38% | Barr.coupon 70% | Mat espérée: ~1.5a (prob mat: 0%)",
+        "reasoning": "Rendement: base 51 → +8 = 59 (Barrière coupon à 70% très éloignée du spot avec beta faible (0.62) et step-down agressif (-2%/sem) qui facilite l'autocall rapide, rendant le coupon de 7% hautement probable.) | Coupon 7%, barrière 38% | Barr.coupon 70% | Mat espérée: ~1.5a (prob mat: 0%)",
         "_bsDelta": 4,
         "_bs": {
           "score": 55,
@@ -342,10 +342,10 @@
         }
       },
       "underlyingQuality": {
-        "score": 66,
+        "score": 72,
         "base": 66,
-        "delta": 0,
-        "reasoning": "Qualité: base 66 | Worst: RHEINMETALL AG B:60"
+        "delta": 6,
+        "reasoning": "Qualité: base 66 → +6 = 72 (Rheinmetall est un pur defense/industrials favorisé en régime RISK_OFF avec vents porteurs structurels (réarmement européen), un secteur listé favorisé par le MI.) | Worst: RHEINMETALL AG B:60"
       },
       "portfolioFit": {
         "score": 85,
@@ -356,28 +356,58 @@
       "riskPremium": {
         "score": 60,
         "base": 12,
-        "delta": 0,
+        "delta": -6,
         "reasoning": "Prime vs CAT (net de frais, cohérent avec le panneau) : coupon espéré 6,2% (7,0% × proba 88%) − marge embarquée 1,33%/an = 4,8% vs CAT 2,8% → spread +2,03%."
       }
     },
-    "verdict": "Score 47/100 (base 47).",
+    "verdict": "En régime RISK_OFF (VIX 22, spreads HY qui s'écartent), ce Phoenix sur Rheinmetall bénéficie d'un secteur industrials/defense favorisé et d'un beta défensif (0.62) qui isole partiellement le titre du bêta marché. La barrière coupon à 70% et le step-down de -2%/semestre rendent l'autocall probable dès 1.5 an, sécurisant un coupon annualisé de 7% supérieur au HY à éviter. Le risque majeur reste la volatilité extrême du titre (43%, DD 52%) qui, malgré une barrière capital très basse à 38%, expose à une perte lourde si le momentum defense s'inverse. Score ajusté ~50 (C+), correct mais concentration mono-sous-jacent à surveiller.",
     "keyRisks": [
+      "Concentration mono-sous-jacent sur un titre à volatilité 43% et drawdown historique de 52% — un retournement du narratif defense/réarmement pourrait faire chuter le titre sous les 38% avec perte capital sévère",
+      "Risque de policy error Fed (divergence PCE 4.07% vs CPI 2.4%) et accélération baissière RISK_OFF pouvant emporter même les secteurs favorisés en cas de liquidation forcée",
       "Barrière à 0.91σ (Danger) — vol 43.43%"
     ],
-    "negotiationPoints": [],
-    "scenarios": null,
+    "negotiationPoints": [
+      "Réduire les commissions de 1.99% jugées élevées",
+      "Rehausser la barrière capital ou ajouter une protection partielle"
+    ],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 3.5,
+        "return_eur": 3500,
+        "probability": 0.45,
+        "duration_years": 0.5
+      },
+      "base": {
+        "return_pct": 10.5,
+        "return_eur": 10500,
+        "probability": 0.3,
+        "duration_years": 1.5
+      },
+      "stress": {
+        "return_pct": 21,
+        "return_eur": 21000,
+        "probability": 0.15,
+        "duration_years": 3
+      },
+      "worst": {
+        "return_pct": -45,
+        "return_eur": -45000,
+        "probability": 0.1,
+        "duration_years": 6
+      }
+    },
     "confidenceInterval": {
-      "low": 39,
-      "high": 55,
+      "low": 42,
+      "high": 58,
       "halfWidth": 8,
       "gradeStable": false,
       "gradeRange": "D-C",
-      "label": "C [39-55]"
+      "label": "C [42-58]"
     },
     "metadata": {
-      "gradedAt": "2026-07-29T16:14:04.895Z",
-      "durationMs": 20858,
-      "aiUsed": false,
+      "gradedAt": "2026-07-29T16:14:33.085Z",
+      "durationMs": 19185,
+      "aiUsed": true,
       "version": "7.1",
       "productType": "autocall",
       "marketDataAvailable": true,
@@ -398,16 +428,21 @@
       "maxBeta": 0.62,
       "baseScore": 47,
       "baseGrade": "C",
-      "adjustments": null,
+      "adjustments": {
+        "p1": 8,
+        "p2": 6,
+        "p3": 0,
+        "p4": -6
+      },
       "barrier_sigma": 0.91,
       "barrier_sigma_label": "Danger",
       "barrier_sigma_danger": true,
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 39,
-      "ci_high": 55,
-      "ci_label": "C [39-55]",
+      "ci_low": 42,
+      "ci_high": 58,
+      "ci_label": "C [42-58]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
@@ -430,7 +465,7 @@
         "p4": 0.25
       },
       "inputHash": "gnn5c7f",
-      "gradeT0": "2026-07-29T16:14:04.895Z",
+      "gradeT0": "2026-07-29T16:14:33.085Z",
       "trackingLevelAt0": null,
       "envelopeMode": "swiss-life",
       "p4NetFeesApplied": true,
@@ -451,23 +486,23 @@
     },
     "regimeScenarios": {
       "current": {
-        "score": 51,
+        "score": 52,
         "grade": "C",
         "label": "Actuel (risk_off)",
         "desc": "Régime actuel → volatilité modérée"
       },
       "bull": {
-        "score": 54,
+        "score": 56,
         "grade": "C",
         "label": "Bull / Risk-on",
-        "delta": 3,
+        "delta": 4,
         "desc": "Marchés haussiers → prob coupon monte, barrière safe"
       },
       "crash": {
-        "score": 37,
+        "score": 39,
         "grade": "D",
         "label": "Crash / Récession",
-        "delta": -14,
+        "delta": -13,
         "desc": "Marchés baissiers → barrière menacée, vol en hausse"
       }
     }
