@@ -112,8 +112,10 @@ function getDistributionByBank() {
 function getDistributionByEntity() {
   const { products, catDeposits } = getPortfolioData();
   const map = {};
-  products.forEach(p => { const entity = p.entity ? (MY_ENTITIES.find(e => e.id === p.entity)?.name || p.entity) : 'Non assigné'; map[entity] = (map[entity]||0) + (parseFloat(p.investedAmount)||0); });
-  catDeposits.forEach(d => { const entId = d.entity || (d.entityName === 'Caméleons' ? 'cameleons' : d.entityName === 'ByCam' ? 'bycam' : null); const entity = entId ? (MY_ENTITIES.find(e => e.id === entId)?.name || entId) : 'Non assigné'; map[entity] = (map[entity]||0) + (parseFloat(d.amount)||0); });
+  const re = (typeof resolveEntity === 'function') ? resolveEntity : (o => o.entity || o.envelope || 'non_assigne');
+  const nameOf = id => { if (id === 'non_assigne') return 'Non assigné'; const e = (typeof MY_ENTITIES !== 'undefined' ? MY_ENTITIES : []).find(x => x.id === id); return e ? e.name : id; };
+  products.forEach(p => { const n = nameOf(re(p)); map[n] = (map[n]||0) + (parseFloat(p.investedAmount)||0); });
+  catDeposits.forEach(d => { const n = nameOf(re(d)); map[n] = (map[n]||0) + (parseFloat(d.amount)||0); });
   return Object.entries(map).map(([name, value]) => ({ name, value })).sort((a,b) => b.value - a.value);
 }
 function getDistributionByType() {
@@ -249,21 +251,22 @@ async function renderAnalytics(container) {
 function _computeEntityBreakdown(products, catDeposits, portfolios) {
   var entities = {};
   function _ent(ent) { if (!entities[ent]) entities[ent] = { products: [], catDeposits: [], portfolios: [], totalInvested: 0, totalYield: 0 }; return entities[ent]; }
+  var _re = (typeof resolveEntity === 'function') ? resolveEntity : function(o) { return o.entity || o.envelope || 'non_assigne'; };
   products.forEach(function(p) {
-    var e = _ent(p.envelope || p.entity || 'non_assigne');
+    var e = _ent(_re(p));
     e.products.push(p);
     e.totalInvested += parseFloat(p.investedAmount) || 0;
     e.totalYield += calcProductAnnualYield(p);
   });
   catDeposits.forEach(function(d) {
-    var e = _ent(d.entity || (d.entityName === 'Caméleons' ? 'cameleons' : d.entityName === 'ByCam' ? 'bycam' : 'non_assigne'));
+    var e = _ent(_re(d));
     e.catDeposits.push(d);
     var amt = parseFloat(d.amount) || 0;
     e.totalInvested += amt;
     e.totalYield += Math.round(amt * _getCurrentCATRate(d) / 100);
   });
   (portfolios || []).forEach(function(p) {
-    var e = _ent(p.entity || 'non_assigne');
+    var e = _ent(_re(p));
     e.portfolios.push(p);
     var amt = parseFloat(p.amount) || 0;
     e.totalInvested += amt;
@@ -358,7 +361,7 @@ function _computeFGDRExposure(products, catDeposits) {
   // Only CAT and deposits are covered by FGDR, not structured products (which are debt securities)
   catDeposits.forEach(function(d) {
     var bank = d.bankName || d.bankId || '?';
-    var ent = d.entity || (d.entityName === 'Caméleons' ? 'cameleons' : 'bycam');
+    var ent = ((typeof resolveEntity === 'function') ? resolveEntity(d) : (d.entity || 'non_assigne'));
     var key = bank + '|' + ent;
     if (!banks[key]) banks[key] = { bank: bank, entity: ent, amount: 0 };
     banks[key].amount += parseFloat(d.amount) || 0;
@@ -593,7 +596,7 @@ function _renderMaturityTimeline(products, catDeposits) {
       name: d.productName || 'CAT',
       type: 'CAT',
       typeColor: 'var(--orange)',
-      entity: d.entity || (d.entityName === 'Caméleons' ? 'cameleons' : d.entityName === 'ByCam' ? 'bycam' : d.entityName) || '?',
+      entity: (typeof resolveEntity === 'function') ? resolveEntity(d) : (d.entity || '?'),
       bank: d.bankName || '?',
       amount: amount,
       rate: rate,
@@ -827,7 +830,7 @@ function _renderStressTest(products, catDeposits) {
       amount: parseFloat(d.amount) || 0,
       exitCost: cost.lostAmount,
       delay: '32 jours',
-      entity: d.entity || (d.entityName === 'Caméleons' ? 'cameleons' : 'bycam'),
+      entity: ((typeof resolveEntity === 'function') ? resolveEntity(d) : (d.entity || 'non_assigne')),
       type: 'cat',
       detail: cost.detail,
       monthsToMaturity: cost.monthsToMaturity,

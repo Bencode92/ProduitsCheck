@@ -16,10 +16,45 @@ const CONFIG = {
 };
 
 const MY_ENTITIES = [
-  { id: 'bycam', name: 'ByCam', color: '#06D6A0', icon: '🏢' },
-  { id: 'cameleons', name: 'Cam.', color: '#8338EC', icon: '🦎' },
+  // riskTolerant / guaranteedOnly = politique de placement portée par l'entité (plus de "=== 'bycam'" en dur).
+  { id: 'bycam', name: 'ByCam', legalName: 'ByCam', color: '#06D6A0', icon: '🏢', riskTolerant: true, guaranteedOnly: false, fgdrLimit: 100000 },
+  { id: 'cameleons', name: 'Cam.', legalName: 'Caméléons Com Mark', color: '#8338EC', icon: '🦎', riskTolerant: false, guaranteedOnly: true, fgdrLimit: 100000 },
   { id: 'swiss-life', name: 'Swiss Life', color: '#E85D04', icon: '🛡️' },
 ];
+
+// Normalise une chaîne pour comparer des noms d'entité malgré accents/casse/orthographes.
+function _normEntityStr(s) {
+  return (s == null ? '' : String(s)).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+}
+// SOURCE UNIQUE de résolution d'entité. Priorité : entity → envelope → entityName (tolérant).
+// NE DEVINE JAMAIS : un objet sans rattachement clair renvoie 'non_assigne' (au lieu d'un fallback
+// silencieux 'cameleons'/'bycam' qui attribuait de l'argent à la mauvaise société).
+function resolveEntity(obj) {
+  if (!obj) return 'non_assigne';
+  var ids = MY_ENTITIES.map(function (e) { return e.id; });
+  var direct = obj.entity || obj.envelope;
+  if (direct && ids.indexOf(direct) >= 0) return direct;
+  var nm = _normEntityStr(obj.entityName || direct);
+  if (nm) {
+    for (var i = 0; i < MY_ENTITIES.length; i++) {
+      var e = MY_ENTITIES[i], en = _normEntityStr(e.name), el = _normEntityStr(e.legalName || '');
+      if (nm === e.id || (en && (nm === en || nm.indexOf(en) >= 0)) || (el && nm.indexOf(el) >= 0)) return e.id;
+    }
+    if (nm.indexOf('bycam') >= 0 || nm.indexOf('by cam') >= 0) return 'bycam'; // avant 'cam' (bycam contient cam)
+    if (nm.indexOf('cam') >= 0) return 'cameleons';
+  }
+  return 'non_assigne';
+}
+// Politique d'une entité (défaut PRUDENT pour 'non_assigne' : capital garanti, pas de risque).
+function entityPolicy(id) {
+  var e = MY_ENTITIES.find(function (x) { return x.id === id; });
+  return {
+    riskTolerant: !!(e && e.riskTolerant),
+    guaranteedOnly: e ? !!e.guaranteedOnly : true,
+    fgdrLimit: (e && e.fgdrLimit) || 100000,
+    label: e ? (e.icon + ' ' + e.name) : '❓ Non assigné'
+  };
+}
 
 const BANKS_LIST = [
   { id: 'swiss-life', name: 'Swiss Life', color: '#E63946' },

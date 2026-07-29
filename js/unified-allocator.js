@@ -84,9 +84,8 @@
       var isLiq = (p.grading && p.grading.grade === '-') || (typeof _isLiquidityProduct === 'function' && typeof _graderNormalize === 'function' && _isLiquidityProduct(_graderNormalize(p)));
       if (!isLiq) return;
       var amount = parseFloat(p.investedAmount) || 0;
-      var ent = p.entity || 'cameleons'; // default to cameleons if not set
-      if (entities[ent]) entities[ent].structLiq += amount;
-      else entities.cameleons.structLiq += amount;
+      var ent = (typeof resolveEntity === 'function') ? resolveEntity(p) : (p.entity || 'cameleons');
+      if (entities[ent]) entities[ent].structLiq += amount; // non_assigne → non compté (plus de devinette 'cameleons')
     });
 
     // Detect CAT maturing within 8 months — per individual contract
@@ -99,7 +98,7 @@
           if (d.status !== 'active' || !d.maturityDate) return;
           var mat = new Date(d.maturityDate);
           if (mat > now && mat <= horizon) {
-            var ent = d.entity || 'cameleons';
+            var ent = (typeof resolveEntity === 'function') ? resolveEntity(d) : (d.entity || 'cameleons');
             var amount = parseFloat(d.amount) || 0;
             if (entities[ent]) {
               entities[ent].maturingCat += amount;
@@ -491,7 +490,8 @@
       var budget = tr.amount;
       if (budget <= 0) { results.push({ horizon: tr.horizon, amount: 0, allocated: 0, remaining: 0, allocations: [] }); return; }
 
-      var candidates = _bestForHorizon(tr.horizon, structCandidates, allocated, bestCatRate, miFactor, issuerExposure, entityKey === 'bycam');
+      var _riskTol = (typeof entityPolicy === 'function') ? entityPolicy(entityKey).riskTolerant : (entityKey === 'bycam');
+      var candidates = _bestForHorizon(tr.horizon, structCandidates, allocated, bestCatRate, miFactor, issuerExposure, _riskTol);
       var allocs = [];
       var remaining = budget;
       // Max 30% of total entity cash per product (diversification)
@@ -1130,7 +1130,7 @@
       if (typeof catManager !== 'undefined' && catManager.deposits) {
         catManager.deposits.forEach(function(d) {
           if (d.status !== 'active') return;
-          var ent = d.entity || 'cameleons';
+          var ent = (typeof resolveEntity === 'function') ? resolveEntity(d) : (d.entity || 'cameleons');
           var amt = parseFloat(d.amount) || 0;
           if (catByEntity[ent]) { catByEntity[ent].total += amt; catByEntity[ent].rdt += Math.round(amt * (parseFloat(d.rate) || 0) / 100); }
         });
@@ -1138,7 +1138,7 @@
     } catch(e) {}
     try {
       (app.state.portfolio || []).forEach(function(p) {
-        var ent = p.entity || 'cameleons';
+        var ent = (typeof resolveEntity === 'function') ? resolveEntity(p) : (p.entity || 'cameleons');
         var amt = parseFloat(p.investedAmount) || 0;
         if (!pfByEntity[ent]) return;
         if (p.grading && p.grading.grade === '-') {
@@ -1438,8 +1438,13 @@
         catManager.deposits.forEach(function(d) {
           if (d.status !== 'active') return;
           var bank = _normBank(d.bankName);
-          if (!issuers[bank]) issuers[bank] = { cat: 0, structured: 0, fund: 0, total: 0 };
-          issuers[bank].cat += parseFloat(d.amount) || 0;
+          if (!issuers[bank]) issuers[bank] = { cat: 0, structured: 0, fund: 0, total: 0, catByEnt: {} };
+          var amt = parseFloat(d.amount) || 0;
+          issuers[bank].cat += amt;
+          // FGDR = par déposant (entité) × banque → on suit le CAT par entité dans chaque banque
+          var ent = (typeof resolveEntity === 'function') ? resolveEntity(d) : (d.entity || 'na');
+          if (!issuers[bank].catByEnt) issuers[bank].catByEnt = {};
+          issuers[bank].catByEnt[ent] = (issuers[bank].catByEnt[ent] || 0) + amt;
         });
       }
     } catch(e) {}
@@ -1474,10 +1479,14 @@
     // Calculate totals
     var grandTotal = 0;
     Object.keys(issuers).forEach(function(bank) {
-      issuers[bank].total = issuers[bank].cat + issuers[bank].structured + issuers[bank].fund;
-      issuers[bank].fgdr = Math.min(100000, issuers[bank].cat); // FGDR covers CAT only, max 100K
-      issuers[bank].exposed = issuers[bank].total - issuers[bank].fgdr;
-      grandTotal += issuers[bank].total;
+      var iss = issuers[bank];
+      iss.total = iss.cat + iss.structured + iss.fund;
+      // FGDR : 100k garantis PAR ENTITÉ (déposant) × banque — pas pour la somme des sociétés.
+      var cbe = iss.catByEnt || {};
+      var fgdr = 0; Object.keys(cbe).forEach(function(e) { fgdr += Math.min(100000, cbe[e]); });
+      iss.fgdr = cbe && Object.keys(cbe).length ? fgdr : Math.min(100000, iss.cat);
+      iss.exposed = iss.total - iss.fgdr;
+      grandTotal += iss.total;
     });
 
     // Sort by total descending

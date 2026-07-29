@@ -161,7 +161,7 @@ RÈGLES CRITIQUES pour rateSchedule:
     const upcoming=active.filter(d=>d.maturityDate&&new Date(d.maturityDate)>=now&&new Date(d.maturityDate)<=in12m).sort((a,b)=>new Date(a.maturityDate)-new Date(b.maturityDate));
     // FGDR : la garantie est par déposant (entité juridique) × banque — on agrège par entité+banque,
     // pas par banque seule (sinon ByCam + Caméleons dans la même banque déclenchent une fausse alerte).
-    const byEntityBank={}; active.forEach(d=>{const ent=d.entityName||d.entity||'Non assigné';const key=(d.entity||d.entityName||'na')+'|'+d.bankId;if(!byEntityBank[key])byEntityBank[key]={name:(d.bankName||d.bankId)+' — '+ent,total:0};byEntityBank[key].total+=parseFloat(d.amount)||0;});
+    const byEntityBank={}; active.forEach(d=>{const entId=(typeof resolveEntity==='function')?resolveEntity(d):(d.entity||d.entityName||'na');const entLbl=(typeof entityPolicy==='function')?entityPolicy(entId).label:entId;const key=entId+'|'+d.bankId;if(!byEntityBank[key])byEntityBank[key]={name:(d.bankName||d.bankId)+' — '+entLbl,total:0};byEntityBank[key].total+=parseFloat(d.amount)||0;});
     const fgdrAlerts=Object.entries(byEntityBank).filter(([,v])=>v.total>this.objectives.maxPerBank);
     return {totalDeposits:active.length,catCount:cats.length,psCount:ps.length,totalInvested,totalInterest,weightedRate,byBank,upcoming,fgdrAlerts,catTotal:cats.reduce((s,d)=>s+(parseFloat(d.amount)||0),0),psTotal:ps.reduce((s,d)=>s+(parseFloat(d.amount)||0),0)};
   }
