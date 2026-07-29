@@ -31,6 +31,9 @@
     } catch(e) {
       console.error('[MarketDashboard] Erreur chargement:', e);
     }
+    // Fraîcheur des données ACTIONS (contexte + corrélations) — chargées à part, non bloquantes.
+    try { var c = await fetch('data/market/market_context.json'); if (c.ok) _data.ctx = await c.json(); } catch(e) {}
+    try { var k = await fetch('data/market/corr_dispersion_tech.json'); if (k.ok) _data.corr = await k.json(); } catch(e) {}
   }
 
   function _renderKPI(label, value, color, sub) {
@@ -104,6 +107,19 @@
         html += 'Dernière synchronisation le ' + new Date(ts).toLocaleDateString('fr-FR') + '. La mise à jour automatique semble interrompue : ';
         html += 'les taux et indicateurs ci-dessous <strong>peuvent ne plus refléter le marché</strong>. À vérifier avant toute décision d\'allocation.</div></div>';
       }
+    })();
+
+    // ═══ FRAÎCHEUR DONNÉES ACTIONS (alimentent la qualité P2 + les corrélations worst-of du grader) ═══
+    (function() {
+      var msgs = [];
+      var ctxTs = _data.ctx && (_data.ctx.as_of || (_data.ctx._meta && _data.ctx._meta.as_of));
+      if (ctxTs) { var a = Math.floor((new Date() - new Date(ctxTs)) / 864e5); if (a >= 7) msgs.push('actions/qualité du ' + new Date(ctxTs).toLocaleDateString('fr-FR') + ' (' + a + 'j)'); }
+      var corrTs = _data.corr && _data.corr._meta && _data.corr._meta.generated;
+      if (corrTs) { var b = Math.floor((new Date() - new Date(corrTs)) / 864e5); if (b >= 30) msgs.push('corrélations worst-of du ' + new Date(corrTs).toLocaleDateString('fr-FR') + ' (' + b + 'j, figées)'); }
+      if (!msgs.length) return;
+      html += '<div style="background:#FFFBEB;border:1px solid #D97706;border-left:5px solid #D97706;border-radius:10px;padding:11px 15px;margin-bottom:18px;display:flex;align-items:center;gap:11px">';
+      html += '<span style="font-size:18px">⚠️</span>';
+      html += '<div style="font-size:12px;color:#78350F;line-height:1.45"><strong>Données actions périmées</strong> — ' + msgs.join(' · ') + '. Elles alimentent la qualité (P2) et les corrélations worst-of du grader : certaines notes peuvent être décalées.</div></div>';
     })();
 
     // ═══ VERDICT DU JOUR : synthèse 5 secondes ═══
