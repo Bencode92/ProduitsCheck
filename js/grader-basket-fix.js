@@ -307,7 +307,7 @@
         if (!result || !result.pillars) return;
         var w = result.metadata && result.metadata.isInPortfolio ?
             { adjustedReturn: 0.35, underlyingQuality: 0.35, portfolioFit: 0, riskPremium: 0.30 } :
-            { adjustedReturn: 0.30, underlyingQuality: 0.25, portfolioFit: 0.20, riskPremium: 0.25 };
+            { adjustedReturn: 0.30, underlyingQuality: 0.30, portfolioFit: 0.10, riskPremium: 0.30 };
 
         var newTotal = Math.round(
             (result.pillars.adjustedReturn ? result.pillars.adjustedReturn.score : 0) * w.adjustedReturn +

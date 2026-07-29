@@ -22,7 +22,7 @@
   'use strict';
 
   // ═══ CONSTANTS ═══
-  var V7_WEIGHTS = { p1: 0.25, p2: 0.20, p3: 0.25, p4: 0.30 };
+  var V7_WEIGHTS = { p1: 0.30, p2: 0.30, p3: 0.10, p4: 0.30 }; // DOCTRINE : rendement net + qualité sous-jacent + prime vs CAT priment ; fit (P3) dégonflé. Synchro : v5.weightsProposal, callable-issuer, p4-netfees, basket-fix.
   var V7_WEIGHTS_SL = { p1: 0.35, p2: 0.25, p3: 0.15, p4: 0.25 }; // Swiss Life: more weight on return
   var MAX_IA_DELTA = 20;
   var RISK_FREE_RATE = 2.05; // €STR proxy — used for BS diffusion only, NOT for P4 spread
@@ -1070,7 +1070,7 @@
         }
       }
 
-      // Step 5: Final total with v7 weights (30/20/15/30)
+      // Step 5: Final total with v7 weights (doctrine 30/30/10/30)
       var p1 = result.pillars.adjustedReturn.score;
       var p2 = result.pillars.underlyingQuality.score;
       var p3 = result.pillars.portfolioFit.score;
@@ -1128,6 +1128,6 @@
     };
 
     ProposalGrader.version = '7.0';
-    console.log('[StructBoard] ProposalGrader v7.0 — consolidated pipeline (BS P1, v6 cal, weights 30/20/15/30)');
+    console.log('[StructBoard] ProposalGrader v7.0 — consolidated pipeline (BS P1, v6 cal, weights 30/30/10/30)');
   });
 })();

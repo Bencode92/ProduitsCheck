@@ -62,7 +62,7 @@
             var oldP4 = (typeof result.pillars.riskPremium.score === 'number') ? result.pillars.riskPremium.score : 50;
             var newP4 = Math.min(oldP4, p4honest);   // garde-fou : ne peut que baisser
 
-            var delta = (newP4 - oldP4) * 0.25;       // poids P4 = 25%
+            var delta = (newP4 - oldP4) * 0.30;       // poids P4 = 30% (doctrine)
             result.pillars.riskPremium.score = newP4;
             result.pillars.riskPremium.reasoning =
                 'Prime vs CAT (net de frais, cohérent avec le panneau) : coupon espéré ' + _f1(couponEspere) +

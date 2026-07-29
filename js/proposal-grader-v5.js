@@ -8,7 +8,7 @@
 
 // ═══ SECTION 1: CONFIG ═══
 const GRADING_CONFIG = {
-    weightsProposal: { adjustedReturn: 0.30, underlyingQuality: 0.25, portfolioFit: 0.20, riskPremium: 0.25 },
+    weightsProposal: { adjustedReturn: 0.30, underlyingQuality: 0.30, portfolioFit: 0.10, riskPremium: 0.30 },
     weightsPortfolio: { adjustedReturn: 0.35, underlyingQuality: 0.35, portfolioFit: 0, riskPremium: 0.30 },
     maxAdjustment: 15,
     grades: { A:{min:75,label:'Excellent',color:'#06D6A0'}, B:{min:60,label:'Bon',color:'#4ECDC4'}, C:{min:45,label:'Moyen',color:'#FFB627'}, D:{min:25,label:'Faible',color:'#E85D04'}, F:{min:0,label:'Mauvais',color:'#EF233C'} },

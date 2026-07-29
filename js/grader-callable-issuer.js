@@ -91,7 +91,7 @@
             // On applique des DELTAS sur le score du moteur (jamais un recalcul complet : le total
             // du moteur mêle base + ajustement IA par pilier, non reproductible ici). Nos plafonds
             // ne peuvent donc que BAISSER le score, jamais le gonfler.
-            var W = { adjustedReturn: 0.30, riskPremium: 0.25 };
+            var W = { adjustedReturn: 0.30, riskPremium: 0.30 }; // doctrine : P1=P4=0.30
             var scoreDelta = 0;
 
             // ── 3. P4 (Prime vs CAT) : rendement FIABLE ≈ 0 (cas échéance), prime de rappel non fiable ──
