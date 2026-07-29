@@ -326,7 +326,7 @@
         "score": 55,
         "base": 51,
         "delta": 0,
-        "reasoning": "Rendement: base 51 → +8 = 59 (Barrière coupon à 70% très éloignée du spot avec beta faible (0.62) et step-down agressif (-2%/sem) qui facilite l'autocall rapide, rendant le coupon de 7% hautement probable.) | Coupon 7%, barrière 38% | Barr.coupon 70% | Mat espérée: ~1.5a (prob mat: 0%)",
+        "reasoning": "Rendement: base 51 → +8 = 59 (Barrière coupon très basse à 70% avec buffer énorme (DD 52.4%) et Rheinmetall dans un momentum défensif structurel (défense) rend la probabilité de coupon réelle élevée malgré le régime RISK_OFF.) | Coupon 7%, barrière 38% | Barr.coupon 70% | Mat espérée: ~1.5a (prob mat: 0%)",
         "_bsDelta": 4,
         "_bs": {
           "score": 55,
@@ -345,31 +345,28 @@
         "score": 72,
         "base": 66,
         "delta": 6,
-        "reasoning": "Qualité: base 66 → +6 = 72 (Rheinmetall est un pur defense/industrials favorisé en régime RISK_OFF avec vents porteurs structurels (réarmement européen), un secteur listé favorisé par le MI.) | Worst: RHEINMETALL AG B:60"
+        "reasoning": "Qualité: base 66 → +6 = 72 (Rheinmetall (défense/industrials favorisé) bénéficie du réarmement européen structurel et affiche un beta faible de 0.62, un profil résilient contra-cyclique idéal en régime RISK_OFF.) | Worst: RHEINMETALL AG B:60"
       },
       "portfolioFit": {
-        "score": 85,
+        "score": 82,
         "base": 85,
-        "delta": 0,
-        "reasoning": "Fit: base 85 — nouveau — diversifie"
+        "delta": -3,
+        "reasoning": "Fit: base 85 → -3 = 82 (Mono-sous-jacent concentré sur un titre à vol 43% aggrave la surexposition equity déjà critique des portefeuilles (95-100% actions, 0% bonds).) — nouveau — diversifie"
       },
       "riskPremium": {
         "score": 60,
         "base": 12,
-        "delta": -6,
+        "delta": -4,
         "reasoning": "Prime vs CAT (net de frais, cohérent avec le panneau) : coupon espéré 6,2% (7,0% × proba 88%) − marge embarquée 1,33%/an = 4,8% vs CAT 2,8% → spread +2,03%."
       }
     },
-    "verdict": "En régime RISK_OFF (VIX 22, spreads HY qui s'écartent), ce Phoenix sur Rheinmetall bénéficie d'un secteur industrials/defense favorisé et d'un beta défensif (0.62) qui isole partiellement le titre du bêta marché. La barrière coupon à 70% et le step-down de -2%/semestre rendent l'autocall probable dès 1.5 an, sécurisant un coupon annualisé de 7% supérieur au HY à éviter. Le risque majeur reste la volatilité extrême du titre (43%, DD 52%) qui, malgré une barrière capital très basse à 38%, expose à une perte lourde si le momentum defense s'inverse. Score ajusté ~50 (C+), correct mais concentration mono-sous-jacent à surveiller.",
+    "verdict": "En régime RISK_OFF (VIX 22, spreads crédit s'écartant, courbe post-inversion signalant une récession 6-12 mois), ce Phoenix mono-sous-jacent sur Rheinmetall offre un couple risque/rendement inhabituellement favorable : coupon annualisé 7%, barrière coupon à 70% et surtout barrière capital à 38% avec un drawdown disponible de 52.4%. Rheinmetall, valeur défense (industrials favorisé), profite d'un momentum structurel lié au réarmement européen et affiche un beta défensif de 0.62, ce qui la rend relativement résiliente aux corrections de marché. L'autocall à 96% avec step-down de -2%/semestre et une maturité espérée ~1.5a maximisent la probabilité de rappel rapide avec encaissement des coupons. Attention toutefois : la vol de 43% reste très élevée et le produit aggrave une surexposition equity déjà critique des portefeuilles.",
     "keyRisks": [
-      "Concentration mono-sous-jacent sur un titre à volatilité 43% et drawdown historique de 52% — un retournement du narratif defense/réarmement pourrait faire chuter le titre sous les 38% avec perte capital sévère",
-      "Risque de policy error Fed (divergence PCE 4.07% vs CPI 2.4%) et accélération baissière RISK_OFF pouvant emporter même les secteurs favorisés en cas de liquidation forcée",
+      "Volatilité extrême de Rheinmetall (43%) : un retournement du narratif défense (cessez-le-feu, cycle budgétaire) peut effacer les gains rapidement malgré le beta faible",
+      "Capital non protégé avec barrière à 38% : en scénario de crash prolongé combiné à une correction sectorielle défense, la perte peut être sévère à maturité 6 ans",
       "Barrière à 0.91σ (Danger) — vol 43.43%"
     ],
-    "negotiationPoints": [
-      "Réduire les commissions de 1.99% jugées élevées",
-      "Rehausser la barrière capital ou ajouter une protection partielle"
-    ],
+    "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
         "return_pct": 3.5,
@@ -405,8 +402,8 @@
       "label": "C [42-58]"
     },
     "metadata": {
-      "gradedAt": "2026-07-29T16:14:33.085Z",
-      "durationMs": 19185,
+      "gradedAt": "2026-07-29T16:18:15.257Z",
+      "durationMs": 16572,
       "aiUsed": true,
       "version": "7.1",
       "productType": "autocall",
@@ -431,8 +428,8 @@
       "adjustments": {
         "p1": 8,
         "p2": 6,
-        "p3": 0,
-        "p4": -6
+        "p3": -3,
+        "p4": -4
       },
       "barrier_sigma": 0.91,
       "barrier_sigma_label": "Danger",
@@ -465,7 +462,7 @@
         "p4": 0.25
       },
       "inputHash": "gnn5c7f",
-      "gradeT0": "2026-07-29T16:14:33.085Z",
+      "gradeT0": "2026-07-29T16:18:15.257Z",
       "trackingLevelAt0": null,
       "envelopeMode": "swiss-life",
       "p4NetFeesApplied": true,
