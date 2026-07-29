@@ -57,35 +57,29 @@
     return _normcdf(d2);
   }
 
-  // Gaussian copula for worst-of: P(all underlyings above trigger)
-  // Uses Monte Carlo with Cholesky decomposition (fast for n≤8)
-  function _worstOfCopula(marginalProbs, rho, nSim) {
-    nSim = nSim || 5000;
+  // Copule gaussienne 1-facteur pour worst-of : P(TOUS les sous-jacents ≥ seuil).
+  // Intégration numérique DÉTERMINISTE sur le facteur commun M (remplace l'ancien "Monte-Carlo"
+  // basé sur un sin(x) pseudo-aléatoire, qui produisait un artefact, pas une vraie proba).
+  // Z_i = √ρ·M + √(1−ρ)·ε_i ; P = ∫ φ(m) · Π_i Φ((zThr_i + √ρ·m)/√(1−ρ)) dm.
+  function _worstOfCopula(marginalProbs, rho) {
     var n = marginalProbs.length;
     if (n <= 1) return marginalProbs[0] || 0.5;
-
-    // Convert marginal probs to Gaussian thresholds via inverse CDF
-    var zThresholds = marginalProbs.map(function(p) { return _norminv(p); });
-
-    // Build correlation matrix and Cholesky decompose
-    // For uniform rho, Cholesky is: L[i][j] = rho for j<i (first col), sqrt(1-rho^2) diagonal
-    var sqrtRho = Math.sqrt(Math.max(0, rho));
-    var sqrtOneMinusRho = Math.sqrt(Math.max(0.001, 1 - rho));
-
-    // Monte Carlo: count how often ALL Z_i > -zThreshold_i
-    var count = 0;
-    // Use deterministic seed-like approach with quasi-random for speed
-    for (var s = 0; s < nSim; s++) {
-      var common = _boxMuller(s * 2);
-      var allAbove = true;
+    rho = Math.max(0, Math.min(0.99, rho));
+    var sr = Math.sqrt(rho), s1 = Math.sqrt(Math.max(1e-6, 1 - rho));
+    var zThr = marginalProbs.map(function(p) { return _norminv(Math.max(0.001, Math.min(0.999, p))); });
+    var lo = -5, hi = 5, steps = 120, dx = (hi - lo) / steps, sum = 0;
+    for (var k = 0; k <= steps; k++) {
+      var m = lo + k * dx;
+      var phi = Math.exp(-m * m / 2) / Math.sqrt(2 * Math.PI);
+      var prod = 1;
       for (var j = 0; j < n; j++) {
-        var idio = _boxMuller(s * 2 + j * nSim + 1);
-        var z = sqrtRho * common + sqrtOneMinusRho * idio;
-        if (z < -zThresholds[j]) { allAbove = false; break; }
+        prod *= _normcdf((zThr[j] + sr * m) / s1);
+        if (prod < 1e-9) { prod = 0; break; }
       }
-      if (allAbove) count++;
+      var w = (k === 0 || k === steps) ? 0.5 : 1; // règle du trapèze
+      sum += w * phi * prod * dx;
     }
-    return Math.max(0.01, Math.min(0.99, count / nSim));
+    return Math.max(0.01, Math.min(0.99, sum));
   }
 
   // Approximate inverse normal CDF (Beasley-Springer-Moro)
@@ -550,7 +544,7 @@
     }
 
     var dec = parseFloat(product.decrementPct) || 0;
-    var div = parseFloat(product.actualDividendYield) || 0;
+    var div = parseFloat(product.actualDividendYield) || parseFloat(norm && norm._dividendYield) || 0; // à défaut, dividende réel de la fiche action (résolu en contexte)
     var drag = Math.max(0, dec - div);
 
     var unds = (product.underlyings || []).map(function(u) { return typeof u === 'string' ? u : (u.name || u.ticker || ''); }).filter(Boolean);
