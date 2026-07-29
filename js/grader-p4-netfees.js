@@ -37,7 +37,11 @@
             }
             if (cprob == null || cprob <= 0) return result;   // pas de proba → on ne touche pas
 
-            var coupon = parseFloat(product.coupon && product.coupon.rate);
+            // Coupon ANNUALISÉ (3,5% semestriel = 7%/an) — sinon la prime vs CAT est calculée
+            // sur la moitié/le quart du vrai rendement et P4 s'effondre à tort.
+            var coupon = (typeof scoring !== 'undefined' && scoring.annualizedCoupon)
+                ? scoring.annualizedCoupon(product)
+                : parseFloat(product.coupon && product.coupon.rate);
             if (isNaN(coupon) || coupon <= 0) return result;
 
             // Marge embarquée annualisée (surcoût que l'investisseur supporte réellement)
