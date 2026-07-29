@@ -655,6 +655,9 @@
   // P3 recalibration: base 50 with structure adjustments
   // v7.1: basket bonus conditioned on P2 quality (OpenAI feedback)
   function _recalibrateP3(oldP3, product, p2Score) {
+    // Le FIT = concentration réelle (même action/secteur/industrie/corrélé), calculée dans la base v5.
+    // On ne l'écrase PLUS par un score de structure (mono-action −10 etc.) qui ne regardait pas le portefeuille.
+    return oldP3;
     var base = 50;
     var st = (product.structureType || '').toLowerCase();
     var ut = (product.underlyingType || '').toLowerCase();
