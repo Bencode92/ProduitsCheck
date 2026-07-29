@@ -86,6 +86,27 @@
                 result.baseScore = Math.round(result.baseScore + delta);
             }
             md.p4NetFeesApplied = true;
+
+            // ═══ PLAFOND DE RISQUE — DERNIÈRE OPÉRATION DU PIPELINE ═══
+            // p4-netfees est le dernier patch : c'est ICI, après tous les ajustements, qu'on
+            // peut garantir qu'un produit à capital NON protégé + barrière en zone "Danger" ne
+            // soit jamais noté "Bon" (B). La prime, le fit et l'IA ne maquillent plus le risque
+            // de perte en capital. (Le même plafond en v7 était défait par ce patch → ici il tient.)
+            try {
+                if (typeof result.score === 'number') {
+                    var _cp = product.capitalProtection;
+                    var _capRisk = !!md.hasBarrier || (!(_cp === true || (_cp && _cp.protected)) && (parseFloat(product.barrier) > 0 || parseFloat((_cp || {}).barrier) > 0));
+                    var _danger = !!md.barrier_sigma_danger || (md.barrier_sigma != null && parseFloat(md.barrier_sigma) < 1.0);
+                    if (_capRisk && _danger && result.score > 55) {
+                        result.score = 55;
+                        result.grade = _lg(55);
+                        md.riskCapped = true;
+                        if (result.keyRisks && result.keyRisks.push && !result.keyRisks.some(function (k) { return ('' + k).indexOf('plafonnée') >= 0; })) {
+                            result.keyRisks.push('Note plafonnée (C) : capital non protégé + barrière en zone danger — perte en capital possible.');
+                        }
+                    }
+                }
+            } catch (e) { console.warn('[p4-netfees] risk cap error:', e && e.message); }
         } catch (e) {
             console.warn('[p4-netfees] post-process error:', e && e.message);
         }
