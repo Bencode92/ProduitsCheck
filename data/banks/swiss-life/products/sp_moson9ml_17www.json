@@ -313,27 +313,27 @@
   "aiAnalyzedAt": "2026-05-05T13:47:22.747Z",
   "envelope": "",
   "_couponProbability": 88,
-  "_bsRendementNet": 0.29,
+  "_bsRendementNet": 3.37,
   "grading": {
-    "grade": "D",
-    "score": 39,
+    "grade": "C",
+    "score": 45,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 37,
-        "base": 31,
+        "score": 55,
+        "base": 51,
         "delta": 0,
-        "reasoning": "Rendement: base 31 → +8 = 39 (Barrière coupon à 70% avec RHM déjà à 60 offre une marge, et le secteur défense/industrials est favorisé, augmentant la probabilité réelle de détachement du coupon.) | Coupon 3.5%, barrière 38% | Barr.coupon 70% | Mat espérée: ~1.5a (prob mat: 0%)",
-        "_bsDelta": 6,
+        "reasoning": "Rendement: base 51 → +8 = 59 (Barrière coupon très basse à 70% avec DD actuel de 52.4% et beta faible (0.62) offre une marge confortable, probabilité de coupon élevée.) | Coupon 7%, barrière 38% | Barr.coupon 70% | Mat espérée: ~1.5a (prob mat: 0%)",
+        "_bsDelta": 4,
         "_bs": {
-          "score": 37,
+          "score": 55,
           "probCoupon": 88,
-          "rendementNet": 0.29,
+          "rendementNet": 3.37,
           "perteEsperee": 2.46,
-          "couponEffectif": 3.5,
+          "couponEffectif": 7,
           "vols": [
             43.43
           ],
@@ -345,78 +345,78 @@
         "score": 71,
         "base": 66,
         "delta": 5,
-        "reasoning": "Qualité: base 66 → +5 = 71 (Rheinmetall (défense/industrials favorisé) bénéficie du contexte de réarmement européen et d'un beta défensif de 0.62 qui atténue le risque en régime RISK_OFF.) | Worst: RHEINMETALL AG B:60"
+        "reasoning": "Qualité: base 66 → +5 = 71 (Rheinmetall est un industriel de défense (secteur industrials favorisé en régime RISK_OFF) bénéficiant du contexte géopolitique et du réarmement européen.) | Worst: RHEINMETALL AG B:60"
       },
       "portfolioFit": {
         "score": 40,
         "base": 80,
-        "delta": -3,
-        "reasoning": "Fit: base 80 → -3 = 77 (Mono-sous-jacent ultra-concentré sur un seul titre volatil (43%), inadapté à des portefeuilles déjà à 95-100% equity nécessitant un rééquilibrage urgent.)"
+        "delta": 0,
+        "reasoning": "Fit: base 80"
       },
       "riskPremium": {
         "score": 9,
-        "base": 0,
-        "delta": -8,
-        "reasoning": "Prime vs CAT (net de frais, cohérent avec le panneau) : coupon espéré 3,1% (3,5% × proba 88%) − marge embarquée 1,33%/an = 1,8% vs CAT 2,8% → spread -1,05%."
+        "base": 12,
+        "delta": -6,
+        "reasoning": "Prime vs CAT (net de frais, cohérent avec le panneau) : coupon espéré 6,2% (7,0% × proba 88%) − marge embarquée 1,33%/an = 4,8% vs CAT 2,8% → spread +2,03%."
       }
     },
-    "verdict": "Produit Phoenix mémoire sur Rheinmetall (secteur défense/industrials favorisé) offrant seulement 3.5% annualisé pour une exposition à un titre affichant 43% de volatilité et un drawdown de 52%. En régime RISK_OFF (VIX 22, spreads crédit qui s'écartent, courbe post-inversion signalant récession dans 6-12 mois), le beta défensif de 0.62 et le momentum structurel du réarmement européen soutiennent le sous-jacent, mais le rapport rendement/risque reste médiocre. La barrière capital à 38% offre un coussin confortable et l'autocall à 96% avec step-down favorise un rappel rapide (~1.5a espéré), mais le coupon rachitique ne compense pas l'illiquidité potentielle sur 6 ans en cas de scénario baissier. Score final faible malgré le contexte sectoriel porteur.",
+    "verdict": "En régime RISK_OFF (VIX 22, spreads crédit qui s'écartent), ce Phoenix mono-sous-jacent sur Rheinmetall combine un profil singulier : le secteur défense/industrials est structurellement favorisé par le réarmement européen, ce qui soutient une probabilité de coupon élevée (barrière 70% très en-dessous, beta 0.62 défensif). Le coupon annualisé de 7% avec effet mémoire et autocall au seuil 96% (step-down -2%/sem) rend un rappel rapide probable (~1.5a espéré), limitant l'exposition à la maturité 6 ans. Toutefois la barrière capital à 38% non protégée sur un titre à volatilité 43% et le drawdown déjà de 52.4% signalent un risque de correction violente si le momentum défense s'inverse. Produit à isoler comme pari tactique sectoriel, non comme diversification de portefeuilles déjà sur-exposés equity.",
     "keyRisks": [
-      "Concentration mono-sous-jacent sur Rheinmetall : un retournement du narratif défense (paix, coupes budgétaires) ou une correction du titre déjà en drawdown de 52% menacerait le capital sous barrière 38%",
-      "Coupon de 3.5% annualisé structurellement insuffisant face à 43% de vol — le porteur est mal rémunéré pour le risque assumé, avec commissions de 1.99% qui dégradent davantage le rendement net",
+      "Concentration totale sur un single-name volatil (43%) déjà en drawdown de 52.4% — une correction du secteur défense sous 38% du strike entraînerait une perte en capital sévère à maturité.",
+      "Le contexte RISK_OFF avec récession probable (courbe 2s10s normalisée, VIX rising, spreads IG stressés) peut déclencher une liquidation généralisée touchant même les valeurs défensives.",
       "Barrière à 0.91σ (Danger) — vol 43.43%"
     ],
     "negotiationPoints": [
-      "Exiger un coupon annualisé minimum de 5.5-6% pour justifier l'exposition à un sous-jacent à 43% de vol",
-      "Négocier une réduction des commissions sous 1% étant donné la maturité longue de 6 ans"
+      "Négocier une réduction des commissions de 1.99% jugées élevées pour un produit mono-sous-jacent.",
+      "Demander un relèvement de la barrière capital ou une protection partielle du nominal."
     ],
     "scenarios": {
       "optimistic": {
-        "return_pct": 5.25,
-        "return_eur": 5250,
+        "return_pct": 3.5,
+        "return_eur": 3500,
         "probability": 0.45,
-        "duration_years": 1.5
+        "duration_years": 0.5
       },
       "base": {
         "return_pct": 7,
         "return_eur": 7000,
         "probability": 0.3,
-        "duration_years": 2
+        "duration_years": 1.5
       },
       "stress": {
         "return_pct": 10.5,
         "return_eur": 10500,
-        "probability": 0.15,
+        "probability": 0.1,
         "duration_years": 3
       },
       "worst": {
-        "return_pct": -45,
-        "return_eur": -45000,
-        "probability": 0.1,
+        "return_pct": -55,
+        "return_eur": -55000,
+        "probability": 0.15,
         "duration_years": 6
       }
     },
     "confidenceInterval": {
-      "low": 33,
-      "high": 49,
+      "low": 41,
+      "high": 57,
       "halfWidth": 8,
       "gradeStable": false,
       "gradeRange": "D-C",
-      "label": "D [33-49]"
+      "label": "C [41-57]"
     },
     "metadata": {
-      "gradedAt": "2026-07-29T10:42:58.708Z",
-      "durationMs": 17100,
+      "gradedAt": "2026-07-29T12:25:37.981Z",
+      "durationMs": 18782,
       "aiUsed": true,
       "version": "7.1",
       "productType": "autocall",
       "marketDataAvailable": true,
       "catBenchmark": 3.3,
       "catSource": "allocator-confirmed",
-      "couponAnnualized": 3.5,
+      "couponAnnualized": 7,
       "couponRaw": 3.5,
-      "couponMultiplier": 1,
-      "couponFrequency": "annuel",
+      "couponMultiplier": 2,
+      "couponFrequency": "semestriel",
       "isInPortfolio": false,
       "hasBarrier": true,
       "barrierPct": 38,
@@ -426,13 +426,13 @@
       "maxMaturity": 6,
       "probReachMaturity": 0,
       "maxBeta": 0.62,
-      "baseScore": 37,
-      "baseGrade": "D",
+      "baseScore": 47,
+      "baseGrade": "C",
       "adjustments": {
         "p1": 8,
         "p2": 5,
-        "p3": -3,
-        "p4": -8
+        "p3": 0,
+        "p4": -6
       },
       "barrier_sigma": 0.91,
       "barrier_sigma_label": "Danger",
@@ -440,15 +440,15 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 33,
-      "ci_high": 49,
-      "ci_label": "D [33-49]",
+      "ci_low": 41,
+      "ci_high": 57,
+      "ci_label": "C [41-57]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
       "decrementDrag": 0,
       "structureType": "autocall",
-      "bsRendementNet": 0.29,
+      "bsRendementNet": 3.37,
       "bsProbCoupon": 88,
       "bsPerteEsperee": 2.46,
       "bsVols": [
@@ -465,7 +465,7 @@
         "p4": 0.25
       },
       "inputHash": "gnn5c7f",
-      "gradeT0": "2026-07-29T10:42:58.708Z",
+      "gradeT0": "2026-07-29T12:25:37.981Z",
       "trackingLevelAt0": null,
       "envelopeMode": "swiss-life",
       "p4NetFeesApplied": true,
@@ -486,23 +486,23 @@
     },
     "regimeScenarios": {
       "current": {
-        "score": 39,
-        "grade": "D",
+        "score": 45,
+        "grade": "C",
         "label": "Actuel (risk_off)",
         "desc": "Régime actuel → volatilité modérée"
       },
       "bull": {
-        "score": 46,
+        "score": 51,
         "grade": "C",
         "label": "Bull / Risk-on",
-        "delta": 7,
+        "delta": 6,
         "desc": "Marchés haussiers → prob coupon monte, barrière safe"
       },
       "crash": {
-        "score": 29,
+        "score": 34,
         "grade": "D",
         "label": "Crash / Récession",
-        "delta": -10,
+        "delta": -11,
         "desc": "Marchés baissiers → barrière menacée, vol en hausse"
       }
     }
