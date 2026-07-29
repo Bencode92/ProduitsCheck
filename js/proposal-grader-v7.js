@@ -1080,7 +1080,9 @@
       // PLAFOND DE RISQUE : capital NON protégé + barrière en zone "Danger" → pas de note "Bon" (B).
       // Tu peux perdre une grosse part du capital ; la prime et le fit ne doivent pas le maquiller.
       var _md = result.metadata || {};
-      if (_md.hasBarrier && _md.barrier_sigma_danger && total > 55) {
+      var _capRisk = !!_md.hasBarrier || (!(product.capitalProtection === true || (product.capitalProtection && product.capitalProtection.protected)) && (parseFloat(product.barrier) > 0 || parseFloat((product.capitalProtection || {}).barrier) > 0));
+      var _danger = !!_md.barrier_sigma_danger || (_md.barrier_sigma != null && parseFloat(_md.barrier_sigma) < 1.0);
+      if (_capRisk && _danger && total > 55) {
         total = 55;
         if (result.keyRisks && result.keyRisks.push) result.keyRisks.push('Note plafonnée (C) : capital non protégé + barrière en zone danger — perte en capital possible.');
       }
