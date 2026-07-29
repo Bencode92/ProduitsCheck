@@ -312,69 +312,72 @@
   "aiOpinion": "Produit offrant un rendement attractif de 7% annuel avec effet mémoire, mais exposé au risque significatif d'un seul sous-jacent (Rheinmetall) sans protection du capital. La barrière basse à 38% et le seuil d'autocall élevé à 96% créent un profil risque/rendement déséquilibré, particulièrement risqué sur une maturité de 6 ans.",
   "aiAnalyzedAt": "2026-05-05T13:47:22.747Z",
   "envelope": "",
-  "_couponProbability": 90.9,
-  "_bsRendementNet": 1.77,
+  "_couponProbability": 88,
+  "_bsRendementNet": 0.29,
   "grading": {
-    "grade": "C",
-    "score": 46,
+    "grade": "D",
+    "score": 39,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 46,
+        "score": 37,
         "base": 31,
         "delta": 0,
-        "reasoning": "Rendement: base 31 → +8 = 39 (Barrière coupon à 70% très éloignée du niveau actuel et Rheinmetall en tendance haussière structurelle sur la défense européenne, ce qui rend le versement du coupon probable malgré le régime RISK_OFF.) | Coupon 3.5%, barrière 38% | Barr.coupon 70% | Mat espérée: ~1.5a (prob mat: 0%)",
-        "_bsDelta": 15,
+        "reasoning": "Rendement: base 31 → +8 = 39 (Barrière coupon à 70% très éloignée (RHM à B=60 avec DD=52.4%) et step-down -2%/sem facilitent l'autocall rapide, augmentant la probabilité réelle du coupon de 3.5%.) | Coupon 3.5%, barrière 38% | Barr.coupon 70% | Mat espérée: ~1.5a (prob mat: 0%)",
+        "_bsDelta": 6,
         "_bs": {
-          "score": 46,
-          "probCoupon": 90.9,
-          "rendementNet": 1.77,
-          "perteEsperee": 1.08,
+          "score": 37,
+          "probCoupon": 88,
+          "rendementNet": 0.29,
+          "perteEsperee": 2.46,
           "couponEffectif": 3.5,
           "vols": [
-            36.69
+            43.43
           ],
           "matEsperee": 1.5,
           "isBasket": false
         }
       },
       "underlyingQuality": {
-        "score": 87,
-        "base": 78,
-        "delta": 9,
-        "reasoning": "Qualité: base 78 → +9 = 87 (Rheinmetall appartient au secteur industrials/défense, favorisé dans le régime actuel, et bénéficie du réarmement européen — un fondamental porteur qui justifie un bonus significatif.) | Worst: RHEINMETALL AG B:85"
+        "score": 72,
+        "base": 66,
+        "delta": 6,
+        "reasoning": "Qualité: base 66 → +6 = 72 (Rheinmetall (défense/industrials favorisé) profite structurellement du contexte géopolitique et du réarmement européen, avec un beta faible de 0.62 offrant décorrélation du marché en régime RISK_OFF.) | Worst: RHEINMETALL AG B:60"
       },
       "portfolioFit": {
         "score": 40,
         "base": 80,
         "delta": -5,
-        "reasoning": "Fit: base 80 → -5 = 75 (Mono-sous-jacent ultra-concentré sur une seule action très volatile, ce qui aggrave la surexposition equity déjà critique (95-100%) des portefeuilles.)"
+        "reasoning": "Fit: base 80 → -5 = 75 (Mono-sous-jacent sur une valeur ultra-volatile (43.43%) apporte une concentration risquée à des portefeuilles déjà surexposés equity à 95-100%.)"
       },
       "riskPremium": {
         "score": 9,
         "base": 0,
-        "delta": -8,
-        "reasoning": "Prime vs CAT (net de frais, cohérent avec le panneau) : coupon espéré 3,2% (3,5% × proba 91%) − marge embarquée 1,33%/an = 1,9% vs CAT 2,8% → spread -0,95%."
+        "delta": -3,
+        "reasoning": "Prime vs CAT (net de frais, cohérent avec le panneau) : coupon espéré 3,1% (3,5% × proba 88%) − marge embarquée 1,33%/an = 1,8% vs CAT 2,8% → spread -1,05%."
       }
     },
-    "verdict": "En régime RISK_OFF (VIX 22, spreads crédit qui s'écartent), ce Phoenix sur Rheinmetall combine un profil paradoxal : un sous-jacent dans un secteur favorisé (défense/industrials, beta 1.17) porté par le réarmement européen, mais un coupon dérisoire de 3.5% annualisé pour un risque single-name extrême. La barrière capital à 38% offre un matelas important tandis que l'autocall à 96% avec step-down de -2%/semestre rend un remboursement anticipé rapide (~1.5a) très probable. Cependant, le rapport rendement/risque est déséquilibré : 3.5% de coupon ne rémunère pas suffisamment la volatilité d'une action de défense pouvant corriger violemment en cas de désescalade géopolitique ou de rotation sectorielle.",
+    "verdict": "En régime RISK_OFF (VIX 22, spreads crédit qui s'écartent), ce Phoenix mono-sous-jacent sur Rheinmetall bénéficie paradoxalement de son secteur défense/industrials favorisé et de son beta faible (0.62) qui le décorrèle du marché. La barrière coupon à 70% et surtout la barrière capital très basse à 38% (DD actuel 52.4%) offrent un matelas confortable, tandis que le step-down -2%/sem et l'autocall à 96% rendent un remboursement anticipé (~1.5a) très probable. Cependant, le coupon de 3.5% annualisé est faible au regard de la volatilité extrême de 43% du sous-jacent, et le capital reste non protégé en cas de retournement violent du secteur défense. À nuancer par le contexte de portefeuilles déjà dangereusement à 0% bonds où ce produit n'apporte aucune diversification obligataire réelle.",
     "keyRisks": [
-      "Concentration mono-sous-jacent sur Rheinmetall, action très volatile dont une correction de -62% (barrière 38%) reste possible en cas de retournement du narratif défense ou de cessez-le-feu géopolitique",
-      "Coupon de 3.5% annualisé structurellement trop faible face au risque de capital non protégé, aggravant la surexposition equity déjà critique (95-100%) signalée dans les portefeuilles"
+      "Concentration mono-sous-jacent sur Rheinmetall avec volatilité de 43.43% : un retournement du narratif géopolitique/défense (cessez-le-feu, coupes budgétaires) pourrait faire chuter le titre sous barrière 38% avec perte capital non protégée.",
+      "Coupon réel de 3.5%/an très faible face au risque pris : le ratio rendement/volatilité est défavorable, et l'autocall rapide limite le gain total à ~5% sur 1.5a.",
+      "Régime RISK_OFF avec courbe 2s10s normalisée signalant récession 6-12 mois : une accélération baissière généralisée pourrait entraîner même les valeurs défensives.",
+      "Barrière à 0.91σ (Danger) — vol 43.43%"
     ],
     "negotiationPoints": [
-      "Exiger un coupon minimum de 6-7% compte tenu du risque single-name et de la volatilité de Rheinmetall",
-      "Négocier une barrière autocall plus haute ou une réduction des commissions de 1.99%"
+      "Demander un relèvement du coupon annualisé vers 6-7% compte tenu de la vol de 43%",
+      "Négocier une barrière autocall step-down plus agressive pour sécuriser le remboursement anticipé",
+      "Réduire les commissions de 1.99% jugées élevées pour un produit mono-sous-jacent"
     ],
     "scenarios": {
       "optimistic": {
-        "return_pct": 3.5,
-        "return_eur": 3500,
+        "return_pct": 1.75,
+        "return_eur": 1750,
         "probability": 0.45,
-        "duration_years": 1
+        "duration_years": 0.5
       },
       "base": {
         "return_pct": 5.25,
@@ -383,29 +386,29 @@
         "duration_years": 1.5
       },
       "stress": {
-        "return_pct": 1.75,
-        "return_eur": 1750,
+        "return_pct": 10.5,
+        "return_eur": 10500,
         "probability": 0.15,
         "duration_years": 3
       },
       "worst": {
-        "return_pct": -55,
-        "return_eur": -55000,
+        "return_pct": -40,
+        "return_eur": -40000,
         "probability": 0.1,
         "duration_years": 6
       }
     },
     "confidenceInterval": {
-      "low": 37,
-      "high": 53,
+      "low": 33,
+      "high": 49,
       "halfWidth": 8,
       "gradeStable": false,
       "gradeRange": "D-C",
-      "label": "C [37-53]"
+      "label": "D [33-49]"
     },
     "metadata": {
-      "gradedAt": "2026-07-29T09:22:47.012Z",
-      "durationMs": 20323,
+      "gradedAt": "2026-07-29T10:23:10.475Z",
+      "durationMs": 19545,
       "aiUsed": true,
       "version": "7.1",
       "productType": "autocall",
@@ -420,38 +423,38 @@
       "hasBarrier": true,
       "barrierPct": 38,
       "barrierCouponPct": 70,
-      "couponProbability": 90.9,
+      "couponProbability": 88,
       "expectedMaturity": 1.5,
       "maxMaturity": 6,
       "probReachMaturity": 0,
-      "maxBeta": 1,
-      "baseScore": 41,
+      "maxBeta": 0.62,
+      "baseScore": 37,
       "baseGrade": "D",
       "adjustments": {
         "p1": 8,
-        "p2": 9,
+        "p2": 6,
         "p3": -5,
-        "p4": -8
+        "p4": -3
       },
-      "barrier_sigma": null,
-      "barrier_sigma_label": null,
-      "barrier_sigma_danger": null,
+      "barrier_sigma": 0.91,
+      "barrier_sigma_label": "Danger",
+      "barrier_sigma_danger": true,
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 37,
-      "ci_high": 53,
-      "ci_label": "C [37-53]",
+      "ci_low": 33,
+      "ci_high": 49,
+      "ci_label": "D [33-49]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
       "decrementDrag": 0,
       "structureType": "autocall",
-      "bsRendementNet": 1.77,
-      "bsProbCoupon": 90.9,
-      "bsPerteEsperee": 1.08,
+      "bsRendementNet": 0.29,
+      "bsProbCoupon": 88,
+      "bsPerteEsperee": 2.46,
       "bsVols": [
-        36.69
+        43.43
       ],
       "bsMatEsperee": 1.5,
       "isBasket": false,
@@ -464,35 +467,41 @@
         "p4": 0.25
       },
       "inputHash": "gnn5c7f",
-      "gradeT0": "2026-07-29T09:22:47.012Z",
+      "gradeT0": "2026-07-29T10:23:10.475Z",
       "trackingLevelAt0": null,
       "envelopeMode": "swiss-life",
       "p4NetFeesApplied": true,
       "stockData": [
         {
           "name": "RHEINMETALL AG",
+          "ticker": "RHM",
           "sector": "—",
-          "buffett_score": 85,
-          "buffett_grade": "A"
+          "perf_ytd": -30.38,
+          "perf_1y": -37.36,
+          "volatility_3y": 43.43,
+          "max_drawdown_3y": 52.4,
+          "buffett_score": 60,
+          "quality_score": 72,
+          "buffett_grade": "B"
         }
       ]
     },
     "regimeScenarios": {
       "current": {
-        "score": 46,
-        "grade": "C",
+        "score": 39,
+        "grade": "D",
         "label": "Actuel (risk_off)",
         "desc": "Régime actuel → volatilité modérée"
       },
       "bull": {
-        "score": 53,
+        "score": 46,
         "grade": "C",
         "label": "Bull / Risk-on",
         "delta": 7,
         "desc": "Marchés haussiers → prob coupon monte, barrière safe"
       },
       "crash": {
-        "score": 36,
+        "score": 29,
         "grade": "D",
         "label": "Crash / Récession",
         "delta": -10,
