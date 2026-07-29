@@ -108,7 +108,7 @@ function _graderNormalize(product){
 
     if(ar.stepDown===true||ar.stepDown==='true'||rawText.indexOf('dégressive')>=0||rawText.indexOf('step-down')>=0){norm._hasStepDown=true;var sdm=rawText.match(/dégressive\s*(?:de\s*)?[-–]?\s*(\d+[.,]?\d*)\s*%/i);if(sdm)norm._stepDownPct=parseFloat(sdm[1].replace(',','.'));}
 
-    if(norm.couponMultiplier>1&&st!=='dispersion'){var ap=rawText.match(/(\d+[.,]?\d*)\s*%\s*(?:p\.?a\.?|annualis|par an|annuel)/i);if(ap){var sa=parseFloat(ap[1].replace(',','.'));if(Math.abs(sa-norm.couponRaw)<0.5){norm.coupon=norm.couponRaw;norm.couponMultiplier=1;norm.couponFrequencySource='already-annual';}}}
+    if(norm.couponMultiplier>1&&st!=='dispersion'&&norm.couponFrequencySource!=='explicit'){var ap=rawText.match(/(\d+[.,]?\d*)\s*%\s*(?:p\.?a\.?|annualis|par an|annuel)/i);if(ap){var sa=parseFloat(ap[1].replace(',','.'));if(Math.abs(sa-norm.couponRaw)<0.5){norm.coupon=norm.couponRaw;norm.couponMultiplier=1;norm.couponFrequencySource='already-annual';}}}
 
     norm._lockupYears=norm.maturityYears||5;
     return norm;
