@@ -727,6 +727,7 @@
   // Illiquidity penalty (sprint2 FIX 6)
   function _applyIlliquidityPenalty(result) {
     if (!result || !result.pillars || !result.pillars.riskPremium || !result.metadata) return;
+    if (result.metadata._illiqApplied) return; // IDEMPOTENCE : déjà appliqué (ex. par sprint2 dans _baseGrade) → plus de double compte
     var type = result.metadata.productType || '';
     if (type === 'liquidity' || type === 'taux_fixe' || type === 'taux_fixe_in_fine') return;
     if (result.metadata.barrierPct === 0 && type === 'capital_garanti') return;
@@ -736,6 +737,7 @@
     var newPremium = 1.5 + 0.20 * Math.max(0, T - 2);
     var scoreDelta = Math.min(Math.round((newPremium - oldPremium) * 5), 10);
     result.pillars.riskPremium.score = Math.max(0, result.pillars.riskPremium.score - scoreDelta);
+    result.metadata._illiqApplied = true;
   }
 
   // Decrement drag penalty

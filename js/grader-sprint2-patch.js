@@ -187,6 +187,7 @@
         var p4 = result.pillars.riskPremium;
         var oldP4 = p4.score;
         p4.score = Math.max(0, p4.score - scoreDelta);
+        result.metadata._illiqApplied = true; // idempotence : v7 ne ré-appliquera pas l'illiquidité (fini le double compte ; version SL-réduite conservée)
 
         if (scoreDelta > 0 && p4.reasoning) {
             p4.reasoning += ' | Illiq. premium +' + deltaPremium.toFixed(1) + '% (-' + scoreDelta + 'pts)' + (isSL ? ' [SL réduit]' : '');
