@@ -351,7 +351,7 @@
         "score": 85,
         "base": 85,
         "delta": 0,
-        "reasoning": "Fit: base 85"
+        "reasoning": "Fit: base 85 — nouveau — diversifie"
       },
       "riskPremium": {
         "score": 60,
@@ -375,8 +375,8 @@
       "label": "C [39-55]"
     },
     "metadata": {
-      "gradedAt": "2026-07-29T16:08:22.448Z",
-      "durationMs": 18810,
+      "gradedAt": "2026-07-29T16:14:04.895Z",
+      "durationMs": 20858,
       "aiUsed": false,
       "version": "7.1",
       "productType": "autocall",
@@ -430,7 +430,7 @@
         "p4": 0.25
       },
       "inputHash": "gnn5c7f",
-      "gradeT0": "2026-07-29T16:08:22.448Z",
+      "gradeT0": "2026-07-29T16:14:04.895Z",
       "trackingLevelAt0": null,
       "envelopeMode": "swiss-life",
       "p4NetFeesApplied": true,
