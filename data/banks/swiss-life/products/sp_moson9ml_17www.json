@@ -375,8 +375,8 @@
       "label": "C [39-55]"
     },
     "metadata": {
-      "gradedAt": "2026-07-29T16:19:50.877Z",
-      "durationMs": 17015,
+      "gradedAt": "2026-07-29T16:20:43.696Z",
+      "durationMs": 23596,
       "aiUsed": false,
       "version": "7.1",
       "productType": "autocall",
@@ -430,7 +430,7 @@
         "p4": 0.25
       },
       "inputHash": "gnn5c7f",
-      "gradeT0": "2026-07-29T16:19:50.877Z",
+      "gradeT0": "2026-07-29T16:20:43.696Z",
       "trackingLevelAt0": null,
       "envelopeMode": "swiss-life",
       "p4NetFeesApplied": true,
