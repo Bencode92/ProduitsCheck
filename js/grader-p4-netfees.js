@@ -64,7 +64,11 @@
             // Mapping spread → score P4 (ancre : 50 à spread 0, ±5 pts par point de spread)
             var p4honest = Math.max(6, Math.min(90, Math.round(50 + spread * 5)));
             var oldP4 = (typeof result.pillars.riskPremium.score === 'number') ? result.pillars.riskPremium.score : 50;
-            var newP4 = Math.min(oldP4, p4honest);   // garde-fou : ne peut que baisser
+            // P4 = LA prime vs CAT (net de frais, proba Black-Scholes) → on FIXE la note sur ce calcul
+            // honnête (le score colle enfin au texte). Le risque en capital est déjà pesé dans P1 +
+            // les scénarios ; le remettre ici le compterait deux fois. Fini le garde-fou "min" qui
+            // empêchait la prime réelle (positive) de remonter un P4 de base sous-estimé.
+            var newP4 = p4honest;
 
             var delta = (newP4 - oldP4) * 0.30;       // poids P4 = 30% (doctrine)
             result.pillars.riskPremium.score = newP4;
