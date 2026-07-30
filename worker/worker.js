@@ -65,22 +65,57 @@ export default {
 };
 
 // ─── Claude API Handler ─────────────────────────────────────
+// Retry sur erreurs TRANSITOIRES d'Anthropic (429 rate-limit, 529 overloaded, 5xx).
+// Sans ça, un simple 529 (fréquent aux heures de pointe) repassait tel quel → le front
+// voyait !resp.ok et basculait en "Local" EN SILENCE. C'était LA cause du mode Local
+// intermittent. + timeout dur par tentative pour ne jamais bloquer sur un upstream figé.
+const _TRANSIENT = [429, 500, 502, 503, 529];
+
 async function handleClaudeAPI(request, env) {
   if (request.method !== 'POST') {
     return new Response('Method not allowed', { status: 405, headers: corsHeaders() });
   }
 
   const body = await request.json();
+  const payload = JSON.stringify(body);
+  const MAX_TRIES = 3;
+  let response = null, lastErr = null;
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': env.ANTHROPIC_API_KEY,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify(body),
-  });
+  for (let attempt = 0; attempt < MAX_TRIES; attempt++) {
+    // Timeout par tentative (12s) — le front coupe à 15s, on reste dessous pour laisser
+    // la place à au moins un retry sans dépasser sa propre limite.
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 12000);
+    try {
+      response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': env.ANTHROPIC_API_KEY,
+          'anthropic-version': '2023-06-01',
+        },
+        body: payload,
+        signal: ctrl.signal,
+      });
+      clearTimeout(timer);
+      // Succès ou erreur définitive (4xx hors 429) → on ne retente pas
+      if (response.ok || _TRANSIENT.indexOf(response.status) === -1) break;
+    } catch (e) {
+      clearTimeout(timer);
+      lastErr = e;                       // timeout/abort/réseau → on retente
+    }
+    // Backoff court avant la prochaine tentative (400ms puis 900ms)
+    if (attempt < MAX_TRIES - 1) {
+      await new Promise((r) => setTimeout(r, attempt === 0 ? 400 : 900));
+    }
+  }
+
+  if (!response) {
+    return new Response(JSON.stringify({ error: 'upstream_unreachable', detail: lastErr && lastErr.message }), {
+      status: 502,
+      headers: { ...corsHeaders(), 'Content-Type': 'application/json' },
+    });
+  }
 
   const data = await response.text();
 
