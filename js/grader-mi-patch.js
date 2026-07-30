@@ -13,25 +13,35 @@
         if (typeof _callClaude !== 'function' || typeof _buildUserPrompt !== 'function' || typeof _buildSystemPrompt !== 'function') return;
         clearInterval(_miPatchInterval);
 
-        // ═══ 1. OVERRIDE _callClaude: Sonnet → Opus ═══
+        // ═══ 1. OVERRIDE _callClaude — FLUIDITÉ : Sonnet d'abord (rapide/fiable), Opus en repli ═══
+        // Le grading = ajustements bornés ±15 + un verdict → Sonnet suffit largement et répond
+        // en ~5-10 s au lieu de ~23 s pour Opus (qui timeoutait → mode "Local" = perte du détail).
+        // Si Sonnet échoue/illisible, on tente Opus ; on ne tombe en "Local" que si LES DEUX échouent.
         var _origCallClaude = _callClaude;
         _callClaude = async function(ctx, base, productType) {
-            var resp = await fetch(CONFIG.AI_ENDPOINT, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    model: 'claude-opus-4-8',
-                    max_tokens: 1500,
-                    system: _buildSystemPrompt(ctx.isInPortfolio, productType),
-                    messages: [{ role: 'user', content: _buildUserPrompt(ctx, base, productType) }]
-                })
-            });
-            if (!resp.ok) throw new Error('Claude API ' + resp.status);
-            var data = await resp.json();
-            var text = (data.content || []).filter(function(c) { return c.type === 'text'; }).map(function(c) { return c.text; }).join('');
-            return _parseJSON(text);
+            var sys = _buildSystemPrompt(ctx.isInPortfolio, productType);
+            var usr = _buildUserPrompt(ctx, base, productType);
+            async function _try(model) {
+                try {
+                    var resp = await fetch(CONFIG.AI_ENDPOINT, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ model: model, max_tokens: 1500, system: sys, messages: [{ role: 'user', content: usr }] })
+                    });
+                    if (!resp.ok) return null;
+                    var data = await resp.json();
+                    var text = (data.content || []).filter(function(c) { return c.type === 'text'; }).map(function(c) { return c.text; }).join('');
+                    return _parseJSON(text);
+                } catch (e) { return null; }
+            }
+            var res = await _try('claude-sonnet-4-5');           // rapide + fiable (défaut)
+            if (res && res.adjustments) return res;
+            var res2 = await _try('claude-opus-4-8');             // repli qualité si Sonnet échoue
+            if (res2 && res2.adjustments) return res2;
+            if (res2 || res) return res2 || res;
+            throw new Error('Claude API (Sonnet + Opus KO)');
         };
-        console.log('[GraderMI] Model switched to claude-opus-4');
+        console.log('[GraderMI] Model: Sonnet (rapide) + repli Opus');
 
         // ═══ 2. LOAD MI INTO MARKET CACHE ═══
         var _origLoadMarketData = _loadAllMarketData;
