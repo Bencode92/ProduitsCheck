@@ -1035,7 +1035,7 @@
     try {
       var resp = await fetch(CONFIG.AI_ENDPOINT, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model: CONFIG.AI_MODEL || 'claude-sonnet-4-5', max_tokens: 2000, messages: [{ role: 'user', content: prompt }] })
+        body: JSON.stringify({ model: CONFIG.AI_MODEL || 'claude-sonnet-5', max_tokens: 2000, messages: [{ role: 'user', content: prompt }] })
       });
       var data = await resp.json();
       var text = data.content ? data.content[0].text : (data.choices ? data.choices[0].message.content : '');

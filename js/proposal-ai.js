@@ -45,7 +45,7 @@ async function analyzeProposal(product) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
+        model: 'claude-sonnet-5',
         max_tokens: 300,
         messages: [{
           role: 'user',
@@ -150,7 +150,7 @@ Classe du plus int\u00e9ressant (3 \u00e9toiles) au moins int\u00e9ressant (1 \u
   try {
     const resp = await fetch(CONFIG.AI_ENDPOINT, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 800, messages: [{ role: 'user', content: prompt }] })
+      body: JSON.stringify({ model: 'claude-sonnet-5', max_tokens: 800, messages: [{ role: 'user', content: prompt }] })
     });
     const data = await resp.json();
     let text = data.content?.[0]?.text || '';

@@ -41,9 +41,9 @@
                 } catch (e) { return null; }
                 finally { if (timer) clearTimeout(timer); }
             }
-            var res = await _try('claude-sonnet-4-5', 15000);    // rapide + fiable (défaut), coupé à 15s
+            var res = await _try('claude-sonnet-5', 15000);      // Sonnet 5 : rapide + fiable (défaut), coupé à 15s
             if (res && res.adjustments) return res;
-            var res2 = await _try('claude-opus-4-8', 15000);     // repli qualité si Sonnet échoue, coupé à 15s
+            var res2 = await _try('claude-opus-4-8', 15000);     // Opus 4.8 : repli qualité si Sonnet échoue, coupé à 15s
             if (res2 && res2.adjustments) return res2;
             if (res2 || res) return res2 || res;
             throw new Error('Claude API (Sonnet + Opus KO)');
