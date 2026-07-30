@@ -5,31 +5,18 @@
     "name": "SL - PHOENIX MEMOIRE TRIMESTRIEL BNP JANVI",
     "structureType": "phoenix_memoire",
     "productType": "autocall",
-    "grade": "B",
-    "score": 74,
+    "grade": "A",
+    "score": 75,
     "p1": 81,
     "p2": 75,
     "p3": 70,
-    "p4": 67,
+    "p4": 70,
     "aiUsed": false,
     "expMat": 1.3,
-    "couponProb": 91.6
-  },
-  {
-    "bank": "cic",
-    "file": "sp_mq579fp6_rgfut.json",
-    "name": "Digitale WO BNP Sanofi Juin 2029",
-    "structureType": "digitale_memoire",
-    "productType": "autocall",
-    "grade": "B",
-    "score": 65,
-    "p1": 64,
-    "p2": 58,
-    "p3": 85,
-    "p4": 65,
-    "aiUsed": false,
-    "expMat": 3,
-    "couponProb": null
+    "couponProb": 91.6,
+    "basketDiv": 1.06,
+    "vsDirectGap": 5.3,
+    "vsDirectAdj": 3
   },
   {
     "bank": "swiss-life",
@@ -45,7 +32,27 @@
     "p4": 65,
     "aiUsed": false,
     "expMat": 5.5,
-    "couponProb": 87.6
+    "couponProb": 87.6,
+    "basketDiv": 0
+  },
+  {
+    "bank": "cic",
+    "file": "sp_mq579fp6_rgfut.json",
+    "name": "Digitale WO BNP Sanofi Juin 2029",
+    "structureType": "digitale_memoire",
+    "productType": "autocall",
+    "grade": "B",
+    "score": 64,
+    "p1": 64,
+    "p2": 58,
+    "p3": 85,
+    "p4": 62,
+    "aiUsed": false,
+    "expMat": 3,
+    "couponProb": null,
+    "basketDiv": 5.19,
+    "vsDirectGap": 0.5,
+    "vsDirectAdj": -3
   },
   {
     "bank": "swiss-life",
@@ -54,14 +61,17 @@
     "structureType": "autocall",
     "productType": "autocall",
     "grade": "B",
-    "score": 65,
+    "score": 64,
     "p1": 53,
     "p2": 75,
     "p3": 85,
-    "p4": 61,
+    "p4": 57,
     "aiUsed": false,
     "expMat": 1.4,
-    "couponProb": 58.1
+    "couponProb": 58.1,
+    "basketDiv": 5.8,
+    "vsDirectGap": -0.7,
+    "vsDirectAdj": -4
   },
   {
     "bank": "swiss-life",
@@ -77,7 +87,10 @@
     "p4": 34,
     "aiUsed": false,
     "expMat": 1.4,
-    "couponProb": 77.3
+    "couponProb": 77.3,
+    "basketDiv": 5.8,
+    "vsDirectGap": -1.4,
+    "vsDirectAdj": -5
   },
   {
     "bank": "cic",
@@ -93,7 +106,8 @@
     "p4": 34,
     "aiUsed": false,
     "expMat": 2,
-    "couponProb": 67.6
+    "couponProb": 67.6,
+    "basketDiv": 0
   },
   {
     "bank": "swiss-life",
@@ -109,7 +123,8 @@
     "p4": 67,
     "aiUsed": false,
     "expMat": 1.6,
-    "couponProb": 92.1
+    "couponProb": 92.1,
+    "basketDiv": 0
   },
   {
     "bank": "cic",
@@ -125,7 +140,8 @@
     "p4": 76,
     "aiUsed": false,
     "expMat": 1.6,
-    "couponProb": 81.2
+    "couponProb": 81.2,
+    "basketDiv": 0
   },
   {
     "bank": "cic",
@@ -141,7 +157,10 @@
     "p4": 34,
     "aiUsed": false,
     "expMat": 3.3,
-    "couponProb": 60
+    "couponProb": 60,
+    "basketDiv": 3.16,
+    "vsDirectGap": 4.8,
+    "vsDirectAdj": 3
   },
   {
     "bank": "swiss-life",
@@ -157,7 +176,8 @@
     "p4": 35,
     "aiUsed": false,
     "expMat": 1.6,
-    "couponProb": 91.4
+    "couponProb": 91.4,
+    "basketDiv": 0
   },
   {
     "bank": "swiss-life",
@@ -173,7 +193,8 @@
     "p4": 65,
     "aiUsed": false,
     "expMat": 1.6,
-    "couponProb": 97.3
+    "couponProb": 97.3,
+    "basketDiv": 0
   },
   {
     "bank": "swiss-life",
@@ -186,10 +207,13 @@
     "p1": 67,
     "p2": 64,
     "p3": 85,
-    "p4": 29,
+    "p4": 30,
     "aiUsed": false,
     "expMat": 3.3,
-    "couponProb": 60
+    "couponProb": 60,
+    "basketDiv": 3.16,
+    "vsDirectGap": 5.1,
+    "vsDirectAdj": 3
   },
   {
     "bank": "swiss-life",
@@ -205,7 +229,10 @@
     "p4": 65,
     "aiUsed": false,
     "expMat": 3.3,
-    "couponProb": 95.5
+    "couponProb": 95.5,
+    "basketDiv": 3.16,
+    "vsDirectGap": 2.8,
+    "vsDirectAdj": 0
   },
   {
     "bank": "swiss-life",
@@ -221,7 +248,10 @@
     "p4": 34,
     "aiUsed": false,
     "expMat": 1.6,
-    "couponProb": 46.6
+    "couponProb": 46.6,
+    "basketDiv": 3,
+    "vsDirectGap": 3.2,
+    "vsDirectAdj": 1
   },
   {
     "bank": "swiss-life",
@@ -237,7 +267,10 @@
     "p4": 43,
     "aiUsed": false,
     "expMat": 3.3,
-    "couponProb": 95.5
+    "couponProb": 95.5,
+    "basketDiv": 3.16,
+    "vsDirectGap": 2.8,
+    "vsDirectAdj": 0
   },
   {
     "bank": "swiss-life",
@@ -253,7 +286,10 @@
     "p4": 34,
     "aiUsed": false,
     "expMat": 1.6,
-    "couponProb": 64.1
+    "couponProb": 64.1,
+    "basketDiv": 2.76,
+    "vsDirectGap": 5.3,
+    "vsDirectAdj": 3
   },
   {
     "bank": "swiss-life",
@@ -269,7 +305,8 @@
     "p4": 34,
     "aiUsed": false,
     "expMat": 1.6,
-    "couponProb": 96.8
+    "couponProb": 96.8,
+    "basketDiv": 0
   },
   {
     "bank": "swiss-life",
@@ -282,10 +319,13 @@
     "p1": 74,
     "p2": 66,
     "p3": 85,
-    "p4": 58,
+    "p4": 59,
     "aiUsed": false,
     "expMat": 1.5,
-    "couponProb": 94.6
+    "couponProb": 94.6,
+    "basketDiv": 1.06,
+    "vsDirectGap": 3.6,
+    "vsDirectAdj": 1
   },
   {
     "bank": "swiss-life",
@@ -301,7 +341,10 @@
     "p4": 34,
     "aiUsed": false,
     "expMat": 2.1,
-    "couponProb": 68.6
+    "couponProb": 68.6,
+    "basketDiv": 5.19,
+    "vsDirectGap": 1.1,
+    "vsDirectAdj": -2
   },
   {
     "bank": "cic",
@@ -317,7 +360,10 @@
     "p4": 35,
     "aiUsed": false,
     "expMat": 3,
-    "couponProb": null
+    "couponProb": null,
+    "basketDiv": 2.76,
+    "vsDirectGap": 2,
+    "vsDirectAdj": -1
   },
   {
     "bank": "swiss-life",
@@ -333,7 +379,10 @@
     "p4": 34,
     "aiUsed": false,
     "expMat": 4.9,
-    "couponProb": 54.4
+    "couponProb": 54.4,
+    "basketDiv": 3.22,
+    "vsDirectGap": 3.3,
+    "vsDirectAdj": 1
   },
   {
     "bank": "sg",
@@ -349,7 +398,10 @@
     "p4": 34,
     "aiUsed": false,
     "expMat": 2.5,
-    "couponProb": 96.2
+    "couponProb": 96.2,
+    "basketDiv": 0,
+    "vsDirectGap": 6.1,
+    "vsDirectAdj": 3
   },
   {
     "bank": "swiss-life",
@@ -365,7 +417,8 @@
     "p4": 35,
     "aiUsed": false,
     "expMat": 3,
-    "couponProb": 51.3
+    "couponProb": 51.3,
+    "basketDiv": 0
   },
   {
     "bank": "sg",
@@ -381,7 +434,10 @@
     "p4": 34,
     "aiUsed": false,
     "expMat": 2.5,
-    "couponProb": 79.1
+    "couponProb": 79.1,
+    "basketDiv": 0,
+    "vsDirectGap": 6.7,
+    "vsDirectAdj": 3
   },
   {
     "bank": "sg",
@@ -397,7 +453,10 @@
     "p4": 34,
     "aiUsed": false,
     "expMat": 2.5,
-    "couponProb": 87.8
+    "couponProb": 87.8,
+    "basketDiv": 0,
+    "vsDirectGap": 6.7,
+    "vsDirectAdj": 3
   },
   {
     "bank": "sg",
@@ -413,7 +472,8 @@
     "p4": 24,
     "aiUsed": false,
     "expMat": 2.3,
-    "couponProb": 84.7
+    "couponProb": 84.7,
+    "basketDiv": 0
   },
   {
     "bank": "cic",
@@ -429,7 +489,8 @@
     "p4": 34,
     "aiUsed": false,
     "expMat": 1.6,
-    "couponProb": 50.1
+    "couponProb": 50.1,
+    "basketDiv": 0
   },
   {
     "bank": "null",
@@ -445,7 +506,8 @@
     "p4": 15,
     "aiUsed": false,
     "expMat": 1.75,
-    "couponProb": 47.7
+    "couponProb": 47.7,
+    "basketDiv": 0
   },
   {
     "bank": "cic",
@@ -461,7 +523,8 @@
     "p4": 67,
     "aiUsed": false,
     "expMat": 1.2,
-    "couponProb": null
+    "couponProb": null,
+    "basketDiv": 0
   },
   {
     "bank": "cic",
@@ -477,7 +540,8 @@
     "p4": 64,
     "aiUsed": false,
     "expMat": 1.2,
-    "couponProb": null
+    "couponProb": null,
+    "basketDiv": 0
   },
   {
     "bank": "swiss-life",
@@ -493,7 +557,8 @@
     "p4": 65,
     "aiUsed": false,
     "expMat": 1.2,
-    "couponProb": null
+    "couponProb": null,
+    "basketDiv": 0
   },
   {
     "bank": "cic",
@@ -509,7 +574,8 @@
     "p4": 58,
     "aiUsed": false,
     "expMat": 1.2,
-    "couponProb": null
+    "couponProb": null,
+    "basketDiv": 0
   },
   {
     "bank": "cic",
@@ -525,7 +591,8 @@
     "p4": 62,
     "aiUsed": false,
     "expMat": 1.2,
-    "couponProb": null
+    "couponProb": null,
+    "basketDiv": 0
   },
   {
     "bank": "cic",
@@ -541,7 +608,8 @@
     "p4": 61,
     "aiUsed": false,
     "expMat": 2.3,
-    "couponProb": 99
+    "couponProb": 99,
+    "basketDiv": 0
   },
   {
     "bank": "cic",
@@ -557,7 +625,10 @@
     "p4": 38,
     "aiUsed": false,
     "expMat": 3,
-    "couponProb": 77.3
+    "couponProb": 77.3,
+    "basketDiv": 2.76,
+    "vsDirectGap": 2.5,
+    "vsDirectAdj": 0
   },
   {
     "bank": "swiss-life",
@@ -573,7 +644,8 @@
     "p4": 34,
     "aiUsed": false,
     "expMat": 2.3,
-    "couponProb": 47.4
+    "couponProb": 47.4,
+    "basketDiv": 0
   },
   {
     "bank": "sg",
@@ -589,7 +661,8 @@
     "p4": 14,
     "aiUsed": false,
     "expMat": 8.27,
-    "couponProb": 50.3
+    "couponProb": 50.3,
+    "basketDiv": 0
   },
   {
     "bank": "sg",
@@ -605,7 +678,8 @@
     "p4": 74,
     "aiUsed": false,
     "expMat": 3,
-    "couponProb": 95
+    "couponProb": 95,
+    "basketDiv": 0.3
   },
   {
     "bank": "sg",
@@ -621,7 +695,8 @@
     "p4": 74,
     "aiUsed": false,
     "expMat": 3,
-    "couponProb": 95
+    "couponProb": 95,
+    "basketDiv": 0.3
   },
   {
     "bank": "sg",
@@ -637,7 +712,8 @@
     "p4": 77,
     "aiUsed": false,
     "expMat": 3,
-    "couponProb": 95
+    "couponProb": 95,
+    "basketDiv": 0.3
   },
   {
     "bank": "sg",
@@ -653,7 +729,8 @@
     "p4": 74,
     "aiUsed": false,
     "expMat": 3,
-    "couponProb": 95
+    "couponProb": 95,
+    "basketDiv": 0.3
   },
   {
     "bank": "null",
@@ -697,7 +774,8 @@
     "p4": 65,
     "aiUsed": false,
     "expMat": 10,
-    "couponProb": 0.4367682280597367
+    "couponProb": 0.4367682280597367,
+    "basketDiv": 0
   },
   {
     "bank": "swiss-life",
@@ -713,7 +791,8 @@
     "p4": 65,
     "aiUsed": false,
     "expMat": 10,
-    "couponProb": 0.4367682280597367
+    "couponProb": 0.4367682280597367,
+    "basketDiv": 0
   },
   {
     "bank": "cic",
@@ -729,7 +808,8 @@
     "p4": 56,
     "aiUsed": false,
     "expMat": 5,
-    "couponProb": 0.6685556246980731
+    "couponProb": 0.6685556246980731,
+    "basketDiv": 0
   },
   {
     "bank": "cic",
@@ -745,7 +825,8 @@
     "p4": 57,
     "aiUsed": false,
     "expMat": 5,
-    "couponProb": 0.5916047890974954
+    "couponProb": 0.5916047890974954,
+    "basketDiv": 0
   },
   {
     "bank": "cic",
@@ -761,7 +842,8 @@
     "p4": 53,
     "aiUsed": false,
     "expMat": 5,
-    "couponProb": null
+    "couponProb": null,
+    "basketDiv": 0
   },
   {
     "bank": "sg",
@@ -777,7 +859,8 @@
     "p4": 34,
     "aiUsed": false,
     "expMat": 2.2,
-    "couponProb": 50.1
+    "couponProb": 50.1,
+    "basketDiv": 0
   },
   {
     "bank": "sg",
@@ -793,7 +876,8 @@
     "p4": 0,
     "aiUsed": false,
     "expMat": 5,
-    "couponProb": 46.2
+    "couponProb": 46.2,
+    "basketDiv": 1.17
   },
   {
     "bank": "cic",
@@ -809,7 +893,8 @@
     "p4": 49,
     "aiUsed": false,
     "expMat": 2.3,
-    "couponProb": null
+    "couponProb": null,
+    "basketDiv": 0
   },
   {
     "bank": "sg",
@@ -825,7 +910,8 @@
     "p4": 52,
     "aiUsed": false,
     "expMat": 0,
-    "couponProb": null
+    "couponProb": null,
+    "basketDiv": 0
   },
   {
     "bank": "cic",
@@ -841,6 +927,7 @@
     "p4": 52,
     "aiUsed": false,
     "expMat": 2.3,
-    "couponProb": null
+    "couponProb": null,
+    "basketDiv": 0
   }
 ]

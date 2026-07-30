@@ -70,13 +70,29 @@
             // empêchait la prime réelle (positive) de remonter un P4 de base sous-estimé.
             var newP4 = p4honest;
 
+            // ── vs ACHAT DIRECT : coût d'opportunité des dividendes abandonnés ──────────────
+            // En détenant les actions du panier en DIRECT, l'investisseur toucherait leurs
+            // dividendes (~div%/an) sans barrière. Le structuré les fait ABANDONNER. La prime du
+            // structuré n'est donc réelle que si le coupon net dépasse nettement ce dividende.
+            // Facteur BORNÉ et asymétrique (surtout malus) → ne double-compte pas le "vs CAT".
+            var basketDiv = parseFloat(md.basketDividend) || parseFloat(product.actualDividendYield) || 0;
+            var vsDirectAdj = 0, gapDirect = null;
+            if (basketDiv > 0.3) {                     // seulement les produits sur actions à dividende
+                gapDirect = expectedGross - basketDiv;  // coupon net espéré − dividende abandonné
+                vsDirectAdj = Math.max(-6, Math.min(3, Math.round((gapDirect - 2.5) * 1.4))); // neutre à +2,5 pts de gap
+                newP4 = Math.max(6, Math.min(90, newP4 + vsDirectAdj));
+                md.vsDirectGap = Math.round(gapDirect * 10) / 10;
+                md.vsDirectAdj = vsDirectAdj;
+            }
+
             var delta = (newP4 - oldP4) * 0.30;       // poids P4 = 30% (doctrine)
             result.pillars.riskPremium.score = newP4;
             result.pillars.riskPremium.reasoning =
                 'Prime vs CAT (net de frais, cohérent avec le panneau) : coupon espéré ' + _f1(couponEspere) +
                 '% (' + _f1(coupon) + '% × proba ' + Math.round(cprob * 100) + '%)' +
                 (marginAnnual > 0.05 ? ' − marge embarquée ' + _f2(marginAnnual) + '%/an' : '') +
-                ' = ' + _f1(expectedGross) + '% vs CAT ' + _f1(cat) + '% → spread ' + (spread >= 0 ? '+' : '') + _f2(spread) + '%.';
+                ' = ' + _f1(expectedGross) + '% vs CAT ' + _f1(cat) + '% → spread ' + (spread >= 0 ? '+' : '') + _f2(spread) + '%.' +
+                (gapDirect !== null ? ' | vs achat direct : coupon net ' + _f1(expectedGross) + '% − dividende panier ' + _f1(basketDiv) + '% = ' + (gapDirect >= 0 ? '+' : '') + _f1(gapDirect) + '% → ' + (vsDirectAdj >= 0 ? '+' : '') + vsDirectAdj + ' pt' + (Math.abs(vsDirectAdj) > 1 ? 's' : '') + '.' : '');
 
             if (typeof result.score === 'number') {
                 result.score = Math.round(result.score + delta);

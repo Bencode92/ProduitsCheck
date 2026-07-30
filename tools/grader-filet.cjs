@@ -151,6 +151,9 @@ function findProducts() {
         aiUsed: !!(g.metadata && g.metadata.aiUsed),
         expMat: g.metadata && g.metadata.expectedMaturity,
         couponProb: g.metadata && g.metadata.couponProbability,
+        basketDiv: g.metadata && g.metadata.basketDividend,
+        vsDirectGap: g.metadata && g.metadata.vsDirectGap,
+        vsDirectAdj: g.metadata && g.metadata.vsDirectAdj,
       });
     } catch (e) {
       results.push({ bank, file, name: (product.name||'').slice(0,42), error: e.message });
