@@ -255,6 +255,15 @@ function _renderUnderstand(p) {
   var vsDirect = protectedMat
     ? 'Tu <strong>plafonnes</strong> ta hausse (~' + f1(couponRate) + '%/an max), mais ton capital est <strong>protégé</strong> à l\'échéance. En direct : 100% de la hausse ET de la baisse.'
     : 'Tu <strong>plafonnes</strong> ta hausse (~' + f1(couponRate) + '%/an), et tu es <strong>protégé jusqu\'à −' + (isNaN(barrier) ? '?' : (100 - barrier)) + '%</strong>. Au-delà : même perte qu\'en direct. En direct : toute la hausse, toute la baisse.';
+  // Comparaison CHIFFRÉE revenu : coupon net espéré vs dividendes du panier abandonnés en direct
+  var basketDiv = (p.grading && p.grading.metadata && parseFloat(p.grading.metadata.basketDividend)) || parseFloat(p.actualDividendYield) || 0;
+  if (basketDiv > 0.3 && espereEco != null) {
+    var gapDir = espereEco - basketDiv;
+    var gapCol = gapDir >= 1.5 ? '#059669' : gapDir >= 0 ? '#B45309' : '#DC2626';
+    vsDirect = '<strong>Revenu :</strong> espéré net <strong>' + pc(espereEco) + '/an</strong> vs dividendes du panier détenu en direct <strong>' + f1(basketDiv) + '%/an</strong> → <strong style="color:' + gapCol + '">' + (gapDir >= 0 ? '+' : '') + f1(gapDir) + ' pt</strong>'
+      + (gapDir < 0.5 ? ' <span style="color:#DC2626">(⚠ tu prends le risque barrière pour à peine plus que les dividendes)</span>' : '')
+      + '.<br>' + vsDirect;
+  }
   h += '<div style="padding:9px 11px;background:#fff;border:1px solid #E2E8F0;border-radius:7px">'
     + '<div style="font-weight:700;color:#334155;margin-bottom:2px">📊 vs acheter ' + sj + ' en direct</div>'
     + '<div style="color:#475569;line-height:1.4">' + vsDirect + '</div></div>';
