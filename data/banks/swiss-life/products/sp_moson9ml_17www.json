@@ -326,7 +326,7 @@
         "score": 55,
         "base": 51,
         "delta": 0,
-        "reasoning": "Rendement: base 51 → -9 = 42 (Régime RISK_OFF + VIX 22 + volatilité 43% : probabilité réduite que RHM reste >70% semestriellement sur 1.5a malgré barrière basse, secteur défense exposé aux coupes budgétaires en ralentissement économique) | Coupon 7%, barrière 38% | Barr.coupon 70% | Mat espérée: ~1.5a (prob mat: 0%)",
+        "reasoning": "Rendement: base 51 → -9 = 42 (Régime RISK_OFF avec VIX 22 + volatilité 43% + drawdown 52% sur RHM : probabilité coupon semestriel sévèrement compromise malgré barrière 70%) | Coupon 7%, barrière 38% | Barr.coupon 70% | Mat espérée: ~1.5a (prob mat: 0%)",
         "_bsDelta": 4,
         "_bs": {
           "score": 55,
@@ -343,16 +343,16 @@
         }
       },
       "underlyingQuality": {
-        "score": 58,
+        "score": 74,
         "base": 66,
-        "delta": -8,
-        "reasoning": "Qualité: base 66 → -8 = 58 (Industrials favorisé (+3) MAIS beta 0.62 vulnérable en risk-off, drawdown 52.4% alarmant, et single-name concentration maximise le risque idiosyncratique dans un contexte de spreads crédit qui s'écartent) | Worst: RHEINMETALL AG B:60"
+        "delta": 8,
+        "reasoning": "Qualité: base 66 → +8 = 74 (Industrials FAVORISÉ en MI (beta 1.17) + Rheinmetall bénéficie du réarmement européen structurel, mais beta 0.62 limite l'upside en phase risk-off) | Worst: RHEINMETALL AG B:60"
       },
       "portfolioFit": {
         "score": 76,
         "base": 85,
         "delta": -9,
-        "reasoning": "Fit: base 85 → -9 = 76 (Portefeuilles clients à 95-100% equity 0% bonds : ajouter un produit equity à barrière 38% AGGRAVE le déséquilibre criant alors que MI recommande rééquilibrage urgent vers défensif) — nouveau — diversifie"
+        "reasoning": "Fit: base 85 → -9 = 76 (Portefeuille déjà 95-100% equity selon MI : ajouter un Phoenix mono-action cyclique aggrave dangereusement la concentration equity en période risk-off) — nouveau — diversifie"
       },
       "riskPremium": {
         "score": 62,
@@ -361,11 +361,11 @@
         "reasoning": "Prime vs CAT (net de frais, cohérent avec le panneau) : coupon espéré 6,2% (7,0% × proba 88%) − marge embarquée 1,33%/an = 4,8% vs CAT 2,8% → spread +2,03%. | vs achat direct : coupon net 4,8% − dividende panier 1,1% = +3,8% → +2 pts."
       }
     },
-    "verdict": "REJET FERME. Rheinmetall affiche un drawdown catastrophique de 52.4% avec volatilité 43%, rendant la barrière coupon 70% périlleuse en régime RISK_OFF (VIX 22, spreads HY/IG qui s'écartent). Même si industrials est favorisé, le single-name amplifie le risque : une alerte sectorielle défense (coupes budgétaires en récession) ou un choc géopolitique peut faire plonger le titre sous 38% en jours. Le coupon 7% ne compense PAS le risque de perte en capital de 62% sur un actif déjà en stress maximal, et l'ajout d'equity aggrave dangereusement un portefeuille déjà à 100% actions 0% obligations. La divergence PCE 4.07% vs CPI 2.4% annonce un policy error Fed, accélérant la correction equity que ce produit ne peut encaisser.",
+    "verdict": "Produit INADAPTÉ au contexte actuel : régime RISK_OFF exige rééquilibrage vers bonds/cash, pas ajout d'equity volatile. Rheinmetall subit -52% de drawdown avec vol 43%, rendant les coupons semestriels (barrière 70%) aléatoires sur 6 ans. Certes, industrials defense bénéficie structurellement du réarmement UE (commandes record), mais VIX 22 + spreads HY en élargissement + divergence PCE/CPI signalent rotation défensive imminente. Avec portefeuilles à 0% obligations, ce Phoenix mono-action aggrave l'exposition au pire moment : attendre consolidation macro (VIX <18) ou diversifier sur basket defensives. Coupon attractif mais timing désastreux.",
     "keyRisks": [
-      "Drawdown 52.4% + barrière capital 38% = marge de sécurité de 14.4% seulement, franchissable en 2-3 sessions si contraction défense ou choc géopolitique",
-      "Single-name industrials défense exposé aux coupes budgétaires gouvernementales en récession (divergence PCE/CPI annonce ralentissement), volatilité 43% rend coupons semestriels aléatoires",
-      "Portefeuille client 100% equity : ce produit ajoute 100k€ de risque equity concentré alors que MI exige rééquilibrage vers bonds/cash, amplifiant l'exposition à une correction de -20-30% anticipée par VIX/spreads",
+      "Drawdown catastrophique 52% + vol 43% rendent barrière coupon 70% vulnérable sur 12 semestrialités — risque sériel de non-paiement si correction equity s'amplifie",
+      "Mono-action defense : malgré thème porteur, exposition binaire aux résultats trimestriels et sanctions/embargo potentiels (risque géopolitique non diversifiable)",
+      "Portefeuille 95-100% equity + ajout Phoenix = levier caché en régime risk-off — absence totale de hedge obligataire amplifie pertes si récession 6-12 mois (signal courbe 2s10s)",
       "Barrière à 0.91σ (Danger) — vol 43.43%",
       "Note plafonnée (C) : capital non protégé + barrière en zone danger — perte en capital possible."
     ],
@@ -373,44 +373,44 @@
     "scenarios": {
       "optimistic": {
         "return_pct": 10.5,
-        "return_eur": 10500,
+        "return_eur": 31500,
         "probability": 0.15,
         "duration_years": 1.5,
-        "description": "Autocall an 1.5 à 96% : RHM rebondit +36% (vers 156€) porté par commandes défense, 3 coupons 3.5% perçus = 10.5% net, nécessite stabilisation macro rapide"
+        "description": "Autocall T3 si rebond defense post-escalade Ukraine/OTAN + rotation industrials, 9 coupons semestriels payés (3×3.5%×3)"
       },
       "base": {
-        "return_pct": 3.5,
-        "return_eur": 3500,
+        "return_pct": 14,
+        "return_eur": 42000,
         "probability": 0.25,
         "duration_years": 3,
-        "description": "RHM oscille 75-90€ (autour -20/-10%) : 2-3 coupons manqués sur 6 ans, sortie à maturité sans perte capital mais rendement 0.6%/an, sous-performance massive vs obligations"
+        "description": "Autocall T6 après consolidation macro, 6 semestrialités payées avec 2-3 skips en phases stress, capital préservé"
       },
       "stress": {
-        "return_pct": -35,
-        "return_eur": -35000,
-        "probability": 0.4,
+        "return_pct": -8,
+        "return_eur": -8000,
+        "probability": 0.35,
         "duration_years": 6,
-        "description": "Récession 2025-26 (anticipée par courbe 2s10s normalisée) : RHM tombe à 50€ (-52%), franchit barrière 38%, perte de 35k€ à maturité, scenario PROBABLE vu drawdown actuel"
+        "description": "Barrière capital 38% effleurée en récession 2025-2026, 40% coupons payés seulement, remboursement ~92k€ à maturité"
       },
       "worst": {
-        "return_pct": -62,
-        "return_eur": -62000,
-        "probability": 0.2,
+        "return_pct": -35,
+        "return_eur": -35000,
+        "probability": 0.25,
         "duration_years": 6,
-        "description": "Choc défense (paix Ukraine ou coupes budgétaires US/EU) + récession sévère : RHM à 38€ (niveau barrière), perte maximale de 62k€, volatilité 43% rend ce scenario crédible en 12-18 mois"
+        "description": "Krach sector defense (embargo/paix Ukraine) + récession : RHM -60% du spot, barrière 38% franchie, perte alignée sur sous-jacent, zéro coupon"
       }
     },
     "confidenceInterval": {
-      "low": 35,
-      "high": 51,
+      "low": 40,
+      "high": 56,
       "halfWidth": 8,
       "gradeStable": false,
       "gradeRange": "D-C",
-      "label": "D [35-51]"
+      "label": "C [40-56]"
     },
     "metadata": {
-      "gradedAt": "2026-07-30T14:24:43.542Z",
-      "durationMs": 33187,
+      "gradedAt": "2026-07-30T14:58:04.367Z",
+      "durationMs": 27827,
       "aiUsed": true,
       "version": "7.1",
       "productType": "autocall",
@@ -435,7 +435,7 @@
       "baseGrade": "C",
       "adjustments": {
         "p1": -9,
-        "p2": -8,
+        "p2": 8,
         "p3": -9,
         "p4": 5
       },
@@ -445,9 +445,9 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 35,
-      "ci_high": 51,
-      "ci_label": "D [35-51]",
+      "ci_low": 40,
+      "ci_high": 56,
+      "ci_label": "C [40-56]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
@@ -472,7 +472,7 @@
         "p4": 0.25
       },
       "inputHash": "gnn5c7f",
-      "gradeT0": "2026-07-30T14:24:43.542Z",
+      "gradeT0": "2026-07-30T14:58:04.367Z",
       "trackingLevelAt0": null,
       "envelopeMode": "swiss-life",
       "vsDirectGap": 3.8,
@@ -488,6 +488,7 @@
           "perf_1y": -37.36,
           "volatility_3y": 43.43,
           "max_drawdown_3y": 52.4,
+          "dividend_yield": 1.06,
           "buffett_score": 60,
           "quality_score": 72,
           "buffett_grade": "B"
@@ -496,23 +497,23 @@
     },
     "regimeScenarios": {
       "current": {
-        "score": 47,
+        "score": 51,
         "grade": "C",
         "label": "Actuel (risk_off)",
         "desc": "Régime actuel → volatilité modérée"
       },
       "bull": {
-        "score": 51,
+        "score": 56,
         "grade": "C",
         "label": "Bull / Risk-on",
-        "delta": 4,
+        "delta": 5,
         "desc": "Marchés haussiers → prob coupon monte, barrière safe"
       },
       "crash": {
-        "score": 34,
+        "score": 39,
         "grade": "D",
         "label": "Crash / Récession",
-        "delta": -13,
+        "delta": -12,
         "desc": "Marchés baissiers → barrière menacée, vol en hausse"
       }
     }
