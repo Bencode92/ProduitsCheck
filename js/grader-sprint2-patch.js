@@ -39,7 +39,7 @@
                 var vol = 25; // default
                 try {
                     if (typeof _mktCache !== 'undefined' && _mktCache && p.underlyings) {
-                        var allStocks = [].concat(_mktCache.stocksEurope || [], _mktCache.stocksUS || []);
+                        var allStocks = [].concat(_mktCache.stocksEurope || [], _mktCache.stocksUS || [], _mktCache.stocksAsia || []);
                         p.underlyings.forEach(function(u) {
                             var tk = typeof _resolveAlias === 'function' ? _resolveAlias(u) : u.toUpperCase();
                             var s = allStocks.find(function(x) { return x.ticker === tk; });

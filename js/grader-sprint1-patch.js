@@ -119,7 +119,7 @@
 
             // Try to get real vol from market data
             if (typeof _mktCache !== 'undefined' && _mktCache) {
-                var allStocks = [].concat(_mktCache.stocksEurope || [], _mktCache.stocksUS || []);
+                var allStocks = [].concat(_mktCache.stocksEurope || [], _mktCache.stocksUS || [], _mktCache.stocksAsia || []);
                 if (p.underlyings && p.underlyings.length > 0) {
                     var maxVol = 0;
                     p.underlyings.forEach(function(u) {
@@ -176,7 +176,7 @@
 
             // Get real vol (same logic as above)
             if (typeof _mktCache !== 'undefined' && _mktCache) {
-                var allStocks = [].concat(_mktCache.stocksEurope || [], _mktCache.stocksUS || []);
+                var allStocks = [].concat(_mktCache.stocksEurope || [], _mktCache.stocksUS || [], _mktCache.stocksAsia || []);
                 if (p.underlyings && p.underlyings.length > 0) {
                     var maxVol = 0;
                     p.underlyings.forEach(function(u) {

@@ -22,7 +22,7 @@ jobs:
         run: |
           mkdir -p data/market
           BASE="https://raw.githubusercontent.com/Bencode92/stock-analysis-platform/main/data"
-          for f in stocks_europe.json stocks_us.json markets.json sectors.json market_context.json macro_indicators.json; do
+          for f in stocks_europe.json stocks_us.json stocks_asia.json markets.json sectors.json market_context.json macro_indicators.json; do
             curl -sL "$BASE/$f" -o "data/market/$f"
             echo "$f: $(wc -c < data/market/$f) bytes"
           done
@@ -75,7 +75,7 @@ jobs:
 
           index = {}
           ts = ''
-          for region_file in ['stocks_europe.json', 'stocks_us.json']:
+          for region_file in ['stocks_europe.json', 'stocks_us.json', 'stocks_asia.json']:
               path = f'data/market/{region_file}'
               if not os.path.exists(path): continue
               with open(path) as f: data = json.load(f)
