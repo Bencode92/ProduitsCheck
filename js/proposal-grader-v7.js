@@ -557,6 +557,25 @@
     if (isBasket && isWorstOf) isWorstOf = false;
     var hasMemory = (coupon.memory === true) || st === 'phoenix_memoire';
 
+    // ─── RANGE ACCRUAL: mécanique CORRIDOR (coupon = fraction du temps où le taux de
+    // référence reste dans [borne_basse, borne_haute]) — AVANT isRate, sinon undType 'rates'
+    // enverrait ce produit au modèle taux générique et jetterait le P1 corridor. ───
+    if (st === 'range_accrual' && typeof window._computeP1RangeAccrual === 'function') {
+      if (!norm.rangeAccrual && product.rangeAccrual) norm.rangeAccrual = product.rangeAccrual;
+      if (!norm.maturityYears && product.maturityYears) norm.maturityYears = product.maturityYears;
+      var raScore = window._computeP1RangeAccrual(norm);
+      var raProb = (norm._rangeProb != null) ? norm._rangeProb : 0.6;
+      return {
+        score: raScore,
+        probCoupon: raProb,
+        rendementNet: (norm._ratesRendementNet != null ? norm._ratesRendementNet : annRate) || 0,
+        perteEsperee: isProtected ? 0 : 0,
+        matEsperee: matMax,
+        vols: null, isBasket: false, volEstimated: false,
+        _method: 'range_accrual_corridor'
+      };
+    }
+
     // ─── RATE PRODUCTS: use historical data instead of BS ──────
     if (isRate) {
       var rateResult = _computeRateP1Historical(product, norm, annRate, triggerCoupon, matMax, hasMemory, isProtected);

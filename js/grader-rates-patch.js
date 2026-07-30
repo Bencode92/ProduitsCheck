@@ -445,6 +445,14 @@
       return Math.max(0, Math.min(100, Math.round(s)));
     }
 
+    // Exposer la mécanique corridor pour que v7 (_computeBSP1) l'utilise au lieu d'écraser
+    // le P1 Range Accrual par le modèle taux générique (isRate captait undType 'rates').
+    if (typeof window !== 'undefined') {
+      window._computeP1RangeAccrual = _computeP1RangeAccrual;
+      window._computeP2RangeAccrual = _computeP2RangeAccrual;
+      window._computeP4RangeAccrual = _computeP4RangeAccrual;
+    }
+
     // ═══ BUILD RATE CONTEXT STRING ═══
     function _buildRateContext() {
         if (!_ratesData) return '';
