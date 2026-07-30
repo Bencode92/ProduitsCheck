@@ -21,22 +21,29 @@
         _callClaude = async function(ctx, base, productType) {
             var sys = _buildSystemPrompt(ctx.isInPortfolio, productType);
             var usr = _buildUserPrompt(ctx, base, productType);
-            async function _try(model) {
+            // Timeout dur par appel : un proxy qui rame est abandonné à 15 s au lieu de
+            // traîner jusqu'au timeout navigateur. Sinon Sonnet(19s)+Opus(19s)=38s avant Local.
+            async function _try(model, timeoutMs) {
+                var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+                var timer = ctrl ? setTimeout(function() { ctrl.abort(); }, timeoutMs || 15000) : null;
                 try {
                     var resp = await fetch(CONFIG.AI_ENDPOINT, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ model: model, max_tokens: 1500, system: sys, messages: [{ role: 'user', content: usr }] })
+                        body: JSON.stringify({ model: model, max_tokens: 1500, system: sys, messages: [{ role: 'user', content: usr }] }),
+                        signal: ctrl ? ctrl.signal : undefined
                     });
+                    if (timer) { clearTimeout(timer); timer = null; }
                     if (!resp.ok) return null;
                     var data = await resp.json();
                     var text = (data.content || []).filter(function(c) { return c.type === 'text'; }).map(function(c) { return c.text; }).join('');
                     return _parseJSON(text);
                 } catch (e) { return null; }
+                finally { if (timer) clearTimeout(timer); }
             }
-            var res = await _try('claude-sonnet-4-5');           // rapide + fiable (défaut)
+            var res = await _try('claude-sonnet-4-5', 15000);    // rapide + fiable (défaut), coupé à 15s
             if (res && res.adjustments) return res;
-            var res2 = await _try('claude-opus-4-8');             // repli qualité si Sonnet échoue
+            var res2 = await _try('claude-opus-4-8', 15000);     // repli qualité si Sonnet échoue, coupé à 15s
             if (res2 && res2.adjustments) return res2;
             if (res2 || res) return res2 || res;
             throw new Error('Claude API (Sonnet + Opus KO)');
