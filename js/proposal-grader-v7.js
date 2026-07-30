@@ -106,11 +106,12 @@
     return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
   }
 
-  function _probBreach(barrierPct, volPct, T, rPct) {
+  function _probBreach(barrierPct, volPct, T, rPct, qPct) {
     if (!barrierPct || barrierPct <= 0 || barrierPct >= 100) return 0;
-    var sigma = volPct / 100, r = (rPct || 0) / 100;
+    var sigma = volPct / 100, r = (rPct || 0) / 100, q = (qPct || 0) / 100;
     T = Math.max(0.25, T);
-    var mu = r - sigma * sigma / 2, sqrtT = Math.sqrt(T);
+    // Dérive r − q : dividende/décrément abaissent le forward → barrière plus probablement touchée (perte plus juste)
+    var mu = r - q - sigma * sigma / 2, sqrtT = Math.sqrt(T);
     var logSB = Math.log(100 / barrierPct);
     var d1 = (logSB + mu * T) / (sigma * sqrtT);
     var d2 = (-logSB + mu * T) / (sigma * sqrtT);
@@ -203,10 +204,11 @@
   }
 
   function _resolveVols(unds, undType) {
-    var vols = [], defaultVol = DEFAULT_VOLS[undType] || 25;
+    var vols = [], defaultVol = DEFAULT_VOLS[undType] || 25, estimated = false;
     if (unds.length > 0) {
-      unds.forEach(function(u) { vols.push(_resolveVol(u) || defaultVol); });
-    } else { vols.push(defaultVol); }
+      unds.forEach(function(u) { var v = _resolveVol(u); if (!v) { estimated = true; v = defaultVol; } vols.push(v); });
+    } else { vols.push(defaultVol); estimated = true; }
+    vols._estimated = estimated; // au moins une vol vient d'un DÉFAUT (pas de vraie donnée) → à signaler
     return vols;
   }
 
@@ -564,7 +566,9 @@
 
     var vols = _resolveVols(unds, undType);
     var r = RISK_FREE_RATE; // €STR for BS diffusion, not CAT benchmark
-    var qDivDec = (div || 0) + (dec || 0); // dividende + décrément → drift r−q (forward abaissé)
+    // Drift r−q : SEUL le DIVIDENDE entre ici. Le décrément est déjà compté par le drag (rendement)
+    // + _applyDecrementPenalty (P1/P4) → l'inclure aussi dans la dérive ferait un triple compte.
+    var qDivDec = (div || 0);
     var probCoupon, couponEffectif, perteEsperee;
 
     // Get real correlation if available (from stock-analysis-platform data)
@@ -626,7 +630,7 @@
     perteEsperee = 0;
     if (!isProtected && barrierCapital > 0 && barrierCapital < 100) {
       var volForBreach = (isBasket && vols.length > 1) ? _basketVol(vols, 0.4) : (vols.length > 0 ? Math.max.apply(null, vols) : 25);
-      var probB = _probBreach(barrierCapital, volForBreach, matEsperee, r);
+      var probB = _probBreach(barrierCapital, volForBreach, matEsperee, r, qDivDec);
       // Swiss Life: lower loss multiplier (long-term envelope, risk accepted)
       var lossMult = _isSwissLifeEnvelope(product) ? 0.6 : 1.3;
       perteEsperee = (1 - barrierCapital / 100) * 100 * lossMult * probB / Math.max(1, matEsperee);
@@ -643,7 +647,7 @@
       rendementNet: Math.round(rendementNet * 100) / 100,
       perteEsperee: Math.round(perteEsperee * 100) / 100,
       couponEffectif: Math.round(couponEffectif * 100) / 100,
-      vols: vols, matEsperee: matEsperee, isBasket: isBasket
+      vols: vols, matEsperee: matEsperee, isBasket: isBasket, volEstimated: !!(vols && vols._estimated)
     };
   }
 
@@ -1016,6 +1020,13 @@
           result.metadata.expectedMaturity = bs.matEsperee;
           result.metadata.couponProbability = bs.probCoupon;
           result.metadata.isBasket = bs.isBasket;
+          // Honnêteté des inputs : signaler quand la vol vient d'un DÉFAUT (pas de donnée réelle) → note à prendre avec précaution
+          result.metadata.volEstimated = !!bs.volEstimated;
+          if (bs.volEstimated) {
+            if (result.pillars.adjustedReturn.reasoning) result.pillars.adjustedReturn.reasoning += ' | ⚠ vol estimée (défaut, pas de donnée réelle)';
+            if (!result.keyRisks) result.keyRisks = [];
+            if (result.keyRisks.push && !result.keyRisks.some(function (k) { return ('' + k).indexOf('vol estimée') >= 0; })) result.keyRisks.push('Volatilité estimée (défaut) — pas de donnée marché sur ce sous-jacent ; note à prendre avec précaution.');
+          }
           // Rate product historical data
           if (bs.isRate) {
             result.metadata.isRateHistorical = true;
