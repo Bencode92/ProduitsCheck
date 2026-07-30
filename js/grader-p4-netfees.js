@@ -76,13 +76,23 @@
             // structuré n'est donc réelle que si le coupon net dépasse nettement ce dividende.
             // Facteur BORNÉ et asymétrique (surtout malus) → ne double-compte pas le "vs CAT".
             var basketDiv = parseFloat(md.basketDividend) || parseFloat(product.actualDividendYield) || 0;
-            var vsDirectAdj = 0, gapDirect = null;
+            var basketVol = parseFloat(md.basketVol) || 0;
+            var vsDirectAdj = 0, gapDirect = null, divAdj = null, volFactor = 1;
             if (basketDiv > 0.3) {                     // seulement les produits sur actions à dividende
-                gapDirect = expectedGross - basketDiv;  // coupon net espéré − dividende abandonné
-                vsDirectAdj = Math.max(-6, Math.min(3, Math.round((gapDirect - 2.5) * 1.4))); // neutre à +2,5 pts de gap
+                // Détenir l'action en direct = toucher le dividende MAIS encaisser toute sa volatilité.
+                // Un gros dividende sur un titre très volatil est un revenu RISQUÉ → on l'escompte par
+                // la vol (réf 30%). Haute vol → dividende compte moins car la protection barrière du
+                // structuré compense l'abandon de ce dividende risqué. Le structuré se juge donc contre
+                // « détenir-l'action-avec-sa-volatilité », pas contre un dividende sans risque.
+                volFactor = basketVol > 0 ? Math.max(0.6, Math.min(2.2, basketVol / 30)) : 1;
+                divAdj = basketDiv / volFactor;         // dividende risque-ajusté
+                gapDirect = expectedGross - divAdj;     // coupon net (protégé) vs dividende risqué
+                vsDirectAdj = Math.max(-6, Math.min(3, Math.round((gapDirect - 2.5) * 1.4))); // neutre à +2,5 pts
                 newP4 = Math.max(6, Math.min(90, newP4 + vsDirectAdj));
                 md.vsDirectGap = Math.round(gapDirect * 10) / 10;
                 md.vsDirectAdj = vsDirectAdj;
+                md.vsDirectDivAdj = Math.round(divAdj * 10) / 10;
+                md.vsDirectVolFactor = Math.round(volFactor * 100) / 100;
             }
 
             var delta = (newP4 - oldP4) * 0.30;       // poids P4 = 30% (doctrine)
@@ -92,7 +102,7 @@
                 '% (' + _f1(coupon) + '% × proba ' + Math.round(cprob * 100) + '%)' +
                 (marginAnnual > 0.05 ? ' − marge embarquée ' + _f2(marginAnnual) + '%/an' : '') +
                 ' = ' + _f1(expectedGross) + '% vs CAT ' + _f1(cat) + '% → spread ' + (spread >= 0 ? '+' : '') + _f2(spread) + '%.' +
-                (gapDirect !== null ? ' | vs achat direct : coupon net ' + _f1(expectedGross) + '% − dividende panier ' + _f1(basketDiv) + '% = ' + (gapDirect >= 0 ? '+' : '') + _f1(gapDirect) + '% → ' + (vsDirectAdj >= 0 ? '+' : '') + vsDirectAdj + ' pt' + (Math.abs(vsDirectAdj) > 1 ? 's' : '') + '.' : '');
+                (gapDirect !== null ? ' | vs achat direct : coupon net ' + _f1(expectedGross) + '% vs dividende panier ' + _f1(basketDiv) + '%' + (volFactor !== 1 ? ' risque-ajusté (vol ' + Math.round(basketVol) + '% → ' + _f1(divAdj) + '%)' : '') + ' = ' + (gapDirect >= 0 ? '+' : '') + _f1(gapDirect) + '% → ' + (vsDirectAdj >= 0 ? '+' : '') + vsDirectAdj + ' pt' + (Math.abs(vsDirectAdj) > 1 ? 's' : '') + '.' : '');
 
             if (typeof result.score === 'number') {
                 result.score = Math.round(result.score + delta);

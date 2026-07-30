@@ -248,33 +248,41 @@ function _renderUnderstand(p) {
   });
   h += '</div>';
 
-  // rendement + comparaisons
+  // ── Trilemme : 3 façons de placer ce cash, rendement ET risque ──────────────
   var espCol = (espereEco != null && espereEco >= catRate) ? '#059669' : '#DC2626';
-  h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:11px">';
-  // vs direct
-  var vsDirect = protectedMat
-    ? 'Tu <strong>plafonnes</strong> ta hausse (~' + f1(couponRate) + '%/an max), mais ton capital est <strong>protégé</strong> à l\'échéance. En direct : 100% de la hausse ET de la baisse.'
-    : 'Tu <strong>plafonnes</strong> ta hausse (~' + f1(couponRate) + '%/an), et tu es <strong>protégé jusqu\'à −' + (isNaN(barrier) ? '?' : (100 - barrier)) + '%</strong>. Au-delà : même perte qu\'en direct. En direct : toute la hausse, toute la baisse.';
-  // Comparaison CHIFFRÉE revenu : coupon net espéré vs dividendes du panier abandonnés en direct
-  var basketDiv = (p.grading && p.grading.metadata && parseFloat(p.grading.metadata.basketDividend)) || parseFloat(p.actualDividendYield) || 0;
-  if (basketDiv > 0.3 && espereEco != null) {
-    var gapDir = espereEco - basketDiv;
-    var gapCol = gapDir >= 1.5 ? '#059669' : gapDir >= 0 ? '#B45309' : '#DC2626';
-    vsDirect = '<strong>Revenu :</strong> espéré net <strong>' + pc(espereEco) + '/an</strong> vs dividendes du panier détenu en direct <strong>' + f1(basketDiv) + '%/an</strong> → <strong style="color:' + gapCol + '">' + (gapDir >= 0 ? '+' : '') + f1(gapDir) + ' pt</strong>'
-      + (gapDir < 0.5 ? ' <span style="color:#DC2626">(⚠ tu prends le risque barrière pour à peine plus que les dividendes)</span>' : '')
-      + '.<br>' + vsDirect;
-  }
-  h += '<div style="padding:9px 11px;background:#fff;border:1px solid #E2E8F0;border-radius:7px">'
-    + '<div style="font-weight:700;color:#334155;margin-bottom:2px">📊 vs acheter ' + sj + ' en direct</div>'
-    + '<div style="color:#475569;line-height:1.4">' + vsDirect + '</div></div>';
-  // vs CAT
-  var vsCatPts = (espereEco != null) ? (espereEco - catRate) : null;
-  h += '<div style="padding:9px 11px;background:#fff;border:1px solid #E2E8F0;border-radius:7px">'
-    + '<div style="font-weight:700;color:#334155;margin-bottom:2px">🏦 vs CAT ' + f1(catRate) + '% (sans risque)</div>'
-    + '<div style="color:#475569;line-height:1.4">Rendement <strong>espéré net</strong> : <strong style="color:' + espCol + '">' + (espereEco != null ? pc(espereEco) + '/an' : '—') + '</strong>'
-    + (vsCatPts != null ? ' → <strong style="color:' + espCol + '">' + (vsCatPts >= 0 ? '+' : '') + f1(vsCatPts) + ' pt</strong> vs CAT' : '')
-    + '. Le CAT ne bloque rien et ne risque rien.</div></div>';
+  var _md = (p.grading && p.grading.metadata) || {};
+  var basketDiv = parseFloat(_md.basketDividend) || parseFloat(p.actualDividendYield) || 0;
+  var basketVol = parseFloat(_md.basketVol) || 0;
+  var basketDD = parseFloat(_md.basketDD) || 0;
+  var protTxt = protectedMat ? 'Capital <strong>protégé</strong> à 100%' : 'Protégé jusqu\'à <strong>−' + (isNaN(barrier) ? '?' : (100 - barrier)) + '%</strong>, puis perte comme en direct';
+  var card = function (icon, title, yieldHtml, riskHtml, riskCol, hi) {
+    return '<div style="padding:9px 11px;background:#fff;border:' + (hi ? '2px solid #2563EB' : '1px solid #E2E8F0') + ';border-radius:7px">'
+      + '<div style="font-weight:700;color:#334155;margin-bottom:3px">' + icon + ' ' + title + '</div>'
+      + '<div style="color:#0F172A;font-size:12px;margin-bottom:3px">' + yieldHtml + '</div>'
+      + '<div style="color:' + riskCol + ';font-size:10.5px;line-height:1.35">' + riskHtml + '</div></div>';
+  };
+  h += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;font-size:11px">';
+  // 1) CAT
+  h += card('🏦', 'CAT', '<strong>' + f1(catRate) + '%/an</strong> fixe', '✓ Capital garanti · aucun risque', '#059669', false);
+  // 2) Détenir en direct
+  h += card('📈', 'Détenir ' + sj + ' en direct',
+    (basketDiv > 0.3 ? '<strong>' + f1(basketDiv) + '%/an</strong> de dividendes' : 'dividendes faibles') + ' + 100% de la hausse',
+    '⚠ Toute la volatilité' + (basketVol > 0 ? ' (vol ' + Math.round(basketVol) + '%' + (basketDD > 0 ? ', perte historique jusqu\'à −' + Math.round(basketDD) + '%' : '') + ')' : '') + ' — aucun filet',
+    '#DC2626', false);
+  // 3) Ce structuré (mis en avant)
+  h += card('🎯', 'Ce structuré',
+    '<strong style="color:' + espCol + '">' + (espereEco != null ? pc(espereEco) + '/an' : '—') + '</strong> net espéré',
+    protTxt, '#475569', true);
   h += '</div>';
+  // Verdict chiffré sous les 3 colonnes
+  var vsCatPts = (espereEco != null) ? (espereEco - catRate) : null;
+  var gapDir = (basketDiv > 0.3 && _md.vsDirectDivAdj != null) ? (espereEco - parseFloat(_md.vsDirectDivAdj)) : (basketDiv > 0.3 && espereEco != null ? espereEco - basketDiv : null);
+  h += '<div style="margin-top:8px;padding:8px 11px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:7px;font-size:11px;color:#334155;line-height:1.5">'
+    + '<strong>Verdict :</strong> le structuré rend '
+    + (vsCatPts != null ? '<strong style="color:' + espCol + '">' + (vsCatPts >= 0 ? '+' : '') + f1(vsCatPts) + ' pt</strong> vs CAT sans risque' : '—')
+    + (gapDir != null ? ', et <strong style="color:' + (gapDir >= 1.5 ? '#059669' : gapDir >= 0 ? '#B45309' : '#DC2626') + '">' + (gapDir >= 0 ? '+' : '') + f1(gapDir) + ' pt</strong> vs les dividendes' + (_md.vsDirectVolFactor && _md.vsDirectVolFactor !== 1 ? ' (risque-ajustés de la vol)' : '') + ' que tu abandonnes en le préférant à la détention directe' : '')
+    + '. ' + (gapDir != null && gapDir < 0.5 ? '<span style="color:#DC2626">⚠ Tu prends le risque barrière pour à peine plus que les dividendes — la détention directe se discute.</span>' : 'Tu échanges les dividendes + la volatilité contre un coupon plus élevé et une protection à la baisse.')
+    + '</div>';
 
   // ligne de synthèse frais + marge
   h += '<div style="margin-top:10px;padding-top:9px;border-top:1px dashed #CBD5E1;font-size:10.5px;color:#64748B">'

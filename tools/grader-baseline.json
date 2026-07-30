@@ -15,7 +15,7 @@
     "expMat": 1.3,
     "couponProb": 91.6,
     "basketDiv": 1.06,
-    "vsDirectGap": 5.3,
+    "vsDirectGap": 5.2,
     "vsDirectAdj": 3
   },
   {
@@ -36,25 +36,6 @@
     "basketDiv": 0
   },
   {
-    "bank": "cic",
-    "file": "sp_mq579fp6_rgfut.json",
-    "name": "Digitale WO BNP Sanofi Juin 2029",
-    "structureType": "digitale_memoire",
-    "productType": "autocall",
-    "grade": "B",
-    "score": 64,
-    "p1": 64,
-    "p2": 58,
-    "p3": 85,
-    "p4": 62,
-    "aiUsed": false,
-    "expMat": 3,
-    "couponProb": null,
-    "basketDiv": 5.19,
-    "vsDirectGap": 0.5,
-    "vsDirectAdj": -3
-  },
-  {
     "bank": "swiss-life",
     "file": "sp_mnd8hjkx_40efj.json",
     "name": "SL - ATHENA PRIVILEGE INTESA SANPAOLO MAI ",
@@ -65,12 +46,31 @@
     "p1": 53,
     "p2": 75,
     "p3": 85,
-    "p4": 57,
+    "p4": 55,
     "aiUsed": false,
     "expMat": 1.4,
     "couponProb": 58.1,
     "basketDiv": 5.8,
-    "vsDirectGap": -0.7,
+    "vsDirectGap": -1.9,
+    "vsDirectAdj": -6
+  },
+  {
+    "bank": "cic",
+    "file": "sp_mq579fp6_rgfut.json",
+    "name": "Digitale WO BNP Sanofi Juin 2029",
+    "structureType": "digitale_memoire",
+    "productType": "autocall",
+    "grade": "B",
+    "score": 63,
+    "p1": 64,
+    "p2": 58,
+    "p3": 85,
+    "p4": 61,
+    "aiUsed": false,
+    "expMat": 3,
+    "couponProb": null,
+    "basketDiv": 5.19,
+    "vsDirectGap": -0.3,
     "vsDirectAdj": -4
   },
   {
@@ -89,8 +89,8 @@
     "expMat": 1.4,
     "couponProb": 77.3,
     "basketDiv": 5.8,
-    "vsDirectGap": -1.4,
-    "vsDirectAdj": -5
+    "vsDirectGap": -2.6,
+    "vsDirectAdj": -6
   },
   {
     "bank": "cic",
@@ -159,7 +159,7 @@
     "expMat": 3.3,
     "couponProb": 60,
     "basketDiv": 3.16,
-    "vsDirectGap": 4.8,
+    "vsDirectGap": 6.3,
     "vsDirectAdj": 3
   },
   {
@@ -212,7 +212,7 @@
     "expMat": 3.3,
     "couponProb": 60,
     "basketDiv": 3.16,
-    "vsDirectGap": 5.1,
+    "vsDirectGap": 6.6,
     "vsDirectAdj": 3
   },
   {
@@ -226,13 +226,13 @@
     "p1": 72,
     "p2": 64,
     "p3": 85,
-    "p4": 65,
+    "p4": 67,
     "aiUsed": false,
     "expMat": 3.3,
     "couponProb": 95.5,
     "basketDiv": 3.16,
-    "vsDirectGap": 2.8,
-    "vsDirectAdj": 0
+    "vsDirectGap": 4.3,
+    "vsDirectAdj": 2
   },
   {
     "bank": "swiss-life",
@@ -250,7 +250,7 @@
     "expMat": 1.6,
     "couponProb": 46.6,
     "basketDiv": 3,
-    "vsDirectGap": 3.2,
+    "vsDirectGap": 3.1,
     "vsDirectAdj": 1
   },
   {
@@ -264,13 +264,13 @@
     "p1": 68,
     "p2": 64,
     "p3": 85,
-    "p4": 43,
+    "p4": 45,
     "aiUsed": false,
     "expMat": 3.3,
     "couponProb": 95.5,
     "basketDiv": 3.16,
-    "vsDirectGap": 2.8,
-    "vsDirectAdj": 0
+    "vsDirectGap": 4.3,
+    "vsDirectAdj": 2
   },
   {
     "bank": "swiss-life",
@@ -319,13 +319,13 @@
     "p1": 74,
     "p2": 66,
     "p3": 85,
-    "p4": 59,
+    "p4": 60,
     "aiUsed": false,
     "expMat": 1.5,
     "couponProb": 94.6,
     "basketDiv": 1.06,
-    "vsDirectGap": 3.6,
-    "vsDirectAdj": 1
+    "vsDirectGap": 3.9,
+    "vsDirectAdj": 2
   },
   {
     "bank": "swiss-life",
@@ -343,8 +343,8 @@
     "expMat": 2.1,
     "couponProb": 68.6,
     "basketDiv": 5.19,
-    "vsDirectGap": 1.1,
-    "vsDirectAdj": -2
+    "vsDirectGap": 0,
+    "vsDirectAdj": -4
   },
   {
     "bank": "cic",
@@ -381,8 +381,8 @@
     "expMat": 4.9,
     "couponProb": 54.4,
     "basketDiv": 3.22,
-    "vsDirectGap": 3.3,
-    "vsDirectAdj": 1
+    "vsDirectGap": 4.8,
+    "vsDirectAdj": 3
   },
   {
     "bank": "sg",
@@ -400,7 +400,7 @@
     "expMat": 2.5,
     "couponProb": 96.2,
     "basketDiv": 0,
-    "vsDirectGap": 6.1,
+    "vsDirectGap": 6.4,
     "vsDirectAdj": 3
   },
   {
@@ -436,7 +436,7 @@
     "expMat": 2.5,
     "couponProb": 79.1,
     "basketDiv": 0,
-    "vsDirectGap": 6.7,
+    "vsDirectGap": 7,
     "vsDirectAdj": 3
   },
   {
@@ -455,7 +455,7 @@
     "expMat": 2.5,
     "couponProb": 87.8,
     "basketDiv": 0,
-    "vsDirectGap": 6.7,
+    "vsDirectGap": 7,
     "vsDirectAdj": 3
   },
   {
@@ -627,7 +627,7 @@
     "expMat": 3,
     "couponProb": 77.3,
     "basketDiv": 2.76,
-    "vsDirectGap": 2.5,
+    "vsDirectGap": 2.4,
     "vsDirectAdj": 0
   },
   {
