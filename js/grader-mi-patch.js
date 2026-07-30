@@ -26,8 +26,9 @@
             // (ex. Sonnet 5) ou 1500 tokens dépassent 15 s → les 2 appels avortaient → Local.
             // On reste sur des modèles RAPIDES (Sonnet 4.5, pas un modèle de raisonnement).
             async function _try(model, timeoutMs) {
+                var t0 = Date.now();
                 var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
-                var timer = ctrl ? setTimeout(function() { ctrl.abort(); }, timeoutMs || 22000) : null;
+                var timer = ctrl ? setTimeout(function() { ctrl.abort(); }, timeoutMs || 40000) : null;
                 try {
                     var resp = await fetch(CONFIG.AI_ENDPOINT, {
                         method: 'POST',
@@ -36,16 +37,31 @@
                         signal: ctrl ? ctrl.signal : undefined
                     });
                     if (timer) { clearTimeout(timer); timer = null; }
-                    if (!resp.ok) return null;
+                    if (!resp.ok) {
+                        var errBody = ''; try { errBody = (await resp.text()).slice(0, 300); } catch (e) {}
+                        console.warn('[GraderMI] ' + model + ' HTTP ' + resp.status + ' en ' + (Date.now() - t0) + 'ms · ' + errBody);
+                        return null;
+                    }
                     var data = await resp.json();
                     var text = (data.content || []).filter(function(c) { return c.type === 'text'; }).map(function(c) { return c.text; }).join('');
-                    return _parseJSON(text);
-                } catch (e) { return null; }
+                    if (!text) { console.warn('[GraderMI] ' + model + ' : réponse SANS bloc texte en ' + (Date.now() - t0) + 'ms · content=' + JSON.stringify((data.content || []).map(function(c) { return c.type; }))); return null; }
+                    try {
+                        var parsed = _parseJSON(text);
+                        console.log('[GraderMI] ' + model + ' OK en ' + (Date.now() - t0) + 'ms · adjustments=' + !!(parsed && parsed.adjustments));
+                        return parsed;
+                    } catch (pe) {
+                        console.warn('[GraderMI] ' + model + ' : JSON illisible en ' + (Date.now() - t0) + 'ms · ' + pe.message + ' · texte=' + text.slice(0, 200));
+                        return null;
+                    }
+                } catch (e) {
+                    console.warn('[GraderMI] ' + model + ' : fetch KO en ' + (Date.now() - t0) + 'ms · ' + (e && e.name) + ' ' + (e && e.message));
+                    return null;
+                }
                 finally { if (timer) clearTimeout(timer); }
             }
-            var res = await _try('claude-sonnet-4-5', 22000);      // Sonnet 4.5 : RAPIDE (~1,8s, pas de "thinking") + fiable, défaut
+            var res = await _try('claude-sonnet-4-5', 40000);      // Sonnet 4.5 : RAPIDE (pas de "thinking") + fiable, défaut
             if (res && res.adjustments) return res;
-            var res2 = await _try('claude-opus-4-8', 22000);       // Opus 4.8 : repli qualité si Sonnet échoue
+            var res2 = await _try('claude-opus-4-8', 40000);       // Opus 4.8 : repli qualité si Sonnet échoue
             if (res2 && res2.adjustments) return res2;
             if (res2 || res) return res2 || res;
             throw new Error('Claude API (Sonnet + Opus KO)');
