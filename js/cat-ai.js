@@ -147,7 +147,7 @@ RÈGLES:
 
     const res = await fetch(CONFIG.AI_ENDPOINT, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-5', max_tokens: 4000, messages: [{ role: 'user', content: prompt }] }),
+      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 4000, messages: [{ role: 'user', content: prompt }] }),
     });
     if (!res.ok) throw new Error('Erreur IA: ' + res.status);
     const data = await res.json();
@@ -332,7 +332,7 @@ RÈGLES CRITIQUES:
   try {
     const res = await fetch(CONFIG.AI_ENDPOINT, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-5', max_tokens: 4000, messages: [{ role: 'user', content: prompt }] }),
+      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 4000, messages: [{ role: 'user', content: prompt }] }),
     });
     if (!res.ok) throw new Error('Erreur IA: ' + res.status);
     const data = await res.json();
@@ -640,7 +640,7 @@ function buildCATPortfolioContext() {
 async function runCATAIAnalysis() {
   const ctx = buildCATPortfolioContext();
   const res = await fetch(CONFIG.AI_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: 'claude-sonnet-5', max_tokens: 2500, messages: [{ role: 'user', content: `Conseiller patrimoine. Analyse ce portefeuille CAT/PS.\n\n${ctx}\n\n1. DIAGNOSTIC 2. CONCENTRATIONS FGDR 3. RENDEMENT vs marché 4. ARBITRAGES 5. OPTIMISATION 6. RISQUES\nDirect, quantitatif.` }] }) });
+    body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 2500, messages: [{ role: 'user', content: `Conseiller patrimoine. Analyse ce portefeuille CAT/PS.\n\n${ctx}\n\n1. DIAGNOSTIC 2. CONCENTRATIONS FGDR 3. RENDEMENT vs marché 4. ARBITRAGES 5. OPTIMISATION 6. RISQUES\nDirect, quantitatif.` }] }) });
   if (!res.ok) throw new Error('Erreur IA: ' + res.status);
   const data = await res.json();
   return data.content?.map(b => b.text || '').join('\n') || '';
@@ -651,7 +651,7 @@ async function sendCATChatMessage(userMessage) {
   catAIConversation.push({ role: 'user', content: userMessage, timestamp: Date.now() });
   const messages = catAIConversation.map(m => ({ role: m.role, content: m.content }));
   const res = await fetch(CONFIG.AI_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: 'claude-sonnet-5', max_tokens: 1500, system: `Conseiller patrimoine.\n\n${ctx}\n\n${catAIAnalysis ? 'ANALYSE:\n' + catAIAnalysis : ''}\n\nDirect, quantitatif.`, messages }) });
+    body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1500, system: `Conseiller patrimoine.\n\n${ctx}\n\n${catAIAnalysis ? 'ANALYSE:\n' + catAIAnalysis : ''}\n\nDirect, quantitatif.`, messages }) });
   if (!res.ok) throw new Error('Erreur IA: ' + res.status);
   const data = await res.json();
   const response = data.content?.map(b => b.text || '').join('\n') || '';

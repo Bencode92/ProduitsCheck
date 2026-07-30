@@ -174,7 +174,7 @@ async function runDeepAnalysis(product) {
 
   const resp = await fetch(CONFIG.AI_ENDPOINT, {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: 'claude-sonnet-5', max_tokens: 1200, messages: [{ role: 'user', content: prompt }] })
+    body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1200, messages: [{ role: 'user', content: prompt }] })
   });
   if (!resp.ok) throw new Error('IA: ' + resp.status);
   const data = await resp.json();

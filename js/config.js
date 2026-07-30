@@ -9,7 +9,7 @@ const CONFIG = {
   BRANCH: 'main',
   AI_ENDPOINT: 'https://studyforge-proxy.benoit-comas.workers.dev',
   AI_MODEL: 'claude-opus-4-8',
-  AI_MODEL_FALLBACK: 'claude-sonnet-5',
+  AI_MODEL_FALLBACK: 'claude-sonnet-4-5',
   PDFJS_CDN: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174',
   // Twelve Data via Cloudflare Worker proxy (API key stays in env vars)
   TWELVE_DATA_PROXY: 'https://studyforge-proxy.benoit-comas.workers.dev/twelvedata',

@@ -432,7 +432,7 @@ async function getStructOptimizerAISummary(analysis) {
         '\nFORMAT:\n- R\u00e9sum\u00e9: X\u20ac disponibles \u2192 Y\u20ac \u00e0 d\u00e9ployer \u2192 +Z\u20ac/an\n- Chaque souscription: \u2705 **[Nom]** \u2192 [montant]\u20ac \u00e0 [coupon]% = +[gain]\u20ac/an vs CAT\n- Chaque rejet: \u274c **[Nom]** \u2014 pourquoi\n- Conclusion: votre allocation totale rapporte X\u20ac de plus que le CAT\n- Max 200 mots';
 
     var res = await fetch(CONFIG.AI_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model: 'claude-sonnet-5', max_tokens: 1500, messages: [{ role: 'user', content: prompt }] }) });
+        body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1500, messages: [{ role: 'user', content: prompt }] }) });
     if (!res.ok) throw new Error('IA: ' + res.status);
     var data = await res.json();
     return (data.content || []).map(function(b) { return b.text || ''; }).join('\n') || '';

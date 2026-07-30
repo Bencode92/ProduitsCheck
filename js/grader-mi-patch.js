@@ -21,11 +21,13 @@
         _callClaude = async function(ctx, base, productType) {
             var sys = _buildSystemPrompt(ctx.isInPortfolio, productType);
             var usr = _buildUserPrompt(ctx, base, productType);
-            // Timeout dur par appel : un proxy qui rame est abandonné à 15 s au lieu de
-            // traîner jusqu'au timeout navigateur. Sinon Sonnet(19s)+Opus(19s)=38s avant Local.
+            // Timeout dur par appel (22 s) : abandonne un proxy figé sans traîner jusqu'au
+            // timeout navigateur. NB : 15 s était trop court — un modèle qui « pense »
+            // (ex. Sonnet 5) ou 1500 tokens dépassent 15 s → les 2 appels avortaient → Local.
+            // On reste sur des modèles RAPIDES (Sonnet 4.5, pas un modèle de raisonnement).
             async function _try(model, timeoutMs) {
                 var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
-                var timer = ctrl ? setTimeout(function() { ctrl.abort(); }, timeoutMs || 15000) : null;
+                var timer = ctrl ? setTimeout(function() { ctrl.abort(); }, timeoutMs || 22000) : null;
                 try {
                     var resp = await fetch(CONFIG.AI_ENDPOINT, {
                         method: 'POST',
@@ -41,9 +43,9 @@
                 } catch (e) { return null; }
                 finally { if (timer) clearTimeout(timer); }
             }
-            var res = await _try('claude-sonnet-5', 15000);      // Sonnet 5 : rapide + fiable (défaut), coupé à 15s
+            var res = await _try('claude-sonnet-4-5', 22000);      // Sonnet 4.5 : RAPIDE (~1,8s, pas de "thinking") + fiable, défaut
             if (res && res.adjustments) return res;
-            var res2 = await _try('claude-opus-4-8', 15000);     // Opus 4.8 : repli qualité si Sonnet échoue, coupé à 15s
+            var res2 = await _try('claude-opus-4-8', 22000);       // Opus 4.8 : repli qualité si Sonnet échoue
             if (res2 && res2.adjustments) return res2;
             if (res2 || res) return res2 || res;
             throw new Error('Claude API (Sonnet + Opus KO)');
