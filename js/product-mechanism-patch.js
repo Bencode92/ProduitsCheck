@@ -141,6 +141,12 @@
         // Dispersion fallback: if participation is 0, use 7% (typical)
         if ((product.structureType === 'dispersion' || structType === 'dispersion') && participation <= 0) participation = 7;
         var amount = 100000;
+        // Perte en capital UNIQUEMENT si le SJ finit SOUS la barrière (niveau 'barrier'%).
+        // On construit un exemple de perte CLAIREMENT sous la barrière (fini le "-50%" en dur
+        // qui était faux dès que la barrière < 50%, ex barrière 38% → à -50% le capital est protégé).
+        var barLvl = parseFloat(barrier) || 60;
+        var lvlBelow = Math.max(5, Math.round(barLvl - 8));       // niveau final sous la barrière
+        var recuBelow = Math.round(amount * lvlBelow / 100);       // capital récupéré (proportionnel)
 
         switch(structType) {
             case 'autocall':
@@ -153,8 +159,9 @@
                     '<div style="font-size:12px;line-height:1.8;color:var(--text)">' +
                     '<strong>Sc\u00e9nario favorable</strong> \u2014 ' + sj + ' au-dessus de ' + (product.earlyRedemption?.trigger || 100) + '% au bout de 1 an :<br>' +
                     '\u2192 Rappel anticip\u00e9 : vous recevez <span style="color:var(--green);font-weight:700">' + formatNumber(amount) + '\u20ac + ' + formatNumber(Math.round(amount * annualCoupon / 100)) + '\u20ac de coupon</span> = ' + formatNumber(amount + Math.round(amount * annualCoupon / 100)) + '\u20ac<br><br>' +
-                    '<strong>Sc\u00e9nario d\u00e9favorable</strong> \u2014 ' + sj + ' \u00e0 -50% \u00e0 maturit\u00e9 (sous barri\u00e8re ' + barrier + '%) :<br>' +
-                    '\u2192 Perte en capital : vous recevez <span style="color:var(--red);font-weight:700">' + formatNumber(amount / 2) + '\u20ac</span> (perte de ' + formatNumber(amount / 2) + '\u20ac)' +
+                    '<strong>\u00c0 l\u2019\u00e9ch\u00e9ance, si ' + sj + ' \u2265 barri\u00e8re ' + barrier + '%</strong> \u2192 <span style="color:var(--green);font-weight:700">capital r\u00e9cup\u00e9r\u00e9 \u00e0 100%</span> (prot\u00e9g\u00e9 tant que la barri\u00e8re tient, m\u00eame si l\u2019action a baiss\u00e9).<br><br>' +
+                    '<strong>Sc\u00e9nario d\u00e9favorable</strong> \u2014 ' + sj + ' finit \u00e0 ' + lvlBelow + '% de l\u2019initial (SOUS la barri\u00e8re ' + barrier + '%) :<br>' +
+                    '\u2192 Perte en capital : vous recevez <span style="color:var(--red);font-weight:700">' + formatNumber(recuBelow) + '\u20ac</span> (perte de ' + formatNumber(amount - recuBelow) + '\u20ac, soit \u2212' + (100 - lvlBelow) + '%)' +
                     '</div></div>';
 
             case 'phoenix_memoire':
@@ -193,7 +200,7 @@
                     '<div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:8px">\ud83d\udca1 Exemple concret (investissement ' + formatNumber(amount) + '\u20ac)</div>' +
                     '<div style="font-size:12px;line-height:1.8;color:var(--text)">' +
                     '<strong>Si SJ > barri\u00e8re ' + barrier + '%</strong> \u2192 Vous recevez <span style="color:var(--green);font-weight:700">' + formatNumber(amount) + '\u20ac + coupon ' + coupon + '%</span><br>' +
-                    '<strong>Si SJ < barri\u00e8re ' + barrier + '%</strong> (ex: -50%) \u2192 Remboursement = <span style="color:var(--red);font-weight:700">' + formatNumber(amount / 2) + '\u20ac</span> + coupon<br>' +
+                    '<strong>Si SJ finit \u00e0 ' + lvlBelow + '%</strong> (sous barri\u00e8re ' + barrier + '%) \u2192 Remboursement = <span style="color:var(--red);font-weight:700">' + formatNumber(recuBelow) + '\u20ac</span> + coupon<br>' +
                     '<span style="color:var(--orange)">\u26a0 Gain plafonn\u00e9 au coupon, perte potentiellement illimit\u00e9e</span>' +
                     '</div></div>';
 
