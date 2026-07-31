@@ -254,6 +254,7 @@ function _renderUnderstand(p) {
   var basketDiv = parseFloat(_md.basketDividend) || parseFloat(p.actualDividendYield) || 0;
   var basketVol = parseFloat(_md.basketVol) || 0;
   var basketDD = parseFloat(_md.basketDD) || 0;
+  var basketMom = (_md.basketMomentum != null) ? parseFloat(_md.basketMomentum) : null;
   var protTxt = protectedMat ? 'Capital <strong>protégé</strong> à 100%' : 'Protégé jusqu\'à <strong>−' + (isNaN(barrier) ? '?' : (100 - barrier)) + '%</strong>, puis perte comme en direct';
   var card = function (icon, title, yieldHtml, riskHtml, riskCol, hi) {
     return '<div style="padding:9px 11px;background:#fff;border:' + (hi ? '2px solid #2563EB' : '1px solid #E2E8F0') + ';border-radius:7px">'
@@ -266,7 +267,7 @@ function _renderUnderstand(p) {
   h += card('🏦', 'CAT', '<strong>' + f1(catRate) + '%/an</strong> fixe', '✓ Capital garanti · aucun risque', '#059669', false);
   // 2) Détenir en direct
   h += card('📈', 'Détenir ' + sj + ' en direct',
-    (basketDiv > 0.3 ? '<strong>' + f1(basketDiv) + '%/an</strong> de dividendes' : 'dividendes faibles') + ' + 100% de la hausse',
+    (basketDiv > 0.3 ? '<strong>' + f1(basketDiv) + '%/an</strong> de dividendes' : 'dividendes faibles') + ' + <strong>100% de la hausse</strong>' + (basketMom != null ? ' <span style="color:#64748B">· momentum 1an ' + (basketMom >= 0 ? '+' : '') + basketMom + '%</span>' : ''),
     '⚠ Toute la volatilité' + (basketVol > 0 ? ' (vol ' + Math.round(basketVol) + '%' + (basketDD > 0 ? ', perte historique jusqu\'à −' + Math.round(basketDD) + '%' : '') + ')' : '') + ' — aucun filet',
     '#DC2626', false);
   // 3) Ce structuré (mis en avant)
@@ -283,6 +284,16 @@ function _renderUnderstand(p) {
     + (gapDir != null ? ', et <strong style="color:' + (gapDir >= 1.5 ? '#059669' : gapDir >= 0 ? '#B45309' : '#DC2626') + '">' + (gapDir >= 0 ? '+' : '') + f1(gapDir) + ' pt</strong> vs les dividendes' + (_md.vsDirectVolFactor && _md.vsDirectVolFactor !== 1 ? ' (risque-ajustés de la vol)' : '') + ' que tu abandonnes en le préférant à la détention directe' : '')
     + '. ' + (gapDir != null && gapDir < 0.5 ? '<span style="color:#DC2626">⚠ Tu prends le risque barrière pour à peine plus que les dividendes — la détention directe se discute.</span>' : 'Tu échanges les dividendes + la volatilité contre un coupon plus élevé et une protection à la baisse.')
     + '</div>';
+  // Perf / conviction : le structuré PLAFONNE la hausse → la question dépend de TA vue sur le titre
+  if (basketMom != null) {
+    var momCol, momMsg;
+    if (basketMom >= 15) { momCol = '#DC2626'; momMsg = '<strong>' + sj + ' est en tendance haussière (' + (basketMom >= 0 ? '+' : '') + basketMom + '%/1an)</strong>. Ce structuré <strong>plafonne</strong> cette hausse à ~' + f1(couponRate) + '%/an — en direct tu la capterais. Adapté surtout si tu es NEUTRE, pas si tu es convaincu que ça va monter.'; }
+    else if (basketMom <= 0) { momCol = '#059669'; momMsg = '<strong>' + sj + ' est sans momentum haussier (' + basketMom + '%/1an)</strong> — tu ne rates pas de rally. Le structuré (income + protection) est ici le bon véhicule plutôt que le direct.'; }
+    else { momCol = '#B45309'; momMsg = '<strong>' + sj + ' : momentum modéré (+' + basketMom + '%/1an)</strong>. Le structuré convient à une vue neutre / légèrement positive ; si tu es franchement haussier, le direct capte davantage.'; }
+    h += '<div style="margin-top:6px;padding:8px 11px;background:#fff;border:1px solid #E2E8F0;border-radius:7px;font-size:11px;color:' + momCol + ';line-height:1.5">'
+      + '📊 <strong style="color:#334155">Perf &amp; ta conviction :</strong> ' + momMsg
+      + ' <span style="color:#94A3B8;font-size:10px">(Rappel : une banque qui propose ce produit ne « croit » pas forcément au titre — elle choisit souvent une forte volatilité pour rendre le coupon attractif.)</span></div>';
+  }
 
   // ligne de synthèse frais + marge
   h += '<div style="margin-top:10px;padding-top:9px;border-top:1px dashed #CBD5E1;font-size:10.5px;color:#64748B">'
