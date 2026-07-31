@@ -133,6 +133,42 @@
                     }
                 }
             } catch (e) { console.warn('[p4-netfees] risk cap error:', e && e.message); }
+
+            // ═══ SCÉNARIOS DÉTERMINISTES — les 3 zones RÉELLES du produit à barrière ═══
+            // Le payoff est discret : coupon (≥ barrière coupon) / capital seul (barrière
+            // capital → barrière coupon) / perte (< barrière capital). On remplace les 4 cartes
+            // "à l'humeur de l'IA" par ces 3 zones, avec les VRAIES probabilités BS du modèle
+            // (P(≥barrière) lognormale, drift r−q), pas des % inventés.
+            try {
+                var _cp2 = product.capitalProtection || {};
+                var _isProt2 = _cp2 === true || _cp2.protected === true;
+                var _barCap = parseFloat(_cp2.barrier) || parseFloat(product.barrier) || 0;
+                var _barCoup = parseFloat(_cp2.barrierCoupon) || parseFloat((product.coupon || {}).trigger) || 70;
+                var _vol2 = parseFloat(md.basketVol) || 0;
+                var _T2 = parseFloat(md.expectedMaturity) || parseFloat(product.maturityYears) || 5;
+                var _divS = parseFloat(md.basketDividend) || 0;
+                if (!_isProt2 && _barCap > 0 && _barCap < 100 && _barCoup > _barCap && _vol2 > 0 && _T2 > 0 && coupon > 0) {
+                    var _drift = 2.0 - _divS;   // r − q (approx cohérent avec le grade)
+                    var _ncdf2 = function (x) { var a1 = 0.254829592, a2 = -0.284496736, a3 = 1.421413741, a4 = -1.453152027, a5 = 1.061405429, pp = 0.3275911; var s = x < 0 ? -1 : 1; x = Math.abs(x) / Math.SQRT2; var t = 1 / (1 + pp * x); var y = 1 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x); return 0.5 * (1 + s * y); };
+                    var _pAb = function (Kpct) { var K = Kpct / 100, sig = _vol2 / 100, mu = (_drift / 100) - sig * sig / 2; return _ncdf2((Math.log(1 / K) + mu * _T2) / (sig * Math.sqrt(_T2))); };
+                    // pWin = proba coupon DÉJÀ affichée dans le panneau (cohérence) ; sinon BS
+                    var pWin = (md.couponProbability != null && md.couponProbability > 0)
+                        ? Math.max(0.02, Math.min(0.96, md.couponProbability / 100))
+                        : Math.max(0.02, Math.min(0.96, _pAb(_barCoup)));
+                    var pLoss = Math.max(0.01, Math.min(0.94, 1 - _pAb(_barCap)));
+                    var pMid = Math.max(0.01, 1 - pWin - pLoss);
+                    var _sum = pWin + pMid + pLoss; pWin /= _sum; pMid /= _sum; pLoss /= _sum;
+                    var _nom = parseFloat(product.nominal) > 0 ? parseFloat(product.nominal) : 100000;
+                    var winPct = Math.round(coupon * Math.min(_T2, parseFloat(product.maturityYears) || _T2)); // coupons cumulés sur maturité espérée
+                    var lossPct = -(100 - Math.round(_barCap * 0.6)); // niveau représentatif sous barrière (~0,6×barrière)
+                    result.scenarios = {
+                        optimistic: { label: 'Coupon (≥' + Math.round(_barCoup) + '%)', desc: 'capital + coupons', return_pct: winPct, return_eur: Math.round(_nom * winPct / 100), probability: Math.round(pWin * 100) / 100 },
+                        stress: { label: 'Capital seul (' + Math.round(_barCap) + '–' + Math.round(_barCoup) + '%)', desc: 'capital rendu, 0 coupon', return_pct: 0, return_eur: 0, probability: Math.round(pMid * 100) / 100 },
+                        worst: { label: 'Perte (<' + Math.round(_barCap) + '%)', desc: 'barrière cassée', return_pct: lossPct, return_eur: Math.round(_nom * lossPct / 100), probability: Math.round(pLoss * 100) / 100 }
+                    };
+                    md.scenariosDeterministic = true;
+                }
+            } catch (e) { console.warn('[p4-netfees] scenarios error:', e && e.message); }
         } catch (e) {
             console.warn('[p4-netfees] post-process error:', e && e.message);
         }
