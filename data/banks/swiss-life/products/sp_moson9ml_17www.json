@@ -326,7 +326,7 @@
         "score": 55,
         "base": 51,
         "delta": 0,
-        "reasoning": "Rendement: base 51 → -9 = 42 (RISK_OFF (VIX 22) + volatilité 43.5% + drawdown -52.4% sur un titre de défense en pleine rotation sectorielle (industrials -3%, sector neutral/evaded) : probabilité coupon 70% très optimiste, réel ~40-45%.) | Coupon 7%, barrière 38% | Barr.coupon 70% | Mat espérée: ~1.5a (prob mat: 0%)",
+        "reasoning": "Rendement: base 51 → -9 = 42 (RISK_OFF + industrials neutre mais momentum -3% + Rheinmetall DD 52.4% proche barrière coupon 70% → probabilité coupon semestriel compromise dès T1 2025) | Coupon 7%, barrière 38% | Barr.coupon 70% | Mat espérée: ~1.5a (prob mat: 0%)",
         "_bsDelta": 4,
         "_bs": {
           "score": 55,
@@ -346,67 +346,67 @@
         "score": 57,
         "base": 66,
         "delta": -9,
-        "reasoning": "Qualité: base 66 → -9 = 57 (Secteur industrials en momentum négatif (-3%), beta 0.62 ne protège pas en risk-off, Brent $91 pèse sur marges industrielles, divergence CPI/PCE annonce repricing macro défavorable aux cycliques.) | Worst: RHEINMETALL AG B:60"
+        "reasoning": "Qualité: base 66 → -9 = 57 (Valeur défense MAIS beta 0.62 + vol 43.55% extrême + régime risk-off avec VIX 22 + brent $91 = stagflation rampante anti-cyclique → fondamentaux court-terme dégradés) | Worst: RHEINMETALL AG B:60"
       },
       "portfolioFit": {
-        "score": 77,
+        "score": 76,
         "base": 85,
-        "delta": -8,
-        "reasoning": "Fit: base 85 → -8 = 77 (Titre UNIQUE sur défense en drawdown -52% = concentration extrême + 0% bonds en portefeuille (warning MI) = levier equity pur inacceptable en régime RISK_OFF, diversification inexistante.) — nouveau — diversifie"
+        "delta": -9,
+        "reasoning": "Fit: base 85 → -9 = 76 (Mono-sous-jacent défense dans portefeuille 0% bonds + exposure equity pure = concentration létale en phase risk-off, aucune protection réelle) — nouveau — diversifie"
       },
       "riskPremium": {
         "score": 62,
         "base": 12,
-        "delta": 3,
+        "delta": 8,
         "reasoning": "Prime vs CAT (net de frais, cohérent avec le panneau) : coupon espéré 6,2% (7,0% × proba 88%) − marge embarquée 1,33%/an = 4,8% vs CAT 2,8% → spread +2,03%. | vs achat direct : coupon net 4,8% vs dividende panier 1,0% risque-ajusté (vol 44% → 0,7%) = +4,1% → +2 pts."
       }
     },
-    "verdict": "**REJET FERME** – Ce Phoenix est un pari contrarian sur Rheinmetall à -52% de drawdown en plein RISK_OFF (VIX 22, S&P -2.4% today). Le sous-jacent affiche 43.5% de volatilité et son secteur industrials recule -3% avec momentum négatif, alors que MI recommande d'éviter consumer-discretionary ET que le régime macro (PCE 4.07%, Brent $91→$95 risk) menace stagflation. La barrière coupon 70% paraît généreuse mais avec -52% DD déjà acté, le titre reste ultra-fragile : un nouveau -18% (facile en 6 mois si le risk-off persiste) tue les coupons. L'absence TOTALE de bonds en portefeuille (warning MI critique) transforme ce produit en levier equity pur sur un single stock cyclique en détresse – c'est une erreur d'allocation capitale en environnement incertain.",
+    "verdict": "REJET CATÉGORIQUE en environnement RISK_OFF. Rheinmetall affiche un drawdown 52.4% à seulement 18pts de la barrière coupon 70%, dans un régime où industrials momentum est -3% et VIX 22 signale stress persistant. La volatilité 43.55% (extrême) rend le coupon semestriel 3.5% illusoire dès mi-2025. L'absence totale de bonds dans le portefeuille transforme ce Phoenix en pari equity pur au pire moment : si Brent dépasse $95 (trajectory actuelle $87→$91 en 5j), la stagflation écrase les cycliques et Rheinmetall peut toucher 38% = perte capitale 62k€. Attendre VIX <18 ou réallocation 30% TIPS avant toute souscription défense.",
     "keyRisks": [
-      "Single stock concentration sur titre en drawdown -52% avec vol 43.5% → rupture barrière capital 38% nécessite seulement -14% supplémentaires, très probable si récession ou stagflation confirmée (courbe 2s10s désinversion = signal historique).",
-      "Régime RISK_OFF + secteur industrials évité/neutral + energy shock potentiel (Brent $95+) → probabilité réelle coupon <45% vs 70% scoré, levier défavorable amplifié par 0% diversification bonds.",
-      "Autocall 96% inaccessible depuis prix actuel post-DD -52% : maturité réelle 6 ans probable, exposition prolongée au stress macro (Fed repricing, HY spreads correction violente prévue par MI) sans protection capital.",
+      "Drawdown 52.4% + barrière coupon 70% = marge 17.6pts avalée en 2-3 semaines si risk-off s'amplifie (HY spreads 284bps historiquement serrés menacent correction violente)",
+      "Energy shock imminent (Brent $91 → $95+) déclenche stagflation → industrials momentum déjà -3% bascule -10%+ = coupons perdus 6 ans",
+      "Volatilité 43.55% + autocall 96% = probabilité remboursement anticipé <5% sur 6a, capital exposé 100% sans diversification bonds (portefeuille 0% fixed income = risque systémique max)",
       "Barrière à 0.91σ (Danger) — vol 43.55%",
       "Note plafonnée (C) : capital non protégé + barrière en zone danger — perte en capital possible."
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 7,
-        "return_eur": 7000,
-        "probability": 0.12,
+        "return_pct": 3.5,
+        "return_eur": 3500,
+        "probability": 0.08,
         "duration_years": 1
       },
       "base": {
-        "return_pct": -2.5,
-        "return_eur": -2500,
-        "probability": 0.28,
-        "duration_years": 3
+        "return_pct": -8,
+        "return_eur": -8000,
+        "probability": 0.45,
+        "duration_years": 6
       },
       "stress": {
-        "return_pct": -18,
-        "return_eur": -18000,
-        "probability": 0.35,
+        "return_pct": -35,
+        "return_eur": -35000,
+        "probability": 0.32,
         "duration_years": 6
       },
       "worst": {
         "return_pct": -62,
         "return_eur": -62000,
-        "probability": 0.25,
+        "probability": 0.15,
         "duration_years": 6
       }
     },
     "confidenceInterval": {
-      "low": 34,
-      "high": 50,
+      "low": 35,
+      "high": 51,
       "halfWidth": 8,
       "gradeStable": false,
       "gradeRange": "D-C",
-      "label": "D [34-50]"
+      "label": "D [35-51]"
     },
     "metadata": {
-      "gradedAt": "2026-07-31T06:25:06.747Z",
-      "durationMs": 29043,
+      "gradedAt": "2026-07-31T09:44:38.974Z",
+      "durationMs": 24147,
       "aiUsed": true,
       "version": "7.1",
       "productType": "autocall",
@@ -416,6 +416,7 @@
       "basketDividend": 1.01,
       "basketVol": 43.55,
       "basketDD": 52.4,
+      "basketMomentum": -34,
       "couponAnnualized": 7,
       "couponRaw": 3.5,
       "couponMultiplier": 2,
@@ -434,8 +435,8 @@
       "adjustments": {
         "p1": -9,
         "p2": -9,
-        "p3": -8,
-        "p4": 3
+        "p3": -9,
+        "p4": 8
       },
       "barrier_sigma": 0.91,
       "barrier_sigma_label": "Danger",
@@ -443,9 +444,9 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 34,
-      "ci_high": 50,
-      "ci_label": "D [34-50]",
+      "ci_low": 35,
+      "ci_high": 51,
+      "ci_label": "D [35-51]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
@@ -470,7 +471,7 @@
         "p4": 0.25
       },
       "inputHash": "gnn5c7f",
-      "gradeT0": "2026-07-31T06:25:06.747Z",
+      "gradeT0": "2026-07-31T09:44:38.974Z",
       "trackingLevelAt0": null,
       "envelopeMode": "swiss-life",
       "vsDirectGap": 4.1,
@@ -490,20 +491,20 @@
           "max_drawdown_3y": 52.4,
           "dividend_yield": 1.01,
           "buffett_score": 60,
-          "quality_score": 70,
+          "quality_score": 71,
           "buffett_grade": "B"
         }
       ]
     },
     "regimeScenarios": {
       "current": {
-        "score": 47,
+        "score": 48,
         "grade": "C",
         "label": "Actuel (risk_off)",
         "desc": "Régime actuel → volatilité modérée"
       },
       "bull": {
-        "score": 51,
+        "score": 52,
         "grade": "C",
         "label": "Bull / Risk-on",
         "delta": 4,
@@ -513,7 +514,7 @@
         "score": 34,
         "grade": "D",
         "label": "Crash / Récession",
-        "delta": -13,
+        "delta": -14,
         "desc": "Marchés baissiers → barrière menacée, vol en hausse"
       }
     }
