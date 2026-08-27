@@ -1,61 +1,8 @@
 {
-  "timestamp": "2026-08-26T19:06:50.380105",
+  "timestamp": "2026-08-27T17:56:54.536541",
   "version": "1.1",
-  "tickers": {
-    "ACWI": {
-      "perf_ytd": 12.99,
-      "perf_1y": 20.49,
-      "perf_3m": 1.74,
-      "vol_3y": 15.83,
-      "max_dd_3y": 16.55,
-      "beta": 1.04,
-      "last_close": 161.005,
-      "data_points": 520
-    },
-    "BNO": {
-      "perf_ytd": 78.8,
-      "perf_1y": 68.31,
-      "perf_3m": -1.6,
-      "vol_3y": 38.87,
-      "max_dd_3y": 34.46,
-      "beta": -1.27,
-      "last_close": 50.51,
-      "data_points": 520
-    },
-    "CARZ": {
-      "perf_ytd": 30.66,
-      "perf_1y": 54.27,
-      "perf_3m": -12.23,
-      "vol_3y": 31.17,
-      "max_dd_3y": 26.83,
-      "beta": 2.07,
-      "last_close": 104.75,
-      "data_points": 520
-    },
-    "SPY": {
-      "perf_ytd": 12.29,
-      "perf_1y": 18.9,
-      "perf_3m": 1.66,
-      "vol_3y": 16.67,
-      "max_dd_3y": 19.0,
-      "beta": null,
-      "last_close": 767.1,
-      "data_points": 520
-    }
-  },
-  "commodity_metrics": {
-    "brent_usd": {
-      "proxy_etf": "BNO",
-      "perf_ytd": 78.8,
-      "perf_1y": 68.31,
-      "perf_3m": -1.6,
-      "vol_3y": 38.87,
-      "max_dd_3y": 34.46,
-      "beta": -1.27,
-      "last_close": 50.51,
-      "data_points": 520
-    }
-  },
+  "tickers": {},
+  "commodity_metrics": {},
   "benchmark": "SPY",
   "data_source": "twelve_data"
 }
