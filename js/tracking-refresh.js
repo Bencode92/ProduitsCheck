@@ -50,6 +50,37 @@
     return true;
   }
 
+  // ── AUTO au chargement : applique le taux live EN MÉMOIRE (affichage seul, PAS d'écriture
+  // github ni de point d'historique) → les TARN affichent le TEC10 réel sans clic ni spam
+  // de commits. Le bouton « 📈 Suivi taux » reste pour FIGER un point d'historique daté.
+  var _ratesCache = null, _autoRan = false, _autoRunning = false;
+  window.autoRefreshRateTrackingInMemory = async function () {
+    if (_autoRan || _autoRunning) return;                 // une seule fois par session
+    _autoRunning = true;
+    try {
+      var R = _ratesCache || (_ratesCache = await _liveRates());
+      if (!R || R.tec10 == null) { _autoRunning = false; return; }
+      var changed = 0;
+      (app.state.portfolio || []).forEach(function (p) {
+        if (!_isRateProduct(p)) return;
+        var ref = _ref(p, R); if (ref.v == null) return;
+        var trig = parseFloat(p.coupon.trigger); if (isNaN(trig)) return;
+        p.tracking = p.tracking || {};
+        // MàJ des seuls champs d'affichage (pas de history/date/note → pas d'écriture)
+        if (p.tracking.level !== ref.v || p.tracking.couponOK !== (ref.v <= trig)) changed++;
+        p.tracking.level = ref.v;
+        p.tracking.refLabel = ref.l;
+        p.tracking.trigger = trig;
+        p.tracking.marginToTrigger = Math.round((trig - ref.v) * 100) / 100;
+        p.tracking.couponOK = ref.v <= trig;
+        if (!p.tracking.note) p.tracking.note = 'taux live (' + ref.l + ')';
+      });
+      _autoRan = true;
+      if (changed > 0 && typeof app.setState === 'function') app.setState({});  // re-render avec le taux live
+    } catch (e) {}
+    _autoRunning = false;
+  };
+
   window.refreshRateTracking = async function () {
     var R = await _liveRates();
     if (!R || R.tec10 == null) { showToast('Taux live indisponibles (rates.json)', 'error'); return; }

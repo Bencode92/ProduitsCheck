@@ -202,6 +202,10 @@ function _renderPortfolioSummaryTable(state) {
     var portfolio = state.portfolio || [];
     if (portfolio.length === 0) return '';
 
+    // Auto (1×/session) : rafraîchit EN MÉMOIRE les produits de taux sur le TEC10 live pour
+    // l'affichage (déclenche un re-render). Fire-and-forget, aucune écriture github.
+    if (typeof window.autoRefreshRateTrackingInMemory === 'function') window.autoRefreshRateTrackingInMemory();
+
     var totalInvested = 0, totalReturn = 0, totalNetReturn = 0, couponsOK = 0, couponsTotal = 0;
     var rows = [];
 
