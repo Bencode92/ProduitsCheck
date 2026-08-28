@@ -5,6 +5,35 @@
 function getTrackingStatus(p) {
   const t = p.tracking;
   if (!t || t.level == null) return null;
+
+  // ═══ PRODUITS DE TAUX (TARN/Range Accrual/Digitale sur TEC10, Euribor, CMS…) ═══
+  // Le « level » est un TAUX (ex TEC10 3,18%), PAS un % de strike. Le coupon est payé si
+  // le taux est SOUS la barrière (ex « coupon 6% si TEC10 ≤ 4,40% ») → logique INVERSÉE.
+  // Sans ça, level−100 donnait −96% et couponOK = 3,75≥4,4 = faux (double erreur).
+  const isRate = /rate|taux/i.test(p.underlyingType || '') || t.ref === 'TEC10' || t.refLabel != null || t.marginToTrigger != null;
+  if (isRate) {
+    const rate = parseFloat(t.level);
+    const trig = parseFloat(t.trigger != null ? t.trigger : (p.coupon && p.coupon.trigger)) || 0;
+    // Sens de la condition : par défaut « taux ≤ trigger » (cas TEC10 des TARN) ; on lit ≥ si annoncé.
+    const detail = ((p.coupon && (p.coupon.triggerDetail || p.coupon.barrierCouponType)) || '') + '';
+    const geCond = /≥|>=|au[\- ]?dess(us|)|sup[eé]rieur/i.test(detail) && !/≤|<=/.test(detail);
+    const couponOK = (t.couponOK != null) ? !!t.couponOK : (geCond ? rate >= trig : rate <= trig);
+    const marginPts = (t.marginToTrigger != null) ? parseFloat(t.marginToTrigger) : (geCond ? rate - trig : trig - rate);
+    // Années garanties = coupon INCONDITIONNEL (payé quel que soit le taux) sur les 1res années.
+    const guaranteedYears = parseInt((p.coupon && p.coupon.guaranteedYears) || p.guaranteedYears || 0, 10) || 0;
+    const annualYield = typeof getAnnualizedRate === 'function' ? getAnnualizedRate(p) : (parseFloat(p.coupon && p.coupon.rate) || 0);
+    const amount = parseFloat(p.investedAmount) || 0;
+    const daysAgo = t.date ? Math.floor((Date.now() - new Date(t.date).getTime()) / 86400000) : null;
+    return {
+      isRate: true, rate, rateTrigger: trig, geCond, couponOK, marginPts,
+      refLabel: t.refLabel || t.ref || 'TAUX', guaranteedYears,
+      variation: marginPts,               // « variation » = marge en points (positif = coupon sûr)
+      annualYield, amount, couponAmount: Math.round(amount * annualYield / 100),
+      autocallOK: false, barrier: 0, margeRestante: 999,
+      couponTrigger: trig, date: t.date, daysAgo, note: t.note
+    };
+  }
+
   const level = parseFloat(t.level);
   const variation = level - 100;
   const barrier = parseFloat(p.capitalProtection?.barrier) || 0;

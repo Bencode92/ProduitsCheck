@@ -218,6 +218,15 @@ function _renderPortfolioSummaryTable(state) {
 
         var statusHtml = '', statusType = 'ok';
         if (grade === '-') { statusHtml = '<span style="color:#94A3B8;font-weight:600">$ CASH</span>'; statusType = 'cash'; }
+        else if (tracking && tracking.isRate) {
+            // Produit de TAUX : coupon OK si le taux de r\u00e9f\u00e9rence est du bon c\u00f4t\u00e9 de la barri\u00e8re.
+            var _cond = tracking.geCond ? '\u2265' : '\u2264';
+            var _tip = tracking.refLabel + ' ' + tracking.rate.toFixed(2) + '% ' + (tracking.couponOK ? _cond : (tracking.geCond ? '<' : '>')) + ' barri\u00e8re ' + tracking.rateTrigger.toFixed(2) + '%' + (tracking.guaranteedYears ? ' \u00b7 ' + tracking.guaranteedYears + ' 1\u00e8res ann\u00e9es INCONDITIONNELLES (coupon garanti quel que soit le taux)' : ' \u00b7 coupon conditionnel chaque ann\u00e9e');
+            var _gtag = tracking.guaranteedYears ? '<span style="font-size:8px;opacity:0.75;font-weight:500"> \u00b7 ' + tracking.guaranteedYears + 'a garantis</span>' : '';
+            if (tracking.couponOK) { statusHtml = '<span title="' + _tip + '" style="background:rgba(76,175,80,0.15);color:#4CAF50;padding:2px 8px;border-radius:10px;font-weight:600;font-size:10px">\u2705 COUPON OK' + _gtag + '</span>'; }
+            else { statusHtml = '<span title="' + _tip + '" style="background:rgba(255,183,77,0.15);color:#FFB74D;padding:2px 8px;border-radius:10px;font-weight:600;font-size:10px">\u26a0 COUPON PERDU</span>'; statusType = 'lost'; }
+            couponsTotal++; if (tracking.couponOK) couponsOK++;
+        }
         else if (tracking) {
             if (tracking.autocallOK) { statusHtml = '<span style="background:rgba(76,175,80,0.15);color:#4CAF50;padding:2px 8px;border-radius:10px;font-weight:600;font-size:10px">\u2705 AUTOCALL</span>'; statusType = 'autocall'; }
             else if (!tracking.couponOK) { statusHtml = '<span style="background:rgba(255,183,77,0.15);color:#FFB74D;padding:2px 8px;border-radius:10px;font-weight:600;font-size:10px">\u26a0 COUPON PERDU</span>'; statusType = 'lost'; }
@@ -234,7 +243,12 @@ function _renderPortfolioSummaryTable(state) {
         if (grade !== '-') { totalReturn += effectiveReturn; totalNetReturn += netAnnual; }
 
         var variationHtml;
-        if (tracking) {
+        if (tracking && tracking.isRate) {
+            // Taux : on montre le taux de r\u00e9f vs barri\u00e8re + la marge en points (positif = coupon s\u00fbr).
+            var rc = tracking.marginPts >= 0.3 ? 'var(--green)' : tracking.marginPts >= 0 ? '#4ECDC4' : 'var(--red)';
+            variationHtml = '<span style="color:' + rc + ';font-weight:700" title="' + tracking.refLabel + ' actuel vs barri\u00e8re coupon">' + tracking.rate.toFixed(2) + '% ' + (tracking.geCond ? '\u2265' : '\u2264') + ' ' + tracking.rateTrigger.toFixed(2) + '% <span style="font-size:9px;opacity:0.8">(' + (tracking.marginPts >= 0 ? '+' : '') + tracking.marginPts.toFixed(2) + 'pt)</span></span>';
+        }
+        else if (tracking) {
             var v = tracking.variation;
             var vc = v >= 5 ? 'var(--green)' : v >= 0 ? '#4ECDC4' : v >= -10 ? 'var(--orange)' : 'var(--red)';
             variationHtml = '<span style="color:' + vc + ';font-weight:700;cursor:pointer" onclick="event.stopPropagation();_quickEditVariation(\'' + p.id + '\')" title="Modifier">' + (v >= 0 ? '+' : '') + v.toFixed(1) + '% \u270e</span>';
