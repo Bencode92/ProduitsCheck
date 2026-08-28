@@ -1,8 +1,383 @@
 {
-  "timestamp": "2026-08-27T17:56:54.536541",
+  "timestamp": "2026-08-28T01:23:30.183344",
   "version": "1.1",
-  "tickers": {},
-  "commodity_metrics": {},
+  "tickers": {
+    "ACWI": {
+      "perf_ytd": 13.36,
+      "perf_1y": 20.83,
+      "perf_3m": 1.89,
+      "vol_3y": 15.74,
+      "max_dd_3y": 16.55,
+      "beta": 1.04,
+      "last_close": 161.53,
+      "data_points": 519
+    },
+    "BNO": {
+      "perf_ytd": 83.04,
+      "perf_1y": 71.23,
+      "perf_3m": 2.21,
+      "vol_3y": 38.83,
+      "max_dd_3y": 34.46,
+      "beta": -1.26,
+      "last_close": 51.71,
+      "data_points": 519
+    },
+    "CARZ": {
+      "perf_ytd": 32.85,
+      "perf_1y": 57.09,
+      "perf_3m": -10.67,
+      "vol_3y": 30.93,
+      "max_dd_3y": 26.83,
+      "beta": 2.07,
+      "last_close": 106.5069,
+      "data_points": 519
+    },
+    "DIA": {
+      "perf_ytd": 10.67,
+      "perf_1y": 17.37,
+      "perf_3m": 4.78,
+      "vol_3y": 14.91,
+      "max_dd_3y": 16.51,
+      "beta": 0.81,
+      "last_close": 535.22,
+      "data_points": 519
+    },
+    "EEM": {
+      "perf_ytd": 20.22,
+      "perf_1y": 35.46,
+      "perf_3m": -1.44,
+      "vol_3y": 21.94,
+      "max_dd_3y": 18.67,
+      "beta": 1.48,
+      "last_close": 67.61,
+      "data_points": 519
+    },
+    "EFIV": {
+      "perf_ytd": 13.98,
+      "perf_1y": 22.28,
+      "perf_3m": 4.2,
+      "vol_3y": 16.2,
+      "max_dd_3y": 19.74,
+      "beta": 0.98,
+      "last_close": 75.67,
+      "data_points": 520
+    },
+    "EUFN": {
+      "perf_ytd": 12.42,
+      "perf_1y": 25.9,
+      "perf_3m": 9.56,
+      "vol_3y": 20.54,
+      "max_dd_3y": 15.95,
+      "beta": 1.06,
+      "last_close": 42.19,
+      "data_points": 519
+    },
+    "EWA": {
+      "perf_ytd": 13.75,
+      "perf_1y": 11.15,
+      "perf_3m": 2.94,
+      "vol_3y": 19.52,
+      "max_dd_3y": 23.2,
+      "beta": 0.92,
+      "last_close": 30.11,
+      "data_points": 520
+    },
+    "EWG": {
+      "perf_ytd": 4.75,
+      "perf_1y": 6.42,
+      "perf_3m": 2.65,
+      "vol_3y": 18.82,
+      "max_dd_3y": 15.49,
+      "beta": 1.0,
+      "last_close": 44.58,
+      "data_points": 519
+    },
+    "EWH": {
+      "perf_ytd": 4.98,
+      "perf_1y": 8.25,
+      "perf_3m": -0.65,
+      "vol_3y": 20.79,
+      "max_dd_3y": 25.31,
+      "beta": 0.8,
+      "last_close": 22.96,
+      "data_points": 519
+    },
+    "EWI": {
+      "perf_ytd": 12.73,
+      "perf_1y": 21.47,
+      "perf_3m": 4.73,
+      "vol_3y": 19.41,
+      "max_dd_3y": 16.8,
+      "beta": 0.95,
+      "last_close": 62.18,
+      "data_points": 520
+    },
+    "EWJ": {
+      "perf_ytd": 17.84,
+      "perf_1y": 20.87,
+      "perf_3m": 3.1,
+      "vol_3y": 21.02,
+      "max_dd_3y": 15.99,
+      "beta": 1.18,
+      "last_close": 95.84,
+      "data_points": 520
+    },
+    "EWL": {
+      "perf_ytd": 5.59,
+      "perf_1y": 15.33,
+      "perf_3m": 0.92,
+      "vol_3y": 16.09,
+      "max_dd_3y": 13.48,
+      "beta": 0.63,
+      "last_close": 63.71,
+      "data_points": 519
+    },
+    "EWP": {
+      "perf_ytd": 14.1,
+      "perf_1y": 30.95,
+      "perf_3m": 7.77,
+      "vol_3y": 20.05,
+      "max_dd_3y": 13.93,
+      "beta": 0.94,
+      "last_close": 62.41,
+      "data_points": 519
+    },
+    "EWQ": {
+      "perf_ytd": 1.81,
+      "perf_1y": 8.39,
+      "perf_3m": 0.35,
+      "vol_3y": 18.32,
+      "max_dd_3y": 15.16,
+      "beta": 0.86,
+      "last_close": 46.13,
+      "data_points": 519
+    },
+    "EWT": {
+      "perf_ytd": 67.72,
+      "perf_1y": 81.75,
+      "perf_3m": 5.69,
+      "vol_3y": 29.21,
+      "max_dd_3y": 27.82,
+      "beta": 1.87,
+      "last_close": 108.63,
+      "data_points": 519
+    },
+    "EWU": {
+      "perf_ytd": 9.38,
+      "perf_1y": 16.73,
+      "perf_3m": 3.62,
+      "vol_3y": 15.71,
+      "max_dd_3y": 12.63,
+      "beta": 0.7,
+      "last_close": 48.63,
+      "data_points": 519
+    },
+    "EWY": {
+      "perf_ytd": 78.18,
+      "perf_1y": 151.33,
+      "perf_3m": -11.51,
+      "vol_3y": 43.59,
+      "max_dd_3y": 34.21,
+      "beta": 2.78,
+      "last_close": 182.14,
+      "data_points": 519
+    },
+    "EWZ": {
+      "perf_ytd": 11.06,
+      "perf_1y": 23.23,
+      "perf_3m": -0.42,
+      "vol_3y": 25.3,
+      "max_dd_3y": 27.58,
+      "beta": 0.98,
+      "last_close": 35.76,
+      "data_points": 519
+    },
+    "FEZ": {
+      "perf_ytd": 9.13,
+      "perf_1y": 19.16,
+      "perf_3m": 5.05,
+      "vol_3y": 19.08,
+      "max_dd_3y": 16.07,
+      "beta": 1.1,
+      "last_close": 71.34,
+      "data_points": 519
+    },
+    "GDX": {
+      "perf_ytd": 20.95,
+      "perf_1y": 68.66,
+      "perf_3m": 15.87,
+      "vol_3y": 42.91,
+      "max_dd_3y": 38.93,
+      "beta": 1.76,
+      "last_close": 103.69,
+      "data_points": 519
+    },
+    "GLD": {
+      "perf_ytd": 6.11,
+      "perf_1y": 35.14,
+      "perf_3m": 1.31,
+      "vol_3y": 23.74,
+      "max_dd_3y": 26.4,
+      "beta": 0.7,
+      "last_close": 422.6,
+      "data_points": 519
+    },
+    "INDA": {
+      "perf_ytd": -9.22,
+      "perf_1y": -5.98,
+      "perf_3m": 2.0,
+      "vol_3y": 14.81,
+      "max_dd_3y": 23.28,
+      "beta": 0.65,
+      "last_close": 49.53,
+      "data_points": 519
+    },
+    "IWM": {
+      "perf_ytd": 20.51,
+      "perf_1y": 27.07,
+      "perf_3m": 3.23,
+      "vol_3y": 21.32,
+      "max_dd_3y": 27.88,
+      "beta": 1.2,
+      "last_close": 299.81,
+      "data_points": 519
+    },
+    "QQQ": {
+      "perf_ytd": 17.61,
+      "perf_1y": 25.74,
+      "perf_3m": -2.33,
+      "vol_3y": 21.88,
+      "max_dd_3y": 22.88,
+      "beta": 1.42,
+      "last_close": 721.11,
+      "data_points": 519
+    },
+    "RSP": {
+      "perf_ytd": 14.82,
+      "perf_1y": 17.26,
+      "perf_3m": 6.04,
+      "vol_3y": 14.64,
+      "max_dd_3y": 18.49,
+      "beta": 0.69,
+      "last_close": 221.45,
+      "data_points": 519
+    },
+    "SIL": {
+      "perf_ytd": 24.25,
+      "perf_1y": 84.34,
+      "perf_3m": 10.04,
+      "vol_3y": 47.18,
+      "max_dd_3y": 39.5,
+      "beta": 2.08,
+      "last_close": 103.14,
+      "data_points": 519
+    },
+    "SLV": {
+      "perf_ytd": -4.53,
+      "perf_1y": 79.39,
+      "perf_3m": -8.14,
+      "vol_3y": 49.26,
+      "max_dd_3y": 52.28,
+      "beta": 1.71,
+      "last_close": 62.77,
+      "data_points": 519
+    },
+    "SPY": {
+      "perf_ytd": 12.87,
+      "perf_1y": 19.25,
+      "perf_3m": 1.93,
+      "vol_3y": 16.6,
+      "max_dd_3y": 19.0,
+      "beta": null,
+      "last_close": 771.1,
+      "data_points": 519
+    },
+    "VGK": {
+      "perf_ytd": 9.13,
+      "perf_1y": 17.32,
+      "perf_3m": 3.67,
+      "vol_3y": 16.68,
+      "max_dd_3y": 14.65,
+      "beta": 0.91,
+      "last_close": 92.28,
+      "data_points": 519
+    },
+    "XLE": {
+      "perf_ytd": 36.45,
+      "perf_1y": 39.63,
+      "perf_3m": 10.66,
+      "vol_3y": 23.45,
+      "max_dd_3y": 21.41,
+      "beta": -0.3,
+      "last_close": 62.29,
+      "data_points": 519
+    },
+    "XLK": {
+      "perf_ytd": 30.71,
+      "perf_1y": 42.64,
+      "perf_3m": -1.26,
+      "vol_3y": 27.08,
+      "max_dd_3y": 25.79,
+      "beta": 1.74,
+      "last_close": 188.61,
+      "data_points": 519
+    },
+    "XLU": {
+      "perf_ytd": 0.0,
+      "perf_1y": 1.27,
+      "perf_3m": -2.79,
+      "vol_3y": 15.94,
+      "max_dd_3y": 11.87,
+      "beta": 0.13,
+      "last_close": 43.18,
+      "data_points": 519
+    },
+    "XLV": {
+      "perf_ytd": 10.33,
+      "perf_1y": 25.27,
+      "perf_3m": 14.79,
+      "vol_3y": 16.26,
+      "max_dd_3y": 18.11,
+      "beta": 0.27,
+      "last_close": 171.58,
+      "data_points": 519
+    }
+  },
+  "commodity_metrics": {
+    "gold_usd": {
+      "proxy_etf": "GLD",
+      "perf_ytd": 6.11,
+      "perf_1y": 35.14,
+      "perf_3m": 1.31,
+      "vol_3y": 23.74,
+      "max_dd_3y": 26.4,
+      "beta": 0.7,
+      "last_close": 422.6,
+      "data_points": 519
+    },
+    "silver_usd": {
+      "proxy_etf": "SLV",
+      "perf_ytd": -4.53,
+      "perf_1y": 79.39,
+      "perf_3m": -8.14,
+      "vol_3y": 49.26,
+      "max_dd_3y": 52.28,
+      "beta": 1.71,
+      "last_close": 62.77,
+      "data_points": 519
+    },
+    "brent_usd": {
+      "proxy_etf": "BNO",
+      "perf_ytd": 83.04,
+      "perf_1y": 71.23,
+      "perf_3m": 2.21,
+      "vol_3y": 38.83,
+      "max_dd_3y": 34.46,
+      "beta": -1.26,
+      "last_close": 51.71,
+      "data_points": 519
+    }
+  },
   "benchmark": "SPY",
   "data_source": "twelve_data"
 }
