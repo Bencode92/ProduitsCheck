@@ -313,7 +313,7 @@
   "aiAnalyzedAt": "2026-05-05T13:47:22.747Z",
   "envelope": "",
   "_couponProbability": 90.2,
-  "_bsRendementNet": 9.76,
+  "_bsRendementNet": 4.35,
   "fees": {
     "structuring": 1.99
   },
@@ -326,17 +326,17 @@
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 94,
-        "base": 63,
+        "score": 61,
+        "base": 57,
         "delta": 0,
-        "reasoning": "Rendement: base 63 → +8 = 71 (Barrière coupon à 70% très en dessous du spot avec DD de 52.4% de marge, coupon mémoire et RHM porté par le supercycle défense européen rendent le coupon 14% hautement probable.) | Coupon 14%, barrière 38% | Barr.coupon 70% | Mat espérée: ~1.5a (prob mat: 0%)",
-        "_bsDelta": 31,
+        "reasoning": "Rendement: base 57 | Coupon 8%, barrière 38% | Barr.coupon 70% | Mat espérée: ~1.5a (prob mat: 0%)",
+        "_bsDelta": 4,
         "_bs": {
-          "score": 94,
+          "score": 61,
           "probCoupon": 90.2,
-          "rendementNet": 9.76,
+          "rendementNet": 4.35,
           "perteEsperee": 2.53,
-          "couponEffectif": 14,
+          "couponEffectif": 8,
           "vols": [
             43.74
           ],
@@ -346,29 +346,26 @@
         }
       },
       "underlyingQuality": {
-        "score": 72,
+        "score": 66,
         "base": 66,
-        "delta": 6,
-        "reasoning": "Qualité: base 66 → +6 = 72 (Rheinmetall (materials/défense) bénéficie du réarmement européen structurel et d'un beta défensif de 0.62, secteur materials favorisé en régime stagflation malgré le VIX à 22.) | Worst: RHEINMETALL AG B:60"
+        "delta": 0,
+        "reasoning": "Qualité: base 66 | Worst: RHEINMETALL AG B:60"
       },
       "portfolioFit": {
-        "score": 60,
+        "score": 63,
         "base": 63,
-        "delta": -3,
-        "reasoning": "Fit: base 63 → -3 = 60 (Mono-sous-jacent concentré sur un seul titre à vol élevée (43.74%) limite la diversification portefeuille malgré l'attractivité du thème.) — secteur déjà exposé (INDUSTRIALS)"
+        "delta": 0,
+        "reasoning": "Fit: base 63 — secteur déjà exposé (INDUSTRIALS)"
       },
       "riskPremium": {
-        "score": 90,
-        "base": 54,
-        "delta": -4,
-        "reasoning": "Prime vs CAT (net de frais, cohérent avec le panneau) : coupon espéré 12,6% (14,0% × proba 90%) − marge embarquée 1,33%/an = 11,3% vs CAT 2,8% → spread +8,50%. | vs achat direct : coupon net 11,3% vs dividende panier 1,1% risque-ajusté (vol 44% → 0,7%) = +10,6% → +3 pts."
+        "score": 68,
+        "base": 10,
+        "delta": 0,
+        "reasoning": "Prime vs CAT (net de frais, cohérent avec le panneau) : coupon espéré 7,2% (8,0% × proba 90%) − marge embarquée 1,33%/an = 5,9% vs CAT 2,8% → spread +3,09%. | vs achat direct : coupon net 5,9% vs dividende panier 1,1% risque-ajusté (vol 44% → 0,7%) = +5,2% → +3 pts."
       }
     },
-    "verdict": "En régime de STAGFLATION (Brent $97, VIX 22, PCE 3.7%), ce Phoenix Mémoire sur Rheinmetall combine un coupon annualisé de 14% avec des barrières exceptionnellement basses (coupon 70%, capital 38%). Rheinmetall, tiré par le supercycle défense européen, présente un beta faible de 0.62 le rendant relativement résilient au bear steepening décrit, et son secteur materials figure parmi les favorisés. Avec un autocall à 96% step-down -2%/semestre et une maturité espérée de ~1.5a, le scénario probable est un rappel rapide avec coupon encaissé. Le risque majeur reste la vol structurelle de 43.74% du sous-jacent unique et une éventuelle correction violente du titre défense après son fort momentum.",
+    "verdict": "Score 46/100 (base 46).",
     "keyRisks": [
-      "Concentration mono-sous-jacent sur Rheinmetall avec vol de 43.74% : une correction sévère du titre défense (après hausse spectaculaire) pourrait franchir la barrière capital à 38% en cas de choc géopolitique inversé.",
-      "Capital non protégé sur 6 ans si pas d'autocall : un choc stagflationniste avec repricing hawkish (10Y vers 5%) pèserait sur les valorisations equity, bien que le beta de 0.62 atténue.",
-      "Barrière coupon à 70% : peu probable d'être touchée vu la marge, mais une baisse >30% du titre suspendrait les coupons (partiellement récupérables via l'effet mémoire).",
       "Barrière à 0.9σ (Danger) — vol 43.74%",
       "Note plafonnée (C) : capital non protégé + barrière en zone danger — perte en capital possible."
     ],
@@ -377,8 +374,8 @@
       "optimistic": {
         "label": "Coupon (≥70%)",
         "desc": "capital + coupons",
-        "return_pct": 21,
-        "return_eur": 21000,
+        "return_pct": 12,
+        "return_eur": 12000,
         "probability": 0.9
       },
       "stress": {
@@ -397,17 +394,17 @@
       }
     },
     "confidenceInterval": {
-      "low": 56,
-      "high": 72,
+      "low": 38,
+      "high": 54,
       "halfWidth": 8,
       "gradeStable": false,
-      "gradeRange": "C-B",
-      "label": "B [56-72]"
+      "gradeRange": "D-C",
+      "label": "C [38-54]"
     },
     "metadata": {
-      "gradedAt": "2026-09-04T08:16:30.768Z",
-      "durationMs": 53446,
-      "aiUsed": true,
+      "gradedAt": "2026-09-04T08:17:38.922Z",
+      "durationMs": 49975,
+      "aiUsed": false,
       "version": "7.1",
       "productType": "autocall",
       "marketDataAvailable": true,
@@ -417,8 +414,8 @@
       "basketVol": 43.74,
       "basketDD": 52.4,
       "basketMomentum": -38,
-      "couponAnnualized": 14,
-      "couponRaw": 3.5,
+      "couponAnnualized": 8,
+      "couponRaw": 2,
       "couponMultiplier": 4,
       "couponFrequency": "trimestriel",
       "isInPortfolio": false,
@@ -430,30 +427,25 @@
       "maxMaturity": 6,
       "probReachMaturity": 0,
       "maxBeta": 0.62,
-      "baseScore": 61,
-      "baseGrade": "B",
-      "adjustments": {
-        "p1": 8,
-        "p2": 6,
-        "p3": -3,
-        "p4": -4
-      },
+      "baseScore": 46,
+      "baseGrade": "C",
+      "adjustments": null,
       "barrier_sigma": 0.9,
       "barrier_sigma_label": "Danger",
       "barrier_sigma_danger": true,
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 56,
-      "ci_high": 72,
-      "ci_label": "B [56-72]",
+      "ci_low": 38,
+      "ci_high": 54,
+      "ci_label": "C [38-54]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
       "decrementDrag": 0,
       "structureType": "autocall",
       "_illiqApplied": true,
-      "bsRendementNet": 9.76,
+      "bsRendementNet": 4.35,
       "bsProbCoupon": 90.2,
       "bsPerteEsperee": 2.53,
       "bsVols": [
@@ -470,11 +462,11 @@
         "p3": 0.15,
         "p4": 0.25
       },
-      "inputHash": "g1f0okzc",
-      "gradeT0": "2026-09-04T08:16:30.768Z",
+      "inputHash": "g11kdd1w",
+      "gradeT0": "2026-09-04T08:17:38.922Z",
       "trackingLevelAt0": null,
       "envelopeMode": "swiss-life",
-      "vsDirectGap": 10.6,
+      "vsDirectGap": 5.2,
       "vsDirectAdj": 3,
       "vsDirectDivAdj": 0.7,
       "vsDirectVolFactor": 1.46,
@@ -499,23 +491,23 @@
     },
     "regimeScenarios": {
       "current": {
-        "score": 55,
+        "score": 49,
         "grade": "C",
         "label": "Actuel (stagflation)",
         "desc": "Régime actuel → volatilité modérée"
       },
       "bull": {
-        "score": 73,
-        "grade": "B",
+        "score": 53,
+        "grade": "C",
         "label": "Bull / Risk-on",
-        "delta": 18,
+        "delta": 4,
         "desc": "Marchés haussiers → prob coupon monte, barrière safe"
       },
       "crash": {
-        "score": 57,
-        "grade": "C",
+        "score": 37,
+        "grade": "D",
         "label": "Crash / Récession",
-        "delta": 2,
+        "delta": -12,
         "desc": "Marchés baissiers → barrière menacée, vol en hausse"
       }
     }
