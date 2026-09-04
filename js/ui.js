@@ -913,13 +913,15 @@ function _renderInvestorMetrics(p) {
     // Timeline par observation
     html += '<div style="font-size:11px;font-weight:600;color:#475569;margin-bottom:6px">' + (hasAutocallProb ? 'Probabilité d\'autocall par date d\'observation :' : 'Probabilité de toucher le coupon par observation :') + '</div>';
     html += '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">';
-    autocallProbs.forEach(function(ap) {
-      if (ap.probCall <= 0) return;
+    // Cadence mensuelle (12/an) = 96 observations → illisible. On n'affiche que les points à
+    // proba non négligeable (≥1%), cappés à 16, + un résumé du reste. Label : M (mois), T, S ou An.
+    var _obsUnit = obsPerYear === 12 ? 'M' : obsPerYear === 4 ? 'T' : obsPerYear === 2 ? 'S' : 'An';
+    var _shown = autocallProbs.filter(function(ap) { return ap.probCall > 0 && Math.round(ap.probCall * 100) >= 1; });
+    var _capped = _shown.slice(0, 16);
+    _capped.forEach(function(ap) {
       var pct = Math.round(ap.probCall * 100);
       var cumPct = Math.round(ap.probCumul * 100);
-      // Label selon la cadence RÉELLE : T (trimestre), S (semestre) ou An, + l'année.
-      var _unit = obsPerYear === 4 ? 'T' : obsPerYear === 2 ? 'S' : 'An';
-      var label = (obsPerYear >= 2 ? _unit + ap.obs + ' · an ' + Math.ceil(ap.year) : 'An ' + ap.obs);
+      var label = (obsPerYear >= 2 ? _obsUnit + ap.obs + ' · an ' + Math.ceil(ap.year) : 'An ' + ap.obs);
       var bg = pct >= 70 ? '#ECFDF5' : pct >= 40 ? '#FFF7ED' : '#F8FAFC';
       var color = pct >= 70 ? '#059669' : pct >= 40 ? '#D97706' : '#475569';
       html += '<div style="padding:4px 8px;background:' + bg + ';border:1px solid #E2E8F0;border-radius:4px;text-align:center;min-width:50px">';
@@ -929,6 +931,7 @@ function _renderInvestorMetrics(p) {
       html += '</div>';
     });
     html += '</div>';
+    if (_shown.length > _capped.length) html += '<div style="font-size:9.5px;color:#94A3B8;margin-bottom:8px">… +' + (_shown.length - _capped.length) + ' autres dates de constatation (proba décroissante). Cumul final ' + Math.round((autocallProbs.length ? autocallProbs[autocallProbs.length - 1].probCumul * 100 : 0)) + '%.</div>';
 
     if (hasMemory) {
       html += '<div style="padding:6px 10px;background:#ECFDF5;border:1px solid #6EE7B7;border-radius:4px;font-size:10px;color:#065F46;margin-bottom:4px">';
@@ -957,7 +960,7 @@ function _renderInvestorMetrics(p) {
     html += '<div style="padding:8px;background:white;border-radius:6px;text-align:center;border:1px solid #E2E8F0">';
     html += '<div style="font-size:10px;color:#475569">Coupon / observation</div>';
     html += '<div style="font-family:var(--mono);font-size:16px;font-weight:800;color:#D97706">' + perPeriodRate + '% = ' + formatNumber(couponPerObs) + '€</div>';
-    html += '<div style="font-size:10px;color:#475569">' + (obsPerYear === 2 ? 'Semestriel' : obsPerYear === 4 ? 'Trimestriel' : 'Annuel') + '</div></div>';
+    html += '<div style="font-size:10px;color:#475569">' + (obsPerYear === 12 ? 'Mensuel' : obsPerYear === 2 ? 'Semestriel' : obsPerYear === 4 ? 'Trimestriel' : 'Annuel') + '</div></div>';
 
     html += '<div style="padding:8px;background:white;border-radius:6px;text-align:center;border:1px solid #E2E8F0">';
     html += '<div style="font-size:10px;color:#475569">Coupon annualisé</div>';

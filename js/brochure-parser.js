@@ -284,7 +284,7 @@
     if (er.possible) {
       try {
         var _freq = ((data.coupon && data.coupon.frequency) || er.frequency || 'annuel').toLowerCase();
-        var _opy = _freq.indexOf('trimestr') >= 0 ? 4 : _freq.indexOf('semestr') >= 0 ? 2 : 1;
+        var _opy = _freq.indexOf('mensuel') >= 0 || _freq.indexOf('month') >= 0 ? 12 : _freq.indexOf('trimestr') >= 0 ? 4 : _freq.indexOf('semestr') >= 0 ? 2 : 1;
         // 1) Source la plus fiable : la date du 1er rappel (firstCallDate ou 1ère ligne du callSchedule)
         var _fcd = er.firstCallDate || (Array.isArray(er.callSchedule) && er.callSchedule[0] && er.callSchedule[0].date) || null;
         if (_fcd && data.strikeDate) {
