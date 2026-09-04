@@ -259,7 +259,7 @@
         "score": 6,
         "base": 60,
         "delta": 0,
-        "reasoning": "Rendement: base 60 → -4 = 56 (Régime STAGFLATION + secteur industrials (favorisé mais non prioritaire) + beta 1.59 très élevé + vol 56% extrême : malgré une proba BS de 95%, le risque de breach de la barrière coupon 85% sur un titre aussi volatile est structurellement accru en environnement de stress macro prolongé.) | Coupon 11.351%, barrière 55% | Barr.coupon 85% | Mat espérée: ~1a (prob mat: 0%)",
+        "reasoning": "Rendement: base 60 → -4 = 56 (Régime stagflation critique pour Siemens Energy (industrials cyclique, beta 1.59) : Brent à $97 comprime les marges tout en freinant la demande d'équipements énergétiques ; proba coupon BS 95% ne capture pas ce risque structurel macro.) | Coupon 11.351%, barrière 55% | Barr.coupon 85% | Mat espérée: ~1a (prob mat: 0%)",
         "_bsDelta": -49,
         "_bs": {
           "score": 11,
@@ -279,13 +279,13 @@
         "score": 46,
         "base": 50,
         "delta": -4,
-        "reasoning": "Qualité: base 50 → -4 = 46 (Siemens Energy présente un drawdown historique de 47% et une volatilité de 56% dans un régime stagflationniste où les valeurs cycliques énergétiques souffrent de coûts inputs élevés (Brent $97) et de conditions financières restrictives (10Y 4.79%) ; beta 1.59 amplifie l'exposition au stress systémique.) | Worst: SIEMENS ENERGY AG B:43"
+        "reasoning": "Qualité: base 50 → -4 = 46 (Fondamentaux fragiles (drawdown 47%, vol 56%, beta 1.59) dans le pire contexte : industrials certes favorisé mais Siemens Energy reste exposé aux coûts énergétiques ; VIX 22 + stress crédit (LQD/HYG -1%+) amplifient le risque de volatilité extrême.) | Worst: SIEMENS ENERGY AG B:43"
       },
       "portfolioFit": {
         "score": 59,
         "base": 63,
         "delta": -4,
-        "reasoning": "Fit: base 63 → -4 = 59 (Produit mono-sous-jacent ultra-volatil (56%) inadapté à un portefeuille sans obligations (0% bonds détecté par MI) en phase de stagflation avec VIX 22 et stress crédit émergent (LQD -1.3%, HYG -1%) ; concentration de risque excessive.) — secteur déjà exposé (INDUSTRIALS)"
+        "reasoning": "Fit: base 63 → -4 = 59 (Portefeuille 0% bonds en stagflation = vulnérabilité maximale ; monoSJ haute volatilité inadapté comme diversification, aggrave l'exposition directionnelle au risque equity en environnement bear steepening.) — secteur déjà exposé (INDUSTRIALS)"
       },
       "riskPremium": {
         "score": 60,
@@ -294,11 +294,11 @@
         "reasoning": "Prime vs CAT (net de frais, cohérent avec le panneau) : coupon espéré 5,9% (11,4% × proba 52%) − marge embarquée 1,50%/an = 4,4% vs CAT 2,8% → spread +1,58%. | vs achat direct : coupon net 4,4% vs dividende panier 0,5% risque-ajusté (vol 56% → 0,3%) = +4,1% → +2 pts."
       }
     },
-    "verdict": "Ce produit autocallable mensuel sur Siemens Energy offre un coupon attractif (11.35% annualisé) avec une probabilité Black-Scholes de paiement de 95%, mais présente un profil de risque inadapté au contexte de stagflation. La volatilité extrême (56%), le drawdown historique de 47%, et le beta de 1.59 rendent le titre vulnérable aux chocs énergétiques (Brent à $97) et au durcissement monétaire. La barrière capital à 55% (0.38σ seulement) est critique pour un actif aussi erratique, exposant à des pertes sévères en cas de stress prolongé. Le profil convient uniquement à un investisseur tolérant une forte volatilité et acceptant un risque de perte en capital substantiel.",
+    "verdict": "Produit techniquement cohérent (proba coupon BS 95%, autocall mensuel 85%) mais fondamentalement inadapté au régime stagflation actuel. Siemens Energy cumule les vulnérabilités : beta 1.59 en phase de restrictivité monétaire, drawdown 47% signalant une fragilité technique, exposition aux coûts énergétiques (Brent $97) alors que le secteur industrials souffre du ralentissement de la demande. La barrière capital à 55% (0.38σ seulement) offre une marge insuffisante face à une volatilité de 56% dans un environnement où le stress crédit s'intensifie (LQD -1.3%). Le portefeuille sans obligations amplifie le risque de perte totale si le VIX franchit 30 et déclenche un flight-to-quality. Malgré un coupon attractif, le timing macro est défavorable : attendre une stabilisation du Brent sous $90 et un VIX sous 18 avant d'envisager ce profil.",
     "keyRisks": [
-      "Volatilité extrême (56%) et drawdown 47% : forte probabilité de breach des barrières en cas de choc énergétique (Brent >$100) ou de repricing hawkish Fed brutal déclenchant un bear market",
-      "Barrière capital critique (55%, soit 0.38σ) : risque de perte en capital >40% si Siemens Energy chute sous ce seuil dans un environnement stagflationniste prolongé avec taux durablement élevés",
-      "Concentration mono-sous-jacent cyclique : exposition totale à un titre énergétique beta 1.59 dans un régime où les industrials subissent des pressions de marge (coûts inputs élevés) et un stress crédit croissant (HYG -1%, spreads IG vers 160bps)",
+      "Choc énergétique (Brent franchissant $100) déclenchant une spirale coûts/demande fatale pour Siemens Energy, avec barrière capital à seulement 0.38σ dans une vol de 56%",
+      "Bear steepening (2s10s +40bps) précédant historiquement un ralentissement sous 6-12 mois : beta 1.59 amplifierait une correction equity de 20%+ en perte de 30%+ sur le sous-jacent",
+      "Repricing hawkish Fed si PCE persiste à 3.7% : taux 10Y vers 5%+ provoquerait une rotation brutale hors cycliques, le drawdown actuel de 47% pouvant s'étendre à 60%+ et franchir la barrière 55%",
       "Barrière à 0.38σ (Critique) — vol 56.25%"
     ],
     "negotiationPoints": [],
@@ -334,8 +334,8 @@
       "label": "B [55-71]"
     },
     "metadata": {
-      "gradedAt": "2026-09-04T09:06:01.126Z",
-      "durationMs": 28417,
+      "gradedAt": "2026-09-04T09:29:35.181Z",
+      "durationMs": 32603,
       "aiUsed": true,
       "version": "7.1",
       "productType": "autocall",
@@ -400,7 +400,7 @@
         "p4": 0.25
       },
       "inputHash": "gh25krj",
-      "gradeT0": "2026-09-04T09:06:01.126Z",
+      "gradeT0": "2026-09-04T09:29:35.181Z",
       "trackingLevelAt0": null,
       "envelopeMode": "swiss-life",
       "vsDirectGap": 4.1,
