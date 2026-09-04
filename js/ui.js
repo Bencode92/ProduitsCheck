@@ -575,7 +575,8 @@ function _renderFeesNet(p) {
   var _feeRows = [];
   var _struct = parseFloat((fees.structuring != null ? fees.structuring : (p.commissions != null ? p.commissions : _ai.commissions)));
   // Commission RÉCURRENTE %/an (ex Barclays 1,5%/an × 8 ans = 12% total) vs upfront one-shot.
-  var _overLife = !!(p.commissionAnnualOverLife || _ai.commissionAnnualOverLife);
+  // On réutilise la détection ROBUSTE de getFeeDrag (flag OU texte brochure), pas juste le flag.
+  var _overLife = !!(fd.overLife || p.commissionAnnualOverLife || _ai.commissionAnnualOverLife);
   var _matMax = parseFloat(p.maturityYears) || 0;
   if (!isNaN(_struct) && _struct > 0) {
     if (_overLife && _matMax > 0) {

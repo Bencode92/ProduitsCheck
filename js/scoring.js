@@ -209,6 +209,7 @@ class ScoringEngine {
       marginAnnualized,                           // marge embarquée annualisée
       embeddedMargin,                             // marge embarquée totale (surcoût)
       economicDragPct: received + marginAnnualized, // drag "valeur économique" (reçu + marge)
+      overLife,                                   // commission récurrente %/an (pas upfront) — pour l'affichage
       documented: fees.documented, fees, years: yrs
     };
   }
