@@ -340,6 +340,26 @@
     "scenDet": true
   },
   {
+    "bank": "swiss-life",
+    "file": "sp_mtmnvmm3_se964.json",
+    "name": "SL - PHOENIX MÉMOIRE TRIMESTRIEL STMICROEL",
+    "structureType": "autocall",
+    "productType": "autocall",
+    "grade": "C",
+    "score": 55,
+    "p1": 84,
+    "p2": 64,
+    "p3": 85,
+    "p4": 41,
+    "aiUsed": false,
+    "expMat": 1.1,
+    "couponProb": 99,
+    "basketDiv": 0.55,
+    "basketVol": 45.34,
+    "vsDirectGap": 1.2,
+    "vsDirectAdj": -2
+  },
+  {
     "bank": "cic",
     "file": "sp_mo74eqxp_v4xv9.json",
     "name": "OBJECTIF MAI 2026",

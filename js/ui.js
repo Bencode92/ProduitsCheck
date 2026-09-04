@@ -912,7 +912,9 @@ function _renderInvestorMetrics(p) {
       if (ap.probCall <= 0) return;
       var pct = Math.round(ap.probCall * 100);
       var cumPct = Math.round(ap.probCumul * 100);
-      var label = obsPerYear >= 2 ? 'S' + ap.obs : 'An ' + ap.obs;
+      // Label selon la cadence RÉELLE : T (trimestre), S (semestre) ou An, + l'année.
+      var _unit = obsPerYear === 4 ? 'T' : obsPerYear === 2 ? 'S' : 'An';
+      var label = (obsPerYear >= 2 ? _unit + ap.obs + ' · an ' + Math.ceil(ap.year) : 'An ' + ap.obs);
       var bg = pct >= 70 ? '#ECFDF5' : pct >= 40 ? '#FFF7ED' : '#F8FAFC';
       var color = pct >= 70 ? '#059669' : pct >= 40 ? '#D97706' : '#475569';
       html += '<div style="padding:4px 8px;background:' + bg + ';border:1px solid #E2E8F0;border-radius:4px;text-align:center;min-width:50px">';
