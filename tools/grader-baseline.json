@@ -418,6 +418,27 @@
     "basketVol": 0
   },
   {
+    "bank": "swiss-life",
+    "file": "sp_mtmrohfi_frpiq.json",
+    "name": "Objectif Octobre 2026",
+    "structureType": "autocall",
+    "productType": "autocall",
+    "grade": "C",
+    "score": 48,
+    "p1": 40,
+    "p2": 66,
+    "p3": 55,
+    "p4": 34,
+    "aiUsed": false,
+    "expMat": 4.9,
+    "couponProb": 48.1,
+    "basketDiv": 4.04,
+    "basketVol": 45.34,
+    "vsDirectGap": 3.9,
+    "vsDirectAdj": 2,
+    "scenDet": true
+  },
+  {
     "bank": "sg",
     "file": "sp_mr4ssbps_te6xi.json",
     "name": "LIVINGSTONE RENDEMENT",

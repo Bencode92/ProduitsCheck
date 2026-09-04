@@ -27,7 +27,11 @@ var LIQUIDITY_KW=['bond 12m','compartiment','fonds monetaire','money market','ca
 var RATE_KW=['TEC','CMS','EURIBOR','EONIA','ESTER','EUR3M','EUR6M','LIBOR','SOFR','OAT','BUND','SWAP','TAUX','RATE','INDICE TEC'];
 
 // ═══ SECTION 2: UTILITIES ═══
-function _stripAccents(s){return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
+// Normalisation de MATCHING (accents + ponctuation). \u00ab AXA S.A. \u00bb et \u00ab AXA SA \u00bb, \u00ab STMicro N.V. \u00bb
+// et \u00ab STMicro NV \u00bb, \u00ab Novo A/S \u00bb et \u00ab Novo AS \u00bb doivent matcher le m\u00eame titre. Sans retirer les
+// points/slashs, le panier perdait des sous-jacents (AXA introuvable) \u2192 vol/qualit\u00e9 fauss\u00e9es \u2192
+// grades incoh\u00e9rents pour le M\u00caME panier selon l'orthographe. Usage matching seulement.
+function _stripAccents(s){return String(s==null?'':s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[.\/]/g,' ').replace(/\s+/g,' ').trim();}
 function _safeParse(d){if(!d)return null;if(typeof d==='string'){try{return JSON.parse(d)}catch(e){return null}}return d;}
 function _resolveAlias(n){var u=n.toUpperCase().trim();if(typeof BANK_ALIASES!=='undefined'&&BANK_ALIASES[u])return BANK_ALIASES[u];if(STOCK_ALIASES[u])return STOCK_ALIASES[u];var s=_stripAccents(u);if(STOCK_ALIASES[s])return STOCK_ALIASES[s];return u;}
 function _normalizeUnderlyings(u){if(typeof u==='string')return u.split(/[,;\\/]/).map(function(s){return s.trim()}).filter(Boolean);if(Array.isArray(u))return u.map(function(x){return typeof x==='string'?x.trim():(x.name||x.ticker||x.isin||'')}).filter(Boolean);return[];}
