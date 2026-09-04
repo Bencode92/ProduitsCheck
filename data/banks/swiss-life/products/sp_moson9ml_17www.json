@@ -19,7 +19,7 @@
   "maturityYears": 6,
   "coupon": {
     "rate": 3.5,
-    "frequency": "semestriel",
+    "frequency": "trimestriel",
     "annualized": true,
     "type": "conditionnel",
     "memory": true,
@@ -516,5 +516,8 @@
         "desc": "Marchés baissiers → barrière menacée, vol en hausse"
       }
     }
+  },
+  "fees": {
+    "structuring": 1.99
   }
 }
