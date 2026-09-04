@@ -296,11 +296,16 @@ function _renderUnderstand(p) {
   // ── RECOMMANDATION 4 OPTIONS (CAT / direct / structuré / rien), risque capital PRICÉ ──
   // C'est LE rôle du grading (Benoit) : le coupon 11% ne vaut rien s'il est mangé par la proba
   // (52%), les frais et la perte attendue. On tranche explicitement.
+  // Enveloppe Swiss Life : pas de CAT possible dans la poche → le repère n'est pas « CAT »
+  // mais « attendre un meilleur produit » (la poche SL reste en fonds monétaire/euro ~2-3%).
+  var _isSL = (md.envelopeMode === 'swiss-life') || (p.bankId === 'swiss-life');
+  var _waitLabel = _isSL ? '⏳ Attendre un meilleur produit' : '🏦 Le CAT (ou ne rien faire) est préférable';
+  var _waitAlt = _isSL ? 'la poche Swiss Life reste en fonds monétaire/euro (~2-3%)' : 'le CAT ' + f1(catRate) + '% GARANTI';
   var _rec;
   if (pLossU >= 15 && espereEco != null && espereEco < catRate + 1.5) {
-    _rec = { c: '#059669', t: '🏦 Le CAT (ou ne rien faire) est préférable', m: 'Une fois le risque pricé — perte attendue <strong>−' + espLossU + '%</strong> (' + pLossU + '% de chance de perdre ~' + sevU + '%) — ce structuré ne rend que <strong>' + pc(espereEco) + '/an</strong> de coupon espéré, ≈ le CAT ' + f1(catRate) + '% GARANTI. Tu prendrais un gros risque de perte pour un rendement quasi identique au sans-risque. Pour de la trésorerie : CAT.' };
+    _rec = { c: '#B45309', t: _waitLabel, m: 'Une fois le risque pricé — perte attendue <strong>−' + espLossU + '%</strong> (' + pLossU + '% de chance de perdre ~' + sevU + '%) — ce structuré ne rend que <strong>' + pc(espereEco) + '/an</strong> de coupon espéré, ≈ ' + _waitAlt + '. Rendement quasi identique au sans-risque pour un gros risque de perte : ' + (_isSL ? 'garde la poche en attente d\'un structuré mieux calibré (coupon plus élevé OU barrière plus basse).' : 'pour de la trésorerie, CAT.') };
   } else if (espereEco != null && espereEco < catRate) {
-    _rec = { c: '#B45309', t: '🏦 CAT préférable', m: 'Coupon espéré <strong>' + pc(espereEco) + '/an</strong> INFÉRIEUR au CAT ' + f1(catRate) + '% garanti — et tu prends en plus le risque de perte (−' + espLossU + '% attendu). Le CAT domine.' };
+    _rec = { c: '#DC2626', t: _waitLabel, m: 'Coupon espéré <strong>' + pc(espereEco) + '/an</strong> INFÉRIEUR à ' + _waitAlt + ' — et tu prends en plus le risque de perte (−' + espLossU + '% attendu). ' + (_isSL ? 'À laisser passer : attends un meilleur produit.' : 'Le CAT domine.') };
   } else if (basketMom != null && basketMom >= 15) {
     _rec = { c: '#B45309', t: '📈 Direct si tu es haussier, sinon prudence', m: sj + ' est en tendance (+' + basketMom + '%/1an) : le structuré <strong>plafonne</strong> ta hausse à ~' + f1(couponRate) + '%/an. Si conviction haussière → direct. Sinon le coupon espéré ' + pc(espereEco) + '/an bat le CAT de ' + f1(vsCatPts) + ' pt, mais avec ' + pLossU + '% de risque de perte.' };
   } else {
