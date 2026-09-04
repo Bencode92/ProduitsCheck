@@ -149,6 +149,7 @@
     { v: 'annuel', l: 'Annuel' },
     { v: 'semestriel', l: 'Semestriel' },
     { v: 'trimestriel', l: 'Trimestriel' },
+    { v: 'mensuel', l: 'Mensuel' },
     { v: 'in_fine', l: 'In Fine (à maturité)' },
     { v: 'à maturité', l: 'À maturité' }
   ];

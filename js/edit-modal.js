@@ -113,7 +113,8 @@ window.showEditModal = function() {
     var erFreqOptions = [
         { id: 'annuel', label: 'Annuel' },
         { id: 'semestriel', label: 'Semestriel' },
-        { id: 'trimestriel', label: 'Trimestriel' }
+        { id: 'trimestriel', label: 'Trimestriel' },
+        { id: 'mensuel', label: 'Mensuel' }
     ].map(function(f) {
         return '<option value="' + f.id + '"' + (erFreq === f.id ? ' selected' : '') + '>' + f.label + '</option>';
     }).join('');

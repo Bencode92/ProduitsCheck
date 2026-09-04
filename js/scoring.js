@@ -179,8 +179,21 @@ class ScoringEngine {
     const fees = this.getProductFees(p);
     const yrs = this._effectiveMaturity(p);
     const received = fees.custodyAnnual;                                   // garde (%/an) — ampute le reçu
-    const embeddedMargin = fees.structuring;                              // marge embarquée totale (%)
-    const marginAnnualized = yrs > 0 ? embeddedMargin / yrs : embeddedMargin; // coût d'opportunité annualisé
+    // Commission RÉCURRENTE « X%/an sur la durée de vie » (ex Barclays 1,5%/an × 8 ans = 12%) :
+    // le chiffre stocké (12%) est un TOTAL sur la maturité MAX, PAS une marge upfront. Le vrai
+    // coût annuel est plat (1,5%/an) quel que soit le moment de sortie. Sans ça, 12% amortis sur
+    // ~1,5 an d'autocall = 8%/an de drag → P4 catastrophé à tort.
+    const overLife = !!(p && (p.commissionAnnualOverLife || (p.aiParsed && p.aiParsed.commissionAnnualOverLife)));
+    const matMax = parseFloat(p && p.maturityYears) || yrs;
+    let embeddedMargin, marginAnnualized;
+    if (overLife && matMax > 0) {
+      const annualRate = fees.structuring / matMax;                        // 12 / 8 = 1,5%/an (plat)
+      marginAnnualized = annualRate;                                       // coût annuel réel (récurrent)
+      embeddedMargin = annualRate * yrs;                                   // total réellement payé sur la durée espérée
+    } else {
+      embeddedMargin = fees.structuring;                                   // marge embarquée totale upfront (%)
+      marginAnnualized = yrs > 0 ? embeddedMargin / yrs : embeddedMargin;  // amortie sur la maturité espérée
+    }
     return {
       dragPct: received,                          // drag sur le rendement REÇU (garde)
       marginAnnualized,                           // marge embarquée annualisée
