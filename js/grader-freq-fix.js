@@ -80,7 +80,14 @@
         product.coupon = {
             rate: annual,
             frequency: 'annuel',
-            annualized: true
+            annualized: true,
+            // NON-DESTRUCTIF : on PRÉSERVE la cadence réelle (ex 2% trimestriel) pour l'affichage
+            // (fiche/modal montrent « 2% trimestriel = 8%/an ») ET pour l'estimateur de maturité
+            // (observations trimestrielles, autocall dès le T4 = an 1). Sans ça, tout l'aval croyait
+            // le produit annuel → maturité par année, « coupon/observation 8% », An 4 au lieu de T4.
+            ratePerPeriod: rawRate,
+            frequencyReal: (typeof oldCoupon === 'object' && oldCoupon) ? (oldCoupon.frequency || detected.freq) : detected.freq,
+            periodsPerYear: mult
         };
         if (typeof oldCoupon === 'object' && oldCoupon !== null) {
             if (oldCoupon.type) product.coupon.type = oldCoupon.type;

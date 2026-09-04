@@ -442,7 +442,17 @@ function renderProductSheet(container, state) {
         ${_renderUnderstand(p)}
         ${p.aiSummary ? `<div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">🤖</span><span class="fiche-section-title">Résumé IA</span></div><div class="fiche-section-body"><div class="fiche-ai-summary">${formatAISummary(p.aiSummary)}</div></div></div>` : ''}
         <div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">💰</span><span class="fiche-section-title">Mécanisme des Coupons</span></div><div class="fiche-section-body">
-          <div class="fiche-info-box ${couponRate && couponRate >= 5 ? 'green' : 'blue'}"><div class="fiche-info-box-title">Coupon ${p.coupon?.type || ''} — ${couponRate ? formatPct(couponRate) : 'N/A'}</div><div class="fiche-info-box-text">${p.coupon?.frequency ? `<strong>Fréquence:</strong> ${p.coupon.frequency}` : ''}${p.coupon?.trigger ? ` · <strong>Seuil:</strong> ${p.coupon.trigger}% du niveau initial` : ''}${hasMem ? ' · <strong>Effet mémoire:</strong> Oui' : ''}</div></div></div></div>
+          ${(() => {
+            var c = p.coupon || {};
+            // Cadence réelle : freq-fix a pu annualiser (rate→8/an) en préservant ratePerPeriod (2) + frequencyReal (trimestriel).
+            var perP = (c.ratePerPeriod != null) ? c.ratePerPeriod : null;
+            var freqReal = c.frequencyReal || c.frequency || '';
+            var annualLbl = couponRate ? formatPct(couponRate) : 'N/A';
+            var title = (perP != null && freqReal && freqReal !== 'annuel')
+              ? 'Coupon ' + (c.type || '') + ' — ' + formatPct(perP) + ' ' + freqReal + ' (= ' + annualLbl + '/an)'
+              : 'Coupon ' + (c.type || '') + ' — ' + annualLbl;
+            return '<div class="fiche-info-box ' + (couponRate && couponRate >= 5 ? 'green' : 'blue') + '"><div class="fiche-info-box-title">' + title + '</div><div class="fiche-info-box-text">' + (freqReal ? '<strong>Fréquence:</strong> ' + freqReal : '') + (c.trigger ? ' · <strong>Seuil:</strong> ' + c.trigger + '% du niveau initial' : '') + (hasMem ? ' · <strong>Effet mémoire:</strong> Oui' : '') + '</div></div>';
+          })()}</div></div>
         <div class="fiche-section"><div class="fiche-section-header"><span class="fiche-section-icon">🛡️</span><span class="fiche-section-title">Protection du Capital</span></div><div class="fiche-section-body">
           <div class="fiche-info-box ${isProtected ? 'green' : 'orange'}"><div class="fiche-info-box-title">${isProtected ? '✓ Capital protégé' : '⚠️ Capital non protégé'} ${p.capitalProtection?.level ? '— ' + p.capitalProtection.level + '%' : ''}</div><div class="fiche-info-box-text">${p.capitalProtection?.type ? `<strong>Type:</strong> ${p.capitalProtection.type}` : ''}${barrier ? ` · <strong>Barrière:</strong> ${barrier}% (${p.capitalProtection?.barrierType || 'européenne'})` : ''}${p.capitalProtection?.barrierObservation ? `<br><strong>Observation:</strong> ${p.capitalProtection.barrierObservation}` : ''}</div></div>
           ${barrier && barrier < 70 ? `<div class="fiche-alert warn">⚠️ Barrière basse (${barrier}%)</div>` : ''}</div></div>
@@ -530,7 +540,31 @@ function _renderFeesNet(p) {
   var netCol = netRecu > 0 ? '#059669' : '#DC2626';
   var isOverLife = !!(p.commissionAnnualOverLife || (p.aiParsed && p.aiParsed.commissionAnnualOverLife));
 
-  var h = '<div style="padding:14px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;margin-bottom:8px">';
+  // ── 0. DÉTAIL DES FRAIS : lister chaque frais séparément (l'utilisateur veut les voir) ──
+  var _ai = p.aiParsed || {};
+  var _feeRows = [];
+  var _struct = parseFloat((fees.structuring != null ? fees.structuring : (p.commissions != null ? p.commissions : _ai.commissions)));
+  if (!isNaN(_struct) && _struct > 0) _feeRows.push(['Commission de distribution / structuration', f2(_struct) + '%', 'one', 'Incluse dans le prix d\'émission (marge embarquée) — payée une fois']);
+  if (custody > 0) _feeRows.push(['Droits de garde / frais sur encours', f2(custody) + '%/an', 'rec', 'Récurrents — prélevés chaque année sur l\'encours']);
+  var _entry = parseFloat(_ai.costEntry); if (!isNaN(_entry) && _entry > 0) _feeRows.push(['Frais d\'entrée / souscription', f2(_entry) + '%', 'one', 'À la souscription']);
+  var _exit = parseFloat(fees.exit != null ? fees.exit : _ai.costExit); if (!isNaN(_exit) && _exit > 0) _feeRows.push(['Frais de sortie anticipée', f2(_exit) + '%', 'one', 'En cas de revente avant l\'échéance']);
+  var _ongoing = parseFloat(_ai.costOngoing); if (!isNaN(_ongoing) && _ongoing > 0) _feeRows.push(['Frais courants (KID)', f2(_ongoing) + '%/an', 'rec', 'Coûts récurrents du DIC PRIIPs']);
+  var _spread = parseFloat(_ai.secondarySpread); if (!isNaN(_spread) && _spread > 0) _feeRows.push(['Fourchette marché secondaire', f2(_spread) + '%', 'one', 'Écart achat/vente en cas de revente']);
+  var h = '';
+  if (_feeRows.length > 0) {
+    h += '<div style="padding:12px 14px;background:#FEF9F3;border:1px solid #FDE68A;border-radius:8px;margin-bottom:8px">';
+    h += '<div style="font-size:11px;font-weight:700;color:#92400E;margin-bottom:8px">📋 Détail des frais</div>';
+    h += '<table style="width:100%;border-collapse:collapse;font-size:11.5px">';
+    _feeRows.forEach(function (r) {
+      var badge = r[2] === 'rec' ? '<span style="font-size:8px;background:#FED7AA;color:#9A3412;padding:1px 5px;border-radius:6px;margin-left:5px">RÉCURRENT</span>' : '<span style="font-size:8px;background:#E0E7FF;color:#3730A3;padding:1px 5px;border-radius:6px;margin-left:5px">UNE FOIS</span>';
+      h += '<tr style="border-bottom:1px solid #FDE68A"><td style="padding:5px 4px;color:#334155">' + r[0] + badge + '<div style="font-size:9.5px;color:#94A3B8">' + r[3] + '</div></td><td style="padding:5px 4px;text-align:right;font-family:var(--mono);font-weight:700;color:#B45309;white-space:nowrap">' + r[1] + '</td></tr>';
+    });
+    h += '</table>';
+    if (isNaN(parseFloat(_ai.costOngoing)) && custody === 0) h += '<div style="font-size:9.5px;color:#94A3B8;margin-top:6px">ℹ Droits de garde non renseignés dans la brochure (hypothèse marché ~0,75%/an dans le calcul du rendement net). Le RIY du DIC donne le coût total exact.</div>';
+    h += '</div>';
+  }
+
+  h += '<div style="padding:14px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;margin-bottom:8px">';
   // ── 1. NET REÇU (payoff contractuel, si coupon touché) — la marge n'ampute PAS ce chiffre ──
   h += '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">';
   h += '<span style="font-size:11px;font-weight:700;color:#92400E">💸 NET REÇU (si coupon touché)</span>';
@@ -778,8 +812,11 @@ function _renderInvestorMetrics(p) {
   if (!isRate && couponRate > 0) {
     var er = p.earlyRedemption || {};
     var hasAutocallProb = er.possible && (er.type === 'autocall' || er.type === 'callable');
-    var freq = (coupon.frequency || 'annuel').toLowerCase();
-    var obsPerYear = freq.indexOf('semestr') >= 0 ? 2 : freq.indexOf('trimestr') >= 0 ? 4 : 1;
+    // Cadence RÉELLE : freq-fix a pu annualiser le coupon (rate→annuel) en préservant la vraie
+    // fréquence dans frequencyReal + le coupon par période dans ratePerPeriod. On les privilégie,
+    // sinon la fréquence de l'autocall (er.frequency), sinon coupon.frequency.
+    var freq = (coupon.frequencyReal || er.frequency || coupon.frequency || 'annuel').toLowerCase();
+    var obsPerYear = coupon.periodsPerYear || (freq.indexOf('semestr') >= 0 ? 2 : freq.indexOf('trimestr') >= 0 ? 4 : 1);
     var triggerAC = parseFloat(er.trigger) || parseFloat(coupon.trigger) || 100;
     var vol = 28; // default single-stock
     var hasMemory = coupon.memory === true;
@@ -897,8 +934,12 @@ function _renderInvestorMetrics(p) {
     // ─── Détail coupon & remboursement ───
     var nominal = parseFloat(p.investedAmount) || parseFloat(p.minInvestment) || 100000;
     var guaranteedYrs = p.guaranteedYears || 0;
-    var annualizedCoupon = couponRate * obsPerYear;
-    var couponPerObs = Math.round(nominal * couponRate / 100);
+    // Taux PAR PÉRIODE (ex 2% trimestriel). couponRate a pu être annualisé par freq-fix (8%) →
+    // on récupère ratePerPeriod si présent, sinon on dérive (annualisé ÷ obs) quand freq réelle infra-annuelle.
+    var perPeriodRate = (coupon.ratePerPeriod != null) ? coupon.ratePerPeriod
+        : (coupon.annualized && obsPerYear > 1 ? Math.round(couponRate / obsPerYear * 1000) / 1000 : couponRate);
+    var annualizedCoupon = Math.round(perPeriodRate * obsPerYear * 1000) / 1000;
+    var couponPerObs = Math.round(nominal * perPeriodRate / 100);
     var couponPerYear = couponPerObs * obsPerYear;
 
     html += '<div style="margin-top:10px;padding:12px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px">';
@@ -908,7 +949,7 @@ function _renderInvestorMetrics(p) {
     html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px">';
     html += '<div style="padding:8px;background:white;border-radius:6px;text-align:center;border:1px solid #E2E8F0">';
     html += '<div style="font-size:10px;color:#475569">Coupon / observation</div>';
-    html += '<div style="font-family:var(--mono);font-size:16px;font-weight:800;color:#D97706">' + couponRate + '% = ' + formatNumber(couponPerObs) + '€</div>';
+    html += '<div style="font-family:var(--mono);font-size:16px;font-weight:800;color:#D97706">' + perPeriodRate + '% = ' + formatNumber(couponPerObs) + '€</div>';
     html += '<div style="font-size:10px;color:#475569">' + (obsPerYear === 2 ? 'Semestriel' : obsPerYear === 4 ? 'Trimestriel' : 'Annuel') + '</div></div>';
 
     html += '<div style="padding:8px;background:white;border-radius:6px;text-align:center;border:1px solid #E2E8F0">';
