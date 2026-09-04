@@ -1,7 +1,7 @@
 {
   "bankId": "swiss-life",
   "bankName": "Swiss Life",
-  "lastUpdated": "2026-09-04T07:57:40.539Z",
+  "lastUpdated": "2026-09-04T08:44:27.707Z",
   "products": [
     {
       "id": "sp_moson9ml_17www",
@@ -30,6 +30,14 @@
     {
       "id": "sp_mtmnvmm3_se964",
       "name": "SL - PHOENIX MÉMOIRE TRIMESTRIEL STMICROELECTRONICS OCTOBRE 2026",
+      "type": "autocall",
+      "status": "analyzing",
+      "score": null,
+      "receivedDate": "2026-09-04"
+    },
+    {
+      "id": "sp_mtmpjsmy_ctjrd",
+      "name": "SL - ATHENA MENSUEL SIEMENS ENERGY OCTOBRE 2026",
       "type": "autocall",
       "status": "analyzing",
       "score": null,
