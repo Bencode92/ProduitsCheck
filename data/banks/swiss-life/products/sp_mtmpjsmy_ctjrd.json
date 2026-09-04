@@ -248,8 +248,8 @@
   "_couponProbability": 51.8,
   "_bsRendementNet": -4.04,
   "grading": {
-    "grade": "F",
-    "score": 23,
+    "grade": "D",
+    "score": 39,
     "killCriteria": {
       "triggered": false,
       "reasons": []
@@ -259,7 +259,7 @@
         "score": 6,
         "base": 60,
         "delta": 0,
-        "reasoning": "Rendement: base 60 → -4 = 56 (Stagflation + beta 1.59 + volatilité 56% + DD -47% sur SJ cyclique énergétique : probabilité coupon mensuel 85% irréaliste, surtout avec Brent à $97 créant une incertitude sectorielle majeure.) | Coupon 11.351%, barrière 55% | Barr.coupon 85% | Mat espérée: ~1a (prob mat: 0%)",
+        "reasoning": "Rendement: base 60 → -4 = 56 (Régime STAGFLATION + secteur industrials (favorisé mais non prioritaire) + beta 1.59 très élevé + vol 56% extrême : malgré une proba BS de 95%, le risque de breach de la barrière coupon 85% sur un titre aussi volatile est structurellement accru en environnement de stress macro prolongé.) | Coupon 11.351%, barrière 55% | Barr.coupon 85% | Mat espérée: ~1a (prob mat: 0%)",
         "_bsDelta": -49,
         "_bs": {
           "score": 11,
@@ -279,26 +279,26 @@
         "score": 46,
         "base": 50,
         "delta": -4,
-        "reasoning": "Qualité: base 50 → -4 = 46 (Siemens Energy n'est PAS dans les secteurs favorisés (IT/materials/utilities/healthcare/staples) ; son beta 1.59 en fait une victime idéale du bear steepening stagflationniste, avec un drawdown déjà à -47%.) | Worst: SIEMENS ENERGY AG B:43"
+        "reasoning": "Qualité: base 50 → -4 = 46 (Siemens Energy présente un drawdown historique de 47% et une volatilité de 56% dans un régime stagflationniste où les valeurs cycliques énergétiques souffrent de coûts inputs élevés (Brent $97) et de conditions financières restrictives (10Y 4.79%) ; beta 1.59 amplifie l'exposition au stress systémique.) | Worst: SIEMENS ENERGY AG B:43"
       },
       "portfolioFit": {
         "score": 59,
         "base": 63,
         "delta": -4,
-        "reasoning": "Fit: base 63 → -4 = 59 (Mono-SJ extrêmement volatile (56%) dans un portefeuille 0% bonds = double vulnérabilité au VIX 22 : aucun amortisseur défensif en cas de flight-to-quality si VIX>30.) — secteur déjà exposé (INDUSTRIALS)"
+        "reasoning": "Fit: base 63 → -4 = 59 (Produit mono-sous-jacent ultra-volatil (56%) inadapté à un portefeuille sans obligations (0% bonds détecté par MI) en phase de stagflation avec VIX 22 et stress crédit émergent (LQD -1.3%, HYG -1%) ; concentration de risque excessive.) — secteur déjà exposé (INDUSTRIALS)"
       },
       "riskPremium": {
-        "score": 6,
+        "score": 60,
         "base": 88,
-        "delta": -4,
-        "reasoning": "Prime vs CAT (net de frais, cohérent avec le panneau) : coupon espéré 5,9% (11,4% × proba 52%) − marge embarquée 12,00%/an = -6,1% vs CAT 2,8% → spread -8,92%. | vs achat direct : coupon net -6,1% vs dividende panier 0,5% risque-ajusté (vol 56% → 0,3%) = -6,4% → -6 pts."
+        "delta": 0,
+        "reasoning": "Prime vs CAT (net de frais, cohérent avec le panneau) : coupon espéré 5,9% (11,4% × proba 52%) − marge embarquée 1,50%/an = 4,4% vs CAT 2,8% → spread +1,58%. | vs achat direct : coupon net 4,4% vs dividende panier 0,5% risque-ajusté (vol 56% → 0,3%) = +4,1% → +2 pts."
       }
     },
-    "verdict": "⛔ REJET CATÉGORIQUE. Ce produit combine les 4 cavaliers de l'apocalypse structurée : (1) mono-SJ sur Siemens Energy déjà en drawdown -47% avec beta 1.59 dans un régime stagflation où l'énergie subit la double peine (Brent $97 = input cost crisis + demand destruction), (2) barrières 85% inatteignables avec une volatilité 56% et aucun momentum haussier visible, (3) portefeuille 0% bonds exposant 100k€ à un VIX qui menace 30 sans filet de sécurité, (4) durée 8 ans piégeant le capital dans une décennie où la Fed en pause + PCE 3.7% garantit un environnement de taux restrictifs prolongés. Le coupon 11.35% n'est qu'un leurre : avec une proba réelle <20% de versement (vs 60% score base fantaisiste) et une barrière capital 55% qui sera testée dès la première correction sectorielle, le scénario central n'est pas 15k€ mais une perte de 30-50k€ sur 8 ans. L'émetteur price ici un risque de faillite ou de restructuration de Siemens Energy dans la fenêtre 2024-2026.",
+    "verdict": "Ce produit autocallable mensuel sur Siemens Energy offre un coupon attractif (11.35% annualisé) avec une probabilité Black-Scholes de paiement de 95%, mais présente un profil de risque inadapté au contexte de stagflation. La volatilité extrême (56%), le drawdown historique de 47%, et le beta de 1.59 rendent le titre vulnérable aux chocs énergétiques (Brent à $97) et au durcissement monétaire. La barrière capital à 55% (0.38σ seulement) est critique pour un actif aussi erratique, exposant à des pertes sévères en cas de stress prolongé. Le profil convient uniquement à un investisseur tolérant une forte volatilité et acceptant un risque de perte en capital substantiel.",
     "keyRisks": [
-      "Risque de perte totale si Siemens Energy franchit -45% (barrière 55%) : avec DD actuel -47% et volatilité 56%, un choc sectoriel (ex: échec transition énergétique, perte contrat majeur) peut effacer 50-80k€ en quelques trimestres",
-      "Piège de liquidité 8 ans : en stagflation, les taux longs restent élevés (10Y à 4.79%), immobiliser 100k€ sans coupon probable = coût d'opportunité massif vs TIPS qui offrent 2%+ réel garanti",
-      "Contagion macro : si Brent franchit $100, la Fed pourrait choquer avec une hausse surprise → VIX>30 + flight-to-quality massacrerait Siemens Energy (cyclique beta 1.59) tandis que le portefeuille 0% bonds ne compenserait rien",
+      "Volatilité extrême (56%) et drawdown 47% : forte probabilité de breach des barrières en cas de choc énergétique (Brent >$100) ou de repricing hawkish Fed brutal déclenchant un bear market",
+      "Barrière capital critique (55%, soit 0.38σ) : risque de perte en capital >40% si Siemens Energy chute sous ce seuil dans un environnement stagflationniste prolongé avec taux durablement élevés",
+      "Concentration mono-sous-jacent cyclique : exposition totale à un titre énergétique beta 1.59 dans un régime où les industrials subissent des pressions de marge (coûts inputs élevés) et un stress crédit croissant (HYG -1%, spreads IG vers 160bps)",
       "Barrière à 0.38σ (Critique) — vol 56.25%"
     ],
     "negotiationPoints": [],
@@ -326,16 +326,16 @@
       }
     },
     "confidenceInterval": {
-      "low": 54,
-      "high": 70,
+      "low": 55,
+      "high": 71,
       "halfWidth": 8,
       "gradeStable": false,
       "gradeRange": "C-B",
-      "label": "B [54-70]"
+      "label": "B [55-71]"
     },
     "metadata": {
-      "gradedAt": "2026-09-04T08:53:46.343Z",
-      "durationMs": 37348,
+      "gradedAt": "2026-09-04T09:06:01.126Z",
+      "durationMs": 28417,
       "aiUsed": true,
       "version": "7.1",
       "productType": "autocall",
@@ -365,7 +365,7 @@
         "p1": -4,
         "p2": -4,
         "p3": -4,
-        "p4": -4
+        "p4": 0
       },
       "barrier_sigma": 0.38,
       "barrier_sigma_label": "Critique",
@@ -373,9 +373,9 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 54,
-      "ci_high": 70,
-      "ci_label": "B [54-70]",
+      "ci_low": 55,
+      "ci_high": 71,
+      "ci_label": "B [55-71]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
@@ -400,11 +400,11 @@
         "p4": 0.25
       },
       "inputHash": "gh25krj",
-      "gradeT0": "2026-09-04T08:53:46.343Z",
+      "gradeT0": "2026-09-04T09:06:01.126Z",
       "trackingLevelAt0": null,
       "envelopeMode": "swiss-life",
-      "vsDirectGap": -6.4,
-      "vsDirectAdj": -6,
+      "vsDirectGap": 4.1,
+      "vsDirectAdj": 2,
       "vsDirectDivAdj": 0.3,
       "vsDirectVolFactor": 1.88,
       "p4NetFeesApplied": true,
