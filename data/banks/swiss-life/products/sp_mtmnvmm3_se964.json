@@ -1,0 +1,239 @@
+{
+  "id": "sp_mtmnvmm3_se964",
+  "name": "SL - PHOENIX MÉMOIRE TRIMESTRIEL STMICROELECTRONICS OCTOBRE 2026",
+  "type": "autocall",
+  "structureType": "autocall",
+  "emitter": "Crédit Industriel et Commercial (CIC)",
+  "guarantor": "Crédit Industriel et Commercial (CIC)",
+  "guarantorRating": {
+    "moodys": "A1",
+    "sp": "A+",
+    "fitch": "AA-"
+  },
+  "underlyings": [
+    "STMicroelectronics"
+  ],
+  "underlyingType": "single-stock",
+  "currency": "EUR",
+  "maturity": "8 ans",
+  "maturityYears": 8,
+  "coupon": {
+    "rate": 2,
+    "rateIfCalled": null,
+    "rateIfMaturity": null,
+    "type": "conditionnel",
+    "frequency": "trimestriel",
+    "trigger": 40,
+    "memory": true,
+    "paymentTiming": "periodic"
+  },
+  "participationRate": null,
+  "capitalProtection": {
+    "protected": false,
+    "level": null,
+    "barrier": 40,
+    "barrierCoupon": 40,
+    "barrierType": "europeenne",
+    "guaranteeType": "barriere"
+  },
+  "earlyRedemption": {
+    "possible": true,
+    "type": "autocall",
+    "trigger": 73,
+    "frequency": "trimestriel",
+    "startSemester": 4,
+    "stepDown": false,
+    "stepDownPct": null
+  },
+  "decrementPct": null,
+  "actualDividendYield": null,
+  "mechanism": "Phoenix Mémoire Trimestriel : autocall trimestriel à partir du trimestre 4 (barrière 73%). Coupon conditionnel trimestriel de 2,00% si l'action ≥ 40% du Niveau Initial, avec mémoire (coupons non versés reportés). À l'échéance, si l'action ne baisse pas de plus de 60% (≥ 40%), remboursement intégral du capital + tous les coupons mémorisés. Si baisse > 60% (< 40%), perte en capital = performance négative de l'action.",
+  "risks": [
+    "Risque de perte partielle ou totale en capital",
+    "Risque de crédit de l'émetteur (CIC)",
+    "Risque de marché et de volatilité",
+    "Risque de liquidité en cours de vie",
+    "Plafonnement du gain à 2% par trimestre",
+    "Durée d'investissement incertaine (autocall possible dès le trimestre 4)",
+    "Pas de bénéfice des dividendes",
+    "Risque d'inflation",
+    "Sensibilité élevée autour du seuil de 40%"
+  ],
+  "summary": "Produit structuré de type Phoenix autocallable indexé sur l'action STMicroelectronics. Remboursement automatique anticipé trimestriel possible dès le trimestre 4 si l'action clôture ≥ 73% du niveau initial. Coupon trimestriel de 2% si l'action ≥ 40%, avec effet mémoire. À l'échéance (8 ans), capital remboursé intégralement si l'action ne baisse pas de plus de 60%, sinon perte en capital égale à la baisse. Émis par CIC (notations S&P A+, Moody's A1, Fitch AA-). Commission de distribution de 5,80% TTC. Investment minimum : 100 000 EUR en compte-titres.",
+  "aiParsed": {
+    "name": "SL - PHOENIX MÉMOIRE TRIMESTRIEL STMICROELECTRONICS OCTOBRE 2026",
+    "type": "autocall",
+    "structureType": "autocall",
+    "emitter": "Crédit Industriel et Commercial (CIC)",
+    "guarantor": "Crédit Industriel et Commercial (CIC)",
+    "guarantorRating": {
+      "moodys": "A1",
+      "sp": "A+",
+      "fitch": "AA-"
+    },
+    "underlyings": [
+      "STMicroelectronics"
+    ],
+    "underlyingType": "single-stock",
+    "currency": "EUR",
+    "maturity": "8 ans",
+    "maturityYears": 8,
+    "maturityDate": "2034-10-30",
+    "strikeDate": "2026-10-23",
+    "coupon": {
+      "rate": 2,
+      "rateIfCalled": null,
+      "rateIfMaturity": null,
+      "type": "conditionnel",
+      "frequency": "trimestriel",
+      "trigger": 40,
+      "memory": true,
+      "paymentTiming": "periodic"
+    },
+    "participationRate": null,
+    "guaranteedYears": 0,
+    "autocallCumulTarget": null,
+    "commissions": 5.8,
+    "fees": {
+      "structuring": 5.8
+    },
+    "sri": null,
+    "riy": null,
+    "isin": "XS3463433030",
+    "minInvestment": 100000,
+    "capitalProtection": {
+      "protected": false,
+      "level": null,
+      "barrier": 40,
+      "barrierCoupon": 40,
+      "barrierType": "europeenne",
+      "guaranteeType": "barriere"
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "autocall",
+      "trigger": 73,
+      "frequency": "trimestriel",
+      "startSemester": 4,
+      "stepDown": false,
+      "stepDownPct": null
+    },
+    "decrementPct": null,
+    "actualDividendYield": null,
+    "mechanism": "Phoenix Mémoire Trimestriel : autocall trimestriel à partir du trimestre 4 (barrière 73%). Coupon conditionnel trimestriel de 2,00% si l'action ≥ 40% du Niveau Initial, avec mémoire (coupons non versés reportés). À l'échéance, si l'action ne baisse pas de plus de 60% (≥ 40%), remboursement intégral du capital + tous les coupons mémorisés. Si baisse > 60% (< 40%), perte en capital = performance négative de l'action.",
+    "risks": [
+      "Risque de perte partielle ou totale en capital",
+      "Risque de crédit de l'émetteur (CIC)",
+      "Risque de marché et de volatilité",
+      "Risque de liquidité en cours de vie",
+      "Plafonnement du gain à 2% par trimestre",
+      "Durée d'investissement incertaine (autocall possible dès le trimestre 4)",
+      "Pas de bénéfice des dividendes",
+      "Risque d'inflation",
+      "Sensibilité élevée autour du seuil de 40%"
+    ],
+    "summary": "Produit structuré de type Phoenix autocallable indexé sur l'action STMicroelectronics. Remboursement automatique anticipé trimestriel possible dès le trimestre 4 si l'action clôture ≥ 73% du niveau initial. Coupon trimestriel de 2% si l'action ≥ 40%, avec effet mémoire. À l'échéance (8 ans), capital remboursé intégralement si l'action ne baisse pas de plus de 60%, sinon perte en capital égale à la baisse. Émis par CIC (notations S&P A+, Moody's A1, Fitch AA-). Commission de distribution de 5,80% TTC. Investment minimum : 100 000 EUR en compte-titres.",
+    "scenarios": {
+      "stress": null,
+      "defavorable": null,
+      "median": null,
+      "favorable": null
+    },
+    "aiParsed": {
+      "name": "SL - PHOENIX MÉMOIRE TRIMESTRIEL STMICROELECTRONICS OCTOBRE 2026",
+      "isin": "XS3463433030",
+      "structureType": "autocall",
+      "emitter": "Crédit Industriel et Commercial (CIC)",
+      "guarantor": "Crédit Industriel et Commercial (CIC)",
+      "guarantorRating": {
+        "moodys": "A1",
+        "sp": "A+",
+        "fitch": "AA-"
+      },
+      "underlyings": [
+        "STMicroelectronics"
+      ],
+      "underlyingType": "single-stock",
+      "currency": "EUR",
+      "maturity": "8 ans",
+      "maturityYears": 8,
+      "maturityDate": "2034-10-30",
+      "strikeDate": "2026-10-23",
+      "coupon": {
+        "rate": 2,
+        "rateIfCalled": null,
+        "rateIfMaturity": null,
+        "type": "conditionnel",
+        "frequency": "trimestriel",
+        "trigger": 40,
+        "memory": true,
+        "paymentTiming": "periodic"
+      },
+      "participationRate": null,
+      "guaranteedYears": 0,
+      "autocallCumulTarget": null,
+      "commissions": 5.8,
+      "commissionAnnualOverLife": false,
+      "commissionRecurringAnnual": null,
+      "capitalProtection": {
+        "protected": false,
+        "level": null,
+        "barrier": 40,
+        "barrierCoupon": 40,
+        "barrierType": "europeenne",
+        "guaranteeType": "barriere"
+      },
+      "earlyRedemption": {
+        "possible": true,
+        "type": "autocall",
+        "trigger": 73,
+        "frequency": "trimestriel",
+        "startSemester": 4,
+        "stepDown": false,
+        "stepDownPct": null,
+        "firstCallDate": "2027-10-29",
+        "callSchedule": []
+      },
+      "decrementPct": null,
+      "actualDividendYield": null,
+      "minInvestment": 100000,
+      "sri": null,
+      "riy": null,
+      "costEntry": null,
+      "costExit": null,
+      "costOngoing": null,
+      "scenarios": {
+        "stress": null,
+        "defavorable": null,
+        "median": null,
+        "favorable": null
+      },
+      "mechanism": "Phoenix Mémoire Trimestriel : autocall trimestriel à partir du trimestre 4 (barrière 73%). Coupon conditionnel trimestriel de 2,00% si l'action ≥ 40% du Niveau Initial, avec mémoire (coupons non versés reportés). À l'échéance, si l'action ne baisse pas de plus de 60% (≥ 40%), remboursement intégral du capital + tous les coupons mémorisés. Si baisse > 60% (< 40%), perte en capital = performance négative de l'action.",
+      "risks": [
+        "Risque de perte partielle ou totale en capital",
+        "Risque de crédit de l'émetteur (CIC)",
+        "Risque de marché et de volatilité",
+        "Risque de liquidité en cours de vie",
+        "Plafonnement du gain à 2% par trimestre",
+        "Durée d'investissement incertaine (autocall possible dès le trimestre 4)",
+        "Pas de bénéfice des dividendes",
+        "Risque d'inflation",
+        "Sensibilité élevée autour du seuil de 40%"
+      ],
+      "summary": "Produit structuré de type Phoenix autocallable indexé sur l'action STMicroelectronics. Remboursement automatique anticipé trimestriel possible dès le trimestre 4 si l'action clôture ≥ 73% du niveau initial. Coupon trimestriel de 2% si l'action ≥ 40%, avec effet mémoire. À l'échéance (8 ans), capital remboursé intégralement si l'action ne baisse pas de plus de 60%, sinon perte en capital égale à la baisse. Émis par CIC (notations S&P A+, Moody's A1, Fitch AA-). Commission de distribution de 5,80% TTC. Investment minimum : 100 000 EUR en compte-titres.",
+      "fees": {
+        "structuring": 5.8
+      },
+      "_parsingAlerts": []
+    },
+    "sourceFile": "Brochure_SL-Phoenix-Memoire-Trimestriel-STMicroelectronics-Octobre-2026_XS3463433030.pdf"
+  },
+  "sourceFile": "JSON import",
+  "bankId": "swiss-life",
+  "status": "analyzing",
+  "receivedDate": "2026-09-04",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null
+}
