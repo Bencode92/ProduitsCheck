@@ -181,7 +181,12 @@ function _renderNegotiation(p) {
 function _renderUnderstand(p) {
   if (typeof scoring === 'undefined' || !scoring.getNetYield) return '';
   var coupon = p.coupon || {};
-  var couponRate = (typeof coupon === 'object' ? coupon.rate : coupon) || 0;
+  // Coupon ANNUALISÉ (source unique) : le coupon peut être stocké PAR PÉRIODE (2% trimestriel) —
+  // pour tout ce qui est rendement %/an (pari, espéré éco, vs CAT/dividende), on annualise (=8%).
+  // Sinon espereEco = 2%×proba−frais ≈ 0% au lieu de 8%×proba−frais (bug affiché : « +0,03%/an »).
+  var couponRate = (typeof scoring.annualizedCoupon === 'function')
+    ? scoring.annualizedCoupon(p)
+    : ((typeof coupon === 'object' ? coupon.rate : coupon) || 0);
   if (!couponRate) return '';
   var ny = scoring.getNetYield(p);
   var fd = scoring.getFeeDrag(p);
