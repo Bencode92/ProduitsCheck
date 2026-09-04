@@ -658,6 +658,7 @@
       guaranteedYears: _fv('bp-guaranteedyears', _data.guaranteedYears || 0),
       autocallCumulTarget: _fv('bp-autocallcumul', _data.autocallCumulTarget),
       commissions: _fv('bp-commissions', _data.commissions),
+      commissionAnnualOverLife: _data.commissionAnnualOverLife === true || (_data.aiParsed && _data.aiParsed.commissionAnnualOverLife === true) || false,
       fees: _data.fees || null,
       sri: _data.sri != null ? _data.sri : null,
       riy: _data.riy != null ? _data.riy : null,
