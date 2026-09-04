@@ -275,5 +275,272 @@
   "conversation": [],
   "conversationSummary": null,
   "decision": null,
-  "decisionReason": null
+  "decisionReason": null,
+  "aiCategory": "autocall-multi",
+  "aiCategoryLabel": "⚡ Autocall Multi-actifs",
+  "aiCategoryColor": "#2EC4B6",
+  "aiOpinion": "Produit offrant un coupon attractif de 8,9% avec rappel automatique possible dès la première observation, mais sans protection du capital (barrière à 60% inactive en cas de non-remboursement anticipé). Le panier de 5 valeurs diversifiées réduit le risque par rapport à un mono sous-jacent, mais l'absence de protection expose à des pertes importantes si l'une des actions chute fortement sur 8 ans.",
+  "aiAnalyzedAt": "2026-09-04T09:44:12.507Z",
+  "grading": {
+    "grade": "C",
+    "score": 50,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 40,
+        "base": 19,
+        "delta": 0,
+        "reasoning": "Rendement: base 19 → -7 = 12 (Stagflation + pire-des-5 financières/énergie : la proba coupon 7% est déjà catastrophique, et le régime macro détériore encore la capacité du basket (AXA, financière β=0.72) à tenir le seuil 100% sur 8 ans dans un contexte de stress crédit (LQD -1.3%) et de courbe bear steepening.) | Coupon 8.9%, barrière 60% | Barr.coupon 100% | Mat espérée: ~4.9a (prob mat: 33%) | Basket +30pts (vol÷0.77)",
+        "_bsDelta": 21,
+        "_bs": {
+          "score": 40,
+          "probCoupon": 48.1,
+          "rendementNet": 0.86,
+          "perteEsperee": 3.41,
+          "couponEffectif": 8.9,
+          "vols": [
+            19.14,
+            23.56,
+            44.68,
+            45.34,
+            21.15
+          ],
+          "matEsperee": 4.9,
+          "isBasket": true,
+          "volEstimated": false
+        }
+      },
+      "underlyingQuality": {
+        "score": 62,
+        "base": 43,
+        "delta": -7,
+        "reasoning": "Qualité: base 43 → -7 = 36 (4/5 sous-jacents dans des secteurs pénalisés par la stagflation (financières hors favorisés, énergie cyclique, STM tech volatile β=1.46 malgré secteur favorisé) ; drawdowns massifs (NOVC -82.68%, STM -64.37%) exposent à une volatilité structurelle incompatible avec une barrière coupon à 100%.) | Worst: AXA SA B:50 | Basket équipondéré 5 actifs: P2 +26pts (diversification)"
+      },
+      "portfolioFit": {
+        "score": 48,
+        "base": 55,
+        "delta": -7,
+        "reasoning": "Fit: base 55 → -7 = 48 (0% bonds dans les portefeuilles selon MI + VIX 22 : ce produit ajoute du risque actions pur sans diversification défensive dans un régime où les obligations seraient le hedge naturel ; inadéquation tactique critique.) — secteur déjà exposé (HEALTHCARE) · industrie déjà exposée"
+      },
+      "riskPremium": {
+        "score": 49,
+        "base": 5,
+        "delta": 0,
+        "reasoning": "Prime vs CAT (net de frais, cohérent avec le panneau) : coupon espéré 4,3% (8,9% × proba 48%) − marge embarquée 1,00%/an = 3,3% vs CAT 2,8% → spread +0,48%. | vs achat direct : coupon net 3,3% vs dividende panier 4,0% risque-ajusté (vol 45% → 2,7%) = +0,6% → -3 pts."
+      }
+    },
+    "verdict": "Produit à éviter catégoriquement : avec une probabilité de coupon de seulement 7% sur une barrière à 100% et une maturité espérée de 4.9 ans (max 8a), ce Worst-of sur 5 sous-jacents combine tous les défauts en régime stagflation. AXA (worst actuel, B=50, -15.72%) et Crédit Agricole (B=60, -21.42%) évoluent dans un secteur financier sous stress (spreads crédit en hausse, LQD -1.3% aujourd'hui), tandis que TotalEnergies (β=0.37 mais B=60, -30.55%) subit la volatilité du Brent à $97, et STM/Novo affichent des drawdowns catastrophiques (-64%/-82%) avec des volatilités 45%. La barrière capitale à 60% n'offre aucune protection réelle (0.4σ seulement sur vol 45%), et le régime macro pénalise structurellement 4/5 titres. Score final 1/100 (F) = rejet sans appel.",
+    "keyRisks": [
+      "Probabilité de coupon 7% + barrière 100% = quasi-certitude de ne recevoir AUCUN coupon pendant 8 ans potentiels, transformant le produit en pure exposition actions sans rendement dans un cycle baissier",
+      "Worst-of sur 5 titres dont 3 avec drawdowns >20% et 2 avec vol >44% : un seul titre cassant la barrière 60% (hautement probable sur 8a en stagflation) déclenche une perte capitale jusqu'à -40% sur 100k€",
+      "Régime stagflation + 0% bonds en portefeuille + stress crédit naissant (HYG -1%, courbe bear steepening) : absence totale de diversification défensive alors que les financières AXA/CA subissent un double choc (hausse spreads IG + ralentissement croissance)",
+      "Barrière à 0.4σ (Critique) — vol 45.34%"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "label": "Coupon (≥100%)",
+        "desc": "capital + coupons",
+        "return_pct": 44,
+        "return_eur": 44000,
+        "probability": 0.47
+      },
+      "stress": {
+        "label": "Capital seul (60–100%)",
+        "desc": "capital rendu, 0 coupon",
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.01
+      },
+      "worst": {
+        "label": "Perte (<60%)",
+        "desc": "barrière cassée",
+        "return_pct": -64,
+        "return_eur": -64000,
+        "probability": 0.52
+      }
+    },
+    "confidenceInterval": {
+      "low": 9,
+      "high": 33,
+      "halfWidth": 12,
+      "gradeStable": false,
+      "gradeRange": "F-D",
+      "label": "F [9-33]"
+    },
+    "metadata": {
+      "gradedAt": "2026-09-04T09:44:51.295Z",
+      "durationMs": 33334,
+      "aiUsed": true,
+      "version": "7.1",
+      "productType": "autocall",
+      "marketDataAvailable": true,
+      "catBenchmark": 3.3,
+      "catSource": "allocator-confirmed",
+      "basketDividend": 4.04,
+      "basketVol": 45.34,
+      "basketDD": 82.68,
+      "basketMomentum": 32,
+      "couponAnnualized": 8.9,
+      "couponRaw": 8.9,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": true,
+      "barrierPct": 60,
+      "barrierCouponPct": 100,
+      "couponProbability": 48.1,
+      "expectedMaturity": 4.9,
+      "maxMaturity": 8,
+      "probReachMaturity": 33,
+      "maxBeta": 1.46,
+      "baseScore": 26,
+      "baseGrade": "D",
+      "adjustments": {
+        "p1": -7,
+        "p2": -7,
+        "p3": -7,
+        "p4": 0
+      },
+      "barrier_sigma": 0.4,
+      "barrier_sigma_label": "Critique",
+      "barrier_sigma_danger": true,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Rappelable 12M",
+      "ci_low": 9,
+      "ci_high": 33,
+      "ci_label": "F [9-33]",
+      "issuer_rating": "A+",
+      "issuer_tier": "IG",
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "autocall",
+      "_illiqApplied": true,
+      "bsRendementNet": 0.86,
+      "bsProbCoupon": 48.1,
+      "bsPerteEsperee": 3.41,
+      "bsVols": [
+        19.14,
+        23.56,
+        44.68,
+        45.34,
+        21.15
+      ],
+      "bsMatEsperee": 4.9,
+      "isBasket": true,
+      "volEstimated": false,
+      "issuerCreditPenalty": 1,
+      "issuerCDS": 60,
+      "v6Weights": {
+        "p1": 0.3,
+        "p2": 0.3,
+        "p3": 0.1,
+        "p4": 0.3
+      },
+      "inputHash": "gq7pd5z",
+      "gradeT0": "2026-09-04T09:44:51.295Z",
+      "trackingLevelAt0": null,
+      "vsDirectGap": 0.6,
+      "vsDirectAdj": -3,
+      "vsDirectDivAdj": 2.7,
+      "vsDirectVolFactor": 1.51,
+      "p4NetFeesApplied": true,
+      "scenariosDeterministic": true,
+      "stockData": [
+        {
+          "name": "AXA SA",
+          "ticker": "CS",
+          "sector": "—",
+          "perf_ytd": 7.93,
+          "perf_1y": 11.19,
+          "volatility_3y": 19.14,
+          "max_drawdown_3y": 15.72,
+          "dividend_yield": 5.25,
+          "buffett_score": 50,
+          "quality_score": 47,
+          "buffett_grade": "C"
+        },
+        {
+          "name": "Crédit Agricole SA",
+          "ticker": "ACA",
+          "sector": "—",
+          "perf_ytd": 7.38,
+          "perf_1y": 18.22,
+          "volatility_3y": 20.9,
+          "max_drawdown_3y": 21.42,
+          "dividend_yield": 6,
+          "buffett_score": 60,
+          "quality_score": 74,
+          "buffett_grade": "B"
+        },
+        {
+          "name": "Novo Nordisk A/S",
+          "ticker": "NOVC",
+          "sector": "—",
+          "perf_ytd": -8.4,
+          "perf_1y": -16.22,
+          "volatility_3y": 44.68,
+          "max_drawdown_3y": 82.68,
+          "dividend_yield": 27.65,
+          "buffett_score": 100,
+          "quality_score": 82,
+          "buffett_grade": "A"
+        },
+        {
+          "name": "STMicroelectronics NV",
+          "ticker": "STM",
+          "sector": "—",
+          "perf_ytd": 96.21,
+          "perf_1y": 94.44,
+          "volatility_3y": 45.34,
+          "max_drawdown_3y": 64.37,
+          "dividend_yield": 0.55,
+          "buffett_score": 83,
+          "quality_score": 85,
+          "buffett_grade": "A"
+        },
+        {
+          "name": "TotalEnergies SE",
+          "ticker": "TTE",
+          "sector": "—",
+          "perf_ytd": 40.35,
+          "perf_1y": 50.33,
+          "volatility_3y": 21.15,
+          "max_drawdown_3y": 30.55,
+          "dividend_yield": 4.36,
+          "buffett_score": 60,
+          "quality_score": 67,
+          "buffett_grade": "B"
+        }
+      ]
+    },
+    "regimeScenarios": {
+      "current": {
+        "score": 38,
+        "grade": "D",
+        "label": "Actuel (stagflation)",
+        "desc": "Régime actuel → volatilité modérée"
+      },
+      "bull": {
+        "score": 45,
+        "grade": "C",
+        "label": "Bull / Risk-on",
+        "delta": 7,
+        "desc": "Marchés haussiers → prob coupon monte, barrière safe"
+      },
+      "crash": {
+        "score": 28,
+        "grade": "D",
+        "label": "Crash / Récession",
+        "delta": -10,
+        "desc": "Marchés baissiers → barrière menacée, vol en hausse"
+      }
+    }
+  },
+  "_couponProbability": 48.1,
+  "_bsRendementNet": 0.86
 }
