@@ -360,6 +360,27 @@
     "vsDirectAdj": -2
   },
   {
+    "bank": "swiss-life",
+    "file": "sp_mtmpjsmy_ctjrd.json",
+    "name": "SL - ATHENA MENSUEL SIEMENS ENERGY OCTOBRE",
+    "structureType": "autocall",
+    "productType": "autocall",
+    "grade": "C",
+    "score": 55,
+    "p1": 73,
+    "p2": 50,
+    "p3": 63,
+    "p4": 39,
+    "aiUsed": false,
+    "expMat": 1,
+    "couponProb": 69.6,
+    "basketDiv": 0.48,
+    "basketVol": 56.25,
+    "vsDirectGap": 7.9,
+    "vsDirectAdj": 3,
+    "scenDet": true
+  },
+  {
     "bank": "cic",
     "file": "sp_mo74eqxp_v4xv9.json",
     "name": "OBJECTIF MAI 2026",

@@ -183,7 +183,17 @@ class ScoringEngine {
     // le chiffre stocké (12%) est un TOTAL sur la maturité MAX, PAS une marge upfront. Le vrai
     // coût annuel est plat (1,5%/an) quel que soit le moment de sortie. Sans ça, 12% amortis sur
     // ~1,5 an d'autocall = 8%/an de drag → P4 catastrophé à tort.
-    const overLife = !!(p && (p.commissionAnnualOverLife || (p.aiParsed && p.aiParsed.commissionAnnualOverLife)));
+    // Détection ROBUSTE d'une commission RÉCURRENTE %/an (pas upfront) : flag explicite OU
+    // texte de brochure (« X%/an sur la durée de vie », « rémunération annuelle », « 1,50% annuel »).
+    // Le flag transitait mal (aiParsed non toujours propagé) → on lit aussi mécanisme/résumé.
+    let overLife = !!(p && (p.commissionAnnualOverLife || (p.aiParsed && p.aiParsed.commissionAnnualOverLife)));
+    if (!overLife && p) {
+      const _ct = ((p.mechanism || '') + ' ' + (p.summary || '') + ' ' + ((p.aiParsed || {}).summary || '')).toLowerCase();
+      if (/(commission|r[ée]mun[ée]ration|distribution)[^.]{0,60}(annuel|par an|%\s*\/\s*an|% annuel|sur la (base de la )?dur[ée]e de vie)/.test(_ct)
+          || /(1[.,]\d+|[0-2])\s*%\s*(annuel|par an|\/an)[^.]{0,30}dur[ée]e/.test(_ct)) {
+        overLife = true;
+      }
+    }
     const matMax = parseFloat(p && p.maturityYears) || yrs;
     let embeddedMargin, marginAnnualized;
     if (overLife && matMax > 0) {

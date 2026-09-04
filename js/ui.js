@@ -549,7 +549,17 @@ function _renderFeesNet(p) {
   var _ai = p.aiParsed || {};
   var _feeRows = [];
   var _struct = parseFloat((fees.structuring != null ? fees.structuring : (p.commissions != null ? p.commissions : _ai.commissions)));
-  if (!isNaN(_struct) && _struct > 0) _feeRows.push(['Commission de distribution / structuration', f2(_struct) + '%', 'one', 'Incluse dans le prix d\'émission (marge embarquée) — payée une fois']);
+  // Commission RÉCURRENTE %/an (ex Barclays 1,5%/an × 8 ans = 12% total) vs upfront one-shot.
+  var _overLife = !!(p.commissionAnnualOverLife || _ai.commissionAnnualOverLife);
+  var _matMax = parseFloat(p.maturityYears) || 0;
+  if (!isNaN(_struct) && _struct > 0) {
+    if (_overLife && _matMax > 0) {
+      var _perAn = _struct / _matMax;
+      _feeRows.push(['Commission de distribution', f2(_perAn) + '%/an', 'rec', 'Rémunération annuelle sur la durée de vie (' + f2(_struct) + '% au total sur ' + _matMax + ' ans max) — pas prélevée d\'un coup']);
+    } else {
+      _feeRows.push(['Commission de distribution / structuration', f2(_struct) + '%', 'one', 'Incluse dans le prix d\'émission (marge embarquée) — payée une fois']);
+    }
+  }
   if (custody > 0) _feeRows.push(['Droits de garde / frais sur encours', f2(custody) + '%/an', 'rec', 'Récurrents — prélevés chaque année sur l\'encours']);
   var _entry = parseFloat(_ai.costEntry); if (!isNaN(_entry) && _entry > 0) _feeRows.push(['Frais d\'entrée / souscription', f2(_entry) + '%', 'one', 'À la souscription']);
   var _exit = parseFloat(fees.exit != null ? fees.exit : _ai.costExit); if (!isNaN(_exit) && _exit > 0) _feeRows.push(['Frais de sortie anticipée', f2(_exit) + '%', 'one', 'En cas de revente avant l\'échéance']);
