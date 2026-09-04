@@ -47,7 +47,23 @@ sandbox.setTimeout = (fn) => 0;
 sandbox.clearTimeout = () => {};
 sandbox.setInterval = (fn) => { const h = { fn, cleared: false }; pendingIntervals.push(h); return h; };
 sandbox.clearInterval = (h) => { if (h) h.cleared = true; };
-sandbox.fetch = () => Promise.reject(new Error('IA coupée (filet)'));   // IA OFF déterministe
+// fetch : IA coupée (POST → reject), MAIS les GET de données locales (data/…) sont servis
+// depuis le disque — sinon _loadVolData (v7) échoue → v7 BS P1 tombe sur des vols par défaut
+// et le filet ne reproduit PAS le navigateur pour les produits actions. Fidélité indispensable.
+sandbox.fetch = (url, opts) => {
+  var u = String(url || '');
+  var isPost = opts && (opts.method || '').toUpperCase() === 'POST';
+  if (isPost || /anthropic|\/api\/|studyforge/.test(u)) return Promise.reject(new Error('IA coupée (filet)'));
+  var rel = u.replace(/^https?:\/\/[^/]+\//, '').replace(/^\.?\//, '').split('?')[0];
+  try {
+    var full = path.join(ROOT, rel);
+    if (fs.existsSync(full)) {
+      var txt = fs.readFileSync(full, 'utf8');
+      return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve(JSON.parse(txt)), text: () => Promise.resolve(txt) });
+    }
+  } catch (e) {}
+  return Promise.resolve({ ok: false, status: 404, json: () => Promise.reject(new Error('404')), text: () => Promise.resolve('') });
+};
 sandbox.AbortController = function(){ this.signal = {}; this.abort = () => {}; };
 sandbox.Date = Date; sandbox.Math = Math; sandbox.JSON = JSON;
 sandbox.Promise = Promise; sandbox.Array = Array; sandbox.Object = Object;
