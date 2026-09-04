@@ -74,8 +74,10 @@
     'CAPITAL:',
     '- "Protection du capital : Non" → protected=false',
     '- "capital garanti" / "garantie en capital à l\'échéance" / "remboursement intégral du capital à l\'échéance" → protected=true, level=100',
-    '- Barrière capital = seuil de PERTE (ex: 60% → perte si SJ < 60%)',
-    '- "baisse de plus de X%" → barrière = 100-X',
+    '- Barrière capital (barrier) = le NIVEAU du sous-jacent (en % du Niveau Initial) SOUS lequel le capital est perdu. TOUJOURS un NIVEAU (0-100), JAMAIS une baisse.',
+    '- ⚠ Si la brochure exprime une BAISSE ("baisse de plus de X%", "recule de plus de X%", "chute supérieure à X%") → CONVERTIR : barrier = 100 − X. Ex : "baisse de plus de 60%" → barrier = 40 (surtout PAS 60). "baisse de plus de 40%" → barrier = 60.',
+    '- Si la brochure exprime déjà un NIVEAU ("SJ ≥ Y% du niveau initial", "barrière à Y%", "clôture ≥ Y%") → barrier = Y directement (ex "barrière 38%" → barrier=38).',
+    '- COHÉRENCE : barrier (perte capital) ≤ barrierCoupon en général (on perd le coupon AVANT le capital). Si barrier > barrierCoupon, re-vérifie : tu as probablement stocké une baisse au lieu d\'un niveau.',
     '- capitalProtection.guaranteeType : "garantie" si VRAIE garantie externe ; "formule" si capital protégé/remboursé à l\'échéance MAIS soumis au risque de crédit émetteur (cas EMTN — la ligne "Garantie en capital" dit souvent "Pas de garantie") ; "barriere" si capital à risque sous une barrière. Indice : un EMTN avec "protection à l\'échéance" + risque émetteur = "formule", PAS "garantie".',
     '- maturityDate : date d\'échéance au format AAAA-MM-JJ si trouvée. strikeDate : Date de Constatation Initiale (AAAA-MM-JJ).',
     '- guarantorRating.fitch : note Fitch si présente (en plus de moodys/sp).',
@@ -247,6 +249,24 @@
       data.fees = data.fees || {};
       if (data.fees.structuring == null) data.fees.structuring = parseFloat(data.commissions);
     }
+
+    // GARDE-FOU barrière capitale : pour un produit ACTIONS à barrière (autocall/phoenix),
+    // on perd le coupon AVANT le capital → barrier (niveau de perte capital) ≤ barrierCoupon.
+    // Si barrier > barrierCoupon, l'IA a stocké une BAISSE au lieu d'un NIVEAU (ex « baisse de
+    // plus de 60% » → 60 stocké au lieu de 40=100−60). On corrige et on alerte.
+    try {
+      var _bC = parseFloat(cp.barrier), _bK = parseFloat(cp.barrierCoupon);
+      var _ut = (data.underlyingType || '').toLowerCase();
+      var _isEquity = !/rate|taux/.test(_ut);
+      if (_isEquity && !isNaN(_bC) && !isNaN(_bK) && _bC > _bK && _bC > 0 && _bC < 100) {
+        var _fixed = 100 - _bC;
+        data._parsingAlerts = data._parsingAlerts || [];
+        data._parsingAlerts.push('Barrière capital ' + _bC + '% > barrière coupon ' + _bK + '% (incohérent) → corrigée en niveau ' + _fixed + '% (probable "baisse de plus de ' + _bC + '%"). À vérifier vs brochure.');
+        console.warn('[BrochureParser] barrier ' + _bC + ' > barrierCoupon ' + _bK + ' → corrigé en ' + _fixed + ' (baisse→niveau)');
+        cp.barrier = _fixed;
+        data.capitalProtection = cp;
+      }
+    } catch (e) {}
 
     // Type de protection : ne pas survendre « garanti ». Par défaut, un capital protégé à
     // l'échéance reste soumis au risque de crédit émetteur (EMTN) → 'formule', pas 'garantie'.
