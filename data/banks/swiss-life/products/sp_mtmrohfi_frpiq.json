@@ -1,0 +1,279 @@
+{
+  "id": "sp_mtmrohfi_frpiq",
+  "name": "Objectif Octobre 2026",
+  "type": "autocall",
+  "structureType": "autocall",
+  "emitter": "Natixis Structured Issuance SA",
+  "guarantor": "Natixis SA",
+  "guarantorRating": {
+    "moodys": "A2",
+    "sp": "A+",
+    "fitch": "A+"
+  },
+  "underlyings": [
+    "AXA SA",
+    "Crédit Agricole SA",
+    "Novo Nordisk A/S",
+    "STMicroelectronics NV",
+    "TotalEnergies SE"
+  ],
+  "underlyingType": "basket",
+  "currency": "EUR",
+  "maturity": "8 ans",
+  "maturityYears": 8,
+  "coupon": {
+    "rate": 8.9,
+    "rateIfCalled": 8.9,
+    "rateIfMaturity": 8.9,
+    "type": "conditionnel",
+    "frequency": "annuel",
+    "trigger": 100,
+    "memory": false,
+    "paymentTiming": "periodic"
+  },
+  "participationRate": null,
+  "capitalProtection": {
+    "protected": false,
+    "level": null,
+    "barrier": 60,
+    "barrierCoupon": 100,
+    "barrierType": "europeenne",
+    "guaranteeType": "barriere"
+  },
+  "earlyRedemption": {
+    "possible": true,
+    "type": "autocall",
+    "trigger": 100,
+    "frequency": "annuel",
+    "startSemester": 1,
+    "stepDown": false,
+    "stepDownPct": null
+  },
+  "decrementPct": null,
+  "actualDividendYield": null,
+  "mechanism": "Autocall annuel à partir de l'année 1 si le niveau du panier équipondéré ≥ 100% du niveau initial. Gain de 8,90% par année écoulée. À l'échéance (8 ans) : si niveau ≥ 100% → remboursement à 171,20% (capital + 71,20% de gain total) ; si 60% ≤ niveau < 100% → remboursement à 100% (capital protégé) ; si niveau < 60% → perte en capital égale à la baisse du panier (perte partielle ou totale possible).",
+  "risks": [
+    "Risque de perte en capital partielle ou totale en cours de vie ou à l'échéance",
+    "Risque de crédit émetteur/garant (défaut, résolution, faillite)",
+    "Risque de volatilité et de liquidité",
+    "Gain plafonné à 8,90% par année écoulée",
+    "Pas de versement de dividendes",
+    "Durée d'investissement incertaine (1 à 8 ans)",
+    "Risque de change (sous-jacents libellés en devises autres que l'euro)"
+  ],
+  "summary": "Objectif Octobre 2026 est un titre de créance autocall à capital à risque (barrière 60%) adossé à un panier équipondéré de 5 actions européennes (AXA, Crédit Agricole, Novo Nordisk, STMicroelectronics, TotalEnergies). Remboursement anticipé automatique annuel possible dès l'année 1 si le panier ≥ 100% du niveau initial, avec un gain fixe de 8,90% par année écoulée. À l'échéance (8 ans), gain de 71,20% si panier ≥ 100%, capital protégé si panier entre 60% et 100%, perte en capital si panier < 60%. Durée conseillée 8 ans. Émis par Natixis Structured Issuance SA, garanti par Natixis SA (A+/A2/A+). Commission de distribution : 1,00% annuel sur durée de vie maximale + 0,50% annuel récurrent.",
+  "aiParsed": {
+    "name": "Objectif Octobre 2026",
+    "type": "autocall",
+    "structureType": "autocall",
+    "emitter": "Natixis Structured Issuance SA",
+    "guarantor": "Natixis SA",
+    "guarantorRating": {
+      "moodys": "A2",
+      "sp": "A+",
+      "fitch": "A+"
+    },
+    "underlyings": [
+      "AXA SA",
+      "Crédit Agricole SA",
+      "Novo Nordisk A/S",
+      "STMicroelectronics NV",
+      "TotalEnergies SE"
+    ],
+    "underlyingType": "basket",
+    "currency": "EUR",
+    "maturity": "8 ans",
+    "maturityYears": 8,
+    "maturityDate": "2034-11-06",
+    "strikeDate": "2026-10-30",
+    "coupon": {
+      "rate": 8.9,
+      "rateIfCalled": 8.9,
+      "rateIfMaturity": 8.9,
+      "type": "conditionnel",
+      "frequency": "annuel",
+      "trigger": 100,
+      "memory": false,
+      "paymentTiming": "periodic"
+    },
+    "participationRate": null,
+    "guaranteedYears": 0,
+    "autocallCumulTarget": null,
+    "commissions": 8,
+    "commissionAnnualOverLife": true,
+    "fees": {
+      "custodyAnnual": 0.5,
+      "structuring": 8
+    },
+    "sri": null,
+    "riy": null,
+    "isin": "FR0014019UC8",
+    "minInvestment": null,
+    "capitalProtection": {
+      "protected": false,
+      "level": null,
+      "barrier": 60,
+      "barrierCoupon": 100,
+      "barrierType": "europeenne",
+      "guaranteeType": "barriere"
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "autocall",
+      "trigger": 100,
+      "frequency": "annuel",
+      "startSemester": 1,
+      "stepDown": false,
+      "stepDownPct": null
+    },
+    "decrementPct": null,
+    "actualDividendYield": null,
+    "mechanism": "Autocall annuel à partir de l'année 1 si le niveau du panier équipondéré ≥ 100% du niveau initial. Gain de 8,90% par année écoulée. À l'échéance (8 ans) : si niveau ≥ 100% → remboursement à 171,20% (capital + 71,20% de gain total) ; si 60% ≤ niveau < 100% → remboursement à 100% (capital protégé) ; si niveau < 60% → perte en capital égale à la baisse du panier (perte partielle ou totale possible).",
+    "risks": [
+      "Risque de perte en capital partielle ou totale en cours de vie ou à l'échéance",
+      "Risque de crédit émetteur/garant (défaut, résolution, faillite)",
+      "Risque de volatilité et de liquidité",
+      "Gain plafonné à 8,90% par année écoulée",
+      "Pas de versement de dividendes",
+      "Durée d'investissement incertaine (1 à 8 ans)",
+      "Risque de change (sous-jacents libellés en devises autres que l'euro)"
+    ],
+    "summary": "Objectif Octobre 2026 est un titre de créance autocall à capital à risque (barrière 60%) adossé à un panier équipondéré de 5 actions européennes (AXA, Crédit Agricole, Novo Nordisk, STMicroelectronics, TotalEnergies). Remboursement anticipé automatique annuel possible dès l'année 1 si le panier ≥ 100% du niveau initial, avec un gain fixe de 8,90% par année écoulée. À l'échéance (8 ans), gain de 71,20% si panier ≥ 100%, capital protégé si panier entre 60% et 100%, perte en capital si panier < 60%. Durée conseillée 8 ans. Émis par Natixis Structured Issuance SA, garanti par Natixis SA (A+/A2/A+). Commission de distribution : 1,00% annuel sur durée de vie maximale + 0,50% annuel récurrent.",
+    "scenarios": {
+      "stress": null,
+      "defavorable": null,
+      "median": null,
+      "favorable": null
+    },
+    "aiParsed": {
+      "name": "Objectif Octobre 2026",
+      "isin": "FR0014019UC8",
+      "structureType": "autocall",
+      "emitter": "Natixis Structured Issuance SA",
+      "guarantor": "Natixis SA",
+      "guarantorRating": {
+        "moodys": "A2",
+        "sp": "A+",
+        "fitch": "A+"
+      },
+      "underlyings": [
+        "AXA SA",
+        "Crédit Agricole SA",
+        "Novo Nordisk A/S",
+        "STMicroelectronics NV",
+        "TotalEnergies SE"
+      ],
+      "underlyingType": "basket",
+      "currency": "EUR",
+      "maturity": "8 ans",
+      "maturityYears": 8,
+      "maturityDate": "2034-11-06",
+      "strikeDate": "2026-10-30",
+      "coupon": {
+        "rate": 8.9,
+        "rateIfCalled": 8.9,
+        "rateIfMaturity": 8.9,
+        "type": "conditionnel",
+        "frequency": "annuel",
+        "trigger": 100,
+        "memory": false,
+        "paymentTiming": "periodic"
+      },
+      "participationRate": null,
+      "guaranteedYears": 0,
+      "autocallCumulTarget": null,
+      "commissions": 8,
+      "commissionAnnualOverLife": true,
+      "commissionRecurringAnnual": 0.5,
+      "capitalProtection": {
+        "protected": false,
+        "level": null,
+        "barrier": 60,
+        "barrierCoupon": 100,
+        "barrierType": "europeenne",
+        "guaranteeType": "barriere"
+      },
+      "earlyRedemption": {
+        "possible": true,
+        "type": "autocall",
+        "trigger": 100,
+        "frequency": "annuel",
+        "startSemester": 1,
+        "stepDown": false,
+        "stepDownPct": null,
+        "firstCallDate": "2027-11-08",
+        "callSchedule": [
+          {
+            "date": "2027-11-08",
+            "amount": 108.9
+          },
+          {
+            "date": "2028-11-06",
+            "amount": 117.8
+          },
+          {
+            "date": "2029-11-06",
+            "amount": 126.7
+          },
+          {
+            "date": "2030-11-06",
+            "amount": 135.6
+          },
+          {
+            "date": "2031-11-06",
+            "amount": 144.5
+          },
+          {
+            "date": "2032-11-08",
+            "amount": 153.4
+          },
+          {
+            "date": "2033-11-07",
+            "amount": 162.3
+          }
+        ]
+      },
+      "decrementPct": null,
+      "actualDividendYield": null,
+      "minInvestment": null,
+      "sri": null,
+      "riy": null,
+      "costEntry": null,
+      "costExit": null,
+      "costOngoing": null,
+      "scenarios": {
+        "stress": null,
+        "defavorable": null,
+        "median": null,
+        "favorable": null
+      },
+      "mechanism": "Autocall annuel à partir de l'année 1 si le niveau du panier équipondéré ≥ 100% du niveau initial. Gain de 8,90% par année écoulée. À l'échéance (8 ans) : si niveau ≥ 100% → remboursement à 171,20% (capital + 71,20% de gain total) ; si 60% ≤ niveau < 100% → remboursement à 100% (capital protégé) ; si niveau < 60% → perte en capital égale à la baisse du panier (perte partielle ou totale possible).",
+      "risks": [
+        "Risque de perte en capital partielle ou totale en cours de vie ou à l'échéance",
+        "Risque de crédit émetteur/garant (défaut, résolution, faillite)",
+        "Risque de volatilité et de liquidité",
+        "Gain plafonné à 8,90% par année écoulée",
+        "Pas de versement de dividendes",
+        "Durée d'investissement incertaine (1 à 8 ans)",
+        "Risque de change (sous-jacents libellés en devises autres que l'euro)"
+      ],
+      "summary": "Objectif Octobre 2026 est un titre de créance autocall à capital à risque (barrière 60%) adossé à un panier équipondéré de 5 actions européennes (AXA, Crédit Agricole, Novo Nordisk, STMicroelectronics, TotalEnergies). Remboursement anticipé automatique annuel possible dès l'année 1 si le panier ≥ 100% du niveau initial, avec un gain fixe de 8,90% par année écoulée. À l'échéance (8 ans), gain de 71,20% si panier ≥ 100%, capital protégé si panier entre 60% et 100%, perte en capital si panier < 60%. Durée conseillée 8 ans. Émis par Natixis Structured Issuance SA, garanti par Natixis SA (A+/A2/A+). Commission de distribution : 1,00% annuel sur durée de vie maximale + 0,50% annuel récurrent.",
+      "fees": {
+        "custodyAnnual": 0.5,
+        "structuring": 8
+      },
+      "_parsingAlerts": [
+        "💸 Commission « 1,00%/an × 8 ans » = 8% upfront (estimation). Le chiffre exact = RIY du KID."
+      ]
+    },
+    "sourceFile": "Brochure OBJECTIF OCTOBRE 2026.pdf"
+  },
+  "sourceFile": "JSON import",
+  "bankId": "swiss-life",
+  "status": "analyzing",
+  "receivedDate": "2026-09-04",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null
+}
