@@ -1,0 +1,241 @@
+{
+  "id": "sp_mtmpjsmy_ctjrd",
+  "name": "SL - ATHENA MENSUEL SIEMENS ENERGY OCTOBRE 2026",
+  "type": "autocall",
+  "structureType": "autocall",
+  "emitter": "Barclays Bank PLC",
+  "guarantor": "",
+  "guarantorRating": {
+    "moodys": "A1",
+    "sp": "A+",
+    "fitch": "AA-"
+  },
+  "underlyings": [
+    "SIEMENS ENERGY AG"
+  ],
+  "underlyingType": "single-stock",
+  "currency": "EUR",
+  "maturity": "8 ans",
+  "maturityYears": 8,
+  "coupon": {
+    "rate": 0.9459,
+    "rateIfCalled": null,
+    "rateIfMaturity": null,
+    "type": "fixe",
+    "frequency": "mensuel",
+    "trigger": 85,
+    "memory": false,
+    "paymentTiming": "periodic"
+  },
+  "participationRate": null,
+  "capitalProtection": {
+    "protected": false,
+    "level": null,
+    "barrier": 55,
+    "barrierCoupon": 85,
+    "barrierType": "europeenne",
+    "guaranteeType": "barriere"
+  },
+  "earlyRedemption": {
+    "possible": true,
+    "type": "autocall",
+    "trigger": 85,
+    "frequency": "mensuel",
+    "startSemester": 1,
+    "stepDown": false,
+    "stepDownPct": null
+  },
+  "decrementPct": null,
+  "actualDividendYield": null,
+  "mechanism": "Produit autocall mensuel sur action unique SIEMENS ENERGY AG. Du mois 12 à 95, remboursement automatique anticipé si l'action ≥ 85% du Niveau Initial, avec paiement du capital + gain de 0,9459% par mois écoulé (TRA net max 9,95%). À l'échéance (mois 96), si jamais remboursé : si action ≥ 85%, capital + gain total de 190,8064% (TRA net 7,30%) ; si 55% ≤ action < 85%, remboursement du capital seul (TRA net -1,00%) ; si action < 55%, perte en capital proportionnelle à la baisse de l'action (remboursement = Valeur Finale de l'Action).",
+  "risks": [
+    "Risque de perte en capital partielle ou totale en cours de vie et à l'échéance",
+    "Risque de crédit lié à Barclays Bank PLC (faillite, défaut de paiement, mise en résolution)",
+    "Risque de liquidité (produit potentiellement illiquide)",
+    "Risque de fluctuation du prix du produit",
+    "Risque lié à l'inflation (rendement réel négatif possible)",
+    "Durée d'investissement incertaine (12 à 96 mois)",
+    "Plafonnement des gains (TRA net max 9,95%)",
+    "Pas de versement des dividendes de l'action sous-jacente",
+    "Sensibilité à une faible variation de l'action autour du seuil de 55% à l'échéance"
+  ],
+  "summary": "Autocall mensuel sur SIEMENS ENERGY AG, durée conseillée 8 ans. Remboursement anticipé automatique possible dès le mois 12 si action ≥ 85% du Niveau Initial, avec gain de 0,9459% par mois écoulé. À l'échéance, capital protégé si action ≥ 55% ; sinon perte proportionnelle à la baisse. Émetteur : Barclays Bank PLC (A1/A+/AA-). ISIN : XS3473202003. Minimum : 100 000 EUR. Commission : 1,50% annuel sur durée de vie.",
+  "aiParsed": {
+    "name": "SL - ATHENA MENSUEL SIEMENS ENERGY OCTOBRE 2026",
+    "type": "autocall",
+    "structureType": "autocall",
+    "emitter": "Barclays Bank PLC",
+    "guarantor": "",
+    "guarantorRating": {
+      "moodys": "A1",
+      "sp": "A+",
+      "fitch": "AA-"
+    },
+    "underlyings": [
+      "SIEMENS ENERGY AG"
+    ],
+    "underlyingType": "single-stock",
+    "currency": "EUR",
+    "maturity": "8 ans",
+    "maturityYears": 8,
+    "maturityDate": "2034-10-30",
+    "strikeDate": "2026-10-23",
+    "coupon": {
+      "rate": 0.9459,
+      "rateIfCalled": null,
+      "rateIfMaturity": null,
+      "type": "fixe",
+      "frequency": "mensuel",
+      "trigger": 85,
+      "memory": false,
+      "paymentTiming": "periodic"
+    },
+    "participationRate": null,
+    "guaranteedYears": 0,
+    "autocallCumulTarget": null,
+    "commissions": 12,
+    "fees": {
+      "structuring": 12
+    },
+    "sri": null,
+    "riy": null,
+    "isin": "XS3473202003",
+    "minInvestment": 100000,
+    "capitalProtection": {
+      "protected": false,
+      "level": null,
+      "barrier": 55,
+      "barrierCoupon": 85,
+      "barrierType": "europeenne",
+      "guaranteeType": "barriere"
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "autocall",
+      "trigger": 85,
+      "frequency": "mensuel",
+      "startSemester": 1,
+      "stepDown": false,
+      "stepDownPct": null
+    },
+    "decrementPct": null,
+    "actualDividendYield": null,
+    "mechanism": "Produit autocall mensuel sur action unique SIEMENS ENERGY AG. Du mois 12 à 95, remboursement automatique anticipé si l'action ≥ 85% du Niveau Initial, avec paiement du capital + gain de 0,9459% par mois écoulé (TRA net max 9,95%). À l'échéance (mois 96), si jamais remboursé : si action ≥ 85%, capital + gain total de 190,8064% (TRA net 7,30%) ; si 55% ≤ action < 85%, remboursement du capital seul (TRA net -1,00%) ; si action < 55%, perte en capital proportionnelle à la baisse de l'action (remboursement = Valeur Finale de l'Action).",
+    "risks": [
+      "Risque de perte en capital partielle ou totale en cours de vie et à l'échéance",
+      "Risque de crédit lié à Barclays Bank PLC (faillite, défaut de paiement, mise en résolution)",
+      "Risque de liquidité (produit potentiellement illiquide)",
+      "Risque de fluctuation du prix du produit",
+      "Risque lié à l'inflation (rendement réel négatif possible)",
+      "Durée d'investissement incertaine (12 à 96 mois)",
+      "Plafonnement des gains (TRA net max 9,95%)",
+      "Pas de versement des dividendes de l'action sous-jacente",
+      "Sensibilité à une faible variation de l'action autour du seuil de 55% à l'échéance"
+    ],
+    "summary": "Autocall mensuel sur SIEMENS ENERGY AG, durée conseillée 8 ans. Remboursement anticipé automatique possible dès le mois 12 si action ≥ 85% du Niveau Initial, avec gain de 0,9459% par mois écoulé. À l'échéance, capital protégé si action ≥ 55% ; sinon perte proportionnelle à la baisse. Émetteur : Barclays Bank PLC (A1/A+/AA-). ISIN : XS3473202003. Minimum : 100 000 EUR. Commission : 1,50% annuel sur durée de vie.",
+    "scenarios": {
+      "stress": null,
+      "defavorable": null,
+      "median": null,
+      "favorable": null
+    },
+    "aiParsed": {
+      "name": "SL - ATHENA MENSUEL SIEMENS ENERGY OCTOBRE 2026",
+      "isin": "XS3473202003",
+      "structureType": "autocall",
+      "emitter": "Barclays Bank PLC",
+      "guarantor": "",
+      "guarantorRating": {
+        "moodys": "A1",
+        "sp": "A+",
+        "fitch": "AA-"
+      },
+      "underlyings": [
+        "SIEMENS ENERGY AG"
+      ],
+      "underlyingType": "single-stock",
+      "currency": "EUR",
+      "maturity": "8 ans",
+      "maturityYears": 8,
+      "maturityDate": "2034-10-30",
+      "strikeDate": "2026-10-23",
+      "coupon": {
+        "rate": 0.9459,
+        "rateIfCalled": null,
+        "rateIfMaturity": null,
+        "type": "fixe",
+        "frequency": "mensuel",
+        "trigger": null,
+        "memory": false,
+        "paymentTiming": "periodic"
+      },
+      "participationRate": null,
+      "guaranteedYears": 0,
+      "autocallCumulTarget": null,
+      "commissions": 12,
+      "commissionAnnualOverLife": true,
+      "commissionRecurringAnnual": null,
+      "capitalProtection": {
+        "protected": false,
+        "level": null,
+        "barrier": 55,
+        "barrierCoupon": 85,
+        "barrierType": "europeenne",
+        "guaranteeType": "barriere"
+      },
+      "earlyRedemption": {
+        "possible": true,
+        "type": "autocall",
+        "trigger": 85,
+        "frequency": "mensuel",
+        "startSemester": 1,
+        "stepDown": false,
+        "stepDownPct": null,
+        "firstCallDate": "2027-10-25",
+        "callSchedule": []
+      },
+      "decrementPct": null,
+      "actualDividendYield": null,
+      "minInvestment": 100000,
+      "sri": null,
+      "riy": null,
+      "costEntry": null,
+      "costExit": null,
+      "costOngoing": null,
+      "scenarios": {
+        "stress": null,
+        "defavorable": null,
+        "median": null,
+        "favorable": null
+      },
+      "mechanism": "Produit autocall mensuel sur action unique SIEMENS ENERGY AG. Du mois 12 à 95, remboursement automatique anticipé si l'action ≥ 85% du Niveau Initial, avec paiement du capital + gain de 0,9459% par mois écoulé (TRA net max 9,95%). À l'échéance (mois 96), si jamais remboursé : si action ≥ 85%, capital + gain total de 190,8064% (TRA net 7,30%) ; si 55% ≤ action < 85%, remboursement du capital seul (TRA net -1,00%) ; si action < 55%, perte en capital proportionnelle à la baisse de l'action (remboursement = Valeur Finale de l'Action).",
+      "risks": [
+        "Risque de perte en capital partielle ou totale en cours de vie et à l'échéance",
+        "Risque de crédit lié à Barclays Bank PLC (faillite, défaut de paiement, mise en résolution)",
+        "Risque de liquidité (produit potentiellement illiquide)",
+        "Risque de fluctuation du prix du produit",
+        "Risque lié à l'inflation (rendement réel négatif possible)",
+        "Durée d'investissement incertaine (12 à 96 mois)",
+        "Plafonnement des gains (TRA net max 9,95%)",
+        "Pas de versement des dividendes de l'action sous-jacente",
+        "Sensibilité à une faible variation de l'action autour du seuil de 55% à l'échéance"
+      ],
+      "summary": "Autocall mensuel sur SIEMENS ENERGY AG, durée conseillée 8 ans. Remboursement anticipé automatique possible dès le mois 12 si action ≥ 85% du Niveau Initial, avec gain de 0,9459% par mois écoulé. À l'échéance, capital protégé si action ≥ 55% ; sinon perte proportionnelle à la baisse. Émetteur : Barclays Bank PLC (A1/A+/AA-). ISIN : XS3473202003. Minimum : 100 000 EUR. Commission : 1,50% annuel sur durée de vie.",
+      "fees": {
+        "structuring": 12
+      },
+      "_parsingAlerts": [
+        "💸 Commission « 1,50%/an × 8 ans » = 12% upfront (estimation). Le chiffre exact = RIY du KID."
+      ]
+    },
+    "sourceFile": "ATHENA MENSUEL SIEMENS ENERGY OCTOBRE 2026.pdf"
+  },
+  "sourceFile": "JSON import",
+  "bankId": "swiss-life",
+  "status": "analyzing",
+  "receivedDate": "2026-09-04",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null
+}
