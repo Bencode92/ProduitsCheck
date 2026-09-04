@@ -715,9 +715,16 @@ function _renderInvestorMetrics(p) {
     pLoss = 0;
     lossGivenLoss = 0;
   } else if (barrier) {
-    // BS approximation de P(breach)
-    var vol = 25; // default stock vol
-    var bSigma = Math.log(100 / barrier) / (vol / 100 * Math.sqrt(matYears));
+    // P(breach) : on PRIVILÉGIE le σ RÉEL du moteur (vol réelle du sous-jacent, ex Siemens 56%),
+    // pas une vol par défaut à 25% qui sous-estimait le risque (19,9% au lieu de 35% sur Siemens).
+    var _mdM = (p.grading && p.grading.metadata) || {};
+    var bSigma;
+    if (_mdM.barrier_sigma != null && isFinite(parseFloat(_mdM.barrier_sigma))) {
+      bSigma = parseFloat(_mdM.barrier_sigma);
+    } else {
+      var vol = (_mdM.bsVols && _mdM.bsVols.length) ? Math.max.apply(null, _mdM.bsVols) : 25; // vol réelle si dispo, sinon défaut
+      bSigma = Math.log(100 / barrier) / (vol / 100 * Math.sqrt(matYears));
+    }
     pLoss = Math.round((1 - _normcdfApprox(bSigma)) * 1000) / 10;
     lossGivenLoss = Math.round((100 - barrier) * 1.3); // severity
     expectedLoss = Math.round(pLoss * lossGivenLoss / 100 * 10) / 10;
