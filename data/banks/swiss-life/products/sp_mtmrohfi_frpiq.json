@@ -281,9 +281,11 @@
   "aiCategoryColor": "#2EC4B6",
   "aiOpinion": "Produit offrant un coupon attractif de 8,9% avec rappel automatique possible dès la première observation, mais sans protection du capital (barrière à 60% inactive en cas de non-remboursement anticipé). Le panier de 5 valeurs diversifiées réduit le risque par rapport à un mono sous-jacent, mais l'absence de protection expose à des pertes importantes si l'une des actions chute fortement sur 8 ans.",
   "aiAnalyzedAt": "2026-09-04T09:44:12.507Z",
+  "_couponProbability": 48.1,
+  "_bsRendementNet": 0.86,
   "grading": {
     "grade": "C",
-    "score": 50,
+    "score": 51,
     "killCriteria": {
       "triggered": false,
       "reasons": []
@@ -293,7 +295,7 @@
         "score": 40,
         "base": 19,
         "delta": 0,
-        "reasoning": "Rendement: base 19 → -7 = 12 (Stagflation + pire-des-5 financières/énergie : la proba coupon 7% est déjà catastrophique, et le régime macro détériore encore la capacité du basket (AXA, financière β=0.72) à tenir le seuil 100% sur 8 ans dans un contexte de stress crédit (LQD -1.3%) et de courbe bear steepening.) | Coupon 8.9%, barrière 60% | Barr.coupon 100% | Mat espérée: ~4.9a (prob mat: 33%) | Basket +30pts (vol÷0.77)",
+        "reasoning": "Rendement: base 19 → -6 = 13 (Barrière coupon à 100% exige que le basket éq. (AXA) reste au-dessus du niveau initial, ce qui en régime de stagflation et VIX à 22 rend la condition très fragile — cohérent avec la proba coupon BS de seulement 7%.) | Coupon 8.9%, barrière 60% | Barr.coupon 100% | Mat espérée: ~4.9a (prob mat: 33%) | Basket +30pts (vol÷0.77)",
         "_bsDelta": 21,
         "_bs": {
           "score": 40,
@@ -314,30 +316,30 @@
         }
       },
       "underlyingQuality": {
-        "score": 62,
+        "score": 64,
         "base": 43,
-        "delta": -7,
-        "reasoning": "Qualité: base 43 → -7 = 36 (4/5 sous-jacents dans des secteurs pénalisés par la stagflation (financières hors favorisés, énergie cyclique, STM tech volatile β=1.46 malgré secteur favorisé) ; drawdowns massifs (NOVC -82.68%, STM -64.37%) exposent à une volatilité structurelle incompatible avec une barrière coupon à 100%.) | Worst: AXA SA B:50 | Basket équipondéré 5 actifs: P2 +26pts (diversification)"
+        "delta": -3,
+        "reasoning": "Qualité: base 43 → -3 = 40 (Panier mixte : financières (AXA, ACA) et énergie (TTE) sensibles au bear steepening et au stress crédit naissant, partiellement compensées par healthcare (Novo) et tech (STM) favorisées, mais NOVC/STM affichent des drawdowns et vol très élevés.) | Worst: AXA SA B:50 | Basket équipondéré 5 actifs: P2 +24pts (diversification)"
       },
       "portfolioFit": {
-        "score": 48,
+        "score": 52,
         "base": 55,
-        "delta": -7,
-        "reasoning": "Fit: base 55 → -7 = 48 (0% bonds dans les portefeuilles selon MI + VIX 22 : ce produit ajoute du risque actions pur sans diversification défensive dans un régime où les obligations seraient le hedge naturel ; inadéquation tactique critique.) — secteur déjà exposé (HEALTHCARE) · industrie déjà exposée"
+        "delta": -3,
+        "reasoning": "Fit: base 55 → -3 = 52 (Portefeuilles sans bonds (0%) déjà très vulnérables au flight-to-quality ; ajouter un worst-of non protégé sur 5 SJ accroît la corrélation au risque actions plutôt que de diversifier.) — secteur déjà exposé (HEALTHCARE) · industrie déjà exposée"
       },
       "riskPremium": {
         "score": 49,
         "base": 5,
-        "delta": 0,
+        "delta": -3,
         "reasoning": "Prime vs CAT (net de frais, cohérent avec le panneau) : coupon espéré 4,3% (8,9% × proba 48%) − marge embarquée 1,00%/an = 3,3% vs CAT 2,8% → spread +0,48%. | vs achat direct : coupon net 3,3% vs dividende panier 4,0% risque-ajusté (vol 45% → 2,7%) = +0,6% → -3 pts."
       }
     },
-    "verdict": "Produit à éviter catégoriquement : avec une probabilité de coupon de seulement 7% sur une barrière à 100% et une maturité espérée de 4.9 ans (max 8a), ce Worst-of sur 5 sous-jacents combine tous les défauts en régime stagflation. AXA (worst actuel, B=50, -15.72%) et Crédit Agricole (B=60, -21.42%) évoluent dans un secteur financier sous stress (spreads crédit en hausse, LQD -1.3% aujourd'hui), tandis que TotalEnergies (β=0.37 mais B=60, -30.55%) subit la volatilité du Brent à $97, et STM/Novo affichent des drawdowns catastrophiques (-64%/-82%) avec des volatilités 45%. La barrière capitale à 60% n'offre aucune protection réelle (0.4σ seulement sur vol 45%), et le régime macro pénalise structurellement 4/5 titres. Score final 1/100 (F) = rejet sans appel.",
+    "verdict": "Produit worst-of sur 5 sous-jacents avec barrière coupon exigeante à 100% du niveau initial, ce qui explique une proba de coupon BS de seulement 7% et une note de base D (26). En régime de stagflation (Brent $97, PCE 3,7%, courbe en bear steepening), les financières et l'énergie du panier restent exposées, et la barrière capital à 60% (0,81σ, zone Danger) laisse un capital non protégé réellement à risque. Le worst-of AXA est le maillon déterminant : tout retour sous 100% annule le coupon, sous 60% expose à des pertes en capital. Structure à réserver à un investisseur pleinement conscient que le coupon est peu probable et le capital non garanti.",
     "keyRisks": [
-      "Probabilité de coupon 7% + barrière 100% = quasi-certitude de ne recevoir AUCUN coupon pendant 8 ans potentiels, transformant le produit en pure exposition actions sans rendement dans un cycle baissier",
-      "Worst-of sur 5 titres dont 3 avec drawdowns >20% et 2 avec vol >44% : un seul titre cassant la barrière 60% (hautement probable sur 8a en stagflation) déclenche une perte capitale jusqu'à -40% sur 100k€",
-      "Régime stagflation + 0% bonds en portefeuille + stress crédit naissant (HYG -1%, courbe bear steepening) : absence totale de diversification défensive alors que les financières AXA/CA subissent un double choc (hausse spreads IG + ralentissement croissance)",
-      "Barrière à 0.4σ (Critique) — vol 45.34%"
+      "Barrière coupon à 100% très rarement franchie (proba BS 7%) : coupons probablement non versés sur le worst-of AXA.",
+      "Capital non protégé sous barrière 60% (0,81σ) : un scénario de stress prolongé sur les financières ou l'énergie peut entraîner une perte en capital significative.",
+      "Concentration sur le worst-of : la haute volatilité de STM (45%) et Novo (45%) tire mécaniquement le panier, malgré leurs secteurs favorisés.",
+      "Barrière à 0.81σ (Danger) — vol 22.21%"
     ],
     "negotiationPoints": [],
     "scenarios": {
@@ -364,16 +366,16 @@
       }
     },
     "confidenceInterval": {
-      "low": 9,
-      "high": 33,
+      "low": 10,
+      "high": 34,
       "halfWidth": 12,
       "gradeStable": false,
       "gradeRange": "F-D",
-      "label": "F [9-33]"
+      "label": "F [10-34]"
     },
     "metadata": {
-      "gradedAt": "2026-09-04T09:44:51.295Z",
-      "durationMs": 33334,
+      "gradedAt": "2026-09-04T11:21:00.155Z",
+      "durationMs": 57093,
       "aiUsed": true,
       "version": "7.1",
       "productType": "autocall",
@@ -400,20 +402,20 @@
       "baseScore": 26,
       "baseGrade": "D",
       "adjustments": {
-        "p1": -7,
-        "p2": -7,
-        "p3": -7,
-        "p4": 0
+        "p1": -6,
+        "p2": -3,
+        "p3": -3,
+        "p4": -3
       },
-      "barrier_sigma": 0.4,
-      "barrier_sigma_label": "Critique",
+      "barrier_sigma": 0.81,
+      "barrier_sigma_label": "Danger",
       "barrier_sigma_danger": true,
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 9,
-      "ci_high": 33,
-      "ci_label": "F [9-33]",
+      "ci_low": 10,
+      "ci_high": 34,
+      "ci_label": "F [10-34]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
@@ -442,7 +444,7 @@
         "p4": 0.3
       },
       "inputHash": "gq7pd5z",
-      "gradeT0": "2026-09-04T09:44:51.295Z",
+      "gradeT0": "2026-09-04T11:21:00.155Z",
       "trackingLevelAt0": null,
       "vsDirectGap": 0.6,
       "vsDirectAdj": -3,
@@ -520,27 +522,25 @@
     },
     "regimeScenarios": {
       "current": {
-        "score": 38,
+        "score": 39,
         "grade": "D",
         "label": "Actuel (stagflation)",
         "desc": "Régime actuel → volatilité modérée"
       },
       "bull": {
-        "score": 45,
+        "score": 46,
         "grade": "C",
         "label": "Bull / Risk-on",
         "delta": 7,
         "desc": "Marchés haussiers → prob coupon monte, barrière safe"
       },
       "crash": {
-        "score": 28,
+        "score": 29,
         "grade": "D",
         "label": "Crash / Récession",
         "delta": -10,
         "desc": "Marchés baissiers → barrière menacée, vol en hausse"
       }
     }
-  },
-  "_couponProbability": 48.1,
-  "_bsRendementNet": 0.86
+  }
 }
