@@ -329,7 +329,7 @@
         "score": 61,
         "base": 57,
         "delta": 0,
-        "reasoning": "Rendement: base 57 | Coupon 8%, barrière 38% | Barr.coupon 70% | Mat espérée: ~1.5a (prob mat: 0%)",
+        "reasoning": "Rendement: base 57 → -9 = 48 (Stagflation + Rheinmetall (industrials defense) exposé au ralentissement économique ; barrière coupon 70% risquée avec drawdown historique 52.4% et volatilité 43.74% en environnement de stress croissant (VIX 22).) | Coupon 8%, barrière 38% | Barr.coupon 70% | Mat espérée: ~1.5a (prob mat: 0%)",
         "_bsDelta": 4,
         "_bs": {
           "score": 61,
@@ -346,26 +346,29 @@
         }
       },
       "underlyingQuality": {
-        "score": 66,
+        "score": 58,
         "base": 66,
-        "delta": 0,
-        "reasoning": "Qualité: base 66 | Worst: RHEINMETALL AG B:60"
+        "delta": -8,
+        "reasoning": "Qualité: base 66 → -8 = 58 (Industrials partiellement favorisé (b=0.89) MAIS Rheinmetall bêta défensif 0.62 inadapté à stagflation ; choc pétrolier Brent $97 + spreads crédit en dégradation (LQD -1.3%, HYG -1%) menacent fondamentaux cycliques defense.) | Worst: RHEINMETALL AG B:60"
       },
       "portfolioFit": {
-        "score": 63,
+        "score": 58,
         "base": 63,
-        "delta": 0,
-        "reasoning": "Fit: base 63 — secteur déjà exposé (INDUSTRIALS)"
+        "delta": -5,
+        "reasoning": "Fit: base 63 → -5 = 58 (Mono sous-jacent defense en stagflation = diversification nulle ; 0% obligations dans portefeuilles existants + absence d'hedging VIX aggrave vulnérabilité au flight-to-quality si VIX>30.) — secteur déjà exposé (INDUSTRIALS)"
       },
       "riskPremium": {
         "score": 68,
         "base": 10,
-        "delta": 0,
+        "delta": 3,
         "reasoning": "Prime vs CAT (net de frais, cohérent avec le panneau) : coupon espéré 7,2% (8,0% × proba 90%) − marge embarquée 1,33%/an = 5,9% vs CAT 2,8% → spread +3,09%. | vs achat direct : coupon net 5,9% vs dividende panier 1,1% risque-ajusté (vol 44% → 0,7%) = +5,2% → +3 pts."
       }
     },
-    "verdict": "Score 46/100 (base 46).",
+    "verdict": "**REJET FORMEL** : Rheinmetall en stagflation cumule les vulnérabilités létales. Avec un drawdown historique de 52.4% et barrière coupon à 70%, la probabilité réelle de versement semestriel chute sous 40% (vs proba base optimiste) dans un régime où Brent à $97 compresse les marges industrielles et où le bear steepening 2s10s +40bps anticipe un ralentissement 6-12 mois. Le bêta défensif 0.62 piège : il sous-performe en expansion ET subit les compressions de multiples en stagflation. L'autocall à 96% avec step-down -2% semble séduisant mais la volatilité 43.74% rend la sortie rapide improbable (maturité espérée 1.5a irréaliste, plutôt 3-4a). Avec 0% bonds dans les portefeuilles et VIX à 22, un choc crédit (spreads IG vers 160bps) déclencherait une spirale baissière où la barrière capital 38% serait testée. Les 8% annualisés ne compensent pas le risque asymétrique de perte en capital 40-60% si stagflation persiste.",
     "keyRisks": [
+      "**Stagflation critique** : Brent $97 (seuil $100 proche) + PCE 3.7% créent compression marges industrielles ; si Fed remonte taux, Rheinmetall subit double peine (coûts financement + demande defense gouvernementale contrainte par budgets)",
+      "**Barrière coupon illusoire** : Drawdown 52.4% > barrière 70%, vol 43.74% et stress crédit (LQD -1.3%) rendent versements semestriels aléatoires sur 6 ans ; mémoire inutile si activation coupon <50%",
+      "**Flight-to-quality imminent** : 0% bonds + VIX 22 en hausse = portefeuille nu face à spike volatilité ; si VIX>30 (probable en stagflation), Rheinmetall pourrait perdre 30-40% en semaines, activant barrière capital 38%",
       "Barrière à 0.9σ (Danger) — vol 43.74%",
       "Note plafonnée (C) : capital non protégé + barrière en zone danger — perte en capital possible."
     ],
@@ -394,17 +397,17 @@
       }
     },
     "confidenceInterval": {
-      "low": 38,
-      "high": 54,
+      "low": 33,
+      "high": 49,
       "halfWidth": 8,
       "gradeStable": false,
       "gradeRange": "D-C",
-      "label": "C [38-54]"
+      "label": "D [33-49]"
     },
     "metadata": {
-      "gradedAt": "2026-09-04T08:17:38.922Z",
-      "durationMs": 49975,
-      "aiUsed": false,
+      "gradedAt": "2026-09-04T08:25:43.357Z",
+      "durationMs": 31361,
+      "aiUsed": true,
       "version": "7.1",
       "productType": "autocall",
       "marketDataAvailable": true,
@@ -429,16 +432,21 @@
       "maxBeta": 0.62,
       "baseScore": 46,
       "baseGrade": "C",
-      "adjustments": null,
+      "adjustments": {
+        "p1": -9,
+        "p2": -8,
+        "p3": -5,
+        "p4": 3
+      },
       "barrier_sigma": 0.9,
       "barrier_sigma_label": "Danger",
       "barrier_sigma_danger": true,
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Rappelable 12M",
-      "ci_low": 38,
-      "ci_high": 54,
-      "ci_label": "C [38-54]",
+      "ci_low": 33,
+      "ci_high": 49,
+      "ci_label": "D [33-49]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
@@ -463,7 +471,7 @@
         "p4": 0.25
       },
       "inputHash": "g11kdd1w",
-      "gradeT0": "2026-09-04T08:17:38.922Z",
+      "gradeT0": "2026-09-04T08:25:43.357Z",
       "trackingLevelAt0": null,
       "envelopeMode": "swiss-life",
       "vsDirectGap": 5.2,
@@ -491,20 +499,20 @@
     },
     "regimeScenarios": {
       "current": {
-        "score": 49,
+        "score": 46,
         "grade": "C",
         "label": "Actuel (stagflation)",
         "desc": "Régime actuel → volatilité modérée"
       },
       "bull": {
-        "score": 53,
+        "score": 50,
         "grade": "C",
         "label": "Bull / Risk-on",
         "delta": 4,
         "desc": "Marchés haussiers → prob coupon monte, barrière safe"
       },
       "crash": {
-        "score": 37,
+        "score": 34,
         "grade": "D",
         "label": "Crash / Récession",
         "delta": -12,
