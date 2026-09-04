@@ -18,7 +18,7 @@
   "maturity": "6 ans",
   "maturityYears": 6,
   "coupon": {
-    "rate": 3.5,
+    "rate": 2,
     "frequency": "trimestriel",
     "annualized": true,
     "type": "conditionnel",
