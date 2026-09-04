@@ -148,6 +148,12 @@ function findProducts() {
   const products = findProducts();
   const results = [];
   const LIMIT = process.env.PC_LIMIT ? parseInt(process.env.PC_LIMIT, 10) : products.length;
+  // PRÉCHAUFFAGE : les chargements async (marché, vol data v7) se font au 1er grade. Sans warmup,
+  // le PREMIER produit est noté avant que les vols soient prêtes → v7 BS ne tourne pas (couponProb
+  // null) → grade infidèle. On grade 2× le 1er produit (jetable) pour réchauffer tous les caches.
+  if (products.length) {
+    try { const w = JSON.parse(JSON.stringify(products[0].product)); delete w.grading; await sandbox.__PG.grade(w); await sandbox.__PG.grade(w); } catch (e) {}
+  }
   for (const { bank, file, product } of products.slice(0, LIMIT)) {
     try {
       // Baseline propre : on note à neuf, sans le grade IA persisté dans le JSON.
