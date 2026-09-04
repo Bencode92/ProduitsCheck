@@ -18,14 +18,13 @@
   "maturity": "8 ans",
   "maturityYears": 8,
   "coupon": {
-    "rate": 2,
-    "rateIfCalled": null,
-    "rateIfMaturity": null,
+    "rate": 8,
+    "frequency": "annuel",
+    "annualized": true,
     "type": "conditionnel",
-    "frequency": "trimestriel",
-    "trigger": 40,
     "memory": true,
-    "paymentTiming": "periodic"
+    "paymentTiming": "periodic",
+    "trigger": 40
   },
   "participationRate": null,
   "capitalProtection": {
@@ -235,5 +234,218 @@
   "conversation": [],
   "conversationSummary": null,
   "decision": null,
-  "decisionReason": null
+  "decisionReason": null,
+  "_freqFixApplied": true,
+  "aiCategory": "phoenix-mono",
+  "aiCategoryLabel": "🎯 Phoenix Mono-actif",
+  "aiCategoryColor": "#3B82F6",
+  "aiOpinion": "Produit offrant un rendement attractif de 8% annuel avec effet mémoire et possibilité de remboursement anticipé, mais exposition importante au risque action sur un seul titre technologique volatile. La barrière de protection à 40% offre une marge de sécurité correcte, toutefois le seuil d'autocall élevé à 73% réduit les chances de sortie anticipée et l'absence de protection du capital expose à des pertes significatives en cas de forte baisse.",
+  "aiAnalyzedAt": "2026-09-04T07:57:47.813Z",
+  "grading": {
+    "grade": "C",
+    "score": 55,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 66,
+        "base": 53,
+        "delta": 0,
+        "reasoning": "Rendement: base 53 → -7 = 46 (STAGFLATION + beta 1.46 sur STM (cyclique tech) : drawdown 64% proche barrière 60%, volatilité 45% extrême, probabilité coupon trimestriel sérieusement compromise en environnement restrictif) | Coupon 8%, barrière 40% | Barr.coupon 40% | Mat espérée: ~1.1a (prob mat: 0%)",
+        "_bsDelta": 13,
+        "_bs": {
+          "score": 66,
+          "probCoupon": 95.9,
+          "rendementNet": 5.15,
+          "perteEsperee": 2.52,
+          "couponEffectif": 8,
+          "vols": [
+            45.34
+          ],
+          "matEsperee": 1.1,
+          "isBasket": false,
+          "volEstimated": false
+        }
+      },
+      "underlyingQuality": {
+        "score": 57,
+        "base": 64,
+        "delta": -7,
+        "reasoning": "Qualité: base 64 → -7 = 57 (Semiconducteurs ultra-cycliques exposés au double choc stagflation (demande faible + coûts énergétiques élevés), mais tech favorisé limite la casse ; beta 1.46 amplifie chaque soubresaut macro) | Worst: STMicroelectronics B:83"
+      },
+      "portfolioFit": {
+        "score": 80,
+        "base": 85,
+        "delta": -5,
+        "reasoning": "Fit: base 85 → -5 = 80 (Mono-sous-jacent sur valeur déjà -64% offre zéro diversification dans un portefeuille sans obligations (warning critique MI), concentration extrême en phase de stress crédit (LQD -1.3%)) — nouveau — diversifie"
+      },
+      "riskPremium": {
+        "score": 47,
+        "base": 26,
+        "delta": 3,
+        "reasoning": "Prime vs CAT (net de frais, cohérent avec le panneau) : coupon espéré 7,7% (8,0% × proba 96%) − marge embarquée 5,27%/an = 2,4% vs CAT 2,8% → spread -0,40%. | vs achat direct : coupon net 2,4% vs dividende panier 0,6% risque-ajusté (vol 45% → 0,4%) = +2,0% → -1 pt."
+      }
+    },
+    "verdict": "PRODUIT À ÉVITER en contexte STAGFLATION avec semi-conducteurs déjà en détresse (-64% DD). STM cumule 3 malédictions : beta 1.46 (amplifie chocs), cyclicité extrême (demande tech s'effondre quand croissance ralentit), exposition énergie (Brent $97 plombe marges fab). Probabilité réelle du 1er coupon trimestriel <40% vu vol 45% et niveau 83 vs barrière 60%, puis effet mémoire devient piège si marché reste déprimé 6-12 mois (scénario bear steepening historique). Les 100k€ sont mieux déployés sur TIPS 3% + small cap value (secteurs favorisés materials/utilities) pour traverser la stagflation sans risque knockout.",
+    "keyRisks": [
+      "Knockout probable si VIX>30 déclenche flight-to-quality : STM beta 1.46 amplifierait une chute SPX de 15% en -22% sur le titre, franchissant la barrière 40% et cristallisant une perte en capital de 43-50k€",
+      "Piège mémoire stagflationniste : 8 trimestres sans coupon si STM reste entre 40-60% (scénario base vu DD actuel), puis remboursement au pair après 8 ans = rendement réel négatif de -25% après inflation cumulée 3.7%/an",
+      "Choc énergie de second tour : Brent franchissant $100 + Fed forcée de remonter les taux → spreads IG explosent >160bps (warning MI), déclenchant ventes forcées sur tech growth dont STM, accélérant vers barrière capitale",
+      "Barrière à 0.71σ (Danger) — vol 45.34%",
+      "Note plafonnée (C) : capital non protégé + barrière en zone danger — perte en capital possible."
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 6.5,
+        "return_eur": 6500,
+        "probability": 0.12,
+        "duration_years": 1
+      },
+      "base": {
+        "return_pct": -2.8,
+        "return_eur": -2800,
+        "probability": 0.38,
+        "duration_years": 4.5
+      },
+      "stress": {
+        "return_pct": -15,
+        "return_eur": -15000,
+        "probability": 0.32,
+        "duration_years": 8
+      },
+      "worst": {
+        "return_pct": -47,
+        "return_eur": -47000,
+        "probability": 0.18,
+        "duration_years": 1.5
+      }
+    },
+    "confidenceInterval": {
+      "low": 40,
+      "high": 56,
+      "halfWidth": 8,
+      "gradeStable": false,
+      "gradeRange": "D-C",
+      "label": "C [40-56]"
+    },
+    "metadata": {
+      "gradedAt": "2026-09-04T07:58:36.831Z",
+      "durationMs": 29446,
+      "aiUsed": true,
+      "version": "7.1",
+      "productType": "autocall",
+      "marketDataAvailable": true,
+      "catBenchmark": 3.3,
+      "catSource": "allocator-confirmed",
+      "basketDividend": 0.55,
+      "basketVol": 45.34,
+      "basketDD": 64.37,
+      "basketMomentum": 94,
+      "couponAnnualized": 8,
+      "couponRaw": 8,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": true,
+      "barrierPct": 40,
+      "barrierCouponPct": 40,
+      "couponProbability": 95.9,
+      "expectedMaturity": 1.1,
+      "maxMaturity": 8,
+      "probReachMaturity": 0,
+      "maxBeta": 1.46,
+      "baseScore": 51,
+      "baseGrade": "C",
+      "adjustments": {
+        "p1": -7,
+        "p2": -7,
+        "p3": -5,
+        "p4": 3
+      },
+      "barrier_sigma": 0.71,
+      "barrier_sigma_label": "Danger",
+      "barrier_sigma_danger": true,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Rappelable 12M",
+      "ci_low": 40,
+      "ci_high": 56,
+      "ci_label": "C [40-56]",
+      "issuer_rating": "A+",
+      "issuer_tier": "IG",
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "autocall",
+      "_illiqApplied": true,
+      "bsRendementNet": 5.15,
+      "bsProbCoupon": 95.9,
+      "bsPerteEsperee": 2.52,
+      "bsVols": [
+        45.34
+      ],
+      "bsMatEsperee": 1.1,
+      "isBasket": false,
+      "volEstimated": false,
+      "issuerCreditPenalty": 1,
+      "issuerCDS": 60,
+      "v6Weights": {
+        "p1": 0.35,
+        "p2": 0.25,
+        "p3": 0.15,
+        "p4": 0.25
+      },
+      "inputHash": "ggshoj",
+      "gradeT0": "2026-09-04T07:58:36.831Z",
+      "trackingLevelAt0": null,
+      "envelopeMode": "swiss-life",
+      "vsDirectGap": 2,
+      "vsDirectAdj": -1,
+      "vsDirectDivAdj": 0.4,
+      "vsDirectVolFactor": 1.51,
+      "p4NetFeesApplied": true,
+      "riskCapped": true,
+      "stockData": [
+        {
+          "name": "STMicroelectronics",
+          "ticker": "STM",
+          "sector": "—",
+          "perf_ytd": 96.21,
+          "perf_1y": 94.44,
+          "volatility_3y": 45.34,
+          "max_drawdown_3y": 64.37,
+          "dividend_yield": 0.55,
+          "buffett_score": 83,
+          "quality_score": 85,
+          "buffett_grade": "A"
+        }
+      ]
+    },
+    "regimeScenarios": {
+      "current": {
+        "score": 54,
+        "grade": "C",
+        "label": "Actuel (stagflation)",
+        "desc": "Régime actuel → volatilité modérée"
+      },
+      "bull": {
+        "score": 58,
+        "grade": "C",
+        "label": "Bull / Risk-on",
+        "delta": 4,
+        "desc": "Marchés haussiers → prob coupon monte, barrière safe"
+      },
+      "crash": {
+        "score": 40,
+        "grade": "D",
+        "label": "Crash / Récession",
+        "delta": -14,
+        "desc": "Marchés baissiers → barrière menacée, vol en hausse"
+      }
+    }
+  },
+  "_couponProbability": 95.9,
+  "_bsRendementNet": 5.15
 }
