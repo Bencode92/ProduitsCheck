@@ -18,14 +18,15 @@
   "maturity": "8 ans",
   "maturityYears": 8,
   "coupon": {
-    "rate": 0.9459,
-    "rateIfCalled": null,
-    "rateIfMaturity": null,
+    "rate": 11.351,
+    "frequency": "annuel",
+    "annualized": true,
+    "ratePerPeriod": 0.9459,
+    "frequencyReal": "mensuel",
+    "periodsPerYear": 12,
     "type": "fixe",
-    "frequency": "mensuel",
-    "trigger": 85,
-    "memory": false,
-    "paymentTiming": "periodic"
+    "paymentTiming": "periodic",
+    "trigger": 85
   },
   "participationRate": null,
   "capitalProtection": {
@@ -237,5 +238,213 @@
   "conversation": [],
   "conversationSummary": null,
   "decision": null,
-  "decisionReason": null
+  "decisionReason": null,
+  "_freqFixApplied": true,
+  "aiCategory": "autocall-mono",
+  "aiCategoryLabel": "⚡ Autocall Mono-actif",
+  "aiCategoryColor": "#06D6A0",
+  "aiOpinion": "Produit offrant un coupon attractif de 11,35% mais sur un sous-jacent très volatil (Siemens Energy) sans protection du capital. Le seuil d'autocall à 85% et la barrière basse à 55% offrent une marge raisonnable, mais l'absence de protection expose à des pertes importantes en cas de forte baisse, ce qui est un risque réel sur ce titre.",
+  "aiAnalyzedAt": "2026-09-04T08:44:33.764Z",
+  "grading": {
+    "grade": "D",
+    "score": 25,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 6,
+        "base": 60,
+        "delta": 0,
+        "reasoning": "Rendement: base 60 → -4 = 56 (Volatilité extrême (56%) et barrière coupon à 85% proche du spot après un DD de 47% rendent le versement mensuel du coupon fragile malgré l'annualisé attractif.) | Coupon 11.351%, barrière 55% | Barr.coupon 85% | Mat espérée: ~1a (prob mat: 0%)",
+        "_bsDelta": -49,
+        "_bs": {
+          "score": 11,
+          "probCoupon": 51.8,
+          "rendementNet": -4.04,
+          "perteEsperee": 9.92,
+          "couponEffectif": 11.35,
+          "vols": [
+            56.25
+          ],
+          "matEsperee": 1,
+          "isBasket": false,
+          "volEstimated": false
+        }
+      },
+      "underlyingQuality": {
+        "score": 53,
+        "base": 50,
+        "delta": 3,
+        "reasoning": "Qualité: base 50 → +3 = 53 (Siemens Energy relève du secteur utilities/industrials favorisé et bénéficie de la transition énergétique, mais le beta 1.59 en régime stagflationniste plafonne le bonus.) | Worst: SIEMENS ENERGY AG B:43"
+      },
+      "portfolioFit": {
+        "score": 63,
+        "base": 63,
+        "delta": 0,
+        "reasoning": "Fit: base 63 — secteur déjà exposé (INDUSTRIALS)"
+      },
+      "riskPremium": {
+        "score": 6,
+        "base": 88,
+        "delta": -4,
+        "reasoning": "Prime vs CAT (net de frais, cohérent avec le panneau) : coupon espéré 5,9% (11,4% × proba 52%) − marge embarquée 12,00%/an = -6,1% vs CAT 2,8% → spread -8,92%. | vs achat direct : coupon net -6,1% vs dividende panier 0,5% risque-ajusté (vol 56% → 0,3%) = -6,4% → -6 pts."
+      }
+    },
+    "verdict": "En régime de STAGFLATION (Brent $97, PCE 3.7%, VIX 22), ce Athena mensuel sur Siemens Energy offre un coupon annualisé de 11.35% mais adossé à un sous-jacent unique extrêmement volatil (vol 56%, beta 1.59, DD 47%). La barrière coupon à 85% est proche du niveau spot, rendant les versements mensuels incertains, tandis que la barrière capital à 55% protège en cas de baisse modérée mais expose à des pertes sévères en scénario de choc. L'autocall à 85% favorise un remboursement rapide (~1a) si l'action reste stable, ce qui reste le scénario central attractif. Le mono-titre concentre le risque idiosyncratique sur un secteur pourtant favorisé par la transition énergétique.",
+    "keyRisks": [
+      "Volatilité de 56% et beta 1.59 : un choc de marché (VIX>30, flight-to-quality) peut faire passer le titre sous la barrière capital 55% avec perte en capital sévère",
+      "Barrière coupon à 85% proche du spot : risque de mois sans coupon si le titre baisse même modérément, dégradant le rendement effectif",
+      "Barrière à 0.38σ (Critique) — vol 56.25%"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "label": "Coupon (≥85%)",
+        "desc": "capital + coupons",
+        "return_pct": 11,
+        "return_eur": 11000,
+        "probability": 0.52
+      },
+      "stress": {
+        "label": "Capital seul (55–85%)",
+        "desc": "capital rendu, 0 coupon",
+        "return_pct": 0,
+        "return_eur": 0,
+        "probability": 0.27
+      },
+      "worst": {
+        "label": "Perte (<55%)",
+        "desc": "barrière cassée",
+        "return_pct": -67,
+        "return_eur": -67000,
+        "probability": 0.21
+      }
+    },
+    "confidenceInterval": {
+      "low": 56,
+      "high": 72,
+      "halfWidth": 8,
+      "gradeStable": false,
+      "gradeRange": "C-B",
+      "label": "B [56-72]"
+    },
+    "metadata": {
+      "gradedAt": "2026-09-04T08:45:28.173Z",
+      "durationMs": 49867,
+      "aiUsed": true,
+      "version": "7.1",
+      "productType": "autocall",
+      "marketDataAvailable": true,
+      "catBenchmark": 3.3,
+      "catSource": "allocator-confirmed",
+      "basketDividend": 0.48,
+      "basketVol": 56.25,
+      "basketDD": 47.28,
+      "basketMomentum": 63,
+      "couponAnnualized": 11.351,
+      "couponRaw": 11.351,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": true,
+      "barrierPct": 55,
+      "barrierCouponPct": 85,
+      "couponProbability": 51.8,
+      "expectedMaturity": 1,
+      "maxMaturity": 8,
+      "probReachMaturity": 0,
+      "maxBeta": 1.59,
+      "baseScore": 66,
+      "baseGrade": "B",
+      "adjustments": {
+        "p1": -4,
+        "p2": 3,
+        "p3": 0,
+        "p4": -4
+      },
+      "barrier_sigma": 0.38,
+      "barrier_sigma_label": "Critique",
+      "barrier_sigma_danger": true,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Rappelable 12M",
+      "ci_low": 56,
+      "ci_high": 72,
+      "ci_label": "B [56-72]",
+      "issuer_rating": "A+",
+      "issuer_tier": "IG",
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "autocall",
+      "_illiqApplied": true,
+      "bsRendementNet": -4.04,
+      "bsProbCoupon": 51.8,
+      "bsPerteEsperee": 9.92,
+      "bsVols": [
+        56.25
+      ],
+      "bsMatEsperee": 1,
+      "isBasket": false,
+      "volEstimated": false,
+      "issuerCreditPenalty": 1,
+      "issuerCDS": 60,
+      "v6Weights": {
+        "p1": 0.35,
+        "p2": 0.25,
+        "p3": 0.15,
+        "p4": 0.25
+      },
+      "inputHash": "gh25krj",
+      "gradeT0": "2026-09-04T08:45:28.173Z",
+      "trackingLevelAt0": null,
+      "envelopeMode": "swiss-life",
+      "vsDirectGap": -6.4,
+      "vsDirectAdj": -6,
+      "vsDirectDivAdj": 0.3,
+      "vsDirectVolFactor": 1.88,
+      "p4NetFeesApplied": true,
+      "scenariosDeterministic": true,
+      "stockData": [
+        {
+          "name": "SIEMENS ENERGY AG",
+          "ticker": "ENR",
+          "sector": "—",
+          "perf_ytd": 20.76,
+          "perf_1y": 63.15,
+          "volatility_3y": 56.25,
+          "max_drawdown_3y": 47.28,
+          "dividend_yield": 0.48,
+          "buffett_score": 43,
+          "quality_score": 52,
+          "buffett_grade": "C"
+        }
+      ]
+    },
+    "regimeScenarios": {
+      "current": {
+        "score": 33,
+        "grade": "D",
+        "label": "Actuel (stagflation)",
+        "desc": "Régime actuel → volatilité modérée"
+      },
+      "bull": {
+        "score": 41,
+        "grade": "D",
+        "label": "Bull / Risk-on",
+        "delta": 8,
+        "desc": "Marchés haussiers → prob coupon monte, barrière safe"
+      },
+      "crash": {
+        "score": 27,
+        "grade": "D",
+        "label": "Crash / Récession",
+        "delta": -6,
+        "desc": "Marchés baissiers → barrière menacée, vol en hausse"
+      }
+    }
+  },
+  "_couponProbability": 51.8,
+  "_bsRendementNet": -4.04
 }
