@@ -143,7 +143,9 @@ function _renderPortfoliosSection(totalStructured, totalCAT, structInterest, cat
   var globalRate = patrimoine > 0 ? globalInterest / patrimoine * 100 : 0;
   var target = (typeof catManager !== 'undefined' && catManager.objectives && parseFloat(catManager.objectives.targetRate)) || 0;
   var fmt = function (n) { return formatNumber(Math.round(n)); };
-  var h ='<div class="fiche-section" style="margin-bottom:12px"><div class="fiche-section-header"><span class="fiche-section-icon">🌐</span><span class="fiche-section-title">Rendement global du patrimoine</span><span style="margin-left:auto;font-family:var(--mono);font-weight:800;font-size:16px">' + fmt(patrimoine) + '€</span></div><div class="fiche-section-body">';
+  var h ='<div class="fiche-section" style="margin-bottom:12px"><div class="fiche-section-header"><span class="fiche-section-icon">🌐</span><span class="fiche-section-title">Rendement global du patrimoine</span>'
+    + '<button class="btn sm" onclick="showPortfoliosModal()" style="margin-left:auto;font-size:11px" title="Ajouter / modifier tes poches AV, PEA, CTO…">💼 Portefeuilles</button>'
+    + '<span style="font-family:var(--mono);font-weight:800;font-size:16px;margin-left:12px">' + fmt(patrimoine) + '€</span></div><div class="fiche-section-body">';
   h += '<div style="display:flex;flex-wrap:wrap;gap:16px;align-items:baseline">';
   h += '<span style="font-size:14px">Rendement global (brut annualisé) : <strong style="color:#06D6A0;font-size:18px">' + globalRate.toFixed(2).replace('.', ',') + '%</strong> <span style="color:#94A3B8;font-size:12px">+' + fmt(globalInterest) + '€/an sur CAT + Structuré + Portefeuille</span></span>';
   if (target > 0) h += '<span style="margin-left:auto;font-size:13px;font-weight:600;color:' + (globalRate >= target ? '#059669' : '#D97706') + '">vs objectif ' + target.toFixed(2).replace('.', ',') + '% → ' + (globalRate >= target ? '✓ atteint (+' : '⚠ manque ') + Math.abs(globalRate - target).toFixed(2).replace('.', ',') + ' pt' + (globalRate >= target ? ')' : '') + '</span>';

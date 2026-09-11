@@ -85,7 +85,11 @@ async function savePortfolios() {
   closeModal();
   await catManager.saveObjectives();
   showToast('Portefeuilles enregistrés', 'success');
-  renderCAT(document.getElementById('main-content'));
+  // Re-render la page COURANTE : le bouton 💼 existe désormais aussi sur Analytique.
+  // Sans ça, sauvegarder depuis Analytique basculait/plantait sur le rendu CAT.
+  var _main = document.getElementById('main-content');
+  if (typeof app !== 'undefined' && app.state && app.state.view === 'analytics' && typeof renderAnalytics === 'function') renderAnalytics(_main);
+  else renderCAT(_main);
 }
 
 // ═══ Override renderCAT ═══
