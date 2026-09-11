@@ -1,7 +1,7 @@
 {
   "bankId": "swiss-life",
   "bankName": "Swiss Life",
-  "lastUpdated": "2026-09-04T09:44:05.694Z",
+  "lastUpdated": "2026-09-11T09:32:48.827Z",
   "products": [
     {
       "id": "sp_moson9ml_17www",
@@ -31,7 +31,7 @@
       "id": "sp_mtmnvmm3_se964",
       "name": "SL - PHOENIX MÉMOIRE TRIMESTRIEL STMICROELECTRONICS OCTOBRE 2026",
       "type": "autocall",
-      "status": "analyzing",
+      "status": "subscribed",
       "score": null,
       "receivedDate": "2026-09-04"
     },
