@@ -451,5 +451,10 @@
   "envelope": "cameleons",
   "entity": "cameleons",
   "investedAmount": 25000,
-  "addedDate": "2026-09-11"
+  "addedDate": "2026-09-11",
+  "strikePrice": 2.64,
+  "_strikePriceDate": "2026-09-11",
+  "_strikePriceSource": "twelve_data:PLX",
+  "_strikePriceOpen": 2.74,
+  "_strikePriceRequested": "2026-09-11"
 }
