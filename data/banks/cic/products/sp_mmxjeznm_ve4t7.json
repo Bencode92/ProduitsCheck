@@ -25,7 +25,6 @@
     "protected": true,
     "level": 100,
     "type": "inconditionnelle-a-echeance",
-    "barrier": null,
     "barrierType": "Non applicable",
     "barrierObservation": "Garantie en capital à l'échéance uniquement",
     "inLifeRisk": "Risque de perte partielle ou totale en cas de sortie anticipée"
@@ -137,23 +136,28 @@
   "tracking": {
     "history": [
       {
-        "date": "2026-03-24",
-        "level": 94.07,
+        "date": "2026-04-20",
+        "level": 95.85,
         "year": 1
       },
       {
         "date": "2026-06-08",
         "level": 3.75,
         "ref": "TEC10"
+      },
+      {
+        "date": "2026-06-09",
+        "level": 3.75,
+        "ref": "TEC10"
       }
     ],
-    "level": 3.75,
-    "date": "2026-06-08",
+    "level": 4.48,
+    "date": "2026-06-09",
     "note": "auto-taux (TEC10)",
     "refLabel": "TEC10",
     "trigger": 4.4,
-    "marginToTrigger": 0.65,
-    "couponOK": true
+    "marginToTrigger": -0.08,
+    "couponOK": false
   },
   "envelope": "cameleons",
   "maturityYears": 10,
@@ -277,9 +281,8 @@
       "structureType": "capital_garanti"
     }
   },
-  "strikePrice": 42.658,
-  "_strikePriceDate": "2025-12-05",
-  "_strikePriceSource": "twelve_data:WISE",
-  "_strikePriceOpen": 43.03,
-  "_strikePriceRequested": "2025-12-05"
+  "guaranteedYears": 2,
+  "autocallCumulTarget": 24,
+  "decrementPct": null,
+  "actualDividendYield": null
 }
