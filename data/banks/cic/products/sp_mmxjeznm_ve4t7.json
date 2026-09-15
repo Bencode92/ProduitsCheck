@@ -284,5 +284,10 @@
   "guaranteedYears": 2,
   "autocallCumulTarget": 24,
   "decrementPct": null,
-  "actualDividendYield": null
+  "actualDividendYield": null,
+  "strikePrice": 13.98,
+  "_strikePriceDate": "2025-12-05",
+  "_strikePriceSource": "twelve_data:REAL",
+  "_strikePriceOpen": 14.13,
+  "_strikePriceRequested": "2025-12-05"
 }
