@@ -719,7 +719,6 @@
       "protected": true,
       "level": 100,
       "type": "inconditionnelle-a-echeance",
-      "barrier": null,
       "barrierType": "Non applicable",
       "barrierObservation": "Garantie en capital à l'échéance uniquement",
       "inLifeRisk": "Risque de perte partielle ou totale en cas de sortie anticipée"
@@ -846,12 +845,12 @@
           "ref": "TEC10"
         }
       ],
-      "level": 4.408,
+      "level": 4.48,
       "date": "2026-06-09",
       "note": "auto-taux (TEC10)",
       "refLabel": "TEC10",
       "trigger": 4.4,
-      "marginToTrigger": -0.01,
+      "marginToTrigger": -0.08,
       "couponOK": false
     },
     "envelope": "cameleons",
@@ -975,7 +974,11 @@
         "decrementDrag": 0,
         "structureType": "capital_garanti"
       }
-    }
+    },
+    "guaranteedYears": 2,
+    "autocallCumulTarget": 24,
+    "decrementPct": null,
+    "actualDividendYield": null
   },
   {
     "id": "sp_mo7btmwi_5hhaf",
@@ -1381,10 +1384,10 @@
           "ref": "TEC10"
         }
       ],
-      "level": 4.408,
+      "level": 4.48,
       "refLabel": "TEC10",
       "trigger": 4.6,
-      "marginToTrigger": 0.19,
+      "marginToTrigger": 0.12,
       "couponOK": true,
       "date": "2026-06-09",
       "note": "auto-taux (TEC10)"
