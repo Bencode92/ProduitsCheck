@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-09-16T12:51:43.031Z",
+  "lastUpdated": "2026-09-16T12:51:53.540Z",
   "rates": [
     {
       "bankId": "bnpp",
@@ -520,31 +520,6 @@
       "minAmount": null,
       "maxAmount": null,
       "category": null,
-      "source": "confirmed",
-      "confidence": "high"
-    },
-    {
-      "bankId": "cic",
-      "bankName": "CIC",
-      "durationMonths": 3,
-      "rate": 2.6,
-      "productType": "cat",
-      "date": "2026-09-16",
-      "rateType": "fixe",
-      "rateSchedule": [],
-      "earlyExitSchedule": [
-        {
-          "period": "Sortie anticipée",
-          "penalty": "Pas de rémunération"
-        }
-      ],
-      "withdrawalConditions": "Pas de rémunération si sortie anticipée",
-      "notice": null,
-      "productName": "CAT Transition Fixe 3 mois",
-      "calculationBase": null,
-      "minAmount": 1500,
-      "maxAmount": 5000000,
-      "category": "transition",
       "source": "confirmed",
       "confidence": "high"
     },
