@@ -51,17 +51,14 @@
 
     if (!isProg) {
       if (h === D) return { rate: nominal, kind: 'free' };
-      if (h > D) return { rate: nominal, kind: 'roll' };
+      if (h > D) return { rate: null, kind: 'na' };
       const f = _fixedEarlyFactor(r, h);
       if (f == null) return { rate: null, kind: 'na' };
       return { rate: nominal * f, kind: 'penalty' };
     }
 
     // Progressif : somme des intérêts mois par mois jusqu'à h
-    if (h > D) {
-      // Au-delà : cycle complet + renouvellement au même profil
-      return { rate: nominal, kind: 'roll' };
-    }
+    if (h > D) return { rate: null, kind: 'na' }; // au-delà de la durée : pas d'hypothèse de renouvellement
     let total = 0, kind = 'penalty';
     for (const s of sched) {
       const from = parseInt(s.fromMonth, 10), to = parseInt(s.toMonth, 10);
@@ -101,7 +98,7 @@
     let html = `<div style="margin-top:16px;padding-top:14px;border-top:1px dashed var(--border)">
       <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;margin-bottom:8px">
         <div style="font-size:12px;font-weight:700;color:var(--text-bright)">⚖️ Équivalence par horizon de sortie</div>
-        <div style="font-size:10px;color:var(--text-dim)">Taux annualisé brut si tu sors au mois indiqué · <strong style="color:var(--green)">vert</strong> = meilleur · gras = échéance (sortie libre) · <span style="color:var(--orange)">orange</span> = retrait anticipé (pénalité du produit) · <span style="opacity:.55">↻</span> = au-delà de la durée, hypothèse renouvellement au même taux</div>
+        <div style="font-size:10px;color:var(--text-dim)">Taux annualisé brut si tu sors au mois indiqué · <strong style="color:var(--green)">vert</strong> = meilleur · gras = échéance (sortie libre) · <span style="color:var(--orange)">orange</span> = retrait anticipé (pénalité du produit) · — = au-delà de la durée du produit · sous chaque taux : <strong>intérêts bruts gagnés sur 100 k€</strong> pendant la période</div>
       </div>
       <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px;min-width:${Math.max(420, 110 + cols.length * 92)}px">
       <thead><tr><th style="text-align:left;padding:6px 8px;color:var(--text-muted);font-weight:600;border-bottom:1px solid var(--border);white-space:nowrap">Sortie au mois</th>`;
@@ -127,13 +124,15 @@
           else if (x.kind === 'penalty') { style += 'color:var(--orange);'; title = 'retrait anticipé : conditions du produit appliquées'; }
           else if (x.kind === 'roll') { style += 'opacity:.55;'; txt = '↻ ' + txt; title = 'au-delà de la durée : hypothèse renouvellement au même taux'; }
           if (isBest) style += 'color:var(--green);background:rgba(6,214,160,0.08);';
+          const eur = Math.round(100000 * (x.rate / 100) * (h / 12));
+          txt += `<div style="font-size:9px;font-weight:400;opacity:.7">+${eur.toLocaleString('fr-FR')} €</div>`;
         }
         html += `<td style="${style}" title="${title}">${txt}</td>`;
       });
       html += `</tr>`;
     });
     html += `</tbody></table></div>
-      <div style="font-size:10px;color:var(--text-dim);margin-top:6px">Lecture : à 6 mois, un progressif 18 m sorti à la fin du semestre 1 rapporte le taux du S1 (sortie libre) — à comparer directement au fixe 6 m. En cours de période, les progressifs servent le taux de retrait anticipé (50 % du taux en S1/A1, taux de la période précédente ensuite) et exigent un préavis de 32 jours (non déduit ici). Base 30/360 approximée en mois entiers.</div>
+      <div style="font-size:10px;color:var(--text-dim);margin-top:6px">Lecture : à 6 mois, un progressif 18 m sorti à la fin du semestre 1 rapporte le taux du S1 (sortie libre) — à comparer directement au fixe 6 m. En cours de période, les progressifs servent le taux de retrait anticipé (50 % du taux en S1/A1, taux de la période précédente ensuite) et exigent un préavis de 32 jours (non déduit ici). Base 30/360 approximée en mois entiers. Les € indiqués = intérêts bruts sur 100 k€ placés jusqu'au mois de sortie (taux annualisé × durée).</div>
     </div>`;
     return html;
   };
