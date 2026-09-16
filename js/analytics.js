@@ -218,6 +218,7 @@ async function renderAnalytics(container) {
 
     ${_renderPortfoliosSection(totalStructured, totalCAT, annualYieldStructured, annualYieldCAT)}
     ${_renderEntityTables(entities, IS_RATE)}
+    ${_renderYearlyTables(entities, IS_RATE)}
     ${_renderFGDRSection(fgdr)}
     ${_renderNextEvents(events)}
     ${_renderRateSensitivity(sensitivity)}
@@ -1065,4 +1066,96 @@ function renderMaturityChart() {
     { label: 'CAT/PS', data: data.map(d => d.cat), backgroundColor: '#06D6A0CC', borderRadius: 4, stack: 's' }
   ] }, options: { responsive: true, plugins: { tooltip: { callbacks: { label: c => c.dataset.label+': '+formatNumber(c.raw)+'€' } } },
     scales: { y: { stacked: true, grid: { color: chartDefaults.borderColor }, ticks: { callback: v => formatNumber(v)+'€' } }, x: { stacked: true, grid: { display: false } } } } });
+}
+
+
+// ═══ Rendement par ANNÉE CIVILE (le « Taux » des tableaux = vitesse instantanée ;
+// ici : ce que chaque placement rapporte réellement en 2026, 2027… selon ses
+// paliers datés, sa date de départ et son échéance) ═══════════════════════════
+function _overlapDays(aFrom, aTo, bFrom, bTo) {
+  var f = Math.max(aFrom.getTime(), bFrom.getTime()), t = Math.min(aTo.getTime(), bTo.getTime());
+  return t > f ? (t - f) / 864e5 : 0;
+}
+// € bruts gagnés par un placement pendant l'année civile `year`
+function _yearlyInterest(kind, obj, year) {
+  var y0 = new Date(year, 0, 1), y1 = new Date(year + 1, 0, 1);
+  var amt = parseFloat(kind === 'cat' ? obj.amount : kind === 'struct' ? obj.investedAmount : obj.amount) || 0;
+  if (!amt) return { eur: 0, days: 0 };
+  if (kind === 'cat') {
+    var start = obj.startDate ? new Date(obj.startDate) : y0;
+    var end = obj.maturityDate ? new Date(obj.maturityDate) : new Date(year + 50, 0, 1);
+    if (obj.rateSchedule && obj.rateSchedule.length && obj.rateSchedule[0].from) {
+      var eur = 0, days = 0;
+      obj.rateSchedule.forEach(function(st) {
+        var f = new Date(st.from), t = new Date(st.to); t = new Date(t.getTime() + 864e5); // « to » inclus
+        var d = _overlapDays(f, t, y0, y1); if (d <= 0) return;
+        eur += amt * (parseFloat(st.rate) || 0) / 100 * d / 365; days += d;
+      });
+      return { eur: eur, days: days };
+    }
+    var d1 = _overlapDays(start, end, y0, y1);
+    return { eur: amt * (parseFloat(obj.rate) || 0) / 100 * d1 / 365, days: d1 };
+  }
+  if (kind === 'struct') {
+    var s0 = obj.strikeDate ? new Date(obj.strikeDate) : (obj.investedDate ? new Date(obj.investedDate) : y0);
+    var s1 = obj.maturityDate ? new Date(obj.maturityDate) : new Date(year + 50, 0, 1);
+    var d2 = _overlapDays(s0, s1, y0, y1);
+    return { eur: amt * getAnnualizedRate(obj) / 100 * d2 / 365, days: d2 };
+  }
+  var d3 = _overlapDays(new Date(year - 50, 0, 1), new Date(year + 50, 0, 1), y0, y1);
+  return { eur: amt * (parseFloat(obj.rate) || 0) / 100 * d3 / 365, days: d3 };
+}
+
+function _renderYearlyTables(entities, isRate) {
+  var fmt = typeof formatNumber === 'function' ? formatNumber : function(n) { return String(Math.round(n)); };
+  var entNames = { bycam: '🏢 ByCam', cameleons: '🦎 Caméléons Com Mark', non_assigne: '❓ Non assigné' };
+  var entColors = { bycam: '#3B82F6', cameleons: '#A855F7', non_assigne: '#94A3B8' };
+  var y = new Date().getFullYear();
+  var years = [y, y + 1, y + 2, y + 3];
+  var h = '<div class="fiche-section" style="margin-bottom:16px"><div class="fiche-section-header"><span class="fiche-section-icon">📅</span><span class="fiche-section-title">Rendement par année civile</span>';
+  h += '<span style="font-size:10px;color:var(--text-muted);margin-left:auto">€ bruts réellement acquis dans l\'année · paliers progressifs datés, départ et échéance pris en compte · structurés = coupon annualisé si versé · <em>échu</em> = plus rien cette année-là</span></div><div class="fiche-section-body">';
+  h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">';
+
+  Object.keys(entities).forEach(function(ent) {
+    var e = entities[ent];
+    var color = entColors[ent] || '#64748B';
+    var rows = [];
+    e.products.forEach(function(p) { rows.push({ icon: '', name: p.name || '?', kind: 'struct', obj: p, amt: parseFloat(p.investedAmount) || 0 }); });
+    e.catDeposits.forEach(function(d) { rows.push({ icon: '🏦 ', name: d.productName || 'CAT', kind: 'cat', obj: d, amt: parseFloat(d.amount) || 0 }); });
+    (e.portfolios || []).forEach(function(p) { rows.push({ icon: '💼 ', name: p.name || 'Portefeuille', kind: 'pf', obj: p, amt: parseFloat(p.amount) || 0 }); });
+    if (!rows.length) return;
+    var totals = years.map(function() { return 0; });
+    var maturing = years.map(function() { return 0; });
+
+    h += '<div style="border:1px solid var(--border);border-radius:8px;overflow:hidden"><div style="padding:6px 10px;font-weight:700;color:' + color + ';font-size:12px;border-bottom:1px solid var(--border)">' + (entNames[ent] || ent) + '</div>';
+    h += '<div style="overflow-x:auto"><table style="width:100%;font-size:11px;border-collapse:collapse;min-width:520px"><thead><tr style="border-bottom:1px solid var(--border)">';
+    h += '<th style="padding:4px 6px;text-align:left;color:var(--text-dim);font-size:10px">Placement</th><th style="padding:4px 6px;text-align:right;color:var(--text-dim);font-size:10px">Montant</th>';
+    years.forEach(function(yy) { h += '<th style="padding:4px 6px;text-align:right;color:var(--text-dim);font-size:10px">' + yy + '</th>'; });
+    h += '</tr></thead><tbody>';
+
+    rows.forEach(function(r) {
+      h += '<tr style="border-bottom:1px solid var(--border)"><td style="padding:4px 6px">' + r.icon + r.name.substring(0, 28) + '</td><td style="padding:4px 6px;text-align:right;font-family:var(--mono)">' + fmt(r.amt) + '€</td>';
+      var matY = r.obj.maturityDate ? new Date(r.obj.maturityDate).getFullYear() : null;
+      years.forEach(function(yy, i) {
+        var res = _yearlyInterest(r.kind, r.obj, yy);
+        var eur = Math.round(res.eur);
+        totals[i] += eur;
+        if (matY === yy) maturing[i] += r.amt;
+        if (res.days <= 0) { h += '<td style="padding:4px 6px;text-align:right;color:var(--text-dim);font-size:10px">' + (matY && yy > matY ? 'échu' : '—') + '</td>'; return; }
+        var effRate = r.amt > 0 ? (res.eur / r.amt * 100 * 365 / Math.max(res.days, 1)) : 0; // taux moyen sur les jours actifs
+        var partial = res.days < 360;
+        h += '<td style="padding:4px 6px;text-align:right;font-family:var(--mono);color:' + (r.kind === 'cat' ? 'var(--orange)' : 'var(--green)') + '">+' + fmt(eur) + '€<div style="font-size:9px;color:var(--text-dim);font-weight:400">' + effRate.toFixed(2) + '%' + (partial ? ' · ' + Math.round(res.days) + ' j' : '') + (matY === yy ? ' · échéance' : '') + '</div></td>';
+      });
+      h += '</tr>';
+    });
+    h += '<tr style="border-top:2px solid var(--border);font-weight:700"><td style="padding:5px 6px">Total brut</td><td style="padding:5px 6px;text-align:right;font-family:var(--mono)">' + fmt(rows.reduce(function(s, r) { return s + r.amt; }, 0)) + '€</td>';
+    totals.forEach(function(t) { h += '<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:var(--green)">+' + fmt(t) + '€</td>'; });
+    h += '</tr><tr style="font-size:10px;color:#06D6A0"><td style="padding:3px 6px">Net IS (' + Math.round(isRate * 100) + '%)</td><td></td>';
+    totals.forEach(function(t) { h += '<td style="padding:3px 6px;text-align:right;font-family:var(--mono)">+' + fmt(Math.round(t * (1 - isRate))) + '€</td>'; });
+    h += '</tr><tr style="font-size:10px;color:var(--text-muted)"><td style="padding:3px 6px">Capital à échéance (à replacer)</td><td></td>';
+    maturing.forEach(function(m) { h += '<td style="padding:3px 6px;text-align:right;font-family:var(--mono)">' + (m > 0 ? fmt(m) + '€' : '—') + '</td>'; });
+    h += '</tr></tbody></table></div></div>';
+  });
+  h += '</div></div></div>';
+  return h;
 }
