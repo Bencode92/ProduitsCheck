@@ -20,7 +20,12 @@
       if (/pas de p[ée]nalit/.test(t) || /sans p[ée]nalit/.test(t)) return 1;
       if (/pas de r[ée]mun|aucune r[ée]mun|sans r[ée]mun/.test(t)) return 0;
       const m = t.match(/(\d+(?:[.,]\d+)?)\s*%/);
-      if (m) return parseFloat(m[1].replace(',', '.')) / 100;
+      if (m) {
+        const pct = parseFloat(m[1].replace(',', '.')) / 100;
+        // « intérêts minorés de 90 % » / « pénalité de 30 % » = réduction → on sert 1 − x ;
+        // « 50 % du taux de souscription » = fraction servie → x
+        return /minor|r[ée]duc|p[ée]nalit[ée]s?\s+de|abattement|retenue/.test(t) ? Math.max(0, 1 - pct) : pct;
+      }
       return null;
     };
     for (const s of sched) {
@@ -88,7 +93,9 @@
     const banks = new Set(list.map(r => r.bankId));
     const multiBank = banks.size > 1;
     // Colonnes : par durée croissante, fixes avant progressifs à durée égale
-    const cols = [...list].sort((a, b) => (a.durationMonths - b.durationMonths) || ((a.rateType === 'progressif') - (b.rateType === 'progressif')));
+    let cols = [...list].sort((a, b) => (a.durationMonths - b.durationMonths) || ((a.rateType === 'progressif') - (b.rateType === 'progressif')));
+    // Banque à grille fine (ex. SG : 24 maturités) → ne garder que les durées repères, sinon illisible
+    if (cols.length > 8) cols = cols.filter(c => HORIZONS.includes(parseInt(c.durationMonths, 10)) || c.rateType === 'progressif');
     const maxD = Math.max(...cols.map(c => parseInt(c.durationMonths, 10) || 0));
     const rows = HORIZONS.filter(h => h <= maxD);
     // Ajouter les bornes de périodes des progressifs (échéances de sortie libre)
