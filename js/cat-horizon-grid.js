@@ -138,23 +138,28 @@
     return html;
   };
 
-  // ── Insertion dans la section « Taux du Marché » ─────────────────
+  // ── Insertion dans le bloc dépliant de chaque banque ─────────────
+  // Une grille par banque, à l'intérieur de #bank-rates-confirmed-<bankId>,
+  // hors produits « Transition » (offre fléchée RSE, comparée à part).
+  function _isTransition(r) {
+    return String(r.category || '').toLowerCase() === 'transition' || /transition/i.test(String(r.productName || ''));
+  }
+
   if (typeof renderCAT === 'function') {
     const _prevRenderCAT = renderCAT;
     renderCAT = function(container) {
       _prevRenderCAT(container);
       try {
-        const rates = (catManager.rates?.rates || []).filter(r => r.source !== 'web scan' && !(typeof _isRateExpired === 'function' && _isRateExpired(r)));
-        if (rates.length < 2) return;
-        const sections = container.querySelectorAll('.section');
-        let target = null;
-        sections.forEach(s => { const t = s.querySelector('.section-title'); if (t && t.textContent.includes('Taux du Marché')) target = s; });
-        if (!target) return;
-        const html = window._renderCATHorizonGrid(rates);
-        if (!html) return;
-        // Avant le bloc « Taux indicatifs » si présent, sinon en fin de section
-        const scanned = Array.from(target.children).find(el => el.textContent.includes('Taux indicatifs'));
-        if (scanned) scanned.insertAdjacentHTML('beforebegin', html); else target.insertAdjacentHTML('beforeend', html);
+        const confirmed = (catManager.rates?.rates || []).filter(r => r.source !== 'web scan' && !(typeof _isRateExpired === 'function' && _isRateExpired(r)) && !_isTransition(r));
+        const byBank = {};
+        confirmed.forEach(r => { const k = r.bankId || 'autre'; (byBank[k] = byBank[k] || []).push(r); });
+        Object.entries(byBank).forEach(([bankId, list]) => {
+          if (list.length < 2) return;
+          const host = container.querySelector('#bank-rates-confirmed-' + bankId);
+          if (!host) return;
+          const html = window._renderCATHorizonGrid(list);
+          if (html) host.insertAdjacentHTML('beforeend', '<div style="padding:0 14px 14px">' + html + '</div>');
+        });
       } catch (e) { console.error('[CATHorizonGrid]', e); }
     };
   }
