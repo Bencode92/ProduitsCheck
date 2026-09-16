@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-09-16T13:00:42.090Z",
+  "lastUpdated": "2026-09-16T13:06:14.463Z",
   "rates": [
     {
       "bankId": "bnpp",
@@ -556,6 +556,510 @@
       "withdrawalConditions": null,
       "notice": null,
       "productName": "Optiplus CT bonifié 12 mois",
+      "calculationBase": null,
+      "minAmount": null,
+      "maxAmount": null,
+      "category": null,
+      "source": "confirmed",
+      "confidence": "high"
+    },
+    {
+      "bankId": "sg",
+      "bankName": "Société Générale",
+      "durationMonths": 1,
+      "rate": 2.22,
+      "productType": "cat",
+      "date": "2026-09-16",
+      "rateType": "fixe",
+      "rateSchedule": [],
+      "earlyExitSchedule": [
+        {
+          "period": "Mois 1",
+          "penalty": "Pas de sortie anticipée possible avant terme"
+        }
+      ],
+      "withdrawalConditions": "Pas de sortie anticipée possible avant terme",
+      "notice": "32 jours",
+      "productName": "CAT Fixe 1 mois",
+      "calculationBase": "exact/365",
+      "minAmount": 8000,
+      "maxAmount": null,
+      "category": null,
+      "source": "confirmed",
+      "confidence": "high"
+    },
+    {
+      "bankId": "sg",
+      "bankName": "Société Générale",
+      "durationMonths": 2,
+      "rate": 2.43,
+      "productType": "cat",
+      "date": "2026-09-16",
+      "rateType": "fixe",
+      "rateSchedule": [],
+      "earlyExitSchedule": [
+        {
+          "period": "Mois 1",
+          "penalty": "Intérêts minorés de 60%"
+        }
+      ],
+      "withdrawalConditions": "Mois 1: intérêts minorés de 60%",
+      "notice": "32 jours",
+      "productName": "CAT Fixe 2 mois",
+      "calculationBase": "exact/365",
+      "minAmount": 8000,
+      "maxAmount": null,
+      "category": null,
+      "source": "confirmed",
+      "confidence": "high"
+    },
+    {
+      "bankId": "sg",
+      "bankName": "Société Générale",
+      "durationMonths": 3,
+      "rate": 2.63,
+      "productType": "cat",
+      "date": "2026-09-16",
+      "rateType": "fixe",
+      "rateSchedule": [],
+      "earlyExitSchedule": [
+        {
+          "period": "Mois 1",
+          "penalty": "Intérêts minorés de 60%"
+        },
+        {
+          "period": "Mois 2",
+          "penalty": "Intérêts minorés de 30%"
+        }
+      ],
+      "withdrawalConditions": "Mois 1: -60%; Mois 2: -30%",
+      "notice": "32 jours",
+      "productName": "CAT Fixe 3 mois",
+      "calculationBase": "exact/365",
+      "minAmount": 8000,
+      "maxAmount": null,
+      "category": null,
+      "source": "confirmed",
+      "confidence": "high"
+    },
+    {
+      "bankId": "sg",
+      "bankName": "Société Générale",
+      "durationMonths": 4,
+      "rate": 2.69,
+      "productType": "cat",
+      "date": "2026-09-16",
+      "rateType": "fixe",
+      "rateSchedule": [],
+      "earlyExitSchedule": [
+        {
+          "period": "Mois 1",
+          "penalty": "Intérêts minorés de 90%"
+        },
+        {
+          "period": "Mois 2",
+          "penalty": "Intérêts minorés de 60%"
+        },
+        {
+          "period": "Mois 3",
+          "penalty": "Intérêts minorés de 30%"
+        }
+      ],
+      "withdrawalConditions": "Mois 1: -90%; Mois 2: -60%; Mois 3: -30%",
+      "notice": "32 jours",
+      "productName": "CAT Fixe 4 mois",
+      "calculationBase": "exact/365",
+      "minAmount": 8000,
+      "maxAmount": null,
+      "category": null,
+      "source": "confirmed",
+      "confidence": "high"
+    },
+    {
+      "bankId": "sg",
+      "bankName": "Société Générale",
+      "durationMonths": 5,
+      "rate": 2.74,
+      "productType": "cat",
+      "date": "2026-09-16",
+      "rateType": "fixe",
+      "rateSchedule": [],
+      "earlyExitSchedule": [
+        {
+          "period": "Mois 1",
+          "penalty": "Intérêts minorés de 90%"
+        },
+        {
+          "period": "Mois 2-3",
+          "penalty": "Intérêts minorés de 60%"
+        },
+        {
+          "period": "Mois 4",
+          "penalty": "Intérêts minorés de 30%"
+        }
+      ],
+      "withdrawalConditions": "Mois 1: -90%; Mois 2-3: -60%; Mois 4: -30%",
+      "notice": "32 jours",
+      "productName": "CAT Fixe 5 mois",
+      "calculationBase": "exact/365",
+      "minAmount": 8000,
+      "maxAmount": null,
+      "category": null,
+      "source": "confirmed",
+      "confidence": "high"
+    },
+    {
+      "bankId": "sg",
+      "bankName": "Société Générale",
+      "durationMonths": 6,
+      "rate": 2.8,
+      "productType": "cat",
+      "date": "2026-09-16",
+      "rateType": "fixe",
+      "rateSchedule": [],
+      "earlyExitSchedule": [
+        {
+          "period": "Mois 1",
+          "penalty": "Intérêts minorés de 90%"
+        },
+        {
+          "period": "Mois 2-3",
+          "penalty": "Intérêts minorés de 60%"
+        },
+        {
+          "period": "Mois 4-5",
+          "penalty": "Intérêts minorés de 30%"
+        }
+      ],
+      "withdrawalConditions": "Mois 1: -90%; Mois 2-3: -60%; Mois 4-5: -30%",
+      "notice": "32 jours",
+      "productName": "CAT Fixe 6 mois",
+      "calculationBase": "exact/365",
+      "minAmount": 8000,
+      "maxAmount": null,
+      "category": null,
+      "source": "confirmed",
+      "confidence": "high"
+    },
+    {
+      "bankId": "sg",
+      "bankName": "Société Générale",
+      "durationMonths": 7,
+      "rate": 2.85,
+      "productType": "cat",
+      "date": "2026-09-16",
+      "rateType": "fixe",
+      "rateSchedule": [],
+      "earlyExitSchedule": [
+        {
+          "period": "Mois 1-2",
+          "penalty": "Intérêts minorés de 90%"
+        },
+        {
+          "period": "Mois 3-4",
+          "penalty": "Intérêts minorés de 60%"
+        },
+        {
+          "period": "Mois 5-6",
+          "penalty": "Intérêts minorés de 30%"
+        }
+      ],
+      "withdrawalConditions": "Mois 1-2: -90%; Mois 3-4: -60%; Mois 5-6: -30%",
+      "notice": "32 jours",
+      "productName": "CAT Fixe 7 mois",
+      "calculationBase": "exact/365",
+      "minAmount": 8000,
+      "maxAmount": null,
+      "category": null,
+      "source": "confirmed",
+      "confidence": "high"
+    },
+    {
+      "bankId": "sg",
+      "bankName": "Société Générale",
+      "durationMonths": 8,
+      "rate": 2.91,
+      "productType": "cat",
+      "date": "2026-09-16",
+      "rateType": "fixe",
+      "rateSchedule": [],
+      "earlyExitSchedule": [
+        {
+          "period": "Mois 1-2",
+          "penalty": "Intérêts minorés de 90%"
+        },
+        {
+          "period": "Mois 3-5",
+          "penalty": "Intérêts minorés de 60%"
+        },
+        {
+          "period": "Mois 6-7",
+          "penalty": "Intérêts minorés de 30%"
+        }
+      ],
+      "withdrawalConditions": "Mois 1-2: -90%; Mois 3-5: -60%; Mois 6-7: -30%",
+      "notice": "32 jours",
+      "productName": "CAT Fixe 8 mois",
+      "calculationBase": "exact/365",
+      "minAmount": 8000,
+      "maxAmount": null,
+      "category": null,
+      "source": "confirmed",
+      "confidence": "high"
+    },
+    {
+      "bankId": "sg",
+      "bankName": "Société Générale",
+      "durationMonths": 9,
+      "rate": 2.96,
+      "productType": "cat",
+      "date": "2026-09-16",
+      "rateType": "fixe",
+      "rateSchedule": [],
+      "earlyExitSchedule": [
+        {
+          "period": "Mois 1-2",
+          "penalty": "Intérêts minorés de 90%"
+        },
+        {
+          "period": "Mois 3-5",
+          "penalty": "Intérêts minorés de 60%"
+        },
+        {
+          "period": "Mois 6-8",
+          "penalty": "Intérêts minorés de 30%"
+        }
+      ],
+      "withdrawalConditions": "Mois 1-2: -90%; Mois 3-5: -60%; Mois 6-8: -30%",
+      "notice": "32 jours",
+      "productName": "CAT Fixe 9 mois",
+      "calculationBase": "exact/365",
+      "minAmount": 8000,
+      "maxAmount": null,
+      "category": null,
+      "source": "confirmed",
+      "confidence": "high"
+    },
+    {
+      "bankId": "sg",
+      "bankName": "Société Générale",
+      "durationMonths": 10,
+      "rate": 3.02,
+      "productType": "cat",
+      "date": "2026-09-16",
+      "rateType": "fixe",
+      "rateSchedule": [],
+      "earlyExitSchedule": [
+        {
+          "period": "Mois 1-3",
+          "penalty": "Intérêts minorés de 90%"
+        },
+        {
+          "period": "Mois 4-6",
+          "penalty": "Intérêts minorés de 60%"
+        },
+        {
+          "period": "Mois 7-9",
+          "penalty": "Intérêts minorés de 30%"
+        }
+      ],
+      "withdrawalConditions": "Mois 1-3: -90%; Mois 4-6: -60%; Mois 7-9: -30%",
+      "notice": "32 jours",
+      "productName": "CAT Fixe 10 mois",
+      "calculationBase": "exact/365",
+      "minAmount": 8000,
+      "maxAmount": null,
+      "category": null,
+      "source": "confirmed",
+      "confidence": "high"
+    },
+    {
+      "bankId": "sg",
+      "bankName": "Société Générale",
+      "durationMonths": 11,
+      "rate": 3.07,
+      "productType": "cat",
+      "date": "2026-09-16",
+      "rateType": "fixe",
+      "rateSchedule": [],
+      "earlyExitSchedule": [
+        {
+          "period": "Mois 1-3",
+          "penalty": "Intérêts minorés de 90%"
+        },
+        {
+          "period": "Mois 4-7",
+          "penalty": "Intérêts minorés de 60%"
+        },
+        {
+          "period": "Mois 8-10",
+          "penalty": "Intérêts minorés de 30%"
+        }
+      ],
+      "withdrawalConditions": "Mois 1-3: -90%; Mois 4-7: -60%; Mois 8-10: -30%",
+      "notice": "32 jours",
+      "productName": "CAT Fixe 11 mois",
+      "calculationBase": "exact/365",
+      "minAmount": 8000,
+      "maxAmount": null,
+      "category": null,
+      "source": "confirmed",
+      "confidence": "high"
+    },
+    {
+      "bankId": "sg",
+      "bankName": "Société Générale",
+      "durationMonths": 12,
+      "rate": 3.13,
+      "productType": "cat",
+      "date": "2026-09-16",
+      "rateType": "fixe",
+      "rateSchedule": [],
+      "earlyExitSchedule": [
+        {
+          "period": "Mois 1-3",
+          "penalty": "Intérêts minorés de 90%"
+        },
+        {
+          "period": "Mois 4-7",
+          "penalty": "Intérêts minorés de 60%"
+        },
+        {
+          "period": "Mois 8-11",
+          "penalty": "Intérêts minorés de 30%"
+        }
+      ],
+      "withdrawalConditions": "Mois 1-3: -90%; Mois 4-7: -60%; Mois 8-11: -30%",
+      "notice": "32 jours",
+      "productName": "CAT Fixe 12 mois",
+      "calculationBase": "exact/365",
+      "minAmount": 8000,
+      "maxAmount": null,
+      "category": null,
+      "source": "confirmed",
+      "confidence": "high"
+    },
+    {
+      "bankId": "sg",
+      "bankName": "Société Générale",
+      "durationMonths": 13,
+      "rate": 3.17,
+      "productType": "cat",
+      "date": "2026-09-16",
+      "rateType": "fixe",
+      "rateSchedule": [],
+      "earlyExitSchedule": [
+        {
+          "period": "Mois 1-4",
+          "penalty": "Intérêts minorés de 90%"
+        },
+        {
+          "period": "Mois 5-8",
+          "penalty": "Intérêts minorés de 60%"
+        },
+        {
+          "period": "Mois 9-12",
+          "penalty": "Intérêts minorés de 30%"
+        }
+      ],
+      "withdrawalConditions": "Mois 1-4: -90%; Mois 5-8: -60%; Mois 9-12: -30%",
+      "notice": "32 jours",
+      "productName": "CAT Fixe 13 mois",
+      "calculationBase": "exact/365",
+      "minAmount": 8000,
+      "maxAmount": null,
+      "category": null,
+      "source": "confirmed",
+      "confidence": "high"
+    },
+    {
+      "bankId": "sg",
+      "bankName": "Société Générale",
+      "durationMonths": 14,
+      "rate": 3.2,
+      "productType": "cat",
+      "date": "2026-09-16",
+      "rateType": "fixe",
+      "rateSchedule": [],
+      "earlyExitSchedule": [
+        {
+          "period": "Mois 1-4",
+          "penalty": "Intérêts minorés de 90%"
+        },
+        {
+          "period": "Mois 5-9",
+          "penalty": "Intérêts minorés de 60%"
+        },
+        {
+          "period": "Mois 10-13",
+          "penalty": "Intérêts minorés de 30%"
+        }
+      ],
+      "withdrawalConditions": "Mois 1-4: -90%; Mois 5-9: -60%; Mois 10-13: -30%",
+      "notice": "32 jours",
+      "productName": "CAT Fixe 14 mois",
+      "calculationBase": "exact/365",
+      "minAmount": 8000,
+      "maxAmount": null,
+      "category": null,
+      "source": "confirmed",
+      "confidence": "high"
+    },
+    {
+      "bankId": "sg",
+      "bankName": "Société Générale",
+      "durationMonths": 15,
+      "rate": 3.23,
+      "productType": "cat",
+      "date": "2026-09-16",
+      "rateType": "fixe",
+      "rateSchedule": [],
+      "earlyExitSchedule": [
+        {
+          "period": "Mois 1-4",
+          "penalty": "Intérêts minorés de 90%"
+        },
+        {
+          "period": "Mois 5-9",
+          "penalty": "Intérêts minorés de 60%"
+        },
+        {
+          "period": "Mois 10-14",
+          "penalty": "Intérêts minorés de 30%"
+        }
+      ],
+      "withdrawalConditions": "Mois 1-4: -90%; Mois 5-9: -60%; Mois 10-14: -30%",
+      "notice": "32 jours",
+      "productName": "CAT Fixe 15 mois",
+      "calculationBase": "exact/365",
+      "minAmount": 8000,
+      "maxAmount": null,
+      "category": null,
+      "source": "confirmed",
+      "confidence": "high"
+    },
+    {
+      "bankId": "sg",
+      "bankName": "Société Générale",
+      "durationMonths": 16,
+      "rate": 3.27,
+      "productType": "cat",
+      "date": "2026-09-16",
+      "rateType": "fixe",
+      "rateSchedule": [],
+      "earlyExitSchedule": [
+        {
+          "period": "Mois 1-5",
+          "penalty": "Intérêts minorés de 90%"
+        },
+        {
+          "period": "Mois 6-10",
+          "penalty": "Intérêts minorés"
+        }
+      ],
+      "withdrawalConditions": null,
+      "notice": null,
+      "productName": "CAT Fixe 16 mois",
       "calculationBase": null,
       "minAmount": null,
       "maxAmount": null,
