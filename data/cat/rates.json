@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-09-16T12:43:55.447Z",
+  "lastUpdated": "2026-09-16T12:51:43.031Z",
   "rates": [
     {
       "bankId": "bnpp",
@@ -562,57 +562,6 @@
       "notice": null,
       "productName": "CAT Transition Fixe 18 mois",
       "calculationBase": null,
-      "minAmount": 1500,
-      "maxAmount": 5000000,
-      "category": "transition",
-      "source": "confirmed",
-      "confidence": "high"
-    },
-    {
-      "bankId": "cic",
-      "bankName": "CIC",
-      "durationMonths": 18,
-      "rate": 3.1,
-      "productType": "cat",
-      "date": "2026-09-16",
-      "rateType": "progressif",
-      "rateSchedule": [
-        {
-          "fromMonth": 1,
-          "toMonth": 6,
-          "rate": 2.8,
-          "earlyRate": 1.4,
-          "label": "Semestre 1"
-        },
-        {
-          "fromMonth": 7,
-          "toMonth": 12,
-          "rate": 3,
-          "earlyRate": 2.8,
-          "label": "Semestre 2"
-        },
-        {
-          "fromMonth": 13,
-          "toMonth": 18,
-          "rate": 3.51,
-          "earlyRate": 3,
-          "label": "Semestre 3"
-        }
-      ],
-      "earlyExitSchedule": [
-        {
-          "period": "Avant fin semestre 1",
-          "penalty": "50% du taux de la période en cours"
-        },
-        {
-          "period": "Entre fin S1 et fin S3",
-          "penalty": "Taux de période précédente"
-        }
-      ],
-      "withdrawalConditions": "Préavis 32j. S1: 50% taux, S2-S3: taux période précédente",
-      "notice": "32 jours",
-      "productName": "CAT Transition Progressif 18 mois",
-      "calculationBase": "30/360 fin période, exact/365 sortie cours période",
       "minAmount": 1500,
       "maxAmount": 5000000,
       "category": "transition",
