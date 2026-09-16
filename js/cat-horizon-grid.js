@@ -28,16 +28,18 @@
       }
       return null;
     };
+    const hasMonths = (p) => /\d/.test(p);
     for (const s of sched) {
       const p = String(s.period || '');
       const rng = p.match(/(\d+)\s*[-–à]\s*(\d+)/);
-      if (rng) {
-        const a = parseInt(rng[1], 10), b = parseInt(rng[2], 10);
-        if (h >= a && h <= b) return parsePenalty(s.penalty);
-      }
+      const single = !rng && p.match(/(\d+)/);
+      const a = rng ? parseInt(rng[1], 10) : single ? parseInt(single[1], 10) : null;
+      const b = rng ? parseInt(rng[2], 10) : a;
+      if (a != null && h >= a && h <= b) return parsePenalty(s.penalty);
     }
+    if (sched.some(s => hasMonths(String(s.period || '')))) return null; // plages explicites, h hors plages → inconnu
     // Condition générique (« Sortie anticipée ») → s'applique à tout h < durée
-    const generic = sched.find(s => !/\d+\s*[-–à]\s*\d+/.test(String(s.period || '')));
+    const generic = sched.find(s => !hasMonths(String(s.period || '')));
     if (generic) return parsePenalty(generic.penalty);
     // Repli sur le texte libre
     if (r.withdrawalConditions) return parsePenalty(r.withdrawalConditions);
@@ -144,6 +146,45 @@
     return html;
   };
 
+  // ── Grille comparative toutes banques ─────────────────────────────
+  // Par horizon de sortie : le meilleur produit de CHAQUE banque, et le gagnant.
+  window._renderCATBankCompare = function(byBank) {
+    const banks = Object.entries(byBank).filter(([, list]) => list.length > 0);
+    if (banks.length < 2) return '';
+    const maxD = Math.max(...banks.flatMap(([, l]) => l.map(r => parseInt(r.durationMonths, 10) || 0)));
+    const rows = HORIZONS.filter(h => h <= maxD);
+    let html = `<div style="margin-bottom:18px;padding:12px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-elevated)">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;margin-bottom:8px">
+        <div style="font-size:12px;font-weight:700;color:var(--text-bright)">🏆 Comparatif banques par horizon de sortie</div>
+        <div style="font-size:10px;color:var(--text-dim)">Meilleur produit de chaque banque si tu sors au mois indiqué · taux annualisé brut + intérêts sur 100 k€ · gras = échéance (sortie libre) · <span style="color:var(--orange)">orange</span> = retrait anticipé · hors produits Transition</div>
+      </div>
+      <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px;min-width:${Math.max(420, 200 + banks.length * 150)}px">
+      <thead><tr><th style="text-align:left;padding:6px 8px;color:var(--text-muted);font-weight:600;border-bottom:1px solid var(--border)">Sortie au mois</th>`;
+    banks.forEach(([, list]) => { html += `<th style="text-align:right;padding:6px 8px;color:var(--text-muted);font-weight:600;border-bottom:1px solid var(--border);white-space:nowrap">${list[0].bankName || list[0].bankId}</th>`; });
+    html += `<th style="text-align:left;padding:6px 8px;color:var(--text-muted);font-weight:600;border-bottom:1px solid var(--border);white-space:nowrap">Gagnant</th></tr></thead><tbody>`;
+    rows.forEach(h => {
+      const bests = banks.map(([, list]) => {
+        let best = null;
+        list.forEach(r => { const x = _effectiveRate(r, h); if (x.rate == null) return; if (!best || x.rate > best.rate || (x.rate === best.rate && x.kind === 'free' && best.kind !== 'free')) best = { rate: x.rate, kind: x.kind, r }; });
+        return best;
+      });
+      const top = bests.reduce((m, b) => (b && (!m || b.rate > m.rate)) ? b : m, null);
+      html += `<tr style="border-bottom:1px solid var(--border)"><td style="padding:7px 8px;font-weight:600;color:var(--text-bright);white-space:nowrap">${h} mois</td>`;
+      bests.forEach(b => {
+        if (!b) { html += `<td style="text-align:right;padding:7px 8px;color:var(--text-dim)">—</td>`; return; }
+        const isTop = top && b === top;
+        const eur = Math.round(100000 * (b.rate / 100) * (h / 12));
+        const color = b.kind === 'penalty' ? 'var(--orange)' : 'var(--text-bright)';
+        html += `<td style="text-align:right;padding:7px 8px;white-space:nowrap;${isTop ? 'background:rgba(6,214,160,0.08);' : ''}" title="${(b.r.withdrawalConditions || '').replace(/"/g, '&quot;')}">
+          <div style="font-family:var(--mono);font-weight:${b.kind === 'free' ? 700 : 400};color:${isTop ? 'var(--green)' : color}">${_fmt(b.rate)} <span style="font-size:9px;font-weight:400;opacity:.7">+${eur.toLocaleString('fr-FR')} €</span></div>
+          <div style="font-size:9px;color:var(--text-dim)">${_shortName(b.r, false)}${b.kind === 'penalty' ? ' · anticipé' : ''}</div></td>`;
+      });
+      html += `<td style="padding:7px 8px;font-size:11px;white-space:nowrap">${top ? '<strong style="color:var(--green)">' + (top.r.bankName || top.r.bankId) + '</strong> <span style="color:var(--text-dim)">' + _shortName(top.r, false) + '</span>' : '—'}</td></tr>`;
+    });
+    html += `</tbody></table></div></div>`;
+    return html;
+  };
+
   // ── Insertion dans le bloc dépliant de chaque banque ─────────────
   // Une grille par banque, à l'intérieur de #bank-rates-confirmed-<bankId>,
   // hors produits « Transition » (offre fléchée RSE, comparée à part).
@@ -159,6 +200,11 @@
         const confirmed = (catManager.rates?.rates || []).filter(r => r.source !== 'web scan' && !(typeof _isRateExpired === 'function' && _isRateExpired(r)) && !_isTransition(r));
         const byBank = {};
         confirmed.forEach(r => { const k = r.bankId || 'autre'; (byBank[k] = byBank[k] || []).push(r); });
+        // Comparatif toutes banques, juste sous l'en-tête de la section « Taux du Marché »
+        let target = null;
+        container.querySelectorAll('.section').forEach(sec => { const t = sec.querySelector('.section-title'); if (t && t.textContent.includes('Taux du Marché')) target = sec; });
+        const cmp = target ? window._renderCATBankCompare(byBank) : '';
+        if (cmp) { const hdr = target.querySelector('.section-header'); if (hdr) hdr.insertAdjacentHTML('afterend', cmp); }
         Object.entries(byBank).forEach(([bankId, list]) => {
           if (list.length < 2) return;
           const host = container.querySelector('#bank-rates-confirmed-' + bankId);
