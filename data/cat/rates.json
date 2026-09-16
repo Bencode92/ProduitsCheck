@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-09-16T12:52:54.590Z",
+  "lastUpdated": "2026-09-16T13:00:42.090Z",
   "rates": [
     {
       "bankId": "bnpp",
@@ -526,42 +526,42 @@
     {
       "bankId": "banque-populaire",
       "bankName": "Banque Populaire",
+      "durationMonths": 6,
+      "rate": 3.05,
       "productType": "cat",
-      "date": "2026-09-16",
+      "date": "2015-09-16",
       "rateType": "fixe",
       "rateSchedule": [],
       "earlyExitSchedule": [],
-      "withdrawalConditions": "Conditions de retrait anticipé non communiquées — à demander",
+      "withdrawalConditions": null,
       "notice": null,
+      "productName": "Optiplus CT bonifié 6 mois",
       "calculationBase": null,
       "minAmount": null,
       "maxAmount": null,
       "category": null,
       "source": "confirmed",
-      "confidence": "high",
-      "durationMonths": 6,
-      "rate": 3.05,
-      "productName": "Optiplus CT bonifié 6 mois"
+      "confidence": "high"
     },
     {
       "bankId": "banque-populaire",
       "bankName": "Banque Populaire",
+      "durationMonths": 12,
+      "rate": 2.85,
       "productType": "cat",
-      "date": "2026-09-16",
+      "date": "2015-09-16",
       "rateType": "fixe",
       "rateSchedule": [],
       "earlyExitSchedule": [],
-      "withdrawalConditions": "Conditions de retrait anticipé non communiquées — à demander",
+      "withdrawalConditions": null,
       "notice": null,
+      "productName": "Optiplus CT bonifié 12 mois",
       "calculationBase": null,
       "minAmount": null,
       "maxAmount": null,
       "category": null,
       "source": "confirmed",
-      "confidence": "high",
-      "durationMonths": 12,
-      "rate": 2.85,
-      "productName": "Optiplus CT bonifié 12 mois"
+      "confidence": "high"
     }
   ]
 }
