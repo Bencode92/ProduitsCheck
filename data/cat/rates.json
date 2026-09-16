@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-09-16T12:52:47.985Z",
+  "lastUpdated": "2026-09-16T12:52:54.590Z",
   "rates": [
     {
       "bankId": "bnpp",
@@ -520,26 +520,6 @@
       "minAmount": null,
       "maxAmount": null,
       "category": null,
-      "source": "confirmed",
-      "confidence": "high"
-    },
-    {
-      "bankId": "cic",
-      "bankName": "CIC",
-      "durationMonths": 18,
-      "rate": 3,
-      "productType": "cat",
-      "date": "2026-09-16",
-      "rateType": "fixe",
-      "rateSchedule": [],
-      "earlyExitSchedule": [],
-      "withdrawalConditions": "Voir détails dans CAT Transition Progressif 18 mois",
-      "notice": null,
-      "productName": "CAT Transition Fixe 18 mois",
-      "calculationBase": null,
-      "minAmount": 1500,
-      "maxAmount": 5000000,
-      "category": "transition",
       "source": "confirmed",
       "confidence": "high"
     }
