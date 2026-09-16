@@ -1,0 +1,161 @@
+// ═══════════════════════════════════════════════════════════════════
+// CAT — Grille d'équivalence par horizon de sortie
+// Compare fixes et progressifs à horizon de sortie ÉGAL : pour chaque
+// produit, taux annualisé effectif si on sort au mois h (échéance = sortie
+// libre ; en cours de période = conditions de retrait anticipé du produit).
+// S'insère dans la section « Taux du Marché » (après cat-patches.js).
+// ═══════════════════════════════════════════════════════════════════
+(function() {
+  'use strict';
+
+  const HORIZONS = [2, 3, 6, 9, 12, 18, 24, 36];
+
+  // ── Parsing des conditions de retrait anticipé (fixes) ────────────
+  // earlyExitSchedule: [{period:'Mois 1-3', penalty:'Pas de rémunération'}, ...]
+  // Retourne la fraction du taux nominal servie si sortie au mois h (0..1), ou null si inconnu.
+  function _fixedEarlyFactor(r, h) {
+    const sched = Array.isArray(r.earlyExitSchedule) ? r.earlyExitSchedule : [];
+    const parsePenalty = (txt) => {
+      const t = String(txt || '').toLowerCase();
+      if (/pas de p[ée]nalit/.test(t) || /sans p[ée]nalit/.test(t)) return 1;
+      if (/pas de r[ée]mun|aucune r[ée]mun|sans r[ée]mun/.test(t)) return 0;
+      const m = t.match(/(\d+(?:[.,]\d+)?)\s*%/);
+      if (m) return parseFloat(m[1].replace(',', '.')) / 100;
+      return null;
+    };
+    for (const s of sched) {
+      const p = String(s.period || '');
+      const rng = p.match(/(\d+)\s*[-–à]\s*(\d+)/);
+      if (rng) {
+        const a = parseInt(rng[1], 10), b = parseInt(rng[2], 10);
+        if (h >= a && h <= b) return parsePenalty(s.penalty);
+      }
+    }
+    // Condition générique (« Sortie anticipée ») → s'applique à tout h < durée
+    const generic = sched.find(s => !/\d+\s*[-–à]\s*\d+/.test(String(s.period || '')));
+    if (generic) return parsePenalty(generic.penalty);
+    // Repli sur le texte libre
+    if (r.withdrawalConditions) return parsePenalty(r.withdrawalConditions);
+    return null;
+  }
+
+  // ── Taux effectif annualisé si sortie au mois h ───────────────────
+  // Retourne { rate, kind } avec kind ∈ 'free' (échéance, sans frais), 'penalty'
+  // (retrait anticipé), 'roll' (au-delà de la durée : hypothèse renouvellement
+  // au même taux), 'na' (inconnu).
+  function _effectiveRate(r, h) {
+    const D = parseInt(r.durationMonths, 10) || 0;
+    const nominal = parseFloat(r.rate) || 0;
+    const sched = Array.isArray(r.rateSchedule) ? r.rateSchedule : [];
+    const isProg = r.rateType === 'progressif' && sched.length > 0;
+
+    if (!isProg) {
+      if (h === D) return { rate: nominal, kind: 'free' };
+      if (h > D) return { rate: nominal, kind: 'roll' };
+      const f = _fixedEarlyFactor(r, h);
+      if (f == null) return { rate: null, kind: 'na' };
+      return { rate: nominal * f, kind: 'penalty' };
+    }
+
+    // Progressif : somme des intérêts mois par mois jusqu'à h
+    if (h > D) {
+      // Au-delà : cycle complet + renouvellement au même profil
+      return { rate: nominal, kind: 'roll' };
+    }
+    let total = 0, kind = 'penalty';
+    for (const s of sched) {
+      const from = parseInt(s.fromMonth, 10), to = parseInt(s.toMonth, 10);
+      const rate = parseFloat(s.rate) || 0;
+      if (h >= to) { total += rate * (to - from + 1); if (h === to) kind = 'free'; continue; }
+      if (h >= from) {
+        // Sortie en cours de période → earlyRate si connu, sinon 50 % du taux
+        const early = s.earlyRate != null ? parseFloat(s.earlyRate) : rate * 0.5;
+        total += early * (h - from + 1);
+        break;
+      }
+    }
+    return { rate: total / h, kind };
+  }
+
+  function _fmt(x) { return (Math.round(x * 100) / 100).toFixed(2).replace('.', ',') + '%'; }
+
+  function _shortName(r, multiBank) {
+    const n = (r.productName || (r.durationMonths + 'm')).replace(/^CAT\s+/i, '');
+    return (multiBank ? (r.bankName || r.bankId) + ' · ' : '') + n;
+  }
+
+  // ── Rendu ─────────────────────────────────────────────────────────
+  window._renderCATHorizonGrid = function(rates) {
+    const list = (rates || []).filter(r => r.productType !== 'parts-sociales' && (parseFloat(r.rate) || 0) > 0);
+    if (list.length < 2) return '';
+    const banks = new Set(list.map(r => r.bankId));
+    const multiBank = banks.size > 1;
+    // Colonnes : par durée croissante, fixes avant progressifs à durée égale
+    const cols = [...list].sort((a, b) => (a.durationMonths - b.durationMonths) || ((a.rateType === 'progressif') - (b.rateType === 'progressif')));
+    const maxD = Math.max(...cols.map(c => parseInt(c.durationMonths, 10) || 0));
+    const rows = HORIZONS.filter(h => h <= maxD);
+    // Ajouter les bornes de périodes des progressifs (échéances de sortie libre)
+    cols.forEach(c => (c.rateSchedule || []).forEach(s => { const t = parseInt(s.toMonth, 10); if (t && t <= maxD && !rows.includes(t)) rows.push(t); }));
+    rows.sort((a, b) => a - b);
+
+    let html = `<div style="margin-top:16px;padding-top:14px;border-top:1px dashed var(--border)">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;margin-bottom:8px">
+        <div style="font-size:12px;font-weight:700;color:var(--text-bright)">⚖️ Équivalence par horizon de sortie</div>
+        <div style="font-size:10px;color:var(--text-dim)">Taux annualisé brut si tu sors au mois indiqué · <strong style="color:var(--green)">vert</strong> = meilleur · gras = échéance (sortie libre) · <span style="color:var(--orange)">orange</span> = retrait anticipé (pénalité du produit) · <span style="opacity:.55">↻</span> = au-delà de la durée, hypothèse renouvellement au même taux</div>
+      </div>
+      <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px;min-width:${Math.max(420, 110 + cols.length * 92)}px">
+      <thead><tr><th style="text-align:left;padding:6px 8px;color:var(--text-muted);font-weight:600;border-bottom:1px solid var(--border);white-space:nowrap">Sortie au mois</th>`;
+    cols.forEach(c => {
+      const prog = c.rateType === 'progressif' && (c.rateSchedule || []).length > 0;
+      html += `<th style="text-align:right;padding:6px 8px;color:var(--text-muted);font-weight:600;border-bottom:1px solid var(--border);white-space:nowrap" title="${(c.withdrawalConditions || '').replace(/"/g, '&quot;')}">${_shortName(c, multiBank)}${prog ? ' <span style="font-size:9px">📈</span>' : ''}<div style="font-size:9px;color:var(--text-dim);font-weight:400">${c.durationMonths}m · ${_fmt(parseFloat(c.rate))}${prog ? ' moy.' : ''}</div></th>`;
+    });
+    html += `</tr></thead><tbody>`;
+
+    rows.forEach(h => {
+      const cells = cols.map(c => _effectiveRate(c, h));
+      // Meilleur = parmi les cellules « réelles » (échéance ou pénalité), pas les renouvellements hypothétiques
+      let best = -Infinity;
+      cells.forEach(x => { if (x.rate != null && x.kind !== 'roll' && x.rate > best) best = x.rate; });
+      html += `<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 8px;font-weight:600;color:var(--text-bright);white-space:nowrap">${h} mois</td>`;
+      cells.forEach(x => {
+        let style = 'text-align:right;padding:6px 8px;font-family:var(--mono);white-space:nowrap;', txt = '—', title = '';
+        if (x.rate == null) { style += 'color:var(--text-dim);'; title = 'conditions de sortie inconnues'; }
+        else {
+          txt = _fmt(x.rate);
+          const isBest = x.kind !== 'roll' && Math.abs(x.rate - best) < 1e-9;
+          if (x.kind === 'free') { style += 'font-weight:700;'; title = 'échéance : sortie sans frais ni préavis'; }
+          else if (x.kind === 'penalty') { style += 'color:var(--orange);'; title = 'retrait anticipé : conditions du produit appliquées'; }
+          else if (x.kind === 'roll') { style += 'opacity:.55;'; txt = '↻ ' + txt; title = 'au-delà de la durée : hypothèse renouvellement au même taux'; }
+          if (isBest) style += 'color:var(--green);background:rgba(6,214,160,0.08);';
+        }
+        html += `<td style="${style}" title="${title}">${txt}</td>`;
+      });
+      html += `</tr>`;
+    });
+    html += `</tbody></table></div>
+      <div style="font-size:10px;color:var(--text-dim);margin-top:6px">Lecture : à 6 mois, un progressif 18 m sorti à la fin du semestre 1 rapporte le taux du S1 (sortie libre) — à comparer directement au fixe 6 m. En cours de période, les progressifs servent le taux de retrait anticipé (50 % du taux en S1/A1, taux de la période précédente ensuite) et exigent un préavis de 32 jours (non déduit ici). Base 30/360 approximée en mois entiers.</div>
+    </div>`;
+    return html;
+  };
+
+  // ── Insertion dans la section « Taux du Marché » ─────────────────
+  if (typeof renderCAT === 'function') {
+    const _prevRenderCAT = renderCAT;
+    renderCAT = function(container) {
+      _prevRenderCAT(container);
+      try {
+        const rates = (catManager.rates?.rates || []).filter(r => r.source !== 'web scan' && !(typeof _isRateExpired === 'function' && _isRateExpired(r)));
+        if (rates.length < 2) return;
+        const sections = container.querySelectorAll('.section');
+        let target = null;
+        sections.forEach(s => { const t = s.querySelector('.section-title'); if (t && t.textContent.includes('Taux du Marché')) target = s; });
+        if (!target) return;
+        const html = window._renderCATHorizonGrid(rates);
+        if (!html) return;
+        // Avant le bloc « Taux indicatifs » si présent, sinon en fin de section
+        const scanned = Array.from(target.children).find(el => el.textContent.includes('Taux indicatifs'));
+        if (scanned) scanned.insertAdjacentHTML('beforebegin', html); else target.insertAdjacentHTML('beforeend', html);
+      } catch (e) { console.error('[CATHorizonGrid]', e); }
+    };
+  }
+})();
