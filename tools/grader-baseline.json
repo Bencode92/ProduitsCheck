@@ -1109,7 +1109,7 @@
     "scenDet": true
   },
   {
-    "bank": "cic",
+    "bank": "banque-populaire",
     "file": "sp_mu5kjuuq_o9cyo.json",
     "name": "Taux fixe callable ZC - 10 ans",
     "structureType": "taux_fixe_in_fine",

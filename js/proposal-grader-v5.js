@@ -222,11 +222,38 @@ try {
 pr+='\n## SCORES BASE\nP1: '+base.p1+' | P2: '+base.p2+' | P3: '+base.p3+' | P4: '+base.p4+' → '+base.total+' ('+base.grade+')\nNominal: '+formatNumber(nom)+'€\n';return pr;}
 
 // ═══ SECTION 19: AI CALL ═══
-function _parseJSON(t){var c=t.replace(/```json\s*/g,'').replace(/```\s*/g,'').trim();
+function _parseJSON(t){var c=String(t||'').replace(/```json\s*/g,'').replace(/```\s*/g,'').trim();
   // Sonnet écrit parfois "delta": +3 (le + en tête de nombre est INVALIDE en JSON).
-  // On le retire en position de valeur (après : [ ,) — jamais dans une chaîne (précédée d'un ").
   c=c.replace(/([:\[,]\s*)\+(\d)/g,'$1$2');
-  try{return JSON.parse(c)}catch(e){}var f=c.indexOf('{'),l=c.lastIndexOf('}');if(f!==-1&&l>f)c=c.slice(f,l+1);c=c.replace(/,\s*([}\]])/g,'$1');return JSON.parse(c);}
+  try{return JSON.parse(c)}catch(e){}
+  // Extraction du PREMIER objet équilibré en respectant les chaînes (texte avant/après ignoré)
+  var f=c.indexOf('{'); if(f===-1) throw new Error('pas de JSON');
+  var depth=0,inStr=false,esc=false,end=-1,stack=[],lastComma=-1;
+  for(var i=f;i<c.length;i++){var ch=c[i];
+    if(inStr){ if(esc){esc=false;} else if(ch==='\\'){esc=true;} else if(ch==='"'){inStr=false;} continue; }
+    if(ch==='"'){inStr=true;continue;}
+    if(ch==='{'||ch==='['){stack.push(ch);depth++;}
+    else if(ch==='}'||ch===']'){stack.pop();depth--; if(depth===0){end=i;break;}}
+    else if(ch===','&&depth>=1){lastComma=i;}
+  }
+  var body;
+  if(end!==-1){ body=c.slice(f,end+1); }
+  else {
+    // Réponse TRONQUÉE (max_tokens) : on coupe à la dernière virgule complète puis on referme les structures ouvertes
+    var cut=lastComma>f?c.slice(f,lastComma):c.slice(f);
+    // recalculer la pile sur la partie conservée
+    var st=[],ins=false,es=false;
+    for(var j=0;j<cut.length;j++){var q=cut[j];
+      if(ins){ if(es){es=false;} else if(q==='\\'){es=true;} else if(q==='"'){ins=false;} continue; }
+      if(q==='"'){ins=true;continue;}
+      if(q==='{'||q==='['){st.push(q);} else if(q==='}'||q===']'){st.pop();}
+    }
+    if(ins) cut+='"';
+    body=cut+st.reverse().map(function(x){return x==='{'?'}':']';}).join('');
+    console.warn('[Grader] JSON tronqué → réparé ('+st.length+' structure(s) refermée(s))');
+  }
+  body=body.replace(/,\s*([}\]])/g,'$1');
+  return JSON.parse(body);}
 async function _callClaude(ctx,base,type){var model=(typeof CONFIG!=='undefined'&&CONFIG.AI_MODEL)?CONFIG.AI_MODEL:'claude-opus-4-8';var sys=_buildSystemPrompt(ctx.isInPortfolio,type);var usr=_buildUserPrompt(ctx,base,type);try{var r=await fetch(CONFIG.AI_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:model,max_tokens:1500,system:sys,messages:[{role:'user',content:usr}]})});if(!r.ok&&CONFIG.AI_MODEL_FALLBACK&&model!==CONFIG.AI_MODEL_FALLBACK){r=await fetch(CONFIG.AI_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:CONFIG.AI_MODEL_FALLBACK,max_tokens:1500,system:sys,messages:[{role:'user',content:usr}]})});}if(!r.ok)throw new Error('Claude API '+r.status);var d=await r.json();var txt=(d.content||[]).filter(function(c){return c.type==='text'}).map(function(c){return c.text}).join('');return _parseJSON(txt);}catch(e){console.warn('[Grader v5.2] Claude:',e.message);throw e;}}
 function _applyAdj(base,adj,w,type,p){var max=GRADING_CONFIG.maxAdjustment;var sens=1.0;if(p.capitalProtection)sens*=0.3;if(p.couponType==='garanti'||p.couponType==='fixe')sens*=0.5;if((p.maturityYears||0)>5)sens*=Math.max(0.2,1-(p.maturityYears||0)/15);if(sens<0.95)max=Math.round(max*sens);var cl=function(d){return Math.max(-max,Math.min(max,d||0))};var cp=function(v){return Math.max(0,Math.min(100,Math.round(v)))};var p1=cp(base.p1+cl(adj.p1&&adj.p1.delta));var p2=cp(base.p2+cl(adj.p2&&adj.p2.delta));var p3=cp(base.p3+cl(adj.p3&&adj.p3.delta));var p4=cp(base.p4+cl(adj.p4&&adj.p4.delta));var tot=Math.round(p1*w.adjustedReturn+p2*w.underlyingQuality+p3*w.portfolioFit+p4*w.riskPremium);return{p1:p1,p2:p2,p3:p3,p4:p4,total:tot,grade:_letterGrade(tot),deltas:{p1:cl(adj.p1&&adj.p1.delta),p2:cl(adj.p2&&adj.p2.delta),p3:cl(adj.p3&&adj.p3.delta),p4:cl(adj.p4&&adj.p4.delta)},reasons:{p1:adj.p1&&adj.p1.reason||'',p2:adj.p2&&adj.p2.reason||'',p3:adj.p3&&adj.p3.reason||'',p4:adj.p4&&adj.p4.reason||''},_miSens:sens,_miMax:max};}
 

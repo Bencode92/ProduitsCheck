@@ -19,7 +19,8 @@
         // Si Sonnet échoue/illisible, on tente Opus ; on ne tombe en "Local" que si LES DEUX échouent.
         var _origCallClaude = _callClaude;
         _callClaude = async function(ctx, base, productType) {
-            var sys = _buildSystemPrompt(ctx.isInPortfolio, productType);
+            var sys = _buildSystemPrompt(ctx.isInPortfolio, productType)
+                + '\n\nFORMAT : réponds UNIQUEMENT par l\'objet JSON (aucun texte avant/après, pas de balises). Chaque "reason" ≤ 220 caractères, le verdict ≤ 700 caractères. Pas de "+" devant les nombres.';
             var usr = _buildUserPrompt(ctx, base, productType);
             // Timeout dur par appel (22 s) : abandonne un proxy figé sans traîner jusqu'au
             // timeout navigateur. NB : 15 s était trop court — un modèle qui « pense »
@@ -28,12 +29,12 @@
             async function _try(model, timeoutMs) {
                 var t0 = Date.now();
                 var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
-                var timer = ctrl ? setTimeout(function() { ctrl.abort(); }, timeoutMs || 40000) : null;
+                var timer = ctrl ? setTimeout(function() { ctrl.abort(); }, timeoutMs || 55000) : null;
                 try {
                     var resp = await fetch(CONFIG.AI_ENDPOINT, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ model: model, max_tokens: 1500, system: sys, messages: [{ role: 'user', content: usr }] }),
+                        body: JSON.stringify({ model: model, max_tokens: 2000, system: sys, messages: [{ role: 'user', content: usr }] }),
                         signal: ctrl ? ctrl.signal : undefined
                     });
                     if (timer) { clearTimeout(timer); timer = null; }
