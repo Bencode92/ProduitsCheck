@@ -770,7 +770,8 @@ function _renderInvestorMetrics(p) {
   // ─── C. Spread vs alternative simple ──────
   var oatRate = 3.08; // repli
   try { if (typeof _ratesData !== 'undefined' && _ratesData && _ratesData.yields && _ratesData.yields.oat_fr_10y && _ratesData.yields.oat_fr_10y.current) oatRate = parseFloat(_ratesData.yields.oat_fr_10y.current); else if (typeof MARKET_RATES !== 'undefined' && MARKET_RATES.tec10) oatRate = MARKET_RATES.tec10; } catch (e) {}
-  var _cmpRate = (typeof md.guaranteedYieldWorst === 'number' && md.guaranteedYieldWorst > 0) ? md.guaranteedYieldWorst : couponRate; // callable acquis : pire cas actuariel
+  var _mdIM = (p.grading && p.grading.metadata) || {};
+  var _cmpRate = (typeof _mdIM.guaranteedYieldWorst === 'number' && _mdIM.guaranteedYieldWorst > 0) ? _mdIM.guaranteedYieldWorst : couponRate; // callable acquis : pire cas actuariel
   var spread = Math.round((_cmpRate - oatRate) * 100) / 100;
   var spreadColor = spread > 2 ? '#059669' : spread > 0 ? '#D97706' : '#DC2626';
   html += '<div style="padding:12px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;border-left:3px solid ' + spreadColor + '">';
