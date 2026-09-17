@@ -81,6 +81,8 @@
     return { rate: total / h, kind };
   }
 
+  window._catFixedEarlyFactor = _fixedEarlyFactor;
+
   function _fmt(x) { return (Math.round(x * 100) / 100).toFixed(2).replace('.', ',') + '%'; }
 
   function _shortName(r, multiBank) {
