@@ -193,106 +193,145 @@
   // ── Rendu ────────────────────────────────────────────────────────
   const SCEN = [{ k: 'down', label: 'Baisse −50 bp', bp: -50 }, { k: 'fwd', label: 'Marché (forward)', bp: 0 }, { k: 'up', label: 'Hausse +50 bp', bp: 50 }];
 
+  // ── Rendu : un FLUX de décision ─────────────────────────────────
+  //   entrées (montant · échéance visée · ma vue · structurés à comparer)
+  //   → A. où placer ce montant (CAT et structurés dans UN classement, avis IA)
+  //   → B. quel CAT existant mérite d'être arbitré (une ligne par contrat)
+  //   → détails repliés (scénarios complets, courbe)
+  const labelsOpt = { keep: '✅ Garder', exitNow: '🔄 Sortir maintenant', exitFree: '⏳ Sortir à l\'échéance libre' };
+
   function render() {
     const host = document.getElementById('cat-v4-host'); if (!host) return;
     if (!S.rates) { host.innerHTML = '<div style="font-size:11px;color:var(--text-dim)">Chargement de la courbe des taux…</div>'; return; }
-    const H = S.horizon, cv = _curve();
+    const H = S.horizon, cv = _curve(), A = S.cash;
     const view = VIEWS.find(v => v.k === S.view) || VIEWS[1];
-    const scen = SCEN.slice(); // colonnes fixes : Baisse / Marché / Hausse +50
-    const viewIdx = view.bp <= -25 ? 0 : view.bp >= 50 ? 2 : view.bp > 0 ? -1 : 1; // -1 = vue intermédiaire (+25) : calculée à part
-    let h = `<div class="section"><div class="section-header"><div class="section-title"><span class="dot" style="background:#0EA5E9"></span>🧭 Décision v4 — courbe, pénalités, scénarios</div>
-      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:11px">
-        <label>Horizon <select id="v4-h" onchange="window._catV4Set('horizon',this.value)">${[6, 12, 18, 24, 36, 60].map(m => `<option value="${m}" ${m === H ? 'selected' : ''}>${m} mois</option>`).join('')}</select></label>
-        <span>Ma vue sur les taux : ${VIEWS.map(v => `<button class="btn sm" style="margin-left:4px;${v.k === view.k ? 'background:#0EA5E9;color:#fff;border-color:#0EA5E9' : ''}" onclick="window._catV4Set('view','${v.k}')" title="${v.bp === 0 ? 'ce que la courbe anticipe déjà' : (v.bp > 0 ? '+' : '') + v.bp + ' bp au-delà du forward'}">${v.label}</button>`).join('')}</span>
-      </div></div>
-      <div style="font-size:10px;color:var(--text-muted);margin:-4px 0 10px">La reco suit <strong>ta vue</strong> (${view.label}${view.bp ? ', ' + (view.bp > 0 ? '+' : '') + view.bp + ' bp vs forward' : ''}) ; les 3 colonnes montrent ce que tu gagnes ou perds si le marché fait autre chose. « Marché » = la courbe telle quelle : une hausse est déjà dedans (forward 6 m dans 6 m ${fmtP(forward(6, 6))} vs ${fmtP(spot(6))} aujourd'hui) — choisir « Hausse » = parier sur PLUS que ça.</div>`;
+    const scen = SCEN.slice();
+    const viewIdx = view.bp <= -25 ? 0 : view.bp >= 50 ? 2 : view.bp > 0 ? -1 : 1;
+    const prods = _rateProducts(); S.selected = S.selected || [];
+    const selected = prods.filter(p => S.selected.includes(p.id));
 
-    // 1. vue taux
-    h += `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:12px">`;
-    cv.nodes.forEach(n => { h += `<div style="padding:8px 10px;background:var(--bg-elevated);border-radius:6px"><div style="font-size:9px;color:var(--text-dim)">Courbe ${n[0]} m</div><div style="font-family:var(--mono);font-weight:700">${fmtP(n[1])}</div></div>`; });
-    [[6, 6], [6, 12], [12, 12], [24, 12]].forEach(([s, l]) => { h += `<div style="padding:8px 10px;background:rgba(14,165,233,0.08);border-radius:6px"><div style="font-size:9px;color:var(--text-dim)">Forward ${l} m dans ${s} m</div><div style="font-family:var(--mono);font-weight:700;color:#0EA5E9">${fmtP(forward(s, l))}</div><div style="font-size:9px;color:var(--text-dim)">CAT attendu ${fmtP(expectedCAT(s, l, 0))}</div></div>`; });
-    h += `</div><div style="font-size:10px;color:var(--text-muted);margin-bottom:14px">Courbe du ${cv.date || '?'} (Euribor + AAA). <strong>Forward</strong> = taux futur déjà anticipé par le marché ; « CAT attendu » = forward + spread moyen des offres CAT sur la courbe (${fmtP(catSpread(12))} à 12 m). Attendre ne gagne que si les taux montent <em>plus</em> que le forward. TEC10 ${cv.tec10 != null ? fmtP(cv.tec10) : '—'}.</div>`;
+    // ── Entrées ──
+    let h = `<div class="section"><div class="section-header"><div class="section-title"><span class="dot" style="background:#0EA5E9"></span>🧭 Où placer mon cash, et quel CAT arbitrer</div><span style="font-size:10px;color:var(--text-dim)">courbe du ${cv.date || '?'} · TEC10 ${cv.tec10 != null ? fmtP(cv.tec10) : '—'} · meilleur CAT ${fmtP(todayRate(12).rate)} (12 m)</span></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;padding:10px 12px;background:var(--bg-elevated);border-radius:8px;margin-bottom:10px;font-size:11px;align-items:end">
+        <label>Montant à placer (€)<br><input type="number" value="${A}" style="width:100%;font-size:14px;font-weight:700" onchange="window._catV4Set('cash',this.value)"></label>
+        <label>Échéance visée<br><select onchange="window._catV4Set('horizon',this.value)" style="width:100%;font-size:14px;font-weight:700">${[6, 12, 18, 24, 36, 60].map(m => `<option value="${m}" ${m === H ? 'selected' : ''}>${m} mois</option>`).join('')}</select></label>
+        <div>Ma vue sur les taux<br><div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">${VIEWS.map(v => `<button class="btn sm" style="${v.k === view.k ? 'background:#0EA5E9;color:#fff;border-color:#0EA5E9' : ''}" onclick="window._catV4Set('view','${v.k}')" title="${v.bp === 0 ? 'ce que la courbe anticipe déjà' : (v.bp > 0 ? '+' : '') + v.bp + ' bp au-delà du forward'}">${v.label}</button>`).join('')}</div></div>
+      </div>
+      <div style="font-size:10px;color:var(--text-muted);margin-bottom:8px">Structurés de taux à comparer (coche jusqu'à 3) — les <strong>détenus</strong> sont évalués plus bas avec tes CAT :</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px">${prods.map(p => { const t = _productTerms(p); const on = S.selected.includes(p.id); const held = (parseFloat(p.investedAmount) || 0) > 0; return `<label style="display:flex;align-items:center;gap:5px;padding:3px 7px;border:1px solid ${on ? '#0EA5E9' : 'var(--border)'};border-radius:6px;font-size:10px;cursor:pointer;background:${on ? 'rgba(14,165,233,0.10)' : 'var(--bg-elevated)'}"><input type="checkbox" ${on ? 'checked' : ''} onchange="window._catV4Toggle('${p.id}')"> ${(p.name || '?').substring(0, 30)}<span style="color:var(--text-dim)"> · ${fmtP(t.coupon)}${t.barrier != null ? ' si TEC10 ≤ ' + fmtP(t.barrier) : ''}${t.isCallable ? ' · call an ' + t.firstCall : t.isTarn ? ' · TARN' : ''}${t.inFine ? ' · in fine' : ''}${held ? ' · détenu' : ''}</span></label>`; }).join('') || '<span style="font-size:10px;color:var(--text-dim)">aucun produit de taux à capital garanti dans la liste</span>'}</div>`;
 
-    // 2. placements existants
-    const active = catManager.deposits.filter(d => d.status === 'active');
-    h += `<div style="font-size:12px;font-weight:700;color:var(--text-bright);margin-bottom:6px">1 · Mes placements — montant à ${H} mois, brut, par scénario</div>
-      <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px;min-width:760px"><thead><tr style="border-bottom:1px solid var(--border)">
-      <th style="text-align:left;padding:5px 6px;color:var(--text-muted)">Placement</th><th style="text-align:left;padding:5px 6px;color:var(--text-muted)">Option</th>${scen.map(s => `<th style="text-align:right;padding:5px 6px;color:var(--text-muted)">${s.label}</th>`).join('')}<th style="text-align:left;padding:5px 6px;color:var(--text-muted)">Reco</th></tr></thead><tbody>`;
+    // ── A. Où placer ce montant : UN classement CAT + structurés, dans ta vue ──
+    const strat = scen.map(s => cashStrategies(A, H, s.bp));
+    const stratView = viewIdx >= 0 ? strat[viewIdx] : cashStrategies(A, H, view.bp);
+    const options = [];
+    // CAT : les 3 meilleurs produits uniques (banque·produit distincts) + le meilleur enchaînement — pas 6 variantes du même
+    const singles = stratView.filter(x => x.single).slice(0, 3), seq = stratView.filter(x => !x.single).slice(0, 1);
+    singles.concat(seq).forEach(st => {
+      const lo = strat[0].find(x => x.label === st.label), hi = strat[2].find(x => x.label === st.label);
+      options.push({ kind: 'CAT', label: st.label, value: st.final, cash: st.final - A, lo: lo ? lo.final : null, hi: hi ? hi.final : null, liquid: true, note: st.single ? (st.type === 'progressif' ? 'progressif, sortie libre à l\'échéance du palier' : 'fixe, capital garanti FGDR') : '2e jambe au CAT attendu du scénario', flag: /⚠/.test(st.label) });
+    });
+    selected.forEach(p => {
+      const t = _productTerms(p);
+      const v = viewIdx >= 0 ? productValue(t, A, H, scen[viewIdx].bp) : productValue(t, A, H, view.bp);
+      const lo = productValue(t, A, H, scen[0].bp), hi = productValue(t, A, H, scen[2].bp);
+      options.push({ kind: 'STRUCT', label: p.name, value: v.value, cash: v.cash, lo: lo.value, hi: hi.value, liquid: v.liquid, note: v.notes.join(' · '), flag: !v.liquid });
+    });
+    options.sort((a, b) => b.value - a.value);
+    const best = options[0];
+    h += `<div style="font-size:13px;font-weight:700;color:var(--text-bright);margin-bottom:4px">A · Où placer ${fmtE(A)} pour ${H} mois — vue « ${view.label} »</div>
+      <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px;min-width:720px"><thead><tr style="border-bottom:1px solid var(--border)">
+      <th style="text-align:left;padding:5px 6px;color:var(--text-muted)">#</th><th style="text-align:left;padding:5px 6px;color:var(--text-muted)">Option</th><th style="text-align:right;padding:5px 6px;color:var(--text-muted)">Montant à ${H} m</th><th style="text-align:right;padding:5px 6px;color:var(--text-muted)">vs n°1</th><th style="text-align:right;padding:5px 6px;color:var(--text-muted)">Si baisse / si hausse</th><th style="text-align:right;padding:5px 6px;color:var(--text-muted)">Encaissé</th><th style="text-align:left;padding:5px 6px;color:var(--text-muted)">Remarque</th></tr></thead><tbody>`;
+    options.forEach((o, i) => {
+      h += `<tr style="border-bottom:1px solid var(--border);${i === 0 ? 'background:rgba(6,214,160,0.08)' : ''}">
+        <td style="padding:5px 6px;color:var(--text-dim)">${i + 1}</td>
+        <td style="padding:5px 6px"><span style="font-size:9px;padding:1px 5px;border-radius:4px;background:${o.kind === 'CAT' ? 'rgba(6,214,160,0.15)' : 'rgba(14,165,233,0.15)'};color:${o.kind === 'CAT' ? '#047857' : '#0369A1'}">${o.kind === 'CAT' ? 'CAT' : 'STRUCTURÉ'}</span> ${o.label}${o.liquid ? '' : ' <span title="capital non disponible à cette échéance" style="color:var(--orange)">🔒</span>'}</td>
+        <td style="padding:5px 6px;text-align:right;font-family:var(--mono);font-weight:700;color:${i === 0 ? 'var(--green)' : 'var(--text-bright)'}">${fmtE(o.value)}</td>
+        <td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:var(--orange)">${i === 0 ? '—' : '−' + fmtE(best.value - o.value)}</td>
+        <td style="padding:5px 6px;text-align:right;font-family:var(--mono);font-size:10px;color:var(--text-muted)">${o.lo != null ? fmtE(o.lo) : '—'} / ${o.hi != null ? fmtE(o.hi) : '—'}</td>
+        <td style="padding:5px 6px;text-align:right;font-family:var(--mono);font-size:10px;color:${o.cash > 0 ? 'var(--text-bright)' : 'var(--orange)'}">${o.kind === 'CAT' ? fmtE(o.cash) + ' à l\'échéance' : fmtE(o.cash)}</td>
+        <td style="padding:5px 6px;font-size:10px;color:var(--text-muted);max-width:280px">${o.note}</td></tr>`;
+    });
+    h += `</tbody></table></div>
+      <div style="display:flex;gap:8px;align-items:center;margin:8px 0 14px;flex-wrap:wrap"><button class="btn sm ai-glow" onclick="window._catV4AskAI()">🤖 Avis IA sur ce classement</button><span style="font-size:10px;color:var(--text-dim)">l'IA commente ces chiffres (elle ne les recalcule pas) : CAT vs structurés, liquidité, risque émetteur, ta vue de taux</span></div>
+      <div id="cat-v4-ai" style="margin-bottom:14px"></div>`;
+
+    // ── B. Quel CAT existant mérite d'être arbitré ──
+    const active = catManager.deposits.filter(d => d.status === 'active' && d.productType !== 'parts-sociales');
+    const arbs = [];
     active.forEach(d => {
       const per = scen.map(s => depositOptions(d, H, s.bp));
-      const keys = Object.keys(per[1]);
-      // reco = meilleure option dans TA vue ; robuste si c'est aussi la meilleure dans les 3 scénarios
-      const perView = viewIdx >= 0 ? per[viewIdx] : depositOptions(d, H, view.bp);
-      const bestKey = keys.reduce((b, k) => (!b || perView[k].value > perView[b].value) ? k : b, null);
+      const pv = viewIdx >= 0 ? per[viewIdx] : depositOptions(d, H, view.bp);
+      const keys = Object.keys(pv);
+      const bestKey = keys.reduce((b, k) => (!b || pv[k].value > pv[b].value) ? k : b, null);
       const robust = scen.every((s, i) => keys.reduce((b, k) => (!b || per[i][k].value > per[i][b].value) ? k : b, null) === bestKey);
-      const labels = { keep: '✅ Garder', exitNow: '🔄 Sortir maintenant', exitFree: '⏳ Sortir à l\'échéance libre' };
-      keys.forEach((k, j) => {
-        h += `<tr style="border-bottom:1px solid var(--border);${k === bestKey ? 'background:rgba(6,214,160,0.06)' : ''}">`;
-        if (j === 0) h += `<td rowspan="${keys.length}" style="padding:5px 6px;vertical-align:top"><strong>${d.productName || 'CAT'}</strong><div style="font-size:9px;color:var(--text-dim)">${d.bankName || ''} · ${d.entityName || ''} · ${fmtE(parseFloat(d.amount) || 0)}${d.maturityDate ? ' · éch. ' + formatDate(d.maturityDate) : ''}</div></td>`;
-        h += `<td style="padding:5px 6px;${k === bestKey ? 'font-weight:700' : ''}" title="${per[1][k].label.replace(/"/g, '&quot;')}">${labels[k]}<div style="font-size:9px;color:var(--text-dim);font-weight:400">${per[1][k].label}</div></td>`;
-        scen.forEach((s, i) => { const v = per[i][k].value, ref = per[i].keep.value; h += `<td style="padding:5px 6px;text-align:right;font-family:var(--mono);white-space:nowrap">${fmtE(v)}<div style="font-size:9px;color:${v - ref > 1 ? 'var(--green)' : v - ref < -1 ? 'var(--orange)' : 'var(--text-dim)'}">${k === 'keep' ? 'réf.' : (v - ref >= 0 ? '+' : '−') + fmtE(Math.abs(v - ref))}</div></td>`; });
-        if (j === 0) h += `<td rowspan="${keys.length}" style="padding:5px 6px;vertical-align:top;font-size:11px">${labels[bestKey]}<div style="font-size:9px;color:${robust ? 'var(--green)' : 'var(--orange)'}">${robust ? 'robuste (gagne dans les 3 scénarios)' : 'selon ta vue « ' + view.label + ' » — change si le marché fait autrement'}</div></td>`;
+      arbs.push({ d, per, pv, keys, bestKey, robust, gain: pv[bestKey].value - pv.keep.value, gainLo: per[0][bestKey].value - per[0].keep.value, gainHi: per[2][bestKey].value - per[2].keep.value });
+    });
+    arbs.sort((a, b) => b.gain - a.gain);
+    const toDo = arbs.filter(a => a.bestKey !== 'keep' && a.gain > 50);
+    const held = _rateProducts().filter(p => (parseFloat(p.investedAmount) || 0) > 0);
+    h += `<div style="font-size:13px;font-weight:700;color:var(--text-bright);margin-bottom:4px">B · Mes CAT : lesquels arbitrer (à ${H} mois, vue « ${view.label} »)</div>`;
+    if (!toDo.length) h += `<div style="font-size:11px;color:var(--green);margin-bottom:8px">✅ Aucun arbitrage payant dans ta vue : tous tes CAT sont à garder.</div>`;
+    else {
+      h += `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px;min-width:720px"><thead><tr style="border-bottom:1px solid var(--border)"><th style="text-align:left;padding:5px 6px;color:var(--text-muted)">Contrat</th><th style="text-align:left;padding:5px 6px;color:var(--text-muted)">À faire</th><th style="text-align:right;padding:5px 6px;color:var(--text-muted)">Gain vs garder</th><th style="text-align:right;padding:5px 6px;color:var(--text-muted)">Si baisse / si hausse</th><th style="text-align:left;padding:5px 6px;color:var(--text-muted)">Fiabilité</th></tr></thead><tbody>`;
+      toDo.forEach(a => {
+        h += `<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 6px"><strong>${a.d.productName || 'CAT'}</strong><div style="font-size:9px;color:var(--text-dim)">${a.d.bankName || ''} · ${a.d.entityName || ''} · ${fmtE(parseFloat(a.d.amount) || 0)}${a.d.maturityDate ? ' · éch. ' + formatDate(a.d.maturityDate) : ''}</div></td>
+          <td style="padding:5px 6px">${labelsOpt[a.bestKey]}<div style="font-size:9px;color:var(--text-dim)">${a.pv[a.bestKey].label}</div></td>
+          <td style="padding:5px 6px;text-align:right;font-family:var(--mono);font-weight:700;color:var(--green)">+${fmtE(a.gain)}</td>
+          <td style="padding:5px 6px;text-align:right;font-family:var(--mono);font-size:10px;color:var(--text-muted)">${(a.gainLo >= 0 ? '+' : '−') + fmtE(Math.abs(a.gainLo))} / ${(a.gainHi >= 0 ? '+' : '−') + fmtE(Math.abs(a.gainHi))}</td>
+          <td style="padding:5px 6px;font-size:10px;color:${a.robust ? 'var(--green)' : 'var(--orange)'}">${a.robust ? 'robuste — gagne quel que soit le scénario' : 'dépend des taux'}</td></tr>`;
+      });
+      h += `</tbody></table></div>`;
+    }
+    // structurés détenus à coupons à risque
+    const risky = held.map(p => { const t = _productTerms(p), Ai = parseFloat(p.investedAmount) || 0; const v = viewIdx >= 0 ? productValue(t, Ai, H, scen[viewIdx].bp) : productValue(t, Ai, H, view.bp); return { p, t, v, Ai }; }).filter(x => x.v.notes.some(n => /perdu/.test(n)));
+    if (risky.length) h += `<div style="margin-top:8px;padding:8px 10px;border:1px solid rgba(232,93,4,0.35);border-radius:6px;font-size:11px;background:rgba(232,93,4,0.05)"><strong style="color:var(--orange)">⚠ Structurés détenus à coupons menacés dans ta vue :</strong> ${risky.map(x => x.p.name + ' (' + fmtE(x.Ai) + ') — ' + x.v.notes.filter(n => /perdu/.test(n)).join(', ')).join(' · ')}. Pas de sortie chiffrable (marché secondaire) : à surveiller, et à ne pas renforcer.</div>`;
+
+    // ── Détails repliés ──
+    h += `<details style="margin-top:14px"><summary style="cursor:pointer;font-size:11px;color:var(--text-muted)">Détail par contrat — garder / sortir maintenant / échéance libre, 3 scénarios</summary><div style="overflow-x:auto;margin-top:8px"><table style="width:100%;border-collapse:collapse;font-size:11px;min-width:760px"><thead><tr style="border-bottom:1px solid var(--border)"><th style="text-align:left;padding:5px 6px;color:var(--text-muted)">Placement</th><th style="text-align:left;padding:5px 6px;color:var(--text-muted)">Option</th>${scen.map(s => `<th style="text-align:right;padding:5px 6px;color:var(--text-muted)">${s.label}</th>`).join('')}</tr></thead><tbody>`;
+    arbs.forEach(a => {
+      a.keys.forEach((k, j) => {
+        h += `<tr style="border-bottom:1px solid var(--border);${k === a.bestKey ? 'background:rgba(6,214,160,0.06)' : ''}">`;
+        if (j === 0) h += `<td rowspan="${a.keys.length}" style="padding:5px 6px;vertical-align:top"><strong>${a.d.productName || 'CAT'}</strong><div style="font-size:9px;color:var(--text-dim)">${a.d.bankName || ''} · ${fmtE(parseFloat(a.d.amount) || 0)}</div></td>`;
+        h += `<td style="padding:5px 6px;${k === a.bestKey ? 'font-weight:700' : ''}">${labelsOpt[k]}<div style="font-size:9px;color:var(--text-dim);font-weight:400">${a.per[1][k].label}</div></td>`;
+        scen.forEach((s, i) => { const v = a.per[i][k].value, ref = a.per[i].keep.value; h += `<td style="padding:5px 6px;text-align:right;font-family:var(--mono);white-space:nowrap">${fmtE(v)}<div style="font-size:9px;color:${v - ref > 1 ? 'var(--green)' : v - ref < -1 ? 'var(--orange)' : 'var(--text-dim)'}">${k === 'keep' ? 'réf.' : (v - ref >= 0 ? '+' : '−') + fmtE(Math.abs(v - ref))}</div></td>`; });
         h += `</tr>`;
       });
     });
-    // Structurés de taux détenus (investedAmount > 0) : ce qu'ils rapportent selon le scénario (coupons conditionnels, rappel/cible)
-    const held = _rateProducts().filter(p => (parseFloat(p.investedAmount) || 0) > 0);
-    held.forEach(p => {
-      const t = _productTerms(p), A = parseFloat(p.investedAmount) || 0;
-      const per = scen.map(s => productValue(t, A, H, s.bp));
-      const pv = viewIdx >= 0 ? per[viewIdx] : productValue(t, A, H, view.bp);
-      h += `<tr style="border-bottom:1px solid var(--border);background:rgba(14,165,233,0.04)"><td style="padding:5px 6px"><strong>${p.name || '?'}</strong><div style="font-size:9px;color:var(--text-dim)">structuré de taux détenu · ${fmtE(A)}${t.barrier != null ? ' · coupon si TEC10 ≤ ' + fmtP(t.barrier) : ''}${t.isTarn ? ' · TARN' : t.isCallable ? ' · callable' : ''}</div></td>
-        <td style="padding:5px 6px">✅ Garder<div style="font-size:9px;color:var(--text-dim)">pas de sortie chiffrable (marché secondaire) — coupons + capital selon scénario</div></td>`;
-      per.forEach(v => { h += `<td style="padding:5px 6px;text-align:right;font-family:var(--mono);white-space:nowrap">${fmtE(v.value)}${v.liquid ? '' : ' 🔒'}<div style="font-size:9px;color:${v.notes.some(n => /perdu/.test(n)) ? 'var(--orange)' : 'var(--text-dim)'}">${v.notes.filter(n => /perdu|rembours|rappel|cible/.test(n)).join(' · ').slice(0, 70) || 'coupons versés'}</div></td>`; });
-      h += `<td style="padding:5px 6px;font-size:10px;color:var(--text-muted)">${pv.notes.some(n => /perdu/.test(n)) ? '⚠ coupons à risque dans ta vue' : '✓ coupons dans ta vue'}</td></tr>`;
-    });
-    h += `</tbody></table></div><div style="font-size:10px;color:var(--text-dim);margin:6px 0 16px">Pénalités = colonne « Sortie » des paliers (progressifs) ou barème % servi (fixes), préavis à 0 % ; « sortir maintenant » replace sur la meilleure offre du jour à la durée restante ; « garder » et « échéance libre » replacent au CAT attendu (forward + spread) du scénario. Écarts en € vs « garder ».</div>`;
-
-    // 3. nouveau cash
-    const strat = scen.map(s => cashStrategies(S.cash, H, s.bp));
-    const stratView = viewIdx >= 0 ? strat[viewIdx] : cashStrategies(S.cash, H, view.bp);
-    h += `<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px"><div style="font-size:12px;font-weight:700;color:var(--text-bright)">2 · Nouveau cash — progressif, fixe ou enchaînement ?</div><label style="font-size:11px">Montant <input type="number" value="${S.cash}" style="width:110px" onchange="window._catV4Set('cash',this.value)"></label></div>
-      <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px;min-width:640px"><thead><tr style="border-bottom:1px solid var(--border)"><th style="text-align:left;padding:5px 6px;color:var(--text-muted)">Scénario</th><th style="text-align:left;padding:5px 6px;color:var(--text-muted)">Meilleure stratégie à ${H} mois</th><th style="text-align:right;padding:5px 6px;color:var(--text-muted)">Montant final</th><th style="text-align:left;padding:5px 6px;color:var(--text-muted)">Meilleur produit unique</th><th style="text-align:right;padding:5px 6px;color:var(--text-muted)">Montant final</th></tr></thead><tbody>`;
-    const rowsCash = scen.map((s, i) => ({ label: s.label, list: strat[i] }));
-    if (viewIdx < 0) rowsCash.push({ label: '★ Ta vue (' + view.label + ' +' + view.bp + ' bp)', list: stratView, hi: true });
-    rowsCash.forEach((s) => { const b = s.list[0], bs = s.list.find(x => x.single && !/⚠/.test(x.label)); if (!b) return;
-      h += `<tr style="border-bottom:1px solid var(--border);${s.hi ? 'background:rgba(14,165,233,0.08);font-weight:600' : ''}"><td style="padding:5px 6px">${s.label}</td><td style="padding:5px 6px">${b.label}</td><td style="padding:5px 6px;text-align:right;font-family:var(--mono);font-weight:700;color:var(--green)">${fmtE(b.final)}</td><td style="padding:5px 6px">${bs ? bs.label : '—'}</td><td style="padding:5px 6px;text-align:right;font-family:var(--mono)">${bs ? fmtE(bs.final) + ' <span style="font-size:9px;color:var(--text-dim)">(' + (bs.final - b.final >= 0 ? '+' : '−') + fmtE(Math.abs(bs.final - b.final)) + ')</span>' : ''}</td></tr>`; });
-    h += `</tbody></table></div><div style="font-size:10px;color:var(--text-dim);margin:6px 0 16px">Si la meilleure stratégie est un enchaînement dont la 2e jambe ne bat le produit unique <em>que</em> dans le scénario « Hausse », c'est un pari sur une hausse au-delà du forward. Un progressif sorti à une échéance libre compte comme 1re jambe.</div>`;
-
-    // 4. produits de taux : sélection dans la liste + produit libre
-    const prods = _rateProducts();
-    S.selected = S.selected || [];
-    const selected = prods.filter(p => S.selected.includes(p.id));
-    const c = S.callable;
-    h += `<div style="font-size:12px;font-weight:700;color:var(--text-bright);margin-bottom:6px">3 · Structurés de taux vs meilleur CAT — coche 1 à 3 produits de ta liste (ou saisis un produit libre)</div>
-      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">${prods.map(p => { const t = _productTerms(p); const on = S.selected.includes(p.id); return `<label style="display:flex;align-items:center;gap:6px;padding:4px 8px;border:1px solid ${on ? 'var(--green)' : 'var(--border)'};border-radius:6px;font-size:10px;cursor:pointer;background:${on ? 'rgba(6,214,160,0.08)' : 'var(--bg-elevated)'}"><input type="checkbox" ${on ? 'checked' : ''} onchange="window._catV4Toggle('${p.id}')"> ${(p.name || '?').substring(0, 34)}<span style="color:var(--text-dim)"> · ${fmtP(t.coupon)}${t.barrier != null ? ' si TEC10 ≤ ' + fmtP(t.barrier) : ''}${t.guaranteed ? ' · ' + t.guaranteed + ' a garantis' : ''}${t.isCallable ? ' · callable dès an ' + t.firstCall : t.isTarn ? ' · TARN cible ' + fmtP(t.target) : ''} · ${t.maturity} a${p.status === 'active' ? ' · détenu' : ''}</span></label>`; }).join('') || '<span style="font-size:10px;color:var(--text-dim)">aucun produit de taux à capital garanti dans la liste</span>'}</div>
-      <details style="margin-bottom:8px"><summary style="font-size:10px;color:var(--text-muted);cursor:pointer">Produit libre (termes saisis à la main)</summary>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:8px 0;font-size:11px">
-        <label>Coupon %/an <input type="number" step="0.05" value="${c.coupon}" onchange="window._catV4Set('callable.coupon',this.value)" style="width:100%"></label>
-        <label>Années garanties / 1er call <input type="number" step="1" value="${c.guaranteed}" onchange="window._catV4Set('callable.guaranteed',this.value)" style="width:100%"></label>
-        <label>Échéance (ans) <input type="number" step="1" value="${c.maturity}" onchange="window._catV4Set('callable.maturity',this.value)" style="width:100%"></label>
-        <label title="Coupon payé seulement si TEC10 ≤ barrière. Vide = coupon fixe">Barrière TEC10 ≤ % <input type="number" step="0.05" value="${c.barrier}" placeholder="fixe" onchange="window._catV4Set('callable.barrier',this.value)" style="width:100%"></label>
-        <label>Spread émetteur % <input type="number" step="0.1" value="${c.spread}" onchange="window._catV4Set('callable.spread',this.value)" style="width:100%"></label>
-        <label>Commission % <input type="number" step="0.05" value="${c.fees}" onchange="window._catV4Set('callable.fees',this.value)" style="width:100%"></label>
-        <label style="display:flex;align-items:center;gap:6px"><input type="checkbox" ${c.enabled ? 'checked' : ''} onchange="window._catV4Set('callable.enabled',this.checked)"> inclure</label>
-      </div></details>`;
-    const cols = selected.map(p => ({ label: p.name, terms: _productTerms(p) }));
-    if (c.enabled) cols.push({ label: 'Produit libre', terms: { coupon: parseFloat(c.coupon) || 0, maturity: parseInt(c.maturity, 10) || 1, inFine: false, isCallable: true, isTarn: false, firstCall: parseInt(c.guaranteed, 10) || 1, guaranteed: parseInt(c.guaranteed, 10) || 0, target: null, barrier: c.barrier === '' || c.barrier == null ? null : parseFloat(c.barrier), memory: false, fees: parseFloat(c.fees) || 0, spread: parseFloat(c.spread) || 0.6 } });
-    if (cols.length) {
-      h += `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px;min-width:640px"><thead><tr style="border-bottom:1px solid var(--border)"><th style="text-align:left;padding:5px 6px;color:var(--text-muted)">Scénario</th><th style="text-align:right;padding:5px 6px;color:var(--text-muted)">Meilleur CAT à ${H} m</th>${cols.map(k => `<th style="text-align:right;padding:5px 6px;color:var(--text-muted)">${(k.label || '').substring(0, 30)}</th>`).join('')}</tr></thead><tbody>`;
-      const rowsP = scen.map((s, i) => ({ label: s.label, bp: s.bp, list: strat[i] }));
-      if (viewIdx < 0) rowsP.push({ label: '★ Ta vue (' + view.label + ')', bp: view.bp, list: stratView, hi: true });
-      rowsP.forEach((s) => { const b = s.list[0];
-        h += `<tr style="border-bottom:1px solid var(--border);${s.hi ? 'background:rgba(14,165,233,0.08);font-weight:600' : ''}"><td style="padding:5px 6px">${s.label}</td><td style="padding:5px 6px;text-align:right;font-family:var(--mono)">${b ? fmtE(b.final) : '—'}<div style="font-size:9px;color:var(--text-dim)">${b ? b.label.substring(0, 40) : ''}</div></td>`;
-        cols.forEach(k => { const v = productValue(k.terms, S.cash, H, s.bp); const gap = b ? v.value - b.final : 0;
-          h += `<td style="padding:5px 6px;text-align:right;font-family:var(--mono);vertical-align:top"><span style="font-weight:700;color:${gap >= 0 ? 'var(--green)' : 'var(--orange)'}">${fmtE(v.value)}</span>${v.liquid ? '' : ' <span title="capital non disponible à cet horizon" style="color:var(--orange)">🔒</span>'}<div style="font-size:9px;color:${gap >= 0 ? 'var(--green)' : 'var(--orange)'}">${(gap >= 0 ? '+' : '−') + fmtE(Math.abs(gap))} vs CAT</div><div style="font-size:9px;color:${v.cash > 0 ? 'var(--text-bright)' : 'var(--orange)'}">💶 encaissé : ${fmtE(v.cash)}</div><div style="font-size:9px;color:var(--text-dim);text-align:left;max-width:220px;white-space:normal">${v.notes.join(' · ')}</div></td>`; });
-        h += `</tr>`; });
-      h += `</tbody></table></div>`;
-    }
-    h += `<div style="font-size:10px;color:var(--text-dim);margin-top:6px">Lecture par mécanique : <strong>TARN</strong> — coupons garantis N ans puis payés si TEC10 ≤ barrière ; remboursé dès que le cumul atteint la cible → il se rembourse vite quand les taux <em>baissent</em>, et te laisse coincé (coupons perdus + capital immobilisé) quand ils <em>montent</em>. <strong>Callable</strong> — l'émetteur rappelle quand il peut se refinancer moins cher (coupon > forward + spread), donc en baisse ; sinon tu restes au coupon jusqu'à l'échéance. TEC10 projeté = TEC10 actuel (${cv.tec10 != null ? fmtP(cv.tec10) : '—'}) + dérive implicite du 10 ans + scénario. Coupons périodiques replacés au CAT attendu ; in fine = acquis mais rien d'encaissé avant remboursement ; commission déduite du nominal. 🔒 = capital non disponible à l'horizon : compare aussi à 36 et 60 mois.</div>`;
+    held.forEach(p => { const t = _productTerms(p), Ai = parseFloat(p.investedAmount) || 0; const per = scen.map(s => productValue(t, Ai, H, s.bp));
+      h += `<tr style="border-bottom:1px solid var(--border);background:rgba(14,165,233,0.04)"><td style="padding:5px 6px"><strong>${p.name}</strong><div style="font-size:9px;color:var(--text-dim)">structuré détenu · ${fmtE(Ai)}</div></td><td style="padding:5px 6px">✅ Garder<div style="font-size:9px;color:var(--text-dim)">coupons + capital selon scénario</div></td>${per.map(v => `<td style="padding:5px 6px;text-align:right;font-family:var(--mono)">${fmtE(v.value)}${v.liquid ? '' : ' 🔒'}<div style="font-size:9px;color:${v.notes.some(n => /perdu/.test(n)) ? 'var(--orange)' : 'var(--text-dim)'}">${v.notes.filter(n => /perdu|rembours|rappel|cible/.test(n)).join(' · ').slice(0, 60) || 'coupons versés'}</div></td>`).join('')}</tr>`; });
+    h += `</tbody></table></div><div style="font-size:10px;color:var(--text-dim);margin-top:6px">Pénalités = colonne « Sortie » des paliers ou barème % servi ; préavis à 0 % ; « sortir maintenant » replace sur la meilleure offre du jour ; « garder » et « échéance libre » replacent au CAT attendu (forward + spread) du scénario.</div></details>`;
+    h += `<details style="margin-top:6px"><summary style="cursor:pointer;font-size:11px;color:var(--text-muted)">Courbe & forwards (ce que le marché anticipe)</summary><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:8px">`;
+    cv.nodes.forEach(n => { h += `<div style="padding:8px 10px;background:var(--bg-elevated);border-radius:6px"><div style="font-size:9px;color:var(--text-dim)">Courbe ${n[0]} m</div><div style="font-family:var(--mono);font-weight:700">${fmtP(n[1])}</div></div>`; });
+    [[6, 6], [6, 12], [12, 12], [24, 12]].forEach(([s, l]) => { h += `<div style="padding:8px 10px;background:rgba(14,165,233,0.08);border-radius:6px"><div style="font-size:9px;color:var(--text-dim)">Forward ${l} m dans ${s} m</div><div style="font-family:var(--mono);font-weight:700;color:#0EA5E9">${fmtP(forward(s, l))}</div><div style="font-size:9px;color:var(--text-dim)">CAT attendu ${fmtP(expectedCAT(s, l, 0))}</div></div>`; });
+    h += `</div><div style="font-size:10px;color:var(--text-muted);margin-top:6px">« Marché » = la courbe telle quelle : une hausse y est déjà (6 m dans 6 m ${fmtP(forward(6, 6))} vs ${fmtP(spot(6))} aujourd'hui). « Hausse » = parier sur PLUS que ça. Coupons périodiques replacés au CAT attendu ; in fine = rien d'encaissé avant remboursement ; TEC10 projeté = actuel + dérive implicite + scénario ; callable rappelé si coupon > forward + spread émetteur (donc en baisse).</div></details>`;
     h += `</div>`;
     host.innerHTML = h;
+    // conserver l'avis IA déjà rendu pour ces mêmes entrées
+    if (S.aiHtml && S.aiKey === _aiKey()) { const el = document.getElementById('cat-v4-ai'); if (el) el.innerHTML = S.aiHtml; }
+    S.lastOptions = options; S.lastArbs = toDo.map(a => ({ name: a.d.productName, amount: a.d.amount, action: labelsOpt[a.bestKey], detail: a.pv[a.bestKey].label, gain: Math.round(a.gain), robust: a.robust })); S.lastRisky = risky.map(x => x.p.name + ' : ' + x.v.notes.filter(n => /perdu/.test(n)).join(', '));
   }
+  function _aiKey() { return [S.cash, S.horizon, S.view, (S.selected || []).join(',')].join('|'); }
+
+  // ── Avis IA : commente les chiffres calculés (ne recalcule rien) ──
+  window._catV4AskAI = async function() {
+    const el = document.getElementById('cat-v4-ai'); if (!el) return;
+    const cv = _curve(), view = VIEWS.find(v => v.k === S.view) || VIEWS[1];
+    el.innerHTML = '<div style="font-size:11px;color:var(--text-dim)">🤖 Analyse en cours…</div>';
+    const opts = (S.lastOptions || []).slice(0, 6).map((o, i) => (i + 1) + '. [' + o.kind + '] ' + o.label + ' → ' + fmtE(o.value) + (o.lo != null ? ' (baisse ' + fmtE(o.lo) + ' / hausse ' + fmtE(o.hi) + ')' : '') + ' · encaissé ' + fmtE(o.cash) + (o.liquid ? '' : ' · capital immobilisé') + (o.note ? ' · ' + o.note : '')).join('\n');
+    const arbs = (S.lastArbs || []).map(a => a.name + ' (' + fmtE(parseFloat(a.amount) || 0) + ') : ' + a.action + ' — ' + a.detail + ' → +' + fmtE(a.gain) + (a.robust ? ' (robuste)' : ' (dépend des taux)')).join('\n') || 'aucun';
+    const sys = 'Tu es le directeur financier d\'une PME française (trésorerie d\'entreprise, IS 25 %, deux entités : Caméléons prudente = capital garanti et majorité CAT ; ByCam tolère le risque). Tu commentes une décision de placement à partir de chiffres DÉJÀ calculés par l\'outil. RÈGLES : n\'invente aucun chiffre, ne recalcule rien, cite uniquement ceux fournis ; zone euro uniquement (jamais le 10 ans US) ; réponds en français, 120 à 200 mots, en 3 points : (1) ce que tu ferais du montant et pourquoi, (2) le risque principal de ce choix si le marché fait l\'inverse de la vue, (3) les arbitrages de CAT à exécuter ou non. Pas de titre, pas de markdown lourd.';
+    const usr = 'Montant : ' + fmtE(S.cash) + ' · échéance visée : ' + S.horizon + ' mois · vue de taux retenue : ' + view.label + (view.bp ? ' (' + (view.bp > 0 ? '+' : '') + view.bp + ' bp vs forward)' : '') + '.\nCourbe : ' + cv.nodes.map(n => n[0] + 'm ' + fmtP(n[1])).join(', ') + ' · TEC10 ' + (cv.tec10 != null ? fmtP(cv.tec10) : '?') + ' · forward 6m dans 6m ' + fmtP(forward(6, 6)) + ', 12m dans 12m ' + fmtP(forward(12, 12)) + ' · meilleur CAT 12 m ' + fmtP(todayRate(12).rate) + '.\n\nCLASSEMENT des options (montant final à ' + S.horizon + ' mois, brut) :\n' + opts + '\n\nARBITRAGES de CAT existants proposés par l\'outil :\n' + arbs + '\n\nStructurés détenus à coupons menacés : ' + ((S.lastRisky || []).join(' ; ') || 'aucun') + '.';
+    try {
+      const ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null; const timer = ctrl ? setTimeout(() => ctrl.abort(), 45000) : null;
+      const resp = await fetch(CONFIG.AI_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 700, system: sys, messages: [{ role: 'user', content: usr }] }), signal: ctrl ? ctrl.signal : undefined });
+      if (timer) clearTimeout(timer);
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      const data = await resp.json();
+      const text = (data.content || []).filter(c => c.type === 'text').map(c => c.text).join('').trim();
+      S.aiHtml = '<div style="padding:10px 12px;border:1px solid rgba(14,165,233,0.35);border-radius:8px;background:rgba(14,165,233,0.05);font-size:11.5px;line-height:1.55;color:var(--text)"><strong style="color:#0369A1">🤖 Avis IA</strong> <span style="font-size:9px;color:var(--text-dim)">(commente les chiffres ci-dessus, ne les recalcule pas)</span><div style="margin-top:6px;white-space:pre-wrap">' + text.replace(/</g, '&lt;') + '</div></div>';
+      S.aiKey = _aiKey(); el.innerHTML = S.aiHtml;
+    } catch (e) { el.innerHTML = '<div style="font-size:11px;color:var(--orange)">IA indisponible (' + (e && e.message) + ') — le classement ci-dessus reste valable.</div>'; }
+  };
 
   window._catV4Toggle = function(id) { S.selected = S.selected || []; const i = S.selected.indexOf(id); if (i >= 0) S.selected.splice(i, 1); else { if (S.selected.length >= 3) S.selected.shift(); S.selected.push(id); } render(); };
   window._catV4Set = function(key, val) {
