@@ -156,14 +156,23 @@
   }
   function productValue(t, A, H, shiftBp) {
     const years = Math.floor(H / 12), tec = _curve().tec10; const notes = [];
-    let coupons = 0, cum = 0, redeemedYear = null, lost = 0, memoryBank = 0;
+    let coupons = 0, cum = 0, redeemedYear = null, lost = 0, memoryBank = 0, cash = 0, accrued = 0;
     for (let y = 1; y <= Math.min(years, Math.ceil(t.maturity)); y++) {
       let paid = true;
       if (t.barrier != null && y > t.guaranteed && tec != null) {
         const tecY = tec + (forward((y - 1) * 12, 120) - spot(120)) + (shiftBp || 0) / 100;
         paid = tecY <= t.barrier;
       }
-      if (paid) { const cpn = A * t.coupon / 100 * (1 + (t.memory ? memoryBank : 0)); coupons += cpn; cum += t.coupon * (1 + (t.memory ? memoryBank : 0)); memoryBank = 0; }
+      if (paid) {
+        const cpn = A * t.coupon / 100 * (1 + (t.memory ? memoryBank : 0)); cum += t.coupon * (1 + (t.memory ? memoryBank : 0)); memoryBank = 0;
+        if (t.inFine) { accrued += cpn; coupons += cpn; }
+        else {
+          // coupon ENCAISSÉ fin d'année y → replacé au CAT attendu du scénario jusqu'à l'horizon
+          const rest = Math.max(0, H - y * 12);
+          const grown = rest > 0 ? cpn * Math.pow(1 + expectedCAT(y * 12, rest, shiftBp) / 100, rest / 12) : cpn;
+          cash += cpn; coupons += grown;
+        }
+      }
       else { lost++; if (t.memory) memoryBank++; }
       if (t.isTarn && t.target && cum >= t.target - 1e-9) { redeemedYear = y; notes.push('cible ' + fmtP(t.target) + ' atteinte → remboursé fin année ' + y); break; }
       if (t.isCallable && t.firstCall != null && y >= t.firstCall && y < t.maturity) {
@@ -175,9 +184,10 @@
     if (redeemedYear != null && redeemedYear * 12 < H) { const rest = H - redeemedYear * 12; value = A * (1 - t.fees / 100) * Math.pow(1 + expectedCAT(redeemedYear * 12, rest, shiftBp) / 100, rest / 12) + coupons; notes.push('capital replacé au CAT attendu ' + fmtP(expectedCAT(redeemedYear * 12, rest, shiftBp)) + ' sur ' + rest + ' m'); }
     else if (t.maturity * 12 > H && redeemedYear == null) { liquid = false; notes.push(H <= (t.isCallable ? (t.firstCall || 1) : t.guaranteed) * 12 ? 'période garantie / non rappelable — juge aussi à ' + Math.min(60, Math.round(t.maturity * 12)) + ' m' : (t.isTarn ? 'cible non atteinte : coupons conditionnels, capital immobilisé jusqu\'à ' + t.maturity + ' ans' : t.isCallable ? 'non rappelé : coincé au coupon ' + fmtP(t.coupon) + ' jusqu\'à ' + t.maturity + ' ans' : 'capital immobilisé jusqu\'à l\'échéance (' + t.maturity + ' ans)')); }
     if (lost) notes.push(lost + ' coupon(s) perdu(s) (taux scénario > barrière ' + fmtP(t.barrier) + ')' + (t.memory ? ' — mémoire' : ''));
-    if (t.inFine && !redeemedYear && years > 0) notes.push('coupons capitalisés, versés seulement au remboursement');
+    if (t.inFine && !redeemedYear && accrued > 0) notes.push('0 € encaissé : ' + fmtE(accrued) + ' acquis mais versés seulement au remboursement');
+    else if (!t.inFine && cash > 0) notes.push(fmtE(cash) + ' encaissés en coupons, replacés au CAT attendu');
     if (t.fees) notes.push('commission ' + fmtP(t.fees) + ' déduite');
-    return { value, liquid, notes, coupons, redeemedYear };
+    return { value, liquid, notes, coupons, redeemedYear, cash: t.inFine && !redeemedYear ? 0 : cash + (redeemedYear ? accrued : 0), accrued };
   }
 
   // ── Rendu ────────────────────────────────────────────────────────
@@ -275,11 +285,11 @@
       rowsP.forEach((s) => { const b = s.list[0];
         h += `<tr style="border-bottom:1px solid var(--border);${s.hi ? 'background:rgba(14,165,233,0.08);font-weight:600' : ''}"><td style="padding:5px 6px">${s.label}</td><td style="padding:5px 6px;text-align:right;font-family:var(--mono)">${b ? fmtE(b.final) : '—'}<div style="font-size:9px;color:var(--text-dim)">${b ? b.label.substring(0, 40) : ''}</div></td>`;
         cols.forEach(k => { const v = productValue(k.terms, S.cash, H, s.bp); const gap = b ? v.value - b.final : 0;
-          h += `<td style="padding:5px 6px;text-align:right;font-family:var(--mono);vertical-align:top"><span style="font-weight:700;color:${gap >= 0 ? 'var(--green)' : 'var(--orange)'}">${fmtE(v.value)}</span>${v.liquid ? '' : ' <span title="capital non disponible à cet horizon" style="color:var(--orange)">🔒</span>'}<div style="font-size:9px;color:${gap >= 0 ? 'var(--green)' : 'var(--orange)'}">${(gap >= 0 ? '+' : '−') + fmtE(Math.abs(gap))} vs CAT</div><div style="font-size:9px;color:var(--text-dim);text-align:left;max-width:220px;white-space:normal">${v.notes.join(' · ')}</div></td>`; });
+          h += `<td style="padding:5px 6px;text-align:right;font-family:var(--mono);vertical-align:top"><span style="font-weight:700;color:${gap >= 0 ? 'var(--green)' : 'var(--orange)'}">${fmtE(v.value)}</span>${v.liquid ? '' : ' <span title="capital non disponible à cet horizon" style="color:var(--orange)">🔒</span>'}<div style="font-size:9px;color:${gap >= 0 ? 'var(--green)' : 'var(--orange)'}">${(gap >= 0 ? '+' : '−') + fmtE(Math.abs(gap))} vs CAT</div><div style="font-size:9px;color:${v.cash > 0 ? 'var(--text-bright)' : 'var(--orange)'}">💶 encaissé : ${fmtE(v.cash)}</div><div style="font-size:9px;color:var(--text-dim);text-align:left;max-width:220px;white-space:normal">${v.notes.join(' · ')}</div></td>`; });
         h += `</tr>`; });
       h += `</tbody></table></div>`;
     }
-    h += `<div style="font-size:10px;color:var(--text-dim);margin-top:6px">Lecture par mécanique : <strong>TARN</strong> — coupons garantis N ans puis payés si TEC10 ≤ barrière ; remboursé dès que le cumul atteint la cible → il se rembourse vite quand les taux <em>baissent</em>, et te laisse coincé (coupons perdus + capital immobilisé) quand ils <em>montent</em>. <strong>Callable</strong> — l'émetteur rappelle quand il peut se refinancer moins cher (coupon > forward + spread), donc en baisse ; sinon tu restes au coupon jusqu'à l'échéance. TEC10 projeté = TEC10 actuel (${cv.tec10 != null ? fmtP(cv.tec10) : '—'}) + dérive implicite du 10 ans + scénario. Coupons non réinvestis, commission déduite du nominal. 🔒 = capital non disponible à l'horizon : compare aussi à 36 et 60 mois.</div>`;
+    h += `<div style="font-size:10px;color:var(--text-dim);margin-top:6px">Lecture par mécanique : <strong>TARN</strong> — coupons garantis N ans puis payés si TEC10 ≤ barrière ; remboursé dès que le cumul atteint la cible → il se rembourse vite quand les taux <em>baissent</em>, et te laisse coincé (coupons perdus + capital immobilisé) quand ils <em>montent</em>. <strong>Callable</strong> — l'émetteur rappelle quand il peut se refinancer moins cher (coupon > forward + spread), donc en baisse ; sinon tu restes au coupon jusqu'à l'échéance. TEC10 projeté = TEC10 actuel (${cv.tec10 != null ? fmtP(cv.tec10) : '—'}) + dérive implicite du 10 ans + scénario. Coupons périodiques replacés au CAT attendu ; in fine = acquis mais rien d'encaissé avant remboursement ; commission déduite du nominal. 🔒 = capital non disponible à l'horizon : compare aussi à 36 et 60 mois.</div>`;
     h += `</div>`;
     host.innerHTML = h;
   }
