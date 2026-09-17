@@ -85,6 +85,7 @@
   }
 
   window._catFixedEarlyFactor = _fixedEarlyFactor;
+  window._catEffectiveRate = _effectiveRate;
 
   function _fmt(x) { return (Math.round(x * 100) / 100).toFixed(2).replace('.', ',') + '%'; }
 
