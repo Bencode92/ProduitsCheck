@@ -268,7 +268,7 @@ function _renderUnderstand(p) {
   h += '</div>';
 
   // ── Trilemme : 3 façons de placer ce cash, rendement ET risque ──────────────
-  var espCol = (espereEco != null && espereEco >= catRate) ? '#059669' : '#DC2626';
+  var espCol = (espereEco != null && espereEco >= catRate * 0.75) ? '#059669' : '#DC2626';
   var _md = (p.grading && p.grading.metadata) || {};
   var basketDiv = parseFloat(_md.basketDividend) || parseFloat(p.actualDividendYield) || 0;
   var basketVol = parseFloat(_md.basketVol) || 0;
@@ -284,7 +284,7 @@ function _renderUnderstand(p) {
   var hasUnderlying = !!(p.underlyings && p.underlyings.length);
   h += '<div style="display:grid;grid-template-columns:repeat(' + (hasUnderlying ? 3 : 2) + ',1fr);gap:8px;font-size:11px">';
   // 1) CAT
-  h += card('🏦', 'CAT', '<strong>' + f1(catRate) + '%/an</strong> fixe', '✓ Capital garanti · aucun risque', '#059669', false);
+  h += card('🏦', 'CAT', '<strong>' + f1(catRate) + '%/an</strong> brut · <strong>' + pc(catRate * 0.75).replace('+', '') + '</strong> net IS', '✓ Capital garanti · aucun risque', '#059669', false);
   // 2) Détenir en direct (seulement s'il y a un sous-jacent)
   if (hasUnderlying) h += card('📈', 'Détenir ' + sj + ' en direct',
     (basketDiv > 0.3 ? '<strong>' + f1(basketDiv) + '%/an</strong> de dividendes' : 'dividendes faibles') + ' + <strong>100% de la hausse</strong>' + (basketMom != null ? ' <span style="color:#64748B">· momentum 1an ' + (basketMom >= 0 ? '+' : '') + basketMom + '%</span>' : ''),
@@ -305,8 +305,9 @@ function _renderUnderstand(p) {
       + (pLossU >= 8 ? '<br><span style="color:#DC2626;font-size:10px">⚠ ' + pLossU + '% risque perte × −' + sevU + '% = perte attendue <strong>−' + espLossU + '%</strong></span>' : ''),
     protTxt, '#475569', true);
   h += '</div>';
-  // Verdict chiffré sous les 3 colonnes
-  var vsCatPts = (espereEco != null) ? (espereEco - catRate) : null;
+  // Verdict chiffré sous les 3 colonnes — MÊME BASE : espereEco est net d'IS (×0,75), donc le CAT aussi
+  var catNet = catRate * 0.75;
+  var vsCatPts = (espereEco != null) ? (espereEco - catNet) : null;
   var gapDir = (basketDiv > 0.3 && _md.vsDirectDivAdj != null) ? (espereEco - parseFloat(_md.vsDirectDivAdj)) : (basketDiv > 0.3 && espereEco != null ? espereEco - basketDiv : null);
   // ── RECOMMANDATION 4 OPTIONS (CAT / direct / structuré / rien), risque capital PRICÉ ──
   // C'est LE rôle du grading (Benoit) : le coupon 11% ne vaut rien s'il est mangé par la proba
@@ -315,11 +316,11 @@ function _renderUnderstand(p) {
   // mais « attendre un meilleur produit » (la poche SL reste en fonds monétaire/euro ~2-3%).
   var _isSL = (md.envelopeMode === 'swiss-life') || (p.bankId === 'swiss-life');
   var _waitLabel = _isSL ? '⏳ Attendre un meilleur produit' : '🏦 Le CAT (ou ne rien faire) est préférable';
-  var _waitAlt = _isSL ? 'la poche Swiss Life reste en fonds monétaire/euro (~2-3%)' : 'le CAT ' + f1(catRate) + '% GARANTI';
+  var _waitAlt = _isSL ? 'la poche Swiss Life reste en fonds monétaire/euro (~2-3%)' : 'le CAT ' + f1(catRate) + '% brut (' + f1(catNet) + '% net IS) GARANTI';
   var _rec;
-  if (pLossU >= 15 && espereEco != null && espereEco < catRate + 1.5) {
+  if (pLossU >= 15 && espereEco != null && espereEco < catNet + 1.5) {
     _rec = { c: '#B45309', t: _waitLabel, m: 'Une fois le risque pricé — perte attendue <strong>−' + espLossU + '%</strong> (' + pLossU + '% de chance de perdre ~' + sevU + '%) — ce structuré ne rend que <strong>' + pc(espereEco) + '/an</strong> de coupon espéré, ≈ ' + _waitAlt + '. Rendement quasi identique au sans-risque pour un gros risque de perte : ' + (_isSL ? 'garde la poche en attente d\'un structuré mieux calibré (coupon plus élevé OU barrière plus basse).' : 'pour de la trésorerie, CAT.') };
-  } else if (espereEco != null && espereEco < catRate) {
+  } else if (espereEco != null && espereEco < catNet) {
     _rec = { c: '#DC2626', t: _waitLabel, m: 'Coupon espéré <strong>' + pc(espereEco) + '/an</strong> INFÉRIEUR à ' + _waitAlt + ' — et tu prends en plus le risque de perte (−' + espLossU + '% attendu). ' + (_isSL ? 'À laisser passer : attends un meilleur produit.' : 'Le CAT domine.') };
   } else if (basketMom != null && basketMom >= 15) {
     _rec = { c: '#B45309', t: '📈 Direct si tu es haussier, sinon prudence', m: sj + ' est en tendance (+' + basketMom + '%/1an) : le structuré <strong>plafonne</strong> ta hausse à ~' + f1(couponRate) + '%/an. Si conviction haussière → direct. Sinon le coupon espéré ' + pc(espereEco) + '/an bat le CAT de ' + f1(vsCatPts) + ' pt, mais avec ' + pLossU + '% de risque de perte.' };
@@ -330,9 +331,9 @@ function _renderUnderstand(p) {
     + '<strong style="color:' + _rec.c + '">' + _rec.t + '</strong> — ' + _rec.m + '</div>';
   h += '<div style="margin-top:6px;padding:8px 11px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:7px;font-size:11px;color:#334155;line-height:1.5">'
     + '<strong>Détail :</strong> le structuré rend '
-    + (vsCatPts != null ? '<strong style="color:' + espCol + '">' + (vsCatPts >= 0 ? '+' : '') + f1(vsCatPts) + ' pt</strong> vs CAT sans risque' : '—')
+    + (vsCatPts != null ? '<strong style="color:' + espCol + '">' + (vsCatPts >= 0 ? '+' : '') + f1(vsCatPts) + ' pt</strong> vs CAT sans risque (net IS des deux côtés)' : '—')
     + (gapDir != null ? ', et <strong style="color:' + (gapDir >= 1.5 ? '#059669' : gapDir >= 0 ? '#B45309' : '#DC2626') + '">' + (gapDir >= 0 ? '+' : '') + f1(gapDir) + ' pt</strong> vs les dividendes' + (_md.vsDirectVolFactor && _md.vsDirectVolFactor !== 1 ? ' (risque-ajustés de la vol)' : '') + ' que tu abandonnes en le préférant à la détention directe' : '')
-    + '. ' + (gapDir != null && gapDir < 0.5 ? '<span style="color:#DC2626">⚠ Tu prends le risque barrière pour à peine plus que les dividendes — la détention directe se discute.</span>' : 'Tu échanges les dividendes + la volatilité contre un coupon plus élevé et une protection à la baisse.')
+    + '. ' + (gapDir != null && gapDir < 0.5 ? '<span style="color:#DC2626">⚠ Tu prends le risque barrière pour à peine plus que les dividendes — la détention directe se discute.</span>' : (hasUnderlying ? 'Tu échanges les dividendes + la volatilité contre un coupon plus élevé et une protection à la baisse.' : 'Tu échanges la liquidité (et le risque émetteur) contre un rendement fixé à l\'avance.'))
     + '</div>';
   // Perf / conviction : le structuré PLAFONNE la hausse → la question dépend de TA vue sur le titre
   if (basketMom != null) {

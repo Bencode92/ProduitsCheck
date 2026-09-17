@@ -540,6 +540,22 @@
                 var callProb = (ctx.product.callable || ctx.product.autocall) ? _estimateCallProb(mat) : null;
 
                 rateBlock += '\n\n## ANALYSE PRODUIT TAUX FIXE/CALLABLE';
+                // Références EUR imposées : l'IA confondait le 10 ans US (market intelligence) avec le 10 ans euro
+                try {
+                    var _y = _ratesData.yields || {};
+                    var _aaa10 = _y.oat_fr_10y && _y.oat_fr_10y.current, _tec = _y.tec10_fr && _y.tec10_fr.current, _aaa2 = _y.oat_fr_2y && _y.oat_fr_2y.current;
+                    rateBlock += '\nR\u00c9F\u00c9RENCES DE TAUX \u00c0 UTILISER (zone euro, ne JAMAIS citer le 10 ans US) : 10 ans AAA ' + (_aaa10 || '?') + '% \u00b7 TEC10 ' + (_tec || '?') + '% \u00b7 2 ans AAA ' + (_aaa2 || '?') + '%. Meilleur CAT ' + ((typeof window._getCATBenchmark === 'function' && window._getCATBenchmark()) || '?') + '%.';
+                    // Callable \u00e0 gain acquis : rendement pire/meilleur cas d\u00e9j\u00e0 calcul\u00e9s (grader-callable-issuer expose la m\u00eame logique)
+                    var _c = ctx.product.coupon || {}, _er = ctx.product.earlyRedemption || {};
+                    var _rim = parseFloat(_c.rateIfMaturity), _rate = parseFloat(_c.rate) || 0;
+                    if (_rim > 0 && mat > 0) {
+                        var _matLvl = 100 + (_rim <= 15 ? _rim * mat : _rim);
+                        var _worst = (Math.pow(_matLvl / 100, 1 / mat) - 1) * 100;
+                        var _firstY = (_er.firstCallDate && ctx.product.strikeDate) ? Math.max(1, Math.round((new Date(_er.firstCallDate) - new Date(ctx.product.strikeDate)) / 864e5 / 365)) : (_er.startSemester ? Math.round(_er.startSemester / 2) : 1);
+                        var _best = (Math.pow(1 + _rate * _firstY / 100, 1 / _firstY) - 1) * 100;
+                        rateBlock += '\nGAIN ACQUIS DANS TOUS LES CAS : ' + _rate + '%/an d\u2019int\u00e9r\u00eat simple \u2192 ' + _worst.toFixed(2) + '%/an actuariel si \u00e9ch\u00e9ance (' + mat + ' ans, ' + _matLvl.toFixed(1) + '% du nominal), ' + _best.toFixed(2) + '%/an si rappel an ' + _firstY + '. La maturit\u00e9 \u00e0 retenir est ' + mat + ' ans (rappel au gr\u00e9 de l\u2019\u00e9metteur, probable seulement si les taux baissent). Ne parle pas de \u00ab coupon non fiable \u00bb ni de \u00ab maturit\u00e9 esp\u00e9r\u00e9e \u00bb plus courte.';
+                    }
+                } catch (e) {}
                 rateBlock += '\nRisques sp\u00e9cifiques \u00e0 int\u00e9grer dans ton analyse:';
                 rateBlock += '\n1. RISQUE CR\u00c9DIT \u00c9METTEUR: Sans sous-jacent action, le risque principal est le d\u00e9faut de l\'\u00e9metteur.';
                 if (callProb !== null) {

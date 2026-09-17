@@ -923,7 +923,7 @@
         bullDesc = 'Taux baissent → call probable → réinvestissement à taux bas';
         crashDesc = 'Taux montent → pas de call, coupon garanti = atout';
         if (st === 'taux_fixe_in_fine') {
-          currentDesc = 'In fine: pas de cash-flow intermédiaire, TRI ~3.9% si go-to-maturity';
+          currentDesc = 'In fine: pas de cash-flow intermédiaire, TRI ' + ((result.metadata && result.metadata.guaranteedYieldWorst) ? '~' + String(result.metadata.guaranteedYieldWorst).replace('.', ',') + '%' : '~3.9%') + ' si go-to-maturity';
           bullDesc = 'Taux baissent → call probable → coupon capitalisé versé en une fois';
           crashDesc = 'Taux montent → pas de call, intérêts simples sur 10 ans = rendement moindre';
         }

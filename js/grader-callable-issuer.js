@@ -179,6 +179,8 @@
                     worst: { label: 'Défaut / résolution ' + issuer, desc: 'bail-in : perte partielle ou totale', return_pct: -60, return_eur: -Math.round(nom * 0.6), probability: 0.02 }
                 };
                 md.scenariosDeterministic = true;
+                // Scénarios régime (calculés par v7 avant ce post-process) : TRI réel du pire cas
+                try { if (result.regimeScenarios && result.regimeScenarios.current) result.regimeScenarios.current.desc = 'In fine : pas de cash-flow intermédiaire, ' + _fmt(worst) + '%/an actuariel si tu vas à l’échéance, ' + _fmt(best) + '% si rappel an ' + gy.best.year; } catch (e) {}
                 // Delta + plafond ≤ C (option vendue à la banque + 10 ans d’illiquidité ≠ « Bon »)
                 if (typeof result.score === 'number') { result.score = Math.min(Math.round(result.score + scoreDelta), 59); result.grade = _lg(result.score); }
                 if (typeof result.baseScore === 'number') result.baseScore = Math.min(Math.round(result.baseScore + scoreDelta), result.score);
