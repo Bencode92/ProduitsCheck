@@ -320,8 +320,10 @@ function _renderUnderstand(p) {
   var _rec;
   if (pLossU >= 15 && espereEco != null && espereEco < catNet + 1.5) {
     _rec = { c: '#B45309', t: _waitLabel, m: 'Une fois le risque pricé — perte attendue <strong>−' + espLossU + '%</strong> (' + pLossU + '% de chance de perdre ~' + sevU + '%) — ce structuré ne rend que <strong>' + pc(espereEco) + '/an</strong> de coupon espéré, ≈ ' + _waitAlt + '. Rendement quasi identique au sans-risque pour un gros risque de perte : ' + (_isSL ? 'garde la poche en attente d\'un structuré mieux calibré (coupon plus élevé OU barrière plus basse).' : 'pour de la trésorerie, CAT.') };
+  } else if (espereEco != null && Math.abs(espereEco - catNet) < 0.15) {
+    _rec = { c: '#B45309', t: _isSL ? '⏳ Rien de plus que le monétaire — attendre' : '⚖️ Égalité avec le CAT — l\'illiquidité n\'est pas payée', m: 'Coupon espéré <strong>' + pc(espereEco) + '/an</strong> ≈ ' + _waitAlt + '. Tu n\'es pas rémunéré pour ' + (hasUnderlying ? 'le risque de perte (−' + espLossU + '% attendu) ni ' : '') + 'l\'immobilisation' + (p.emitter ? ' et le risque ' + p.emitter : ' et le risque émetteur') + '. ' + (_isSL ? 'Attends un produit mieux calibré.' : 'À égalité, le CAT garanti et liquide gagne.') };
   } else if (espereEco != null && espereEco < catNet) {
-    _rec = { c: '#DC2626', t: _waitLabel, m: 'Coupon espéré <strong>' + pc(espereEco) + '/an</strong> INFÉRIEUR à ' + _waitAlt + ' — et tu prends en plus le risque de perte (−' + espLossU + '% attendu). ' + (_isSL ? 'À laisser passer : attends un meilleur produit.' : 'Le CAT domine.') };
+    _rec = { c: '#DC2626', t: _waitLabel, m: 'Coupon espéré <strong>' + pc(espereEco) + '/an</strong> INFÉRIEUR à ' + _waitAlt + (hasUnderlying ? ' — et tu prends en plus le risque de perte (−' + espLossU + '% attendu). ' : ' — pour de l\'illiquidité en plus. ') + (_isSL ? 'À laisser passer : attends un meilleur produit.' : 'Le CAT domine.') };
   } else if (basketMom != null && basketMom >= 15) {
     _rec = { c: '#B45309', t: '📈 Direct si tu es haussier, sinon prudence', m: sj + ' est en tendance (+' + basketMom + '%/1an) : le structuré <strong>plafonne</strong> ta hausse à ~' + f1(couponRate) + '%/an. Si conviction haussière → direct. Sinon le coupon espéré ' + pc(espereEco) + '/an bat le CAT de ' + f1(vsCatPts) + ' pt, mais avec ' + pLossU + '% de risque de perte.' };
   } else {
