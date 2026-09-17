@@ -1145,6 +1145,12 @@
         }
       }
 
+      // Step 7: classe « callable au gré de l'émetteur » — DOIT passer après _adjustP1/_adjustP4 et le
+      // recalcul du total (sinon ses plafonds sont défaits par v7). Idempotent.
+      if (typeof window !== 'undefined' && typeof window._callableIssuerPostProcess === 'function') {
+        try { result = window._callableIssuerPostProcess(result, product) || result; } catch (e) {}
+      }
+
       return result;
     };
 

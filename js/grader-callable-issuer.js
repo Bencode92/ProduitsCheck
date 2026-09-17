@@ -31,8 +31,9 @@
         var sub = ((p.subType || (p.aiParsed && p.aiParsed.subType)) || '').toLowerCase();
         if (sub.indexOf('issuer_discretion') >= 0 || sub.indexOf('issuer-discretion') >= 0) return true;
         if (p._callableIssuerDiscretion === true || (p.aiParsed && p.aiParsed._callableIssuerDiscretion === true)) return true;
-        // Détection texte : « au gré de l'émetteur » + callable
+        // Un « callable » SANS seuil de marché est par nature au gré de l'émetteur (un autocall a un trigger)
         var isCallable = String(er.type || '').toLowerCase() === 'callable';
+        if (isCallable && (er.trigger == null || parseFloat(er.trigger) === 0) && (p.underlyings || []).length === 0) return true;
         var t = _txt(p);
         var discretion = /gr[eé] de l['’ ]?[eé]metteur|discr[eé]tion de l['’ ]?[eé]metteur|option of the issuer|issuer['’]?s?\s+(sole\s+)?discretion/.test(t);
         return isCallable && discretion;
@@ -73,6 +74,19 @@
         var matLevel = parseFloat(er.maturityRedemptionLevel);
         if (!(matLevel > 100) && rim > 0) matLevel = 100 + (rim <= 15 ? rim * maxM : rim); // rateIfMaturity annuel ou total
         if (!(matLevel > 100) && fixedType && c.guaranteed !== false && rate > 0 && levels.length) matLevel = 100 + rate * maxM;
+        // Coupon fixe VERSÉ PÉRIODIQUEMENT (annuel/semestriel…) et inconditionnel : le rendement est le coupon,
+        // quelle que soit la durée (les coupons sont encaissés chaque année) → pire cas = meilleur cas = coupon
+        var periodic = fixedType && c.guaranteed !== false && rate > 0 && (c.paymentTiming === 'periodic' || /annuel|semestr|trimestr|mensuel/i.test(String(c.frequency || ''))) && !/in_fine|maturit/i.test(String(c.frequency || '')) && c.paymentTiming !== 'at_redemption';
+        if (periodic) {
+            var mult = /semestr/i.test(String(c.frequency || '')) ? 2 : /trimestr/i.test(String(c.frequency || '')) ? 4 : /mensuel/i.test(String(c.frequency || '')) ? 12 : 1;
+            var annual = rate * mult;
+            var fcY = null;
+            if (er.firstCallDate && p.strikeDate) fcY = Math.max(1, Math.round((new Date(er.firstCallDate) - new Date(p.strikeDate)) / 864e5 / 365));
+            else if (er.startSemester) fcY = Math.max(1, Math.round(er.startSemester / 2));
+            var yW = { year: maxM, level: 100 + annual * maxM, y: annual, maturity: true };
+            var yB = { year: fcY || 1, level: 100 + annual * (fcY || 1), y: annual };
+            return { worst: yW, best: yB, matLevel: yW.level, simpleRate: annual, points: [yB, yW], periodic: true };
+        }
         if (!(matLevel > 100)) return null; // gain à l'échéance inconnu → famille « prime seulement si rappel »
         var strike = p.strikeDate ? new Date(p.strikeDate) : null;
         var yields = [];
@@ -151,8 +165,8 @@
                     var oP4 = (typeof result.pillars.riskPremium.score === 'number') ? result.pillars.riskPremium.score : 50;
                     scoreDelta += (p4B - oP4) * W.riskPremium;
                     result.pillars.riskPremium.score = p4B;
-                    result.pillars.riskPremium.reasoning = 'Prime vs CAT (gain acquis dans tous les cas) : pire cas ' + _fmt(worst) + '%/an actuariel' +
-                        (gy.worst.maturity ? ' (échéance ' + maxM + ' a, ' + _fmt(gy.matLevel) + '% du nominal)' : ' (rappel an ' + gy.worst.year + ')') +
+                    result.pillars.riskPremium.reasoning = 'Prime vs CAT (gain acquis dans tous les cas) : ' + (gy.periodic ? 'coupon ' + _fmt(worst) + '%/an versé chaque année' : 'pire cas ' + _fmt(worst) + '%/an actuariel' +
+                        (gy.worst.maturity ? ' (échéance ' + maxM + ' a, ' + _fmt(gy.matLevel) + '% du nominal)' : ' (rappel an ' + gy.worst.year + ')')) +
                         (fees ? ' − commission ' + _fmt(fees) + '% (' + _fmt(fees / maxM) + '%/an)' : '') +
                         ' vs CAT ' + _fmt(cat) + '% − illiquidité ' + _fmt(illiq) + '% = ' + _fmt(p4spreadB) + '%. Meilleur cas ' + _fmt(best) + '%/an si ' + issuer + ' rappelle an ' + gy.best.year +
                         ' — ce qui n’arrive que si les taux BAISSENT.';
@@ -164,9 +178,12 @@
                     var nP1 = Math.min(oP1, p1capB);
                     scoreDelta += (nP1 - oP1) * W.adjustedReturn;
                     result.pillars.adjustedReturn.score = nP1;
-                    result.pillars.adjustedReturn.reasoning = 'Rendement acquis quel que soit le rappel : ' + _fmt(gy.simpleRate) + '%/an d’intérêt simple → ' +
+                    result.pillars.adjustedReturn.reasoning = gy.periodic
+                        ? ('Coupon ' + _fmt(gy.simpleRate) + '%/an versé chaque année, inconditionnel → rendement ' + _fmt(worst) + '%/an quelle que soit la durée (rappel possible dès l’an ' + gy.best.year + ', échéance ' + maxM + ' a). ' +
+                           'Le seul aléa est la DURÉE : ' + issuer + ' rappelle si les taux baissent (tu réinvestis plus bas), te garde si les taux montent (coupon devenu inférieur au marché). | Coupon fiable ' + _fmt(worst) + '%, protégé | Maturité pleine ~' + _fmt(maxM) + 'a (rappel au gré de ' + issuer + ')')
+                        : ('Rendement acquis quel que soit le rappel : ' + _fmt(gy.simpleRate) + '%/an d’intérêt simple → ' +
                         _fmt(worst) + '%/an actuariel au pire cas (' + (gy.worst.maturity ? 'échéance ' + maxM + ' a' : 'rappel an ' + gy.worst.year) + '), ' + _fmt(best) + '%/an au mieux (rappel an ' + gy.best.year + '). ' +
-                        'Plus tu restes longtemps, moins ça rapporte — et tu restes longtemps précisément quand les taux montent. | Coupon fiable ' + _fmt(worst) + '%, protégé | Maturité pleine ~' + _fmt(maxM) + 'a (rappel au gré de ' + issuer + ')';
+                        'Plus tu restes longtemps, moins ça rapporte — et tu restes longtemps précisément quand les taux montent. | Coupon fiable ' + _fmt(worst) + '%, protégé | Maturité pleine ~' + _fmt(maxM) + 'a (rappel au gré de ' + issuer + ')');
                 }
                 // Scénarios déterministes (plus d’IA) : rappel au meilleur cas / échéance / revente / défaut
                 var nom = parseFloat(product.nominal) > 0 ? parseFloat(product.nominal) : 100000;
@@ -174,7 +191,7 @@
                 var early = firstCall || gy.best;
                 result.scenarios = {
                     optimistic: { label: 'Rappelé an ' + early.year + ' (taux en baisse)', desc: 'capital + gain acquis, replacé plus bas', return_pct: Math.round((early.level - 100) * 10) / 10, return_eur: Math.round(nom * (early.level - 100) / 100), probability: 0.3 },
-                    base: { label: 'Échéance ' + maxM + ' a (taux stables/hausse)', desc: _fmt(gy.matLevel) + '% du nominal, ' + _fmt(gy.worst.y) + '%/an actuariel, coincé jusqu’au bout', return_pct: Math.round((gy.matLevel - 100) * 10) / 10, return_eur: Math.round(nom * (gy.matLevel - 100) / 100), probability: 0.65 },
+                    base: { label: 'Échéance ' + maxM + ' a (taux stables/hausse)', desc: (gy.periodic ? maxM + ' coupons de ' + _fmt(gy.simpleRate) + '% encaissés, ' : _fmt(gy.matLevel) + '% du nominal, ') + _fmt(gy.worst.y) + '%/an, coincé jusqu’au bout', return_pct: Math.round((gy.matLevel - 100) * 10) / 10, return_eur: Math.round(nom * (gy.matLevel - 100) / 100), probability: 0.65 },
                     stress: { label: 'Revente en cours de vie', desc: 'prix de marché : perte non mesurable (≈ −3 % à −10 % si les taux montent)', return_pct: -5, return_eur: -Math.round(nom * 0.05), probability: 0.03 },
                     worst: { label: 'Défaut / résolution ' + issuer, desc: 'bail-in : perte partielle ou totale', return_pct: -60, return_eur: -Math.round(nom * 0.6), probability: 0.02 }
                 };
@@ -184,8 +201,10 @@
                 // Delta + plafond ≤ C (option vendue à la banque + 10 ans d’illiquidité ≠ « Bon »)
                 if (typeof result.score === 'number') { result.score = Math.min(Math.round(result.score + scoreDelta), 59); result.grade = _lg(result.score); }
                 if (typeof result.baseScore === 'number') result.baseScore = Math.min(Math.round(result.baseScore + scoreDelta), result.score);
-                md.gradeCaveat = '⚠️ Callable au gré de ' + issuer + ' : gain ' + _fmt(gy.simpleRate) + '%/an acquis dans tous les cas, mais c’est ' + issuer + ' qui choisit la durée : ' +
-                    _fmt(best) + '%/an si rappel rapide (taux en baisse), ' + _fmt(worst) + '%/an si tu vas au bout (taux en hausse). Illiquide avant le remboursement.';
+                md.gradeCaveat = gy.periodic
+                    ? ('⚠️ Callable au gré de ' + issuer + ' : coupon ' + _fmt(gy.simpleRate) + '%/an versé chaque année quoi qu’il arrive ; ' + issuer + ' choisit la durée (rappel dès l’an ' + gy.best.year + ' si les taux baissent, sinon jusqu’à ' + maxM + ' ans). Illiquide avant le remboursement.')
+                    : ('⚠️ Callable au gré de ' + issuer + ' : gain ' + _fmt(gy.simpleRate) + '%/an acquis dans tous les cas, mais c’est ' + issuer + ' qui choisit la durée : ' +
+                    _fmt(best) + '%/an si rappel rapide (taux en baisse), ' + _fmt(worst) + '%/an si tu vas au bout (taux en hausse). Illiquide avant le remboursement.');
                 return result;
             }
 
@@ -225,23 +244,29 @@
         return result;
     }
 
-    function _patch() {
-        if (typeof ProposalGrader === 'undefined' || !ProposalGrader.grade) return false;
-        if (ProposalGrader.grade._issuerCallablePatched) return true;
+    // Ordre d'exécution : v7 (pipeline consolidé) recalcule P1/P4/total APRÈS tout ce qui l'entoure
+    // (il capture la chaîne comme « base »). Nos plafonds seraient défaits si on enveloppait grade().
+    // → on s'expose comme HOOK FINAL appelé par v7 (Step 7). Si v7 n'est pas là (vieille page), on
+    // enveloppe grade() comme avant. Le post-process est idempotent (2e passage : delta nul).
+    window._callableIssuerPostProcess = _postProcess;
+    window._isIssuerCallable = _isIssuerCallable;
+
+    function _wrapLegacy() {
+        if (typeof ProposalGrader === 'undefined' || !ProposalGrader.grade || ProposalGrader.grade._issuerCallablePatched) return;
         var orig = ProposalGrader.grade;
-        ProposalGrader.grade = function (product) {
+        var w = function (product) {
             var r = orig.call(this, product);
             if (r && typeof r.then === 'function') return r.then(function (res) { return _postProcess(res, product); });
             return _postProcess(r, product);
         };
-        ProposalGrader.grade._issuerCallablePatched = true;
-        window._isIssuerCallable = _isIssuerCallable;
-        console.log('[callable-issuer] issuer-discretion callable class patched (post-process)');
-        return true;
+        w._issuerCallablePatched = true;
+        ProposalGrader.grade = w;
+        console.log('[callable-issuer] legacy wrap (v7 absent)');
     }
-
-    if (!_patch()) {
-        var n = 0;
-        var iv = setInterval(function () { if (_patch() || ++n > 60) clearInterval(iv); }, 100);
-    }
+    var n = 0;
+    var iv = setInterval(function () {
+        n++;
+        if (typeof window._gradeInputHash === 'function') { clearInterval(iv); console.log('[callable-issuer] hook final v7 enregistré'); return; } // v7 présent → hook
+        if (n > 100) { clearInterval(iv); _wrapLegacy(); }
+    }, 100);
 })();

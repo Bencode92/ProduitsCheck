@@ -215,7 +215,9 @@ function _renderUnderstand(p) {
 
   // ── Le pari en une phrase ──
   var pari;
-  if (isICG) pari = 'Tu prêtes à <strong>' + (p.emitter || 'la banque') + '</strong>. Le gain (' + f1(parseFloat((p.coupon || {}).rate) || couponRate) + '%/an d\'intérêt simple) est <strong>acquis dans tous les cas</strong> — mais c\'est elle qui choisit <strong>quand</strong> te rembourser : tôt si les taux baissent (' + f1(gyB) + '%/an actuariel), à l\'échéance si les taux montent (' + f1(gyW) + '%/an). Illiquide entre-temps.';
+  var _gyPer = Math.abs(gyB - gyW) < 0.01; // coupon périodique : même rendement quelle que soit la durée
+  if (isICG && _gyPer) pari = 'Tu prêtes à <strong>' + (p.emitter || 'la banque') + '</strong>. Coupon <strong>' + f1(gyW) + '%/an versé chaque année, sans condition</strong>. C\'est elle qui choisit la durée : rappel tôt si les taux baissent (tu réinvestis plus bas), jusqu\'à l\'échéance si les taux montent (coupon devenu inférieur au marché). Illiquide entre-temps.';
+  else if (isICG) pari = 'Tu prêtes à <strong>' + (p.emitter || 'la banque') + '</strong>. Le gain (' + f1(parseFloat((p.coupon || {}).rate) || couponRate) + '%/an d\'intérêt simple) est <strong>acquis dans tous les cas</strong> — mais c\'est elle qui choisit <strong>quand</strong> te rembourser : tôt si les taux baissent (' + f1(gyB) + '%/an actuariel), à l\'échéance si les taux montent (' + f1(gyW) + '%/an). Illiquide entre-temps.';
   else if (isIC) pari = 'Tu prêtes à la banque. Elle te rembourse <strong>quand ça L\'arrange</strong> (prime ~' + f1(couponRate) + '%/an). Ton capital est protégé à l\'échéance — mais le rendement dépend d\'elle, pas de toi.';
   else if (protectedMat) pari = 'Ton capital est protégé à l\'échéance. Tu touches le coupon si <strong>' + sj + '</strong> tient ses conditions. Rendement plafonné.';
   else if (!isNaN(barrier)) pari = 'Tu paries que <strong>' + sj + '</strong> ne s\'effondre pas de plus de <strong>' + (100 - barrier) + '%</strong>. S\'il tient → coupon ' + f1(couponRate) + '%/an ; s\'il chute sous ce seuil → tu encaisses toute la baisse.';
@@ -227,10 +229,10 @@ function _renderUnderstand(p) {
   if (isICG) {
     var bestYr = parseInt(md.guaranteedYieldBestYear, 10) || 2;
     rows.push(['#065F46', '#ECFDF5', '✅ Rappel rapide (taux en baisse)',
-      (p.emitter || 'La banque') + ' te rembourse an ' + bestYr + ' → capital + gain acquis, à replacer dans un marché plus bas',
-      eur(nominal * Math.pow(1 + gyB / 100, bestYr)), 'soit ' + f1(gyB) + '%/an brut · ' + pc(gyB * 0.75) + '/an net IS']);
+      (p.emitter || 'La banque') + ' te rembourse an ' + bestYr + ' → capital + ' + (_gyPer ? bestYr + ' coupons encaissés' : 'gain acquis') + ', à replacer dans un marché plus bas',
+      eur(_gyPer ? nominal * (1 + gyB / 100 * bestYr) : nominal * Math.pow(1 + gyB / 100, bestYr)), 'soit ' + f1(gyB) + '%/an brut · ' + pc(gyB * 0.75) + '/an net IS']);
     rows.push(['#92400E', '#FFFBEB', '⚖️ Échéance sans rappel (taux stables ou en hausse)',
-      'Tu restes jusqu\'au bout → ' + f1(gyLvl) + '% du nominal, mais à un taux devenu inférieur au marché',
+      'Tu restes jusqu\'au bout → ' + (_gyPer ? 'capital + ' + (parseFloat(p.maturityYears) || 10) + ' coupons' : f1(gyLvl) + '% du nominal') + ', mais à un taux devenu inférieur au marché',
       eur(nominal * gyLvl / 100), 'soit ' + f1(gyW) + '%/an brut · ' + pc(gyW * 0.75) + '/an net IS']);
   } else {
   rows.push(['#065F46', '#ECFDF5', '✅ Favorable' + (cprob != null ? ' (proba ~' + Math.round(cprob) + '%)' : ''),
