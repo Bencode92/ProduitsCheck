@@ -34,6 +34,7 @@
         <div class="form-field" style="margin:0"><label>Préavis (jours)</label><input id="pl-notice-days" type="number" min="0" value="${d.noticeDays ?? (isNotice ? 32 : '')}" placeholder="32"></div>
         <div class="form-field" style="margin:0"><label>Frais annuels (%/an)</label><input id="pl-fees-pct" type="number" min="0" step="0.01" value="${d.feesAnnualPct ?? ''}" placeholder="0"></div>
       </div>
+      <label style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:11px;color:var(--text-bright);cursor:pointer"><input type="checkbox" id="pl-exit-free-period" ${d.exitFreeAtPeriodEnd ? 'checked' : ''}> Sortie libre (sans frais ni préavis) à chaque fin de palier / échéance annuelle — l'optimiseur teste alors « attendre l'échéance puis replacer »</label>
       <div style="margin-top:10px;font-size:10px;color:var(--text-muted);margin-bottom:6px">Barème de pénalité en cas de retrait anticipé — <em>% du taux nominal servi</em> selon le mois de sortie (ex. SG : mois 1-3 → 10, mois 4-7 → 40, mois 8-11 → 70 ; CIC fixe 12 m : mois 1-3 → 0, mois 4-12 → 50). Pour un progressif, la colonne « Sortie » des paliers prévaut.</div>
       <div id="ex-rows">${sched.map(_row).join('')}</div>
       <button class="btn ghost sm" style="width:100%;margin-top:2px" type="button" onclick="document.getElementById('ex-rows').insertAdjacentHTML('beforeend', window._exitTermsRow())">+ Ajouter une plage</button>`;
@@ -54,7 +55,8 @@
     })).filter(x => x.fromMonth >= 1 && x.toMonth >= x.fromMonth && !isNaN(x.servedPct));
     const nd = document.getElementById('pl-notice-days')?.value;
     const fp = document.getElementById('pl-fees-pct')?.value;
-    return { earlyExitSchedule: rows, noticeDays: nd === '' || nd == null ? null : parseInt(nd, 10), feesAnnualPct: fp === '' || fp == null ? null : parseFloat(fp) };
+    const free = !!document.getElementById('pl-exit-free-period')?.checked;
+    return { exitFreeAtPeriodEnd: free, earlyExitSchedule: rows, noticeDays: nd === '' || nd == null ? null : parseInt(nd, 10), feesAnnualPct: fp === '' || fp == null ? null : parseFloat(fp) };
   }
 
   // ── Hooks modales (add + edit) ───────────────────────────────────
@@ -74,6 +76,7 @@
       const t = editId ? catManager.deposits.find(d => d.id === editId) : catManager.deposits[catManager.deposits.length - 1];
       if (!t) return;
       t.earlyExitSchedule = terms.earlyExitSchedule;
+      t.exitFreeAtPeriodEnd = terms.exitFreeAtPeriodEnd;
       if (terms.noticeDays != null) t.noticeDays = terms.noticeDays; else delete t.noticeDays;
       if (terms.feesAnnualPct != null) t.feesAnnualPct = terms.feesAnnualPct; else delete t.feesAnnualPct;
       await catManager.saveDeposits();
@@ -143,10 +146,60 @@
       if (nd) bits.push('préavis ' + nd + ' j');
       const s = Array.isArray(d.earlyExitSchedule) ? d.earlyExitSchedule : [];
       if (s.length) bits.push('sortie : ' + s.map(x => 'M' + x.fromMonth + (x.toMonth !== x.fromMonth ? '-' + x.toMonth : '') + ' → ' + x.servedPct + '%').join(' · '));
+      if (d.exitFreeAtPeriodEnd) bits.push('sortie libre à chaque échéance');
       if (parseFloat(d.feesAnnualPct) > 0) bits.push('frais ' + d.feesAnnualPct + '%/an');
       if (!bits.length) return html;
       const extra = `<div style="font-size:9px;color:var(--text-dim);margin-top:4px">🚪 ${bits.join(' · ')}</div>`;
       return html.replace(/<\/div><\/div>\s*$/, extra + '</div></div>');
     };
   }
+})();
+
+// ═══ Optimiseur : scénario « sortir à la prochaine échéance libre » ══════════
+// Un CAT progressif à préavis se sort SANS frais ni préavis à chaque fin de
+// palier (exitFreeAtPeriodEnd). L'arbitrage « maintenant vs garder » ignorait
+// cette 3e voie : garder jusqu'à l'échéance du palier, puis replacer au meilleur
+// taux sans pénalité. On l'ajoute et on la retient si elle domine sur 12 mois.
+(function() {
+  'use strict';
+  function _wrap() {
+    if (typeof buildOptimizationAnalysis !== 'function' || buildOptimizationAnalysis.__exitTerms) return;
+    var _orig = buildOptimizationAnalysis;
+    var w = function() {
+      var analysis = _orig();
+      try {
+        var horizonDays = (typeof HORIZON_DAYS !== 'undefined') ? HORIZON_DAYS : 365;
+        var isRate = (typeof _IS_TAX_RATE !== 'undefined') ? _IS_TAX_RATE : 0.25;
+        var now = new Date();
+        (analysis.depositAnalysis || []).forEach(function(a) {
+          var d = catManager.deposits.find(function(x) { return x.id === a.id; });
+          if (!d || !d.exitFreeAtPeriodEnd || !d.rateSchedule || !d.rateSchedule.length || !a.bestAlt) return;
+          var cur = d.rateSchedule.find(function(s) { return new Date(s.from) <= now && new Date(s.to) >= now; });
+          if (!cur) return;
+          var freeDate = new Date(new Date(cur.to).getTime() + 864e5); // lendemain de la fin du palier
+          var daysToFree = Math.round((freeDate - now) / 864e5);
+          if (daysToFree <= 0 || daysToFree >= horizonDays) return;
+          var amt = parseFloat(d.amount) || 0;
+          var keepPart = amt * (parseFloat(cur.rate) || 0) / 100 * daysToFree / 365;
+          var reinvest = amt * (a.bestAlt.rate / 100) * (horizonDays - daysToFree) / 365;
+          var freeExit12m = Math.round((keepPart + reinvest) * 100) / 100;
+          a.freeExitDate = freeDate.toISOString().split('T')[0];
+          a.freeExit12m = freeExit12m;
+          var best = Math.max(a.keep12m || 0, a.switch12m || 0);
+          if (freeExit12m > best) {
+            var gain = Math.round((freeExit12m - (a.keep12m || 0)) * (1 - isRate));
+            a.recommendation = 'ATTENDRE ÉCHÉANCE';
+            a.reason = 'Sortir sans frais ni préavis le ' + formatDate(a.freeExitDate) + ' (fin de palier ' + cur.rate + '%) puis replacer à ' + a.bestAlt.rate + '% (' + a.bestAlt.name + ') : ' + formatNumber(freeExit12m) + '€/12m vs garder ' + formatNumber(a.keep12m) + '€ · arbitrer maintenant ' + formatNumber(a.switch12m) + '€ → +' + formatNumber(gain) + '€ net IS';
+          } else if (a.recommendation === 'ARBITRER') {
+            a.reason += ' · (sortie libre le ' + formatDate(a.freeExitDate) + ' : ' + formatNumber(freeExit12m) + '€/12m, moins bien)';
+          }
+        });
+      } catch (e) { console.error('[ExitTerms optimizer]', e); }
+      return analysis;
+    };
+    w.__exitTerms = true;
+    window.buildOptimizationAnalysis = w;
+  }
+  _wrap();
+  var _t = setInterval(function() { if (typeof buildOptimizationAnalysis === 'function') { clearInterval(_t); _wrap(); } }, 200);
 })();
