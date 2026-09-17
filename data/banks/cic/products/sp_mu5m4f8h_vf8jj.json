@@ -1,0 +1,222 @@
+{
+  "id": "sp_mu5m4f8h_vf8jj",
+  "name": "EMTN Callable 10YNC3&1 Septembre 2036",
+  "type": "taux-fixe",
+  "structureType": "taux_fixe",
+  "emitter": "CIC",
+  "guarantor": "",
+  "guarantorRating": {
+    "moodys": "",
+    "sp": "",
+    "fitch": ""
+  },
+  "underlyings": [],
+  "underlyingType": "none",
+  "currency": "EUR",
+  "maturity": "10 ans",
+  "maturityYears": 10,
+  "coupon": {
+    "rate": 4.15,
+    "rateIfCalled": null,
+    "rateIfMaturity": null,
+    "type": "fixe",
+    "frequency": "annuel",
+    "trigger": null,
+    "memory": false,
+    "paymentTiming": "periodic"
+  },
+  "participationRate": null,
+  "capitalProtection": {
+    "protected": true,
+    "level": 100,
+    "barrier": null,
+    "barrierCoupon": null,
+    "barrierType": "europeenne",
+    "guaranteeType": "formule"
+  },
+  "earlyRedemption": {
+    "possible": true,
+    "type": "callable",
+    "trigger": null,
+    "frequency": "annuel",
+    "startSemester": 3,
+    "stepDown": false,
+    "stepDownPct": null,
+    "firstCallDate": "2029-09-22"
+  },
+  "decrementPct": null,
+  "actualDividendYield": null,
+  "mechanism": "EMTN à taux fixe callable par l'émetteur. Coupon annuel fixe de 4,15% versé chaque année sans condition. Capital garanti à l'échéance quelle que soit l'évolution du marché. À partir de l'année 3, l'émetteur peut décider de rappeler le produit par anticipation : l'investisseur reçoit alors 100% du capital + un dernier coupon de 4,15%. Si non rappelé, à l'échéance (10 ans), remboursement à 100% du capital + dernier coupon de 4,15%.",
+  "risks": [
+    "Risque de perte partielle ou totale en capital en cas de sortie prématurée en dehors des conditions de remboursement anticipé",
+    "Durée exacte de l'investissement non connue à l'avance (callable)",
+    "Performance potentiellement inférieure à un placement sans risque de même durée",
+    "Risque de crédit émetteur (dégradation qualité ou défaut)",
+    "Risque d'inflation érodant le rendement réel et le capital"
+  ],
+  "summary": "EMTN Callable 10 ans (rappelable à partir de l'année 3) offrant un coupon annuel fixe de 4,15% versé sans condition chaque année et une garantie du capital à l'échéance. L'émetteur peut rappeler le produit dès l'année 3 en remboursant 100% du capital + dernier coupon. Produit de taux à capital garanti à l'échéance, SRI 1/7, valeur nominale 100 000€.",
+  "aiParsed": {
+    "name": "EMTN Callable 10YNC3&1 Septembre 2036",
+    "type": "taux-fixe",
+    "structureType": "taux_fixe",
+    "emitter": "CIC",
+    "guarantor": "",
+    "guarantorRating": {
+      "moodys": "",
+      "sp": "",
+      "fitch": ""
+    },
+    "underlyings": [],
+    "underlyingType": "none",
+    "currency": "EUR",
+    "maturity": "10 ans",
+    "maturityYears": 10,
+    "maturityDate": "2036-09-22",
+    "strikeDate": "2026-09-21",
+    "coupon": {
+      "rate": 4.15,
+      "rateIfCalled": null,
+      "rateIfMaturity": null,
+      "type": "fixe",
+      "frequency": "annuel",
+      "trigger": null,
+      "memory": false,
+      "paymentTiming": "periodic"
+    },
+    "participationRate": null,
+    "guaranteedYears": 10,
+    "autocallCumulTarget": null,
+    "commissions": null,
+    "commissionAnnualOverLife": false,
+    "fees": null,
+    "sri": 1,
+    "riy": null,
+    "isin": "XS3493393071",
+    "minInvestment": 100000,
+    "capitalProtection": {
+      "protected": true,
+      "level": 100,
+      "barrier": null,
+      "barrierCoupon": null,
+      "barrierType": "europeenne",
+      "guaranteeType": "formule"
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "callable",
+      "trigger": null,
+      "frequency": "annuel",
+      "startSemester": 3,
+      "stepDown": false,
+      "stepDownPct": null,
+      "firstCallDate": "2029-09-22"
+    },
+    "decrementPct": null,
+    "actualDividendYield": null,
+    "mechanism": "EMTN à taux fixe callable par l'émetteur. Coupon annuel fixe de 4,15% versé chaque année sans condition. Capital garanti à l'échéance quelle que soit l'évolution du marché. À partir de l'année 3, l'émetteur peut décider de rappeler le produit par anticipation : l'investisseur reçoit alors 100% du capital + un dernier coupon de 4,15%. Si non rappelé, à l'échéance (10 ans), remboursement à 100% du capital + dernier coupon de 4,15%.",
+    "risks": [
+      "Risque de perte partielle ou totale en capital en cas de sortie prématurée en dehors des conditions de remboursement anticipé",
+      "Durée exacte de l'investissement non connue à l'avance (callable)",
+      "Performance potentiellement inférieure à un placement sans risque de même durée",
+      "Risque de crédit émetteur (dégradation qualité ou défaut)",
+      "Risque d'inflation érodant le rendement réel et le capital"
+    ],
+    "summary": "EMTN Callable 10 ans (rappelable à partir de l'année 3) offrant un coupon annuel fixe de 4,15% versé sans condition chaque année et une garantie du capital à l'échéance. L'émetteur peut rappeler le produit dès l'année 3 en remboursant 100% du capital + dernier coupon. Produit de taux à capital garanti à l'échéance, SRI 1/7, valeur nominale 100 000€.",
+    "scenarios": {
+      "stress": null,
+      "defavorable": null,
+      "median": null,
+      "favorable": null
+    },
+    "aiParsed": {
+      "name": "EMTN Callable 10YNC3&1 Septembre 2036",
+      "isin": "XS3493393071",
+      "structureType": "taux_fixe",
+      "emitter": "CIC",
+      "guarantor": "",
+      "guarantorRating": {
+        "moodys": "",
+        "sp": "",
+        "fitch": ""
+      },
+      "underlyings": [],
+      "underlyingType": "none",
+      "currency": "EUR",
+      "maturity": "10 ans",
+      "maturityYears": 10,
+      "maturityDate": "2036-09-22",
+      "strikeDate": "2026-09-21",
+      "coupon": {
+        "rate": 4.15,
+        "rateIfCalled": null,
+        "rateIfMaturity": null,
+        "type": "fixe",
+        "frequency": "annuel",
+        "trigger": null,
+        "memory": false,
+        "paymentTiming": "periodic"
+      },
+      "participationRate": null,
+      "guaranteedYears": 10,
+      "autocallCumulTarget": null,
+      "commissions": null,
+      "commissionAnnualOverLife": false,
+      "commissionRecurringAnnual": null,
+      "capitalProtection": {
+        "protected": true,
+        "level": 100,
+        "barrier": null,
+        "barrierCoupon": null,
+        "barrierType": "europeenne",
+        "guaranteeType": "formule"
+      },
+      "earlyRedemption": {
+        "possible": true,
+        "type": "callable",
+        "trigger": null,
+        "frequency": "annuel",
+        "startSemester": 3,
+        "stepDown": false,
+        "stepDownPct": null,
+        "firstCallDate": "2029-09-22",
+        "callSchedule": []
+      },
+      "decrementPct": null,
+      "actualDividendYield": null,
+      "minInvestment": 100000,
+      "sri": 1,
+      "riy": null,
+      "costEntry": null,
+      "costExit": null,
+      "costOngoing": null,
+      "scenarios": {
+        "stress": null,
+        "defavorable": null,
+        "median": null,
+        "favorable": null
+      },
+      "mechanism": "EMTN à taux fixe callable par l'émetteur. Coupon annuel fixe de 4,15% versé chaque année sans condition. Capital garanti à l'échéance quelle que soit l'évolution du marché. À partir de l'année 3, l'émetteur peut décider de rappeler le produit par anticipation : l'investisseur reçoit alors 100% du capital + un dernier coupon de 4,15%. Si non rappelé, à l'échéance (10 ans), remboursement à 100% du capital + dernier coupon de 4,15%.",
+      "risks": [
+        "Risque de perte partielle ou totale en capital en cas de sortie prématurée en dehors des conditions de remboursement anticipé",
+        "Durée exacte de l'investissement non connue à l'avance (callable)",
+        "Performance potentiellement inférieure à un placement sans risque de même durée",
+        "Risque de crédit émetteur (dégradation qualité ou défaut)",
+        "Risque d'inflation érodant le rendement réel et le capital"
+      ],
+      "summary": "EMTN Callable 10 ans (rappelable à partir de l'année 3) offrant un coupon annuel fixe de 4,15% versé sans condition chaque année et une garantie du capital à l'échéance. L'émetteur peut rappeler le produit dès l'année 3 en remboursant 100% du capital + dernier coupon. Produit de taux à capital garanti à l'échéance, SRI 1/7, valeur nominale 100 000€.",
+      "_parsingAlerts": [
+        "Commissions non détectées (vérifier dans la brochure)",
+        "🛡️ Capital protégé à l’échéance par la formule — NON garanti : risque de crédit émetteur (EMTN, bail-in). Le seul risque sur le capital = l’émetteur. Vérifier la ligne « Garantie en capital » du KID."
+      ]
+    },
+    "sourceFile": "Cameleons EMTN 170920262.pdf"
+  },
+  "sourceFile": "JSON import",
+  "bankId": "cic",
+  "status": "analyzing",
+  "receivedDate": "2026-09-17",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null
+}
