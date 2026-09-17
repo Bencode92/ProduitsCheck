@@ -1,0 +1,374 @@
+{
+  "id": "sp_mu5kjuuq_o9cyo",
+  "name": "Taux fixe callable ZC - 10 ans",
+  "type": "taux_fixe_in_fine",
+  "structureType": "taux_fixe_in_fine",
+  "emitter": "Natixis",
+  "guarantor": "Natixis",
+  "guarantorRating": {
+    "moodys": "A2",
+    "sp": "A+",
+    "fitch": "A+"
+  },
+  "underlyings": [],
+  "underlyingType": "none",
+  "currency": "EUR",
+  "maturity": "10 ans",
+  "maturityYears": 10,
+  "coupon": {
+    "rate": 4.3,
+    "rateIfCalled": 4.3,
+    "rateIfMaturity": 43,
+    "type": "fixe_capitalise",
+    "frequency": "in_fine",
+    "trigger": null,
+    "memory": false,
+    "paymentTiming": "at_redemption"
+  },
+  "participationRate": null,
+  "capitalProtection": {
+    "protected": true,
+    "level": 100,
+    "barrier": null,
+    "barrierCoupon": null,
+    "barrierType": "europeenne",
+    "guaranteeType": "formule"
+  },
+  "earlyRedemption": {
+    "possible": true,
+    "type": "callable",
+    "trigger": null,
+    "frequency": "annuel",
+    "startSemester": 4,
+    "stepDown": false,
+    "stepDownPct": null,
+    "callSchedule": [
+      {
+        "date": "2028-10-19",
+        "amount": 108.6
+      },
+      {
+        "date": "2029-10-19",
+        "amount": 112.9
+      },
+      {
+        "date": "2030-10-19",
+        "amount": 117.2
+      },
+      {
+        "date": "2031-10-19",
+        "amount": 121.5
+      },
+      {
+        "date": "2032-10-19",
+        "amount": 125.8
+      },
+      {
+        "date": "2033-10-19",
+        "amount": 130.1
+      },
+      {
+        "date": "2034-10-19",
+        "amount": 134.4
+      },
+      {
+        "date": "2035-10-19",
+        "amount": 138.7
+      }
+    ],
+    "firstCallDate": "2028-10-19"
+  },
+  "decrementPct": null,
+  "actualDividendYield": null,
+  "mechanism": "Obligation Callable In Fine émise par Natixis, avec remboursement du capital garanti à 100% à l'échéance ou en cas de remboursement anticipé. Gain fixe de 4,30% par année écoulée, versé à l'échéance ou au remboursement anticipé décidé par l'émetteur (années 2 à 9). À l'échéance (10 ans) : capital + 43% (soit 143% du capital initial). Le coupon est garanti et capitalisé (zéro-coupon), versé uniquement au remboursement.",
+  "risks": [
+    "Risque de perte en capital en cas de cession avant l'échéance",
+    "Risque de défaut, d'ouverture d'une procédure de résolution ou de faillite de l'émetteur Natixis",
+    "Risque de volatilité et de liquidité sur le marché secondaire",
+    "Risque de réinvestissement en cas de remboursement anticipé décidé par l'émetteur",
+    "Risque lié à la variation des taux d'intérêts (impact négatif en cas de hausse des taux)",
+    "Durée d'investissement incertaine (2 à 10 ans selon décision de l'émetteur)",
+    "Risque de crédit de l'émetteur (notation A+/A2/A+)"
+  ],
+  "summary": "Obligation à taux fixe callable zéro-coupon sur 10 ans émise par Natixis. Capital garanti à 100% à l'échéance et en cas de rappel anticipé. Gain fixe de 4,30% par année écoulée, versé à l'échéance ou au remboursement anticipé (callable par l'émetteur de l'année 2 à 9). À maturité (10 ans) : remboursement à 143% du capital initial (TRA brut 3,64%). Structure sans sous-jacent, remboursement anticipé à la discrétion de l'émetteur, pas de coupon périodique (zéro-coupon in fine). Risque de perte en capital en cas de revente avant échéance. Soumis au risque de crédit émetteur Natixis (A+/A2/A+).",
+  "aiParsed": {
+    "name": "Taux fixe callable ZC - 10 ans",
+    "type": "taux_fixe_in_fine",
+    "structureType": "taux_fixe_in_fine",
+    "emitter": "Natixis",
+    "guarantor": "Natixis",
+    "guarantorRating": {
+      "moodys": "A2",
+      "sp": "A+",
+      "fitch": "A+"
+    },
+    "underlyings": [],
+    "underlyingType": "none",
+    "currency": "EUR",
+    "maturity": "10 ans",
+    "maturityYears": 10,
+    "maturityDate": "2036-10-19",
+    "strikeDate": "2026-10-19",
+    "coupon": {
+      "rate": 4.3,
+      "rateIfCalled": 4.3,
+      "rateIfMaturity": 43,
+      "type": "fixe_capitalise",
+      "frequency": "in_fine",
+      "trigger": null,
+      "memory": false,
+      "paymentTiming": "at_redemption"
+    },
+    "participationRate": null,
+    "guaranteedYears": 10,
+    "autocallCumulTarget": null,
+    "commissions": 1,
+    "commissionAnnualOverLife": false,
+    "fees": {
+      "structuring": 1
+    },
+    "sri": null,
+    "riy": null,
+    "isin": "",
+    "minInvestment": null,
+    "capitalProtection": {
+      "protected": true,
+      "level": 100,
+      "barrier": null,
+      "barrierCoupon": null,
+      "barrierType": "europeenne",
+      "guaranteeType": "formule"
+    },
+    "earlyRedemption": {
+      "possible": true,
+      "type": "callable",
+      "trigger": null,
+      "frequency": "annuel",
+      "startSemester": 4,
+      "stepDown": false,
+      "stepDownPct": null,
+      "callSchedule": [
+        {
+          "date": "2028-10-19",
+          "amount": 108.6
+        },
+        {
+          "date": "2029-10-19",
+          "amount": 112.9
+        },
+        {
+          "date": "2030-10-19",
+          "amount": 117.2
+        },
+        {
+          "date": "2031-10-19",
+          "amount": 121.5
+        },
+        {
+          "date": "2032-10-19",
+          "amount": 125.8
+        },
+        {
+          "date": "2033-10-19",
+          "amount": 130.1
+        },
+        {
+          "date": "2034-10-19",
+          "amount": 134.4
+        },
+        {
+          "date": "2035-10-19",
+          "amount": 138.7
+        }
+      ],
+      "firstCallDate": "2028-10-19"
+    },
+    "decrementPct": null,
+    "actualDividendYield": null,
+    "mechanism": "Obligation Callable In Fine émise par Natixis, avec remboursement du capital garanti à 100% à l'échéance ou en cas de remboursement anticipé. Gain fixe de 4,30% par année écoulée, versé à l'échéance ou au remboursement anticipé décidé par l'émetteur (années 2 à 9). À l'échéance (10 ans) : capital + 43% (soit 143% du capital initial). Le coupon est garanti et capitalisé (zéro-coupon), versé uniquement au remboursement.",
+    "risks": [
+      "Risque de perte en capital en cas de cession avant l'échéance",
+      "Risque de défaut, d'ouverture d'une procédure de résolution ou de faillite de l'émetteur Natixis",
+      "Risque de volatilité et de liquidité sur le marché secondaire",
+      "Risque de réinvestissement en cas de remboursement anticipé décidé par l'émetteur",
+      "Risque lié à la variation des taux d'intérêts (impact négatif en cas de hausse des taux)",
+      "Durée d'investissement incertaine (2 à 10 ans selon décision de l'émetteur)",
+      "Risque de crédit de l'émetteur (notation A+/A2/A+)"
+    ],
+    "summary": "Obligation à taux fixe callable zéro-coupon sur 10 ans émise par Natixis. Capital garanti à 100% à l'échéance et en cas de rappel anticipé. Gain fixe de 4,30% par année écoulée, versé à l'échéance ou au remboursement anticipé (callable par l'émetteur de l'année 2 à 9). À maturité (10 ans) : remboursement à 143% du capital initial (TRA brut 3,64%). Structure sans sous-jacent, remboursement anticipé à la discrétion de l'émetteur, pas de coupon périodique (zéro-coupon in fine). Risque de perte en capital en cas de revente avant échéance. Soumis au risque de crédit émetteur Natixis (A+/A2/A+).",
+    "scenarios": {
+      "stress": null,
+      "defavorable": null,
+      "median": null,
+      "favorable": null
+    },
+    "aiParsed": {
+      "name": "Taux fixe callable ZC - 10 ans",
+      "isin": null,
+      "structureType": "taux_fixe_in_fine",
+      "emitter": "Natixis",
+      "guarantor": "Natixis",
+      "guarantorRating": {
+        "moodys": "A2",
+        "sp": "A+",
+        "fitch": "A+"
+      },
+      "underlyings": [],
+      "underlyingType": "none",
+      "currency": "EUR",
+      "maturity": "10 ans",
+      "maturityYears": 10,
+      "maturityDate": "2036-10-19",
+      "strikeDate": "2026-10-19",
+      "coupon": {
+        "rate": 4.3,
+        "rateIfCalled": null,
+        "rateIfMaturity": null,
+        "type": "fixe_capitalise",
+        "frequency": "in_fine",
+        "trigger": null,
+        "memory": false,
+        "paymentTiming": "at_redemption"
+      },
+      "participationRate": null,
+      "guaranteedYears": 10,
+      "autocallCumulTarget": null,
+      "commissions": 1,
+      "commissionAnnualOverLife": false,
+      "commissionRecurringAnnual": null,
+      "capitalProtection": {
+        "protected": true,
+        "level": 100,
+        "barrier": null,
+        "barrierCoupon": null,
+        "barrierType": null,
+        "guaranteeType": "formule"
+      },
+      "earlyRedemption": {
+        "possible": true,
+        "type": "callable",
+        "trigger": null,
+        "frequency": "annuel",
+        "startSemester": 2,
+        "stepDown": false,
+        "stepDownPct": null,
+        "firstCallDate": "2028-10-19",
+        "callSchedule": [
+          {
+            "date": "2028-10-19",
+            "amount": 108.6
+          },
+          {
+            "date": "2029-10-19",
+            "amount": 112.9
+          },
+          {
+            "date": "2030-10-19",
+            "amount": 117.2
+          },
+          {
+            "date": "2031-10-19",
+            "amount": 121.5
+          },
+          {
+            "date": "2032-10-19",
+            "amount": 125.8
+          },
+          {
+            "date": "2033-10-19",
+            "amount": 130.1
+          },
+          {
+            "date": "2034-10-19",
+            "amount": 134.4
+          },
+          {
+            "date": "2035-10-19",
+            "amount": 138.7
+          }
+        ],
+        "atIssuerDiscretion": true,
+        "investorFavorable": false
+      },
+      "decrementPct": null,
+      "actualDividendYield": null,
+      "minInvestment": null,
+      "sri": null,
+      "riy": null,
+      "costEntry": null,
+      "costExit": null,
+      "costOngoing": null,
+      "scenarios": {
+        "stress": null,
+        "defavorable": null,
+        "median": null,
+        "favorable": null
+      },
+      "mechanism": "Obligation Callable In Fine émise par Natixis, avec remboursement du capital garanti à 100% à l'échéance ou en cas de remboursement anticipé. Gain fixe de 4,30% par année écoulée, versé à l'échéance ou au remboursement anticipé décidé par l'émetteur (années 2 à 9). À l'échéance (10 ans) : capital + 43% (soit 143% du capital initial). Le coupon est garanti et capitalisé (zéro-coupon), versé uniquement au remboursement.",
+      "risks": [
+        "Risque de perte en capital en cas de cession avant l'échéance",
+        "Risque de défaut, d'ouverture d'une procédure de résolution ou de faillite de l'émetteur Natixis",
+        "Risque de volatilité et de liquidité sur le marché secondaire",
+        "Risque de réinvestissement en cas de remboursement anticipé décidé par l'émetteur",
+        "Risque lié à la variation des taux d'intérêts (impact négatif en cas de hausse des taux)",
+        "Durée d'investissement incertaine (2 à 10 ans selon décision de l'émetteur)",
+        "Risque de crédit de l'émetteur (notation A+/A2/A+)"
+      ],
+      "summary": "Obligation à taux fixe callable zéro-coupon sur 10 ans émise par Natixis. Capital garanti à 100% à l'échéance et en cas de rappel anticipé. Gain fixe de 4,30% par année écoulée, versé à l'échéance ou au remboursement anticipé (callable par l'émetteur de l'année 2 à 9). À maturité (10 ans) : remboursement à 143% du capital initial (TRA brut 3,64%). Structure sans sous-jacent, remboursement anticipé à la discrétion de l'émetteur, pas de coupon périodique (zéro-coupon in fine). Risque de perte en capital en cas de revente avant échéance. Soumis au risque de crédit émetteur Natixis (A+/A2/A+).",
+      "fees": {
+        "structuring": 1
+      },
+      "subType": "callable_issuer_discretion",
+      "_callableIssuerDiscretion": true,
+      "type": "taux_fixe_in_fine",
+      "_parsingAlerts": [
+        "⚠️ Callable In Fine : rateIfMaturity non détecté (coupon total si pas de call)",
+        "Code ISIN non détecté",
+        "🛡️ Capital protégé à l’échéance par la formule — NON garanti : risque de crédit émetteur (EMTN, bail-in). Le seul risque sur le capital = l’émetteur. Vérifier la ligne « Garantie en capital » du KID."
+      ]
+    },
+    "sourceFile": "BC - Taux Fixe Callable ZC - 10 ans - BP.pdf",
+    "callSchedule": [
+      {
+        "date": "2028-10-19",
+        "amount": 108.6
+      },
+      {
+        "date": "2029-10-19",
+        "amount": 112.9
+      },
+      {
+        "date": "2030-10-19",
+        "amount": 117.2
+      },
+      {
+        "date": "2031-10-19",
+        "amount": 121.5
+      },
+      {
+        "date": "2032-10-19",
+        "amount": 125.8
+      },
+      {
+        "date": "2033-10-19",
+        "amount": 130.1
+      },
+      {
+        "date": "2034-10-19",
+        "amount": 134.4
+      },
+      {
+        "date": "2035-10-19",
+        "amount": 138.7
+      }
+    ]
+  },
+  "sourceFile": "JSON import",
+  "bankId": "cic",
+  "status": "analyzing",
+  "receivedDate": "2026-09-17",
+  "conversation": [],
+  "conversationSummary": null,
+  "decision": null,
+  "decisionReason": null
+}
