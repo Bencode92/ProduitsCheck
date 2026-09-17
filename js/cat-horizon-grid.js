@@ -66,19 +66,20 @@
 
     // Progressif : somme des intérêts mois par mois jusqu'à h
     if (h > D) return { rate: null, kind: 'na' }; // au-delà de la durée : pas d'hypothèse de renouvellement
-    let total = 0, kind = 'penalty';
+    let growth = 1, kind = 'penalty';
     for (const s of sched) {
       const from = parseInt(s.fromMonth, 10), to = parseInt(s.toMonth, 10);
       const rate = parseFloat(s.rate) || 0;
-      if (h >= to) { total += rate * (to - from + 1); if (h === to) kind = 'free'; continue; }
+      if (h >= to) { growth *= Math.pow(1 + rate / 100, (to - from + 1) / 12); if (h === to) kind = 'free'; continue; }
       if (h >= from) {
         // Sortie en cours de période → earlyRate si connu, sinon 50 % du taux
         const early = s.earlyRate != null ? parseFloat(s.earlyRate) : rate * 0.5;
-        total += early * (h - from + 1);
+        growth *= Math.pow(1 + early / 100, (h - from + 1) / 12);
         break;
       }
     }
-    return { rate: total / h, kind };
+    // Taux actuariel annualisé (capitalisation à chaque palier) = convention « taux actuariel moyen » des banques
+    return { rate: (Math.pow(growth, 12 / h) - 1) * 100, kind };
   }
 
   window._catFixedEarlyFactor = _fixedEarlyFactor;
@@ -135,7 +136,7 @@
           else if (x.kind === 'penalty') { style += 'color:var(--orange);'; title = 'retrait anticipé : conditions du produit appliquées'; }
           else if (x.kind === 'roll') { style += 'opacity:.55;'; txt = '↻ ' + txt; title = 'au-delà de la durée : hypothèse renouvellement au même taux'; }
           if (isBest) style += 'color:var(--green);background:rgba(6,214,160,0.08);';
-          const eur = Math.round(100000 * (x.rate / 100) * (h / 12));
+          const eur = Math.round(100000 * (Math.pow(1 + x.rate / 100, h / 12) - 1));
           txt += `<div style="font-size:9px;font-weight:400;opacity:.7">+${eur.toLocaleString('fr-FR')} €</div>`;
         }
         html += `<td style="${style}" title="${title}">${txt}</td>`;
@@ -143,7 +144,7 @@
       html += `</tr>`;
     });
     html += `</tbody></table></div>
-      <div style="font-size:10px;color:var(--text-dim);margin-top:6px">Lecture : à 6 mois, un progressif 18 m sorti à la fin du semestre 1 rapporte le taux du S1 (sortie libre) — à comparer directement au fixe 6 m. En cours de période, les progressifs servent le taux de retrait anticipé (50 % du taux en S1/A1, taux de la période précédente ensuite) et exigent un préavis de 32 jours (non déduit ici). Base 30/360 approximée en mois entiers. Les € indiqués = intérêts bruts sur 100 k€ placés jusqu'au mois de sortie (taux annualisé × durée).</div>
+      <div style="font-size:10px;color:var(--text-dim);margin-top:6px">Lecture : à 6 mois, un progressif 18 m sorti à la fin du semestre 1 rapporte le taux du S1 (sortie libre) — à comparer directement au fixe 6 m. En cours de période, les progressifs servent le taux de retrait anticipé (50 % du taux en S1/A1, taux de la période précédente ensuite) et exigent un préavis de 32 jours (non déduit ici). Taux actuariels, base 30/360 approximée en mois entiers. Les € indiqués = intérêts bruts sur 100 k€ jusqu'au mois de sortie, en convention actuarielle (capitalisation : 100 k€ × ((1 + taux)^(mois/12) − 1)) ; les paliers des progressifs se capitalisent entre eux.</div>
     </div>`;
     return html;
   };
@@ -175,7 +176,7 @@
       bests.forEach(b => {
         if (!b) { html += `<td style="text-align:right;padding:7px 8px;color:var(--text-dim)">—</td>`; return; }
         const isTop = top && b === top;
-        const eur = Math.round(100000 * (b.rate / 100) * (h / 12));
+        const eur = Math.round(100000 * (Math.pow(1 + b.rate / 100, h / 12) - 1));
         const color = b.kind === 'penalty' ? 'var(--orange)' : 'var(--text-bright)';
         html += `<td style="text-align:right;padding:7px 8px;white-space:nowrap;${isTop ? 'background:rgba(6,214,160,0.08);' : ''}" title="${(b.r.withdrawalConditions || '').replace(/"/g, '&quot;')}">
           <div style="font-family:var(--mono);font-weight:${b.kind === 'free' ? 700 : 400};color:${isTop ? 'var(--green)' : color}">${_fmt(b.rate)} <span style="font-size:9px;font-weight:400;opacity:.7">+${eur.toLocaleString('fr-FR')} €</span></div>
