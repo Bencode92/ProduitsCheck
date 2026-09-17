@@ -364,7 +364,7 @@
     ]
   },
   "sourceFile": "JSON import",
-  "bankId": "cic",
+  "bankId": "banque-populaire",
   "status": "analyzing",
   "receivedDate": "2026-09-17",
   "conversation": [],
@@ -547,5 +547,8 @@
         "desc": "Taux montent → pas de call, intérêts simples sur 10 ans = rendement moindre"
       }
     }
-  }
+  },
+  "strikeDate": "2026-10-19",
+  "maturityDate": "2036-10-19",
+  "bankName": "Banque Populaire"
 }

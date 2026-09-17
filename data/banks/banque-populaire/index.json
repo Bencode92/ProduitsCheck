@@ -1,0 +1,15 @@
+{
+  "bankId": "banque-populaire",
+  "bankName": "Banque Populaire",
+  "lastUpdated": "2026-09-17T13:48:50.763910Z",
+  "products": [
+    {
+      "id": "sp_mu5kjuuq_o9cyo",
+      "name": "Taux fixe callable ZC - 10 ans",
+      "type": "taux_fixe_in_fine",
+      "status": "analyzing",
+      "score": null,
+      "receivedDate": "2026-09-17"
+    }
+  ]
+}
