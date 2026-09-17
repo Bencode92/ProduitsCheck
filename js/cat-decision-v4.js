@@ -11,7 +11,7 @@
 (function() {
   'use strict';
 
-  const S = window._catV4State = window._catV4State || { horizon: 12, shift: 0, cash: 300000, callable: { coupon: 4.0, guaranteed: 2, maturity: 10, spread: 0.6, barrier: '', fees: 0 }, rates: null };
+  const S = window._catV4State = window._catV4State || { horizon: 12, shift: 0, cash: 300000, callable: { coupon: 4.0, guaranteed: 2, maturity: 10, spread: 0.6, barrier: '', fees: 0, enabled: false }, selected: [], rates: null };
   const fmtE = (n) => Math.round(n).toLocaleString('fr-FR') + ' €';
   const fmtP = (x) => (Math.round(x * 100) / 100).toFixed(2).replace('.', ',') + ' %';
   const DAY = 864e5;
@@ -121,33 +121,61 @@
     return out.filter(s => !seen.has(s.label) && seen.add(s.label)).sort((x, y) => y.final - x.final);
   }
 
-  // ── 4. Callable / TARN saisi ─────────────────────────────────────
-  function callableValue(c, A, H, shiftBp) {
-    // c: {coupon %/an, guaranteed (ans), maturity (ans), spread émetteur %, barrier TEC10 (≤) ou '', fees %/an}
-    const years = Math.ceil(H / 12); const tec = _curve().tec10;
-    let capital = A, coupons = 0, called = null, lostCoupons = 0, notes = [];
-    for (let y = 1; y <= Math.min(years, c.maturity); y++) {
-      // coupon de l'année y
+  // ── 4bis. Produits de taux réels (fiches StructBoard) ─────────────
+  function _rateProducts() {
+    const seen = new Set(), out = [];
+    const push = (p) => { if (!p || !p.id || seen.has(p.id)) return; seen.add(p.id); out.push(p); };
+    try { Object.values((window.app && app.state && app.state.proposals) || {}).forEach(arr => (arr || []).forEach(push)); } catch (e) {}
+    try { ((window.app && app.state && app.state.portfolio) || []).forEach(push); } catch (e) {}
+    return out.filter(p => {
+      const cp = p.capitalProtection || {}; const c = p.coupon || {}; const er = p.earlyRedemption || {};
+      const rateLike = /TEC|EURIBOR|CMS|€STR|ESTR|OAT/i.test(String(c.barrierCouponType || '') + ' ' + String((p.underlyings || []).join(' '))) || c.type === 'fixe' || c.type === 'fixe_capitalise' || er.type === 'callable' || er.type === 'tarn';
+      return (cp.protected === true || cp.protected === 'true' || /capital_garanti|taux_fixe|taux-fixe|capital-protege/.test(String(p.structureType || p.type || ''))) && rateLike;
+    }).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  }
+  function _productTerms(p) {
+    const c = p.coupon || {}, er = p.earlyRedemption || {};
+    const coupon = parseFloat(c.annualizedRate != null ? c.annualizedRate : c.rate) || 0;
+    const maturity = parseFloat(p.maturityYears) || 10;
+    const inFine = /in_fine|maturit/i.test(String(c.frequency || '')) || c.paymentTiming === 'at_redemption';
+    const isCallable = er.type === 'callable' || er.discretionary === true;
+    const isTarn = er.type === 'tarn' || (er.targetCouponLevel != null && er.targetCouponLevel > 0);
+    // 1re année de rappel possible : firstCallDate vs strike, sinon startSemester/2, sinon années garanties
+    let firstCall = null;
+    if (isCallable) {
+      if (er.firstCallDate && p.strikeDate) firstCall = Math.max(1, Math.round((new Date(er.firstCallDate) - new Date(p.strikeDate)) / DAY / 365));
+      else if (er.firstCallDate && /^\d{4}-/.test(er.firstCallDate)) firstCall = Math.max(1, new Date(er.firstCallDate).getFullYear() - new Date().getFullYear());
+      else if (er.startSemester) firstCall = Math.max(1, Math.round(er.startSemester / 2));
+      else firstCall = 1;
+    }
+    const barrier = (c.type === 'conditionnel' && c.trigger != null && c.trigger > 0 && c.trigger < 20) ? parseFloat(c.trigger) : null; // seuil de taux (≤)
+    const fees = parseFloat((p.aiParsed && p.aiParsed.commissions) || (p.fees && p.fees.structuring)) || 0; // one-shot, en % du nominal
+    return { coupon, maturity, inFine, isCallable, isTarn, firstCall, guaranteed: parseInt(c.guaranteedYears, 10) || 0, target: parseFloat(er.targetCouponLevel || er.trigger) || null, barrier, memory: !!c.memory, fees, spread: 0.6, name: p.name };
+  }
+  function productValue(t, A, H, shiftBp) {
+    const years = Math.floor(H / 12), tec = _curve().tec10; const notes = [];
+    let coupons = 0, cum = 0, redeemedYear = null, lost = 0, memoryBank = 0;
+    for (let y = 1; y <= Math.min(years, Math.ceil(t.maturity)); y++) {
       let paid = true;
-      if (c.barrier !== '' && c.barrier != null && tec != null) {
-        const drift = forward((y - 1) * 12, 120) - spot(120); // dérive du 10 ans implicite
-        const tecY = tec + drift + (shiftBp || 0) / 100;
-        paid = tecY <= parseFloat(c.barrier);
-        if (!paid) lostCoupons++;
+      if (t.barrier != null && y > t.guaranteed && tec != null) {
+        const tecY = tec + (forward((y - 1) * 12, 120) - spot(120)) + (shiftBp || 0) / 100;
+        paid = tecY <= t.barrier;
       }
-      if (paid) coupons += A * (c.coupon - (c.fees || 0)) / 100;
-      // rappel possible à partir de la fin des années garanties
-      if (y >= c.guaranteed && y < c.maturity) {
-        const mkt = forward(y * 12, (c.maturity - y) * 12) + (shiftBp || 0) / 100 + (c.spread || 0);
-        if (c.coupon - mkt > 0.15) { called = y; break; } // l'émetteur se refinance moins cher → il rappelle
+      if (paid) { const cpn = A * t.coupon / 100 * (1 + (t.memory ? memoryBank : 0)); coupons += cpn; cum += t.coupon * (1 + (t.memory ? memoryBank : 0)); memoryBank = 0; }
+      else { lost++; if (t.memory) memoryBank++; }
+      if (t.isTarn && t.target && cum >= t.target - 1e-9) { redeemedYear = y; notes.push('cible ' + fmtP(t.target) + ' atteinte → remboursé fin année ' + y); break; }
+      if (t.isCallable && t.firstCall != null && y >= t.firstCall && y < t.maturity) {
+        const mkt = forward(y * 12, (t.maturity - y) * 12) + (shiftBp || 0) / 100 + t.spread;
+        if (t.coupon - mkt > 0.15) { redeemedYear = y; notes.push('rappelé par l\'émetteur fin année ' + y + ' (coupon ' + fmtP(t.coupon) + ' > marché ' + fmtP(mkt) + ')'); break; }
       }
     }
-    let value = capital + coupons;
-    let liquid = true;
-    if (called != null && called * 12 < H) { const rest = H - called * 12; value = capital * Math.pow(1 + expectedCAT(called * 12, rest, shiftBp) / 100, rest / 12) + coupons; notes.push('rappelé fin année ' + called + ' → capital replacé au CAT attendu ' + fmtP(expectedCAT(called * 12, rest, shiftBp))); }
-    else if (c.maturity * 12 > H) { liquid = false; notes.push(H <= c.guaranteed * 12 ? 'période garantie (rappel impossible avant l\'année ' + c.guaranteed + ') — compare aussi à ' + (c.guaranteed * 12 + 12) + ' et 60 mois' : 'non rappelé dans ce scénario : capital immobilisé jusqu\'à l\'échéance (' + c.maturity + ' ans) au coupon ' + fmtP(c.coupon)); }
-    if (lostCoupons) notes.push(lostCoupons + ' coupon(s) perdu(s) : TEC10 scénario > barrière ' + c.barrier + ' %');
-    return { value, called, liquid, notes, coupons };
+    let value = A * (1 - t.fees / 100) + coupons, liquid = true;
+    if (redeemedYear != null && redeemedYear * 12 < H) { const rest = H - redeemedYear * 12; value = A * (1 - t.fees / 100) * Math.pow(1 + expectedCAT(redeemedYear * 12, rest, shiftBp) / 100, rest / 12) + coupons; notes.push('capital replacé au CAT attendu ' + fmtP(expectedCAT(redeemedYear * 12, rest, shiftBp)) + ' sur ' + rest + ' m'); }
+    else if (t.maturity * 12 > H && redeemedYear == null) { liquid = false; notes.push(H <= (t.isCallable ? (t.firstCall || 1) : t.guaranteed) * 12 ? 'période garantie / non rappelable — juge aussi à ' + Math.min(60, Math.round(t.maturity * 12)) + ' m' : (t.isTarn ? 'cible non atteinte : coupons conditionnels, capital immobilisé jusqu\'à ' + t.maturity + ' ans' : 'non rappelé : coincé au coupon ' + fmtP(t.coupon) + ' jusqu\'à ' + t.maturity + ' ans')); }
+    if (lost) notes.push(lost + ' coupon(s) perdu(s) (taux scénario > barrière ' + fmtP(t.barrier) + ')' + (t.memory ? ' — mémoire' : ''));
+    if (t.inFine && !redeemedYear && years > 0) notes.push('coupons capitalisés, versés seulement au remboursement');
+    if (t.fees) notes.push('commission ' + fmtP(t.fees) + ' déduite');
+    return { value, liquid, notes, coupons, redeemedYear };
   }
 
   // ── Rendu ────────────────────────────────────────────────────────
@@ -202,25 +230,40 @@
       h += `<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 6px">${s.label}</td><td style="padding:5px 6px">${b.label}</td><td style="padding:5px 6px;text-align:right;font-family:var(--mono);font-weight:700;color:var(--green)">${fmtE(b.final)}</td><td style="padding:5px 6px">${bs ? bs.label : '—'}</td><td style="padding:5px 6px;text-align:right;font-family:var(--mono)">${bs ? fmtE(bs.final) + ' <span style="font-size:9px;color:var(--text-dim)">(' + (bs.final - b.final >= 0 ? '+' : '−') + fmtE(Math.abs(bs.final - b.final)) + ')</span>' : ''}</td></tr>`; });
     h += `</tbody></table></div><div style="font-size:10px;color:var(--text-dim);margin:6px 0 16px">Si la meilleure stratégie est un enchaînement dont la 2e jambe ne bat le produit unique <em>que</em> dans le scénario « Hausse », c'est un pari sur une hausse au-delà du forward. Un progressif sorti à une échéance libre compte comme 1re jambe.</div>`;
 
-    // 4. callable
+    // 4. produits de taux : sélection dans la liste + produit libre
+    const prods = _rateProducts();
+    S.selected = S.selected || [];
+    const selected = prods.filter(p => S.selected.includes(p.id));
     const c = S.callable;
-    h += `<div style="font-size:12px;font-weight:700;color:var(--text-bright);margin-bottom:6px">3 · Callable / TARN à comparer (saisis les termes de l'offre)</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:8px;font-size:11px">
+    h += `<div style="font-size:12px;font-weight:700;color:var(--text-bright);margin-bottom:6px">3 · Structurés de taux vs meilleur CAT — coche 1 à 3 produits de ta liste (ou saisis un produit libre)</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">${prods.map(p => { const t = _productTerms(p); const on = S.selected.includes(p.id); return `<label style="display:flex;align-items:center;gap:6px;padding:4px 8px;border:1px solid ${on ? 'var(--green)' : 'var(--border)'};border-radius:6px;font-size:10px;cursor:pointer;background:${on ? 'rgba(6,214,160,0.08)' : 'var(--bg-elevated)'}"><input type="checkbox" ${on ? 'checked' : ''} onchange="window._catV4Toggle('${p.id}')"> ${(p.name || '?').substring(0, 34)}<span style="color:var(--text-dim)"> · ${fmtP(t.coupon)}${t.barrier != null ? ' si TEC10 ≤ ' + fmtP(t.barrier) : ''}${t.guaranteed ? ' · ' + t.guaranteed + ' a garantis' : ''}${t.isCallable ? ' · callable dès an ' + t.firstCall : t.isTarn ? ' · TARN cible ' + fmtP(t.target) : ''} · ${t.maturity} a${p.status === 'active' ? ' · détenu' : ''}</span></label>`; }).join('') || '<span style="font-size:10px;color:var(--text-dim)">aucun produit de taux à capital garanti dans la liste</span>'}</div>
+      <details style="margin-bottom:8px"><summary style="font-size:10px;color:var(--text-muted);cursor:pointer">Produit libre (termes saisis à la main)</summary>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:8px 0;font-size:11px">
         <label>Coupon %/an <input type="number" step="0.05" value="${c.coupon}" onchange="window._catV4Set('callable.coupon',this.value)" style="width:100%"></label>
-        <label>Années garanties <input type="number" step="1" value="${c.guaranteed}" onchange="window._catV4Set('callable.guaranteed',this.value)" style="width:100%"></label>
+        <label>Années garanties / 1er call <input type="number" step="1" value="${c.guaranteed}" onchange="window._catV4Set('callable.guaranteed',this.value)" style="width:100%"></label>
         <label>Échéance (ans) <input type="number" step="1" value="${c.maturity}" onchange="window._catV4Set('callable.maturity',this.value)" style="width:100%"></label>
-        <label title="Coupon payé seulement si TEC10 ≤ barrière (TARN). Vide = coupon fixe">Barrière TEC10 ≤ % <input type="number" step="0.05" value="${c.barrier}" placeholder="fixe" onchange="window._catV4Set('callable.barrier',this.value)" style="width:100%"></label>
-        <label title="Spread de refinancement de l'émetteur au-dessus de la courbe : il rappelle si coupon > forward + spread">Spread émetteur % <input type="number" step="0.1" value="${c.spread}" onchange="window._catV4Set('callable.spread',this.value)" style="width:100%"></label>
-        <label>Frais %/an <input type="number" step="0.05" value="${c.fees}" onchange="window._catV4Set('callable.fees',this.value)" style="width:100%"></label>
-      </div>
-      <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px;min-width:640px"><thead><tr style="border-bottom:1px solid var(--border)"><th style="text-align:left;padding:5px 6px;color:var(--text-muted)">Scénario</th><th style="text-align:right;padding:5px 6px;color:var(--text-muted)">Callable à ${H} m</th><th style="text-align:right;padding:5px 6px;color:var(--text-muted)">Meilleur CAT à ${H} m</th><th style="text-align:right;padding:5px 6px;color:var(--text-muted)">Écart</th><th style="text-align:left;padding:5px 6px;color:var(--text-muted)">Ce qui se passe</th></tr></thead><tbody>`;
-    scen.forEach((s, i) => { const cv4 = callableValue({ ...c, coupon: parseFloat(c.coupon) || 0, guaranteed: parseInt(c.guaranteed, 10) || 0, maturity: parseInt(c.maturity, 10) || 1, spread: parseFloat(c.spread) || 0, fees: parseFloat(c.fees) || 0 }, S.cash, H, s.bp); const b = strat[i][0]; const gap = b ? cv4.value - b.final : 0;
-      h += `<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 6px">${s.label}</td><td style="padding:5px 6px;text-align:right;font-family:var(--mono);font-weight:700">${fmtE(cv4.value)}${cv4.liquid ? '' : ' <span title="capital non disponible à cet horizon" style="color:var(--orange)">🔒</span>'}</td><td style="padding:5px 6px;text-align:right;font-family:var(--mono)">${b ? fmtE(b.final) : '—'}</td><td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:${gap >= 0 ? 'var(--green)' : 'var(--orange)'}">${(gap >= 0 ? '+' : '−') + fmtE(Math.abs(gap))}</td><td style="padding:5px 6px;font-size:10px;color:var(--text-muted)">${cv4.notes.join(' · ') || 'coupons ' + fmtE(cv4.coupons) + ' · non rappelé'}</td></tr>`; });
-    h += `</tbody></table></div><div style="font-size:10px;color:var(--text-dim);margin-top:6px">Le callable est rappelé quand l'émetteur peut se refinancer moins cher (coupon > forward de la durée restante + spread émetteur) — donc surtout dans le scénario « Baisse » ; dans les scénarios « Marché » et « Hausse » tu restes coincé au coupon jusqu'à l'échéance (🔒). Coupons non réinvestis. Une barrière TEC10 teste le TEC10 projeté (TEC10 actuel + dérive implicite du 10 ans + scénario) chaque année. Un callable ne se compare pas à un CAT de 2 ans mais à ce que tu subis s'il n'est pas rappelé.</div>`;
+        <label title="Coupon payé seulement si TEC10 ≤ barrière. Vide = coupon fixe">Barrière TEC10 ≤ % <input type="number" step="0.05" value="${c.barrier}" placeholder="fixe" onchange="window._catV4Set('callable.barrier',this.value)" style="width:100%"></label>
+        <label>Spread émetteur % <input type="number" step="0.1" value="${c.spread}" onchange="window._catV4Set('callable.spread',this.value)" style="width:100%"></label>
+        <label>Commission % <input type="number" step="0.05" value="${c.fees}" onchange="window._catV4Set('callable.fees',this.value)" style="width:100%"></label>
+        <label style="display:flex;align-items:center;gap:6px"><input type="checkbox" ${c.enabled ? 'checked' : ''} onchange="window._catV4Set('callable.enabled',this.checked)"> inclure</label>
+      </div></details>`;
+    const cols = selected.map(p => ({ label: p.name, terms: _productTerms(p) }));
+    if (c.enabled) cols.push({ label: 'Produit libre', terms: { coupon: parseFloat(c.coupon) || 0, maturity: parseInt(c.maturity, 10) || 1, inFine: false, isCallable: true, isTarn: false, firstCall: parseInt(c.guaranteed, 10) || 1, guaranteed: parseInt(c.guaranteed, 10) || 0, target: null, barrier: c.barrier === '' || c.barrier == null ? null : parseFloat(c.barrier), memory: false, fees: parseFloat(c.fees) || 0, spread: parseFloat(c.spread) || 0.6 } });
+    if (cols.length) {
+      h += `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px;min-width:640px"><thead><tr style="border-bottom:1px solid var(--border)"><th style="text-align:left;padding:5px 6px;color:var(--text-muted)">Scénario</th><th style="text-align:right;padding:5px 6px;color:var(--text-muted)">Meilleur CAT à ${H} m</th>${cols.map(k => `<th style="text-align:right;padding:5px 6px;color:var(--text-muted)">${(k.label || '').substring(0, 30)}</th>`).join('')}</tr></thead><tbody>`;
+      scen.forEach((s, i) => { const b = strat[i][0];
+        h += `<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 6px">${s.label}</td><td style="padding:5px 6px;text-align:right;font-family:var(--mono)">${b ? fmtE(b.final) : '—'}<div style="font-size:9px;color:var(--text-dim)">${b ? b.label.substring(0, 40) : ''}</div></td>`;
+        cols.forEach(k => { const v = productValue(k.terms, S.cash, H, s.bp); const gap = b ? v.value - b.final : 0;
+          h += `<td style="padding:5px 6px;text-align:right;font-family:var(--mono);vertical-align:top"><span style="font-weight:700;color:${gap >= 0 ? 'var(--green)' : 'var(--orange)'}">${fmtE(v.value)}</span>${v.liquid ? '' : ' <span title="capital non disponible à cet horizon" style="color:var(--orange)">🔒</span>'}<div style="font-size:9px;color:${gap >= 0 ? 'var(--green)' : 'var(--orange)'}">${(gap >= 0 ? '+' : '−') + fmtE(Math.abs(gap))} vs CAT</div><div style="font-size:9px;color:var(--text-dim);text-align:left;max-width:220px;white-space:normal">${v.notes.join(' · ')}</div></td>`; });
+        h += `</tr>`; });
+      h += `</tbody></table></div>`;
+    }
+    h += `<div style="font-size:10px;color:var(--text-dim);margin-top:6px">Lecture par mécanique : <strong>TARN</strong> — coupons garantis N ans puis payés si TEC10 ≤ barrière ; remboursé dès que le cumul atteint la cible → il se rembourse vite quand les taux <em>baissent</em>, et te laisse coincé (coupons perdus + capital immobilisé) quand ils <em>montent</em>. <strong>Callable</strong> — l'émetteur rappelle quand il peut se refinancer moins cher (coupon > forward + spread), donc en baisse ; sinon tu restes au coupon jusqu'à l'échéance. TEC10 projeté = TEC10 actuel (${cv.tec10 != null ? fmtP(cv.tec10) : '—'}) + dérive implicite du 10 ans + scénario. Coupons non réinvestis, commission déduite du nominal. 🔒 = capital non disponible à l'horizon : compare aussi à 36 et 60 mois.</div>`;
     h += `</div>`;
     host.innerHTML = h;
   }
 
+  window._catV4Toggle = function(id) { S.selected = S.selected || []; const i = S.selected.indexOf(id); if (i >= 0) S.selected.splice(i, 1); else { if (S.selected.length >= 3) S.selected.shift(); S.selected.push(id); } render(); };
   window._catV4Set = function(key, val) {
     if (key.startsWith('callable.')) S.callable[key.split('.')[1]] = val === '' ? '' : val;
     else if (key === 'horizon') S.horizon = parseInt(val, 10) || 12;
