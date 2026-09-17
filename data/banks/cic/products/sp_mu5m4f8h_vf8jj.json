@@ -226,5 +226,177 @@
   "decision": null,
   "decisionReason": null,
   "strikeDate": "2026-09-21",
-  "maturityDate": "2036-09-22"
+  "maturityDate": "2036-09-22",
+  "grading": {
+    "grade": "C",
+    "score": 59,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 55,
+        "base": 63,
+        "delta": -1,
+        "reasoning": "Coupon 4,2%/an versé chaque année, inconditionnel → rendement 4,2%/an quelle que soit la durée (rappel possible dès l’an 3, échéance 10 a). Le seul aléa est la DURÉE : Crédit Industriel et Commercial rappelle si les taux baissent (tu réinvestis plus bas), te garde si les taux montent (coupon devenu inférieur au marché). | Coupon fiable 4,2%, protégé | Maturité pleine ~10a (rappel au gré de Crédit Industriel et Commercial)"
+      },
+      "underlyingQuality": {
+        "score": 70,
+        "base": 71,
+        "delta": -1,
+        "reasoning": "Qualité: base 71 → -1 = 70 (Stagflation élevée risque/crédit : VIX 22, HY spreads en widening (271bps), aucun sous-jacent equity mais exposition pure crédit émetteur sur 10Y avec spread très faible (62bps) vs risque macro actuel.)"
+      },
+      "portfolioFit": {
+        "score": 86,
+        "base": 85,
+        "delta": 1,
+        "reasoning": "Fit: base 85 → +1 = 86 (MI critique : portefeuilles à 0% bonds, 81-87% equity sans amortisseur. Ce produit apporte enfin une composante obligataire (capital garanti, coupons fixes) essentielle en stagflation pour diversifier.) — nouveau — diversifie"
+      },
+      "riskPremium": {
+        "score": 40,
+        "base": 22,
+        "delta": -1,
+        "reasoning": "Prime vs CAT (gain acquis dans tous les cas) : coupon 4,2%/an versé chaque année vs CAT 3,5% − illiquidité 3,1% = -2,5%. Meilleur cas 4,2%/an si Crédit Industriel et Commercial rappelle an 3 — ce qui n’arrive que si les taux BAISSENT."
+      }
+    },
+    "verdict": "Produit défensif bienvenu pour diversifier des portefeuilles surpondérés en equity (81-87% vs 0% bonds), mais timing et pricing problématiques. Le coupon garanti 4.15% offre visibilité, toutefois le spread de 62bps vs AAA 10Y (3.53%) sous-évalue le risque crédit en stagflation (VIX 22, HY spreads en widening). Probabilité de call faible (20%) implique détention probable sur 10 ans : immobilisation longue avec rendement modeste vs TEC10 4.48%. Rôle de stabilisateur dans une allocation agressive justifie l'achat, mais à condition de négocier un spread supérieur (100-120bps minimum) ou de réduire la taille pour limiter l'exposition crédit émetteur unique.",
+    "keyRisks": [
+      "Risque crédit émetteur concentré sur 10 ans avec spread 62bps largement insuffisant en contexte stagflation (HY spreads 271bps en élargissement, signaux de repricing brutal vers 400bps+ selon MI)",
+      "Probabilité de call 20% → détention probable jusqu'à maturité 10Y : risque de durée élevé (DV01 ~10bps par 1% hausse taux) si 10Y AAA dépasse 5% (actuellement 3.53%, Fed 10Y déjà à 4.97%)",
+      "Coût d'opportunité : immobilisation 10 ans à 4.15% alors que TEC10 à 4.48% et meilleur CAT 3.54% offrent alternatives plus liquides ; risque de réinvestissement si courbe se re-steepening continue (+32bps 2s10s)"
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "label": "Rappelé an 3 (taux en baisse)",
+        "desc": "capital + gain acquis, replacé plus bas",
+        "return_pct": 12.5,
+        "return_eur": 12450,
+        "probability": 0.3
+      },
+      "base": {
+        "label": "Échéance 10 a (taux stables/hausse)",
+        "desc": "10 coupons de 4,2% encaissés, 4,2%/an, coincé jusqu’au bout",
+        "return_pct": 41.5,
+        "return_eur": 41500,
+        "probability": 0.65
+      },
+      "stress": {
+        "label": "Revente en cours de vie",
+        "desc": "prix de marché : perte non mesurable (≈ −3 % à −10 % si les taux montent)",
+        "return_pct": -5,
+        "return_eur": -5000,
+        "probability": 0.03
+      },
+      "worst": {
+        "label": "Défaut / résolution Crédit Industriel et Commercial",
+        "desc": "bail-in : perte partielle ou totale",
+        "return_pct": -60,
+        "return_eur": -60000,
+        "probability": 0.02
+      }
+    },
+    "confidenceInterval": {
+      "low": 45,
+      "high": 63,
+      "halfWidth": 9,
+      "gradeStable": false,
+      "gradeRange": "C-B",
+      "label": "C [45-63]"
+    },
+    "metadata": {
+      "gradedAt": "2026-09-17T14:20:07.146Z",
+      "durationMs": 22376,
+      "aiUsed": true,
+      "version": "7.1",
+      "productType": "taux_fixe",
+      "marketDataAvailable": false,
+      "catBenchmark": 3.54,
+      "catSource": "allocator-confirmed",
+      "basketDividend": 0,
+      "basketVol": 0,
+      "basketDD": 0,
+      "basketMomentum": null,
+      "couponAnnualized": 4.15,
+      "couponRaw": 4.15,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": false,
+      "barrierPct": 0,
+      "barrierCouponPct": null,
+      "couponProbability": null,
+      "expectedMaturity": 10,
+      "maxMaturity": 10,
+      "probReachMaturity": 100,
+      "maxBeta": null,
+      "baseScore": 55,
+      "baseGrade": "C",
+      "adjustments": {
+        "p1": -1,
+        "p2": -1,
+        "p3": 1,
+        "p4": -1
+      },
+      "barrier_sigma": null,
+      "barrier_sigma_label": null,
+      "barrier_sigma_danger": null,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Callable LT",
+      "ci_low": 45,
+      "ci_high": 63,
+      "ci_label": "C [45-63]",
+      "issuer_rating": "A+",
+      "issuer_tier": "IG",
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "taux_fixe",
+      "issuerCreditPenalty": 1,
+      "issuerCDS": 55,
+      "v6Weights": {
+        "p1": 0.3,
+        "p2": 0.3,
+        "p3": 0.1,
+        "p4": 0.3
+      },
+      "inputHash": "g1pnd6f9",
+      "gradeT0": "2026-09-17T14:20:07.146Z",
+      "trackingLevelAt0": null,
+      "catRate": 3.54,
+      "productClass": "callable_issuer_discretion",
+      "callableIssuerDiscretion": true,
+      "callPremiumAnnual": 4.15,
+      "guaranteedYieldWorst": 4.15,
+      "guaranteedYieldBest": 4.15,
+      "guaranteedYieldBestYear": 3,
+      "guaranteedMaturityLevel": 141.5,
+      "callableGuaranteedGain": true,
+      "scenariosDeterministic": true,
+      "gradeCaveat": "⚠️ Callable au gré de Crédit Industriel et Commercial : coupon 4,2%/an versé chaque année quoi qu’il arrive ; Crédit Industriel et Commercial choisit la durée (rappel dès l’an 3 si les taux baissent, sinon jusqu’à 10 ans). Illiquide avant le remboursement."
+    },
+    "regimeScenarios": {
+      "current": {
+        "score": 63,
+        "grade": "B",
+        "label": "Actuel (stagflation)",
+        "desc": "In fine : pas de cash-flow intermédiaire, 4,2%/an actuariel si tu vas à l’échéance, 4,2% si rappel an 3"
+      },
+      "bull": {
+        "score": 69,
+        "grade": "B",
+        "label": "Bull / Risk-on",
+        "delta": 6,
+        "desc": "Taux baissent → call probable → réinvestissement à taux bas"
+      },
+      "crash": {
+        "score": 55,
+        "grade": "C",
+        "label": "Crash / Récession",
+        "delta": -8,
+        "desc": "Taux montent → pas de call, coupon garanti = atout"
+      }
+    }
+  }
 }
