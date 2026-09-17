@@ -3,12 +3,12 @@
   "name": "EMTN Callable 10YNC3&1 Septembre 2036",
   "type": "taux-fixe",
   "structureType": "taux_fixe",
-  "emitter": "CIC",
-  "guarantor": "",
+  "emitter": "Crédit Industriel et Commercial",
+  "guarantor": "Crédit Industriel et Commercial",
   "guarantorRating": {
-    "moodys": "",
-    "sp": "",
-    "fitch": ""
+    "moodys": "A1",
+    "sp": "A+",
+    "fitch": "AA-"
   },
   "underlyings": [],
   "underlyingType": "none",
@@ -17,13 +17,14 @@
   "maturityYears": 10,
   "coupon": {
     "rate": 4.15,
-    "rateIfCalled": null,
-    "rateIfMaturity": null,
+    "rateIfCalled": 4.15,
+    "rateIfMaturity": 4.15,
     "type": "fixe",
     "frequency": "annuel",
     "trigger": null,
     "memory": false,
-    "paymentTiming": "periodic"
+    "paymentTiming": "periodic",
+    "guaranteed": true
   },
   "participationRate": null,
   "capitalProtection": {
@@ -39,10 +40,12 @@
     "type": "callable",
     "trigger": null,
     "frequency": "annuel",
-    "startSemester": 3,
+    "startSemester": 6,
     "stepDown": false,
     "stepDownPct": null,
-    "firstCallDate": "2029-09-22"
+    "firstCallDate": "2029-09-22",
+    "atIssuerDiscretion": true,
+    "discretionary": true
   },
   "decrementPct": null,
   "actualDividendYield": null,
@@ -60,11 +63,11 @@
     "type": "taux-fixe",
     "structureType": "taux_fixe",
     "emitter": "CIC",
-    "guarantor": "",
+    "guarantor": "Crédit Industriel et Commercial",
     "guarantorRating": {
-      "moodys": "",
-      "sp": "",
-      "fitch": ""
+      "moodys": "A1",
+      "sp": "A+",
+      "fitch": "AA-"
     },
     "underlyings": [],
     "underlyingType": "none",
@@ -75,13 +78,14 @@
     "strikeDate": "2026-09-21",
     "coupon": {
       "rate": 4.15,
-      "rateIfCalled": null,
-      "rateIfMaturity": null,
+      "rateIfCalled": 4.15,
+      "rateIfMaturity": 4.15,
       "type": "fixe",
       "frequency": "annuel",
       "trigger": null,
       "memory": false,
-      "paymentTiming": "periodic"
+      "paymentTiming": "periodic",
+      "guaranteed": true
     },
     "participationRate": null,
     "guaranteedYears": 10,
@@ -106,10 +110,12 @@
       "type": "callable",
       "trigger": null,
       "frequency": "annuel",
-      "startSemester": 3,
+      "startSemester": 6,
       "stepDown": false,
       "stepDownPct": null,
-      "firstCallDate": "2029-09-22"
+      "firstCallDate": "2029-09-22",
+      "atIssuerDiscretion": true,
+      "discretionary": true
     },
     "decrementPct": null,
     "actualDividendYield": null,
@@ -218,5 +224,7 @@
   "conversation": [],
   "conversationSummary": null,
   "decision": null,
-  "decisionReason": null
+  "decisionReason": null,
+  "strikeDate": "2026-09-21",
+  "maturityDate": "2036-09-22"
 }
