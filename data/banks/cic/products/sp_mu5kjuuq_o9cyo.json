@@ -394,13 +394,13 @@
         "score": 64,
         "base": 66,
         "delta": -2,
-        "reasoning": "Qualité: base 66 → -2 = 64 (Stagflation + stance hawkish = risque de hausse des taux 10Y au-delà de 5% (actuellement 4.97%), exposant à un mark-to-market négatif sur duration 10a ; proba call 20% faible = immobilisation longue en contexte défavorable.)"
+        "reasoning": "Qualité: base 66 → -2 = 64 (STAGFLATION + stance hawkish_hold avec courbe re-steepening post-inversion = signal récession 6-12m ; risque mark-to-market sévère si 10Y franchit 5% et duration 10a exposée ; HY spreads en widening (271→400bps?) menacent émetteur.)"
       },
       "portfolioFit": {
         "score": 87,
         "base": 85,
         "delta": 2,
-        "reasoning": "Fit: base 85 → +2 = 87 (MI alerte critique : portefeuilles à 0% bonds, exposition equity 81-87% sans amortisseur en stagflation/VIX 22 = besoin URGENT de diversification obligataire, ce produit répond exactement à ce gap structurel.) — nouveau — diversifie"
+        "reasoning": "Fit: base 85 → +2 = 87 (⚠ ALERTE MI: portfolios à 0% bonds avec 81-87% equity en stagflation VIX 22 = déficit critique d'amortisseur ; ce produit apporte 100k€ de ballast obligataire défensif indispensable.) — nouveau — diversifie"
       },
       "riskPremium": {
         "score": 38,
@@ -409,11 +409,11 @@
         "reasoning": "Prime vs CAT (gain acquis dans tous les cas) : pire cas 3,6%/an actuariel (échéance 10 a, 143% du nominal) − commission 1% (0,1%/an) vs CAT 3,5% − illiquidité 3,1% = -3,1%. Meilleur cas 4,2%/an si Natixis rappelle an 2 — ce qui n’arrive que si les taux BAISSENT."
       }
     },
-    "verdict": "Produit à forte pertinence TACTIQUE pour corriger l'absence totale d'obligataire dans les portefeuilles (alerte MI critique). Le coupon garanti 4.3% sur maturité espérée 2.3a (proba call 20% faible = durée réelle probable 8-10a) offre un rendement supérieur au 10Y AAA (3.53%) avec spread crédit émetteur de 77bps. MAIS le contexte stagflation/hawkish hold crée un risque de duration significatif : si le 10Y franchit 5% (seuil proche à 4.97%), le mark-to-market sera négatif pendant l'immobilisation longue. La faible probabilité de call (20%) est un AVANTAGE (flux garanti) mais aussi un PIÈGE (pas de sortie anticipée si les taux montent). Note ajustée D+ → C+ grâce à l'urgence de diversification obligataire, mais ce n'est PAS un produit sans risque en environnement de taux volatils.",
+    "verdict": "Produit DÉFENSIF pertinent dans le contexte actuel : coupon garanti 4.3% (77bps au-dessus AAA 10Y) avec probabilité de call faible (20%) signifie que l'investisseur conservera très probablement le bond sur 10 ans, générant un rendement prévisible supérieur au sans-risque. RÔLE CLEF : combler le déficit obligataire critique (0% bonds dans les portfolios actuels) en pleine stagflation VIX 22, offrant le ballast manquant face à l'exposition equity 81-87%. RISQUE PRINCIPAL : duration 10 ans exposée à un repricing brutal si 10Y franchit 5% (actuellement 4.97%) ou si HY spreads s'élargissent violemment vers 400bps+ en cas de récession imminente (courbe re-steepening post-inversion = signal historique 6-12m) ; perte latente potentielle de 8-12% avant maturité, mais capital garanti *si tenu jusqu'au terme*. Allocation défensive justifiée mais surveiller qualité crédit émetteur.",
     "keyRisks": [
-      "Duration 10a en stagflation : si taux 10Y franchit 5% (actuellement 4.97%), mark-to-market négatif de ~10% sans possibilité de sortie anticipée (proba call 20% faible), capital immobilisé dans un actif décoté.",
-      "Risque crédit émetteur : sans sous-jacent actions, dépendance totale à la solvabilité de l'émetteur ; en cas de stress HY (spreads s'élargissent déjà, HYG -0.94%), risque de défaut si émetteur non-investment grade.",
-      "Coût d'opportunité : immobilisation 8-10a probable (call peu probable) à 4.3% alors que la courbe pourrait offrir 5%+ si la Fed/BCE restent hawkish plus longtemps que prévu, notamment si Brent $107+ maintient PCE élevé."
+      "Duration 10 ans : DV01 ~10bps/1% hausse taux → si 10Y passe de 4.97% à 6% (scénario stagflation persistante), perte latente ~10% ; immobilisation longue si besoin liquidité avant maturité",
+      "Risque crédit émetteur : seul garant du capital et coupons ; en stagflation avec HY spreads qui s'écartent (HYG -0.94%, 271→400bps potentiel), risque de dégradation notation ou défaut si récession se matérialise dans 6-12m (signal courbe)",
+      "Coût opportunité réinvestissement : proba call 20% faible mais si callé an 1-3, devra réinvestir 100k€ dans environnement taux potentiellement plus bas (si récession) ou plus élevés (si stagflation persiste) ; scénario base = tenu 10a donc risque limité"
     ],
     "negotiationPoints": [],
     "scenarios": {
@@ -455,8 +455,8 @@
       "label": "C [41-59]"
     },
     "metadata": {
-      "gradedAt": "2026-09-17T13:43:32.690Z",
-      "durationMs": 31001,
+      "gradedAt": "2026-09-17T13:47:27.863Z",
+      "durationMs": 28555,
       "aiUsed": true,
       "version": "7.1",
       "productType": "taux_fixe",
@@ -511,7 +511,7 @@
         "p4": 0.3
       },
       "inputHash": "g1us0irp",
-      "gradeT0": "2026-09-17T13:43:32.690Z",
+      "gradeT0": "2026-09-17T13:47:27.863Z",
       "trackingLevelAt0": null,
       "catRate": 3.54,
       "productClass": "callable_issuer_discretion",
