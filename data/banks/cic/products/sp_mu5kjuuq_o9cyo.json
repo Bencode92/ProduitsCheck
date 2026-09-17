@@ -370,5 +370,171 @@
   "conversation": [],
   "conversationSummary": null,
   "decision": null,
-  "decisionReason": null
+  "decisionReason": null,
+  "aiCategory": "track-taux",
+  "aiCategoryLabel": "📈 Tracker Taux",
+  "aiCategoryColor": "#FFB74D",
+  "aiOpinion": "Produit de taux à capital protégé offrant 4.3% capitalisés sur 10 ans avec option d'autocall émetteur, soit un rendement total d'environ 52% si tenu jusqu'au terme. La structure callable favorise l'émetteur qui peut rembourser anticipativement si les taux baissent, limitant ainsi le gain potentiel de l'investisseur tout en l'exposant au risque de réinvestissement à des conditions moins favorables.",
+  "aiAnalyzedAt": "2026-09-17T13:32:17.442Z",
+  "grading": {
+    "grade": "C",
+    "score": 47,
+    "killCriteria": {
+      "triggered": false,
+      "reasons": []
+    },
+    "pillars": {
+      "adjustedReturn": {
+        "score": 38,
+        "base": 47,
+        "delta": 0,
+        "reasoning": "Rendement : le « coupon » est une prime de rappel au gré de l’émetteur (non fiable). À l’échéance sans rappel : capital + participation plafonnée (min 0%) → net de frais souvent NÉGATIF. Rendement: base 47 | Coupon 4.3%, protégé | Maturité pleine ~10a (rappel au gré de SG — non fiable)"
+      },
+      "underlyingQuality": {
+        "score": 64,
+        "base": 66,
+        "delta": -2,
+        "reasoning": "Qualité: base 66 → -2 = 64 (Régime stagflation avec 10Y à 4.97% et risque de repricing obligataire brutal augmentent le risque de duration/mark-to-market sur ce ZC 10 ans.)"
+      },
+      "portfolioFit": {
+        "score": 87,
+        "base": 85,
+        "delta": 2,
+        "reasoning": "Fit: base 85 → +2 = 87 (En stagflation avec portefeuilles à 0% bonds, un instrument à capital garanti apporte un amortisseur obligataire pertinent.) — nouveau — diversifie"
+      },
+      "riskPremium": {
+        "score": 26,
+        "base": 22,
+        "delta": -2,
+        "reasoning": "Prime vs CAT : prime de rappel ~4,3%/an mais AU GRÉ DE SG (non fiable) → rendement fiable ≈ 0% (cas échéance) vs CAT 2,8% − illiq 3,1% = -5,9%. SG rappelle quand ça L’arrange."
+      }
+    },
+    "verdict": "Produit à taux fixe callable in fine, capital garanti, offrant 4.3% annualisé sur un ZC 10 ans dans un régime de stagflation confirmée (VIX 22, Brent $107). La probabilité de call reste faible (~20%), donc l'investisseur bénéficiera probablement du coupon sur la durée complète, ce qui est un point positif en environnement incertain. Le spread réel n'est que de 0.77% au-dessus du 10Y AAA, une compensation modeste au regard de l'immobilisation longue et du risque crédit émetteur. Note C cohérente : instrument défensif correct mais rémunération peu généreuse.",
+    "keyRisks": [
+      "Risque crédit émetteur : sans sous-jacent, le défaut de l'émetteur est le principal aléa sur le capital nominalement garanti.",
+      "Risque de duration/liquidité : sensibilité élevée d'un ZC 10 ans à une hausse des taux (10Y proche de 5%), pénalisant en cas de revente avant terme.",
+      "Coût d'opportunité : spread de 0.77% faible, capital immobilisé longtemps si le bond n'est pas rappelé."
+    ],
+    "negotiationPoints": [],
+    "scenarios": {
+      "optimistic": {
+        "return_pct": 9,
+        "return_eur": 9000,
+        "probability": 0.2,
+        "duration_years": 2.3
+      },
+      "base": {
+        "return_pct": 43,
+        "return_eur": 43000,
+        "probability": 0.55,
+        "duration_years": 10
+      },
+      "stress": {
+        "return_pct": 10,
+        "return_eur": 10000,
+        "probability": 0.15,
+        "duration_years": 10
+      },
+      "worst": {
+        "return_pct": -40,
+        "return_eur": -40000,
+        "probability": 0.1,
+        "duration_years": 10
+      }
+    },
+    "confidenceInterval": {
+      "low": 39,
+      "high": 57,
+      "halfWidth": 9,
+      "gradeStable": false,
+      "gradeRange": "D-C",
+      "label": "C [39-57]"
+    },
+    "metadata": {
+      "gradedAt": "2026-09-17T13:33:09.099Z",
+      "durationMs": 48482,
+      "aiUsed": true,
+      "version": "7.1",
+      "productType": "taux_fixe",
+      "marketDataAvailable": false,
+      "catBenchmark": 3.54,
+      "catSource": "allocator-confirmed",
+      "basketDividend": 0,
+      "basketVol": 0,
+      "basketDD": 0,
+      "basketMomentum": null,
+      "couponAnnualized": 4.3,
+      "couponRaw": 4.3,
+      "couponMultiplier": 1,
+      "couponFrequency": "annuel",
+      "isInPortfolio": false,
+      "hasBarrier": false,
+      "barrierPct": 0,
+      "barrierCouponPct": null,
+      "couponProbability": null,
+      "expectedMaturity": 10,
+      "maxMaturity": 10,
+      "probReachMaturity": 100,
+      "maxBeta": null,
+      "baseScore": 49,
+      "baseGrade": "C",
+      "adjustments": {
+        "p1": 0,
+        "p2": -2,
+        "p3": 2,
+        "p4": -2
+      },
+      "barrier_sigma": null,
+      "barrier_sigma_label": null,
+      "barrier_sigma_danger": null,
+      "liquidity_level": "L3",
+      "liquidity_score": 40,
+      "liquidity_label": "Callable LT",
+      "ci_low": 39,
+      "ci_high": 57,
+      "ci_label": "C [39-57]",
+      "issuer_rating": "A+",
+      "issuer_tier": "IG",
+      "hasDecrement": false,
+      "decrementDrag": 0,
+      "structureType": "taux_fixe_in_fine",
+      "issuerCreditPenalty": 1,
+      "issuerCDS": 55,
+      "v6Weights": {
+        "p1": 0.3,
+        "p2": 0.3,
+        "p3": 0.1,
+        "p4": 0.3
+      },
+      "inputHash": "g1us0irp",
+      "gradeT0": "2026-09-17T13:33:09.099Z",
+      "trackingLevelAt0": null,
+      "productClass": "callable_issuer_discretion",
+      "callableIssuerDiscretion": true,
+      "callPremiumAnnual": 4.3,
+      "gradeCaveat": "⚠️ Callable AU GRÉ DE L’ÉMETTEUR : grade indicatif (hors modèle autocall). Le vrai rendement = scénarios NETS : négatif dans les cas réalistes, positif seulement si SG rappelle tôt."
+    },
+    "regimeScenarios": {
+      "current": {
+        "score": 57,
+        "grade": "C",
+        "label": "Actuel (stagflation)",
+        "desc": "In fine: pas de cash-flow intermédiaire, TRI ~3.9% si go-to-maturity"
+      },
+      "bull": {
+        "score": 63,
+        "grade": "B",
+        "label": "Bull / Risk-on",
+        "delta": 6,
+        "desc": "Taux baissent → call probable → coupon capitalisé versé en une fois"
+      },
+      "crash": {
+        "score": 49,
+        "grade": "C",
+        "label": "Crash / Récession",
+        "delta": -8,
+        "desc": "Taux montent → pas de call, intérêts simples sur 10 ans = rendement moindre"
+      }
+    }
+  }
 }
