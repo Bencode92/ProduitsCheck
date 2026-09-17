@@ -145,6 +145,8 @@ window.showEditModal = function() {
         '<div class="form-field"><label>Montant investi (€)</label><input id="fe-invested" type="number" value="' + amount + '"></div>' +
         '<div class="form-field"><label>Nominal unitaire (€)</label><input id="fe-mininvest" type="number" value="' + minInvestment + '" placeholder="Ex: 100000"></div>' +
         '<div class="form-field"><label>Maturité</label><input id="fe-maturity" value="' + escapeAttr(p.maturity || '') + '"></div>' +
+        '<div class="form-field"><label>Date de strike</label><input id="fe-strikedate" type="date" value="' + escapeAttr(p.strikeDate || '') + '"></div>' +
+        '<div class="form-field"><label>Date d\'échéance</label><input id="fe-matdate" type="date" value="' + escapeAttr(p.maturityDate || '') + '"></div>' +
         '<div class="form-field"><label>Niveau initial (strike)</label><input id="fe-strike-price" type="number" step="0.01" value="' + strikePrice + '" placeholder="Ex: 4950"></div>' +
         '<div class="form-field full"><label>Sous-jacents (séparés par virgule)</label><input id="fe-underlyings" value="' + escapeAttr(underlyings) + '"></div>' +
         '</div>' +
@@ -250,6 +252,7 @@ window.handleJSONImport = function() {
         _setFieldValue('fe-name', json.name);
         _setFieldValue('fe-structure-type', json.structureType);
         _setFieldValue('fe-maturity', json.maturity);
+        _setFieldValue('fe-strikedate', json.strikeDate); _setFieldValue('fe-matdate', json.maturityDate);
 
         // Coupon
         if (json.coupon && typeof json.coupon === 'object') {
@@ -464,6 +467,12 @@ window.handleEditSave = async function() {
     if (newMaturity) p.maturity = newMaturity;
     var yearsMatch = newMaturity?.match(/(\d+)/);
     if (yearsMatch) p.maturityYears = parseInt(yearsMatch[1]);
+    // ─── Dates strike / échéance (ne jamais effacer une date existante si le champ est vide) ───
+    var newStrikeDate = document.getElementById('fe-strikedate')?.value;
+    var newMatDate = document.getElementById('fe-matdate')?.value;
+    if (newStrikeDate) p.strikeDate = newStrikeDate;
+    if (newMatDate) p.maturityDate = newMatDate;
+    else if (p.strikeDate && !p.maturityDate && p.maturityYears > 0) { try { var _dm = new Date(p.strikeDate); _dm.setMonth(_dm.getMonth() + Math.round(p.maturityYears * 12)); p.maturityDate = _dm.toISOString().split('T')[0]; } catch (e) {} }
 
     // ─── Early Redemption (COMPLETE) ───
     if (!p.earlyRedemption) p.earlyRedemption = {};

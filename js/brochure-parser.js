@@ -633,6 +633,8 @@
     var years = _fv('bp-years', _data.maturityYears || 10);
     var capProtected = _fv('bp-capprotected', dcp.protected || false);
 
+    var _sd = _fv('bp-strikedate', _data.strikeDate || null), _md0 = _fv('bp-matdate', _data.maturityDate || null);
+    if (_sd && !_md0 && parseFloat(years) > 0) { try { var _dm = new Date(_sd); _dm.setMonth(_dm.getMonth() + Math.round(parseFloat(years) * 12)); _md0 = _dm.toISOString().split('T')[0]; } catch (e) {} }
     var product = {
       name: _fv('bp-name', _data.name || ''),
       type: typeMap[st] || st,
@@ -643,7 +645,7 @@
       underlyingType: _fv('bp-undtype', _data.underlyingType || 'single-index'),
       currency: _fv('bp-currency', _data.currency || 'EUR'),
       maturity: years + ' ans', maturityYears: years,
-      maturityDate: _data.maturityDate || null, strikeDate: _data.strikeDate || null,
+      maturityDate: _md0 || null, strikeDate: _sd || null,
       coupon: {
         rate: _fv('bp-rate', dc.rate),
         rateIfCalled: _fv('bp-rateIfCalled', dc.rateIfCalled),
@@ -880,7 +882,9 @@
       _field('Type', _sel('bp-undtype', d.underlyingType, UND_TYPES)) +
       _field('Devise', _inp('bp-currency', d.currency || 'EUR')) +
       _field('Maturité (ans)', _inp('bp-years', d.maturityYears, 'number')) +
-      _field('Décrément (%)', _inp('bp-decrement', d.decrementPct, 'number', '—')));
+      _field('Décrément (%)', _inp('bp-decrement', d.decrementPct, 'number', '—')) +
+      _field('Date de strike', _inp('bp-strikedate', d.strikeDate || '', 'date'), 'Constatation initiale / émission') +
+      _field('Date d\'échéance', _inp('bp-matdate', d.maturityDate || '', 'date'), 'Vide → calculée : strike + maturité'));
     html += _section('COUPON', '💰', 'var(--green)',
       _field('Taux (%)', _inp('bp-rate', c.rate, 'number'), 'PAR PÉRIODE') +
       _field('Type', _sel('bp-coupontype', c.type || 'conditionnel', COUPON_TYPES)) +
