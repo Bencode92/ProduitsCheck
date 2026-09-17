@@ -1,7 +1,7 @@
 {
   "bankId": "cic",
   "bankName": "CIC",
-  "lastUpdated": "2026-06-08T16:07:15.080Z",
+  "lastUpdated": "2026-09-17T13:32:09.842Z",
   "products": [
     {
       "id": "sp_mnd7pep1_5gh0t",
@@ -58,6 +58,14 @@
       "status": "analyzing",
       "score": null,
       "receivedDate": "2026-06-08"
+    },
+    {
+      "id": "sp_mu5kjuuq_o9cyo",
+      "name": "Taux fixe callable ZC - 10 ans",
+      "type": "taux_fixe_in_fine",
+      "status": "analyzing",
+      "score": null,
+      "receivedDate": "2026-09-17"
     }
   ]
 }
