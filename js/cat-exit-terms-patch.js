@@ -147,6 +147,7 @@
       const s = Array.isArray(d.earlyExitSchedule) ? d.earlyExitSchedule : [];
       if (s.length) bits.push('sortie : ' + s.map(x => 'M' + x.fromMonth + (x.toMonth !== x.fromMonth ? '-' + x.toMonth : '') + ' → ' + x.servedPct + '%').join(' · '));
       if (d.exitFreeAtPeriodEnd) bits.push('sortie libre à chaque échéance');
+      if (d.reviewDate) bits.push('<strong style="color:var(--orange)">📌 point de décision ' + formatDate(d.reviewDate) + '</strong>' + (d.reviewNote ? ' — ' + d.reviewNote : ''));
       if (parseFloat(d.feesAnnualPct) > 0) bits.push('frais ' + d.feesAnnualPct + '%/an');
       if (!bits.length) return html;
       const extra = `<div style="font-size:9px;color:var(--text-dim);margin-top:4px">🚪 ${bits.join(' · ')}</div>`;

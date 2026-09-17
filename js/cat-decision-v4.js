@@ -56,6 +56,28 @@
   // meilleur taux disponible AUJOURD'HUI pour `len` mois (offre réelle), repli forward+spread
   function todayRate(len) { const b = bestOffer(len); return b ? { rate: b.rate, label: (b.r.bankName || '') + ' ' + (b.r.productName || '').replace(/^CAT\s+/i, '') } : { rate: expectedCAT(0, len, 0), label: 'estimation (courbe + spread)' }; }
 
+
+  // ── Concentration par GROUPE bancaire (expert 17/09 : plafond 30-35 % de la trésorerie liquide par groupe,
+  //    aucun flux nouveau vers un groupe au-dessus du plafond ; BPCE = Banque Populaire + Natixis + Caisse d'Épargne)
+  const GROUPS = { 'banque-populaire': 'BPCE', 'natixis': 'BPCE', 'caisse-epargne': 'BPCE', 'bpce': 'BPCE', 'cic': 'Crédit Mutuel Alliance Fédérale', 'credit-mutuel': 'Crédit Mutuel Alliance Fédérale', 'sg': 'Société Générale', 'societe-generale': 'Société Générale', 'bnp': 'BNP Paribas', 'bnpp': 'BNP Paribas', 'ca': 'Crédit Agricole', 'ca-cib': 'Crédit Agricole', 'lcl': 'Crédit Agricole', 'lbp': 'La Banque Postale', 'hsbc': 'HSBC', 'swiss-life': 'Swiss Life' };
+  const GROUP_CAP = 0.35;
+  function _groupOf(x) {
+    const k = String(x || '').toLowerCase();
+    if (GROUPS[k]) return GROUPS[k];
+    if (/populaire|natixis|epargne|bpce/.test(k)) return 'BPCE';
+    if (/cic|cr[ée]dit industriel|mutuel/.test(k)) return 'Crédit Mutuel Alliance Fédérale';
+    if (/soci[ée]t[ée] g[ée]n[ée]rale|\bsg\b/.test(k)) return 'Société Générale';
+    if (/bnp/.test(k)) return 'BNP Paribas';
+    if (/agricole|lcl/.test(k)) return 'Crédit Agricole';
+    return x || '—';
+  }
+  function groupExposure() {
+    const by = {}; let total = 0;
+    catManager.deposits.filter(d => d.status === 'active').forEach(d => { const g = _groupOf(d.bankId || d.bankName), a = parseFloat(d.amount) || 0; by[g] = (by[g] || 0) + a; total += a; });
+    _rateProducts().filter(p => (parseFloat(p.investedAmount) || 0) > 0).forEach(p => { const g = _groupOf(p.emitter || p.bankId), a = parseFloat(p.investedAmount) || 0; by[g] = (by[g] || 0) + a; total += a; });
+    return { by, total };
+  }
+
   // ── 2. Placements existants ──────────────────────────────────────
   function _growthSchedule(d, from, to, penaltyOnCurrent) {
     // croissance actuarielle du placement entre deux dates, selon ses paliers datés (ou taux fixe)
@@ -180,14 +202,25 @@
         if (t.coupon - mkt > 0.15) { redeemedYear = y; notes.push('rappelé par l\'émetteur fin année ' + y + ' (coupon ' + fmtP(t.coupon) + ' > marché ' + fmtP(mkt) + ')'); break; }
       }
     }
-    let value = A * (1 - t.fees / 100) + coupons, liquid = true;
+    let value = A * (1 - t.fees / 100) + coupons, liquid = true, mtm = null;
+    if (redeemedYear == null && t.maturity * 12 > H) {
+      // Valeur de marché estimée à l'horizon : flux restants (coupons attendus + capital) actualisés au taux
+      // sans risque de la durée restante + spread émetteur + scénario (réserve n°1 de l'expert : c'est le seul
+      // chiffre qui compte si le scénario tourne mal et qu'il faut sortir)
+      const restY = Math.max(0.25, t.maturity - years); const disc = (spot(Math.round(restY * 12)) + (shiftBp || 0) / 100 + t.spread) / 100;
+      let pv;
+      if (t.inFine) pv = (A * (1 + t.coupon / 100 * t.maturity)) * Math.pow(1 + disc, -restY); // in fine : nominal + gain total à l'échéance
+      else { pv = A * Math.pow(1 + disc, -restY); for (let k = 1; k <= Math.ceil(restY); k++) { const yy = years + k; let paidK = true; if (t.barrier != null && yy > t.guaranteed && tec != null) paidK = (tec + (forward((yy - 1) * 12, 120) - spot(120)) + (shiftBp || 0) / 100) <= t.barrier; if (paidK) pv += A * t.coupon / 100 * Math.pow(1 + disc, -Math.min(k, restY)); } }
+      mtm = Math.round(pv * 0.99); // fourchette de reprise ~1 %
+    }
     if (redeemedYear != null && redeemedYear * 12 < H) { const rest = H - redeemedYear * 12; value = A * (1 - t.fees / 100) * Math.pow(1 + expectedCAT(redeemedYear * 12, rest, shiftBp) / 100, rest / 12) + coupons; notes.push('capital replacé au CAT attendu ' + fmtP(expectedCAT(redeemedYear * 12, rest, shiftBp)) + ' sur ' + rest + ' m'); }
     else if (t.maturity * 12 > H && redeemedYear == null) { liquid = false; notes.push(H <= (t.isCallable ? (t.firstCall || 1) : t.guaranteed) * 12 ? 'période garantie / non rappelable — juge aussi à ' + Math.min(60, Math.round(t.maturity * 12)) + ' m' : (t.isTarn ? 'cible non atteinte : coupons conditionnels, capital immobilisé jusqu\'à ' + t.maturity + ' ans' : t.isCallable ? 'non rappelé : coincé au coupon ' + fmtP(t.coupon) + ' jusqu\'à ' + t.maturity + ' ans' : 'capital immobilisé jusqu\'à l\'échéance (' + t.maturity + ' ans)')); }
     if (lost) notes.push(lost + ' coupon(s) perdu(s) (taux scénario > barrière ' + fmtP(t.barrier) + ')' + (t.memory ? ' — mémoire' : ''));
     if (t.inFine && !redeemedYear && accrued > 0) notes.push('0 € encaissé : ' + fmtE(accrued) + ' acquis mais versés seulement au remboursement');
     else if (!t.inFine && cash > 0) notes.push(fmtE(cash) + ' encaissés en coupons, replacés au CAT attendu');
     if (t.fees) notes.push('commission ' + fmtP(t.fees) + ' déduite');
-    return { value, liquid, notes, coupons, redeemedYear, cash: t.inFine && !redeemedYear ? 0 : cash + (redeemedYear ? accrued : 0), accrued };
+    if (mtm != null) notes.push('valeur de marché estimée si sortie à ' + H + ' m ≈ ' + fmtE(mtm) + (mtm < A ? ' (−' + fmtE(A - mtm) + ' vs nominal)' : ''));
+    return { value, liquid, notes, coupons, redeemedYear, mtm, cash: t.inFine && !redeemedYear ? 0 : cash + (redeemedYear ? accrued : 0), accrued };
   }
 
   // ── Rendu ────────────────────────────────────────────────────────
@@ -220,6 +253,12 @@
       <div style="font-size:10px;color:var(--text-muted);margin-bottom:8px">Structurés de taux à comparer (coche jusqu'à 3) — les <strong>détenus</strong> sont évalués plus bas avec tes CAT :</div>
       <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px">${prods.map(p => { const t = _productTerms(p); const on = S.selected.includes(p.id); const held = (parseFloat(p.investedAmount) || 0) > 0; return `<label style="display:flex;align-items:center;gap:5px;padding:3px 7px;border:1px solid ${on ? '#0EA5E9' : 'var(--border)'};border-radius:6px;font-size:10px;cursor:pointer;background:${on ? 'rgba(14,165,233,0.10)' : 'var(--bg-elevated)'}"><input type="checkbox" ${on ? 'checked' : ''} onchange="window._catV4Toggle('${p.id}')"> ${(p.name || '?').substring(0, 30)}<span style="color:var(--text-dim)"> · ${fmtP(t.coupon)}${t.barrier != null ? ' si TEC10 ≤ ' + fmtP(t.barrier) : ''}${t.isCallable ? ' · call an ' + t.firstCall : t.isTarn ? ' · TARN' : ''}${t.inFine ? ' · in fine' : ''}${held ? ' · détenu' : ''}</span></label>`; }).join('') || '<span style="font-size:10px;color:var(--text-dim)">aucun produit de taux à capital garanti dans la liste</span>'}</div>`;
 
+    // ── Concentration par groupe bancaire ──
+    const gx = groupExposure();
+    const over = Object.entries(gx.by).filter(([, a]) => gx.total > 0 && a / gx.total > GROUP_CAP).sort((a, b) => b[1] - a[1]);
+    if (gx.total > 0) h += `<div style="padding:8px 12px;border:1px solid ${over.length ? 'rgba(232,93,4,0.4)' : 'var(--border)'};border-radius:6px;font-size:11px;margin-bottom:12px;background:${over.length ? 'rgba(232,93,4,0.05)' : 'var(--bg-elevated)'}"><strong>Concentration par groupe bancaire</strong> (CAT + structurés détenus, ${fmtE(gx.total)}) : ${Object.entries(gx.by).sort((a, b) => b[1] - a[1]).map(([g, a]) => `${g} <span style="font-family:var(--mono);${a / gx.total > GROUP_CAP ? 'color:var(--orange);font-weight:700' : ''}">${Math.round(a / gx.total * 100)} %</span>`).join(' · ')} — plafond ${Math.round(GROUP_CAP * 100)} % par groupe.${over.length ? ' <span style="color:var(--orange)">⚠ ' + over.map(([g]) => g).join(', ') + ' au-dessus du plafond : aucun flux nouveau vers ce groupe tant qu\'il n\'est pas revenu dessous (🚫 ci-dessous = groupe déjà au-dessus, ou qui le dépasserait en recevant ce montant).</span>' : ''}</div>`;
+    // 🚫 si le groupe est déjà au-dessus du plafond, OU s'il le dépasserait en recevant ce montant
+    const overGroups = new Set(Object.entries(gx.by).filter(([, a]) => gx.total + A > 0 && (a + A) / (gx.total + A) > GROUP_CAP).map(([g]) => g));
     // ── A. Où placer ce montant : UN classement CAT + structurés, dans ta vue ──
     const strat = scen.map(s => cashStrategies(A, H, s.bp));
     const stratView = viewIdx >= 0 ? strat[viewIdx] : cashStrategies(A, H, view.bp);
@@ -228,13 +267,14 @@
     const singles = stratView.filter(x => x.single).slice(0, 3), seq = stratView.filter(x => !x.single).slice(0, 1);
     singles.concat(seq).forEach(st => {
       const lo = strat[0].find(x => x.label === st.label), hi = strat[2].find(x => x.label === st.label);
-      options.push({ kind: 'CAT', label: st.label, value: st.final, cash: st.final - A, lo: lo ? lo.final : null, hi: hi ? hi.final : null, liquid: true, note: st.single ? (st.type === 'progressif' ? 'progressif, sortie libre à l\'échéance du palier' : 'fixe, capital garanti FGDR') : '2e jambe au CAT attendu du scénario', flag: /⚠/.test(st.label) });
+      const g = _groupOf((st.label.split(' ')[0] === 'Banque' ? 'banque-populaire' : st.label.split(' ')[0]));
+      options.push({ kind: 'CAT', label: st.label, value: st.final, cash: st.final - A, lo: lo ? lo.final : null, hi: hi ? hi.final : null, liquid: true, group: g, note: (st.single ? (st.type === 'progressif' ? 'progressif, sortie libre à l\'échéance du palier' : 'fixe, capital garanti FGDR') : '2e jambe au CAT attendu du scénario'), flag: /⚠/.test(st.label) });
     });
     selected.forEach(p => {
       const t = _productTerms(p);
       const v = viewIdx >= 0 ? productValue(t, A, H, scen[viewIdx].bp) : productValue(t, A, H, view.bp);
       const lo = productValue(t, A, H, scen[0].bp), hi = productValue(t, A, H, scen[2].bp);
-      options.push({ kind: 'STRUCT', label: p.name, value: v.value, cash: v.cash, lo: lo.value, hi: hi.value, liquid: v.liquid, note: v.notes.join(' · '), flag: !v.liquid });
+      options.push({ kind: 'STRUCT', label: p.name, value: v.value, cash: v.cash, lo: lo.value, hi: hi.value, liquid: v.liquid, group: _groupOf(p.emitter || p.bankId), note: v.notes.join(' · '), flag: !v.liquid });
     });
     options.sort((a, b) => b.value - a.value);
     const best = options[0];
@@ -244,7 +284,7 @@
     options.forEach((o, i) => {
       h += `<tr style="border-bottom:1px solid var(--border);${i === 0 ? 'background:rgba(6,214,160,0.08)' : ''}">
         <td style="padding:5px 6px;color:var(--text-dim)">${i + 1}</td>
-        <td style="padding:5px 6px"><span style="font-size:9px;padding:1px 5px;border-radius:4px;background:${o.kind === 'CAT' ? 'rgba(6,214,160,0.15)' : 'rgba(14,165,233,0.15)'};color:${o.kind === 'CAT' ? '#047857' : '#0369A1'}">${o.kind === 'CAT' ? 'CAT' : 'STRUCTURÉ'}</span> ${o.label}${o.liquid ? '' : ' <span title="capital non disponible à cette échéance" style="color:var(--orange)">🔒</span>'}</td>
+        <td style="padding:5px 6px"><span style="font-size:9px;padding:1px 5px;border-radius:4px;background:${o.kind === 'CAT' ? 'rgba(6,214,160,0.15)' : 'rgba(14,165,233,0.15)'};color:${o.kind === 'CAT' ? '#047857' : '#0369A1'}">${o.kind === 'CAT' ? 'CAT' : 'STRUCTURÉ'}</span> ${o.label}${o.liquid ? '' : ' <span title="capital non disponible à cette échéance" style="color:var(--orange)">🔒</span>'}${overGroups.has(o.group) ? ' <span title="groupe bancaire déjà au-dessus du plafond de concentration" style="color:var(--orange)">🚫 ' + o.group + '</span>' : ''}</td>
         <td style="padding:5px 6px;text-align:right;font-family:var(--mono);font-weight:700;color:${i === 0 ? 'var(--green)' : 'var(--text-bright)'}">${fmtE(o.value)}</td>
         <td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:var(--orange)">${i === 0 ? '—' : '−' + fmtE(best.value - o.value)}</td>
         <td style="padding:5px 6px;text-align:right;font-family:var(--mono);font-size:10px;color:var(--text-muted)">${o.lo != null ? fmtE(o.lo) : '—'} / ${o.hi != null ? fmtE(o.hi) : '—'}</td>

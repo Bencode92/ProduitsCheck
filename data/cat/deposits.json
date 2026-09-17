@@ -177,7 +177,9 @@
     ],
     "noticeDays": 32,
     "exitFreeAtPeriodEnd": true,
-    "earlyExitSchedule": []
+    "earlyExitSchedule": [],
+    "reviewDate": "2027-08-05",
+    "reviewNote": "Sortie libre sans préavis. AVANT : demander au CIC un réalignement sur la grille en cours (2,80 / 3,30 / 3,81 % vs 2,60 / 2,70 / 2,80) = 1 200 à 2 000 €/an sur 200 k€. Refus → sortir vers la meilleure offre du jour."
   },
   {
     "productType": "cat",
