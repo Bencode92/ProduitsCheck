@@ -201,18 +201,22 @@ function _renderUnderstand(p) {
   var margin = ny.embeddedMargin || 0;
   var isIC = (typeof window._isIssuerCallable === 'function' && window._isIssuerCallable(p)) || er.atIssuerDiscretion === true;
   var sj = (p.underlyings && p.underlyings.length) ? p.underlyings[0] : 'le sous-jacent';
-  var catRate = 2.8; try { if (typeof _mktCache !== 'undefined' && _mktCache && _mktCache._catRate) catRate = _mktCache._catRate; else if (md.catRate) catRate = md.catRate; } catch (e) {}
+  var catRate = 2.8; try { if (md.catRate) catRate = md.catRate; else if (typeof window._getCATBenchmark === 'function' && parseFloat(window._getCATBenchmark())) catRate = parseFloat(window._getCATBenchmark()); else if (typeof _mktCache !== 'undefined' && _mktCache && _mktCache._catRate) catRate = _mktCache._catRate; } catch (e) {}
+  var gyW = parseFloat(md.guaranteedYieldWorst), gyB = parseFloat(md.guaranteedYieldBest), gyLvl = parseFloat(md.guaranteedMaturityLevel);
+  var isICG = isIC && !isNaN(gyW) && gyLvl > 100; // callable dont le gain est acquis dans tous les cas
   var eur = function (v) { return formatNumber(Math.round(v)) + '€'; };
   var pc = function (v) { return (v >= 0 ? '+' : '') + v.toFixed(2).replace('.', ',') + '%'; };
   var f1 = function (v) { return v.toFixed(1).replace('.', ','); };
 
   // Rendement espéré économique (proba-pondéré, net de frais + marge) = le vrai chiffre
   var espereEco = (cprob != null) ? (couponRate * (cprob / 100) * 0.75 - fd.economicDragPct) : (ny.netEconomic != null ? ny.netEconomic : null);
+  if (typeof md.guaranteedYieldWorst === 'number' && md.guaranteedYieldWorst > 0) espereEco = md.guaranteedYieldWorst * 0.75 - (fd.economicDragPct || 0); // callable à gain acquis : pire cas net IS
   var netRecu = ny.netAfterFees;
 
   // ── Le pari en une phrase ──
   var pari;
-  if (isIC) pari = 'Tu prêtes à la banque. Elle te rembourse <strong>quand ça L\'arrange</strong> (prime ~' + f1(couponRate) + '%/an). Ton capital est protégé à l\'échéance — mais le rendement dépend d\'elle, pas de toi.';
+  if (isICG) pari = 'Tu prêtes à <strong>' + (p.emitter || 'la banque') + '</strong>. Le gain (' + f1(parseFloat((p.coupon || {}).rate) || couponRate) + '%/an d\'intérêt simple) est <strong>acquis dans tous les cas</strong> — mais c\'est elle qui choisit <strong>quand</strong> te rembourser : tôt si les taux baissent (' + f1(gyB) + '%/an actuariel), à l\'échéance si les taux montent (' + f1(gyW) + '%/an). Illiquide entre-temps.';
+  else if (isIC) pari = 'Tu prêtes à la banque. Elle te rembourse <strong>quand ça L\'arrange</strong> (prime ~' + f1(couponRate) + '%/an). Ton capital est protégé à l\'échéance — mais le rendement dépend d\'elle, pas de toi.';
   else if (protectedMat) pari = 'Ton capital est protégé à l\'échéance. Tu touches le coupon si <strong>' + sj + '</strong> tient ses conditions. Rendement plafonné.';
   else if (!isNaN(barrier)) pari = 'Tu paries que <strong>' + sj + '</strong> ne s\'effondre pas de plus de <strong>' + (100 - barrier) + '%</strong>. S\'il tient → coupon ' + f1(couponRate) + '%/an ; s\'il chute sous ce seuil → tu encaisses toute la baisse.';
   else pari = 'Coupon ' + f1(couponRate) + '%/an conditionné à <strong>' + sj + '</strong>.';
@@ -220,12 +224,22 @@ function _renderUnderstand(p) {
   // ── 3 scénarios chiffrés ──
   var favAmount = nominal * (1 + couponRate / 100);
   var rows = [];
+  if (isICG) {
+    var bestYr = parseInt(md.guaranteedYieldBestYear, 10) || 2;
+    rows.push(['#065F46', '#ECFDF5', '✅ Rappel rapide (taux en baisse)',
+      (p.emitter || 'La banque') + ' te rembourse an ' + bestYr + ' → capital + gain acquis, à replacer dans un marché plus bas',
+      eur(nominal * Math.pow(1 + gyB / 100, bestYr)), 'soit ' + f1(gyB) + '%/an brut · ' + pc(gyB * 0.75) + '/an net IS']);
+    rows.push(['#92400E', '#FFFBEB', '⚖️ Échéance sans rappel (taux stables ou en hausse)',
+      'Tu restes jusqu\'au bout → ' + f1(gyLvl) + '% du nominal, mais à un taux devenu inférieur au marché',
+      eur(nominal * gyLvl / 100), 'soit ' + f1(gyW) + '%/an brut · ' + pc(gyW * 0.75) + '/an net IS']);
+  } else {
   rows.push(['#065F46', '#ECFDF5', '✅ Favorable' + (cprob != null ? ' (proba ~' + Math.round(cprob) + '%)' : ''),
     (isIC ? 'La banque te rappelle tôt' : sj + ' ≥ son seuil') + ' → capital + coupon',
     eur(favAmount), 'soit ' + pc(netRecu) + '/an net']);
   rows.push(['#92400E', '#FFFBEB', '⚖️ Médian (capital seul)',
     (protectedMat ? 'À l\'échéance sans rappel' : sj + ' baisse un peu (au-dessus de la barrière), pas de coupon') + ' → capital rendu',
     eur(nominal), 'soit ' + pc(-(fd.dragPct || 0) - 1) + '/an net (frais)']);
+  }
   if (!protectedMat && !isNaN(barrier) && barrier > 0) {
     var dropEx = Math.min(90, (100 - barrier) + 10);
     var defAmount = nominal * (100 - dropEx) / 100;
@@ -267,11 +281,12 @@ function _renderUnderstand(p) {
       + '<div style="color:#0F172A;font-size:12px;margin-bottom:3px">' + yieldHtml + '</div>'
       + '<div style="color:' + riskCol + ';font-size:10.5px;line-height:1.35">' + riskHtml + '</div></div>';
   };
-  h += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;font-size:11px">';
+  var hasUnderlying = !!(p.underlyings && p.underlyings.length);
+  h += '<div style="display:grid;grid-template-columns:repeat(' + (hasUnderlying ? 3 : 2) + ',1fr);gap:8px;font-size:11px">';
   // 1) CAT
   h += card('🏦', 'CAT', '<strong>' + f1(catRate) + '%/an</strong> fixe', '✓ Capital garanti · aucun risque', '#059669', false);
-  // 2) Détenir en direct
-  h += card('📈', 'Détenir ' + sj + ' en direct',
+  // 2) Détenir en direct (seulement s'il y a un sous-jacent)
+  if (hasUnderlying) h += card('📈', 'Détenir ' + sj + ' en direct',
     (basketDiv > 0.3 ? '<strong>' + f1(basketDiv) + '%/an</strong> de dividendes' : 'dividendes faibles') + ' + <strong>100% de la hausse</strong>' + (basketMom != null ? ' <span style="color:#64748B">· momentum 1an ' + (basketMom >= 0 ? '+' : '') + basketMom + '%</span>' : ''),
     '⚠ Toute la volatilité' + (basketVol > 0 ? ' (vol ' + Math.round(basketVol) + '%' + (basketDD > 0 ? ', perte historique jusqu\'à −' + Math.round(basketDD) + '%' : '') + ')' : '') + ' — aucun filet',
     '#DC2626', false);
@@ -753,14 +768,15 @@ function _renderInvestorMetrics(p) {
   html += '</div>';
 
   // ─── C. Spread vs alternative simple ──────
-  var oatRate = 3.08; // OAT 10Y actuel (ou lire depuis MARKET_RATES)
-  if (typeof MARKET_RATES !== 'undefined' && MARKET_RATES.tec10) oatRate = MARKET_RATES.tec10;
-  var spread = Math.round((couponRate - oatRate) * 100) / 100;
+  var oatRate = 3.08; // repli
+  try { if (typeof _ratesData !== 'undefined' && _ratesData && _ratesData.yields && _ratesData.yields.oat_fr_10y && _ratesData.yields.oat_fr_10y.current) oatRate = parseFloat(_ratesData.yields.oat_fr_10y.current); else if (typeof MARKET_RATES !== 'undefined' && MARKET_RATES.tec10) oatRate = MARKET_RATES.tec10; } catch (e) {}
+  var _cmpRate = (typeof md.guaranteedYieldWorst === 'number' && md.guaranteedYieldWorst > 0) ? md.guaranteedYieldWorst : couponRate; // callable acquis : pire cas actuariel
+  var spread = Math.round((_cmpRate - oatRate) * 100) / 100;
   var spreadColor = spread > 2 ? '#059669' : spread > 0 ? '#D97706' : '#DC2626';
   html += '<div style="padding:12px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;border-left:3px solid ' + spreadColor + '">';
   html += '<div style="font-size:11px;font-weight:700;color:#475569">PRIME DE COMPLEXITÉ</div>';
   html += '<div style="font-family:var(--mono);font-size:20px;font-weight:800;color:' + spreadColor + ';margin:4px 0">' + (spread >= 0 ? '+' : '') + spread.toFixed(2) + '%</div>';
-  html += '<div style="font-size:11px;color:#475569">Coupon ' + couponRate + '% vs OAT ' + matYears + 'Y ' + oatRate.toFixed(2) + '%<br>Ce que vous gagnez de plus vs un placement sans risque</div>';
+  html += '<div style="font-size:11px;color:#475569">' + (_cmpRate !== couponRate ? 'Pire cas actuariel ' + _cmpRate.toFixed(2) + '%' : 'Coupon ' + couponRate + '%') + ' vs 10 ans AAA ' + oatRate.toFixed(2) + '%<br>Ce que vous gagnez de plus vs un placement sans risque</div>';
   html += '</div>';
 
   html += '</div>';
