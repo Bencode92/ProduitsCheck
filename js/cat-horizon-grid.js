@@ -191,6 +191,98 @@
     return html;
   };
 
+
+  // ── Simulateur « combien j'aurai après X mois » ───────────────────
+  // Compare le MONTANT FINAL de toutes les stratégies sur un horizon donné :
+  //   • un produit unique tenu jusqu'à l'horizon (échéance ou sortie anticipée, signalée)
+  //   • un enchaînement A → B (toutes banques) : A sorti à une échéance libre, puis B
+  //     sur la durée restante — au taux d'aujourd'hui, ou au taux de réinvestissement saisi
+  window._catSimState = window._catSimState || { amount: 300000, horizon: 12, reinvest: '' };
+
+  function _finalAmount(amount, rate, months) { return amount * Math.pow(1 + rate / 100, months / 12); }
+
+  window._renderCATHorizonSim = function(rates) {
+    const st = window._catSimState;
+    const list = (rates || []).filter(r => r.productType !== 'parts-sociales' && (parseFloat(r.rate) || 0) > 0);
+    if (!list.length) return '';
+    const H = parseInt(st.horizon, 10) || 12, A = parseFloat(st.amount) || 0;
+    const reinvest = st.reinvest === '' || st.reinvest == null ? null : parseFloat(st.reinvest);
+    const name = (r) => (r.bankName || r.bankId) + ' ' + (r.productName || (r.durationMonths + 'm')).replace(/^CAT\s+/i, '');
+    const strategies = [];
+
+    // 1) produit unique jusqu'à H
+    list.forEach(r => {
+      const x = _effectiveRate(r, H);
+      if (x.rate == null) return;
+      strategies.push({ label: name(r), legs: [{ r, months: H, kind: x.kind, rate: x.rate }], final: _finalAmount(A, x.rate, H), flags: x.kind === 'penalty' ? ['sortie anticipée ' + name(r)] : [] });
+    });
+    // 2) enchaînement A (échéance libre à d1 < H) → B (H − d1)
+    list.forEach(a => {
+      for (let d1 = 1; d1 < H; d1++) {
+        const xa = _effectiveRate(a, d1);
+        if (xa.rate == null || xa.kind !== 'free') continue;
+        const rest = H - d1;
+        const mid = _finalAmount(A, xa.rate, d1);
+        if (reinvest != null) {
+          strategies.push({ label: name(a) + ' (' + d1 + ' m) → réinvesti à ' + _fmt(reinvest) + ' (' + rest + ' m)', legs: [{ r: a, months: d1, kind: 'free', rate: xa.rate }, { months: rest, rate: reinvest, manual: true }], final: _finalAmount(mid, reinvest, rest), flags: ['2e jambe au taux saisi'] });
+        }
+        list.forEach(b => {
+          const xb = _effectiveRate(b, rest);
+          if (xb.rate == null) return;
+          const flags = ['2e jambe au taux d\'aujourd\'hui (hypothèse)'];
+          if (xb.kind === 'penalty') flags.push('sortie anticipée ' + name(b));
+          strategies.push({ label: name(a) + ' (' + d1 + ' m) → ' + name(b) + ' (' + rest + ' m)', legs: [{ r: a, months: d1, kind: 'free', rate: xa.rate }, { r: b, months: rest, kind: xb.kind, rate: xb.rate }], final: _finalAmount(mid, xb.rate, rest), flags });
+        });
+      }
+    });
+    // dédoublonner (même chemin), trier, garder les meilleures
+    const seen = new Set();
+    const ranked = strategies.filter(s => { if (seen.has(s.label)) return false; seen.add(s.label); return true; }).sort((x, y) => y.final - x.final);
+    const top = ranked.slice(0, 12);
+    const best = top[0];
+    const bestSingle = ranked.find(s => s.legs.length === 1 && s.legs[0].kind === 'free');
+
+    let html = `<div style="margin-bottom:18px;padding:12px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-elevated)">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px">
+        <div style="font-size:12px;font-weight:700;color:var(--text-bright)">🎯 Combien j'aurai après X mois</div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:11px">
+          <label>Montant <input id="cs-amount" type="number" value="${A}" style="width:110px" onchange="window._catSimUpdate()"></label>
+          <label>Horizon <select id="cs-horizon" onchange="window._catSimUpdate()">${[3, 6, 9, 12, 18, 24, 36].map(m => `<option value="${m}" ${m === H ? 'selected' : ''}>${m} mois</option>`).join('')}</select></label>
+          <label title="Taux annualisé appliqué à la 2e jambe si tu anticipes une hausse (ex. 3,4). Vide = offres d'aujourd'hui">Réinvest. 2e jambe % <input id="cs-reinvest" type="number" step="0.05" value="${st.reinvest ?? ''}" placeholder="auto" style="width:70px" onchange="window._catSimUpdate()"></label>
+        </div>
+      </div>
+      <div style="font-size:10px;color:var(--text-dim);margin-bottom:8px">Montant final brut (actuariel) pour ${_fmtEur(A)} sur ${H} mois. Produit unique, ou enchaînement A → B toutes banques (A sorti à une échéance libre). ⚠ = sortie anticipée avec la pénalité du produit. La 2e jambe suppose les offres d'aujourd'hui, sauf si tu saisis un taux de réinvestissement.</div>
+      <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px;min-width:560px"><thead><tr style="border-bottom:1px solid var(--border)">
+        <th style="text-align:left;padding:5px 6px;color:var(--text-muted);font-weight:600">#</th><th style="text-align:left;padding:5px 6px;color:var(--text-muted);font-weight:600">Stratégie</th>
+        <th style="text-align:right;padding:5px 6px;color:var(--text-muted);font-weight:600">Montant final</th><th style="text-align:right;padding:5px 6px;color:var(--text-muted);font-weight:600">Intérêts bruts</th><th style="text-align:right;padding:5px 6px;color:var(--text-muted);font-weight:600">Net IS 25 %</th><th style="text-align:right;padding:5px 6px;color:var(--text-muted);font-weight:600">Taux annualisé</th><th style="text-align:right;padding:5px 6px;color:var(--text-muted);font-weight:600">vs meilleur</th></tr></thead><tbody>`;
+    top.forEach((s, i) => {
+      const int = s.final - A, ann = (Math.pow(s.final / A, 12 / H) - 1) * 100, gap = s.final - best.final;
+      const warn = s.flags.some(f => /anticipée/.test(f));
+      html += `<tr style="border-bottom:1px solid var(--border);${i === 0 ? 'background:rgba(6,214,160,0.08);' : ''}" title="${s.flags.join(' · ').replace(/"/g, '&quot;')}">
+        <td style="padding:5px 6px;color:var(--text-dim)">${i + 1}</td>
+        <td style="padding:5px 6px">${s.label}${warn ? ' <span style="color:var(--orange)">⚠</span>' : ''}${s.legs.length > 1 && !s.legs[1].manual ? ' <span style="font-size:9px;color:var(--text-dim)">(2e jambe : taux du jour)</span>' : ''}</td>
+        <td style="padding:5px 6px;text-align:right;font-family:var(--mono);font-weight:700;color:${i === 0 ? 'var(--green)' : 'var(--text-bright)'}">${_fmtEur(s.final)}</td>
+        <td style="padding:5px 6px;text-align:right;font-family:var(--mono)">+${_fmtEur(int)}</td>
+        <td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:#06D6A0">+${_fmtEur(int * 0.75)}</td>
+        <td style="padding:5px 6px;text-align:right;font-family:var(--mono)">${_fmt(ann)}</td>
+        <td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:${gap < 0 ? 'var(--orange)' : 'var(--green)'}">${gap < 0 ? '−' + _fmtEur(-gap) : '—'}</td></tr>`;
+    });
+    html += `</tbody></table></div>`;
+    if (best && bestSingle && best !== bestSingle) html += `<div style="font-size:10px;color:var(--text-muted);margin-top:6px">Meilleur produit unique sans pénalité : <strong>${bestSingle.label}</strong> → ${_fmtEur(bestSingle.final)} (−${_fmtEur(best.final - bestSingle.final)} vs l'enchaînement n°1, qui dépend du taux de la 2e jambe).</div>`;
+    html += `</div>`;
+    return html;
+  };
+  function _fmtEur(n) { return Math.round(n).toLocaleString('fr-FR') + ' €'; }
+  window._catSimUpdate = function() {
+    const st = window._catSimState;
+    st.amount = parseFloat(document.getElementById('cs-amount')?.value) || st.amount;
+    st.horizon = parseInt(document.getElementById('cs-horizon')?.value, 10) || st.horizon;
+    const rv = document.getElementById('cs-reinvest')?.value; st.reinvest = rv === '' || rv == null ? '' : parseFloat(rv);
+    const host = document.getElementById('cat-sim-host'); if (!host) return;
+    const rates = (catManager.rates?.rates || []).filter(r => r.source !== 'web scan' && !(typeof _isRateExpired === 'function' && _isRateExpired(r)) && !_isTransition(r));
+    host.innerHTML = window._renderCATHorizonSim(rates);
+  };
+
   // ── Insertion dans le bloc dépliant de chaque banque ─────────────
   // Une grille par banque, à l'intérieur de #bank-rates-confirmed-<bankId>,
   // hors produits « Transition » (offre fléchée RSE, comparée à part).
@@ -210,7 +302,7 @@
         let target = null;
         container.querySelectorAll('.section').forEach(sec => { const t = sec.querySelector('.section-title'); if (t && t.textContent.includes('Taux du Marché')) target = sec; });
         const cmp = target ? window._renderCATBankCompare(byBank) : '';
-        if (cmp) { const hdr = target.querySelector('.section-header'); if (hdr) hdr.insertAdjacentHTML('afterend', cmp); }
+        if (cmp) { const hdr = target.querySelector('.section-header'); if (hdr) hdr.insertAdjacentHTML('afterend', cmp + '<div id="cat-sim-host">' + window._renderCATHorizonSim(confirmed) + '</div>'); }
         Object.entries(byBank).forEach(([bankId, list]) => {
           if (list.length < 2) return;
           const host = container.querySelector('#bank-rates-confirmed-' + bankId);
