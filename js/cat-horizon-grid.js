@@ -66,20 +66,22 @@
 
     // Progressif : somme des intérêts mois par mois jusqu'à h
     if (h > D) return { rate: null, kind: 'na' }; // au-delà de la durée : pas d'hypothèse de renouvellement
-    let growth = 1, kind = 'penalty';
-    for (const s of sched) {
+    let growth = 1, kind = 'penalty', periodRate = null, nextRate = null;
+    for (let i = 0; i < sched.length; i++) {
+      const s = sched[i];
       const from = parseInt(s.fromMonth, 10), to = parseInt(s.toMonth, 10);
       const rate = parseFloat(s.rate) || 0;
-      if (h >= to) { growth *= Math.pow(1 + rate / 100, (to - from + 1) / 12); if (h === to) kind = 'free'; continue; }
+      if (h >= to) { growth *= Math.pow(1 + rate / 100, (to - from + 1) / 12); if (h === to) { kind = 'free'; periodRate = rate; nextRate = sched[i + 1] ? parseFloat(sched[i + 1].rate) || null : null; } continue; }
       if (h >= from) {
         // Sortie en cours de période → earlyRate si connu, sinon 50 % du taux
         const early = s.earlyRate != null ? parseFloat(s.earlyRate) : rate * 0.5;
         growth *= Math.pow(1 + early / 100, (h - from + 1) / 12);
+        periodRate = rate; nextRate = sched[i + 1] ? parseFloat(sched[i + 1].rate) || null : null;
         break;
       }
     }
     // Taux actuariel annualisé (capitalisation à chaque palier) = convention « taux actuariel moyen » des banques
-    return { rate: (Math.pow(growth, 12 / h) - 1) * 100, kind };
+    return { rate: (Math.pow(growth, 12 / h) - 1) * 100, kind, periodRate, nextRate };
   }
 
   window._catFixedEarlyFactor = _fixedEarlyFactor;
@@ -110,7 +112,7 @@
     let html = `<div style="margin-top:16px;padding-top:14px;border-top:1px dashed var(--border)">
       <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;margin-bottom:8px">
         <div style="font-size:12px;font-weight:700;color:var(--text-bright)">⚖️ Équivalence par horizon de sortie</div>
-        <div style="font-size:10px;color:var(--text-dim)">Taux annualisé brut si tu sors au mois indiqué · <strong style="color:var(--green)">vert</strong> = meilleur · gras = échéance (sortie libre) · <span style="color:var(--orange)">orange</span> = retrait anticipé (pénalité du produit) · — = au-delà de la durée du produit · sous chaque taux : <strong>intérêts bruts gagnés sur 100 k€</strong> pendant la période</div>
+        <div style="font-size:10px;color:var(--text-dim)">Taux annualisé brut si tu sors au mois indiqué · <strong style="color:var(--green)">vert</strong> = meilleur · gras = échéance (sortie libre) · <span style="color:var(--orange)">orange</span> = retrait anticipé (pénalité du produit) · — = au-delà de la durée du produit · progressifs : taux = <em>actuariel moyen depuis le départ</em>, « palier » = taux de la période en cours → suivant · sous chaque taux : <strong>intérêts bruts gagnés sur 100 k€</strong> pendant la période</div>
       </div>
       <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px;min-width:${Math.max(420, 110 + cols.length * 92)}px">
       <thead><tr><th style="text-align:left;padding:6px 8px;color:var(--text-muted);font-weight:600;border-bottom:1px solid var(--border);white-space:nowrap">Sortie au mois</th>`;
@@ -138,6 +140,7 @@
           if (isBest) style += 'color:var(--green);background:rgba(6,214,160,0.08);';
           const eur = Math.round(100000 * (Math.pow(1 + x.rate / 100, h / 12) - 1));
           txt += `<div style="font-size:9px;font-weight:400;opacity:.7">+${eur.toLocaleString('fr-FR')} €</div>`;
+          if (x.periodRate != null) txt += `<div style="font-size:9px;font-weight:400;color:var(--text-dim)">palier ${_fmt(x.periodRate)}${x.nextRate != null ? ' → ' + _fmt(x.nextRate) + ' ensuite' : ''}</div>`;
         }
         html += `<td style="${style}" title="${title}">${txt}</td>`;
       });
@@ -168,7 +171,7 @@
     rows.forEach(h => {
       const bests = banks.map(([, list]) => {
         let best = null;
-        list.forEach(r => { const x = _effectiveRate(r, h); if (x.rate == null) return; if (!best || x.rate > best.rate || (x.rate === best.rate && x.kind === 'free' && best.kind !== 'free')) best = { rate: x.rate, kind: x.kind, r }; });
+        list.forEach(r => { const x = _effectiveRate(r, h); if (x.rate == null) return; if (!best || x.rate > best.rate || (x.rate === best.rate && x.kind === 'free' && best.kind !== 'free')) best = { rate: x.rate, kind: x.kind, r, periodRate: x.periodRate, nextRate: x.nextRate }; });
         return best;
       });
       const top = bests.reduce((m, b) => (b && (!m || b.rate > m.rate)) ? b : m, null);
@@ -180,7 +183,7 @@
         const color = b.kind === 'penalty' ? 'var(--orange)' : 'var(--text-bright)';
         html += `<td style="text-align:right;padding:7px 8px;white-space:nowrap;${isTop ? 'background:rgba(6,214,160,0.08);' : ''}" title="${(b.r.withdrawalConditions || '').replace(/"/g, '&quot;')}">
           <div style="font-family:var(--mono);font-weight:${b.kind === 'free' ? 700 : 400};color:${isTop ? 'var(--green)' : color}">${_fmt(b.rate)} <span style="font-size:9px;font-weight:400;opacity:.7">+${eur.toLocaleString('fr-FR')} €</span></div>
-          <div style="font-size:9px;color:var(--text-dim)">${_shortName(b.r, false)}${b.kind === 'penalty' ? ' · anticipé' : ''}</div></td>`;
+          <div style="font-size:9px;color:var(--text-dim)">${_shortName(b.r, false)}${b.kind === 'penalty' ? ' · anticipé' : ''}${b.periodRate != null ? ' · palier ' + _fmt(b.periodRate) + (b.nextRate != null ? ' → ' + _fmt(b.nextRate) : '') : ''}</div></td>`;
       });
       html += `<td style="padding:7px 8px;font-size:11px;white-space:nowrap">${top ? '<strong style="color:var(--green)">' + (top.r.bankName || top.r.bankId) + '</strong> <span style="color:var(--text-dim)">' + _shortName(top.r, false) + '</span>' : '—'}</td></tr>`;
     });
