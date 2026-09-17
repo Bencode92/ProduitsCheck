@@ -378,81 +378,85 @@
   "aiAnalyzedAt": "2026-09-17T13:32:17.442Z",
   "grading": {
     "grade": "C",
-    "score": 47,
+    "score": 56,
     "killCriteria": {
       "triggered": false,
       "reasons": []
     },
     "pillars": {
       "adjustedReturn": {
-        "score": 38,
+        "score": 54,
         "base": 47,
-        "delta": 0,
-        "reasoning": "Rendement : le « coupon » est une prime de rappel au gré de l’émetteur (non fiable). À l’échéance sans rappel : capital + participation plafonnée (min 0%) → net de frais souvent NÉGATIF. Rendement: base 47 | Coupon 4.3%, protégé | Maturité pleine ~10a (rappel au gré de SG — non fiable)"
+        "delta": 2,
+        "reasoning": "Rendement acquis quel que soit le rappel : 4,3%/an d’intérêt simple → 3,6%/an actuariel au pire cas (échéance 10 a), 4,2%/an au mieux (rappel an 2). Plus tu restes longtemps, moins ça rapporte — et tu restes longtemps précisément quand les taux montent. | Coupon fiable 3,6%, protégé | Maturité pleine ~10a (rappel au gré de Natixis)"
       },
       "underlyingQuality": {
         "score": 64,
         "base": 66,
         "delta": -2,
-        "reasoning": "Qualité: base 66 → -2 = 64 (Régime stagflation avec 10Y à 4.97% et risque de repricing obligataire brutal augmentent le risque de duration/mark-to-market sur ce ZC 10 ans.)"
+        "reasoning": "Qualité: base 66 → -2 = 64 (Stagflation + stance hawkish = risque de hausse des taux 10Y au-delà de 5% (actuellement 4.97%), exposant à un mark-to-market négatif sur duration 10a ; proba call 20% faible = immobilisation longue en contexte défavorable.)"
       },
       "portfolioFit": {
         "score": 87,
         "base": 85,
         "delta": 2,
-        "reasoning": "Fit: base 85 → +2 = 87 (En stagflation avec portefeuilles à 0% bonds, un instrument à capital garanti apporte un amortisseur obligataire pertinent.) — nouveau — diversifie"
+        "reasoning": "Fit: base 85 → +2 = 87 (MI alerte critique : portefeuilles à 0% bonds, exposition equity 81-87% sans amortisseur en stagflation/VIX 22 = besoin URGENT de diversification obligataire, ce produit répond exactement à ce gap structurel.) — nouveau — diversifie"
       },
       "riskPremium": {
-        "score": 26,
+        "score": 38,
         "base": 22,
-        "delta": -2,
-        "reasoning": "Prime vs CAT : prime de rappel ~4,3%/an mais AU GRÉ DE SG (non fiable) → rendement fiable ≈ 0% (cas échéance) vs CAT 2,8% − illiq 3,1% = -5,9%. SG rappelle quand ça L’arrange."
+        "delta": 2,
+        "reasoning": "Prime vs CAT (gain acquis dans tous les cas) : pire cas 3,6%/an actuariel (échéance 10 a, 143% du nominal) − commission 1% (0,1%/an) vs CAT 3,5% − illiquidité 3,1% = -3,1%. Meilleur cas 4,2%/an si Natixis rappelle an 2 — ce qui n’arrive que si les taux BAISSENT."
       }
     },
-    "verdict": "Produit à taux fixe callable in fine, capital garanti, offrant 4.3% annualisé sur un ZC 10 ans dans un régime de stagflation confirmée (VIX 22, Brent $107). La probabilité de call reste faible (~20%), donc l'investisseur bénéficiera probablement du coupon sur la durée complète, ce qui est un point positif en environnement incertain. Le spread réel n'est que de 0.77% au-dessus du 10Y AAA, une compensation modeste au regard de l'immobilisation longue et du risque crédit émetteur. Note C cohérente : instrument défensif correct mais rémunération peu généreuse.",
+    "verdict": "Produit à forte pertinence TACTIQUE pour corriger l'absence totale d'obligataire dans les portefeuilles (alerte MI critique). Le coupon garanti 4.3% sur maturité espérée 2.3a (proba call 20% faible = durée réelle probable 8-10a) offre un rendement supérieur au 10Y AAA (3.53%) avec spread crédit émetteur de 77bps. MAIS le contexte stagflation/hawkish hold crée un risque de duration significatif : si le 10Y franchit 5% (seuil proche à 4.97%), le mark-to-market sera négatif pendant l'immobilisation longue. La faible probabilité de call (20%) est un AVANTAGE (flux garanti) mais aussi un PIÈGE (pas de sortie anticipée si les taux montent). Note ajustée D+ → C+ grâce à l'urgence de diversification obligataire, mais ce n'est PAS un produit sans risque en environnement de taux volatils.",
     "keyRisks": [
-      "Risque crédit émetteur : sans sous-jacent, le défaut de l'émetteur est le principal aléa sur le capital nominalement garanti.",
-      "Risque de duration/liquidité : sensibilité élevée d'un ZC 10 ans à une hausse des taux (10Y proche de 5%), pénalisant en cas de revente avant terme.",
-      "Coût d'opportunité : spread de 0.77% faible, capital immobilisé longtemps si le bond n'est pas rappelé."
+      "Duration 10a en stagflation : si taux 10Y franchit 5% (actuellement 4.97%), mark-to-market négatif de ~10% sans possibilité de sortie anticipée (proba call 20% faible), capital immobilisé dans un actif décoté.",
+      "Risque crédit émetteur : sans sous-jacent actions, dépendance totale à la solvabilité de l'émetteur ; en cas de stress HY (spreads s'élargissent déjà, HYG -0.94%), risque de défaut si émetteur non-investment grade.",
+      "Coût d'opportunité : immobilisation 8-10a probable (call peu probable) à 4.3% alors que la courbe pourrait offrir 5%+ si la Fed/BCE restent hawkish plus longtemps que prévu, notamment si Brent $107+ maintient PCE élevé."
     ],
     "negotiationPoints": [],
     "scenarios": {
       "optimistic": {
-        "return_pct": 9,
-        "return_eur": 9000,
-        "probability": 0.2,
-        "duration_years": 2.3
+        "label": "Rappelé an 2 (taux en baisse)",
+        "desc": "capital + gain acquis, replacé plus bas",
+        "return_pct": 8.6,
+        "return_eur": 8600,
+        "probability": 0.3
       },
       "base": {
+        "label": "Échéance 10 a (taux stables/hausse)",
+        "desc": "143% du nominal, 3,6%/an actuariel, coincé jusqu’au bout",
         "return_pct": 43,
         "return_eur": 43000,
-        "probability": 0.55,
-        "duration_years": 10
+        "probability": 0.65
       },
       "stress": {
-        "return_pct": 10,
-        "return_eur": 10000,
-        "probability": 0.15,
-        "duration_years": 10
+        "label": "Revente en cours de vie",
+        "desc": "prix de marché : perte non mesurable (≈ −3 % à −10 % si les taux montent)",
+        "return_pct": -5,
+        "return_eur": -5000,
+        "probability": 0.03
       },
       "worst": {
-        "return_pct": -40,
-        "return_eur": -40000,
-        "probability": 0.1,
-        "duration_years": 10
+        "label": "Défaut / résolution Natixis",
+        "desc": "bail-in : perte partielle ou totale",
+        "return_pct": -60,
+        "return_eur": -60000,
+        "probability": 0.02
       }
     },
     "confidenceInterval": {
-      "low": 39,
-      "high": 57,
+      "low": 41,
+      "high": 59,
       "halfWidth": 9,
       "gradeStable": false,
       "gradeRange": "D-C",
-      "label": "C [39-57]"
+      "label": "C [41-59]"
     },
     "metadata": {
-      "gradedAt": "2026-09-17T13:33:09.099Z",
-      "durationMs": 48482,
+      "gradedAt": "2026-09-17T13:43:32.690Z",
+      "durationMs": 31001,
       "aiUsed": true,
       "version": "7.1",
       "productType": "taux_fixe",
@@ -463,7 +467,7 @@
       "basketVol": 0,
       "basketDD": 0,
       "basketMomentum": null,
-      "couponAnnualized": 4.3,
+      "couponAnnualized": 3.64,
       "couponRaw": 4.3,
       "couponMultiplier": 1,
       "couponFrequency": "annuel",
@@ -479,10 +483,10 @@
       "baseScore": 49,
       "baseGrade": "C",
       "adjustments": {
-        "p1": 0,
+        "p1": 2,
         "p2": -2,
         "p3": 2,
-        "p4": -2
+        "p4": 2
       },
       "barrier_sigma": null,
       "barrier_sigma_label": null,
@@ -490,9 +494,9 @@
       "liquidity_level": "L3",
       "liquidity_score": 40,
       "liquidity_label": "Callable LT",
-      "ci_low": 39,
-      "ci_high": 57,
-      "ci_label": "C [39-57]",
+      "ci_low": 41,
+      "ci_high": 59,
+      "ci_label": "C [41-59]",
       "issuer_rating": "A+",
       "issuer_tier": "IG",
       "hasDecrement": false,
@@ -507,29 +511,36 @@
         "p4": 0.3
       },
       "inputHash": "g1us0irp",
-      "gradeT0": "2026-09-17T13:33:09.099Z",
+      "gradeT0": "2026-09-17T13:43:32.690Z",
       "trackingLevelAt0": null,
+      "catRate": 3.54,
       "productClass": "callable_issuer_discretion",
       "callableIssuerDiscretion": true,
       "callPremiumAnnual": 4.3,
-      "gradeCaveat": "⚠️ Callable AU GRÉ DE L’ÉMETTEUR : grade indicatif (hors modèle autocall). Le vrai rendement = scénarios NETS : négatif dans les cas réalistes, positif seulement si SG rappelle tôt."
+      "guaranteedYieldWorst": 3.64,
+      "guaranteedYieldBest": 4.21,
+      "guaranteedYieldBestYear": 2,
+      "guaranteedMaturityLevel": 143,
+      "callableGuaranteedGain": true,
+      "scenariosDeterministic": true,
+      "gradeCaveat": "⚠️ Callable au gré de Natixis : gain 4,3%/an acquis dans tous les cas, mais c’est Natixis qui choisit la durée : 4,2%/an si rappel rapide (taux en baisse), 3,6%/an si tu vas au bout (taux en hausse). Illiquide avant le remboursement."
     },
     "regimeScenarios": {
       "current": {
-        "score": 57,
+        "score": 58,
         "grade": "C",
         "label": "Actuel (stagflation)",
         "desc": "In fine: pas de cash-flow intermédiaire, TRI ~3.9% si go-to-maturity"
       },
       "bull": {
-        "score": 63,
+        "score": 64,
         "grade": "B",
         "label": "Bull / Risk-on",
         "delta": 6,
         "desc": "Taux baissent → call probable → coupon capitalisé versé en une fois"
       },
       "crash": {
-        "score": 49,
+        "score": 50,
         "grade": "C",
         "label": "Crash / Récession",
         "delta": -8,
