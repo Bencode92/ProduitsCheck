@@ -11,7 +11,8 @@
 (function() {
   'use strict';
 
-  const S = window._catV4State = window._catV4State || { horizon: 12, shift: 0, cash: 300000, callable: { coupon: 4.0, guaranteed: 2, maturity: 10, spread: 0.6, barrier: '', fees: 0, enabled: false }, selected: [], rates: null };
+  const VIEWS = [{ k: 'down', label: 'Baisse', bp: -50 }, { k: 'fwd', label: 'Marché (forward)', bp: 0 }, { k: 'up25', label: 'Hausse modérée', bp: 25 }, { k: 'up50', label: 'Hausse forte', bp: 50 }];
+  const S = window._catV4State = window._catV4State || { horizon: 12, view: 'fwd', shift: 0, cash: 300000, callable: { coupon: 4.0, guaranteed: 2, maturity: 10, spread: 0.6, barrier: '', fees: 0, enabled: false }, selected: [], rates: null };
   const fmtE = (n) => Math.round(n).toLocaleString('fr-FR') + ' €';
   const fmtP = (x) => (Math.round(x * 100) / 100).toFixed(2).replace('.', ',') + ' %';
   const DAY = 864e5;
@@ -125,8 +126,9 @@
   function _rateProducts() {
     const seen = new Set(), out = [];
     const push = (p) => { if (!p || !p.id || seen.has(p.id)) return; seen.add(p.id); out.push(p); };
-    try { Object.values((window.app && app.state && app.state.proposals) || {}).forEach(arr => (arr || []).forEach(push)); } catch (e) {}
-    try { ((window.app && app.state && app.state.portfolio) || []).forEach(push); } catch (e) {}
+    const _app = (typeof app !== 'undefined' && app && app.state) ? app : null;
+    try { Object.values((_app && _app.state.proposals) || {}).forEach(arr => (arr || []).forEach(push)); } catch (e) {}
+    try { ((_app && _app.state.portfolio) || []).forEach(push); } catch (e) {}
     return out.filter(p => {
       const cp = p.capitalProtection || {}; const c = p.coupon || {}; const er = p.earlyRedemption || {};
       const rateLike = /TEC|EURIBOR|CMS|€STR|ESTR|OAT/i.test(String(c.barrierCouponType || '') + ' ' + String((p.underlyings || []).join(' '))) || c.type === 'fixe' || c.type === 'fixe_capitalise' || er.type === 'callable' || er.type === 'tarn';
@@ -171,7 +173,7 @@
     }
     let value = A * (1 - t.fees / 100) + coupons, liquid = true;
     if (redeemedYear != null && redeemedYear * 12 < H) { const rest = H - redeemedYear * 12; value = A * (1 - t.fees / 100) * Math.pow(1 + expectedCAT(redeemedYear * 12, rest, shiftBp) / 100, rest / 12) + coupons; notes.push('capital replacé au CAT attendu ' + fmtP(expectedCAT(redeemedYear * 12, rest, shiftBp)) + ' sur ' + rest + ' m'); }
-    else if (t.maturity * 12 > H && redeemedYear == null) { liquid = false; notes.push(H <= (t.isCallable ? (t.firstCall || 1) : t.guaranteed) * 12 ? 'période garantie / non rappelable — juge aussi à ' + Math.min(60, Math.round(t.maturity * 12)) + ' m' : (t.isTarn ? 'cible non atteinte : coupons conditionnels, capital immobilisé jusqu\'à ' + t.maturity + ' ans' : 'non rappelé : coincé au coupon ' + fmtP(t.coupon) + ' jusqu\'à ' + t.maturity + ' ans')); }
+    else if (t.maturity * 12 > H && redeemedYear == null) { liquid = false; notes.push(H <= (t.isCallable ? (t.firstCall || 1) : t.guaranteed) * 12 ? 'période garantie / non rappelable — juge aussi à ' + Math.min(60, Math.round(t.maturity * 12)) + ' m' : (t.isTarn ? 'cible non atteinte : coupons conditionnels, capital immobilisé jusqu\'à ' + t.maturity + ' ans' : t.isCallable ? 'non rappelé : coincé au coupon ' + fmtP(t.coupon) + ' jusqu\'à ' + t.maturity + ' ans' : 'capital immobilisé jusqu\'à l\'échéance (' + t.maturity + ' ans)')); }
     if (lost) notes.push(lost + ' coupon(s) perdu(s) (taux scénario > barrière ' + fmtP(t.barrier) + ')' + (t.memory ? ' — mémoire' : ''));
     if (t.inFine && !redeemedYear && years > 0) notes.push('coupons capitalisés, versés seulement au remboursement');
     if (t.fees) notes.push('commission ' + fmtP(t.fees) + ' déduite');
@@ -185,13 +187,15 @@
     const host = document.getElementById('cat-v4-host'); if (!host) return;
     if (!S.rates) { host.innerHTML = '<div style="font-size:11px;color:var(--text-dim)">Chargement de la courbe des taux…</div>'; return; }
     const H = S.horizon, cv = _curve();
-    const shiftCustom = parseFloat(S.shift) || 0;
-    const scen = SCEN.map(s => ({ ...s, bp: s.bp + shiftCustom }));
+    const view = VIEWS.find(v => v.k === S.view) || VIEWS[1];
+    const scen = SCEN.slice(); // colonnes fixes : Baisse / Marché / Hausse +50
+    const viewIdx = view.bp <= -25 ? 0 : view.bp >= 50 ? 2 : view.bp > 0 ? -1 : 1; // -1 = vue intermédiaire (+25) : calculée à part
     let h = `<div class="section"><div class="section-header"><div class="section-title"><span class="dot" style="background:#0EA5E9"></span>🧭 Décision v4 — courbe, pénalités, scénarios</div>
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:11px">
-        <label>Horizon <select id="v4-h" onchange="window._catV4Set('horizon',this.value)">${[6, 12, 18, 24, 36].map(m => `<option value="${m}" ${m === H ? 'selected' : ''}>${m} mois</option>`).join('')}</select></label>
-        <label title="Décalage appliqué aux taux FUTURS dans tous les scénarios (ex. +25 si tu crois que la BCE ira plus loin que ce que la courbe anticipe)">Ma vue vs marché <input id="v4-shift" type="number" step="5" value="${shiftCustom}" style="width:60px" onchange="window._catV4Set('shift',this.value)"> bp</label>
-      </div></div>`;
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:11px">
+        <label>Horizon <select id="v4-h" onchange="window._catV4Set('horizon',this.value)">${[6, 12, 18, 24, 36, 60].map(m => `<option value="${m}" ${m === H ? 'selected' : ''}>${m} mois</option>`).join('')}</select></label>
+        <span>Ma vue sur les taux : ${VIEWS.map(v => `<button class="btn sm" style="margin-left:4px;${v.k === view.k ? 'background:#0EA5E9;color:#fff;border-color:#0EA5E9' : ''}" onclick="window._catV4Set('view','${v.k}')" title="${v.bp === 0 ? 'ce que la courbe anticipe déjà' : (v.bp > 0 ? '+' : '') + v.bp + ' bp au-delà du forward'}">${v.label}</button>`).join('')}</span>
+      </div></div>
+      <div style="font-size:10px;color:var(--text-muted);margin:-4px 0 10px">La reco suit <strong>ta vue</strong> (${view.label}${view.bp ? ', ' + (view.bp > 0 ? '+' : '') + view.bp + ' bp vs forward' : ''}) ; les 3 colonnes montrent ce que tu gagnes ou perds si le marché fait autre chose. « Marché » = la courbe telle quelle : une hausse est déjà dedans (forward 6 m dans 6 m ${fmtP(forward(6, 6))} vs ${fmtP(spot(6))} aujourd'hui) — choisir « Hausse » = parier sur PLUS que ça.</div>`;
 
     // 1. vue taux
     h += `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:12px">`;
@@ -203,12 +207,13 @@
     const active = catManager.deposits.filter(d => d.status === 'active');
     h += `<div style="font-size:12px;font-weight:700;color:var(--text-bright);margin-bottom:6px">1 · Mes placements — montant à ${H} mois, brut, par scénario</div>
       <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px;min-width:760px"><thead><tr style="border-bottom:1px solid var(--border)">
-      <th style="text-align:left;padding:5px 6px;color:var(--text-muted)">Placement</th><th style="text-align:left;padding:5px 6px;color:var(--text-muted)">Option</th>${scen.map(s => `<th style="text-align:right;padding:5px 6px;color:var(--text-muted)">${s.label}${shiftCustom ? ' ' + (shiftCustom > 0 ? '+' : '') + shiftCustom : ''}</th>`).join('')}<th style="text-align:left;padding:5px 6px;color:var(--text-muted)">Reco</th></tr></thead><tbody>`;
+      <th style="text-align:left;padding:5px 6px;color:var(--text-muted)">Placement</th><th style="text-align:left;padding:5px 6px;color:var(--text-muted)">Option</th>${scen.map(s => `<th style="text-align:right;padding:5px 6px;color:var(--text-muted)">${s.label}</th>`).join('')}<th style="text-align:left;padding:5px 6px;color:var(--text-muted)">Reco</th></tr></thead><tbody>`;
     active.forEach(d => {
       const per = scen.map(s => depositOptions(d, H, s.bp));
       const keys = Object.keys(per[1]);
-      // reco = meilleure option dans le scénario marché ; robuste si meilleure dans les 3
-      const bestKey = keys.reduce((b, k) => (!b || per[1][k].value > per[1][b].value) ? k : b, null);
+      // reco = meilleure option dans TA vue ; robuste si c'est aussi la meilleure dans les 3 scénarios
+      const perView = viewIdx >= 0 ? per[viewIdx] : depositOptions(d, H, view.bp);
+      const bestKey = keys.reduce((b, k) => (!b || perView[k].value > perView[b].value) ? k : b, null);
       const robust = scen.every((s, i) => keys.reduce((b, k) => (!b || per[i][k].value > per[i][b].value) ? k : b, null) === bestKey);
       const labels = { keep: '✅ Garder', exitNow: '🔄 Sortir maintenant', exitFree: '⏳ Sortir à l\'échéance libre' };
       keys.forEach((k, j) => {
@@ -216,18 +221,32 @@
         if (j === 0) h += `<td rowspan="${keys.length}" style="padding:5px 6px;vertical-align:top"><strong>${d.productName || 'CAT'}</strong><div style="font-size:9px;color:var(--text-dim)">${d.bankName || ''} · ${d.entityName || ''} · ${fmtE(parseFloat(d.amount) || 0)}${d.maturityDate ? ' · éch. ' + formatDate(d.maturityDate) : ''}</div></td>`;
         h += `<td style="padding:5px 6px;${k === bestKey ? 'font-weight:700' : ''}" title="${per[1][k].label.replace(/"/g, '&quot;')}">${labels[k]}<div style="font-size:9px;color:var(--text-dim);font-weight:400">${per[1][k].label}</div></td>`;
         scen.forEach((s, i) => { const v = per[i][k].value, ref = per[i].keep.value; h += `<td style="padding:5px 6px;text-align:right;font-family:var(--mono);white-space:nowrap">${fmtE(v)}<div style="font-size:9px;color:${v - ref > 1 ? 'var(--green)' : v - ref < -1 ? 'var(--orange)' : 'var(--text-dim)'}">${k === 'keep' ? 'réf.' : (v - ref >= 0 ? '+' : '−') + fmtE(Math.abs(v - ref))}</div></td>`; });
-        if (j === 0) h += `<td rowspan="${keys.length}" style="padding:5px 6px;vertical-align:top;font-size:11px">${labels[bestKey]}<div style="font-size:9px;color:${robust ? 'var(--green)' : 'var(--orange)'}">${robust ? 'robuste (gagne dans les 3 scénarios)' : 'dépend du scénario de taux'}</div></td>`;
+        if (j === 0) h += `<td rowspan="${keys.length}" style="padding:5px 6px;vertical-align:top;font-size:11px">${labels[bestKey]}<div style="font-size:9px;color:${robust ? 'var(--green)' : 'var(--orange)'}">${robust ? 'robuste (gagne dans les 3 scénarios)' : 'selon ta vue « ' + view.label + ' » — change si le marché fait autrement'}</div></td>`;
         h += `</tr>`;
       });
+    });
+    // Structurés de taux détenus (investedAmount > 0) : ce qu'ils rapportent selon le scénario (coupons conditionnels, rappel/cible)
+    const held = _rateProducts().filter(p => (parseFloat(p.investedAmount) || 0) > 0);
+    held.forEach(p => {
+      const t = _productTerms(p), A = parseFloat(p.investedAmount) || 0;
+      const per = scen.map(s => productValue(t, A, H, s.bp));
+      const pv = viewIdx >= 0 ? per[viewIdx] : productValue(t, A, H, view.bp);
+      h += `<tr style="border-bottom:1px solid var(--border);background:rgba(14,165,233,0.04)"><td style="padding:5px 6px"><strong>${p.name || '?'}</strong><div style="font-size:9px;color:var(--text-dim)">structuré de taux détenu · ${fmtE(A)}${t.barrier != null ? ' · coupon si TEC10 ≤ ' + fmtP(t.barrier) : ''}${t.isTarn ? ' · TARN' : t.isCallable ? ' · callable' : ''}</div></td>
+        <td style="padding:5px 6px">✅ Garder<div style="font-size:9px;color:var(--text-dim)">pas de sortie chiffrable (marché secondaire) — coupons + capital selon scénario</div></td>`;
+      per.forEach(v => { h += `<td style="padding:5px 6px;text-align:right;font-family:var(--mono);white-space:nowrap">${fmtE(v.value)}${v.liquid ? '' : ' 🔒'}<div style="font-size:9px;color:${v.notes.some(n => /perdu/.test(n)) ? 'var(--orange)' : 'var(--text-dim)'}">${v.notes.filter(n => /perdu|rembours|rappel|cible/.test(n)).join(' · ').slice(0, 70) || 'coupons versés'}</div></td>`; });
+      h += `<td style="padding:5px 6px;font-size:10px;color:var(--text-muted)">${pv.notes.some(n => /perdu/.test(n)) ? '⚠ coupons à risque dans ta vue' : '✓ coupons dans ta vue'}</td></tr>`;
     });
     h += `</tbody></table></div><div style="font-size:10px;color:var(--text-dim);margin:6px 0 16px">Pénalités = colonne « Sortie » des paliers (progressifs) ou barème % servi (fixes), préavis à 0 % ; « sortir maintenant » replace sur la meilleure offre du jour à la durée restante ; « garder » et « échéance libre » replacent au CAT attendu (forward + spread) du scénario. Écarts en € vs « garder ».</div>`;
 
     // 3. nouveau cash
     const strat = scen.map(s => cashStrategies(S.cash, H, s.bp));
+    const stratView = viewIdx >= 0 ? strat[viewIdx] : cashStrategies(S.cash, H, view.bp);
     h += `<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px"><div style="font-size:12px;font-weight:700;color:var(--text-bright)">2 · Nouveau cash — progressif, fixe ou enchaînement ?</div><label style="font-size:11px">Montant <input type="number" value="${S.cash}" style="width:110px" onchange="window._catV4Set('cash',this.value)"></label></div>
       <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px;min-width:640px"><thead><tr style="border-bottom:1px solid var(--border)"><th style="text-align:left;padding:5px 6px;color:var(--text-muted)">Scénario</th><th style="text-align:left;padding:5px 6px;color:var(--text-muted)">Meilleure stratégie à ${H} mois</th><th style="text-align:right;padding:5px 6px;color:var(--text-muted)">Montant final</th><th style="text-align:left;padding:5px 6px;color:var(--text-muted)">Meilleur produit unique</th><th style="text-align:right;padding:5px 6px;color:var(--text-muted)">Montant final</th></tr></thead><tbody>`;
-    scen.forEach((s, i) => { const b = strat[i][0], bs = strat[i].find(x => x.single && !/⚠/.test(x.label)); if (!b) return;
-      h += `<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 6px">${s.label}</td><td style="padding:5px 6px">${b.label}</td><td style="padding:5px 6px;text-align:right;font-family:var(--mono);font-weight:700;color:var(--green)">${fmtE(b.final)}</td><td style="padding:5px 6px">${bs ? bs.label : '—'}</td><td style="padding:5px 6px;text-align:right;font-family:var(--mono)">${bs ? fmtE(bs.final) + ' <span style="font-size:9px;color:var(--text-dim)">(' + (bs.final - b.final >= 0 ? '+' : '−') + fmtE(Math.abs(bs.final - b.final)) + ')</span>' : ''}</td></tr>`; });
+    const rowsCash = scen.map((s, i) => ({ label: s.label, list: strat[i] }));
+    if (viewIdx < 0) rowsCash.push({ label: '★ Ta vue (' + view.label + ' +' + view.bp + ' bp)', list: stratView, hi: true });
+    rowsCash.forEach((s) => { const b = s.list[0], bs = s.list.find(x => x.single && !/⚠/.test(x.label)); if (!b) return;
+      h += `<tr style="border-bottom:1px solid var(--border);${s.hi ? 'background:rgba(14,165,233,0.08);font-weight:600' : ''}"><td style="padding:5px 6px">${s.label}</td><td style="padding:5px 6px">${b.label}</td><td style="padding:5px 6px;text-align:right;font-family:var(--mono);font-weight:700;color:var(--green)">${fmtE(b.final)}</td><td style="padding:5px 6px">${bs ? bs.label : '—'}</td><td style="padding:5px 6px;text-align:right;font-family:var(--mono)">${bs ? fmtE(bs.final) + ' <span style="font-size:9px;color:var(--text-dim)">(' + (bs.final - b.final >= 0 ? '+' : '−') + fmtE(Math.abs(bs.final - b.final)) + ')</span>' : ''}</td></tr>`; });
     h += `</tbody></table></div><div style="font-size:10px;color:var(--text-dim);margin:6px 0 16px">Si la meilleure stratégie est un enchaînement dont la 2e jambe ne bat le produit unique <em>que</em> dans le scénario « Hausse », c'est un pari sur une hausse au-delà du forward. Un progressif sorti à une échéance libre compte comme 1re jambe.</div>`;
 
     // 4. produits de taux : sélection dans la liste + produit libre
@@ -251,8 +270,10 @@
     if (c.enabled) cols.push({ label: 'Produit libre', terms: { coupon: parseFloat(c.coupon) || 0, maturity: parseInt(c.maturity, 10) || 1, inFine: false, isCallable: true, isTarn: false, firstCall: parseInt(c.guaranteed, 10) || 1, guaranteed: parseInt(c.guaranteed, 10) || 0, target: null, barrier: c.barrier === '' || c.barrier == null ? null : parseFloat(c.barrier), memory: false, fees: parseFloat(c.fees) || 0, spread: parseFloat(c.spread) || 0.6 } });
     if (cols.length) {
       h += `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px;min-width:640px"><thead><tr style="border-bottom:1px solid var(--border)"><th style="text-align:left;padding:5px 6px;color:var(--text-muted)">Scénario</th><th style="text-align:right;padding:5px 6px;color:var(--text-muted)">Meilleur CAT à ${H} m</th>${cols.map(k => `<th style="text-align:right;padding:5px 6px;color:var(--text-muted)">${(k.label || '').substring(0, 30)}</th>`).join('')}</tr></thead><tbody>`;
-      scen.forEach((s, i) => { const b = strat[i][0];
-        h += `<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 6px">${s.label}</td><td style="padding:5px 6px;text-align:right;font-family:var(--mono)">${b ? fmtE(b.final) : '—'}<div style="font-size:9px;color:var(--text-dim)">${b ? b.label.substring(0, 40) : ''}</div></td>`;
+      const rowsP = scen.map((s, i) => ({ label: s.label, bp: s.bp, list: strat[i] }));
+      if (viewIdx < 0) rowsP.push({ label: '★ Ta vue (' + view.label + ')', bp: view.bp, list: stratView, hi: true });
+      rowsP.forEach((s) => { const b = s.list[0];
+        h += `<tr style="border-bottom:1px solid var(--border);${s.hi ? 'background:rgba(14,165,233,0.08);font-weight:600' : ''}"><td style="padding:5px 6px">${s.label}</td><td style="padding:5px 6px;text-align:right;font-family:var(--mono)">${b ? fmtE(b.final) : '—'}<div style="font-size:9px;color:var(--text-dim)">${b ? b.label.substring(0, 40) : ''}</div></td>`;
         cols.forEach(k => { const v = productValue(k.terms, S.cash, H, s.bp); const gap = b ? v.value - b.final : 0;
           h += `<td style="padding:5px 6px;text-align:right;font-family:var(--mono);vertical-align:top"><span style="font-weight:700;color:${gap >= 0 ? 'var(--green)' : 'var(--orange)'}">${fmtE(v.value)}</span>${v.liquid ? '' : ' <span title="capital non disponible à cet horizon" style="color:var(--orange)">🔒</span>'}<div style="font-size:9px;color:${gap >= 0 ? 'var(--green)' : 'var(--orange)'}">${(gap >= 0 ? '+' : '−') + fmtE(Math.abs(gap))} vs CAT</div><div style="font-size:9px;color:var(--text-dim);text-align:left;max-width:220px;white-space:normal">${v.notes.join(' · ')}</div></td>`; });
         h += `</tr>`; });
@@ -267,6 +288,7 @@
   window._catV4Set = function(key, val) {
     if (key.startsWith('callable.')) S.callable[key.split('.')[1]] = val === '' ? '' : val;
     else if (key === 'horizon') S.horizon = parseInt(val, 10) || 12;
+    else if (key === 'view') S.view = val;
     else if (key === 'shift') S.shift = parseFloat(val) || 0;
     else if (key === 'cash') S.cash = parseFloat(val) || S.cash;
     render();
