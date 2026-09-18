@@ -78,6 +78,26 @@
     return { by, total };
   }
 
+
+  // ── Lecture automatique du marché (vraies données : BCE, Euribor, courbe, TEC10, régime) ──
+  function marketRead() {
+    const y = (S.rates && S.rates.yields) || {}, pr = (S.rates && S.rates.policy_rates) || {};
+    const g = (k, f) => (y[k] && y[k][f] != null) ? y[k][f] : null;
+    const dep = pr.ecb_deposit_rate && pr.ecb_deposit_rate.current, refi = pr.ecb_main_rate && pr.ecb_main_rate.current, prDate = pr.ecb_deposit_rate && pr.ecb_deposit_rate.date;
+    const e3 = g('euribor_3m', 'current'), e3chg = g('euribor_3m', 'change_3m_bps'), e12 = g('euribor_12m', 'current');
+    const f66 = forward(6, 6), f1212 = forward(12, 12), tec = g('tec10_fr', 'current'), tecChg = g('tec10_fr', 'change_3m_bps');
+    const a2 = g('oat_fr_2y', 'current'), a10 = g('oat_fr_10y', 'current');
+    const regime = (S.mi && (S.mi.regime || (S.mi.ai_response && S.mi.ai_response.regime))) || null;
+    const anticip = e12 != null ? Math.round((f1212 - e12) * 100) : null; // hausse déjà pricée à 1 an (bp)
+    const trend = e3chg > 15 ? 'hausse' : e3chg < -15 ? 'baisse' : 'stable';
+    // Horizon conseillé : là où le marché rémunère le mieux l'engagement (meilleure offre CAT réelle, hors groupes plafonnés)
+    const gx = groupExposure(); const A = S.cash || 0;
+    const overG = new Set(Object.entries(gx.by).filter(([, a]) => gx.total + A > 0 && (a + A) / (gx.total + A) > GROUP_CAP).map(([g]) => g));
+    const perH = [6, 12, 24].map(H => { const b = cashStrategies(A || 100000, H, 0).filter(x => x.single && !/⚠/.test(x.label) && !overG.has(_groupOf((x.label.split(' ')[0] === 'Banque' ? 'banque-populaire' : x.label.split(' ')[0]))))[0]; return b ? { H, label: b.label, rate: (Math.pow(b.final / (A || 100000), 12 / H) - 1) * 100 } : null; }).filter(Boolean);
+    const advised = perH.length ? perH.reduce((m, x) => x.rate > m.rate + 0.15 ? x : m, perH[0]) : null; // il faut +15 bp pour justifier de s'engager plus long
+    return { dep, refi, prDate, e3, e3chg, e12, f66, f1212, tec, tecChg, a2, a10, regime, anticip, trend, perH, advised };
+  }
+
   // ── 2. Placements existants ──────────────────────────────────────
   function _growthSchedule(d, from, to, penaltyOnCurrent) {
     // croissance actuarielle du placement entre deux dates, selon ses paliers datés (ou taux fixe)
@@ -236,7 +256,7 @@
   function render() {
     const host = document.getElementById('cat-v4-host'); if (!host) return;
     if (!S.rates) { host.innerHTML = '<div style="font-size:11px;color:var(--text-dim)">Chargement de la courbe des taux…</div>'; return; }
-    const H = S.horizon, cv = _curve(); let A = S.cash;
+    let H = S.horizon; const cv = _curve(); let A = S.cash;
     const view = VIEWS.find(v => v.k === S.view) || VIEWS[1];
     const scen = SCEN.slice();
     const viewIdx = view.bp <= -25 ? 0 : view.bp >= 50 ? 2 : view.bp > 0 ? -1 : 1;
@@ -258,11 +278,29 @@
         h += `<label style="display:flex;align-items:center;gap:6px;padding:5px 9px;border:1px solid ${on ? 'var(--orange)' : 'var(--border)'};border-radius:6px;font-size:11px;cursor:pointer;background:${on ? 'rgba(232,93,4,0.10)' : 'var(--bg-elevated)'}"><input type="checkbox" ${on ? 'checked' : ''} onchange="window._catV4Source('${d.id}')"><strong>${d.productName || 'CAT'}</strong> · ${fmtE(parseFloat(d.amount) || 0)} · ${d.entityName || ''} · <span style="color:${days <= 0 ? 'var(--orange)' : 'var(--text-dim)'}">${days <= 0 ? 'échu le ' + formatDate(d.maturityDate) : 'J-' + days + ' (' + formatDate(d.maturityDate) + ')'}</span></label>`; });
       h += `</div>${srcDeps.length ? '<div style="font-size:11px;margin-top:8px"><strong>' + fmtE(srcAmount) + '</strong> à replacer (' + srcDeps.map(d => d.productName).join(' + ') + ' · ' + (srcDeps[0].entityName || '') + ')</div>' : '<div style="font-size:10px;color:var(--text-dim);margin-top:6px">Aucune échéance cochée : le classement porte sur le montant libre ci-dessous (pour une allocation globale par entité, utilise l\'onglet Allocateur).</div>'}</div>`;
     }
-    h += `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;padding:10px 12px;background:var(--bg-elevated);border-radius:8px;margin-bottom:10px;font-size:11px;align-items:end">
-        <label>${srcDeps.length ? 'Montant (= échéances cochées)' : 'Montant libre (€)'}<br><input type="number" value="${A0}" ${srcDeps.length ? 'disabled' : ''} style="width:100%;font-size:14px;font-weight:700" onchange="window._catV4Set('cash',this.value)"></label>
-        <label>Échéance visée<br><select onchange="window._catV4Set('horizon',this.value)" style="width:100%;font-size:14px;font-weight:700">${[6, 12, 18, 24, 36, 60].map(m => `<option value="${m}" ${m === H ? 'selected' : ''}>${m} mois</option>`).join('')}</select></label>
-        <div>Ma vue sur les taux<br><div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">${VIEWS.map(v => `<button class="btn sm" style="${v.k === view.k ? 'background:#0EA5E9;color:#fff;border-color:#0EA5E9' : ''}" onclick="window._catV4Set('view','${v.k}')" title="${v.bp === 0 ? 'ce que la courbe anticipe déjà' : (v.bp > 0 ? '+' : '') + v.bp + ' bp au-delà du forward'}">${v.label}</button>`).join('')}</div></div>
-      </div>
+    const mr = marketRead();
+    if (!S.horizonManual && mr.advised) S.horizon = mr.advised.H;
+    H = S.horizon; const H2 = H; // horizon effectif (conseillé par le marché sauf réglage manuel)
+    h += `<div style="display:grid;grid-template-columns:minmax(180px,220px) 1fr;gap:12px;margin-bottom:10px;align-items:start">
+      <div style="padding:10px 12px;background:var(--bg-elevated);border-radius:8px;font-size:11px"><label>${srcDeps.length ? 'Montant (= échéances cochées)' : 'Montant libre (€)'}<br><input type="number" value="${A0}" ${srcDeps.length ? 'disabled' : ''} style="width:100%;font-size:14px;font-weight:700" onchange="window._catV4Set('cash',this.value)"></label></div>
+      <div style="padding:10px 12px;border:1px solid rgba(14,165,233,0.35);border-radius:8px;background:rgba(14,165,233,0.05);font-size:11px">
+        <div style="font-weight:700;color:#0369A1;margin-bottom:4px">📡 Lecture du marché — données réelles du ${cv.date || '?'}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px 14px;font-family:var(--mono);font-size:10.5px">
+          <span title="Taux directeurs BCE (dépôt / refi)">BCE dépôt <strong>${mr.dep != null ? fmtP(mr.dep) : '—'}</strong> · refi <strong>${mr.refi != null ? fmtP(mr.refi) : '—'}</strong>${mr.prDate ? ' <span style="color:var(--text-dim)">(' + mr.prDate + ')</span>' : ''}</span>
+          <span>Euribor 3 m <strong>${mr.e3 != null ? fmtP(mr.e3) : '—'}</strong> <span style="color:${mr.trend === 'hausse' ? 'var(--orange)' : mr.trend === 'baisse' ? 'var(--green)' : 'var(--text-dim)'}">${mr.e3chg != null ? (mr.e3chg > 0 ? '+' : '') + Math.round(mr.e3chg) + ' bp / 3 m' : ''}</span></span>
+          <span>Euribor 12 m <strong>${mr.e12 != null ? fmtP(mr.e12) : '—'}</strong></span>
+          <span>2 ans <strong>${mr.a2 != null ? fmtP(mr.a2) : '—'}</strong> · 10 ans <strong>${mr.a10 != null ? fmtP(mr.a10) : '—'}</strong></span>
+          <span>TEC10 <strong>${mr.tec != null ? fmtP(mr.tec) : '—'}</strong>${mr.tecChg != null ? ' <span style="color:var(--text-dim)">(' + (mr.tecChg > 0 ? '+' : '') + Math.round(mr.tecChg) + ' bp / 3 m)</span>' : ''}</span>
+          ${mr.regime ? '<span>régime macro <strong>' + mr.regime + '</strong></span>' : ''}
+        </div>
+        <div style="margin-top:6px;line-height:1.5"><strong>Ce que le marché anticipe :</strong> 6 m dans 6 m <strong>${fmtP(mr.f66)}</strong>, 12 m dans 12 m <strong>${fmtP(mr.f1212)}</strong>${mr.anticip != null ? ' → <strong>' + (mr.anticip > 0 ? '+' : '') + mr.anticip + ' bp</strong> déjà intégrés à un an' : ''}. Tendance courte : <strong>${mr.trend}</strong>. ${view.k === 'fwd' ? 'Le scénario de référence est ce forward — pas une opinion.' : '<span style="color:var(--orange)">Hypothèse manuelle active : ' + view.label + ' (' + (view.bp > 0 ? '+' : '') + view.bp + ' bp vs marché)</span>'}</div>
+        ${mr.perH.length ? '<div style="margin-top:6px;line-height:1.5"><strong>Où le marché rémunère l\'engagement :</strong> ' + mr.perH.map(x => x.H + ' m <strong>' + fmtP(x.rate) + '</strong> <span style="color:var(--text-dim)">(' + x.label.replace(/ Fixe /, ' ') + ')</span>').join(' · ') + (mr.advised ? ' → <strong>horizon conseillé ' + mr.advised.H + ' mois</strong>' + (S.horizonManual && S.horizonManual !== mr.advised.H ? ' <span style="color:var(--orange)">(réglé manuellement sur ' + H2 + ' m)</span>' : '') : '') + '</div>' : ''}
+        <details style="margin-top:6px"><summary style="cursor:pointer;font-size:10px;color:var(--text-muted)">Tester une autre hypothèse (échéance, vue de taux)</summary><div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:6px">
+          <label>Échéance <select onchange="window._catV4Set('horizon',this.value)">${[6, 12, 18, 24, 36, 60].map(m => `<option value="${m}" ${m === H2 ? 'selected' : ''}>${m} mois</option>`).join('')}</select></label>
+          <span>Vue : ${VIEWS.map(v => `<button class="btn sm" style="margin-left:4px;${v.k === view.k ? 'background:#0EA5E9;color:#fff;border-color:#0EA5E9' : ''}" onclick="window._catV4Set('view','${v.k}')">${v.label}</button>`).join('')}</span>
+          ${(S.horizonManual || view.k !== 'fwd') ? '<button class="btn sm" onclick="window._catV4Set(\'auto\',1)">↺ Revenir au marché</button>' : ''}
+        </div></details>
+      </div></div>
       <div style="font-size:10px;color:var(--text-muted);margin-bottom:8px">Structurés de taux à comparer (coche jusqu'à 3) — les <strong>détenus</strong> sont évalués plus bas avec tes CAT :</div>
       <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px">${prods.map(p => { const t = _productTerms(p); const on = S.selected.includes(p.id); const held = (parseFloat(p.investedAmount) || 0) > 0; return `<label style="display:flex;align-items:center;gap:5px;padding:3px 7px;border:1px solid ${on ? '#0EA5E9' : 'var(--border)'};border-radius:6px;font-size:10px;cursor:pointer;background:${on ? 'rgba(14,165,233,0.10)' : 'var(--bg-elevated)'}"><input type="checkbox" ${on ? 'checked' : ''} onchange="window._catV4Toggle('${p.id}')"> ${(p.name || '?').substring(0, 30)}<span style="color:var(--text-dim)"> · ${fmtP(t.coupon)}${t.barrier != null ? ' si TEC10 ≤ ' + fmtP(t.barrier) : ''}${t.isCallable ? ' · call an ' + t.firstCall : t.isTarn ? ' · TARN' : ''}${t.inFine ? ' · in fine' : ''}${held ? ' · détenu' : ''}</span></label>`; }).join('') || '<span style="font-size:10px;color:var(--text-dim)">aucun produit de taux à capital garanti dans la liste</span>'}</div>`;
 
@@ -394,7 +432,7 @@
   }
   window._catV4AskAI = async function() {
     const el = document.getElementById('cat-v4-ai'); if (!el) return;
-    const cv = _curve(), view = VIEWS.find(v => v.k === S.view) || VIEWS[1], A = S.cash;
+    const cv = _curve(), view = VIEWS.find(v => v.k === S.view) || VIEWS[1], A = S.cash, mr0 = marketRead();
     const prods = _rateProducts(), selected = prods.filter(p => (S.selected || []).includes(p.id));
     const gx = groupExposure(); const overGroups = new Set(Object.entries(gx.by).filter(([, a]) => gx.total + A > 0 && (a + A) / (gx.total + A) > GROUP_CAP).map(([g]) => g));
     el.innerHTML = '<div style="font-size:11px;color:var(--text-dim)">🤖 Analyse en cours (Opus, 20-40 s)…</div>';
@@ -405,7 +443,7 @@
     const conc = Object.entries(gx.by).sort((a, b) => b[1] - a[1]).map(([g, a]) => g + ' ' + Math.round(a / gx.total * 100) + ' %').join(', ');
     const sys = 'Tu es un directeur financier expérimenté de PME française qui conseille un dirigeant sur sa TRÉSORERIE EXCÉDENTAIRE (hors BFR, à but d\'investissement, IS 25 %). Deux entités : Caméléons (prudente : capital garanti, majorité comptes à terme) et ByCam (tolère le risque). Tu écris une ANALYSE D\'INVESTISSEMENT, pas un choix de ligne : tu peux proposer de répartir le montant entre plusieurs supports et durées, de séquencer (agir maintenant / attendre une nouvelle grille bancaire / point de décision daté), de négocier avec les banques, et tu dis ce qui te ferait changer d\'avis. RÈGLES : n\'invente aucun chiffre, utilise uniquement ceux fournis (montants finaux, forwards, plafonds) ; zone euro uniquement ; respecte la règle de concentration (aucun flux vers un groupe marqué ÉCARTÉ, sauf pour dire explicitement que tu recommandes d\'assouplir la règle et pourquoi) ; un capital « immobilisé » n\'est pas disponible à cet horizon ; réponds en français, 350 à 500 mots, structure : 1) Lecture du marché et de ta vue, 2) Stratégie proposée (répartition chiffrée par support et durée, avec les montants finaux correspondants), 3) Séquencement et négociations (dates, leviers), 4) Ce qu\'il faut éviter et pourquoi, 5) Ce qui ferait changer la décision. Markdown léger (titres ##, listes -, gras **).';
     const usr = 'CONTEXTE\nMontant : ' + fmtE(A) + (S.sourceIds && S.sourceIds.length ? ' (échéances Optiplus Conquête BP échues le 18/09/2026, entité Caméléons)' : '') + ' · liquidité hors BFR, objectif investissement, horizon flexible · échéance regardée en priorité : ' + S.horizon + ' mois · vue de taux du dirigeant : ' + view.label + (view.bp ? ' (' + (view.bp > 0 ? '+' : '') + view.bp + ' bp vs forward)' : ' (la courbe telle quelle)') + '.' + (S.aiBrief ? '\nConsigne du dirigeant : ' + S.aiBrief : '') +
-      '\n\nMARCHÉ (courbe du ' + (cv.date || '?') + ') : ' + cv.nodes.map(n => n[0] + ' m ' + fmtP(n[1])).join(', ') + ' · TEC10 ' + (cv.tec10 != null ? fmtP(cv.tec10) : '?') + ' · forwards : 6 m dans 6 m ' + fmtP(forward(6, 6)) + ', 12 m dans 12 m ' + fmtP(forward(12, 12)) + ', 12 m dans 24 m ' + fmtP(forward(24, 12)) + ' · spread CAT moyen ' + fmtP(catSpread(12)) + '.' +
+      '\n\nLECTURE DU MARCHÉ (données réelles) : BCE dépôt ' + (mr0.dep != null ? fmtP(mr0.dep) : '?') + ' / refi ' + (mr0.refi != null ? fmtP(mr0.refi) : '?') + (mr0.prDate ? ' au ' + mr0.prDate : '') + ' · Euribor 3 m ' + (mr0.e3 != null ? fmtP(mr0.e3) : '?') + ' (' + (mr0.e3chg != null ? (mr0.e3chg > 0 ? '+' : '') + Math.round(mr0.e3chg) + ' bp sur 3 mois' : '') + ', tendance ' + mr0.trend + ') · hausse déjà intégrée à 1 an ' + (mr0.anticip != null ? mr0.anticip + ' bp' : '?') + (mr0.regime ? ' · régime macro ' + mr0.regime : '') + ' · horizon conseillé par la courbe ' + (mr0.advised ? mr0.advised.H + ' mois' : '?') + '.\nCOURBE (' + (cv.date || '?') + ') : ' + cv.nodes.map(n => n[0] + ' m ' + fmtP(n[1])).join(', ') + ' · TEC10 ' + (cv.tec10 != null ? fmtP(cv.tec10) : '?') + ' · forwards : 6 m dans 6 m ' + fmtP(forward(6, 6)) + ', 12 m dans 12 m ' + fmtP(forward(12, 12)) + ', 12 m dans 24 m ' + fmtP(forward(24, 12)) + ' · spread CAT moyen ' + fmtP(catSpread(12)) + '.' +
       '\n\nCONCENTRATION par groupe bancaire (CAT + structurés détenus, ' + fmtE(gx.total) + ') : ' + conc + ' · plafond ' + Math.round(GROUP_CAP * 100) + ' % (règle validée par un expert le 17/09/2026 : aucun flux nouveau vers un groupe au-dessus).' +
       '\n\nOPTIONS POUR CE MONTANT — montant final brut par horizon, dans la vue du dirigeant (les structurés cochés sont évalués sur leur mécanique réelle) :\n' + byH +
       '\n\nCAT EXISTANTS :\n' + deps + '\n\nARBITRAGES PROPOSÉS PAR L\'OUTIL :\n' + arbs + '\n\nSTRUCTURÉS DE TAUX DÉTENUS (à 12 mois) :\n' + held +
@@ -428,7 +466,8 @@
   window._catV4Toggle = function(id) { S.selected = S.selected || []; const i = S.selected.indexOf(id); if (i >= 0) S.selected.splice(i, 1); else { if (S.selected.length >= 3) S.selected.shift(); S.selected.push(id); } render(); };
   window._catV4Set = function(key, val) {
     if (key.startsWith('callable.')) S.callable[key.split('.')[1]] = val === '' ? '' : val;
-    else if (key === 'horizon') S.horizon = parseInt(val, 10) || 12;
+    else if (key === 'horizon') { S.horizon = parseInt(val, 10) || 12; S.horizonManual = S.horizon; }
+    else if (key === 'auto') { S.horizonManual = null; S.view = 'fwd'; }
     else if (key === 'view') S.view = val;
     else if (key === 'shift') S.shift = parseFloat(val) || 0;
     else if (key === 'cash') { S.cash = parseFloat(val) || S.cash; S.sourceIds = []; }
@@ -446,7 +485,7 @@
         let anchor = null;
         container.querySelectorAll('.section').forEach(sec => { const t = sec.querySelector('.section-title'); if (t && /Optimisa/i.test(t.textContent)) anchor = sec; });
         if (anchor) anchor.after(host); else container.appendChild(host);
-        if (S.rates) render(); else { render(); github.readFile('data/market/rates.json').then(r => { S.rates = r; render(); }).catch(() => {}); }
+        if (S.rates) render(); else { render(); Promise.all([github.readFile('data/market/rates.json'), github.readFile('data/market/market_intelligence.json').catch(() => null)]).then(([r, mi]) => { S.rates = r; S.mi = mi; render(); }).catch(() => {}); }
       } catch (e) { console.error('[CAT v4]', e); }
     };
   }
