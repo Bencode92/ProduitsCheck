@@ -310,6 +310,17 @@
       h += `<tr style="border-bottom:1px solid var(--border);opacity:.55"><td style="padding:5px 6px;color:var(--text-dim)">🚫</td><td style="padding:5px 6px"><span style="font-size:9px;padding:1px 5px;border-radius:4px;background:var(--bg-elevated);color:var(--text-dim)">${o.kind === 'CAT' ? 'CAT' : 'STRUCTURÉ'}</span> ${o.label} <span style="color:var(--orange);font-size:10px">hors plafond ${o.group}</span></td><td style="padding:5px 6px;text-align:right;font-family:var(--mono)">${fmtE(o.value)}</td><td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:var(--text-dim)">${best ? (o.value >= best.value ? '+' : '−') + fmtE(Math.abs(o.value - best.value)) : ''}</td><td colspan="3" style="padding:5px 6px;font-size:10px;color:var(--text-dim)">écarté par la règle de concentration — ne compte pas dans la reco</td></tr>`;
     });
     h += `</tbody></table></div>`;
+    // « Patienter » : à horizon court, chiffrer ce que coûte / rapporte le fait de revoir dans H mois plutôt que de bloquer 12 mois
+    if (H < 12 && best) {
+      const s12 = cashStrategies(A, 12, view.bp).filter(x => x.single && !/⚠/.test(x.label) && !overGroups.has(_groupOf((x.label.split(' ')[0] === 'Banque' ? 'banque-populaire' : x.label.split(' ')[0]))))[0];
+      if (s12) {
+        const rH = Math.pow(best.value / A, 12 / H) - 1, r12 = Math.pow(s12.final / A, 1) - 1;
+        const be = (Math.pow((1 + r12) / Math.pow(1 + rH, H / 12), 12 / (12 - H)) - 1) * 100;
+        const exp = expectedCAT(H, 12 - H, view.bp);
+        const vWait = best.value * Math.pow(1 + exp / 100, (12 - H) / 12), diff = vWait - s12.final;
+        h += `<div style="margin:8px 0 4px;padding:8px 10px;border:1px solid var(--border);border-radius:6px;background:var(--bg-elevated);font-size:11px"><strong>⏳ Patienter ${H} mois puis revoir, ou bloquer 12 mois ?</strong> ${best.label} (${H} m) puis replacement : il faut que le CAT de ${12 - H} mois dans ${H} mois dépasse <strong>${fmtP(be)}</strong> pour battre ${s12.label} 12 m (${fmtE(s12.final)}). Dans ta vue, le marché attend <strong>${fmtP(exp)}</strong> → patienter ${diff >= 0 ? 'rapporte' : 'coûte'} ≈ <strong style="color:${diff >= 0 ? 'var(--green)' : 'var(--orange)'}">${fmtE(Math.abs(diff))}</strong> sur 12 mois${Math.abs(diff) < A * 0.002 ? ' — quasi neutre : tu achètes de l\'optionnalité gratuitement' : ''}.</div>`;
+      }
+    }
     if (best && srcDeps.length) h += `<div style="margin:8px 0 4px;padding:8px 10px;border:1px solid rgba(6,214,160,0.4);border-radius:6px;background:rgba(6,214,160,0.06);font-size:11px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><span>Reco pour ${fmtE(A)} : <strong>${best.label}</strong> → ${fmtE(best.value)} à ${H} mois.</span>${best.kind === 'CAT' ? '<button class="btn sm primary" onclick="showRenewFromOfferModal(\'' + srcDeps[0].id + '\')">↻ Créer le placement (archive l\'ancien)</button>' : '<span style="font-size:10px;color:var(--text-dim)">structuré : à souscrire via la fiche produit</span>'}</div>`;
     h += `<div style="display:flex;gap:8px;align-items:center;margin:8px 0 14px;flex-wrap:wrap"><button class="btn sm ai-glow" onclick="window._catV4AskAI()">🤖 Avis IA sur ce classement</button><span style="font-size:10px;color:var(--text-dim)">l'IA commente ces chiffres (elle ne les recalcule pas) : CAT vs structurés, liquidité, risque émetteur, ta vue de taux</span></div>
       <div id="cat-v4-ai" style="margin-bottom:14px"></div>`;
