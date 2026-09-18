@@ -194,7 +194,10 @@
     }
     const barrier = (c.type === 'conditionnel' && c.trigger != null && c.trigger > 0 && c.trigger < 20) ? parseFloat(c.trigger) : null; // seuil de taux (≤)
     const fees = parseFloat((p.aiParsed && p.aiParsed.commissions) || (p.fees && p.fees.structuring)) || 0; // one-shot, en % du nominal
-    return { coupon, maturity, inFine, isCallable, isTarn, firstCall, guaranteed: parseInt(c.guaranteedYears, 10) || 0, target: parseFloat(er.targetCouponLevel || er.trigger) || null, barrier, memory: !!c.memory, fees, spread: 0.6, name: p.name };
+    // années garanties : niveau coupon ou racine ; pour un produit déjà détenu, on ne compte que ce qui RESTE depuis le strike
+    let guaranteed = parseInt(c.guaranteedYears != null ? c.guaranteedYears : p.guaranteedYears, 10) || 0;
+    if (guaranteed > 0 && p.strikeDate && new Date(p.strikeDate) < new Date()) { const elapsed = (Date.now() - new Date(p.strikeDate).getTime()) / (365.25 * DAY); guaranteed = Math.max(0, Math.ceil(guaranteed - elapsed)); }
+    return { coupon, maturity, inFine, isCallable, isTarn, firstCall, guaranteed, target: parseFloat(er.targetCouponLevel || er.trigger) || null, barrier, memory: !!c.memory, fees, spread: 0.6, name: p.name };
   }
   function productValue(t, A, H, shiftBp) {
     const years = Math.floor(H / 12), tec = _curve().tec10; const notes = [];

@@ -21,12 +21,17 @@ function getTrackingStatus(p) {
     const marginPts = (t.marginToTrigger != null) ? parseFloat(t.marginToTrigger) : (geCond ? rate - trig : trig - rate);
     // Années garanties = coupon INCONDITIONNEL (payé quel que soit le taux) sur les 1res années.
     const guaranteedYears = parseInt((p.coupon && p.coupon.guaranteedYears) || p.guaranteedYears || 0, 10) || 0;
+    // Pendant les années garanties, le coupon est dû QUEL QUE SOIT le taux : la barrière ne s'applique pas encore.
+    const _strike = p.strikeDate || (p.tracking && p.tracking.strikeDate) || null;
+    const guaranteedActive = guaranteedYears > 0 && _strike && (Date.now() < new Date(_strike).getTime() + guaranteedYears * 365.25 * 864e5);
+    const couponOKFinal = guaranteedActive ? true : couponOK;
+    const guaranteedUntil = guaranteedActive ? new Date(new Date(_strike).getTime() + guaranteedYears * 365.25 * 864e5) : null;
     const annualYield = typeof getAnnualizedRate === 'function' ? getAnnualizedRate(p) : (parseFloat(p.coupon && p.coupon.rate) || 0);
     const amount = parseFloat(p.investedAmount) || 0;
     const daysAgo = t.date ? Math.floor((Date.now() - new Date(t.date).getTime()) / 86400000) : null;
     return {
-      isRate: true, rate, rateTrigger: trig, geCond, couponOK, marginPts,
-      refLabel: t.refLabel || t.ref || 'TAUX', guaranteedYears,
+      isRate: true, rate, rateTrigger: trig, geCond, couponOK: couponOKFinal, couponOKByRate: couponOK, marginPts,
+      refLabel: t.refLabel || t.ref || 'TAUX', guaranteedYears, guaranteedActive: !!guaranteedActive, guaranteedUntil,
       variation: marginPts,               // « variation » = marge en points (positif = coupon sûr)
       annualYield, amount, couponAmount: Math.round(amount * annualYield / 100),
       autocallOK: false, barrier: 0, margeRestante: 999,
