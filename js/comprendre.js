@@ -176,95 +176,229 @@
   }
 
   // ── 3. Les familles ──────────────────────────────────────────────
-  var FAMILLES = [
-    { id: 'cat', tag: 'SANS RISQUE', col: '#059669', nom: 'Compte à terme — fixe, progressif, à préavis',
-      vend: 'Rien. C\'est le seul support de la liste où tu ne cèdes aucune option.',
-      meca: 'Tu bloques une somme pour une durée convenue. <strong>Fixe</strong> : un taux unique. <strong>Progressif</strong> : des paliers croissants, avec sortie libre à chaque fin de palier — le taux affiché est une moyenne actuarielle, jamais le taux du dernier palier. <strong>À préavis</strong> : sortie possible hors échéance moyennant 32 jours de préavis et une rémunération réduite.',
-      piege: 'Le taux n\'est que la moitié du sujet : les <strong>conditions de sortie anticipée</strong> varient énormément d\'une banque à l\'autre (0 % les trois premiers mois puis 50 % chez l\'une, minoration de 90/60/30 % chez l\'autre, aucune pénalité chez une troisième). À taux égal, c\'est ce qui départage les offres. Et le FGDR ne couvre que 100 000 € par banque et par société.',
-      match: function (p) { return false; } },
-    { id: 'oblig', tag: 'SANS RISQUE', col: '#0891B2', nom: 'Obligation d\'État et obligation corporate',
-      vend: 'Rien non plus — tu prêtes, simplement.',
-      meca: 'Tu achètes un titre coté. Il te verse un coupon et te rend le pair à l\'échéance. Entre-temps sa valeur bouge avec les taux : elle baisse quand les taux montent, et inversement.',
-      piege: 'La valeur de marché inquiète à tort : si tu tiens jusqu\'à l\'échéance, tu récupères le pair, exactement comme sur un EMTN — à la différence que l\'obligation d\'État, elle, est <strong>vendable tous les jours sur un marché profond</strong>. Pour une société, la moins-value latente peut toutefois imposer une provision à la clôture : à valider avec l\'expert-comptable selon la classification comptable retenue.',
-      match: function (p) { return false; } },
-    { id: 'callable', tag: 'TAUX', col: '#0891B2', nom: 'Callable — l\'émetteur choisit la durée',
-      vend: 'Une option de rappel bermudéenne. Elle vaut 30 à 60 bp par an.',
-      meca: 'À partir de l\'année N, la banque peut te rembourser quand ça l\'arrange. Elle rappelle si elle peut se refinancer moins cher, donc <strong>quand les taux baissent</strong> — tu réinvestis plus bas. Elle ne rappelle pas quand les taux montent : tu restes coincé sous le marché.',
-      piege: 'Perdant dans les deux sens. C\'est normal et c\'est le prix du coupon — la question est seulement « suis-je assez payé ? ». Le seuil : coupon ≥ taux fixe non rappelable de même durée + la valeur de l\'option.',
-      match: function (p) { var er = p.earlyRedemption || {}; return er.type === 'callable'; } },
-    { id: 'tarn', tag: 'TAUX', col: '#0891B2', nom: 'TARN — cible de coupons cumulés',
-      vend: 'La durée et la conditionnalité ensemble.',
-      meca: 'Coupons garantis N années, puis payés seulement si le taux de référence reste sous une barrière. Remboursement automatique dès que le <strong>cumul</strong> des coupons atteint la cible.',
-      piege: 'Asymétrie totale : taux bas → cible atteinte vite → remboursé quand tu voulais rester. Taux hauts → coupons perdus → cible jamais atteinte → immobilisé jusqu\'au terme sans rien toucher. Regarde toujours où est le taux de référence <em>aujourd\'hui</em> par rapport à la barrière.',
-      match: function (p) { var er = p.earlyRedemption || {}; return er.type === 'tarn' || (er.targetCouponLevel > 0); } },
-    { id: 'range', tag: 'TAUX', col: '#0891B2', nom: 'Range accrual — coupon au prorata du temps',
-      vend: 'De la volatilité de taux : tu paries sur l\'immobilité.',
-      meca: 'Le coupon n\'est pas binaire : tu touches <span class="mono">taux facial × (jours dans le corridor ÷ jours totaux)</span>.',
-      piege: 'L\'écart le plus grand du catalogue entre l\'affiche et le réel. 4,20 % affiché avec un corridor tenu 55 % du temps = 2,31 % encaissés. Demande toujours le pourcentage de temps historiquement passé dans le corridor, sur 5 et 10 ans.',
-      match: function (p) { return /range|accrual|corridor/i.test(p.name || '') || /range/i.test(p.structureType || ''); } },
-    { id: 'digitale', tag: 'TAUX', col: '#0891B2', nom: 'Digitale — tout ou rien',
-      vend: 'Une option binaire sur un seuil.',
-      meca: 'Coupon plein ou zéro selon la position du sous-jacent face à un seuil, à chaque observation annuelle.',
-      piege: 'La variante décisive est la <strong>mémoire</strong> : avec elle, les coupons ratés sont rattrapés dès qu\'une observation repasse du bon côté ; sans elle, ils sont perdus définitivement. Sur une digitale actions, un seuil à 100 % du niveau initial est une condition dure — il faut que le titre n\'ait pas baissé du tout.',
-      match: function (p) { return /digital/i.test((p.name || '') + (p.structureType || '')); } },
-    { id: 'infine', tag: 'TAUX', col: '#0891B2', nom: 'In fine / zéro-coupon — rien avant la fin',
-      vend: 'La disponibilité de tes flux pendant toute la vie du produit.',
-      meca: 'Aucun coupon versé ; remboursement à 100 + gain cumulé, souvent en intérêt <strong>simple</strong> — le rendement actuariel baisse alors avec la durée.',
-      piege: 'Double peine pour une société à l\'IS : la prime de remboursement est imposée <strong>chaque année sur les intérêts courus</strong>, alors que tu n\'encaisses rien. Tu paies l\'impôt avant de toucher l\'argent. Et 4,82 %/an d\'intérêt simple sur 10 ans, ce n\'est pas 4,82 % : c\'est 4,02 % actuariel.',
-      match: function (p) { var c = p.coupon || {}; return /in_fine|maturit/i.test(String(c.frequency || '')) || c.paymentTiming === 'at_redemption'; } },
-    { id: 'autocall', tag: 'ACTIONS', col: '#7C3AED', nom: 'Autocall / Athena / Phoenix',
-      vend: 'Un put à barrière, et ta participation à la hausse.',
-      meca: 'À chaque observation, si le sous-jacent dépasse le seuil : remboursement + coupons, fin du produit. Sinon on continue. À l\'échéance, capital rendu si le sous-jacent est au-dessus de la barrière. <strong>Phoenix</strong> ajoute une barrière coupon distincte et plus basse : tu peux toucher des coupons même si le titre a beaucoup baissé.',
-      piege: 'Le vrai risque n\'est pas le coupon, c\'est la barrière capital. Et sur un <strong>worst-of</strong>, c\'est le plus mauvais titre du panier qui décide de tout : passer de 1 à 4 sous-jacents peut doubler la probabilité de toucher la barrière, à barrière identique. C\'est le mécanisme qui gonfle le plus les coupons.',
-      match: function (p) { var er = p.earlyRedemption || {}; return er.type === 'autocall' || /autocall|athena|phoenix/i.test((p.name || '') + (p.structureType || '')); } },
-    { id: 'cppi', tag: 'FONDS', col: '#B45309', nom: 'Note à capital garanti sur fonds (CPPI, gestion à coussin)',
-      vend: 'La participation, contre une garantie mécanique et non contractuelle.',
-      meca: 'Le gérant répartit en permanence entre un actif risqué et du monétaire, en gardant un « coussin » suffisant pour ramener 100 % à l\'échéance. Plus le coussin s\'épaissit, plus il investit dans le risqué ; plus il s\'amincit, plus il se réfugie en monétaire.',
-      piege: '<strong>Le risque de monétarisation.</strong> Après une forte baisse précoce, le coussin disparaît : le fonds se fige définitivement en monétaire et ne profitera d\'aucun rebond. Tu conserves ton capital, mais tu immobilises plusieurs années pour un rendement nul. Regarde aussi les frais de sortie anticipée (souvent 1 %) et le fait qu\'un objectif de rendement (« €STR + 3 % ») n\'est jamais un engagement.',
-      match: function (p) { return /cppi|coussin|stork|guaranteed note|fonds/i.test((p.name || '') + (p.structureType || '')); } },
-    { id: 'credit', tag: 'CRÉDIT', col: '#C2410C', nom: 'CLN / indice crédit — tu assures une entreprise',
-      vend: 'Une protection contre la faillite d\'une ou plusieurs entreprises. Ton coupon est la prime d\'assurance.',
-      meca: 'En l\'absence d\'événement de crédit, tu touches le coupon et récupères ton capital. Sinon, coupon et capital sont réduits au prorata des entités en défaut — ou totalement perdus s\'il s\'agit d\'un <em>first-to-default</em>.',
-      piege: '<strong>Double risque crédit</strong> : l\'émetteur du titre <em>et</em> l\'entreprise de référence. « Capital garanti » veut dire ici « garanti par l\'émetteur, sauf événement de crédit sur la référence » — ce n\'est pas la garantie d\'un CAT. Le test : le coupon face au spread CDS de la même signature à la même maturité, et face à l\'OAT. Un CLN à 3,90 % sur du BBB− quand l\'État paie 4,00 % ne rémunère rien du tout.',
-      match: function (p) { return /cln|credit linked|crédit/i.test((p.name || '') + (p.structureType || '')) && !/capital/i.test(p.structureType || ''); } }
+  // ── 3. Les fiches produit ────────────────────────────────────────
+  //  Une carte par type classique rencontré par une trésorerie d'entreprise :
+  //  définition · mécanique · exemple chiffré sur 100 000 € · ce que tu vends · le piège.
+  var CATS = [
+    { k: 'base', l: 'Sans risque', c: '#059669' },
+    { k: 'taux', l: 'Structurés de taux', c: '#0891B2' },
+    { k: 'actions', l: 'Structurés actions', c: '#7C3AED' },
+    { k: 'autre', l: 'Fonds & crédit', c: '#C2410C' }
   ];
 
-  function _familles() {
+  var FICHES = [
+    // ───────── SANS RISQUE ─────────
+    { cat: 'base', nom: 'Compte à terme à taux fixe', sous: 'CAT fixe',
+      def: 'Tu bloques une somme sur une durée convenue, à un taux connu d\'avance. Le capital est garanti par la banque et couvert par le FGDR jusqu\'à 100 000 € par société et par banque.',
+      meca: 'Le taux annoncé est <strong>actuariel</strong> : il suppose que tu vas au terme. Sortir avant déclenche les conditions de retrait anticipé, qui varient beaucoup d\'une banque à l\'autre.',
+      ex: '100 000 € à 3,05 % sur 12 mois → <strong>103 050 €</strong> à l\'échéance. Sortie au mois 5 avec la grille CIC (0 % les 3 premiers mois, puis 50 %) → seulement <strong>1,53 %</strong> annualisé.',
+      vend: 'Rien — mais tu cèdes ta liquidité jusqu\'au terme.',
+      piege: 'Le taux n\'est que la moitié du sujet. À taux égal, c\'est la <strong>pénalité de sortie</strong> qui départage les offres : 0 % puis 50 % chez CIC, minoration de 90/60/30 % chez SG, aucune pénalité chez Banque Populaire. Demande-la toujours par écrit.' },
+
+    { cat: 'base', nom: 'Compte à terme à taux progressif', sous: 'CAT progressif, à préavis',
+      def: 'Un compte à terme dont le taux monte par paliers, avec une sortie libre à chaque fin de palier.',
+      meca: 'Le taux affiché est la <strong>moyenne actuarielle</strong> de tous les paliers, jamais le taux du dernier. Hors échéance de palier, la sortie exige un préavis (32 jours) et te rémunère au taux de la période précédente.',
+      ex: 'CIC 18 mois : 2,90 % (S1) → 3,10 % (S2) → 3,61 % (S3), soit <strong>3,20 % de moyenne</strong>. Sorti fin du S1 tu touches 2,90 % — à comparer au fixe 6 mois à 2,80 %. Sorti au milieu du S2, tu retombes à 2,90 %.',
+      vend: 'Rien. C\'est le produit le plus souple de la gamme sans risque.',
+      piege: 'Ne jamais comparer le « 3,20 % » d\'un progressif au « 3,05 % » d\'un fixe 12 mois : ce ne sont pas les mêmes durées. Compare toujours à <strong>horizon de sortie égal</strong> — c\'est ce que fait la grille d\'équivalence de l\'onglet CAT.' },
+
+    { cat: 'base', nom: 'OPC monétaire', sous: 'fonds monétaire, SICAV de trésorerie',
+      def: 'Un fonds qui place à très court terme sur le marché monétaire. Pas de capital garanti, mais un risque quasi nul et une valeur liquidative quotidienne.',
+      meca: 'Le rendement suit l\'€STR (le taux au jour le jour de la BCE) diminué des frais de gestion. Aucun engagement de durée : tu entres et tu sors en J+1.',
+      ex: 'Avec l\'€STR à 2,50 % et 0,15 % de frais → environ <strong>2,35 % annualisé</strong>, disponible à tout moment.',
+      vend: 'Rien. Tu paies simplement des frais de gestion pour la liquidité.',
+      piege: 'Rendement inférieur au CAT, et ce n\'est pas un dépôt : pas de FGDR. C\'est le bon support pour le cash qui peut partir demain, pas pour du cash immobilisable.' },
+
+    { cat: 'base', nom: 'Obligation d\'État', sous: 'OAT, TEC',
+      def: 'Un prêt à l\'État français, matérialisé par un titre coté que tu peux revendre tous les jours sur un marché profond.',
+      meca: 'Coupon annuel fixe, remboursement au pair à l\'échéance. Entre-temps, la valeur de marché bouge à l\'inverse des taux : elle baisse quand ils montent.',
+      ex: 'Une OAT 10 ans à 4,48 % rapporte <strong>4 480 € par an</strong> sur 100 000 €. Si les taux montent de 1 point, sa valeur baisse d\'environ 8 % — mais si tu la gardes, tu récupères 100 000 € plus tous les coupons.',
+      vend: 'Rien du tout. Aucune option cédée, aucun call, aucun risque bancaire.',
+      piege: 'Personne ne te la proposera : la banque ne marge pas dessus. La moins-value latente peut imposer une provision comptable à la clôture selon la classification retenue — à valider avec ton expert-comptable, c\'est le seul vrai frein.' },
+
+    { cat: 'base', nom: 'Obligation d\'entreprise', sous: 'corporate, OPC obligataire daté',
+      def: 'Le même mécanisme, mais tu prêtes à une entreprise au lieu de l\'État. Le supplément de taux rémunère le risque qu\'elle ne rembourse pas.',
+      meca: 'Le <strong>rang</strong> compte plus que le coupon : une dette senior et une dette subordonnée du même émetteur n\'ont rien à voir en cas de difficulté. En format OPC daté, tu obtiens la diversification et une valorisation quotidienne, contre des frais annuels.',
+      ex: 'Une corporate BBB à 6 ans autour de 4,5 % quand l\'État paie 4,0 % : <strong>+50 bp</strong> pour le risque de crédit. En dessous de cet écart, le risque n\'est pas payé.',
+      vend: 'Rien, mais tu portes le risque de défaut de l\'entreprise.',
+      piege: 'Les titres « subordonnés » et les « hybrides » affichent des coupons séduisants parce qu\'ils passent après tout le monde en cas de faillite. Un AT1 bancaire peut même être effacé par le régulateur sans faillite.' },
+
+    // ───────── STRUCTURÉS DE TAUX ─────────
+    { cat: 'taux', nom: 'EMTN à taux fixe', sous: 'obligation bancaire simple, non rappelable',
+      def: 'Un titre de créance émis par une banque, à coupon fixe et durée ferme. C\'est le mètre étalon de tous les structurés de taux.',
+      meca: 'Rien de plus qu\'une obligation, sauf qu\'elle est émise par une banque et non par l\'État, et qu\'elle n\'a pas de marché secondaire actif.',
+      ex: '100 000 € à 4,20 % sur 5 ans → <strong>4 200 € par an</strong>, capital rendu à l\'échéance.',
+      vend: 'Rien — aucune option cédée. C\'est ce qui en fait la référence.',
+      piege: 'C\'est contre ce produit qu\'il faut comparer tous les autres : si un callable de même durée ne paie pas nettement plus qu\'un fixe non rappelable, l\'option de rappel que tu cèdes est offerte gratuitement.' },
+
+    { cat: 'taux', nom: 'Callable — coupon annuel', sous: '10NC3, rappelable par l\'émetteur',
+      def: 'Un taux fixe dont <strong>la banque</strong> peut décider d\'arrêter le paiement, en te remboursant par anticipation à partir d\'une certaine année.',
+      meca: 'Chaque année à partir de l\'année N, l\'émetteur choisit : il rembourse ou il continue. Il rembourse quand il peut se refinancer moins cher — donc <strong>quand les taux ont baissé</strong>.',
+      ex: 'EMTN CIC 4,15 %, 10 ans, rappelable dès l\'an 3 : <strong>4 150 €/an</strong>. Si les taux baissent et qu\'il te rappelle fin an 3, tu as touché 12 450 € et tu replaces 100 000 € dans un marché devenu moins généreux. S\'ils montent, il ne rappelle pas et tu restes à 4,15 % jusqu\'en 2036.',
+      vend: 'Une option de rappel bermudéenne, qui vaut 30 à 60 bp par an.',
+      piege: 'Tu es <strong>perdant dans les deux sens</strong>, par construction. Ce n\'est pas une arnaque, c\'est le prix du coupon — mais il faut que ce coupon dépasse le taux fixe non rappelable de même durée <em>plus</em> la valeur de l\'option. Aujourd\'hui, ce seuil est vers 4,6-4,8 % sur 10 ans.' },
+
+    { cat: 'taux', nom: 'Callable in fine', sous: 'zéro-coupon, intérêt simple',
+      def: 'Un callable qui ne verse rien pendant toute sa vie : les gains sont accumulés et payés en une seule fois au remboursement.',
+      meca: 'Le gain est presque toujours exprimé en <strong>intérêt simple</strong> — « 4,82 % par année écoulée ». Le rendement actuariel réel <em>baisse</em> donc avec la durée, puisque rien n\'est réinvesti.',
+      ex: 'Callable In Fine 4,82 %, rappelable dès l\'an 4. Rappelé an 4 : tu reçois 119 280 €, soit <strong>4,50 % actuariel</strong>. Jamais rappelé, à 10 ans : 148 200 €, soit seulement <strong>4,02 %</strong>.',
+      vend: 'L\'option de rappel, et la disponibilité de tes flux pendant toute la durée.',
+      piege: 'Double peine pour une société à l\'IS : la prime de remboursement est imposée <strong>chaque année sur les intérêts courus</strong>, alors que tu n\'encaisses rien. Tu paies l\'impôt avant de toucher l\'argent.' },
+
+    { cat: 'taux', nom: 'TARN', sous: 'Target Accrual Redemption Note, à cible de coupons',
+      def: 'Un produit qui verse des coupons conditionnels et se rembourse <strong>tout seul</strong> dès que le total des coupons versés atteint un objectif fixé d\'avance.',
+      meca: 'Coupons garantis les N premières années, puis versés uniquement si un taux de référence (le TEC 10) reste sous une barrière. Dès que le cumul atteint la cible, le produit s\'arrête et te rend le capital.',
+      ex: 'TARN 6,55 %, 2 ans garantis, barrière TEC10 ≤ 4,90 %, cible 26,20 %. Années 1 et 2 : <strong>6 550 € chacune</strong>, acquis. Ensuite il faut que le TEC10 reste sous 4,90 % — il est à 4,48 % aujourd\'hui. Si les 4 premiers coupons tombent, le cumul atteint 26,20 % et tu es remboursé fin an 4.',
+      vend: 'La durée <em>et</em> la conditionnalité, en une seule fois.',
+      piege: 'L\'asymétrie est totale. Taux bas : cible atteinte vite, tu es remboursé au moment où tu aurais voulu rester. Taux hauts : coupons perdus, cible jamais atteinte, <strong>tu restes immobilisé dix ans sans rien toucher</strong>. Regarde toujours où est le taux de référence <em>aujourd\'hui</em> par rapport à la barrière.' },
+
+    { cat: 'taux', nom: 'Range accrual', sous: 'corridor, tunnel',
+      def: 'Un coupon payé <strong>au prorata du nombre de jours</strong> où un taux reste à l\'intérieur d\'une fourchette.',
+      meca: 'Ce n\'est pas du tout ou rien : chaque jour compte. Le coupon final est le taux facial multiplié par la fraction de jours passés dans le tunnel.',
+      ex: 'Range accrual 4,20 %, tunnel Euribor 3M [1,90 % – 3,75 %]. L\'Euribor est à 2,66 % : dans le tunnel. Si c\'est le cas toute l\'année → <strong>4 200 €</strong>. S\'il en sort la moitié du temps → <strong>2 100 €</strong>.',
+      vend: 'De la volatilité de taux : tu paries sur l\'immobilité, pas sur une direction.',
+      piege: 'C\'est le produit où l\'écart entre l\'affiche et la réalité est le plus grand. <strong>Demande l\'historique</strong> : sur les 5 et 10 dernières années, quel pourcentage du temps le taux serait-il resté dans ce tunnel ? La réponse est souvent bien inférieure à 100 %.' },
+
+    { cat: 'taux', nom: 'Digitale de taux', sous: 'binaire, avec ou sans mémoire',
+      def: 'Tout ou rien : à chaque date d\'observation, le coupon est versé en entier si le taux est du bon côté d\'un seuil, ou pas du tout.',
+      meca: 'La variante <strong>mémoire</strong> change tout : les coupons non versés sont mis en réserve et rattrapés dès qu\'une observation repasse du bon côté. Sans mémoire, un coupon raté est perdu définitivement.',
+      ex: 'Digitale Mémoire TEC10 : 4,60 % si le TEC 10 est ≤ 4,40 %. Le TEC 10 est à <strong>4,48 %</strong> : au-dessus, coupon non versé cette année mais <em>mémorisé</em>. Si l\'an prochain il repasse sous 4,40 %, tu touches <strong>9 200 €</strong> d\'un coup.',
+      vend: 'Une option binaire sur un seuil de taux.',
+      piege: 'Sensibilité extrême au voisinage du seuil : 4,39 % et 4,41 % donnent des résultats opposés. Et sans mémoire, une année ratée ne se rattrape jamais.' },
+
+    { cat: 'taux', nom: 'Steepener', sous: 'CMS spread, pari sur la pente',
+      def: 'Un coupon indexé sur l\'<strong>écart</strong> entre un taux long et un taux court, multiplié par un levier.',
+      meca: 'Formule type : <span class="mono">levier × (CMS 10 ans − CMS 2 ans)</span>, avec un plancher à zéro. Tu gagnes si la courbe se redresse, tu perds si elle s\'aplatit.',
+      ex: 'Avec un levier 5 et une pente actuelle d\'environ 1,00 point → <strong>5 %/an</strong>. Si la pente se réduit à 0,50 → <strong>2,5 %</strong>. Si elle s\'annule → zéro.',
+      vend: 'L\'aplatissement de la courbe, amplifié par le levier.',
+      piege: 'Le levier joue dans les deux sens et la pente est très instable. Ce produit se vend surtout quand la courbe est raide — c\'est-à-dire quand le coupon de départ paraît généreux, et que le potentiel d\'amélioration est déjà derrière.' },
+
+    { cat: 'taux', nom: 'Floater', sous: 'taux variable, capé/floaté',
+      def: 'Un coupon révisé périodiquement, égal à un taux de marché plus une marge fixe.',
+      meca: 'Chaque trimestre, le coupon est recalculé sur l\'Euribor du moment. Un <strong>cap</strong> plafonne le coupon (c\'est une option que tu vends), un <strong>floor</strong> le protège (c\'est une option qu\'on te donne).',
+      ex: 'Euribor 3M + 0,80 % : avec l\'Euribor à 2,66 %, le coupon actuel est de <strong>3,46 %</strong>. Si la BCE monte encore, ton coupon suit automatiquement.',
+      vend: 'Rien s\'il n\'y a pas de cap ; le plafond s\'il y en a un.',
+      piege: 'C\'est le <strong>seul produit de taux qui te protège d\'une hausse</strong> au lieu de te punir. Vérifie où est le cap par rapport au forward : un cap déjà dépassé par les anticipations du marché est perdu dès la souscription.' },
+
+    // ───────── STRUCTURÉS ACTIONS ─────────
+    { cat: 'actions', nom: 'Autocall / Athena', sous: 'Express, à rappel automatique',
+      def: 'Un produit sur action qui se rembourse automatiquement, avec un coupon, dès que le sous-jacent dépasse un seuil à une date d\'observation.',
+      meca: 'À chaque observation : si le titre est au-dessus du seuil de rappel, fin du produit avec coupon. Sinon on continue. À l\'échéance, le capital est rendu <em>si</em> le titre est au-dessus de la barrière ; sinon tu encaisses toute la baisse.',
+      ex: 'Athena Siemens Energy, 11,35 %/an, rappel dès le mois 12 si l\'action ≥ 85 %, barrière capital 55 %. Rappelé au mois 12 : <strong>111 350 €</strong>. Mais si l\'action finit à 40 % : tu récupères <strong>40 000 €</strong>.',
+      vend: 'Un put à barrière, et toute la hausse au-delà du coupon.',
+      piege: 'Le coupon élevé n\'est jamais une conviction de la banque sur le titre : elle choisit au contraire les valeurs les <strong>plus volatiles</strong>, parce que c\'est ce qui rend le coupon vendable. Un coupon de 11 % te dit que le marché juge ce titre très risqué.' },
+
+    { cat: 'actions', nom: 'Phoenix', sous: 'coupon conditionnel à barrière basse',
+      def: 'Un autocall amélioré : le coupon a sa <strong>propre barrière</strong>, plus basse que celle du capital. Tu peux donc toucher des coupons même si le titre a beaucoup baissé.',
+      meca: 'Deux seuils indépendants : une barrière coupon (par exemple 40 %) et une barrière capital. Avec l\'effet mémoire, les coupons ratés sont rattrapés.',
+      ex: 'Phoenix Mémoire STMicro : 2 % par trimestre si l\'action ≥ 40 % de son niveau initial, soit <strong>8 %/an</strong>. Capital protégé tant que la baisse n\'excède pas 60 %.',
+      vend: 'Le même put à barrière, mais on te laisse une chance bien plus large de toucher le coupon.',
+      piege: 'C\'est la variante la plus favorable de la famille à coupon égal — mais le risque de perte en capital reste entier. Regarde la barrière capital, pas la barrière coupon.' },
+
+    { cat: 'actions', nom: 'Digitale actions', sous: 'binaire, souvent worst-of',
+      def: 'Un coupon tout ou rien selon que le sous-jacent est au-dessus d\'un seuil à la date anniversaire — très souvent 100 % de son niveau de départ.',
+      meca: 'Le seuil à 100 % est une condition dure : il faut que le titre <strong>n\'ait pas baissé du tout</strong>. En version <em>worst-of</em>, la condition porte sur le plus mauvais d\'un panier.',
+      ex: 'Digitale WO BNP / Airbus, 3 ans, capital garanti : <strong>7 300 €</strong> par an si le moins performant des deux est ≥ 100 % de son niveau initial, avec mémoire. Sinon rien cette année-là, mémorisé.',
+      vend: 'Une option binaire, et sur un worst-of, de la décorrélation entre les titres.',
+      piege: 'Sur un worst-of, il suffit qu\'<strong>un seul</strong> titre soit en retard pour tout bloquer. Avec deux titres, la probabilité de rater le coupon est bien supérieure au double de celle d\'un seul titre.' },
+
+    { cat: 'actions', nom: 'Reverse convertible', sous: 'BRC, à livraison d\'actions',
+      def: 'Coupon fixe élevé versé quoi qu\'il arrive, mais remboursement <strong>en actions</strong> si le titre a franchi la barrière.',
+      meca: 'C\'est la vente de put sous sa forme la plus nue, et la plus honnête : la mécanique est visible dès la première ligne de la brochure.',
+      ex: 'Coupon 8 % garanti sur 2 ans. Si le titre finit sous 70 %, on te livre les actions valant 65 000 € au lieu de te rendre 100 000 €.',
+      vend: 'Un put, directement.',
+      piege: 'Le coupon est garanti, ce qui rassure — mais il ne compense pas une chute du titre. C\'est un produit de conviction sur le sous-jacent, jamais un produit de trésorerie.' },
+
+    { cat: 'actions', nom: 'Capital garanti + participation', sous: 'indexé, à formule',
+      def: 'Ton capital est intégralement rendu, et tu reçois en plus une fraction de la hausse d\'un indice.',
+      meca: 'Le budget option (aujourd\'hui 17 % à 5 ans) est dépensé en options d\'achat au lieu de coupon. Le taux de participation dépend directement de ce budget.',
+      ex: '100 % du capital + 50 % de la hausse de l\'EuroStoxx sur 6 ans. Si l\'indice fait +30 %, tu touches <strong>115 000 €</strong>. S\'il baisse, tu récupères 100 000 € — mais tu as immobilisé six ans pour un rendement nul.',
+      vend: 'Les dividendes de l\'indice, et la part de hausse au-delà de la participation.',
+      piege: 'Le risque n\'est pas la perte, c\'est le <strong>coût d\'opportunité</strong> : six ans à 0 % pendant qu\'un CAT payait 3,5 %. Et la participation est calculée sur un indice <em>hors dividendes</em>, voire à décrément.' },
+
+    { cat: 'actions', nom: 'Airbag', sous: 'amorti, protection dégressive',
+      def: 'Une variante qui <strong>amortit la perte</strong> au lieu de la subir intégralement quand la barrière est franchie.',
+      meca: 'Sous la barrière, la perte est divisée par le niveau de la barrière au lieu d\'être proportionnelle à la baisse.',
+      ex: 'Barrière 55 %, titre à 47 % à l\'échéance. Sans airbag tu perds 53 % ; <strong>avec airbag tu perds 14,5 %</strong> (47 ÷ 55).',
+      vend: 'Un peu de coupon, pour acheter cette protection.',
+      piege: 'Rare, et jamais mis en avant parce qu\'il fait baisser le coupon affiché. C\'est pourtant l\'une des trois seules mécaniques du marché qui jouent en ta faveur — à demander par son nom.' },
+
+    // ───────── FONDS & CRÉDIT ─────────
+    { cat: 'autre', nom: 'Note à capital garanti sur fonds', sous: 'CPPI, gestion à coussin',
+      def: 'Un titre qui garantit ton capital à l\'échéance tout en investissant dans un fonds de gestion alternative.',
+      meca: 'Un algorithme répartit en permanence entre l\'actif risqué et le monétaire, en gardant toujours de quoi ramener 100 % à l\'échéance. Plus le « coussin » est épais, plus il investit dans le risqué.',
+      ex: 'Note 5 ans, objectif €STR + 3 %, capital garanti, sortie mensuelle avec 1 % de frais. Si le fonds chute fortement la première année, l\'algorithme bascule en monétaire.',
+      vend: 'La participation à la hausse, en échange d\'une garantie mécanique.',
+      piege: '<strong>Le risque de monétarisation.</strong> Après une forte baisse précoce, le coussin disparaît : le fonds se fige définitivement en monétaire et ne profitera d\'<em>aucun</em> rebond. Tu conserves ton capital, mais tu immobilises cinq ans pour zéro. Et « objectif de rendement » n\'est jamais un engagement.' },
+
+    { cat: 'autre', nom: 'CLN — obligation synthétique', sous: 'Credit Linked Note, sur entité de référence',
+      def: 'Tu reçois un coupon en échange d\'une <strong>assurance que tu vends</strong> sur la solvabilité d\'une entreprise donnée.',
+      meca: 'Tant qu\'aucun événement de crédit (défaut, restructuration, procédure collective) n\'affecte l\'entreprise de référence, tu touches le coupon et récupères ton capital. Sinon tu perds tout ou partie du capital.',
+      ex: 'CLN Renault 6 ans à 3,90 % : <strong>3 900 €/an</strong>. Mais l\'État français paie environ 4,00 % sur la même durée — tu prendrais donc le risque Renault <em>et</em> le risque Natixis pour être moins bien payé que sans risque.',
+      vend: 'Une protection contre la faillite d\'une entreprise. C\'est littéralement un contrat d\'assurance où tu es l\'assureur.',
+      piege: '<strong>Deux signatures, pas une.</strong> « Capital garanti » veut dire ici « garanti par l\'émetteur, sauf événement de crédit sur la référence » — ce n\'est pas la garantie d\'un CAT. Le test : compare toujours le coupon à l\'OAT de même durée, et demande le spread CDS de la signature.' },
+
+    { cat: 'autre', nom: 'Indice crédit — panier d\'entités', sous: 'CLN sur panier, first-to-default',
+      def: 'La même chose, mais sur plusieurs entreprises à la fois.',
+      meca: 'En version <strong>linéaire</strong>, chaque défaut réduit coupon et capital au prorata. En version <strong>first-to-default</strong>, le tout premier défaut du panier fait tout perdre.',
+      ex: 'Panier de 3 entités, version linéaire : si une seule fait défaut, tu reçois <strong>2/3 du coupon</strong> chaque année et <strong>2/3 du capital</strong> à l\'échéance.',
+      vend: 'Une protection sur plusieurs signatures simultanément.',
+      piege: 'Sur un first-to-default, plus le panier est large, <strong>plus c\'est dangereux</strong> — exactement l\'inverse de l\'intuition de diversification. Et en récession, les défauts n\'arrivent pas isolément : ils arrivent ensemble.' }
+  ];
+
+  function _fiches() {
     var prods = [];
     try { Object.keys((app.state && app.state.proposals) || {}).forEach(function (b) { (app.state.proposals[b] || []).forEach(function (p) { prods.push(p); }); }); } catch (e) {}
     try { ((app.state && app.state.portfolio) || []).forEach(function (p) { prods.push(p); }); } catch (e) {}
+    var filt = _open.filter || 'tous';
 
-    var h = '<div class="section"><div class="section-header"><div class="section-title"><span class="dot" style="background:#0891B2"></span>📚 Les familles de produits</div>' +
-      '<span style="font-size:10px;color:var(--text-dim)">clique pour déplier · tes produits sont rattachés à leur famille</span></div>';
-    FAMILLES.forEach(function (f) {
-      var mine = prods.filter(function (p) { try { return f.match(p); } catch (e) { return false; } });
-      var open = !!_open[f.id];
-      h += '<div style="border:1px solid var(--border);border-left:3px solid ' + f.col + ';border-radius:var(--radius-sm);margin-bottom:8px;overflow:hidden">' +
-        '<div onclick="window._cmpToggle(\'' + f.id + '\')" style="padding:10px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--bg-elevated)">' +
-        '<span style="color:var(--text-dim);font-size:10px;width:10px">' + (open ? '▾' : '▸') + '</span>' +
-        '<span style="font-size:9px;letter-spacing:.06em;font-weight:700;color:' + f.col + '">' + f.tag + '</span>' +
-        '<strong style="font-size:12.5px;color:var(--text-bright)">' + f.nom + '</strong>' +
-        (mine.length ? '<span style="margin-left:auto;font-size:10px;color:var(--text-dim)">' + mine.length + ' produit' + (mine.length > 1 ? 's' : '') + ' chez toi</span>' : '<span style="margin-left:auto;font-size:10px;color:var(--text-dim)">—</span>') +
-        '</div>';
-      if (open) {
-        h += '<div style="padding:12px 16px;font-size:11.5px;line-height:1.6">' +
-          '<div style="margin-bottom:8px"><span style="color:var(--text-dim);font-weight:600">Ce que tu vends · </span>' + f.vend + '</div>' +
-          '<div style="margin-bottom:8px"><span style="color:var(--text-dim);font-weight:600">Mécanique · </span>' + f.meca + '</div>' +
-          '<div style="padding:9px 11px;background:rgba(232,93,4,0.07);border-left:2px solid var(--orange);border-radius:4px"><span style="color:var(--orange);font-weight:600">Le piège · </span>' + f.piege + '</div>';
-        if (mine.length) {
-          h += '<div style="margin-top:10px;padding-top:8px;border-top:1px dashed var(--border)"><div style="font-size:10px;color:var(--text-dim);margin-bottom:5px">DANS TON PORTEFEUILLE OU TES PROPOSITIONS</div>';
-          mine.forEach(function (p) {
-            var c = p.coupon || {}, inv = parseFloat(p.investedAmount) || 0;
-            h += '<div style="display:flex;justify-content:space-between;gap:10px;padding:3px 0;font-size:11px;flex-wrap:wrap"><span>' + _esc((p.name || '?').substring(0, 46)) + (inv > 0 ? ' <span style="font-size:9px;color:var(--green)">· détenu</span>' : '') + '</span>' +
-              '<span style="font-family:var(--mono);color:var(--text-dim);white-space:nowrap">' + (c.rate ? _fmtP(parseFloat(c.rate)) : '—') + (c.trigger && c.trigger < 20 ? ' si ≤ ' + _fmtP(parseFloat(c.trigger)) : '') + ' · ' + (p.maturityYears || '?') + ' a</span></div>';
-          });
-          h += '</div>';
-        }
+    var h = '<div class="section"><div class="section-header"><div class="section-title"><span class="dot" style="background:#0891B2"></span>🗂️ Les fiches produit</div>' +
+      '<span style="font-size:10px;color:var(--text-dim)">' + FICHES.length + ' types classiques · définition, mécanique, exemple chiffré sur 100 000 €</span></div>' +
+      '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">' +
+      '<button class="btn sm" style="' + (filt === 'tous' ? 'background:var(--accent);color:#fff;border-color:var(--accent)' : '') + '" onclick="window._cmpFilter(\'tous\')">Tous</button>';
+    CATS.forEach(function (c) {
+      h += '<button class="btn sm" style="' + (filt === c.k ? 'background:' + c.c + ';color:#fff;border-color:' + c.c : 'color:' + c.c) + '" onclick="window._cmpFilter(\'' + c.k + '\')">' + c.l + '</button>';
+    });
+    h += '</div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:12px">';
+
+    FICHES.filter(function (f) { return filt === 'tous' || f.cat === filt; }).forEach(function (f) {
+      var cat = CATS.filter(function (c) { return c.k === f.cat; })[0] || CATS[0];
+      h += '<div style="border:1px solid var(--border);border-top:3px solid ' + cat.c + ';border-radius:var(--radius-sm);padding:14px 16px;background:var(--bg-card,var(--bg-elevated))">' +
+        '<div style="font-size:9px;letter-spacing:.06em;font-weight:700;color:' + cat.c + ';margin-bottom:3px">' + cat.l.toUpperCase() + '</div>' +
+        '<div style="font-size:14px;font-weight:700;color:var(--text-bright);line-height:1.25">' + f.nom + '</div>' +
+        '<div style="font-size:10px;color:var(--text-dim);font-style:italic;margin-bottom:9px">aussi appelé : ' + f.sous + '</div>' +
+        '<div style="font-size:11.5px;line-height:1.6;margin-bottom:9px">' + f.def + '</div>' +
+        '<div style="font-size:11px;line-height:1.55;margin-bottom:9px;color:var(--text-muted)"><span style="font-weight:700;color:var(--text)">Comment ça marche · </span>' + f.meca + '</div>' +
+        '<div style="font-size:11px;line-height:1.55;padding:9px 11px;background:var(--bg-elevated);border-left:2px solid ' + cat.c + ';border-radius:4px;margin-bottom:9px"><span style="font-size:9px;letter-spacing:.06em;font-weight:700;color:' + cat.c + ';display:block;margin-bottom:3px">EXEMPLE SUR 100 000 €</span>' + f.ex + '</div>' +
+        '<div style="font-size:11px;line-height:1.55;margin-bottom:8px"><span style="font-weight:700">Ce que tu vends · </span><span style="color:var(--text-muted)">' + f.vend + '</span></div>' +
+        '<div style="font-size:11px;line-height:1.55;padding:9px 11px;background:rgba(232,93,4,0.07);border-left:2px solid var(--orange);border-radius:4px"><span style="color:var(--orange);font-weight:700">⚠ Le piège · </span>' + f.piege + '</div>';
+      // Produits du portefeuille rattachés à cette fiche
+      var mine = prods.filter(function (p) {
+        var t = ((p.name || '') + ' ' + (p.structureType || '') + ' ' + ((p.earlyRedemption || {}).type || '') + ' ' + ((p.coupon || {}).frequency || '')).toLowerCase();
+        var n = f.nom.toLowerCase();
+        if (/tarn/.test(n)) return /tarn/.test(t);
+        if (/range/.test(n)) return /range|accrual/.test(t);
+        if (/digitale de taux/.test(n)) return /digital/.test(t) && /tec|euribor|cms/i.test((p.underlyings || []).join(' ') + t);
+        if (/digitale actions/.test(n)) return /digital/.test(t) && !/tec|euribor|cms/i.test((p.underlyings || []).join(' ') + t);
+        if (/callable in fine|in fine/.test(n)) return /callable/.test(t) && /in_fine|maturit/.test(t);
+        if (/callable — coupon annuel/.test(n)) return /callable/.test(t) && !/in_fine|maturit/.test(t);
+        if (/phoenix/.test(n)) return /phoenix/.test(t);
+        if (/autocall|athena/.test(n)) return /autocall|athena/.test(t) && !/phoenix/.test(t);
+        if (/cppi|fonds/.test(n)) return /cppi|coussin|stork|guaranteed note/.test(t);
+        if (/cln/.test(n)) return /cln|credit linked|synth/.test(t);
+        return false;
+      });
+      if (mine.length) {
+        h += '<div style="margin-top:9px;padding-top:8px;border-top:1px dashed var(--border)"><div style="font-size:9px;letter-spacing:.05em;color:var(--text-dim);margin-bottom:4px">CHEZ TOI</div>';
+        mine.slice(0, 5).forEach(function (p) {
+          var c = p.coupon || {}, inv = parseFloat(p.investedAmount) || 0;
+          h += '<div style="display:flex;justify-content:space-between;gap:8px;font-size:10.5px;padding:2px 0;flex-wrap:wrap"><span>' + _esc((p.name || '?').substring(0, 40)) + (inv > 0 ? ' <span style="color:var(--green);font-size:9px">· détenu</span>' : '') + '</span><span style="font-family:var(--mono);color:var(--text-dim);white-space:nowrap">' + (c.rate ? _fmtP(parseFloat(c.rate)) : '—') + ' · ' + (p.maturityYears || '?') + ' a</span></div>';
+        });
         h += '</div>';
       }
       h += '</div>';
     });
-    return h + '</div>';
+    return h + '</div></div>';
   }
 
   // ── 4. Décodeur ──────────────────────────────────────────────────
@@ -324,6 +458,7 @@
 
   // ── Rendu ────────────────────────────────────────────────────────
   window._cmpToggle = function (id) { _open[id] = !_open[id]; renderComprendre(document.getElementById('main-content')); };
+  window._cmpFilter = function (k) { _open.filter = k; renderComprendre(document.getElementById('main-content')); };
 
   window.renderComprendre = function (container) {
     if (!container) return;
@@ -332,10 +467,10 @@
     if (!_rates) {
       container.innerHTML = head + '<div class="section" style="font-size:12px;color:var(--text-dim)">Chargement de la courbe des taux…</div>';
       github.readFile('data/market/rates.json').then(function (r) { _rates = r; renderComprendre(container); }).catch(function () {
-        container.innerHTML = head + _briques() + _familles() + _decodeur() + _questions();
+        container.innerHTML = head + _briques() + _fiches() + _decodeur() + _questions();
       });
       return;
     }
-    container.innerHTML = head + _echelle() + _testSouverain() + _briques() + _familles() + _decodeur() + _questions();
+    container.innerHTML = head + _echelle() + _testSouverain() + _briques() + _fiches() + _decodeur() + _questions();
   };
 })();
