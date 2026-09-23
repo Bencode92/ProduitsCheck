@@ -129,7 +129,9 @@
 
     // ═══ VERDICT DU JOUR : synthèse 5 secondes ═══
     (function() {
-      var vSpread = Math.round((curve.spread_2_10 || 0) * 100);
+      // Pente lue sur la courbe FRANÇAISE (TEC 2 → TEC 10), cohérente avec les cartes affichées.
+      // curve.spread_2_10 vient de la courbe zone euro AAA : trois fois plus plate, il ne faut pas la mélanger.
+      var vSpread = (oat2y.current && tec10.current) ? Math.round((tec10.current - oat2y.current) * 100) : Math.round((curve.spread_2_10 || 0) * 100);
       var vTec = tec10.current || 3.10;
       var vHy = md.hy_spread_bps || 0;
       var vVix = md.vix || 0;
@@ -165,8 +167,78 @@
       html += '</div></div>';
     })();
 
+    // ═══ LECTURE DE LA SITUATION : ce que disent les taux, en clair ═══
+    (function() {
+      var y = (rates.yields) || {}, pr = (rates.policy_rates) || {};
+      var num = function (o) { return (o && o.current != null) ? parseFloat(o.current) : null; };
+      var dep = num(pr.ecb_deposit_rate), refi = num(pr.ecb_main_rate), depDate = pr.ecb_deposit_rate && pr.ecb_deposit_rate.date;
+      var e3 = num(y.euribor_3m), e6 = num(y.euribor_6m), e12 = num(y.euribor_12m);
+      var e3Date = y.euribor_3m && y.euribor_3m.date, e3Chg = y.euribor_3m && y.euribor_3m.change_3m_bps;
+      var t2 = num(y.tec2_fr) || num(y.oat_fr_2y), t5 = num(y.tec5_fr) || num(y.oat_fr_5y), t10 = num(y.tec10_fr);
+      var a2 = num(y.oat_fr_2y), a10 = num(y.oat_fr_10y);
+      if (dep == null || e12 == null || t10 == null) return;
+
+      // Ce qui est déjà pricé : forward 6 mois dans 6 mois (segment Euribor pur, ACT/360)
+      var fwd66 = (e6 != null && e12 != null) ? (e12 * 12 - e6 * 6) / 6 : null;
+      var anticip = Math.round((e12 - dep) * 100);           // hausse intégrée à 1 an, en bp
+      var hikes = (anticip / 25).toFixed(1);
+      var penteFR = (t2 != null) ? Math.round((t10 - t2) * 100) : null;
+      var penteAAA = (a2 != null && a10 != null) ? Math.round((a10 - a2) * 100) : null;
+      var primeFR = (a10 != null) ? Math.round((t10 - a10) * 100) : null;
+      // Inflation projetée : market intelligence si dispo, sinon hypothèse affichée
+      var infl = null, inflSrc = '';
+      try {
+        var mi = (typeof _data !== "undefined" && _data.mi) ? _data.mi : null;
+        var f = mi && (mi._market_data_flat || mi.market_data_input) || {};
+        infl = parseFloat(f.hicp_yoy || f.euro_inflation || f.pce_yoy) || null;
+        if (infl) inflSrc = 'données marché';
+      } catch (e) {}
+      if (!infl) { infl = 3.4; inflSrc = 'projection BCE S2 2026'; }
+      var stale = e3Date && /^\d{4}-\d{2}$/.test(String(e3Date));
+
+      var P = function (x) { return (Math.round(x * 100) / 100).toFixed(2).replace('.', ',') + ' %'; };
+      var R = function (x) { var v = x - infl; return '<span style="font-family:var(--mono);color:' + (v >= 0.5 ? '#047857' : v >= 0 ? '#B45309' : '#B91C1C') + ';font-weight:700">' + (v >= 0 ? '+' : '−') + Math.abs(Math.round(v * 100) / 100).toFixed(2).replace('.', ',') + ' %</span>'; };
+
+      html += '<div style="background:' + BG.card + ';border:1px solid #BAE6FD;border-left:4px solid #0284C7;border-radius:10px;padding:14px 16px;margin-bottom:16px">';
+      html += '<div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:8px"><span style="font-size:13px;font-weight:800;color:#075985">📡 Lecture de la situation</span>';
+      html += '<span style="font-size:10px;color:' + BG.textDim + '">BCE dépôt ' + P(dep) + (refi != null ? ' · refi ' + P(refi) : '') + (depDate ? ' au ' + depDate : '') + '</span></div>';
+
+      // Ligne 1 — ce que le marché price déjà
+      html += '<div style="font-size:11.5px;line-height:1.6;color:' + BG.text + ';margin-bottom:8px">';
+      html += '<strong>Ce qui est déjà dans les prix.</strong> L\'Euribor 12 mois (' + P(e12) + ') est <strong>' + (anticip >= 0 ? '+' : '') + anticip + ' bp</strong> au-dessus du taux de dépôt BCE : le marché anticipe environ <strong>' + String(hikes).replace('.', ',') + ' hausse' + (Math.abs(parseFloat(hikes)) > 1 ? 's' : '') + ' de 25 bp</strong> sur un an.';
+      if (fwd66 != null) html += ' Le forward 6 mois dans 6 mois ressort à <strong>' + P(fwd66) + '</strong> — c\'est le point mort : attendre ne gagne que si le taux futur dépasse ce niveau.';
+      html += '</div>';
+
+      // Ligne 2 — la pente française
+      if (penteFR != null && penteAAA != null) {
+        html += '<div style="font-size:11.5px;line-height:1.6;color:' + BG.text + ';margin-bottom:8px">';
+        html += '<strong>La pente est française, pas européenne.</strong> De 2 à 10 ans, la courbe France monte de <strong>+' + penteFR + ' bp</strong> quand la zone euro AAA ne monte que de <strong>+' + penteAAA + ' bp</strong>' + (primeFR != null ? ', soit <strong>' + primeFR + ' bp</strong> de prime française sur le 10 ans' : '') + '. Cet écart n\'est pas une anticipation d\'inflation : c\'est la prime de risque politique et budgétaire, qui s\'élargit avec la maturité.';
+        html += '</div>';
+      }
+
+      // Ligne 3 — taux réels
+      html += '<div style="font-size:11.5px;line-height:1.6;color:' + BG.text + ';margin-bottom:6px"><strong>Le chiffre qui décide : le taux réel</strong> <span style="font-size:10px;color:' + BG.textDim + '">(inflation retenue ' + P(infl) + ', ' + inflSrc + ')</span></div>';
+      html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:8px">';
+      var LR = [];
+      try { var bc = (typeof window._getCATBenchmark === 'function') ? parseFloat(window._getCATBenchmark()) : null; if (bc) LR.push(['Meilleur CAT', bc]); } catch (e) {}
+      if (t2 != null) LR.push(['OAT 2 ans', t2]);
+      if (t5 != null) LR.push(['OAT 5 ans', t5]);
+      LR.push(['OAT 10 ans', t10]);
+      LR.forEach(function (r) {
+        html += '<div style="padding:8px 10px;background:' + BG.bg + ';border-radius:6px"><div style="font-size:10px;color:' + BG.textDim + '">' + r[0] + '</div>' +
+          '<div style="font-family:var(--mono);font-size:14px;font-weight:700;color:' + BG.text + '">' + P(r[1]) + '</div>' +
+          '<div style="font-size:10px;color:' + BG.textDim + '">réel ' + R(r[1]) + '</div></div>';
+      });
+      html += '</div>';
+      html += '<div style="font-size:11px;line-height:1.55;color:' + BG.textDim + ';padding:8px 10px;background:' + BG.bg + ';border-radius:6px">' +
+        '<strong style="color:' + BG.text + '">Ce que ça implique.</strong> Le court terme ne couvre pas l\'inflation : rester court pour « voir venir » coûte du pouvoir d\'achat pendant l\'attente, <em>et</em> suppose une hausse au-delà des ' + anticip + ' bp déjà pricés. Seule la partie longue paie un taux réel franchement positif — et c\'est celle que les banques ne proposent pas en direct.' +
+        '</div>';
+      if (stale) html += '<div style="font-size:10px;color:#B45309;margin-top:7px">⚠ Euribor issu de la <strong>moyenne mensuelle ' + e3Date + '</strong> (série BCE) : il ne reflète pas encore la dernière décision de politique monétaire. Le fixing du jour est typiquement 10 à 20 bp plus haut.</div>';
+      html += '</div>';
+    })();
+
     // ═══ SECTION 1: TAUX SOUVERAINS (cliquables) ═══
-    html += '<div style="font-size:14px;font-weight:700;color:' + BG.text + ';margin-bottom:4px">🏛️ Taux souverains EUR (zone euro AAA)</div>';
+    html += '<div style="font-size:14px;font-weight:700;color:' + BG.text + ';margin-bottom:4px">🏛️ Taux souverains — France (séries TEC, Banque de France)</div>';
     html += '<div style="font-size:11px;color:' + BG.textDim + ';margin-bottom:10px">Cliquez sur un taux pour voir l\'analyse détaillée et l\'historique</div>';
 
     // Clickable rate cards
@@ -210,7 +282,7 @@
     html += '<div style="padding:10px 14px;border:1px solid ' + BG.border + ';border-radius:8px;background:' + BG.section + ';display:flex;justify-content:space-between;align-items:center">';
     html += '<div><span style="font-size:12px;font-weight:700;color:' + BG.text + '">Courbe des taux : </span>';
     html += '<span style="font-family:var(--mono);font-size:14px;font-weight:800;color:' + (curve.shape === 'normal' ? '#059669' : '#DC2626') + '">' + (curve.shape === 'normal' ? 'Normale ↗' : 'Inversée ↘') + '</span></div>';
-    html += '<div style="font-size:10px;color:' + BG.textDim + '">Spread 2s10s : +' + Math.round((curve.spread_2_10 || 0.57) * 100) + 'bp · ' + (curve.shape === 'normal' ? 'Favorable aux structurés' : 'Défavorable') + '</div>';
+    html += '<div style="font-size:10px;color:' + BG.textDim + '">Spread 2s10s France : +' + ((oat2y.current && tec10.current) ? Math.round((tec10.current - oat2y.current) * 100) : Math.round((curve.spread_2_10 || 0.57) * 100)) + 'bp · zone euro AAA +' + Math.round((curve.spread_2_10 || 0) * 100) + 'bp · ' + (curve.shape === 'normal' ? 'Favorable aux structurés' : 'Défavorable') + '</div>';
     html += '</div></div>';
 
     // ═══ REPÈRE TRÉSORERIE : le meilleur CAT (sans risque) — le taux à battre ═══
