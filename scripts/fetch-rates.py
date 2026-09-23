@@ -60,6 +60,26 @@ DAILY_RATES = {
         "name": "ECB Deposit Facility Rate",
         "description": "Taux de dépôt BCE"
     },
+    # €STR = taux au jour le jour RÉELLEMENT constaté sur le marché (≠ taux directeur).
+    # C'est la base de toute la courbe swap OIS : ce que la salle des marchés actualise.
+    # Dataflow EST (quotidien, J+1, gratuit, sans clé).
+    "estr": {
+        "ecb_url": f"{BASE_ECB}/EST/B.EU000A2X2A25.WT?format=csvdata&lastNObservations=1",
+        "name": "€STR (Euro Short-Term Rate)",
+        "description": "Taux au jour le jour constaté sur le marché euro (base de la courbe OIS)"
+    },
+}
+
+# ─── Courbe des forwards instantanés BCE (zone euro AAA) ───────
+# SR_xY = taux spot (zero-coupon). IF_xY = forward instantané à l'horizon x.
+# Le forward instantané répond à : « quel taux court le marché price-t-il DANS x années ? ».
+# C'est le seul vrai « consensus marché » disponible gratuitement — pas une hypothèse maison.
+ECB_FORWARDS = {
+    "fwd_1y": {"h": 1, "url": f"{BASE_ECB}/YC/B.U2.EUR.4F.G_N_A.SV_C_YM.IF_1Y?format=csvdata&lastNObservations=1"},
+    "fwd_2y": {"h": 2, "url": f"{BASE_ECB}/YC/B.U2.EUR.4F.G_N_A.SV_C_YM.IF_2Y?format=csvdata&lastNObservations=1"},
+    "fwd_3y": {"h": 3, "url": f"{BASE_ECB}/YC/B.U2.EUR.4F.G_N_A.SV_C_YM.IF_3Y?format=csvdata&lastNObservations=1"},
+    "fwd_5y": {"h": 5, "url": f"{BASE_ECB}/YC/B.U2.EUR.4F.G_N_A.SV_C_YM.IF_5Y?format=csvdata&lastNObservations=1"},
+    "fwd_10y": {"h": 10, "url": f"{BASE_ECB}/YC/B.U2.EUR.4F.G_N_A.SV_C_YM.IF_10Y?format=csvdata&lastNObservations=1"},
 }
 
 # Euribor avec historique complet (comme les yields)
@@ -277,6 +297,7 @@ def main():
         "yields": {},
         "policy_rates": {},
         "yield_curve": {},
+        "forwards": {},
     }
 
     # ─── Fetch monthly yield series (ECB primary) ───
@@ -359,6 +380,22 @@ def main():
             print(f"  ✓ {config['name']}: {value}%")
         else:
             print(f"  ✗ No data for {config['name']}")
+
+    # ─── Forwards instantanés BCE (ce que le marché price déjà) ───
+    print("\n→ Forwards instantanés (courbe BCE AAA)...")
+    for key, cfg in ECB_FORWARDS.items():
+        obs = fetch_ecb_csv(cfg["url"])
+        if obs:
+            date, value = obs[-1]
+            output["forwards"][key] = {
+                "horizon_years": cfg["h"],
+                "current": round(value, 3),
+                "date": date,
+                "name": f"Forward instantané {cfg['h']} an" + ("s" if cfg["h"] > 1 else ""),
+            }
+            print(f"  ✓ {key}: {value}%")
+        else:
+            print(f"  ✗ {key}")
 
     # ─── Twelve Data yield proxies (always try if key available) ───
     if TD_API_KEY:

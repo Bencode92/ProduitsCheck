@@ -1,6 +1,6 @@
 {
   "source": "ECB + Banque de France (TEC) + Twelve Data",
-  "fetched_at": "2026-09-23T12:21:34.905648+00:00",
+  "fetched_at": "2026-09-23T13:01:44.686831+00:00",
   "yields": {
     "oat_fr_10y": {
       "current": 3.453,
@@ -24760,6 +24760,12 @@
       "description": "Taux de dépôt BCE",
       "current": 2.5,
       "date": "2026-09-23"
+    },
+    "estr": {
+      "name": "€STR (Euro Short-Term Rate)",
+      "description": "Taux au jour le jour constaté sur le marché euro (base de la courbe OIS)",
+      "current": 2.44,
+      "date": "2026-09-22"
     }
   },
   "yield_curve": {
@@ -24779,5 +24785,37 @@
     ],
     "spread_2_10": 0.317,
     "shape": "normal"
+  },
+  "forwards": {
+    "fwd_1y": {
+      "horizon_years": 1,
+      "current": 3.282,
+      "date": "2026-09-22",
+      "name": "Forward instantané 1 an"
+    },
+    "fwd_2y": {
+      "horizon_years": 2,
+      "current": 3.281,
+      "date": "2026-09-22",
+      "name": "Forward instantané 2 ans"
+    },
+    "fwd_3y": {
+      "horizon_years": 3,
+      "current": 3.23,
+      "date": "2026-09-22",
+      "name": "Forward instantané 3 ans"
+    },
+    "fwd_5y": {
+      "horizon_years": 5,
+      "current": 3.378,
+      "date": "2026-09-22",
+      "name": "Forward instantané 5 ans"
+    },
+    "fwd_10y": {
+      "horizon_years": 10,
+      "current": 3.941,
+      "date": "2026-09-22",
+      "name": "Forward instantané 10 ans"
+    }
   }
 }

@@ -1,0 +1,27 @@
+{
+  "_lisezmoi": "Taux SANS source gratuite fiable (swaps, CMS, forwards Euribor). À demander à la conseillère (écran Bloomberg/Reuters) et à saisir ici. Laisser null tant que la donnée n'est pas connue : l'app affichera « à saisir » plutôt qu'un chiffre faux.",
+  "as_of": null,
+  "source": "",
+  "swap_estr": {
+    "_quoi": "Courbe swap €STR (OIS) — la vraie courbe sans risque euro. C'est celle qu'utilise la salle des marchés pour pricer un callable.",
+    "2y": null,
+    "5y": null,
+    "10y": null
+  },
+  "swap_euribor6m": {
+    "_quoi": "Courbe swap Euribor 6M (IRS) — référence des CMS et des produits de pente.",
+    "2y": null,
+    "5y": null,
+    "10y": null
+  },
+  "cms": {
+    "_quoi": "Constant Maturity Swap — sous-jacent DIRECT du Range Accrual CMS10Y et des steepeners. Sans lui, ce produit ne peut pas être suivi.",
+    "2y": null,
+    "10y": null
+  },
+  "forwards_euribor": {
+    "_quoi": "Forwards Euribor cotés par la banque (≠ forwards reconstruits depuis la courbe spot). Format : taux attendu de l'Euribor 6M dans 6 mois, etc.",
+    "6m_in_6m": null,
+    "12m_in_12m": null
+  }
+}
