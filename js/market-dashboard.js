@@ -77,8 +77,13 @@
     // (~70 bp d'écart possible) — la source est affichée explicitement pour ne pas les confondre.
     var tec10Real = !!(yields.tec10_fr && yields.tec10_fr.current != null);
     var tec10 = yields.tec10_fr || yields.oat_fr_10y || {};
-    var oat5y = yields.oat_fr_5y || {};
-    var oat2y = yields.oat_fr_2y || {};
+    // Courbe FRANÇAISE réelle = séries TEC Banque de France (tec2/5/7/10). Les séries « oat_fr_* »
+    // sont en fait la courbe zone euro AAA (allemande) : 58 à 92 bp plus basse. On affiche les deux,
+    // sans les confondre — le repère d'un produit émis par une banque française est l'OAT, pas l'AAA.
+    var oat5y = yields.tec5_fr || yields.oat_fr_5y || {};
+    var oat2y = yields.tec2_fr || yields.oat_fr_2y || {};
+    var aaa10 = yields.oat_fr_10y || {};
+    var aaa5 = yields.oat_fr_5y || {};
     var bce = policy.ecb_deposit_rate || {};
     var bceMain = policy.ecb_main_rate || {};
     var eur3m = yields.euribor_3m || policy.euribor_3m || {};
@@ -171,10 +176,10 @@
       { id: tec10Real ? 'tec10_fr' : 'oat_fr_10y', label: tec10Real ? 'TEC10 (Banque de France)' : 'OAT 10 ans (proxy AAA)', data: tec10, color: '#0891B2',
         desc: tec10Real ? 'Taux d\'État français 10 ans (Banque de France). Référence pour les TARN et produits structurés taux longs.' : '⚠ TEC10 réel indisponible — proxy rendement souverain AAA zone euro (écart possible ~70 bp vs TEC10 BdF).',
         sub: 'Vol ' + (tec10.vol_annualized_bps || 18) + 'bp · ' + (tec10.direction || 'stable') + ' · Range ' + (tec10.low_1y || '?') + '-' + (tec10.high_1y || '?') },
-      { id: 'oat_fr_5y', label: 'OAT 5 ans', data: oat5y, color: '#2563EB',
+      { id: yields.tec5_fr ? 'tec5_fr' : 'oat_fr_5y', label: yields.tec5_fr ? 'TEC 5 (OAT 5 ans)' : 'Zone euro AAA 5 ans', data: oat5y, color: '#2563EB',
         desc: 'Taux souverain à 5 ans. Sert au calcul du budget option des produits structurés 5 ans.',
         sub: 'Vol ' + (oat5y.vol_annualized_bps || 22) + 'bp · ' + (oat5y.direction || 'stable') + ' · Spread 5-10Y +' + Math.round(((tec10.current||3.10) - (oat5y.current||2.70)) * 100) + 'bp' },
-      { id: 'oat_fr_2y', label: 'OAT 2 ans', data: oat2y, color: '#7C3AED',
+      { id: yields.tec2_fr ? 'tec2_fr' : 'oat_fr_2y', label: yields.tec2_fr ? 'TEC 2 (OAT 2 ans)' : 'Zone euro AAA 2 ans', data: oat2y, color: '#7C3AED',
         desc: 'Taux souverain à 2 ans. Reflète les anticipations de politique monétaire BCE à court terme.',
         sub: 'Vol ' + (oat2y.vol_annualized_bps || 26) + 'bp · ' + (oat2y.direction || 'stable') + ' · Spread 2-10Y +' + Math.round(((tec10.current||3.10) - (oat2y.current||2.53)) * 100) + 'bp' },
       { id: 'euribor_3m', label: 'Euribor 3M', data: eur3m, color: '#D97706',
@@ -335,7 +340,7 @@
     function _rateRef(p) {
       var t = ((p.name || '') + ' ' + (((p.coupon || {}).triggerDetail) || '')).toLowerCase();
       if (/euribor/.test(t)) return { val: eur3mVal, label: 'Euribor 3M' };
-      if (/oat 5|5 ans|cms/.test(t)) return { val: (oat5y.current || 2.70), label: 'OAT 5Y' };
+      if (/oat 5|5 ans|cms/.test(t)) return { val: (oat5y.current || 2.70), label: 'TEC 5 (OAT 5 ans)' };
       return { val: tec10Val, label: 'TEC10' };
     }
     var _gHtml = '', _shown = 0, _noLevel = 0;
@@ -1041,8 +1046,8 @@
     // Get history
     var rateMap = {
       tec10: { key: 'tec10_fr', label: 'TEC10', section: 'yields', fallback: 'oat_fr_10y' },
-      oat5y: { key: 'oat_fr_5y', label: 'OAT 5Y', section: 'yields' },
-      oat2y: { key: 'oat_fr_2y', label: 'OAT 2Y', section: 'yields' },
+      oat5y: { key: 'tec5_fr', label: 'TEC 5 (OAT 5Y)', section: 'yields', fallback: 'oat_fr_5y' },
+      oat2y: { key: 'tec2_fr', label: 'TEC 2 (OAT 2Y)', section: 'yields', fallback: 'oat_fr_2y' },
       euribor3m: { key: 'euribor_3m', label: 'Euribor 3M', section: 'yields' },
       euribor12m: { key: 'euribor_12m', label: 'Euribor 12M', section: 'yields' }
     };
@@ -1262,7 +1267,7 @@
         html += '<td style="padding:6px;text-align:center;font-family:var(--mono);font-size:11px;color:' + (typeof marge === 'string' && marge.indexOf('+') === 0 ? '#059669' : '#DC2626') + '">' + marge + '</td>';
         // Analyser button — loads threshold into the chart above
         if (p.hasExploitableSeuil && p.rateAlias) {
-          var clickAction = '_mktOpenRate(\'' + (p.rateAlias === 'tec10' ? 'oat_fr_10y' : p.rateAlias === 'oat5y' ? 'oat_fr_5y' : p.rateAlias === 'oat2y' ? 'oat_fr_2y' : 'euribor_3m') + '\')';
+          var clickAction = '_mktOpenRate(\'' + (p.rateAlias === 'tec10' ? 'tec10_fr' : p.rateAlias === 'oat5y' ? 'tec5_fr' : p.rateAlias === 'oat2y' ? 'tec2_fr' : 'euribor_3m') + '\')';
           html += '<td style="padding:6px;text-align:center"><button onclick="' + clickAction + ';setTimeout(function(){var e=document.getElementById(\'mkt-custom-threshold\');if(e){e.value=\'' + (p.threshold || p.corridorLow || '') + '\';var m=document.getElementById(\'mkt-custom-mode\');if(m)m.value=\'' + (p.thresholdMode || 'below') + '\';_mktUpdateChart()}},200)" style="padding:3px 8px;border-radius:3px;border:1px solid #7C3AED;background:#F5F3FF;color:#7C3AED;font-size:11px;font-weight:600;cursor:pointer">Analyser</button></td>';
         } else {
           html += '<td style="padding:6px;text-align:center;color:#475569;font-size:11px">—</td>';

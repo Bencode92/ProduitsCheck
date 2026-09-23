@@ -21,8 +21,10 @@
   function _curve() {
     const y = (S.rates && S.rates.yields) || {};
     const g = (k) => (y[k] && parseFloat(y[k].current)) || null;
-    const nodes = [[3, g('euribor_3m')], [6, g('euribor_6m')], [12, g('euribor_12m')], [24, g('oat_fr_2y')], [60, g('oat_fr_5y')], [120, g('oat_fr_10y')]].filter(n => n[1] != null);
-    return { nodes, tec10: g('tec10_fr'), date: S.rates && S.rates.fetched_at ? S.rates.fetched_at.split('T')[0] : null };
+    // Segment monétaire = Euribor (ACT/360) ; segment obligataire = courbe FRANÇAISE réelle (TEC Banque de
+    // France), pas la zone euro AAA qui est 58 à 92 bp plus basse. L'AAA reste dispo comme « vrai sans risque ».
+    const nodes = [[3, g('euribor_3m')], [6, g('euribor_6m')], [12, g('euribor_12m')], [24, g('tec2_fr') || g('oat_fr_2y')], [60, g('tec5_fr') || g('oat_fr_5y')], [84, g('tec7_fr')], [120, g('tec10_fr') || g('oat_fr_10y')]].filter(n => n[1] != null);
+    return { nodes, tec10: g('tec10_fr'), aaa10: g('oat_fr_10y'), aaa5: g('oat_fr_5y'), date: S.rates && S.rates.fetched_at ? S.rates.fetched_at.split('T')[0] : null };
   }
   function spot(m) {
     const n = _curve().nodes; if (!n.length) return 3;
