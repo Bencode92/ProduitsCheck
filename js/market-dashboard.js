@@ -35,6 +35,8 @@
     try { var c = await fetch('data/market/market_context.json'); if (c.ok) _data.ctx = await c.json(); } catch(e) {}
     // Taux sans source gratuite (swaps OIS/IRS, CMS, forwards Euribor) : saisis à la main.
     try { var sw = await fetch('data/market/swaps-manual.json'); if (sw.ok) _data.swaps = await sw.json(); } catch(e) {}
+    // Courbe swap EUR officielle (EIOPA, mensuelle) — voir scripts/fetch-swaps-eiopa.py
+    try { var sc = await fetch('data/market/swaps.json'); if (sc.ok) _data.swapCurve = await sc.json(); } catch(e) {}
     try { var k = await fetch('data/market/corr_dispersion_tech.json'); if (k.ok) _data.corr = await k.json(); } catch(e) {}
   }
 
@@ -250,11 +252,19 @@
       var e3 = num(yields.euribor_3m), e6 = num(yields.euribor_6m), e12 = num(yields.euribor_12m);
       var t2 = num(yields.tec2_fr), t5 = num(yields.tec5_fr), t10 = num(yields.tec10_fr);
       var a10 = num(yields.oat_fr_10y);
-      var cms10 = (sw.cms && sw.cms['10y'] != null) ? parseFloat(sw.cms['10y']) : null;
-      var cms2 = (sw.cms && sw.cms['2y'] != null) ? parseFloat(sw.cms['2y']) : null;
-      var ois10 = (sw.swap_estr && sw.swap_estr['10y'] != null) ? parseFloat(sw.swap_estr['10y']) : null;
-      var ois5 = (sw.swap_estr && sw.swap_estr['5y'] != null) ? parseFloat(sw.swap_estr['5y']) : null;
-      var ois2 = (sw.swap_estr && sw.swap_estr['2y'] != null) ? parseFloat(sw.swap_estr['2y']) : null;
+      // Courbe swap : EIOPA (mensuelle, officielle) en source de base ; une saisie manuelle
+      // plus fraîche (écran de la conseillère) la remplace point par point.
+      var sc = _data.swapCurve || {}, scv = sc.swap_eur || {};
+      var _sw = function (mat, manual) {
+        if (manual != null) return { v: parseFloat(manual), src: 'manuel' };
+        if (scv[mat] != null) return { v: parseFloat(scv[mat]), src: 'eiopa' };
+        return { v: null, src: null };
+      };
+      var _c10 = _sw('10y', sw.cms && sw.cms['10y']), _c2 = _sw('2y', sw.cms && sw.cms['2y']);
+      var _o10 = _sw('10y', sw.swap_estr && sw.swap_estr['10y']), _o5 = _sw('5y', sw.swap_estr && sw.swap_estr['5y']), _o2 = _sw('2y', sw.swap_estr && sw.swap_estr['2y']);
+      var cms10 = _c10.v, cms2 = _c2.v, ois10 = _o10.v, ois5 = _o5.v, ois2 = _o2.v;
+      var swAsOf = sw.as_of || sc.as_of || null;
+      var swSrc = (_o10.src === 'manuel' || _c10.src === 'manuel') ? 'saisie manuelle' : (sc.source ? 'EIOPA (courbe swap EUR)' : null);
 
       // Le portefeuille contient-il un produit indexé CMS ? (sinon l'alerte n'a pas lieu d'être)
       // On regarde le portefeuille ET les propositions à l'étude : une offre CMS en cours
@@ -305,7 +315,7 @@
         chips: chip('Dépôt (DFR)', P(dep)) + chip('Refi (MRO)', P(refi)) +
                ((dep != null && refi != null) ? chip('Corridor', Math.round((refi - dep) * 100) + ' bp') : ''),
         body: 'Le <strong>taux de dépôt</strong> est celui auquel une banque place son cash excédentaire à la BCE, au jour le jour, sans risque. C\'est le <strong>plancher absolu</strong> du marché monétaire euro : personne ne prête moins cher, puisque cette alternative existe toujours. Le taux de refi est celui auquel une banque <em>emprunte</em> à la BCE à une semaine — historiquement « le » taux directeur, aujourd\'hui marginal : les banques sont en excédent de liquidité, elles déposent, elles n\'empruntent plus. <strong>C\'est donc le taux de dépôt qui pilote réellement les marchés</strong>, pas le refi.',
-        use: 'ton repère de base. Un CAT à ' + P((dep != null ? dep + 1.04 : null)) + ' = dépôt BCE + ' + (dep != null ? '104' : '—') + ' bp : c\'est la prime que la banque paie pour capter ton dépôt plutôt que de laisser son cash à la BCE.'
+        use: '<strong>pour lire un structuré :</strong> c\'est ce qui finance le <strong>budget option</strong>. Sur un produit à capital garanti, l\'émetteur place ton capital au taux du marché et n\'a que les intérêts à dépenser en coupons. Taux courts hauts = budget large = coupons généreux <em>sans</em> risque sur le capital ; taux courts qui baissent = le même produit devient impossible à structurer. Et c\'est aussi le plancher du CAT : le structuré doit battre <strong>ça</strong>, pas zéro.'
       });
 
       // ── Étage 2 : €STR
@@ -314,7 +324,7 @@
         chips: chip('€STR', P(estr)) + (policy.estr && policy.estr.date ? chip('au', policy.estr.date) : '') +
                ((estr != null && dep != null) ? chip('vs dépôt BCE', (estr - dep >= 0 ? '+' : '−') + Math.abs(Math.round((estr - dep) * 100)) + ' bp') : ''),
         body: 'Le <strong>taux moyen réellement payé</strong> sur les prêts au jour le jour entre banques, calculé chaque matin par la BCE sur les transactions de la veille. Il colle au taux de dépôt, quelques points de base en dessous. Ce n\'est pas une décision : c\'est une mesure.',
-        use: 'la <strong>base de toute la courbe swap</strong>. Quand une salle des marchés actualise les flux futurs d\'un produit structuré, c\'est l\'€STR composé qu\'elle utilise comme taux sans risque.'
+        use: '<strong>pour lire un structuré :</strong> c\'est le taux avec lequel on <strong>actualise</strong> les flux futurs du produit. Autrement dit, c\'est ce qui fixe sa <strong>valeur de marché en cours de vie</strong> — le prix auquel la banque te rachètera si tu dois sortir avant l\'échéance. Quand l\'€STR monte, la valeur d\'un produit à taux fixe déjà émis baisse.'
       });
 
       // ── Étage 3 : Euribor
@@ -324,7 +334,7 @@
         chips: chip('3 mois', P(e3)) + chip('6 mois', P(e6)) + chip('12 mois', P(e12)) +
                ((e12 != null && dep != null) ? chip('vs BCE', '+' + Math.round((e12 - dep) * 100) + ' bp') : ''),
         body: 'Contrairement à l\'€STR qui est du jour le jour, l\'Euribor engage sur 3, 6 ou 12 mois. Il contient donc deux choses : <strong>l\'anticipation des décisions BCE</strong> sur la période, <strong>plus une prime de risque bancaire et de liquidité</strong>. L\'écart Euribor 12 mois − dépôt BCE (' + (e12 != null && dep != null ? '+' + Math.round((e12 - dep) * 100) + ' bp' : '—') + ') est la mesure directe de ce que le marché price en hausses à un an.' + (e3Stale ? ' <span style="color:#B45309">⚠ Ici en <strong>moyenne mensuelle</strong> (' + yields.euribor_3m.date + ') : la BCE ne publie pas le fixing quotidien, et la série quotidienne de la Banque de France s\'arrête en 2024. Le fixing du jour est typiquement un peu plus haut.</span>' : ''),
-        use: 'référence des floaters, des range accrual Euribor, et de ton point mort quand tu hésites entre placer maintenant ou attendre.'
+        use: '<strong>pour lire un structuré :</strong> sous-jacent direct des <strong>floaters</strong> et des <strong>range accrual Euribor</strong> — le coupon tombe si l\'Euribor reste dans un corridor. Et c\'est ton <strong>point mort</strong> : quand tu hésites entre placer maintenant ou attendre, l\'écart Euribor − dépôt BCE te dit ce que le marché price déjà, donc ce que tu dois battre pour que l\'attente rapporte.'
       });
 
       // ── Étage 4 : les swaps (l'étage manquant)
@@ -333,16 +343,45 @@
       if (ois2 != null || ois5 != null || ois10 != null) swChips += chip('OIS 2a', P(ois2)) + chip('OIS 5a', P(ois5)) + chip('OIS 10a', P(ois10));
       if (cms2 != null || cms10 != null) swChips += chip('CMS 2a', P(cms2)) + chip('CMS 10a', P(cms10));
       if (!swChips) swChips = chip('OIS', 'à saisir', true) + chip('CMS 10 ans', 'à saisir', true);
-      if (sw.as_of) swChips += chip('au', sw.as_of);
+      if (swAsOf) swChips += chip('au', swAsOf);
       html += rung({
-        n: 4, color: swMissing ? '#B45309' : '#0F766E', title: 'Les swaps — OIS, IRS, CMS', who: swMissing ? '· ÉTAGE MANQUANT' : '· saisie manuelle',
+        n: 4, color: swMissing ? '#B45309' : '#0F766E', title: 'Les swaps — OIS, IRS, CMS', who: swMissing ? '· ÉTAGE MANQUANT' : '· ' + (swSrc || 'source externe'),
         chips: swChips,
-        body: 'Un swap échange un taux fixe contre un taux variable. Trois courbes comptent ici. La <strong>courbe OIS (€STR)</strong> : le fixe échangé contre l\'€STR composé — <strong>c\'est la vraie courbe sans risque euro, et c\'est elle que ta banque utilise pour te coter un callable</strong>, pas l\'OAT. La <strong>courbe IRS Euribor 6M</strong> : même principe contre l\'Euribor, elle intègre le risque bancaire. Le <strong>CMS</strong> (Constant Maturity Swap) : le taux swap à maturité constante, relevé à chaque date de constatation.' +
-              (swMissing ? ' <br><strong style="color:#B45309">Aucune de ces courbes n\'est disponible gratuitement</strong> — ni la BCE ni la Banque de France ne les publient (vérifié). Elles se saisissent à la main dans <code style="font-size:10px;background:' + BG.input + ';padding:1px 5px;border-radius:3px">data/market/swaps-manual.json</code>, à partir de l\'écran de ta conseillère.' : ''),
-        use: 'pricer un callable, juger si un coupon paie vraiment la complexité, et <strong>suivre tout produit indexé CMS</strong>.'
+        body: 'Un swap échange un taux fixe contre un taux variable. La <strong>courbe swap</strong> est <strong>la vraie courbe sans risque euro — c\'est elle que ta banque utilise pour te coter un produit, pas l\'OAT</strong>. Le <strong>CMS</strong> (Constant Maturity Swap) est simplement cette courbe lue au point 2 ou 10 ans, relevée à chaque date de constatation : c\'est le sous-jacent direct des range accrual et des steepeners.' +
+              (swMissing ? ' <br><strong style="color:#B45309">Courbe absente</strong> — à saisir dans <code style="font-size:10px;background:' + BG.input + ';padding:1px 5px;border-radius:3px">data/market/swaps-manual.json</code> depuis l\'écran de ta conseillère.'
+                         : ' <br>Source : <strong>EIOPA</strong>, qui publie chaque mois la courbe swap euro pour Solvabilité II — gratuite et officielle. La BCE et la Banque de France ne publient, elles, aucune courbe swap (vérifié). Fiable jusqu\'à 20 ans ; une saisie manuelle plus fraîche prend le dessus si tu en renseignes une.') +
+              ((cms10 != null && t10 != null) ? ' <br><strong>L\'écart qui compte : swap 10 ans ' + P(cms10) + ' contre OAT France ' + P(t10) + ', soit ' + Math.round((t10 - cms10) * 100) + ' bp.</strong> Lire une barrière CMS sur le TEC te trompe donc de ' + Math.round((t10 - cms10) * 100) + ' bp — dans le sens qui fait conclure « coupon perdu » à tort.' : ''),
+        use: '<strong>pour lire un structuré :</strong> c\'est l\'étage où se price le produit. Le coupon qu\'on te propose se compare à <em>ce</em> taux pour savoir ce que tu es payé en échange du risque et de l\'option que tu vends. Et toute barrière indexée CMS se lit ici, jamais sur le TEC.'
       });
 
-      if (cmsProd && cms10 == null) {
+      if (cmsProd && cms10 != null) {
+        // La donnée existe : on la confronte directement à la barrière du produit.
+        var _bar = null, _barName = '';
+        try {
+          var _all = [].concat((window.app && app.state && app.state.portfolio) || [], (window.app && app.state && app.state.products) || []);
+          for (var _j = 0; _j < _all.length; _j++) {
+            if ((_all[_j].name || '') !== cmsProd) continue;
+            var _cp = _all[_j].capitalProtection || {}, _co = _all[_j].coupon || {};
+            _bar = parseFloat(_co.trigger != null ? _co.trigger : _cp.barrierCoupon);
+            _barName = (_co.trigger != null) ? 'barrière de coupon' : 'barrière de coupon';
+            break;
+          }
+        } catch (e) {}
+        var _gap = (!isNaN(_bar) && _bar != null) ? Math.round((cms10 - _bar) * 100) : null;
+        var _tone = (_gap == null) ? '#0F766E' : (Math.abs(_gap) <= 15 ? '#B45309' : (_gap <= 0 ? '#047857' : '#B91C1C'));
+        html += '<div style="background:' + BG.section + ';border:1px solid ' + _tone + ';border-left:5px solid ' + _tone + ';border-radius:8px;padding:11px 14px;font-size:11.5px;line-height:1.65;color:' + BG.text + '">';
+        html += '<strong>📌 ' + cmsProd + '</strong> <span style="font-size:10px;color:' + BG.textMuted + '">(' + cmsWhere + ')</span><br>';
+        if (_gap != null) {
+          html += 'Sa ' + _barName + ' est à <strong>' + P(_bar) + '</strong>. Le <strong>CMS 10 ans est à ' + P(cms10) + '</strong> : ' +
+            (Math.abs(_gap) <= 15
+              ? '<strong style="color:' + _tone + '">' + Math.abs(_gap) + ' bp seulement ' + (_gap > 0 ? 'au-dessus' : 'en dessous') + ' — le produit est sur le fil.</strong> Un mouvement de quelques points de base fait basculer le coupon.'
+              : (_gap <= 0 ? '<strong style="color:' + _tone + '">' + Math.abs(_gap) + ' bp sous la barrière : condition remplie aujourd\'hui.</strong>' : '<strong style="color:' + _tone + '">' + _gap + ' bp au-dessus : pas de coupon aux niveaux actuels.</strong>')) + '<br>';
+          html += '<span style="color:' + BG.textDim + '">Jugé au TEC 10 (' + P(t10) + '), l\'écart aurait paru de ' + Math.round((t10 - _bar) * 100) + ' bp — soit une lecture fausse de ' + Math.round((t10 - cms10) * 100) + ' bp. C\'est exactement l\'erreur que la substitution CMS→TEC produisait.</span>';
+        } else {
+          html += 'Indexé sur le CMS 10 ans, à <strong>' + P(cms10) + '</strong> aujourd\'hui. Barrière non renseignée dans la fiche produit — à compléter pour que le suivi fonctionne.';
+        }
+        html += '</div>';
+      } else if (cmsProd && cms10 == null) {
         html += '<div style="background:#FFFBEB;border:1px solid #F59E0B;border-radius:8px;padding:11px 14px;font-size:11.5px;line-height:1.6;color:#78350F">';
         html += '<strong>⚠ Conséquence directe.</strong> « ' + cmsProd + ' » (' + cmsWhere + ') est indexé sur le CMS, et aucune donnée CMS n\'existe dans l\'app : ce produit ne peut pas être suivi. Ne pas le juger au TEC 10 (' + P(t10) + ') — le CMS est un <em>taux de swap</em>, le TEC un <em>rendement d\'État français</em>. Avec la prime de risque française actuelle, l\'OAT se traite nettement au-dessus du swap : conclure « barrière franchie » sur le TEC alors que le CMS est plusieurs dizaines de bp plus bas serait une erreur de lecture.';
         html += '</div>';
@@ -354,7 +393,7 @@
         chips: chip('TEC 2', P(t2)) + chip('TEC 5', P(t5)) + chip('TEC 10', P(t10)) +
                ((t10 != null && a10 != null) ? chip('prime France', '+' + Math.round((t10 - a10) * 100) + ' bp', true) : ''),
         body: 'Le <strong>TEC</strong> (Taux de l\'Échéance Constante, Banque de France) est le rendement d\'une OAT théorique d\'exactement 2, 5 ou 10 ans. Il ajoute à l\'anticipation de taux une <strong>prime de terme</strong> (immobiliser son argent longtemps) et une <strong>prime de risque France</strong>. La courbe <strong>zone euro AAA</strong> affichée à côté ne retient que les États les mieux notés, essentiellement l\'Allemagne : c\'est le vrai « sans risque » souverain euro. L\'écart entre les deux' + (t10 != null && a10 != null ? ' — <strong>' + Math.round((t10 - a10) * 100) + ' bp à 10 ans</strong> —' : '') + ' <em>est</em> le spread OAT-Bund. Les deux séries sont affichées séparément pour ne jamais les confondre.',
-        use: 'le repère d\'un produit émis par une banque française. Un EMTN qui paie <em>moins</em> que l\'OAT de même durée te fait prendre un risque bancaire pour un rendement inférieur à celui de l\'État.'
+        use: '<strong>pour lire un structuré :</strong> c\'est le <strong>test de l\'émetteur</strong>. Un EMTN de banque française qui paie <em>moins</em> que l\'OAT de même durée te fait prendre un risque bancaire, une illiquidité et souvent un aléa de rappel — pour un rendement inférieur à celui de l\'État. C\'est aussi le sous-jacent des <strong>TARN TEC 10</strong> : leur barrière se lit ici, et nulle part ailleurs.'
       });
 
       html += '</div>';
@@ -595,10 +634,12 @@
       // fausserait la lecture de la barrière (« coupon perdu » à tort). Sans donnée CMS saisie
       // dans data/market/swaps-manual.json, on refuse de jauger plutôt que de jauger faux.
       if (/cms/.test(t)) {
-        var _sw = (_data.swaps && _data.swaps.cms) || {};
-        var _m = /cms\s*2/.test(t) ? _sw['2y'] : _sw['10y'];
+        var _k = /cms\s*2/.test(t) ? '2y' : '10y';
+        var _man = (_data.swaps && _data.swaps.cms) || {};
+        var _crv = (_data.swapCurve && _data.swapCurve.swap_eur) || {};
+        var _m = (_man[_k] != null) ? _man[_k] : _crv[_k];
         if (_m == null) return { val: null, label: 'CMS', missing: true };
-        return { val: parseFloat(_m), label: 'CMS ' + (/cms\s*2/.test(t) ? '2 ans' : '10 ans') };
+        return { val: parseFloat(_m), label: 'CMS ' + (_k === '2y' ? '2 ans' : '10 ans') };
       }
       if (/oat 5|5 ans/.test(t)) return { val: (oat5y.current || 2.70), label: 'TEC 5 (OAT 5 ans)' };
       return { val: tec10Val, label: 'TEC10' };

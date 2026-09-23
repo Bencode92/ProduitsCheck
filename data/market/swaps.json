@@ -1,0 +1,24 @@
+{
+  "source": "EIOPA Risk-Free Rate term structures (courbe swap EUR, SWP_LLP)",
+  "source_url": "https://www.eiopa.europa.eu/tools-and-data/risk-free-interest-rate-term-structures_en",
+  "fetched_at": "2026-09-23T14:41:06.948959+00:00",
+  "as_of": "2026-08-31",
+  "frequency": "mensuelle (publiée ~5 jours après la fin du mois)",
+  "credit_risk_adjustment_bps": 10.0,
+  "note": "Courbe swap euro zéro-coupon. EIOPA publie RFR = swap − CRA ; le CRA est rajouté ici pour retrouver le taux swap coté. Fiable jusqu'à 20 ans (Last Liquid Point) ; au-delà EIOPA extrapole vers l'UFR, non publié ici. Le CMS n ans se lit sur cette courbe au point n.",
+  "swap_eur": {
+    "1y": 3.016,
+    "2y": 3.146,
+    "3y": 3.172,
+    "4y": 3.193,
+    "5y": 3.207,
+    "6y": 3.238,
+    "7y": 3.267,
+    "8y": 3.302,
+    "9y": 3.337,
+    "10y": 3.368,
+    "12y": 3.438,
+    "15y": 3.511,
+    "20y": 3.551
+  }
+}

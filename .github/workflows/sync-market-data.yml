@@ -58,6 +58,13 @@ jobs:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: python3 scripts/fetch-rates.py
 
+      # Courbe swap EUR : publication mensuelle EIOPA (~5 jours après la fin du mois).
+      # Le fichier est lourd (3 Mo) et ne change qu'une fois par mois : un échec ne doit
+      # pas casser la synchro quotidienne des autres taux.
+      - name: Fetch EUR swap curve (EIOPA)
+        continue-on-error: true
+        run: python3 scripts/fetch-swaps-eiopa.py
+
       - name: Fetch underlying proxy metrics (Twelve Data API)
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
