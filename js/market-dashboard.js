@@ -37,6 +37,8 @@
     try { var sw = await fetch('data/market/swaps-manual.json'); if (sw.ok) _data.swaps = await sw.json(); } catch(e) {}
     // Courbe swap EUR officielle (EIOPA, mensuelle) — voir scripts/fetch-swaps-eiopa.py
     try { var sc = await fetch('data/market/swaps.json'); if (sc.ok) _data.swapCurve = await sc.json(); } catch(e) {}
+    // Grille CAT des banques — pour mesurer ce qu'elle paie AU-DESSUS du marché.
+    try { var cr = await fetch('data/cat/rates.json'); if (cr.ok) _data.catRates = await cr.json(); } catch(e) {}
     try { var k = await fetch('data/market/corr_dispersion_tech.json'); if (k.ok) _data.corr = await k.json(); } catch(e) {}
   }
 
@@ -452,6 +454,156 @@
         html += '</div>';
       })();
       html += '</div>';
+    })();
+
+    // ═══ TON CAT PAIE-T-IL LE MARCHÉ ? ═══
+    // La question qui revient tout le temps : « les taux vont monter, dois-je attendre ? »
+    // Elle se tranche en décomposant le taux offert : €STR d'aujourd'hui + ce que le marché
+    // price déjà de hausses sur la durée + la marge de la banque. Seule la marge peut encore
+    // bouger : la hausse anticipée, elle, est déjà payée.
+    (function () {
+      var num = function (o) { return (o && o.current != null) ? parseFloat(o.current) : null; };
+      var P = function (x) { return x == null ? '—' : (Math.round(x * 100) / 100).toFixed(2).replace('.', ',') + ' %'; };
+      var BP = function (x) { return (x >= 0 ? '+' : '−') + Math.abs(Math.round(x)) + ' bp'; };
+      var estr = num(policy.estr);
+      var scv = (_data.swapCurve && _data.swapCurve.swap_eur) || {};
+      var e3 = num(yields.euribor_3m), e6 = num(yields.euribor_6m), e12 = num(yields.euribor_12m);
+      if (estr == null || !scv['1y']) return;
+
+      // Courbe de référence, en mois. Le court terme vient de l'Euribor (converti ACT/360 →
+      // effectif annuel, ×365/360) ; au-delà d'un an, de la courbe swap.
+      var cv = { 0: estr };
+      if (e3 != null) cv[3] = e3 * 365 / 360;
+      if (e6 != null) cv[6] = e6 * 365 / 360;
+      cv[12] = parseFloat(scv['1y']);
+      [['2y', 24], ['3y', 36], ['4y', 48], ['5y', 60], ['7y', 84], ['10y', 120]].forEach(function (k) {
+        if (scv[k[0]] != null) cv[k[1]] = parseFloat(scv[k[0]]);
+      });
+      var mkeys = Object.keys(cv).map(Number).sort(function (a, b) { return a - b; });
+      var market = function (m) {
+        if (m <= mkeys[0]) return cv[mkeys[0]];
+        for (var i = 0; i < mkeys.length - 1; i++) {
+          var a = mkeys[i], b = mkeys[i + 1];
+          if (m >= a && m <= b) return cv[a] + (cv[b] - cv[a]) * (m - a) / (b - a);
+        }
+        return cv[mkeys[mkeys.length - 1]];
+      };
+
+      // Offres CAT récentes, taux fixe uniquement (le progressif se compare à horizon de sortie,
+      // pas à maturité — il a sa propre grille d'équivalence).
+      var raw = (_data.catRates && _data.catRates.rates) || [];
+      var cutoff = new Date(Date.now() - 120 * 864e5).toISOString().slice(0, 10);
+      var offers = [];
+      raw.forEach(function (o) {
+        if ((o.date || '') < cutoff) return;
+        if (o.rateType === 'progressif') return;
+        var m = parseInt(o.durationMonths, 10), r = parseFloat(o.rate);
+        if (!m || isNaN(r)) return;
+        var mr = market(m);
+        offers.push({ bank: o.bankName || o.bankId, prod: o.productName || '', m: m, r: r, mr: mr, sp: (r - mr) * 100 });
+      });
+      if (offers.length < 4) return;
+      offers.sort(function (a, b) { return a.m - b.m || b.r - a.r; });
+
+      // Meilleure offre à 12 mois : c'est elle qui sert de base au calcul « attendre ? »
+      var best12 = null, best24 = null;
+      offers.forEach(function (o) {
+        if (o.m === 12 && (!best12 || o.r > best12.r)) best12 = o;
+        if (o.m === 24 && (!best24 || o.r > best24.r)) best24 = o;
+      });
+
+      html += '<div style="margin:22px 0 16px">';
+      html += '<div style="font-size:14px;font-weight:700;color:' + BG.text + ';margin-bottom:3px">💶 Ton CAT paie-t-il le marché ?</div>';
+      html += '<div style="font-size:11px;color:' + BG.textDim + ';margin-bottom:12px">Un taux CAT n\'est pas « le taux d\'aujourd\'hui » : c\'est la moyenne des taux courts attendus sur toute la durée, plus la marge de la banque. Décomposer les deux répond à la seule vraie question — reste-t-il quelque chose à gagner en attendant ?</div>';
+
+      // ── La décomposition, sur la meilleure offre 12 mois
+      if (best12) {
+        var antic = (best12.mr - estr) * 100, marge = best12.sp;
+        html += '<div style="background:' + BG.section + ';border:1px solid ' + BG.border + ';border-radius:8px;padding:13px 15px;margin-bottom:11px">';
+        html += '<div style="font-size:11.5px;font-weight:700;color:' + BG.text + ';margin-bottom:9px">D\'où viennent les ' + P(best12.r) + ' de <span style="color:#0F766E">' + best12.bank + ' à ' + best12.m + ' mois</span></div>';
+        html += '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:stretch;margin-bottom:9px">';
+        var parts = [
+          ['Taux du jour (€STR)', P(estr), '#0891B2', 'ce que vaut l\'argent au jour le jour'],
+          ['+ hausses déjà pricées', BP(antic), '#4338CA', 'l\'anticipation BCE sur ' + best12.m + ' mois, déjà payée'],
+          ['+ marge de la banque', BP(marge), marge >= 20 ? '#047857' : marge >= 0 ? '#B45309' : '#B91C1C', 'la seule part négociable']
+        ];
+        parts.forEach(function (pt) {
+          html += '<div style="flex:1;min-width:145px;padding:10px 12px;background:' + BG.row1 + ';border:1px solid ' + BG.border + ';border-top:3px solid ' + pt[2] + ';border-radius:6px">';
+          html += '<div style="font-size:9.5px;color:' + BG.textMuted + '">' + pt[0] + '</div>';
+          html += '<div style="font-family:var(--mono,ui-monospace,monospace);font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;color:' + pt[2] + '">' + pt[1] + '</div>';
+          html += '<div style="font-size:9.5px;color:' + BG.textMuted + ';line-height:1.4;margin-top:2px">' + pt[3] + '</div></div>';
+        });
+        html += '</div>';
+        html += '<div style="font-size:11.5px;line-height:1.6;color:' + BG.textDim + '"><strong style="color:' + BG.text + '">Ce que ça veut dire.</strong> Sur les ' + Math.round((best12.r - estr) * 100) + ' bp que ce CAT paie au-dessus du jour le jour, <strong>' + Math.round(antic) + ' bp sont l\'anticipation de hausse déjà intégrée</strong> et seulement <strong>' + Math.round(marge) + ' bp</strong> la marge de la banque. Une hausse BCE conforme aux attentes ne fera donc <em>pas</em> monter ce taux : elle est déjà dedans. Seule une hausse <em>au-delà</em> du forward, ou un rattrapage de marge, peut le bouger.</div>';
+        html += '</div>';
+      }
+
+      // ── Attendre le prochain CAT ? Le point mort, en euros
+      if (best12) {
+        var mont = 300000;
+        try { var mm = (window.app && app.state && app.state.deposits) ? null : null; } catch (e) {}
+        var H = best12.m + 1;                                      // durée de l'offre + le mois d'attente
+        var gainNow = mont * best12.r / 100 * H / 12;              // placer tout de suite couvre H mois
+        var beEmpty = gainNow / mont * 100;                        // cash dormant à 0 %
+        var beRem = (gainNow - mont * 2.0 / 100 / 12) / mont * 100; // cash à 2 % pendant l'attente
+        html += '<div style="background:' + BG.section + ';border:1px solid ' + BG.border + ';border-left:5px solid #B45309;border-radius:8px;padding:13px 15px;margin-bottom:11px">';
+        html += '<div style="font-size:11.5px;font-weight:700;color:' + BG.text + ';margin-bottom:8px">⏳ Attendre la grille du mois prochain ?</div>';
+        html += '<div style="font-size:11.5px;line-height:1.65;color:' + BG.textDim + ';margin-bottom:9px">Attendre un mois, c\'est un mois sans intérêts. Pour que ce soit rentable, la grille suivante doit compenser ce mois perdu <em>en plus</em> d\'égaler le taux d\'aujourd\'hui. Sur ' + _fmt(mont) + ' € et un horizon commun de ' + H + ' mois :</div>';
+        html += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:9px">';
+        [['Placer maintenant', P(best12.r) + ' sur ' + best12.m + ' m', _fmt(Math.round(gainNow)) + ' €', '#047857'],
+         ['Attendre — cash à 0 %', 'il faudrait ' + P(beEmpty), BP((beEmpty - best12.r) * 100) + ' vs aujourd\'hui', '#B45309'],
+         ['Attendre — cash à 2 %', 'il faudrait ' + P(beRem), BP((beRem - best12.r) * 100) + ' vs aujourd\'hui', '#B45309']
+        ].forEach(function (c) {
+          html += '<div style="flex:1;min-width:155px;padding:10px 12px;background:' + BG.row1 + ';border:1px solid ' + BG.border + ';border-top:3px solid ' + c[3] + ';border-radius:6px">';
+          html += '<div style="font-size:9.5px;color:' + BG.textMuted + '">' + c[0] + '</div>';
+          html += '<div style="font-family:var(--mono,ui-monospace,monospace);font-size:14px;font-weight:700;color:' + BG.text + '">' + c[1] + '</div>';
+          html += '<div style="font-size:10px;font-weight:700;color:' + c[3] + '">' + c[2] + '</div></div>';
+        });
+        html += '</div>';
+        var f1 = (_data.rates && _data.rates.forwards && _data.rates.forwards.fwd_1y) ? parseFloat(_data.rates.forwards.fwd_1y.current) : null;
+        var f3 = (_data.rates && _data.rates.forwards && _data.rates.forwards.fwd_3y) ? parseFloat(_data.rates.forwards.fwd_3y.current) : null;
+        html += '<div style="font-size:11.5px;line-height:1.65;color:' + BG.textDim + '"><strong style="color:' + BG.text + '">Le marché price-t-il ce rattrapage ?</strong> ';
+        if (f1 != null && f3 != null) {
+          html += 'Non. Le forward à 1 an est à <strong>' + P(f1) + '</strong> et celui à 3 ans à <strong>' + P(f3) + '</strong> : la courbe est <strong>plate au-delà d\'un an</strong>. Le marché voit un pic de politique monétaire autour de ' + P(Math.max(f1, f3)) + ' puis un plateau — pas un cycle de hausses qui continue. ';
+        }
+        html += 'Attendre un mois pour capter une hausse déjà payée coûte le mois d\'intérêts, sans contrepartie.</div>';
+        html += '</div>';
+      }
+
+      // ── Le tableau : chaque offre face au marché de même durée
+      html += '<div style="background:' + BG.section + ';border:1px solid ' + BG.border + ';border-radius:8px;padding:13px 15px">';
+      html += '<div style="font-size:11.5px;font-weight:700;color:' + BG.text + ';margin-bottom:3px">Chaque offre face au marché de même durée</div>';
+      html += '<div style="font-size:10.5px;color:' + BG.textMuted + ';margin-bottom:9px">L\'écart est la marge réelle de la banque — ce qu\'elle te paie <em>en plus</em> de ce que vaut l\'argent sur cette durée. C\'est le seul chiffre qui se négocie.</div>';
+      html += '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px">';
+      html += '<thead><tr style="background:' + BG.header + '">' +
+        ['Banque', 'Produit', 'Durée', 'Taux CAT', 'Marché', 'Marge'].map(function (h, i) {
+          return '<th style="padding:6px 9px;text-align:' + (i < 3 ? 'left' : 'right') + ';font-size:9.5px;letter-spacing:.04em;text-transform:uppercase;color:' + BG.textDim + ';white-space:nowrap">' + h + '</th>';
+        }).join('') + '</tr></thead><tbody>';
+      offers.forEach(function (o, i) {
+        var col = o.sp >= 25 ? '#047857' : o.sp >= 5 ? '#0F766E' : o.sp >= -5 ? '#B45309' : '#B91C1C';
+        html += '<tr style="background:' + (i % 2 ? BG.row1 : BG.row0) + ';border-bottom:1px solid ' + BG.border + '">';
+        html += '<td style="padding:5px 9px;color:' + BG.text + ';white-space:nowrap">' + o.bank + '</td>';
+        html += '<td style="padding:5px 9px;color:' + BG.textMuted + ';font-size:10px">' + o.prod.slice(0, 30) + '</td>';
+        html += '<td style="padding:5px 9px;color:' + BG.textDim + ';white-space:nowrap">' + o.m + ' m</td>';
+        html += '<td style="padding:5px 9px;text-align:right;font-family:var(--mono,ui-monospace,monospace);font-variant-numeric:tabular-nums;font-weight:700;color:' + BG.text + '">' + P(o.r) + '</td>';
+        html += '<td style="padding:5px 9px;text-align:right;font-family:var(--mono,ui-monospace,monospace);font-variant-numeric:tabular-nums;color:' + BG.textMuted + '">' + P(o.mr) + '</td>';
+        html += '<td style="padding:5px 9px;text-align:right;font-family:var(--mono,ui-monospace,monospace);font-variant-numeric:tabular-nums;font-weight:700;color:' + col + ';white-space:nowrap">' + BP(o.sp) + '</td>';
+        html += '</tr>';
+      });
+      html += '</tbody></table></div>';
+      html += '<div style="margin-top:8px;font-size:10.5px;color:' + BG.textMuted + ';line-height:1.55">Référence : €STR au jour le jour, Euribor converti en base annuelle jusqu\'à 6 mois, courbe swap EUR (EIOPA) au-delà. Le progressif est exclu — il se compare à horizon de sortie, via la grille d\'équivalence de l\'onglet CAT.</div>';
+
+      // ── L'anomalie de pente, si elle existe
+      if (best12 && best24) {
+        var catStep = (best24.r - best12.r) * 100, mktStep = (best24.mr - best12.mr) * 100;
+        if (catStep - mktStep >= 15) {
+          html += '<div style="margin-top:11px;background:#ECFDF5;border:1px solid #059669;border-left:5px solid #059669;border-radius:8px;padding:11px 14px;font-size:11.5px;line-height:1.65;color:#064E3B">';
+          html += '<strong>📈 Une anomalie de pente à exploiter.</strong> Passer de 12 à 24 mois te rapporte <strong>' + BP(catStep) + '</strong> chez ' + best24.bank + ' (' + P(best12.r) + ' → ' + P(best24.r) + '), alors que le marché ne valorise cette année supplémentaire que <strong>' + BP(mktStep) + '</strong>. La banque paie donc <strong>' + BP(catStep - mktStep) + ' de prime de terme au-delà du marché</strong>. ';
+          html += 'Si une partie du capital n\'est pas nécessaire dans 12 mois, allonger capte cet écart — c\'est la décision la mieux rémunérée de la grille. À arbitrer contre ton besoin réel de liquidité, pas contre une vue sur les taux.';
+          html += '</div>';
+        }
+      }
+      html += '</div></div>';
     })();
 
     // ═══ SECTION 1: TAUX SOUVERAINS (cliquables) ═══
