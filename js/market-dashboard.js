@@ -169,7 +169,7 @@
 
     // ═══ LECTURE DE LA SITUATION : ce que disent les taux, en clair ═══
     (function() {
-      var y = (rates.yields) || {}, pr = (rates.policy_rates) || {};
+      var y = yields || {}, pr = policy || {};
       var num = function (o) { return (o && o.current != null) ? parseFloat(o.current) : null; };
       var dep = num(pr.ecb_deposit_rate), refi = num(pr.ecb_main_rate), depDate = pr.ecb_deposit_rate && pr.ecb_deposit_rate.date;
       var e3 = num(y.euribor_3m), e6 = num(y.euribor_6m), e12 = num(y.euribor_12m);
@@ -188,8 +188,7 @@
       // Inflation projetée : market intelligence si dispo, sinon hypothèse affichée
       var infl = null, inflSrc = '';
       try {
-        var mi = (typeof _data !== "undefined" && _data.mi) ? _data.mi : null;
-        var f = mi && (mi._market_data_flat || mi.market_data_input) || {};
+        var f = md || {};
         infl = parseFloat(f.hicp_yoy || f.euro_inflation || f.pce_yoy) || null;
         if (infl) inflSrc = 'données marché';
       } catch (e) {}
@@ -205,7 +204,7 @@
 
       // Ligne 1 — ce que le marché price déjà
       html += '<div style="font-size:11.5px;line-height:1.6;color:' + BG.text + ';margin-bottom:8px">';
-      html += '<strong>Ce qui est déjà dans les prix.</strong> L\'Euribor 12 mois (' + P(e12) + ') est <strong>' + (anticip >= 0 ? '+' : '') + anticip + ' bp</strong> au-dessus du taux de dépôt BCE : le marché anticipe environ <strong>' + String(hikes).replace('.', ',') + ' hausse' + (Math.abs(parseFloat(hikes)) > 1 ? 's' : '') + ' de 25 bp</strong> sur un an.';
+      html += '<strong>Ce qui est déjà dans les prix.</strong> L\'Euribor 12 mois (' + P(e12) + ') est <strong>' + (anticip >= 0 ? '+' : '') + anticip + ' bp</strong> au-dessus du taux de dépôt BCE : le marché anticipe environ <strong>' + String(hikes).replace('.', ',') + ' hausse' + (Math.abs(parseFloat(hikes)) >= 2 ? 's' : '') + ' de 25 bp</strong> sur un an.';
       if (fwd66 != null) html += ' Le forward 6 mois dans 6 mois ressort à <strong>' + P(fwd66) + '</strong> — c\'est le point mort : attendre ne gagne que si le taux futur dépasse ce niveau.';
       html += '</div>';
 
