@@ -291,6 +291,10 @@
         '.rk-c{flex:none;font-size:11px;color:' + BG.textMuted + ';transition:transform .15s}' +
         '.rk-d[open] .rk-c{transform:rotate(90deg)}' +
         '.rk-b{padding:12px 13px 13px;font-size:11.5px;line-height:1.65;color:' + BG.textDim + '}' +
+        '.rk-f{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:1px;background:' + BG.border + ';border:1px solid ' + BG.border + ';border-radius:6px;overflow:hidden;margin-bottom:11px}' +
+        '.rk-f>div{background:' + BG.section + ';padding:9px 11px}' +
+        '.rk-f span{display:block;font-size:9px;letter-spacing:.07em;text-transform:uppercase;font-weight:800;margin-bottom:3px}' +
+        '.rk-f p{margin:0;font-size:11px;line-height:1.55;color:' + BG.textDim + '}' +
         '.rk-u{margin-top:10px;padding:9px 11px;border-radius:6px;background:' + BG.row1 + ';font-size:11px;line-height:1.6;color:' + BG.textDim + '}' +
         '.rk-u strong.h{display:block;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px}' +
         '@media(max-width:560px){.rk-d>summary{flex-wrap:wrap}.rk-v{margin-left:0;width:100%;justify-content:flex-start}}' +
@@ -336,7 +340,15 @@
         h += '<summary><span class="rk-n" style="background:' + o.color + '">' + o.n + '</span>';
         h += '<span><span class="rk-t">' + o.title + '</span><br><span class="rk-s">' + o.who + '</span></span>';
         h += '<span class="rk-v">' + o.chips + '</span><span class="rk-c">›</span></summary>';
-        h += '<div class="rk-b">' + o.body;
+        h += '<div class="rk-b">';
+        if (o.facts && o.facts.length) {
+          h += '<div class="rk-f">';
+          o.facts.forEach(function (f) {
+            h += '<div><span style="color:' + o.color + '">' + f[0] + '</span><p>' + f[1] + '</p></div>';
+          });
+          h += '</div>';
+        }
+        h += o.body;
         h += '<div class="rk-u" style="border-left:3px solid ' + o.color + '"><strong class="h" style="color:' + o.color + '">Pour lire un structuré</strong>' + o.use + '</div>';
         h += '</div></details>';
         return h;
@@ -346,33 +358,53 @@
       };
 
       html += rung({
+        facts: [
+          ['Qui décide', 'Le Conseil des gouverneurs de la BCE, environ huit fois par an. Trois taux sont fixés d\'un coup ; la décision s\'applique quelques jours plus tard, à date annoncée.'],
+          ['Sur quoi', 'Rien de mesuré : c\'est une <strong>décision</strong>. Le taux de dépôt est le prix auquel la BCE accepte le cash des banques pour la nuit, en quantité illimitée.'],
+          ['Où tu le croises', 'Jamais en direct — mais c\'est le plancher sous chaque taux qu\'on te propose. Aucune banque ne te paiera durablement moins que ce qu\'elle obtient sans bouger de son bureau.']
+        ],
         n: 1, color: '#7C3AED', title: 'Les taux directeurs', who: 'décidés par la BCE — le plancher',
         chips: V(P(dep), refi != null ? 'refi ' + P(refi) : ''),
-        body: 'Le <strong>taux de dépôt</strong> est celui auquel une banque place son cash excédentaire à la BCE, au jour le jour, sans risque. C\'est le <strong>plancher absolu</strong> du marché monétaire euro : personne ne prête moins cher, puisque cette alternative existe toujours. Le taux de refi est celui auquel une banque <em>emprunte</em> à la BCE à une semaine — historiquement « le » taux directeur, aujourd\'hui marginal : les banques sont en excédent de liquidité, elles déposent, elles n\'empruntent plus. <strong>C\'est donc le taux de dépôt qui pilote réellement les marchés.</strong>',
+        body: '<strong>Pourquoi regarder le dépôt et pas le refi.</strong> Le refi était « le » taux directeur tant que les banques venaient emprunter à la BCE. Depuis 2015 elles nagent dans les liquidités : elles ne lui empruntent plus, elles lui <em>déposent</em>. Le taux qui mord est donc devenu celui du dépôt — le refi n\'est plus qu\'un plafond théorique à ' + (refi != null && dep != null ? Math.round((refi - dep) * 100) + ' bp au-dessus' : 'quelques points au-dessus') + '.',
         use: 'c\'est ce qui finance le <strong>budget option</strong>. Sur un produit à capital garanti, l\'émetteur place ton capital au taux du marché et n\'a que les intérêts à dépenser en coupons. Taux courts hauts = coupons généreux <em>sans</em> risque sur le capital ; taux qui baissent = le même produit devient impossible à structurer. C\'est aussi le plancher du CAT : le structuré doit battre <strong>ça</strong>, pas zéro.'
       });
 
       html += rung({
+        facts: [
+          ['Qui le publie', 'La BCE, <strong>chaque matin vers 8 h</strong>, portant sur la journée de la veille. Il a remplacé l\'EONIA en 2022.'],
+          ['Sur quoi', 'Des <strong>transactions réellement conclues</strong>, pas des déclarations : les emprunts en blanc au jour le jour des banques de la zone euro auprès de contreparties financières. Moyenne pondérée par les volumes, après élagage des extrêmes.'],
+          ['Où tu le croises', 'Dans le <strong>prix de rachat</strong> de tes produits structurés. Quand une salle des marchés te cote une sortie anticipée, elle actualise les flux restants avec cette courbe-là.']
+        ],
         n: 2, color: '#0891B2', title: 'Le jour le jour constaté — €STR', who: 'observé, pas décidé' + (policy.estr && policy.estr.date ? ' · ' + policy.estr.date : ''),
         chips: V(P(estr), (estr != null && dep != null) ? BPs((estr - dep) * 100) + ' vs BCE' : ''),
-        body: 'Le <strong>taux moyen réellement payé</strong> sur les prêts au jour le jour entre banques, calculé chaque matin par la BCE sur les transactions de la veille. Il colle au taux de dépôt, quelques points de base en dessous. Ce n\'est pas une décision : c\'est une mesure.',
+        body: '<strong>Décidé contre constaté.</strong> L\'étage 1 est un prix que la BCE annonce ; celui-ci est un prix que le marché paie vraiment. Les deux collent — ' + ((estr != null && dep != null) ? '<strong>' + Math.abs(Math.round((estr - dep) * 100)) + ' bp</strong> d\'écart aujourd\'hui' : 'à quelques points près') + ' — et c\'est normal : une banque qui peut déposer à la BCE ne prêtera pas beaucoup moins cher à une consœur. Quand cet écart se creuse, c\'est un signal de tension sur la liquidité bancaire.',
         use: 'c\'est le taux avec lequel on <strong>actualise</strong> les flux futurs du produit — donc ce qui fixe sa <strong>valeur de rachat en cours de vie</strong>, le prix auquel la banque te reprend si tu dois sortir avant l\'échéance. Quand l\'€STR monte, la valeur d\'un produit à taux fixe déjà émis baisse.'
       });
 
       var e3Stale = yields.euribor_3m && /^\d{4}-\d{2}$/.test(String(yields.euribor_3m.date || ''));
       html += rung({
+        facts: [
+          ['Qui le publie', 'L\'EMMI, à Bruxelles — un organisme privé, pas la BCE. Publication <strong>chaque jour ouvré à 11 h</strong>, pour les échéances 1 semaine, 1, 3, 6 et 12 mois.'],
+          ['Sur quoi', 'Une vingtaine de grandes banques déclarent à quel taux elles se prêteraient. Depuis le scandale de manipulation, la méthode est <strong>hiérarchisée</strong> : les transactions réelles d\'abord, les données de marché voisines ensuite, le jugement d\'expert en dernier recours.'],
+          ['Où tu le croises', 'Partout dans les contrats : <strong>crédits d\'entreprise indexés</strong> (« Euribor 3 mois + marge »), prêts à taux variable, découverts, et le coupon de toute obligation à taux variable. C\'est le taux de référence le plus utilisé d\'Europe.']
+        ],
         n: 3, color: '#0284C7', title: 'L\'interbancaire à terme — Euribor', who: 'base ACT/360' + (e3Stale ? ' · ⚠ moyenne mensuelle ' + yields.euribor_3m.date : ''),
         chips: V(P(e12), (e12 != null && dep != null) ? BPs((e12 - dep) * 100) + ' vs BCE' : '') + '<i style="color:' + BG.textMuted + '">3 m ' + P(e3) + ' · 6 m ' + P(e6) + '</i>',
-        body: 'Contrairement à l\'€STR qui est du jour le jour, l\'Euribor engage sur 3, 6 ou 12 mois. Il contient donc <strong>l\'anticipation des décisions BCE</strong> sur la période, <strong>plus une prime de risque bancaire et de liquidité</strong>. L\'écart Euribor 12 mois − dépôt BCE (' + (e12 != null && dep != null ? BPs((e12 - dep) * 100) : '—') + ') mesure directement ce que le marché price en hausses à un an.' + (e3Stale ? ' <span style="color:#B45309">⚠ Ici en moyenne mensuelle : la BCE ne publie pas le fixing quotidien, et la série quotidienne de la Banque de France s\'arrête en 2024. Le fixing du jour est typiquement un peu plus haut.</span>' : ''),
+        body: '<strong>Ce que l\'Euribor ajoute à l\'€STR : le temps.</strong> Prêter une nuit ne demande aucune anticipation ; prêter douze mois oblige à parier sur toutes les décisions BCE de l\'année, et à se faire payer le risque de ne pas revoir son argent avant. D\'où l\'écart de <strong>' + (e12 != null && dep != null ? BPs((e12 - dep) * 100) : '—') + '</strong> entre l\'Euribor 12 mois et le taux de dépôt : <strong>c\'est la mesure directe des hausses que le marché a déjà payées.</strong>' + (e3Stale ? ' <span style="color:#B45309">⚠ Ici en moyenne mensuelle : la BCE ne publie pas le fixing quotidien, et la série quotidienne de la Banque de France s\'arrête en 2024. Le fixing du jour est typiquement un peu plus haut.</span>' : ''),
         use: 'sous-jacent direct des <strong>floaters</strong> et des <strong>range accrual Euribor</strong> — le coupon tombe si l\'Euribor reste dans un corridor. Et c\'est ton <strong>point mort</strong> : quand tu hésites entre placer maintenant ou attendre, cet écart dit ce que le marché price déjà, donc ce que l\'attente doit battre.'
       });
 
       var swChips = swMissing ? V('à saisir', '', '#B45309')
         : V(P(cms10), '2 ans ' + P(cms2)) + '<i style="color:' + BG.textMuted + '">' + (swSrc || '') + (swAsOf ? ' · ' + swAsOf : '') + '</i>';
       html += rung({
+        facts: [
+          ['Qui le fixe', '<strong>Personne d\'officiel</strong> : ce sont des prix de marché, cotés en continu par les salles des marchés. Des agrégateurs en publient un niveau de référence quotidien ; EIOPA en publie une version mensuelle, que nous utilisons ici.'],
+          ['Sur quoi', 'Un contrat où deux parties <strong>échangent un taux fixe contre un taux variable</strong> pendant N années, sur un montant qui ne change jamais de mains. Le taux fixe qui équilibre l\'échange, c\'est le taux swap à N ans.'],
+          ['Où tu le croises', 'Tu ne le vois jamais écrit — mais <strong>c\'est le taux avec lequel ta banque a fabriqué chaque produit qu\'elle te propose</strong>. Et un <strong>CMS 10 ans</strong>, c\'est simplement ce taux relevé à une date donnée : le sous-jacent de tes range accrual.']
+        ],
         n: 4, color: swMissing ? '#B45309' : '#0F766E', title: 'Les swaps — OIS, IRS, CMS', who: swMissing ? '⚠ étage manquant' : 'la courbe qui price tes produits',
         chips: swChips,
-        body: 'Un swap échange un taux fixe contre un taux variable. La <strong>courbe swap</strong> est <strong>la vraie courbe sans risque euro — c\'est elle que ta banque utilise pour te coter un produit, pas l\'OAT</strong>. Le <strong>CMS</strong> (Constant Maturity Swap) est simplement cette courbe lue au point 2 ou 10 ans, relevée à chaque date de constatation : c\'est le sous-jacent direct des range accrual et des steepeners.' +
+        body: '<strong>Pourquoi c\'est la vraie courbe sans risque, et pas l\'OAT.</strong> Un swap ne prête aucun capital : seuls les intérêts s\'échangent, le nominal ne bouge jamais. Il n\'y a donc presque pas de risque de crédit dedans — alors qu\'acheter une OAT, c\'est prêter 100 € à l\'État français pendant dix ans. C\'est pour ça que le marché price avec le swap, et que l\'OAT se traite au-dessus.' +
               (swMissing ? ' <br><strong style="color:#B45309">Courbe absente</strong> — à saisir dans <code style="font-size:10px;background:' + BG.input + ';padding:1px 5px;border-radius:3px">data/market/swaps-manual.json</code> depuis l\'écran de ta conseillère.'
                          : ' <br>Source : <strong>EIOPA</strong>, qui publie chaque mois la courbe swap euro pour Solvabilité II — gratuite et officielle. La BCE et la Banque de France ne publient, elles, aucune courbe swap (vérifié). Fiable jusqu\'à 20 ans ; une saisie manuelle plus fraîche prend le dessus.') +
               ((cms10 != null && t10 != null) ? ' <br><strong>L\'écart qui compte : swap 10 ans ' + P(cms10) + ' contre OAT France ' + P(t10) + ', soit ' + Math.round((t10 - cms10) * 100) + ' bp.</strong> Lire une barrière CMS sur le TEC te trompe donc de ' + Math.round((t10 - cms10) * 100) + ' bp — dans le sens qui fait conclure « coupon perdu » à tort.' : ''),
@@ -380,9 +412,14 @@
       });
 
       html += rung({
+        facts: [
+          ['Qui le publie', 'La <strong>Banque de France</strong>, chaque jour ouvré. L\'Agence France Trésor, elle, émet la dette.'],
+          ['Sur quoi', 'Le TEC 10 n\'est pas une obligation existante : c\'est le rendement d\'une OAT <strong>fictive d\'exactement 10 ans</strong>, interpolé entre les deux OAT réelles qui encadrent cette maturité. D\'où son nom : Taux de l\'Échéance Constante.'],
+          ['Où tu le croises', 'C\'est le <strong>sous-jacent direct de tes TARN</strong> — leur barrière se lit ici. Et c\'est le taux auquel l\'État français emprunte : le repère de ce que « sans risque en France » rapporte vraiment sur la durée.']
+        ],
         n: 5, color: '#047857', title: 'Le souverain — TEC France', who: 'base ACT/ACT · zone euro AAA en regard',
         chips: V(P(t10), (t10 != null && a10 != null) ? BPs((t10 - a10) * 100) + ' vs AAA' : '', '#B45309') + '<i style="color:' + BG.textMuted + '">2 a ' + P(t2) + ' · 5 a ' + P(t5) + '</i>',
-        body: 'Le <strong>TEC</strong> (Taux de l\'Échéance Constante, Banque de France) est le rendement d\'une OAT théorique d\'exactement 2, 5 ou 10 ans. Il ajoute à l\'anticipation de taux une <strong>prime de terme</strong> et une <strong>prime de risque France</strong>. La courbe <strong>zone euro AAA</strong> affichée à côté ne retient que les États les mieux notés, essentiellement l\'Allemagne : c\'est le vrai « sans risque » souverain euro. L\'écart entre les deux' + (t10 != null && a10 != null ? ' — <strong>' + Math.round((t10 - a10) * 100) + ' bp à 10 ans</strong> —' : '') + ' <em>est</em> le spread OAT-Bund. Les deux séries sont affichées séparément pour ne jamais les confondre.',
+        body: '<strong>Ce que la France paie de plus.</strong> La courbe <strong>zone euro AAA</strong> affichée à côté ne retient que les États les mieux notés, essentiellement l\'Allemagne. L\'écart entre les deux' + (t10 != null && a10 != null ? ' — <strong>' + Math.round((t10 - a10) * 100) + ' bp à 10 ans</strong> —' : '') + ' <em>est</em> le spread OAT-Bund. Les deux séries sont affichées séparément pour ne jamais les confondre.',
         use: 'c\'est le <strong>test de l\'émetteur</strong>. Un EMTN de banque française qui paie <em>moins</em> que l\'OAT de même durée te fait prendre un risque bancaire, une illiquidité et souvent un aléa de rappel — pour un rendement inférieur à celui de l\'État. C\'est aussi le sous-jacent des <strong>TARN TEC 10</strong> : leur barrière se lit ici, et nulle part ailleurs.'
       });
 
@@ -435,7 +472,11 @@
         html += '</div>';
         html += '<div style="font-size:11.5px;line-height:1.6;color:' + BG.textDim + '">Pas une prévision maison : ce qui est <strong>déjà payé</strong> dans les prix d\'aujourd\'hui. ';
         if (f1 != null) html += 'À un an, le marché price <strong>' + P(f1) + '</strong> contre ' + P(estr) + ' aujourd\'hui — <strong>' + Math.round((f1 - estr) * 100) + ' bp de hausse déjà intégrés</strong>. ';
-        if (f1 != null && f3 != null && Math.abs(f3 - f1) < 0.25) html += 'Et la courbe est <strong>plate au-delà d\'un an</strong> (' + P(f3) + ' à 3 ans) : un pic puis un plateau, pas un cycle qui continue. ';
+        if (f1 != null && f3 != null && Math.abs(f3 - f1) < 0.25) {
+          var f10 = fw.fwd_10y ? parseFloat(fw.fwd_10y.current) : null;
+          html += 'Et elle est <strong>plate de 1 à 3 ans</strong> (' + P(f3) + ' à 3 ans) : le marché voit un <strong>pic de politique monétaire puis un plateau</strong>, pas un cycle qui continue. ';
+          if (f10 != null) html += 'La remontée au-delà (' + P(f10) + ' à 10 ans) n\'est <em>pas</em> une anticipation de hausses supplémentaires : c\'est de la <strong>prime de terme</strong>, le supplément exigé pour immobiliser son argent longtemps. ';
+        }
         html += '<strong>Attendre ne rapporte que si la hausse dépasse ce niveau.</strong></div>';
         html += '</div>';
       })();
@@ -457,15 +498,20 @@
       var e3 = num(yields.euribor_3m), e6 = num(yields.euribor_6m), e12 = num(yields.euribor_12m);
       if (estr == null || !scv['1y']) return;
 
-      // Courbe de référence, en mois. Le court terme vient de l'Euribor (converti ACT/360 →
-      // effectif annuel, ×365/360) ; au-delà d'un an, de la courbe swap.
+      // UNE SEULE courbe de référence pour tout ce bloc : la courbe quotidienne BCE des
+      // États zone euro notés AAA, aux maturités exactes d'une grille CAT. Mélanger deux
+      // références (swap au 31/08 ici, AAA au 22/09 là) donnait deux « marché » différents
+      // à 12 mois sur la même page — illisible. Le swap reste la référence du LONG, dans
+      // le bloc structurés, où sa granularité mensuelle ne gêne pas.
+      var SCd = (_data.rates && _data.rates.short_curve) || {};
       var cv = { 0: estr };
-      if (e3 != null) cv[3] = e3 * 365 / 360;
-      if (e6 != null) cv[6] = e6 * 365 / 360;
-      cv[12] = parseFloat(scv['1y']);
-      [['2y', 24], ['3y', 36], ['4y', 48], ['5y', 60], ['7y', 84], ['10y', 120]].forEach(function (k) {
+      [['curve_3m', 3], ['curve_6m', 6], ['curve_9m', 9], ['curve_12m', 12], ['curve_24m', 24]].forEach(function (k) {
+        if (SCd[k[0]] && SCd[k[0]].current != null) cv[k[1]] = parseFloat(SCd[k[0]].current);
+      });
+      [['5y', 60], ['7y', 84], ['10y', 120]].forEach(function (k) {
         if (scv[k[0]] != null) cv[k[1]] = parseFloat(scv[k[0]]);
       });
+      if (cv[12] == null) return;   // sans la courbe quotidienne, pas d'analyse CAT
       var mkeys = Object.keys(cv).map(Number).sort(function (a, b) { return a - b; });
       var market = function (m) {
         if (m <= mkeys[0]) return cv[mkeys[0]];
@@ -537,11 +583,19 @@
         var series = keys.map(function (k) { return SC[k]; }).filter(function (o) { return o && o.history && o.history.length; });
         if (series.length < 3) return;
 
-        // Valeur de la courbe à une date donnée (dernière observation ≤ date).
+        // La courbe quotidienne oscille de ±5 bp d'un jour à l'autre (ex. 12 mois :
+        // 3,026 le 14/09, 2,967 le 16/09, 3,023 le 18/09). Comparer deux jours isolés,
+        // c'est lire du bruit. On prend donc la moyenne des 5 derniers jours cotés.
+        var WIN = 5;
         var at = function (s, d) {
-          var h = s.history, best = null;
-          for (var i = 0; i < h.length; i++) { if (h[i].date <= d) best = h[i]; else break; }
-          return best ? best.value : null;
+          var h = s.history, acc = [];
+          for (var i = 0; i < h.length; i++) {
+            if (h[i].date > d) break;
+            acc.push(h[i].value);
+            if (acc.length > WIN) acc.shift();
+          }
+          if (!acc.length) return null;
+          return acc.reduce(function (a, b) { return a + b; }, 0) / acc.length;
         };
         // Date de grille la plus fréquente parmi les offres retenues.
         var counts = {};
@@ -551,14 +605,14 @@
         var today = series[0].date;
 
         var rows = series.map(function (s) {
-          var then = at(s, gridDate), now = s.current;
+          var then = at(s, gridDate), now = at(s, s.date);
           return { m: s.months, then: then, now: now, drift: (then != null) ? (now - then) * 100 : null };
         }).filter(function (r) { return r.drift != null; });
         if (!rows.length) return;
 
         var maxDrift = rows.reduce(function (a, r) { return Math.abs(r.drift) > Math.abs(a) ? r.drift : a; }, 0);
         gridDrift = maxDrift; gridDateUsed = gridDate;
-        var stale = Math.abs(maxDrift) >= 8;
+        var stale = Math.abs(maxDrift) >= 12;
         var tone = stale ? '#B45309' : '#047857';
 
         html += '<div style="margin-top:11px;background:' + BG.section + ';border:1px solid ' + BG.border + ';border-left:5px solid ' + tone + ';border-radius:8px;padding:13px 15px">';
@@ -567,11 +621,11 @@
 
         html += '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px">';
         html += '<thead><tr style="background:' + BG.header + '">' +
-          ['Maturité', 'Marché au ' + gridDate.slice(8) + '/' + gridDate.slice(5, 7), 'Marché au ' + today.slice(8) + '/' + today.slice(5, 7), 'Dérive'].map(function (h, i) {
+          ['Maturité', 'Marché au ' + gridDate.slice(8) + '/' + gridDate.slice(5, 7), 'Marché au ' + today.slice(8) + '/' + today.slice(5, 7), 'Dérive']  /* moyennes 5 jours */.map(function (h, i) {
             return '<th style="padding:6px 9px;text-align:' + (i ? 'right' : 'left') + ';font-size:9.5px;letter-spacing:.04em;text-transform:uppercase;color:' + BG.textDim + ';white-space:nowrap">' + h + '</th>';
           }).join('') + '</tr></thead><tbody>';
         rows.forEach(function (r, i) {
-          var c = Math.abs(r.drift) >= 8 ? '#B45309' : BG.textMuted;
+          var c = Math.abs(r.drift) >= 12 ? '#B45309' : BG.textMuted;
           html += '<tr style="background:' + (i % 2 ? BG.row1 : BG.row0) + ';border-bottom:1px solid ' + BG.border + '">';
           html += '<td style="padding:5px 9px;color:' + BG.text + ';white-space:nowrap">' + r.m + ' mois</td>';
           html += '<td style="padding:5px 9px;text-align:right;font-family:var(--mono,ui-monospace,monospace);font-variant-numeric:tabular-nums;color:' + BG.textMuted + '">' + P(r.then) + '</td>';
@@ -588,7 +642,7 @@
           html += '<strong style="color:' + BG.text + '">Pas de retard.</strong> Le marché n\'a quasiment pas bougé depuis l\'édition de la grille (' + BP(maxDrift) + ' au plus) : elle est au prix du jour. Une hausse antérieure a donc déjà été répercutée — <strong>attendre la grille suivante ne capterait rien</strong>, et coûterait le mois d\'intérêts.';
         }
         html += '</div>';
-        html += '<div style="margin-top:7px;font-size:10px;color:' + BG.textMuted + ';line-height:1.5">Référence : courbe zone euro AAA quotidienne (BCE), aux maturités exactes de la grille. L\'Euribor ne convient pas ici — la BCE ne le publie qu\'en moyennes mensuelles, donc il ne peut pas dater une dérive de trois semaines.</div>';
+        html += '<div style="margin-top:7px;font-size:10px;color:' + BG.textMuted + ';line-height:1.55">Référence : courbe zone euro AAA quotidienne (BCE), aux maturités exactes de la grille. L\'Euribor ne convient pas ici — la BCE ne le publie qu\'en <strong>moyennes mensuelles</strong>, donc il ne peut pas dater une dérive de trois semaines. <strong>Chaque valeur est une moyenne sur 5 jours cotés</strong> : la courbe oscille de ±5 bp d\'un jour à l\'autre, et comparer deux jours isolés reviendrait à lire du bruit. Un retard n\'est signalé qu\'au-delà de <strong>12 bp</strong>.</div>';
         html += '</div>';
       })();
 
@@ -618,19 +672,19 @@
         var f3 = (_data.rates && _data.rates.forwards && _data.rates.forwards.fwd_3y) ? parseFloat(_data.rates.forwards.fwd_3y.current) : null;
         html += '<div style="font-size:11.5px;line-height:1.65;color:' + BG.textDim + '"><strong style="color:' + BG.text + '">Le marché price-t-il ce rattrapage ?</strong> ';
         if (f1 != null && f3 != null) {
-          html += 'Non. Le forward à 1 an est à <strong>' + P(f1) + '</strong> et celui à 3 ans à <strong>' + P(f3) + '</strong> : la courbe est <strong>plate au-delà d\'un an</strong>. Le marché voit un pic de politique monétaire autour de ' + P(Math.max(f1, f3)) + ' puis un plateau — pas un cycle de hausses qui continue. ';
+          html += 'Non. Le forward à 1 an est à <strong>' + P(f1) + '</strong> et celui à 3 ans à <strong>' + P(f3) + '</strong> : la courbe est <strong>plate de 1 à 3 ans</strong>. Le marché voit un pic de politique monétaire autour de ' + P(Math.max(f1, f3)) + ' puis un plateau — pas un cycle de hausses qui continue. ';
         }
         html += '</div>';
         var beNeed = (beEmpty - best12.r) * 100, beNeedRem = (beRem - best12.r) * 100;
         html += '<div style="margin-top:8px;padding:9px 11px;background:' + BG.row1 + ';border-radius:6px;font-size:11.5px;line-height:1.65;color:' + BG.textDim + '">';
         html += '<strong style="color:' + BG.text + '">Verdict.</strong> ';
-        if (gridDrift != null && Math.abs(gridDrift) >= 8) {
+        if (gridDrift != null && Math.abs(gridDrift) >= 12) {
           html += 'Ta grille traîne <strong>' + BP(gridDrift) + '</strong> de retard sur le marché, pour un point mort de <strong>' + BP(beNeed) + '</strong> (cash dormant) ou <strong>' + BP(beNeedRem) + '</strong> (cash rémunéré). ';
           html += (gridDrift >= beNeedRem)
             ? '<strong>Le rattrapage dû dépasse le coût de l\'attente si ton cash reste rémunéré</strong> — mais la bonne réponse n\'est pas d\'attendre : c\'est de <strong>demander l\'actualisation tout de suite</strong>, chiffre en main. Tu prends le rattrapage sans payer le mois.'
             : 'Le rattrapage dû ne couvre pas le coût de l\'attente. Place maintenant.';
         } else if (gridDrift != null) {
-          html += 'La grille est au prix du jour (' + BP(gridDrift) + ' de dérive), et la courbe est plate au-delà d\'un an. <strong>Rien à capter en attendant</strong> : le mois d\'intérêts serait perdu sec. Place maintenant.';
+          html += 'La grille est au prix du jour (' + BP(gridDrift) + ' de dérive), et la courbe ne monte plus entre 1 et 3 ans. <strong>Rien à capter en attendant</strong> : le mois d\'intérêts serait perdu sec. Place maintenant.';
         } else {
           html += 'Attendre un mois pour capter une hausse déjà payée coûte le mois d\'intérêts, sans contrepartie.';
         }
@@ -659,7 +713,7 @@
         html += '</tr>';
       });
       html += '</tbody></table></div>';
-      html += '<div style="margin-top:8px;font-size:10.5px;color:' + BG.textMuted + ';line-height:1.55">Référence : €STR au jour le jour, Euribor converti en base annuelle jusqu\'à 6 mois, courbe swap EUR (EIOPA) au-delà. Le progressif est exclu — il se compare à horizon de sortie, via la grille d\'équivalence de l\'onglet CAT.</div>';
+      html += '<div style="margin-top:8px;font-size:10.5px;color:' + BG.textMuted + ';line-height:1.55">Référence : <strong>courbe quotidienne BCE des États zone euro notés AAA</strong> (série YC), aux maturités exactes de la grille — c\'est le rendement sans risque comparable sur la même durée. La marge est donc ce que ta banque paie <em>au-dessus</em> de ce sans-risque. Le progressif est exclu — il se compare à horizon de sortie, via la grille d\'équivalence de l\'onglet CAT.</div>';
 
       // ── L'anomalie de pente, si elle existe
       if (best12 && best24) {
