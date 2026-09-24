@@ -262,12 +262,12 @@
       var P = function (x) { return (Math.round(x * 100) / 100).toFixed(2).replace('.', ',') + ' %'; };
       var R = function (x) { var v = x - infl; return '<span style="font-family:var(--mono);color:' + (v >= 0.5 ? '#047857' : v >= 0 ? '#B45309' : '#B91C1C') + ';font-weight:700">' + (v >= 0 ? '+' : '−') + Math.abs(Math.round(v * 100) / 100).toFixed(2).replace('.', ',') + ' %</span>'; };
 
-      html += '<div style="background:' + BG.card + ';border:1px solid #BAE6FD;border-left:4px solid #0284C7;border-radius:10px;padding:14px 16px;margin-bottom:16px">';
+      html += '<div style="background:' + BG.section + ';border:1px solid #BAE6FD;border-left:4px solid #0284C7;border-radius:10px;padding:14px 16px;margin-bottom:16px">';
       html += '<div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:8px"><span style="font-size:13px;font-weight:800;color:#075985">📡 Le taux réel — ce qui reste après inflation</span>';
       html += '<span style="font-size:10px;color:' + BG.textDim + '">BCE dépôt ' + P(dep) + (refi != null ? ' · refi ' + P(refi) : '') + (depDate ? ' au ' + depDate : '') + '</span></div>';
 
-      // Ligne 3 — taux réels
-      html += '<div style="font-size:11.5px;line-height:1.6;color:' + BG.text + ';margin-bottom:6px"><strong>Le chiffre qui décide : le taux réel</strong> <span style="font-size:10px;color:' + BG.textDim + '">(inflation retenue ' + P(infl) + ', ' + inflSrc + ')</span></div>';
+      // Le taux réel : ce que chaque placement rapporte une fois l'inflation déduite.
+      html += '<div style="font-size:11px;line-height:1.6;color:' + BG.textDim + ';margin-bottom:8px">Ce que chaque placement rapporte <strong>une fois l\'inflation déduite</strong> — le seul chiffre qui dise si ta trésorerie gagne ou perd du pouvoir d\'achat. <span style="color:' + BG.textMuted + '">(inflation retenue ' + P(infl) + ', ' + inflSrc + ')</span></div>';
       html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:8px">';
       var LR = [];
       try { var bc = (typeof window._getCATBenchmark === 'function') ? parseFloat(window._getCATBenchmark()) : null; if (bc) LR.push(['Meilleur CAT', bc]); } catch (e) {}
@@ -275,12 +275,12 @@
       if (t5 != null) LR.push(['OAT 5 ans', t5]);
       LR.push(['OAT 10 ans', t10]);
       LR.forEach(function (r) {
-        html += '<div style="padding:8px 10px;background:' + BG.bg + ';border-radius:6px"><div style="font-size:10px;color:' + BG.textDim + '">' + r[0] + '</div>' +
+        html += '<div style="padding:8px 10px;background:' + BG.row1 + ';border-radius:6px"><div style="font-size:10px;color:' + BG.textDim + '">' + r[0] + '</div>' +
           '<div style="font-family:var(--mono);font-size:14px;font-weight:700;color:' + BG.text + '">' + P(r[1]) + '</div>' +
           '<div style="font-size:10px;color:' + BG.textDim + '">réel ' + R(r[1]) + '</div></div>';
       });
       html += '</div>';
-      html += '<div style="font-size:11px;line-height:1.55;color:' + BG.textDim + ';padding:8px 10px;background:' + BG.bg + ';border-radius:6px">' +
+      html += '<div style="font-size:11px;line-height:1.55;color:' + BG.textDim + ';padding:8px 10px;background:' + BG.row1 + ';border-radius:6px">' +
         '<strong style="color:' + BG.text + '">Ce que ça implique.</strong> Le court terme ne couvre pas l\'inflation : rester court pour « voir venir » coûte du pouvoir d\'achat pendant l\'attente. Seule la partie longue paie un taux réel franchement positif — et c\'est celle que les banques ne proposent pas en direct.' +
         '</div>';
       if (stale) html += '<div style="font-size:10px;color:#B45309;margin-top:7px">⚠ Euribor issu de la <strong>moyenne mensuelle ' + e3Date + '</strong> (série BCE) : il ne reflète pas encore la dernière décision de politique monétaire. Le fixing du jour est typiquement 10 à 20 bp plus haut.</div>';

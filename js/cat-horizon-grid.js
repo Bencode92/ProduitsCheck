@@ -141,7 +141,7 @@
       return b;
     };
 
-    let h = '';
+    let h = '', synth = [];
     [6, 12, 24].forEach(H => {
       const f = bestAt(H, 'fixe'), p = bestAt(H, 'prog');
       if (!f && !p) return;
@@ -149,16 +149,15 @@
       const lose = win === f ? p : f;
       const gap = (lose && win) ? EUR(win.rate, H) - EUR(lose.rate, H) : null;
 
-      h += '<div style="border:1px solid var(--border);border-left:3px solid var(--green);border-radius:6px;padding:11px 13px;margin-bottom:8px">';
-      h += '<div style="font-size:12px;font-weight:700;color:var(--text-bright);margin-bottom:6px">Si tu vises ' + H + ' mois</div>';
-      h += '<div style="font-size:11.5px;line-height:1.65;color:var(--text)">';
-      h += '<strong>' + _shortName(win.col, true) + '</strong> — ' + P(win.rate) + ' annualisé, soit <strong>' + E(EUR(win.rate, H)) + '</strong> d\'intérêts bruts sur 100 k€';
+      var corps = '<div style="font-size:11.5px;line-height:1.65;color:var(--text)">';
+      const push = x => { corps += x; };
+      corps += '<strong>' + _shortName(win.col, true) + '</strong> — ' + P(win.rate) + ' annualisé, soit <strong>' + E(EUR(win.rate, H)) + '</strong> d\'intérêts bruts sur 100 k€';
       h += (win.kind === 'free' ? ' <span style="color:var(--green)">(échéance : sortie libre)</span>' : ' <span style="color:var(--orange)">(retrait anticipé : pénalité appliquée)</span>') + '.';
       if (lose && gap != null) {
         const meilleur = win === f ? 'fixe' : 'progressif', autre = win === f ? 'progressif' : 'fixe';
-        h += ' Le meilleur <strong>' + autre + '</strong> à cet horizon (' + _shortName(lose.col, true) + ', ' + P(lose.rate) + ') rapporte <strong>' + E(Math.abs(gap)) + ' de moins</strong>' + (Math.abs(gap) < 150 ? ' — un écart trop mince pour trancher sur le seul rendement : regarde alors les conditions de sortie.' : ', donc le <strong>' + meilleur + '</strong> l\'emporte nettement.');
+        corps += ' Le meilleur <strong>' + autre + '</strong> à cet horizon (' + _shortName(lose.col, true) + ', ' + P(lose.rate) + ') rapporte <strong>' + E(Math.abs(gap)) + ' de moins</strong>' + (Math.abs(gap) < 150 ? ' — un écart trop mince pour trancher sur le seul rendement : regarde alors les conditions de sortie.' : ', donc le <strong>' + meilleur + '</strong> l\'emporte nettement.');
       }
-      h += '</div>';
+      corps += '</div>';
 
       // Fractionner ? On compare H direct à (H/2 aujourd'hui) puis (H/2 renouvelé).
       const half = H / 2;
@@ -170,22 +169,43 @@
         if (fwd != null) {
           const attendu = fwd + (prime || 0);
           const gagne = attendu > seuil;
-          h += '<div style="margin-top:9px;padding-top:9px;border-top:1px solid var(--border);font-size:11.5px;line-height:1.65;color:var(--text-muted)">';
-          h += '<strong style="color:var(--text-bright)">Ou fractionner en ' + half + ' + ' + half + ' ?</strong> Prendre ' + _shortName(fh.col, true) + ' à ' + P(fh.rate) + ' puis renouveler. ';
-          h += 'Cette chaîne ne bat le ' + H + ' mois direct que si le ' + half + ' mois se renégocie <strong>au-dessus de ' + P(seuil) + '</strong> dans ' + half + ' mois. ';
-          h += 'Le marché price ce renouvellement à ' + P(fwd) + (prime ? ', soit ' + P(attendu) + ' avec la même prime bancaire (' + (prime >= 0 ? '+' : '−') + Math.abs(Math.round(prime * 100)) + ' bp)' : '') + ' : ';
+          corps += '<div style="margin-top:9px;padding-top:9px;border-top:1px solid var(--border);font-size:11.5px;line-height:1.65;color:var(--text-muted)">';
+          corps += '<strong style="color:var(--text-bright)">Ou fractionner en ' + half + ' + ' + half + ' ?</strong> Prendre ' + _shortName(fh.col, true) + ' à ' + P(fh.rate) + ' puis renouveler. ';
+          corps += 'Cette chaîne ne bat le ' + H + ' mois direct que si le ' + half + ' mois se renégocie <strong>au-dessus de ' + P(seuil) + '</strong> dans ' + half + ' mois. ';
+          corps += 'Le marché price ce renouvellement à ' + P(fwd) + (prime ? ', soit ' + P(attendu) + ' avec la même prime bancaire (' + (prime >= 0 ? '+' : '−') + Math.abs(Math.round(prime * 100)) + ' bp)' : '') + ' : ';
           h += gagne
             ? '<strong style="color:var(--green)">fractionner passe devant de ' + Math.round((attendu - seuil) * 100) + ' bp</strong>, et te laisse la main dans ' + half + ' mois. Le pari est que la banque maintienne sa prime.'
             : '<strong style="color:var(--orange)">il manque ' + Math.round((seuil - attendu) * 100) + ' bp</strong>. Fractionner ne paie donc que si la hausse dépasse ce que le marché price déjà — ce qui est un pari, pas un constat.';
-          h += '</div>';
+          corps += '</div>';
         }
       }
-      h += '</div>';
+      // Verdict en une ligne pour le bandeau, raisonnement dans le dépliant.
+      var frac = corps.indexOf('fractionner passe devant') > 0;
+      var fracKnown = corps.indexOf('Ou fractionner') > 0;
+      synth.push([H + ' mois', _shortName(win.col, true), E(EUR(win.rate, H)),
+                  fracKnown ? (frac ? 'fractionner passe devant' : 'ne pas fractionner') : null]);
+      h += '<details style="border:1px solid var(--border);border-left:3px solid var(--green);border-radius:0 6px 6px 0;margin-bottom:8px">';
+      h += '<summary style="list-style:none;cursor:pointer;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:10px 13px;user-select:none">';
+      h += '<span style="font-size:12px;font-weight:700;color:var(--text-bright)">' + H + ' mois</span>';
+      h += '<span style="font-size:11.5px;color:var(--text)"><strong>' + _shortName(win.col, true) + '</strong> · ' + E(EUR(win.rate, H)) + '</span>';
+      h += '<span style="margin-left:auto;font-size:10.5px;color:var(--text-dim)">pourquoi ›</span></summary>';
+      h += '<div style="padding:0 13px 12px">' + corps + '</div></details>';
     });
 
     if (!h) return '';
+    var bandeau = '<div style="border:1px solid var(--border);border-radius:6px;padding:11px 13px;margin-bottom:9px">';
+    bandeau += '<div style="font-size:10px;letter-spacing:.05em;text-transform:uppercase;font-weight:700;color:var(--text-dim);margin-bottom:7px">Les réponses, avant le détail</div>';
+    synth.forEach(function (r, i) {
+      bandeau += '<div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:6px 0' + (i ? ';border-top:1px solid var(--border)' : '') + '">';
+      bandeau += '<span style="flex:none;min-width:58px;font-size:12px;font-weight:800;color:var(--text-bright)">' + r[0] + '</span>';
+      bandeau += '<span style="flex:1;min-width:170px;font-size:11.5px;color:var(--text)">' + r[1] + '</span>';
+      bandeau += '<span style="font-family:var(--mono);font-size:12px;font-weight:700;color:var(--green)">' + r[2] + '</span>';
+      if (r[3]) bandeau += '<span style="font-size:10.5px;color:var(--text-muted);white-space:nowrap">' + r[3] + '</span>';
+      bandeau += '</div>';
+    });
+    bandeau += '</div>';
     return '<div style="font-size:12px;font-weight:700;color:var(--text-bright);margin-bottom:7px">🎯 Ce que la grille conclut</div>' +
-      '<div style="font-size:10.5px;color:var(--text-dim);margin-bottom:9px">Le meilleur produit à chaque horizon, fixe ou progressif, et la question qui suit toujours : vaut-il mieux tout bloquer ou fractionner pour se laisser la main ?</div>' + h +
+      '<div style="font-size:10.5px;color:var(--text-dim);margin-bottom:9px">Le meilleur produit à chaque horizon, fixe ou progressif, et la question qui suit toujours : vaut-il mieux tout bloquer ou fractionner pour se laisser la main ?</div>' + bandeau + h +
       '<div style="font-size:10px;color:var(--text-dim);line-height:1.5">Le taux de renouvellement n\'est pas une hypothèse : c\'est le <strong>forward</strong> lu sur la courbe quotidienne BCE (zone euro AAA), convertie en actuariel, majorée de la prime que la banque consent aujourd\'hui à cette maturité. Les montants sont bruts, sur 100 k€, avant IS.</div>';
   }
 
