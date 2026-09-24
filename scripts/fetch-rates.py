@@ -105,6 +105,23 @@ RATE_SERIES["euribor_12m"] = {
     "freq": "monthly"
 }
 
+# ─── Courbe courte quotidienne (BCE, zone euro AAA) ─────────
+# Pourquoi : une grille CAT est figée à sa date d'édition, alors que le marché bouge
+# tous les jours. Pour savoir si une grille a pris du retard — et donc si la prochaine
+# doit mécaniquement monter — il faut le taux de marché AUX MÊMES MATURITÉS (3, 6, 9,
+# 12, 24 mois) À LA DATE DE LA GRILLE. L'Euribor ne le permet pas (moyennes mensuelles) ;
+# la courbe AAA de la BCE, elle, est quotidienne. On garde la pleine résolution sur
+# ~6 mois, assez pour couvrir n'importe quelle grille en cours.
+SHORT_CURVE = {
+    "curve_3m": {"m": 3, "code": "SR_3M"},
+    "curve_6m": {"m": 6, "code": "SR_6M"},
+    "curve_9m": {"m": 9, "code": "SR_9M"},
+    "curve_12m": {"m": 12, "code": "SR_1Y"},
+    "curve_24m": {"m": 24, "code": "SR_2Y"},
+}
+SHORT_CURVE_START = "2026-01-01"
+
+
 # ─── Banque de France TEC series (via Worker proxy) ─────────
 # TEC = Taux de l'Échéance Constante (French government bond yields)
 # These are the REAL rates referenced by TARN and structured products
@@ -298,6 +315,7 @@ def main():
         "policy_rates": {},
         "yield_curve": {},
         "forwards": {},
+        "short_curve": {},
     }
 
     # ─── Fetch monthly yield series (ECB primary) ───
@@ -380,6 +398,24 @@ def main():
             print(f"  ✓ {config['name']}: {value}%")
         else:
             print(f"  ✗ No data for {config['name']}")
+
+    # ─── Courbe courte quotidienne, avec historique (retard des grilles CAT) ───
+    print("\n→ Courbe courte quotidienne (3/6/9/12/24 mois)...")
+    for key, cfg in SHORT_CURVE.items():
+        url = f"{BASE_ECB}/YC/B.U2.EUR.4F.G_N_A.SV_C_YM.{cfg['code']}?format=csvdata&startPeriod={SHORT_CURVE_START}"
+        obs = fetch_ecb_csv(url)
+        if obs:
+            hist = [{"date": d, "value": round(v, 4)} for d, v in obs]
+            output["short_curve"][key] = {
+                "months": cfg["m"],
+                "current": round(obs[-1][1], 4),
+                "date": obs[-1][0],
+                "name": f"Zone euro AAA {cfg['m']} mois",
+                "history": hist,
+            }
+            print(f"  ✓ {cfg['m']:>2} mois : {obs[-1][1]:.3f} % ({len(hist)} jours)")
+        else:
+            print(f"  ✗ {key}")
 
     # ─── Forwards instantanés BCE (ce que le marché price déjà) ───
     print("\n→ Forwards instantanés (courbe BCE AAA)...")

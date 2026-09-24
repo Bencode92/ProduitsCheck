@@ -487,7 +487,7 @@
         var m = parseInt(o.durationMonths, 10), r = parseFloat(o.rate);
         if (!m || isNaN(r)) return;
         var mr = market(m);
-        offers.push({ bank: o.bankName || o.bankId, prod: o.productName || '', m: m, r: r, mr: mr, sp: (r - mr) * 100 });
+        offers.push({ bank: o.bankName || o.bankId, prod: o.productName || '', m: m, r: r, mr: mr, sp: (r - mr) * 100, date: o.date || '' });
       });
       if (offers.length < 4) return;
       offers.sort(function (a, b) { return a.m - b.m || b.r - a.r; });
@@ -525,6 +525,73 @@
         html += '</div>';
       }
 
+      var gridDrift = null, gridDateUsed = null;   // renseignés par le bloc « retard » ci-dessous
+      // ── Ta grille a-t-elle pris du retard ? ─────────────────────────────────
+      // Une grille CAT est figée à sa date d'édition ; le marché, lui, bouge tous les
+      // jours. Si le marché a monté depuis, la banque a mécaniquement gagné de la marge
+      // et la prochaine grille « doit » monter d'autant. Si le marché n'a pas bougé
+      // depuis, attendre ne capte rien. C'est mesurable, donc on le mesure.
+      (function () {
+        var SC = (_data.rates && _data.rates.short_curve) || {};
+        var keys = ['curve_3m', 'curve_6m', 'curve_9m', 'curve_12m', 'curve_24m'];
+        var series = keys.map(function (k) { return SC[k]; }).filter(function (o) { return o && o.history && o.history.length; });
+        if (series.length < 3) return;
+
+        // Valeur de la courbe à une date donnée (dernière observation ≤ date).
+        var at = function (s, d) {
+          var h = s.history, best = null;
+          for (var i = 0; i < h.length; i++) { if (h[i].date <= d) best = h[i]; else break; }
+          return best ? best.value : null;
+        };
+        // Date de grille la plus fréquente parmi les offres retenues.
+        var counts = {};
+        offers.forEach(function (o) { if (o.date) counts[o.date] = (counts[o.date] || 0) + 1; });
+        var gridDate = Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a] || (a < b ? 1 : -1); })[0];
+        if (!gridDate) return;
+        var today = series[0].date;
+
+        var rows = series.map(function (s) {
+          var then = at(s, gridDate), now = s.current;
+          return { m: s.months, then: then, now: now, drift: (then != null) ? (now - then) * 100 : null };
+        }).filter(function (r) { return r.drift != null; });
+        if (!rows.length) return;
+
+        var maxDrift = rows.reduce(function (a, r) { return Math.abs(r.drift) > Math.abs(a) ? r.drift : a; }, 0);
+        gridDrift = maxDrift; gridDateUsed = gridDate;
+        var stale = Math.abs(maxDrift) >= 8;
+        var tone = stale ? '#B45309' : '#047857';
+
+        html += '<div style="margin-top:11px;background:' + BG.section + ';border:1px solid ' + BG.border + ';border-left:5px solid ' + tone + ';border-radius:8px;padding:13px 15px">';
+        html += '<div style="font-size:11.5px;font-weight:700;color:' + BG.text + ';margin-bottom:3px">📅 Ta grille a-t-elle pris du retard ?</div>';
+        html += '<div style="font-size:10.5px;color:' + BG.textMuted + ';margin-bottom:10px">Une grille est figée à sa date d\'édition — ici le <strong>' + gridDate + '</strong> — pendant que le marché bouge chaque jour. S\'il a monté depuis, la banque a encaissé la différence et la prochaine grille la doit mécaniquement.</div>';
+
+        html += '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px">';
+        html += '<thead><tr style="background:' + BG.header + '">' +
+          ['Maturité', 'Marché au ' + gridDate.slice(8) + '/' + gridDate.slice(5, 7), 'Marché au ' + today.slice(8) + '/' + today.slice(5, 7), 'Dérive'].map(function (h, i) {
+            return '<th style="padding:6px 9px;text-align:' + (i ? 'right' : 'left') + ';font-size:9.5px;letter-spacing:.04em;text-transform:uppercase;color:' + BG.textDim + ';white-space:nowrap">' + h + '</th>';
+          }).join('') + '</tr></thead><tbody>';
+        rows.forEach(function (r, i) {
+          var c = Math.abs(r.drift) >= 8 ? '#B45309' : BG.textMuted;
+          html += '<tr style="background:' + (i % 2 ? BG.row1 : BG.row0) + ';border-bottom:1px solid ' + BG.border + '">';
+          html += '<td style="padding:5px 9px;color:' + BG.text + ';white-space:nowrap">' + r.m + ' mois</td>';
+          html += '<td style="padding:5px 9px;text-align:right;font-family:var(--mono,ui-monospace,monospace);font-variant-numeric:tabular-nums;color:' + BG.textMuted + '">' + P(r.then) + '</td>';
+          html += '<td style="padding:5px 9px;text-align:right;font-family:var(--mono,ui-monospace,monospace);font-variant-numeric:tabular-nums;color:' + BG.text + '">' + P(r.now) + '</td>';
+          html += '<td style="padding:5px 9px;text-align:right;font-family:var(--mono,ui-monospace,monospace);font-variant-numeric:tabular-nums;font-weight:700;color:' + c + ';white-space:nowrap">' + BP(r.drift) + '</td>';
+          html += '</tr>';
+        });
+        html += '</tbody></table></div>';
+
+        html += '<div style="margin-top:9px;font-size:11.5px;line-height:1.65;color:' + BG.textDim + '">';
+        if (stale) {
+          html += '<strong style="color:' + BG.text + '">Retard confirmé.</strong> Le marché a pris jusqu\'à <strong style="color:' + tone + '">' + BP(maxDrift) + '</strong> depuis l\'édition de la grille. La banque encaisse cet écart tant qu\'elle ne la réédite pas. <strong>Le bon geste n\'est pas d\'attendre la prochaine grille — c\'est de demander l\'actualisation maintenant</strong>, chiffre en main : tu captes le rattrapage sans perdre un mois d\'intérêts.';
+        } else {
+          html += '<strong style="color:' + BG.text + '">Pas de retard.</strong> Le marché n\'a quasiment pas bougé depuis l\'édition de la grille (' + BP(maxDrift) + ' au plus) : elle est au prix du jour. Une hausse antérieure a donc déjà été répercutée — <strong>attendre la grille suivante ne capterait rien</strong>, et coûterait le mois d\'intérêts.';
+        }
+        html += '</div>';
+        html += '<div style="margin-top:7px;font-size:10px;color:' + BG.textMuted + ';line-height:1.5">Référence : courbe zone euro AAA quotidienne (BCE), aux maturités exactes de la grille. L\'Euribor ne convient pas ici — la BCE ne le publie qu\'en moyennes mensuelles, donc il ne peut pas dater une dérive de trois semaines.</div>';
+        html += '</div>';
+      })();
+
       // ── Attendre le prochain CAT ? Le point mort, en euros
       if (best12) {
         var mont = 300000;
@@ -553,7 +620,21 @@
         if (f1 != null && f3 != null) {
           html += 'Non. Le forward à 1 an est à <strong>' + P(f1) + '</strong> et celui à 3 ans à <strong>' + P(f3) + '</strong> : la courbe est <strong>plate au-delà d\'un an</strong>. Le marché voit un pic de politique monétaire autour de ' + P(Math.max(f1, f3)) + ' puis un plateau — pas un cycle de hausses qui continue. ';
         }
-        html += 'Attendre un mois pour capter une hausse déjà payée coûte le mois d\'intérêts, sans contrepartie.</div>';
+        html += '</div>';
+        var beNeed = (beEmpty - best12.r) * 100, beNeedRem = (beRem - best12.r) * 100;
+        html += '<div style="margin-top:8px;padding:9px 11px;background:' + BG.row1 + ';border-radius:6px;font-size:11.5px;line-height:1.65;color:' + BG.textDim + '">';
+        html += '<strong style="color:' + BG.text + '">Verdict.</strong> ';
+        if (gridDrift != null && Math.abs(gridDrift) >= 8) {
+          html += 'Ta grille traîne <strong>' + BP(gridDrift) + '</strong> de retard sur le marché, pour un point mort de <strong>' + BP(beNeed) + '</strong> (cash dormant) ou <strong>' + BP(beNeedRem) + '</strong> (cash rémunéré). ';
+          html += (gridDrift >= beNeedRem)
+            ? '<strong>Le rattrapage dû dépasse le coût de l\'attente si ton cash reste rémunéré</strong> — mais la bonne réponse n\'est pas d\'attendre : c\'est de <strong>demander l\'actualisation tout de suite</strong>, chiffre en main. Tu prends le rattrapage sans payer le mois.'
+            : 'Le rattrapage dû ne couvre pas le coût de l\'attente. Place maintenant.';
+        } else if (gridDrift != null) {
+          html += 'La grille est au prix du jour (' + BP(gridDrift) + ' de dérive), et la courbe est plate au-delà d\'un an. <strong>Rien à capter en attendant</strong> : le mois d\'intérêts serait perdu sec. Place maintenant.';
+        } else {
+          html += 'Attendre un mois pour capter une hausse déjà payée coûte le mois d\'intérêts, sans contrepartie.';
+        }
+        html += '</div>';
         html += '</div>';
       }
 
