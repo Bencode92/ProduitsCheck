@@ -1,5 +1,6 @@
 // ═══════════════════════════════════════════════════════════════════
 // COMPRENDRE — page de référence sur les produits structurés
+//   0. Les cinq taux, par l'exemple (où chacun mord, et ce qui les distingue)
 //   1. Le test du souverain : chaque produit de taux vs l'OAT de même durée
 //   2. Les 3 briques + budget option (calculé sur la courbe du jour)
 //   3. Les familles de produits, avec TES produits rattachés
@@ -456,6 +457,121 @@
     return h + '</div>';
   }
 
+  // Un seul principe — échanger des flux sans échanger le capital — décliné selon
+  // ce qu'on met de chaque côté. C'est la question « si le CMS est un swap, il existe
+  // quoi d'autre en swap ? », qui revient dès qu'on a compris le premier.
+  var SWAPS = [
+    ['IRS', 'Swap de taux vanille', 'un taux fixe', 'l\'Euribor 3 ou 6 mois',
+     'Le plus courant. Une entreprise s\'en sert pour figer le coût d\'un crédit à taux variable.', true],
+    ['OIS', 'Overnight Index Swap', 'un taux fixe', 'l\'€STR composé jour après jour',
+     'Aucun risque bancaire à terme dedans : c\'est <strong>la courbe d\'actualisation</strong>, celle qui fixe la valeur de rachat de tes produits.', true],
+    ['CMS', 'Constant Maturity Swap', 'un taux fixe', '<strong>le taux swap 10 ans</strong>, relevé à chaque date',
+     'La jambe variable n\'est pas un taux court mais un <strong>taux long</strong>, dont la maturité ne raccourcit jamais. Sous-jacent de ton range accrual.', true],
+    ['Swaption', 'Option sur swap', 'une prime', 'le droit d\'entrer plus tard dans un swap',
+     '<strong>C\'est ce que tu vends dans un callable</strong> : l\'émetteur t\'achète le droit de te rembourser par anticipation. Le coupon élevé, c\'est le prix de cette option.', true],
+    ['Basis swap', 'Swap de base', 'un index variable', 'un autre index variable',
+     'Euribor 3 mois contre Euribor 6 mois, ou Euribor contre €STR. Sert à mesurer l\'écart entre deux références.', false],
+    ['Cross-currency', 'Swap de devises', 'des intérêts en euros', 'des intérêts en dollars',
+     'Seule famille où <strong>le capital s\'échange vraiment</strong>, au début et à la fin. Sert à se financer dans une devise et à dépenser dans une autre.', false],
+    ['Inflation swap', 'Swap d\'inflation', 'un taux fixe', 'l\'inflation réellement constatée',
+     'Le taux fixe qui équilibre l\'échange <em>est</em> l\'inflation anticipée par le marché — le « point mort d\'inflation » qui sert à juger un taux réel.', false],
+    ['CDS', 'Credit Default Swap', 'une prime annuelle', 'une indemnité si l\'émetteur fait défaut',
+     'Pas un swap de taux malgré le nom. Sa prime <strong>est</strong> le prix du risque de crédit de l\'émetteur — le chiffre à comparer au supplément de coupon qu\'on te propose.', false]
+  ];
+
+  function _familleSwaps() {
+    var h = '<div style="margin-top:11px;border:1px solid var(--border);border-radius:6px;padding:11px 13px">';
+    h += '<div style="font-size:11.5px;font-weight:700;color:var(--text-bright);margin-bottom:3px">Et il existe quoi d\'autre, en swap ?</div>';
+    h += '<div style="font-size:11.5px;line-height:1.6;color:var(--text-muted);margin-bottom:9px">Toujours le même principe — <strong>échanger des flux sans échanger le capital</strong>. Ce qui change, c\'est ce qu\'on met de chaque côté. Les quatre premiers te concernent directement.</div>';
+    h += '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px">';
+    h += '<thead><tr style="border-bottom:1px solid var(--border)">' +
+      ['', 'Tu paies', 'Tu reçois', 'Où ça te concerne'].map(function (x) {
+        return '<th style="text-align:left;padding:5px 8px;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim);white-space:nowrap">' + x + '</th>';
+      }).join('') + '</tr></thead><tbody>';
+    SWAPS.forEach(function (w, i) {
+      h += '<tr style="border-bottom:1px solid var(--border);' + (i % 2 ? 'background:var(--bg-elevated)' : '') + (w[5] ? '' : 'opacity:.72') + '">';
+      h += '<td style="padding:6px 8px;vertical-align:top;white-space:nowrap"><strong style="color:' + (w[5] ? '#0F766E' : 'var(--text-muted)') + '">' + w[0] + '</strong><div style="font-size:9.5px;color:var(--text-dim)">' + w[1] + '</div></td>';
+      h += '<td style="padding:6px 8px;vertical-align:top;color:var(--text-muted)">' + w[2] + '</td>';
+      h += '<td style="padding:6px 8px;vertical-align:top;color:var(--text-muted)">' + w[3] + '</td>';
+      h += '<td style="padding:6px 8px;vertical-align:top;color:var(--text)">' + w[4] + '</td>';
+      h += '</tr>';
+    });
+    h += '</tbody></table></div>';
+    h += '<div style="margin-top:9px;font-size:11px;line-height:1.6;color:var(--text-muted)">Deux d\'entre eux changent ta lecture d\'une brochure. La <strong>swaption</strong> : quand on te vante un coupon élevé sur un callable, tu n\'es pas payé pour un risque de marché mais pour <em>une option que tu as vendue</em>. Le <strong>CDS</strong> : sa prime donne le prix de marché du risque de l\'émetteur — si le supplément de coupon qu\'on te propose est inférieur à cette prime, tu prends le risque sans être payé pour.</div>';
+    return h + '</div>';
+  }
+
+  // ── 0. Les cinq taux, par l'exemple ──────────────────────────────
+  // Même matière que l'échelle de la page Marché, mais ici l'entrée se fait par
+  // l'exemple : où chaque taux mord concrètement, et en quoi il diffère du voisin.
+  // Les niveaux viennent de la courbe du jour ; les exemples sont des cas types.
+  function _lesTaux() {
+    var y = (_rates && _rates.yields) || {}, pr = (_rates && _rates.policy_rates) || {};
+    var sc = (_rates && _rates.short_curve) || {};
+    var n = function (o) { return (o && o.current != null) ? parseFloat(o.current) : null; };
+    var act = function (r) { return r == null ? null : (Math.exp(r / 100) - 1) * 100; };
+    var dep = n(pr.ecb_deposit_rate), estr = n(pr.estr);
+    var e3 = n(y.euribor_3m), e12 = n(y.euribor_12m), t10 = n(y.tec10_fr);
+    var cms = act(n(sc.curve_120m));   // proxy swap 10 ans, courbe du jour
+    var P = _fmtP;
+
+    var T = [
+      {
+        c: '#7C3AED', nom: 'Taux directeurs BCE', val: dep,
+        court: 'Le prix que la BCE fixe pour le cash des banques, au jour le jour.',
+        diff: 'C\'est le seul de la liste qui soit <strong>décidé</strong>. Tous les autres sont constatés ou négociés sur un marché.',
+        ex: 'Tu places <strong>300 000 €</strong> un an. Laissés à la BCE, ils rapporteraient <strong>7 500 €</strong> — c\'est ce que ta banque obtient sans rien faire. Ton CAT à 3,13 % t\'en verse <strong>9 390 €</strong>. Les <strong>1 890 €</strong> d\'écart sont ce qu\'elle consent pour garder ton dépôt, et la première chose qui disparaîtra si la BCE baisse.'
+      },
+      {
+        c: '#0891B2', nom: '€STR', val: estr,
+        court: 'Le taux vraiment payé, hier, sur les prêts d\'une nuit entre banques.',
+        diff: 'Même horizon que le taux directeur — une nuit — mais <strong>mesuré au lieu d\'être décidé</strong>. L\'écart entre les deux est un thermomètre de la liquidité bancaire.',
+        ex: 'Tu détiens un produit à taux fixe <strong>4 %</strong> émis il y a deux ans et tu veux sortir. La banque n\'actualise pas au taux de l\'époque mais à celui d\'aujourd\'hui. Comme les taux ont monté, ton 4 % vaut moins qu\'un produit neuf : <strong>elle te rachète sous 100</strong>. Même contrat, même coupon — c\'est le taux d\'actualisation qui a bougé.'
+      },
+      {
+        c: '#0284C7', nom: 'Euribor', val: e12,
+        court: 'Ce que les banques se prêtent sur 3, 6 ou 12 mois.',
+        diff: 'Ce qu\'il ajoute à l\'€STR, c\'est <strong>le temps</strong> : prêter une nuit ne demande aucune anticipation, prêter un an oblige à parier sur toute l\'année de décisions BCE.',
+        ex: 'Un crédit d\'entreprise de <strong>500 000 €</strong> indexé « Euribor 3 mois + 1,20 % ». Avec l\'Euribor 3 mois à ' + P(e3) + ', tu paies ' + P(e3 + 1.2) + ', soit <strong>' + (typeof formatNumber === 'function' ? formatNumber(Math.round(500000 * (e3 + 1.2) / 100)) : Math.round(500000 * (e3 + 1.2) / 100)) + ' € par an</strong>. S\'il prend 50 bp, ta charge grimpe de <strong>2 500 €</strong> sans qu\'une ligne du contrat ait changé.'
+      },
+      {
+        c: '#0F766E', nom: 'Swap et CMS', val: cms,
+        court: 'Le taux fixe qu\'on échange contre un taux variable, sans que le capital bouge.',
+        diff: 'C\'est <strong>la courbe avec laquelle ta banque fabrique ses produits</strong>. Un CMS n\'est pas un autre taux : c\'est ce même taux swap, relevé à une date future.',
+        famille: _familleSwaps(),
+        ex: '<strong>Le swap :</strong> une entreprise endettée à taux variable dit à sa banque « je te paie ' + P(cms) + ' fixe pendant 10 ans, tu me paies l\'Euribor ». Son crédit devient fixe. <strong>Les capitaux ne bougent jamais</strong> — seuls les intérêts s\'échangent.<br><br><strong>Le CMS :</strong> ce taux change tous les jours. Un « CMS 10 ans » est ce taux swap 10 ans constaté à telle date. <strong>La différence à retenir :</strong> l\'Euribor 3 mois constaté dans cinq ans sera encore un taux à <em>3 mois</em> ; le CMS 10 ans constaté dans cinq ans sera encore un taux à <em>10 ans</em>. Sa maturité ne raccourcit jamais — d\'où « maturité constante ».'
+      },
+      {
+        c: '#047857', nom: 'TEC France (OAT)', val: t10,
+        court: 'Ce que l\'État français paie pour emprunter à 10 ans.',
+        diff: 'Même durée que le swap, mais ici <strong>on prête vraiment 100 €</strong> à un État pendant dix ans. D\'où l\'écart : ' + (t10 != null && cms != null ? '<strong>' + Math.round((t10 - cms) * 100) + ' bp</strong> au-dessus du swap' : 'le souverain se traite au-dessus du swap') + '.',
+        ex: 'Un <strong>TARN TEC 10</strong> verse un coupon si le TEC 10 reste sous 4,40 %. Il est à <strong>' + P(t10) + '</strong> : pas de coupon cette année. Et attention au piège — si tu avais lu « taux 10 ans » sur la courbe swap (' + P(cms) + '), tu aurais conclu l\'inverse. <strong>Regarde toujours quel taux la fiche nomme.</strong>'
+      }
+    ];
+
+    var h = '<div class="section"><div class="section-header"><div class="section-title"><span class="dot" style="background:#0284C7"></span>🪜 Les cinq taux, par l\'exemple</div></div>' +
+      '<div style="font-size:12px;line-height:1.65;color:var(--text);margin-bottom:12px;max-width:72ch">« Le taux à 10 ans » ne veut rien dire tout seul : il en existe plusieurs, qui ne mesurent pas la même chose et ne donnent pas la même réponse. Voici chacun avec l\'endroit précis où il mord.</div>';
+
+    T.forEach(function (t) {
+      h += '<div style="border:1px solid var(--border);border-left:3px solid ' + t.c + ';border-radius:8px;padding:12px 14px;margin-bottom:9px">';
+      h += '<div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:6px">';
+      h += '<span style="font-size:13px;font-weight:700;color:var(--text-bright)">' + t.nom + '</span>';
+      if (t.val != null) h += '<span style="font-family:var(--mono);font-size:15px;font-weight:700;color:' + t.c + '">' + P(t.val) + '</span>';
+      h += '</div>';
+      h += '<div style="font-size:11.5px;line-height:1.6;color:var(--text);margin-bottom:6px">' + t.court + '</div>';
+      h += '<div style="font-size:11.5px;line-height:1.6;color:var(--text-muted);margin-bottom:9px"><strong style="color:' + t.c + '">Ce qui le distingue :</strong> ' + t.diff + '</div>';
+      h += '<div style="border:1px dashed var(--border);border-radius:6px;padding:10px 12px;font-size:11.5px;line-height:1.65;color:var(--text)">';
+      h += '<div style="font-size:9px;letter-spacing:.07em;text-transform:uppercase;font-weight:700;color:' + t.c + ';margin-bottom:4px">Un exemple concret</div>' + t.ex + '</div>';
+      if (t.famille) h += t.famille;
+      h += '</div>';
+    });
+
+    h += '<div style="font-size:11.5px;line-height:1.65;color:var(--text-muted);padding:10px 12px;background:var(--bg-elevated);border-radius:6px">';
+    h += '<strong style="color:var(--text-bright)">La règle qui évite l\'erreur la plus chère.</strong> Avant de juger une barrière, regarde <strong>quel taux la fiche produit nomme</strong> — TEC, CMS, Euribor — et va chercher celui-là. Deux taux « 10 ans » peuvent différer de plus de 100 bp, ce qui suffit à inverser la conclusion sur un coupon.';
+    h += '</div></div>';
+    return h;
+  }
+
   // ── Rendu ────────────────────────────────────────────────────────
   window._cmpToggle = function (id) { _open[id] = !_open[id]; renderComprendre(document.getElementById('main-content')); };
   window._cmpFilter = function (k) { _open.filter = k; renderComprendre(document.getElementById('main-content')); };
@@ -467,10 +583,10 @@
     if (!_rates) {
       container.innerHTML = head + '<div class="section" style="font-size:12px;color:var(--text-dim)">Chargement de la courbe des taux…</div>';
       github.readFile('data/market/rates.json').then(function (r) { _rates = r; renderComprendre(container); }).catch(function () {
-        container.innerHTML = head + _briques() + _fiches() + _decodeur() + _questions();
+        container.innerHTML = head + _lesTaux() + _briques() + _fiches() + _decodeur() + _questions();
       });
       return;
     }
-    container.innerHTML = head + _echelle() + _testSouverain() + _briques() + _fiches() + _decodeur() + _questions();
+    container.innerHTML = head + _lesTaux() + _echelle() + _testSouverain() + _briques() + _fiches() + _decodeur() + _questions();
   };
 })();
