@@ -674,6 +674,122 @@
       html += '</div></div>';
     })();
 
+    // ═══ LANCER UN STRUCTURÉ MAINTENANT OU ATTENDRE ? ═══
+    // Symétrique du bloc CAT, mais l'économie est différente : un CAT se nourrit du segment
+    // 3-12 mois, un structuré du LONG (5-10 ans), parce que c'est le taux long qui finance
+    // le budget option. La question « attendre ? » se tranche donc sur le forward du long,
+    // pas sur celui du court — et la volatilité, elle, est le seul vrai levier de timing.
+    (function () {
+      var P = function (x) { return x == null ? '—' : (Math.round(x * 100) / 100).toFixed(2).replace('.', ',') + ' %'; };
+      var PT = function (x) { return (x >= 0 ? '+' : '−') + Math.abs(Math.round(x * 100) / 100).toFixed(2).replace('.', ',') + ' pt'; };
+      var scv = (_data.swapCurve && _data.swapCurve.swap_eur) || {};
+      if (!scv['10y'] || !scv['1y']) return;
+      var t10 = (yields.tec10_fr && yields.tec10_fr.current != null) ? parseFloat(yields.tec10_fr.current) : null;
+
+      var z = function (t) {
+        var k = t + 'y';
+        if (scv[k] != null) return parseFloat(scv[k]);
+        var ks = Object.keys(scv).map(function (x) { return parseInt(x, 10); }).sort(function (a, b) { return a - b; });
+        for (var i = 0; i < ks.length - 1; i++) {
+          if (ks[i] < t && t < ks[i + 1]) {
+            var a = parseFloat(scv[ks[i] + 'y']), b = parseFloat(scv[ks[i + 1] + 'y']);
+            return a + (b - a) * (t - ks[i]) / (ks[i + 1] - ks[i]);
+          }
+        }
+        return null;
+      };
+      // Taux à `len` ans, tel que le marché le price dans `start` ans.
+      var fwd = function (start, len) {
+        var a = z(start + len), b = z(start);
+        if (a == null || b == null) return null;
+        return (Math.pow(Math.pow(1 + a / 100, start + len) / Math.pow(1 + b / 100, start), 1 / len) - 1) * 100;
+      };
+      // Le budget option : ce qui reste à dépenser en coupons quand le capital est garanti.
+      var budget = function (r, T) { return (1 - 1 / Math.pow(1 + r / 100, T)) * 100; };
+
+      var rows = [5, 10].map(function (T) {
+        var s = z(T), f = fwd(1, T);
+        if (s == null || f == null) return null;
+        return { T: T, spot: s, f1: f, bNow: budget(s, T), bF1: budget(f, T) };
+      }).filter(Boolean);
+      if (!rows.length) return;
+      var r10 = rows[rows.length - 1];
+
+      var vix = null;
+      try { vix = parseFloat((md || {}).vix) || null; } catch (e) {}
+      var vixTrend = (md || {}).vix_trend || '';
+
+      html += '<div style="margin:22px 0 16px">';
+      html += '<div style="font-size:14px;font-weight:700;color:' + BG.text + ';margin-bottom:3px">🏗️ Lancer un structuré maintenant ou attendre ?</div>';
+      html += '<div style="font-size:11px;color:' + BG.textDim + ';margin-bottom:12px">Un CAT se nourrit du segment 3-12 mois ; un structuré, du <strong>long terme</strong> — c\'est le taux à 5 ou 10 ans qui finance les coupons. La question se tranche donc sur une autre partie de la courbe, et la réponse n\'est pas la même.</div>';
+
+      // ── Le budget option, aujourd'hui vs dans un an
+      html += '<div style="background:' + BG.section + ';border:1px solid ' + BG.border + ';border-radius:8px;padding:13px 15px;margin-bottom:11px">';
+      html += '<div style="font-size:11.5px;font-weight:700;color:' + BG.text + ';margin-bottom:4px">Le budget option — ce qui finance tout produit à capital garanti</div>';
+      html += '<div style="font-size:10.5px;color:' + BG.textMuted + ';margin-bottom:10px">Capital garanti = l\'émetteur met de côté de quoi te rendre 100 % à l\'échéance et ne dispose que du reste pour acheter les options qui paient tes coupons. Ce « reste » dépend directement du taux long.</div>';
+      html += '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px">';
+      html += '<thead><tr style="background:' + BG.header + '">' +
+        ['Durée', 'Taux long aujourd\'hui', 'Tel que pricé dans 1 an', 'Budget aujourd\'hui', 'Budget dans 1 an', 'Gain à attendre'].map(function (h, i) {
+          return '<th style="padding:6px 9px;text-align:' + (i ? 'right' : 'left') + ';font-size:9.5px;letter-spacing:.04em;text-transform:uppercase;color:' + BG.textDim + ';white-space:nowrap">' + h + '</th>';
+        }).join('') + '</tr></thead><tbody>';
+      rows.forEach(function (r, i) {
+        var gain = r.bF1 - r.bNow;
+        html += '<tr style="background:' + (i % 2 ? BG.row1 : BG.row0) + ';border-bottom:1px solid ' + BG.border + '">';
+        html += '<td style="padding:5px 9px;color:' + BG.text + ';white-space:nowrap">' + r.T + ' ans</td>';
+        ['spot', 'f1'].forEach(function (k) {
+          html += '<td style="padding:5px 9px;text-align:right;font-family:var(--mono,ui-monospace,monospace);font-variant-numeric:tabular-nums;color:' + (k === 'spot' ? BG.text : BG.textMuted) + '">' + P(r[k]) + '</td>';
+        });
+        html += '<td style="padding:5px 9px;text-align:right;font-family:var(--mono,ui-monospace,monospace);font-variant-numeric:tabular-nums;font-weight:700;color:' + BG.text + '">' + r.bNow.toFixed(1).replace('.', ',') + ' %</td>';
+        html += '<td style="padding:5px 9px;text-align:right;font-family:var(--mono,ui-monospace,monospace);font-variant-numeric:tabular-nums;color:' + BG.textMuted + '">' + r.bF1.toFixed(1).replace('.', ',') + ' %</td>';
+        html += '<td style="padding:5px 9px;text-align:right;font-family:var(--mono,ui-monospace,monospace);font-variant-numeric:tabular-nums;font-weight:700;color:' + (gain >= 1 ? '#047857' : '#B45309') + ';white-space:nowrap">' + PT(gain) + '</td>';
+        html += '</tr>';
+      });
+      html += '</tbody></table></div>';
+
+      // ── Le même arbitrage, en euros
+      var N = 100000, gain10 = (r10.bF1 - r10.bNow), coutAnnee = r10.spot;
+      html += '<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">';
+      [['Gain à attendre 1 an', _fmt(Math.round(N * gain10 / 100)) + ' €', PT(gain10) + ' de budget', '#B45309'],
+       ['Coût de l\'année perdue', _fmt(Math.round(N * coutAnnee / 100)) + ' €', 'une année au taux long', '#B91C1C']
+      ].forEach(function (c) {
+        html += '<div style="flex:1;min-width:170px;padding:10px 12px;background:' + BG.row1 + ';border:1px solid ' + BG.border + ';border-top:3px solid ' + c[3] + ';border-radius:6px">';
+        html += '<div style="font-size:9.5px;color:' + BG.textMuted + '">' + c[0] + '</div>';
+        html += '<div style="font-family:var(--mono,ui-monospace,monospace);font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;color:' + c[3] + '">' + c[1] + '</div>';
+        html += '<div style="font-size:9.5px;color:' + BG.textMuted + '">' + c[2] + '</div></div>';
+      });
+      html += '</div>';
+      html += '<div style="margin-top:9px;font-size:11.5px;line-height:1.65;color:' + BG.textDim + '"><strong style="color:' + BG.text + '">Verdict.</strong> Le marché price le taux à ' + r10.T + ' ans quasiment inchangé dans un an (' + P(r10.spot) + ' → ' + P(r10.f1) + '). Attendre une année entière n\'élargirait le budget option que de <strong>' + PT(gain10) + '</strong> — soit ' + _fmt(Math.round(N * gain10 / 100)) + ' € sur ' + _fmt(N) + ' € — pendant que l\'année perdue en coûterait <strong>' + _fmt(Math.round(N * coutAnnee / 100)) + ' €</strong>. <strong>Sur les taux, il n\'y a aucune raison d\'attendre</strong> : le long terme est déjà là où le marché l\'attend.</div>';
+      html += '</div>';
+
+      // ── Le vrai levier de timing : la volatilité
+      if (vix != null) {
+        var vTone = vix >= 26 ? '#047857' : vix >= 20 ? '#B45309' : '#B91C1C';
+        var vSay = vix >= 26 ? 'Volatilité élevée : les coupons actions sont <strong>chers à vendre</strong>, donc généreux. C\'est le moment où un Phoenix ou un autocall se négocie bien.'
+                 : vix >= 20 ? 'Volatilité moyenne : coupons actions corrects, sans fenêtre exceptionnelle. Rien qui justifie de se presser ni d\'attendre.'
+                 : 'Volatilité basse : les coupons actions sont <strong>pauvres</strong>. Sur un produit indexé actions, c\'est la seule vraie raison de patienter — mais on attend une secousse, pas une date.';
+        html += '<div style="background:' + BG.section + ';border:1px solid ' + BG.border + ';border-left:5px solid ' + vTone + ';border-radius:8px;padding:12px 14px;margin-bottom:11px">';
+        html += '<div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:7px">';
+        html += '<span style="font-size:12.5px;font-weight:700;color:' + BG.text + '">⚡ Le seul vrai levier de timing : la volatilité</span>';
+        html += '<span style="font-family:var(--mono,ui-monospace,monospace);font-size:15px;font-weight:700;color:' + vTone + '">VIX ' + vix.toFixed(0) + '</span>';
+        if (vixTrend) html += '<span style="font-size:10px;color:' + BG.textMuted + '">' + vixTrend + '</span></div>';
+        html += '<div style="font-size:11.5px;line-height:1.65;color:' + BG.textDim + '">Un coupon de structuré a <strong>deux carburants</strong> : les taux (le budget option) et la volatilité (le prix auquel tu vends l\'option). Les taux sont stables et prévus stables — ils ne donnent aucun signal de timing. La volatilité, elle, bouge vite et ne se prévoit pas. ' + vSay + ' <strong>Sur un produit de taux pur (callable, TARN, range accrual), la volatilité actions ne joue pas : il n\'y a alors strictement rien à attendre.</strong></div>';
+        html += '</div>';
+      }
+
+      // ── La prime française : un budget élargi, à condition qu'il te soit reversé
+      if (t10 != null && scv['10y'] != null) {
+        var sw10 = parseFloat(scv['10y']), prime = (t10 - sw10) * 100;
+        var bSwap = budget(sw10, 10), bFr = budget(t10, 10);
+        if (prime >= 30) {
+          html += '<div style="background:#ECFDF5;border:1px solid #059669;border-left:5px solid #059669;border-radius:8px;padding:12px 14px;font-size:11.5px;line-height:1.65;color:#064E3B">';
+          html += '<strong>🇫🇷 La prime française élargit le budget — vérifie qu\'elle te revient.</strong> Un émetteur français se finance aujourd\'hui autour de ' + P(t10) + ' à 10 ans, contre ' + P(sw10) + ' pour la courbe swap : <strong>' + Math.round(prime) + ' bp de plus</strong>. Mécaniquement, son budget option à 10 ans passe de <strong>' + bSwap.toFixed(1).replace('.', ',') + ' %</strong> à <strong>' + bFr.toFixed(1).replace('.', ',') + ' %</strong> du nominal — près de ' + Math.round(bFr - bSwap) + ' points de plus à dépenser en coupons. ';
+          html += 'C\'est une fenêtre réellement favorable pour émettre <em>maintenant</em>. Mais elle ne vaut que si l\'émetteur te la reverse : <strong>un produit qui paie moins que l\'OAT de même durée garde cette prime pour lui</strong>, et tu portes le risque bancaire en prime. C\'est le test à appliquer à chaque proposition.';
+          html += '</div>';
+        }
+      }
+      html += '</div>';
+    })();
+
     // ═══ SECTION 1: TAUX SOUVERAINS (cliquables) ═══
     html += '<div style="font-size:14px;font-weight:700;color:' + BG.text + ';margin-bottom:4px">🏛️ Taux souverains — France (séries TEC, Banque de France)</div>';
     html += '<div style="font-size:11px;color:' + BG.textDim + ';margin-bottom:10px">Cliquez sur un taux pour voir l\'analyse détaillée et l\'historique</div>';
