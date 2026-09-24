@@ -345,14 +345,15 @@
       // Toutes les bornes sur la MÊME convention (actuarielle) et la MÊME date (aujourd'hui,
       // swap recalé) : enchaîner un €STR ACT/360, un Euribor mensuel et un swap du 31/08
       // faisait passer des écarts de convention et de date pour des primes de marché.
-      var _sc12 = (_data.rates && _data.rates.short_curve && _data.rates.short_curve.curve_12m) || null;
-      var m12 = _sc12 && _sc12.current != null ? _actu(parseFloat(_sc12.current)) : null;
+      var _SCr = (_data.rates && _data.rates.short_curve) || {};
+      var _cur = function (k) { return (_SCr[k] && _SCr[k].current != null) ? _actu(parseFloat(_SCr[k].current)) : null; };
+      var m12 = _cur('curve_12m'), m120 = _cur('curve_120m'), m24 = _cur('curve_24m');
       var anchors = [];
       var estrA0 = _estrActu(estr);
       if (estrA0 != null) anchors.push({ v: estrA0, lab: 'Base — €STR capitalisé sur 1 an', col: '#0891B2' });
       if (m12 != null) anchors.push({ v: m12, lab: 'anticipation BCE à 1 an', col: '#4338CA' });
-      if (cms10 != null) anchors.push({ v: cms10, lab: 'terme, de 1 an à 10 ans (swap)', col: '#0F766E' });
-      anchors.push({ v: t10, lab: 'risque & terme France', col: '#047857' });
+      if (m120 != null) anchors.push({ v: m120, lab: 'terme, de 1 an à 10 ans', col: '#0F766E' });
+      anchors.push({ v: t10, lab: 'risque France (spread OAT-AAA)', col: '#047857' });
       if (anchors.length >= 3) {
         var top = anchors[anchors.length - 1].v;
         html += '<div style="background:' + BG.section + ';border:1px solid ' + BG.border + ';border-radius:8px;padding:14px 15px;margin-bottom:11px">';
@@ -373,7 +374,7 @@
             '<span style="font-size:10.5px;color:' + BG.textDim + '">' + a.lab + '</span></div>';
         });
         html += '</div>';
-        html += '<div style="margin-top:9px;font-size:11px;line-height:1.6;color:' + BG.textDim + '">Lecture : sur les <strong style="color:' + BG.text + '">' + P(top) + '</strong> que rapporte l\'OAT française à 10 ans, <strong>' + P(anchors[0].v) + '</strong> ne sont que le prix de l\'argent au jour le jour. <span style="color:' + BG.textMuted + '">Toutes les bornes sont ramenées à la même convention actuarielle et à la date du jour.</span> Le reste se gagne en acceptant successivement le risque de taux, la durée, puis le risque France — <strong>et chaque produit qu\'on te propose se juge à l\'étage où ton capital est réellement immobilisé, pas un étage plus bas.</strong></div>';
+        html += '<div style="margin-top:9px;font-size:11px;line-height:1.6;color:' + BG.textDim + '">Lecture : sur les <strong style="color:' + BG.text + '">' + P(top) + '</strong> que rapporte l\'OAT française à 10 ans, <strong>' + P(anchors[0].v) + '</strong> ne sont que le prix de l\'argent au jour le jour. <span style="color:' + BG.textMuted + '">Toutes les bornes viennent de la <strong>même courbe</strong> (zone euro AAA, BCE), à la même date et en convention actuarielle — sans quoi des écarts de base et de date passeraient pour des primes. Le swap, lui, se lit à l\'étage 4.</span> Le reste se gagne en acceptant successivement le risque de taux, la durée, puis le risque France — <strong>et chaque produit qu\'on te propose se juge à l\'étage où ton capital est réellement immobilisé, pas un étage plus bas.</strong></div>';
         html += '</div>';
       }
 
@@ -485,7 +486,8 @@
         html += '<div style="margin-top:9px;background:' + BG.section + ';border:1px solid ' + _tone + ';border-left:5px solid ' + _tone + ';border-radius:8px;padding:11px 14px;font-size:11.5px;line-height:1.65;color:' + BG.text + '">';
         html += '<strong>📌 ' + cmsProd + '</strong> <span style="font-size:10px;color:' + BG.textMuted + '">(' + cmsWhere + ')</span><br>';
         if (_gap != null) {
-          html += 'Barrière de coupon <strong>' + P(_bar) + '</strong> · CMS 10 ans <strong>' + P(cms10) + '</strong> → ' +
+          var _band = (swShift != null) ? ' <span style="font-size:10.5px;color:' + BG.textMuted + '">(± 5 bp : le recalage suppose stable le spread swap/AAA)</span>' : '';
+          html += 'Barrière de coupon <strong>' + P(_bar) + '</strong> · CMS 10 ans <strong>' + P(cms10) + '</strong>' + _band + ' → ' +
             (Math.abs(_gap) <= 15
               ? '<strong style="color:' + _tone + '">' + Math.abs(_gap) + ' bp ' + (_gap > 0 ? 'au-dessus' : 'en dessous') + ', le produit est sur le fil.</strong>'
               : (_gap <= 0 ? '<strong style="color:' + _tone + '">' + Math.abs(_gap) + ' bp sous la barrière, condition remplie.</strong>' : '<strong style="color:' + _tone + '">' + _gap + ' bp au-dessus, pas de coupon aux niveaux actuels.</strong>')) + '<br>';
@@ -619,6 +621,18 @@
       }
 
       var gridDrift = null, gridDateUsed = null;   // renseignés par le bloc « retard » ci-dessous
+      // ── Où sera la grille dans un an ? Le forward 1 an dans 1 an ───────────
+      // Ni le forward instantané (niveau du jour le jour dans 1 an) ni la moyenne sur
+      // 12 mois ne répondent à cette question. Le 1y1y, si : c'est le taux à 1 an tel que
+      // le marché le price dans 1 an. Reconstruit depuis les spots continus 1 et 2 ans.
+      var f1y1y = null;
+      (function () {
+        var SC2 = (_data.rates && _data.rates.short_curve) || {};
+        var s1 = SC2.curve_12m && SC2.curve_12m.current, s2 = SC2.curve_24m && SC2.curve_24m.current;
+        if (s1 == null || s2 == null) return;
+        f1y1y = _actu(2 * parseFloat(s2) - parseFloat(s1));   // continus : additifs
+      })();
+
       // ── Ta grille a-t-elle pris du retard ? ─────────────────────────────────
       // Une grille CAT est figée à sa date d'édition ; le marché, lui, bouge tous les
       // jours. Si le marché a monté depuis, la banque a mécaniquement gagné de la marge
@@ -682,13 +696,27 @@
         });
         html += '</tbody></table></div>';
 
+        // Un écart n'a de sens ni sans son signe ni sans son montant : une grille en retard
+        // dans un marché qui BAISSE est une grille généreuse, donc un signal de souscrire,
+        // pas de négocier. Et 12 bp ne se négocient pas sur 100 k€, mais sur 2 M€ oui.
+        var NREF = 300000, r12 = rows.filter(function (r) { return r.m === 12; })[0] || rows[rows.length - 1];
+        var euros = Math.abs(NREF * (r12.drift / 100) / 100 * (r12.m / 12));
         html += '<div style="margin-top:9px;font-size:11.5px;line-height:1.65;color:' + BG.textDim + '">';
-        if (stale) {
-          html += '<strong style="color:' + BG.text + '">Retard confirmé.</strong> Le marché a pris jusqu\'à <strong style="color:' + tone + '">' + BP(maxDrift) + '</strong> depuis l\'édition de la grille. La banque encaisse cet écart tant qu\'elle ne la réédite pas. <strong>Le bon geste n\'est pas d\'attendre la prochaine grille — c\'est de demander l\'actualisation maintenant</strong>, chiffre en main : tu captes le rattrapage sans perdre un mois d\'intérêts.';
+        if (stale && maxDrift > 0) {
+          html += '<strong style="color:' + BG.text + '">Retard dans un marché qui monte.</strong> Le marché a pris jusqu\'à <strong style="color:' + tone + '">' + BP(maxDrift) + '</strong> depuis l\'édition de la grille : la banque encaisse l\'écart tant qu\'elle ne la réédite pas. <strong>Demande l\'actualisation maintenant</strong>, chiffre en main — tu captes le rattrapage sans perdre un mois d\'intérêts.';
+        } else if (stale) {
+          html += '<strong style="color:' + BG.text + '">Retard dans un marché qui baisse.</strong> Le marché a reculé de <strong style="color:' + tone + '">' + BP(Math.abs(maxDrift)) + '</strong> depuis l\'édition de la grille : <strong>elle est devenue généreuse</strong>. Le geste n\'est pas de négocier mais de <strong>souscrire avant la réédition</strong>, qui la ramènera au marché.';
         } else {
-          html += '<strong style="color:' + BG.text + '">Pas de retard.</strong> Le marché n\'a quasiment pas bougé depuis l\'édition de la grille (' + BP(maxDrift) + ' au plus) : elle est au prix du jour. Une hausse antérieure a donc déjà été répercutée — <strong>attendre la grille suivante ne capterait rien</strong>, et coûterait le mois d\'intérêts.';
+          html += '<strong style="color:' + BG.text + '">Pas de retard.</strong> Le marché n\'a quasiment pas bougé depuis l\'édition de la grille (' + BP(maxDrift) + ' au plus) : elle est au prix du jour. <strong>Attendre la grille suivante ne capterait rien</strong>, et coûterait le mois d\'intérêts.';
         }
+        html += ' <span style="color:' + BG.textMuted + '">À ' + r12.m + ' mois, l\'écart de ' + BP(r12.drift) + ' vaut <strong>' + _fmt(Math.round(euros)) + ' €</strong> sur ' + _fmt(NREF) + ' € — c\'est ce montant, pas le nombre de points de base, qui dit si une négociation vaut le coup de fil.</span>';
         html += '</div>';
+        if (f1y1y != null && best12) {
+          html += '<div style="margin-top:9px;padding:10px 12px;background:' + BG.row1 + ';border-radius:6px;font-size:11.5px;line-height:1.65;color:' + BG.textDim + '">';
+          html += '<strong style="color:' + BG.text + '">Et dans un an, où sera la grille ?</strong> Ni la moyenne sur 12 mois ni le forward instantané ne répondent à ça. Le bon instrument est le <strong>forward 1 an dans 1 an</strong> : <strong>' + P(f1y1y) + '</strong>. Avec la même prime bancaire (' + BP(best12.sp) + '), la grille 12 mois de l\'an prochain devrait sortir autour de <strong>' + P(f1y1y + best12.sp / 100) + '</strong>, contre ' + P(best12.r) + ' aujourd\'hui.';
+          html += ' <strong>Ce n\'est pas une raison d\'attendre</strong> : sur une courbe ascendante la fenêtre glisse toujours vers le haut, mais tu perds le portage entre-temps. En espérance, c\'est une opération blanche.</div>';
+        }
+        html += '<div style="margin-top:9px;padding:9px 11px;background:' + BG.row1 + ';border-radius:6px;font-size:11px;line-height:1.6;color:' + BG.textMuted + '"><strong style="color:' + BG.text + '">Ce qu\'il faut surveiller, et ce n\'est pas une date.</strong> Une hausse BCE conforme au pricing ne déplace pas la grille : la décision du 10 septembre a fait bouger le 12 mois de <strong>+11,8 bp en une séance</strong>, mais sa date d\'effet, le 16, l\'a laissé à <strong>−2,3 bp</strong>. Ce sont les <em>surprises</em> qui comptent — inflation flash, pétrole, discours du Conseil — pas le calendrier des réunions. D\'où un suivi déclenché par un mouvement de courbe au-delà du seuil, et non par une échéance.</div>';
         html += '<div style="margin-top:7px;font-size:10px;color:' + BG.textMuted + ';line-height:1.55">Référence : courbe zone euro AAA quotidienne (BCE), aux maturités exactes de la grille. L\'Euribor ne convient pas ici — la BCE ne le publie qu\'en <strong>moyennes mensuelles</strong>, donc il ne peut pas dater une dérive de trois semaines. <strong>Chaque valeur est une moyenne sur 5 jours cotés</strong> : la courbe oscille de ±5 bp d\'un jour à l\'autre, et comparer deux jours isolés reviendrait à lire du bruit. Un retard n\'est signalé qu\'au-delà de <strong>12 bp</strong>.</div>';
         html += '</div>';
       })();
@@ -768,7 +796,14 @@
         if (catStep - mktStep >= 15) {
           html += '<div style="margin-top:11px;background:#ECFDF5;border:1px solid #059669;border-left:5px solid #059669;border-radius:8px;padding:11px 14px;font-size:11.5px;line-height:1.65;color:#064E3B">';
           html += '<strong>📈 Une anomalie de pente à exploiter.</strong> Passer de 12 à 24 mois te rapporte <strong>' + BP(catStep) + '</strong> chez ' + best24.bank + ' (' + P(best12.r) + ' → ' + P(best24.r) + '), alors que le marché ne valorise cette année supplémentaire que <strong>' + BP(mktStep) + '</strong>. La banque paie donc <strong>' + BP(catStep - mktStep) + ' de prime de terme au-delà du marché</strong>. ';
-          html += 'Si une partie du capital n\'est pas nécessaire dans 12 mois, allonger capte cet écart — c\'est la décision la mieux rémunérée de la grille. À arbitrer contre ton besoin réel de liquidité, pas contre une vue sur les taux.';
+          // Le vrai comparatif n'est pas « 24 mois contre 12 mois » mais « 24 mois contre
+          // 12 mois PUIS renouvellement au taux que le marché price déjà » (le 1y1y).
+          if (f1y1y != null) {
+            var roll = f1y1y + best12.sp / 100;
+            var chain = (Math.sqrt((1 + best12.r / 100) * (1 + roll / 100)) - 1) * 100;
+            html += '<br><br><strong>Le bon comparatif.</strong> Pas « 24 mois contre 12 mois » — mais 24 mois contre <em>12 mois puis renouvellement au taux que le marché price déjà</em>. Ce renouvellement ressort à ' + P(roll) + ' (forward 1 an dans 1 an, plus la même prime), soit une chaîne à <strong>' + P(chain) + '</strong> par an sur deux ans. Le 24 mois direct à ' + P(best24.r) + ' la bat de <strong>' + BP((best24.r - chain) * 100) + ' par an</strong> : l\'anomalie survit au test le plus exigeant.';
+          }
+          html += '<br><br><strong>À vérifier avant d\'allonger :</strong> que le taux affiché ne soit pas <em>progressif</em> (le facial serait la dernière marche) ; les conditions et pénalités de sortie anticipée ; le plafond FGDR de 100 k€ par déposant et par banque — une offre isolée peut rémunérer un risque de crédit ; et ton besoin réel de liquidité sur l\'horizon, seul argument qui devrait trancher.';
           html += '</div>';
         }
       }
@@ -876,7 +911,7 @@
       html += '</div>';
       html += '<div style="margin-top:9px;font-size:11.5px;line-height:1.65;color:' + BG.textDim + '"><strong style="color:' + BG.text + '">Verdict.</strong> Le marché price le taux à ' + r10.T + ' ans quasiment inchangé dans un an (' + P(r10.spot) + ' → ' + P(r10.f1) + ') : attendre n\'élargirait le budget option que de <strong>' + PT(gain10) + '</strong>, soit ' + _fmt(Math.round(N * gain10 / 100)) + ' € sur ' + _fmt(N) + ' €. ';
       if (catAlt != null) {
-        html += 'En face, l\'attente ne coûte pas une année de taux long — ton argent reste placé en CAT à ' + P(catAlt) + '. Elle coûte <strong>l\'écart entre le structuré et ce CAT</strong> : ' + _fmt(Math.round(N * coutAnnee / 100)) + ' € pour un produit qui rendrait ' + P(hyp) + '. <strong>Attendre reste perdant d\'environ ' + (coutAnnee / (gain10 || 0.01)).toFixed(1).replace('.', ',') + ' fois</strong> — mais seulement pour un produit qui bat le CAT.</div>';
+        html += 'En face, l\'attente ne coûte pas une année de taux long — ton argent reste placé en CAT à ' + P(catAlt) + '. Elle coûte <strong>l\'écart entre le structuré et ce CAT</strong> : ' + _fmt(Math.round(N * coutAnnee / 100)) + ' € pour un produit qui rendrait ' + P(hyp) + '. <strong>Attendre est alors perdant d\'environ ' + (coutAnnee / (gain10 || 0.01)).toFixed(1).replace('.', ',') + ' fois</strong>. Attention : ce ' + P(hyp) + ' est le <strong>plafond</strong> — un émetteur ne peut pas verser plus que son propre coût de financement, frais et option de rappel déduits. C\'est donc un majorant, atteint seulement par un produit parfaitement pricé et sans frais ; le facteur 2,7 est un « au mieux », pas un résultat général.</div>';
         html += '<div style="margin-top:8px;padding:9px 11px;background:' + BG.row1 + ';border-radius:6px;font-size:11px;line-height:1.6;color:' + BG.textDim + '"><strong style="color:' + BG.text + '">Le piège à éviter.</strong> Si l\'espérance du produit est <em>inférieure</em> à ' + P(catAlt) + ', le calcul n\'a plus de sens : la bonne réponse n\'est pas « attendre un an », c\'est <strong>ne pas l\'acheter du tout</strong>. Attendre suppose qu\'on achètera plus tard — à un prix que le forward annonce identique.</div>';
       } else {
         html += '<strong>Sur les taux, il n\'y a aucune raison d\'attendre.</strong></div>';
