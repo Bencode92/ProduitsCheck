@@ -94,6 +94,106 @@
     return (multiBank ? (r.bankName || r.bankId) + ' · ' : '') + n;
   }
 
+
+  // ── Marché : courbe quotidienne BCE (zone euro AAA), convertie en actuariel ──
+  // Sert à répondre « faut-il fractionner ? » sans hypothèse maison : le taux de
+  // renouvellement n'est pas deviné, il est lu sur les forwards que le marché price.
+  let _mkt = null;
+  function _loadMarket() {
+    if (_mkt !== null) return;
+    _mkt = false;
+    fetch('data/market/rates.json').then(r => r.json()).then(j => {
+      _mkt = j;
+      const el = document.getElementById('cat-verdict');
+      if (el) el.innerHTML = _verdictInner(el.dataset.cols ? JSON.parse(el.dataset.cols) : []);
+    }).catch(() => {});
+  }
+  const _act = r => (Math.exp(r / 100) - 1) * 100;          // spot BCE (continu) → actuariel
+  function _spot(months) {                                   // en actuariel
+    const sc = (_mkt && _mkt.short_curve) || {};
+    const k = { 3: 'curve_3m', 6: 'curve_6m', 9: 'curve_9m', 12: 'curve_12m', 24: 'curve_24m' }[months];
+    return (k && sc[k] && sc[k].current != null) ? _act(parseFloat(sc[k].current)) : null;
+  }
+  // Taux à `len` mois, tel que le marché le price dans `start` mois.
+  function _fwd(start, len) {
+    const a = _spot(start + len), b = _spot(start);
+    if (a == null || b == null) return null;
+    return (Math.pow(Math.pow(1 + a / 100, (start + len) / 12) / Math.pow(1 + b / 100, start / 12), 12 / len) - 1) * 100;
+  }
+
+  // ── Verdict : à chaque horizon, quel produit gagne — et faut-il fractionner ──
+  function _verdictInner(cols) {
+    const EUR = (r, h) => 100000 * (Math.pow(1 + r / 100, h / 12) - 1);
+    const P = x => x == null ? '—' : (Math.round(x * 100) / 100).toFixed(2).replace('.', ',') + ' %';
+    const E = n => Math.round(n).toLocaleString('fr-FR') + ' €';
+
+    // Pour un horizon donné : la meilleure offre atteignable, fixe et progressive séparées.
+    const bestAt = (h, type) => {
+      let b = null;
+      cols.forEach(c => {
+        const prog = c.rateType === 'progressif' && (c.rateSchedule || []).length > 0;
+        if (type === 'fixe' && prog) return;
+        if (type === 'prog' && !prog) return;
+        const x = _effectiveRate(c, h);
+        if (!x || x.rate == null || x.kind === 'roll') return;
+        if (!b || x.rate > b.rate) b = { rate: x.rate, kind: x.kind, col: c };
+      });
+      return b;
+    };
+
+    let h = '';
+    [6, 12, 24].forEach(H => {
+      const f = bestAt(H, 'fixe'), p = bestAt(H, 'prog');
+      if (!f && !p) return;
+      const win = (!p || (f && f.rate >= p.rate)) ? f : p;
+      const lose = win === f ? p : f;
+      const gap = (lose && win) ? EUR(win.rate, H) - EUR(lose.rate, H) : null;
+
+      h += '<div style="border:1px solid var(--border);border-left:3px solid var(--green);border-radius:6px;padding:11px 13px;margin-bottom:8px">';
+      h += '<div style="font-size:12px;font-weight:700;color:var(--text-bright);margin-bottom:6px">Si tu vises ' + H + ' mois</div>';
+      h += '<div style="font-size:11.5px;line-height:1.65;color:var(--text)">';
+      h += '<strong>' + _shortName(win.col, true) + '</strong> — ' + P(win.rate) + ' annualisé, soit <strong>' + E(EUR(win.rate, H)) + '</strong> d\'intérêts bruts sur 100 k€';
+      h += (win.kind === 'free' ? ' <span style="color:var(--green)">(échéance : sortie libre)</span>' : ' <span style="color:var(--orange)">(retrait anticipé : pénalité appliquée)</span>') + '.';
+      if (lose && gap != null) {
+        const meilleur = win === f ? 'fixe' : 'progressif', autre = win === f ? 'progressif' : 'fixe';
+        h += ' Le meilleur <strong>' + autre + '</strong> à cet horizon (' + _shortName(lose.col, true) + ', ' + P(lose.rate) + ') rapporte <strong>' + E(Math.abs(gap)) + ' de moins</strong>' + (Math.abs(gap) < 150 ? ' — un écart trop mince pour trancher sur le seul rendement : regarde alors les conditions de sortie.' : ', donc le <strong>' + meilleur + '</strong> l\'emporte nettement.');
+      }
+      h += '</div>';
+
+      // Fractionner ? On compare H direct à (H/2 aujourd'hui) puis (H/2 renouvelé).
+      const half = H / 2;
+      const fh = bestAt(half, 'fixe');
+      if (fh && Number.isInteger(half) && _mkt) {
+        const seuil = (Math.pow(Math.pow(1 + win.rate / 100, H / 12) / Math.pow(1 + fh.rate / 100, half / 12), 12 / half) - 1) * 100;
+        const fwd = _fwd(half, half);
+        const prime = (_spot(half) != null) ? fh.rate - _spot(half) : null;   // prime bancaire observée
+        if (fwd != null) {
+          const attendu = fwd + (prime || 0);
+          const gagne = attendu > seuil;
+          h += '<div style="margin-top:9px;padding-top:9px;border-top:1px solid var(--border);font-size:11.5px;line-height:1.65;color:var(--text-muted)">';
+          h += '<strong style="color:var(--text-bright)">Ou fractionner en ' + half + ' + ' + half + ' ?</strong> Prendre ' + _shortName(fh.col, true) + ' à ' + P(fh.rate) + ' puis renouveler. ';
+          h += 'Cette chaîne ne bat le ' + H + ' mois direct que si le ' + half + ' mois se renégocie <strong>au-dessus de ' + P(seuil) + '</strong> dans ' + half + ' mois. ';
+          h += 'Le marché price ce renouvellement à ' + P(fwd) + (prime ? ', soit ' + P(attendu) + ' avec la même prime bancaire (' + (prime >= 0 ? '+' : '−') + Math.abs(Math.round(prime * 100)) + ' bp)' : '') + ' : ';
+          h += gagne
+            ? '<strong style="color:var(--green)">fractionner passe devant de ' + Math.round((attendu - seuil) * 100) + ' bp</strong>, et te laisse la main dans ' + half + ' mois. Le pari est que la banque maintienne sa prime.'
+            : '<strong style="color:var(--orange)">il manque ' + Math.round((seuil - attendu) * 100) + ' bp</strong>. Fractionner ne paie donc que si la hausse dépasse ce que le marché price déjà — ce qui est un pari, pas un constat.';
+          h += '</div>';
+        }
+      }
+      h += '</div>';
+    });
+
+    if (!h) return '';
+    return '<div style="font-size:12px;font-weight:700;color:var(--text-bright);margin-bottom:7px">🎯 Ce que la grille conclut</div>' +
+      '<div style="font-size:10.5px;color:var(--text-dim);margin-bottom:9px">Le meilleur produit à chaque horizon, fixe ou progressif, et la question qui suit toujours : vaut-il mieux tout bloquer ou fractionner pour se laisser la main ?</div>' + h +
+      '<div style="font-size:10px;color:var(--text-dim);line-height:1.5">Le taux de renouvellement n\'est pas une hypothèse : c\'est le <strong>forward</strong> lu sur la courbe quotidienne BCE (zone euro AAA), convertie en actuariel, majorée de la prime que la banque consent aujourd\'hui à cette maturité. Les montants sont bruts, sur 100 k€, avant IS.</div>';
+  }
+
+  function _verdict(cols) {
+    _loadMarket();
+    return '<div id="cat-verdict" data-cols=\'' + JSON.stringify(cols).replace(/'/g, '&#39;') + '\' style="margin-top:14px;padding-top:12px;border-top:1px dashed var(--border)">' + _verdictInner(cols) + '</div>';
+  }
+
   // ── Rendu ─────────────────────────────────────────────────────────
   window._renderCATHorizonGrid = function(rates) {
     const list = (rates || []).filter(r => r.productType !== 'parts-sociales' && (parseFloat(r.rate) || 0) > 0);
@@ -148,8 +248,9 @@
       html += `</tr>`;
     });
     html += `</tbody></table></div>
-      <div style="font-size:10px;color:var(--text-dim);margin-top:6px">Lecture : à 6 mois, un progressif 18 m sorti à la fin du semestre 1 rapporte le taux du S1 (sortie libre) — à comparer directement au fixe 6 m. En cours de période, les progressifs servent le taux de retrait anticipé (50 % du taux en S1/A1, taux de la période précédente ensuite) et exigent un préavis de 32 jours (non déduit ici). Taux actuariels, base 30/360 approximée en mois entiers. Les € indiqués = intérêts bruts sur 100 k€ jusqu'au mois de sortie, en convention actuarielle (capitalisation : 100 k€ × ((1 + taux)^(mois/12) − 1)) ; les paliers des progressifs se capitalisent entre eux.</div>
-    </div>`;
+      <div style="font-size:10px;color:var(--text-dim);margin-top:6px">Lecture : à 6 mois, un progressif 18 m sorti à la fin du semestre 1 rapporte le taux du S1 (sortie libre) — à comparer directement au fixe 6 m. En cours de période, les progressifs servent le taux de retrait anticipé (50 % du taux en S1/A1, taux de la période précédente ensuite) et exigent un préavis de 32 jours (non déduit ici). Taux actuariels, base 30/360 approximée en mois entiers. Les € indiqués = intérêts bruts sur 100 k€ jusqu'au mois de sortie, en convention actuarielle (capitalisation : 100 k€ × ((1 + taux)^(mois/12) − 1)) ; les paliers des progressifs se capitalisent entre eux.</div>`;
+    html += _verdict(cols);
+    html += `</div>`;
     return html;
   };
 
