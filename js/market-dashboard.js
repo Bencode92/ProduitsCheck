@@ -316,7 +316,7 @@
         '.rk-d{border:1px solid ' + BG.border + ';border-radius:8px;background:' + BG.section + ';overflow:hidden}' +
         '.rk-d+.rk-d{margin-top:6px}' +
         '.rk-d>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:11px;padding:10px 13px;user-select:none}' +
-        '.rk-d>summary::-webkit-details-marker{display:none}' +
+        '.rk-d>summary::-webkit-details-marker{display:none}' + 'summary::-webkit-details-marker{display:none}' +
         '.rk-d>summary:hover{background:' + BG.row1 + '}' +
         '.rk-d[open]>summary{border-bottom:1px solid ' + BG.border + ';background:' + BG.row1 + '}' +
         '.rk-n{flex:none;width:21px;height:21px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:800;color:#fff}' +
@@ -781,8 +781,15 @@
 
       // ── Le tableau : chaque offre face au marché de même durée
       html += '<div style="background:' + BG.section + ';border:1px solid ' + BG.border + ';border-radius:8px;padding:13px 15px">';
-      html += '<div style="font-size:11.5px;font-weight:700;color:' + BG.text + ';margin-bottom:3px">Chaque offre face au marché de même durée</div>';
-      html += '<div style="font-size:10.5px;color:' + BG.textMuted + ';margin-bottom:9px">L\'écart est la <strong>prime</strong> que la banque te consent au-dessus du sans-risque de même durée — pas sa marge : c\'est ce qu\'elle <em>paie</em>, en échange de ton risque de crédit sur elle et de la valeur réglementaire de ton dépôt. C\'est le seul chiffre qui se négocie.</div>';
+      // 30 lignes déroulées noyaient la décomposition et le verdict, qui sont l'essentiel.
+      // Le bandeau garde ce qui se lit d'un coup d'œil : combien d'offres, meilleure prime.
+      var bestSp = offers.reduce(function (a, o) { return o.sp > a.sp ? o : a; }, offers[0]);
+      var nBanks = {}; offers.forEach(function (o) { nBanks[o.bank] = 1; });
+      html += '<details><summary style="list-style:none;cursor:pointer;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;user-select:none">';
+      html += '<span style="font-size:11.5px;font-weight:700;color:' + BG.text + '">Chaque offre face au marché de même durée</span>';
+      html += '<span style="font-size:10.5px;color:' + BG.textMuted + '">' + offers.length + ' offres · ' + Object.keys(nBanks).length + ' banques · meilleure prime <strong style="color:#047857">' + BP(bestSp.sp) + '</strong> (' + bestSp.bank + ', ' + bestSp.m + ' mois)</span>';
+      html += '<span style="margin-left:auto;font-size:11px;color:' + BG.textMuted + '">déplier ›</span></summary>';
+      html += '<div style="font-size:10.5px;color:' + BG.textMuted + ';margin:9px 0">L\'écart est la <strong>prime</strong> que la banque te consent au-dessus du sans-risque de même durée — pas sa marge : c\'est ce qu\'elle <em>paie</em>, en échange de ton risque de crédit sur elle et de la valeur réglementaire de ton dépôt. C\'est le seul chiffre qui se négocie.</div>';
       html += '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px">';
       html += '<thead><tr style="background:' + BG.header + '">' +
         ['Banque', 'Produit', 'Durée', 'Taux CAT', 'Sans risque', 'Prime'].map(function (h, i) {
@@ -800,7 +807,7 @@
         html += '</tr>';
       });
       html += '</tbody></table></div>';
-      html += '<div style="margin-top:8px;font-size:10.5px;color:' + BG.textMuted + ';line-height:1.55">Référence : <strong>courbe quotidienne BCE des États zone euro notés AAA</strong> (série YC), aux maturités exactes de la grille, <strong>convertie de la composition continue vers l\'actuariel</strong> pour être comparable à un taux de CAT. En deçà de 6 mois la courbe est mal contrainte (le modèle n\'utilise que des titres de plus de 3 mois) : les primes y sont à prendre avec réserve. Le progressif est exclu — il se compare à horizon de sortie, via la grille d\'équivalence de l\'onglet CAT.</div>';
+      html += '<div style="margin-top:8px;font-size:10.5px;color:' + BG.textMuted + ';line-height:1.55">Référence : <strong>courbe quotidienne BCE des États zone euro notés AAA</strong> (série YC), aux maturités exactes de la grille, <strong>convertie de la composition continue vers l\'actuariel</strong> pour être comparable à un taux de CAT. En deçà de 6 mois la courbe est mal contrainte (le modèle n\'utilise que des titres de plus de 3 mois) : les primes y sont à prendre avec réserve. Le progressif est exclu — il se compare à horizon de sortie, via la grille d\'équivalence de l\'onglet CAT.</div></details>';
 
       // ── L'anomalie de pente, si elle existe
       if (best12 && best24) {
