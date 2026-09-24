@@ -86,6 +86,39 @@
   // la variation observée sur la courbe AAA quotidienne de même maturité, entre la date
   // EIOPA et aujourd'hui. Approximation assumée : le spread swap/AAA est supposé stable
   // sur l'intervalle — bien plus juste que de ne rien faire.
+  // Courbe swap entière, ramenée à la date du jour : chaque ténor est décalé du
+  // mouvement observé sur la courbe AAA quotidienne de maturité la plus proche.
+  // Sans ça, l'étage 4 affichait un swap recalé (3,48 %) et le bloc structurés le
+  // swap brut d'EIOPA (3,37 %) — deux chiffres pour la même chose, sur la même page.
+  function _swapToday() {
+    var sc = _data.swapCurve || {}, scv = sc.swap_eur || {};
+    if (!sc.as_of) return { curve: scv, shift: null, dated: null };
+    var SC = (_data.rates && _data.rates.short_curve) || {};
+    var PIL = [[12, 'curve_12m'], [24, 'curve_24m'], [60, 'curve_60m'], [84, 'curve_84m'], [120, 'curve_120m']];
+    var shifts = [], dated = null;
+    PIL.forEach(function (q) {
+      var d = SC[q[1]];
+      if (!d || !d.history || d.current == null) return;
+      var then = null;
+      for (var i = 0; i < d.history.length; i++) { if (d.history[i].date <= sc.as_of) then = d.history[i].value; else break; }
+      if (then == null) return;
+      shifts.push([q[0], parseFloat(d.current) - parseFloat(then)]);
+      dated = d.date;
+    });
+    if (!shifts.length) return { curve: scv, shift: null, dated: sc.as_of };
+    var near = function (m) {                         // décalage du pilier le plus proche
+      var b = shifts[0];
+      shifts.forEach(function (x) { if (Math.abs(x[0] - m) < Math.abs(b[0] - m)) b = x; });
+      return b[1];
+    };
+    var out = {};
+    Object.keys(scv).forEach(function (k) {
+      var yrs = parseInt(k, 10);
+      out[k] = parseFloat(scv[k]) + near(yrs * 12);
+    });
+    return { curve: out, shift: near(120) * 100, dated: dated };
+  }
+
   function _swapAdj(months) {
     var sc = _data.swapCurve || {}, scv = sc.swap_eur || {};
     var yrs = months / 12, key = yrs + 'y';
@@ -899,7 +932,7 @@ var _mkD_html = html.slice(_mkD); html = html.slice(0, _mkD);
     (function () {
       var P = function (x) { return x == null ? '—' : (Math.round(x * 100) / 100).toFixed(2).replace('.', ',') + ' %'; };
       var PT = function (x) { return (x >= 0 ? '+' : '−') + Math.abs(Math.round(x * 100) / 100).toFixed(2).replace('.', ',') + ' pt'; };
-      var scv = (_data.swapCurve && _data.swapCurve.swap_eur) || {};
+      var _st = _swapToday(), scv = _st.curve || {};
       if (!scv['10y'] || !scv['1y']) return;
       var t10 = (yields.tec10_fr && yields.tec10_fr.current != null) ? parseFloat(yields.tec10_fr.current) : null;
 
@@ -963,6 +996,7 @@ var _sA = html.length;
         html += '</tr>';
       });
       html += '</tbody></table></div>';
+      html += '<div style="margin-top:7px;font-size:10px;color:' + BG.textMuted + ';line-height:1.5">Courbe <strong>swap EUR</strong> (EIOPA' + (_st.shift != null ? ', publiée au ' + (_data.swapCurve.as_of || '—') + ' et recalée de ' + (_st.shift >= 0 ? '+' : '−') + Math.abs(Math.round(_st.shift)) + ' bp sur la courbe AAA quotidienne' : '') + '). « Tel que pricé dans 1 an » = <strong>forward</strong> reconstruit sur cette courbe : (1+z<sub>T+1</sub>)<sup>T+1</sup> ÷ (1+z<sub>1</sub>), ramené en taux annuel sur T ans. Budget option = <strong>1 − 1/(1+r)<sup>T</sup></strong> : la part du nominal qui n\'est pas immobilisée pour rembourser le capital, donc disponible pour acheter les options qui paient les coupons.</div>';
 
       // ── Le même arbitrage, en euros
       // Attendre ne laisse pas l'argent oisif : il reste placé en CAT. Le coût de l'attente
