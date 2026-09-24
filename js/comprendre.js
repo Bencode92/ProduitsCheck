@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════════
 // COMPRENDRE — page de référence sur les produits structurés
-//   0. Les cinq taux, par l'exemple (où chacun mord, et ce qui les distingue)
-//   1. Le test du souverain : chaque produit de taux vs l'OAT de même durée
+//   1. Les cinq taux, par l'exemple (où chacun mord, et ce qui les distingue)
+//   3. Le test du souverain : chaque produit de taux vs l'OAT de même durée
 //   2. Les 3 briques + budget option (calculé sur la courbe du jour)
 //   3. Les familles de produits, avec TES produits rattachés
 //   4. Décodeur des noms commerciaux
@@ -74,7 +74,7 @@
   }
 
 
-  // ── 0. L'échelle de placement d'une trésorerie d'entreprise ──────
+  // ── 2. L'échelle de placement d'une trésorerie d'entreprise ──────
   function _echelle() {
     var y = (_rates && _rates.yields) || {}, pr = (_rates && _rates.policy_rates) || {};
     var g = function (k) { return (y[k] && parseFloat(y[k].current)) || null; };
@@ -93,7 +93,7 @@
       ['Structuré actions', 'illiquide', '7 à 11 % affichés', 'Capital à risque sous une barrière. Le coupon élevé est le prix du put que tu vends. Hors cadre pour la poche prudente.', 'var(--red)'],
       ['Actions, OPC actions', 'quotidienne', '—', 'Ce n\'est plus de la trésorerie. À réserver à une poche longue clairement identifiée.', 'var(--red)']
     ];
-    var h = '<div class="section"><div class="section-header"><div class="section-title"><span class="dot" style="background:#059669"></span>🪜 L\'échelle de placement d\'une trésorerie d\'entreprise</div>' +
+    var h = '<div class="section"><div class="section-header"><div class="section-title"><span class="dot" style="background:#059669"></span>🏦 L\'échelle de placement d\'une trésorerie d\'entreprise</div>' +
       '<span style="font-size:10px;color:var(--text-dim)">taux du ' + ((_rates && _rates.fetched_at) ? _rates.fetched_at.split('T')[0] : '?') + '</span></div>' +
       '<div style="font-size:12px;line-height:1.65;max-width:72ch;margin-bottom:12px">Les banques présentent toujours le même escalier — du compte courant aux actions. Ce qui compte n\'est pas le taux affiché de chaque marche, mais <strong>ce que tu abandonnes pour l\'obtenir</strong> : la liquidité d\'abord, la garantie ensuite.</div>' +
       '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px;min-width:680px"><thead><tr style="border-bottom:1px solid var(--border)">' +
@@ -572,9 +572,80 @@
     return h;
   }
 
+  // ── Mise en page : sommaire + sections repliables ────────────────
+  // La page fait ~6 400 mots. Tout déroulé d'un bloc, l'information juste devient
+  // illisible : on ne sait ni par où commencer ni ce qu'on va trouver. On met donc
+  // un sommaire en tête (ce qu'on apprend + le temps que ça prend) et on replie
+  // tout sauf la première section. Les fiches produit, à elles seules 60 % du
+  // texte, ne s'ouvrent que si on les demande.
+
+  // Isole l'en-tête d'une section pour le transformer en bandeau cliquable.
+  function _splitSection(html) {
+    var k = '<div class="section-header">';
+    var a = html.indexOf(k);
+    if (a < 0) return null;
+    var i = a + k.length, depth = 1;
+    while (i < html.length && depth > 0) {
+      if (html.substr(i, 4) === '<div') { depth++; i += 4; continue; }
+      if (html.substr(i, 6) === '</div>') { depth--; i += 6; continue; }
+      i++;
+    }
+    var open = html.indexOf('>') + 1;                    // fin de <div class="section" …>
+    return { head: html.slice(a + k.length, i - 6), body: html.slice(i, html.lastIndexOf('</div>')), attrs: html.slice(0, open) };
+  }
+
+  function _mots(html) { return html.replace(/<[^>]*>/g, ' ').split(/\s+/).filter(Boolean).length; }
+
+  function _pliable(id, html, ouvert) {
+    var p = _splitSection(html);
+    if (!p) return html;
+    var on = !!ouvert;
+    var mn = Math.max(1, Math.round(_mots(p.body) / 200));
+    var h = '<div class="section" id="' + id + '" style="padding:0;overflow:hidden">';
+    h += '<div onclick="window._cmpSec(\'' + id + '\')" style="display:flex;align-items:center;gap:12px;padding:13px 16px;cursor:pointer;user-select:none' + (on ? ';border-bottom:1px solid var(--border)' : '') + '">';
+    h += '<div style="flex:1;min-width:0">' + p.head + '</div>';
+    h += '<span style="font-size:10px;color:var(--text-dim);white-space:nowrap">' + mn + ' min</span>';
+    h += '<span style="font-size:13px;color:var(--text-dim);transform:rotate(' + (on ? '90' : '0') + 'deg);transition:transform .15s">›</span>';
+    h += '</div>';
+    if (on) h += '<div style="padding:14px 16px 16px">' + p.body + '</div>';
+    return h + '</div>';
+  }
+
+  var PLAN = [
+    ['taux', '🪜', 'Les cinq taux, par l\'exemple', 'Ce que mesure chacun, et où il mord concrètement. <strong>Commence ici.</strong>'],
+    ['echelle', '🏦', 'L\'échelle de placement', 'Du compte courant au structuré : ce que chaque marche rapporte et immobilise.'],
+    ['souverain', '⚖️', 'Le test du souverain', 'La question unique qui élimine 80 % des propositions.'],
+    ['briques', '🧱', 'Comment un structuré est fabriqué', 'Un prêt, plus une option que tu vends. Et le budget disponible aujourd\'hui.'],
+    ['fiches', '🗂️', 'Les fiches produit', '19 types classiques, avec un exemple chiffré sur 100 000 €. <em>La section la plus longue — à consulter à la demande.</em>'],
+    ['decodeur', '🔤', 'Décodeur des noms commerciaux', 'Traduire une marque en mécanique.'],
+    ['questions', '✅', 'Les six questions devant une brochure', 'À garder sous la main pendant le rendez-vous.']
+  ];
+
+  function _sommaire() {
+    var h = '<div class="section" style="border-left:3px solid #0284C7">';
+    h += '<div style="font-size:13px;font-weight:700;color:var(--text-bright);margin-bottom:3px">Par où commencer</div>';
+    h += '<div style="font-size:11.5px;line-height:1.6;color:var(--text-muted);margin-bottom:11px;max-width:72ch">Cette page fait une trentaine de minutes si on la lit d\'un trait — ce n\'est pas l\'idée. Les sections sont repliées : ouvre celle qui répond à ta question du moment. <strong>Pressé ?</strong> Les cinq taux, puis les six questions : cinq minutes, et tu tiens l\'essentiel.</div>';
+    h += '<div style="display:grid;gap:5px">';
+    PLAN.forEach(function (p) {
+      h += '<div onclick="window._cmpSec(\'' + p[0] + '\',1)" style="display:flex;align-items:baseline;gap:10px;padding:7px 10px;border-radius:6px;cursor:pointer;background:var(--bg-elevated)">';
+      h += '<span style="font-size:13px;flex:none">' + p[1] + '</span>';
+      h += '<span style="flex:1;min-width:0;font-size:11.5px;line-height:1.5"><strong style="color:var(--text-bright)">' + p[2] + '</strong> <span style="color:var(--text-muted)">— ' + p[3] + '</span></span>';
+      h += '</div>';
+    });
+    return h + '</div></div>';
+  }
+
   // ── Rendu ────────────────────────────────────────────────────────
   window._cmpToggle = function (id) { _open[id] = !_open[id]; renderComprendre(document.getElementById('main-content')); };
   window._cmpFilter = function (k) { _open.filter = k; renderComprendre(document.getElementById('main-content')); };
+  window._cmpSec = function (id, force) {
+    _open['sec_' + id] = force ? true : !_open['sec_' + id];
+    renderComprendre(document.getElementById('main-content'));
+    if (force) setTimeout(function () {
+      var el = document.getElementById(id);
+      if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 40);
+  };
 
   window.renderComprendre = function (container) {
     if (!container) return;
@@ -587,6 +658,14 @@
       });
       return;
     }
-    container.innerHTML = head + _lesTaux() + _echelle() + _testSouverain() + _briques() + _fiches() + _decodeur() + _questions();
+    var O = function (id, def) { return _open['sec_' + id] === undefined ? !!def : _open['sec_' + id]; };
+    container.innerHTML = head + _sommaire()
+      + _pliable('taux', _lesTaux(), O('taux', true))
+      + _pliable('echelle', _echelle(), O('echelle'))
+      + _pliable('souverain', _testSouverain(), O('souverain'))
+      + _pliable('briques', _briques(), O('briques'))
+      + _pliable('fiches', _fiches(), O('fiches'))
+      + _pliable('decodeur', _decodeur(), O('decodeur'))
+      + _pliable('questions', _questions(), O('questions'));
   };
 })();
