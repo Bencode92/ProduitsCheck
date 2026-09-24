@@ -205,21 +205,8 @@
       var R = function (x) { var v = x - infl; return '<span style="font-family:var(--mono);color:' + (v >= 0.5 ? '#047857' : v >= 0 ? '#B45309' : '#B91C1C') + ';font-weight:700">' + (v >= 0 ? '+' : '−') + Math.abs(Math.round(v * 100) / 100).toFixed(2).replace('.', ',') + ' %</span>'; };
 
       html += '<div style="background:' + BG.card + ';border:1px solid #BAE6FD;border-left:4px solid #0284C7;border-radius:10px;padding:14px 16px;margin-bottom:16px">';
-      html += '<div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:8px"><span style="font-size:13px;font-weight:800;color:#075985">📡 Lecture de la situation</span>';
+      html += '<div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:8px"><span style="font-size:13px;font-weight:800;color:#075985">📡 Le taux réel — ce qui reste après inflation</span>';
       html += '<span style="font-size:10px;color:' + BG.textDim + '">BCE dépôt ' + P(dep) + (refi != null ? ' · refi ' + P(refi) : '') + (depDate ? ' au ' + depDate : '') + '</span></div>';
-
-      // Ligne 1 — ce que le marché price déjà
-      html += '<div style="font-size:11.5px;line-height:1.6;color:' + BG.text + ';margin-bottom:8px">';
-      html += '<strong>Ce qui est déjà dans les prix.</strong> L\'Euribor 12 mois (' + P(e12) + ') est <strong>' + (anticip >= 0 ? '+' : '') + anticip + ' bp</strong> au-dessus du taux de dépôt BCE : le marché anticipe environ <strong>' + String(hikes).replace('.', ',') + ' hausse' + (Math.abs(parseFloat(hikes)) >= 2 ? 's' : '') + ' de 25 bp</strong> sur un an.';
-      if (fwd66 != null) html += ' Le forward 6 mois dans 6 mois ressort à <strong>' + P(fwd66) + '</strong> — c\'est le point mort : attendre ne gagne que si le taux futur dépasse ce niveau.';
-      html += '</div>';
-
-      // Ligne 2 — la pente française
-      if (penteFR != null && penteAAA != null) {
-        html += '<div style="font-size:11.5px;line-height:1.6;color:' + BG.text + ';margin-bottom:8px">';
-        html += '<strong>La pente est française, pas européenne.</strong> De 2 à 10 ans, la courbe France monte de <strong>+' + penteFR + ' bp</strong> quand la zone euro AAA ne monte que de <strong>+' + penteAAA + ' bp</strong>' + (primeFR != null ? ', soit <strong>' + primeFR + ' bp</strong> de prime française sur le 10 ans' : '') + '. Cet écart n\'est pas une anticipation d\'inflation : c\'est la prime de risque politique et budgétaire, qui s\'élargit avec la maturité.';
-        html += '</div>';
-      }
 
       // Ligne 3 — taux réels
       html += '<div style="font-size:11.5px;line-height:1.6;color:' + BG.text + ';margin-bottom:6px"><strong>Le chiffre qui décide : le taux réel</strong> <span style="font-size:10px;color:' + BG.textDim + '">(inflation retenue ' + P(infl) + ', ' + inflSrc + ')</span></div>';
@@ -236,26 +223,26 @@
       });
       html += '</div>';
       html += '<div style="font-size:11px;line-height:1.55;color:' + BG.textDim + ';padding:8px 10px;background:' + BG.bg + ';border-radius:6px">' +
-        '<strong style="color:' + BG.text + '">Ce que ça implique.</strong> Le court terme ne couvre pas l\'inflation : rester court pour « voir venir » coûte du pouvoir d\'achat pendant l\'attente, <em>et</em> suppose une hausse au-delà des ' + anticip + ' bp déjà pricés. Seule la partie longue paie un taux réel franchement positif — et c\'est celle que les banques ne proposent pas en direct.' +
+        '<strong style="color:' + BG.text + '">Ce que ça implique.</strong> Le court terme ne couvre pas l\'inflation : rester court pour « voir venir » coûte du pouvoir d\'achat pendant l\'attente. Seule la partie longue paie un taux réel franchement positif — et c\'est celle que les banques ne proposent pas en direct.' +
         '</div>';
       if (stale) html += '<div style="font-size:10px;color:#B45309;margin-top:7px">⚠ Euribor issu de la <strong>moyenne mensuelle ' + e3Date + '</strong> (série BCE) : il ne reflète pas encore la dernière décision de politique monétaire. Le fixing du jour est typiquement 10 à 20 bp plus haut.</div>';
       html += '</div>';
     })();
 
     // ═══ L'ÉCHELLE DES TAUX : qui est qui, du plancher au produit ═══
-    // Objectif pédagogique : sur la même page, les taux affichés viennent de 4 mondes
-    // différents (décidé / constaté / interbancaire / souverain). Les empiler dans l'ordre
-    // montre ce que chaque étage ajoute au précédent — et rend visible l'étage manquant.
+    // Contrainte d'affichage : cinq explications de même poids visuel = mur de texte illisible.
+    // La hiérarchie est donc : (1) l'empilement en une barre, lisible en trois secondes ;
+    // (2) cinq lignes compactes avec le chiffre qui compte ; (3) la prose derrière un clic.
     (function () {
       var num = function (o) { return (o && o.current != null) ? parseFloat(o.current) : null; };
       var P = function (x) { return x == null ? '—' : (Math.round(x * 100) / 100).toFixed(2).replace('.', ',') + ' %'; };
+      var BPs = function (x) { return (x >= 0 ? '+' : '−') + Math.abs(Math.round(x)) + ' bp'; };
       var sw = _data.swaps || {};
       var dep = num(policy.ecb_deposit_rate), refi = num(policy.ecb_main_rate), estr = num(policy.estr);
       var e3 = num(yields.euribor_3m), e6 = num(yields.euribor_6m), e12 = num(yields.euribor_12m);
       var t2 = num(yields.tec2_fr), t5 = num(yields.tec5_fr), t10 = num(yields.tec10_fr);
       var a10 = num(yields.oat_fr_10y);
-      // Courbe swap : EIOPA (mensuelle, officielle) en source de base ; une saisie manuelle
-      // plus fraîche (écran de la conseillère) la remplace point par point.
+
       var sc = _data.swapCurve || {}, scv = sc.swap_eur || {};
       var _sw = function (mat, manual) {
         if (manual != null) return { v: parseFloat(manual), src: 'manuel' };
@@ -266,11 +253,12 @@
       var _o10 = _sw('10y', sw.swap_estr && sw.swap_estr['10y']), _o5 = _sw('5y', sw.swap_estr && sw.swap_estr['5y']), _o2 = _sw('2y', sw.swap_estr && sw.swap_estr['2y']);
       var cms10 = _c10.v, cms2 = _c2.v, ois10 = _o10.v, ois5 = _o5.v, ois2 = _o2.v;
       var swAsOf = sw.as_of || sc.as_of || null;
-      var swSrc = (_o10.src === 'manuel' || _c10.src === 'manuel') ? 'saisie manuelle' : (sc.source ? 'EIOPA (courbe swap EUR)' : null);
+      var swSrc = (_o10.src === 'manuel' || _c10.src === 'manuel') ? 'saisie manuelle' : (sc.source ? 'EIOPA' : null);
+      var swMissing = (ois10 == null && cms10 == null);
 
-      // Le portefeuille contient-il un produit indexé CMS ? (sinon l'alerte n'a pas lieu d'être)
-      // On regarde le portefeuille ET les propositions à l'étude : une offre CMS en cours
-      // d'analyse est justement le moment où l'absence de donnée coûte le plus cher.
+      if (dep == null || t10 == null) return;
+
+      // Produit indexé CMS : portefeuille ET propositions à l'étude.
       var cmsProd = null, cmsWhere = '';
       try {
         var lists = [
@@ -286,173 +274,172 @@
         }
       } catch (e) {}
 
-      var chip = function (label, val, dim) {
-        return '<div style="display:flex;flex-direction:column;gap:1px;min-width:74px">' +
-          '<span style="font-size:9.5px;letter-spacing:.04em;text-transform:uppercase;color:' + BG.textMuted + '">' + label + '</span>' +
-          '<span style="font-family:var(--mono,ui-monospace,monospace);font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;color:' + (dim ? '#B45309' : BG.text) + '">' + val + '</span></div>';
-      };
-
-      var rung = function (o) {
-        var h = '<div style="display:flex;gap:0;background:' + BG.section + ';border:1px solid ' + BG.border + ';border-left:5px solid ' + o.color + ';border-radius:8px;overflow:hidden">';
-        h += '<div style="flex:1;min-width:0;padding:12px 14px">';
-        h += '<div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:8px">';
-        h += '<span style="font-size:9.5px;font-weight:800;letter-spacing:.06em;color:' + o.color + '">ÉTAGE ' + o.n + '</span>';
-        h += '<span style="font-size:13px;font-weight:700;color:' + BG.text + '">' + o.title + '</span>';
-        h += '<span style="font-size:10.5px;color:' + BG.textMuted + '">' + o.who + '</span></div>';
-        h += '<div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:9px">' + o.chips + '</div>';
-        h += '<div style="font-size:11.5px;line-height:1.6;color:' + BG.textDim + '">' + o.body + '</div>';
-        if (o.use) h += '<div style="margin-top:7px;font-size:10.5px;color:' + BG.textMuted + '"><strong style="color:' + o.color + '">Sert à :</strong> ' + o.use + '</div>';
-        h += '</div></div>';
-        return h;
-      };
+      // Styles de l'accordéon — injectés une fois, portée limitée par le préfixe .rk-
+      html += '<style>' +
+        '.rk-d{border:1px solid ' + BG.border + ';border-radius:8px;background:' + BG.section + ';overflow:hidden}' +
+        '.rk-d+.rk-d{margin-top:6px}' +
+        '.rk-d>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:11px;padding:10px 13px;user-select:none}' +
+        '.rk-d>summary::-webkit-details-marker{display:none}' +
+        '.rk-d>summary:hover{background:' + BG.row1 + '}' +
+        '.rk-d[open]>summary{border-bottom:1px solid ' + BG.border + ';background:' + BG.row1 + '}' +
+        '.rk-n{flex:none;width:21px;height:21px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:800;color:#fff}' +
+        '.rk-t{font-size:12.5px;font-weight:700;color:' + BG.text + '}' +
+        '.rk-s{font-size:10.5px;color:' + BG.textMuted + '}' +
+        '.rk-v{margin-left:auto;display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;justify-content:flex-end}' +
+        '.rk-v b{font-family:var(--mono,ui-monospace,monospace);font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;color:' + BG.text + '}' +
+        '.rk-v i{font-style:normal;font-size:10.5px;font-weight:700;font-variant-numeric:tabular-nums}' +
+        '.rk-c{flex:none;font-size:11px;color:' + BG.textMuted + ';transition:transform .15s}' +
+        '.rk-d[open] .rk-c{transform:rotate(90deg)}' +
+        '.rk-b{padding:12px 13px 13px;font-size:11.5px;line-height:1.65;color:' + BG.textDim + '}' +
+        '.rk-u{margin-top:10px;padding:9px 11px;border-radius:6px;background:' + BG.row1 + ';font-size:11px;line-height:1.6;color:' + BG.textDim + '}' +
+        '.rk-u strong.h{display:block;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px}' +
+        '@media(max-width:560px){.rk-d>summary{flex-wrap:wrap}.rk-v{margin-left:0;width:100%;justify-content:flex-start}}' +
+        '</style>';
 
       html += '<div style="margin:22px 0 16px">';
       html += '<div style="font-size:14px;font-weight:700;color:' + BG.text + ';margin-bottom:3px">🪜 L\'échelle des taux — qui est qui</div>';
-      html += '<div style="font-size:11px;color:' + BG.textDim + ';margin-bottom:12px">Les taux de cette page ne mesurent pas la même chose. Empilés du plancher au produit, chaque étage ajoute une prime au précédent : c\'est cet écart qui se négocie.</div>';
-      html += '<div style="display:flex;flex-direction:column;gap:9px">';
+      html += '<div style="font-size:11px;color:' + BG.textDim + ';margin-bottom:12px">Les taux de cette page ne mesurent pas la même chose. Chaque étage ajoute une prime au précédent : c\'est cet écart qui se négocie. <span style="color:' + BG.textMuted + '">Cliquez un étage pour le détail.</span></div>';
 
-      // ── Étage 1 : les taux directeurs
+      // ── HERO : l'empilement en une barre ────────────────────────────────────
+      var anchors = [];
+      if (estr != null) anchors.push({ v: estr, lab: 'Base — €STR au jour le jour', col: '#0891B2', short: '€STR' });
+      if (e12 != null) anchors.push({ v: e12, lab: 'anticipation BCE à 1 an', col: '#4338CA', short: 'Euribor 12 m' });
+      if (cms10 != null) anchors.push({ v: cms10, lab: 'terme, de 1 an à 10 ans', col: '#0F766E', short: 'Swap 10 ans' });
+      anchors.push({ v: t10, lab: 'risque & terme France', col: '#047857', short: 'OAT 10 ans' });
+      if (anchors.length >= 3) {
+        var top = anchors[anchors.length - 1].v;
+        html += '<div style="background:' + BG.section + ';border:1px solid ' + BG.border + ';border-radius:8px;padding:14px 15px;margin-bottom:11px">';
+        html += '<div style="display:flex;height:26px;border-radius:5px;overflow:hidden;border:1px solid ' + BG.border + '">';
+        anchors.forEach(function (a, i) {
+          var span = (i === 0) ? a.v : (a.v - anchors[i - 1].v);
+          var pct = Math.max(2, span / top * 100);
+          html += '<div title="' + a.lab + '" style="width:' + pct + '%;background:' + a.col + ';opacity:' + (i === 0 ? '.85' : (0.5 + i * 0.16)) + '"></div>';
+        });
+        html += '</div>';
+        html += '<div style="display:flex;justify-content:space-between;margin-top:5px;font-family:var(--mono,ui-monospace,monospace);font-size:10px;color:' + BG.textMuted + '"><span>0 %</span><span style="font-weight:700;color:' + BG.text + ';font-size:12px">' + P(top) + '</span></div>';
+        html += '<div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:9px">';
+        anchors.forEach(function (a, i) {
+          var span = (i === 0) ? a.v : (a.v - anchors[i - 1].v);
+          html += '<div style="display:flex;align-items:center;gap:6px;padding:5px 9px;background:' + BG.row1 + ';border-radius:5px">' +
+            '<span style="width:9px;height:9px;border-radius:2px;background:' + a.col + ';flex:none"></span>' +
+            '<span style="font-family:var(--mono,ui-monospace,monospace);font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;color:' + a.col + '">' + (i === 0 ? P(span) : BPs(span * 100)) + '</span>' +
+            '<span style="font-size:10.5px;color:' + BG.textDim + '">' + a.lab + '</span></div>';
+        });
+        html += '</div>';
+        html += '<div style="margin-top:9px;font-size:11px;line-height:1.6;color:' + BG.textDim + '">Lecture : sur les <strong style="color:' + BG.text + '">' + P(top) + '</strong> que rapporte l\'OAT française à 10 ans, <strong>' + P(anchors[0].v) + '</strong> ne sont que le prix de l\'argent au jour le jour. Le reste se gagne en acceptant successivement le risque de taux, la durée, puis le risque France — <strong>et chaque produit qu\'on te propose se juge à l\'étage où ton capital est réellement immobilisé, pas un étage plus bas.</strong></div>';
+        html += '</div>';
+      }
+
+      // ── Les cinq étages, compacts et dépliables ─────────────────────────────
+      var rung = function (o) {
+        var h = '<details class="rk-d"' + (o.open ? ' open' : '') + '>';
+        h += '<summary><span class="rk-n" style="background:' + o.color + '">' + o.n + '</span>';
+        h += '<span><span class="rk-t">' + o.title + '</span><br><span class="rk-s">' + o.who + '</span></span>';
+        h += '<span class="rk-v">' + o.chips + '</span><span class="rk-c">›</span></summary>';
+        h += '<div class="rk-b">' + o.body;
+        h += '<div class="rk-u" style="border-left:3px solid ' + o.color + '"><strong class="h" style="color:' + o.color + '">Pour lire un structuré</strong>' + o.use + '</div>';
+        h += '</div></details>';
+        return h;
+      };
+      var V = function (v, note, col) {
+        return '<b>' + v + '</b>' + (note ? '<i style="color:' + (col || BG.textMuted) + '">' + note + '</i>' : '');
+      };
+
       html += rung({
-        n: 1, color: '#7C3AED', title: 'Les taux directeurs', who: '· décidés par la BCE',
-        chips: chip('Dépôt (DFR)', P(dep)) + chip('Refi (MRO)', P(refi)) +
-               ((dep != null && refi != null) ? chip('Corridor', Math.round((refi - dep) * 100) + ' bp') : ''),
-        body: 'Le <strong>taux de dépôt</strong> est celui auquel une banque place son cash excédentaire à la BCE, au jour le jour, sans risque. C\'est le <strong>plancher absolu</strong> du marché monétaire euro : personne ne prête moins cher, puisque cette alternative existe toujours. Le taux de refi est celui auquel une banque <em>emprunte</em> à la BCE à une semaine — historiquement « le » taux directeur, aujourd\'hui marginal : les banques sont en excédent de liquidité, elles déposent, elles n\'empruntent plus. <strong>C\'est donc le taux de dépôt qui pilote réellement les marchés</strong>, pas le refi.',
-        use: '<strong>pour lire un structuré :</strong> c\'est ce qui finance le <strong>budget option</strong>. Sur un produit à capital garanti, l\'émetteur place ton capital au taux du marché et n\'a que les intérêts à dépenser en coupons. Taux courts hauts = budget large = coupons généreux <em>sans</em> risque sur le capital ; taux courts qui baissent = le même produit devient impossible à structurer. Et c\'est aussi le plancher du CAT : le structuré doit battre <strong>ça</strong>, pas zéro.'
+        n: 1, color: '#7C3AED', title: 'Les taux directeurs', who: 'décidés par la BCE — le plancher',
+        chips: V(P(dep), refi != null ? 'refi ' + P(refi) : ''),
+        body: 'Le <strong>taux de dépôt</strong> est celui auquel une banque place son cash excédentaire à la BCE, au jour le jour, sans risque. C\'est le <strong>plancher absolu</strong> du marché monétaire euro : personne ne prête moins cher, puisque cette alternative existe toujours. Le taux de refi est celui auquel une banque <em>emprunte</em> à la BCE à une semaine — historiquement « le » taux directeur, aujourd\'hui marginal : les banques sont en excédent de liquidité, elles déposent, elles n\'empruntent plus. <strong>C\'est donc le taux de dépôt qui pilote réellement les marchés.</strong>',
+        use: 'c\'est ce qui finance le <strong>budget option</strong>. Sur un produit à capital garanti, l\'émetteur place ton capital au taux du marché et n\'a que les intérêts à dépenser en coupons. Taux courts hauts = coupons généreux <em>sans</em> risque sur le capital ; taux qui baissent = le même produit devient impossible à structurer. C\'est aussi le plancher du CAT : le structuré doit battre <strong>ça</strong>, pas zéro.'
       });
 
-      // ── Étage 2 : €STR
       html += rung({
-        n: 2, color: '#0891B2', title: 'Le jour le jour constaté — €STR', who: '· observé, pas décidé',
-        chips: chip('€STR', P(estr)) + (policy.estr && policy.estr.date ? chip('au', policy.estr.date) : '') +
-               ((estr != null && dep != null) ? chip('vs dépôt BCE', (estr - dep >= 0 ? '+' : '−') + Math.abs(Math.round((estr - dep) * 100)) + ' bp') : ''),
+        n: 2, color: '#0891B2', title: 'Le jour le jour constaté — €STR', who: 'observé, pas décidé' + (policy.estr && policy.estr.date ? ' · ' + policy.estr.date : ''),
+        chips: V(P(estr), (estr != null && dep != null) ? BPs((estr - dep) * 100) + ' vs BCE' : ''),
         body: 'Le <strong>taux moyen réellement payé</strong> sur les prêts au jour le jour entre banques, calculé chaque matin par la BCE sur les transactions de la veille. Il colle au taux de dépôt, quelques points de base en dessous. Ce n\'est pas une décision : c\'est une mesure.',
-        use: '<strong>pour lire un structuré :</strong> c\'est le taux avec lequel on <strong>actualise</strong> les flux futurs du produit. Autrement dit, c\'est ce qui fixe sa <strong>valeur de marché en cours de vie</strong> — le prix auquel la banque te rachètera si tu dois sortir avant l\'échéance. Quand l\'€STR monte, la valeur d\'un produit à taux fixe déjà émis baisse.'
+        use: 'c\'est le taux avec lequel on <strong>actualise</strong> les flux futurs du produit — donc ce qui fixe sa <strong>valeur de rachat en cours de vie</strong>, le prix auquel la banque te reprend si tu dois sortir avant l\'échéance. Quand l\'€STR monte, la valeur d\'un produit à taux fixe déjà émis baisse.'
       });
 
-      // ── Étage 3 : Euribor
       var e3Stale = yields.euribor_3m && /^\d{4}-\d{2}$/.test(String(yields.euribor_3m.date || ''));
       html += rung({
-        n: 3, color: '#0284C7', title: 'L\'interbancaire à terme — Euribor', who: '· ce que les banques se prêtent, base ACT/360',
-        chips: chip('3 mois', P(e3)) + chip('6 mois', P(e6)) + chip('12 mois', P(e12)) +
-               ((e12 != null && dep != null) ? chip('vs BCE', '+' + Math.round((e12 - dep) * 100) + ' bp') : ''),
-        body: 'Contrairement à l\'€STR qui est du jour le jour, l\'Euribor engage sur 3, 6 ou 12 mois. Il contient donc deux choses : <strong>l\'anticipation des décisions BCE</strong> sur la période, <strong>plus une prime de risque bancaire et de liquidité</strong>. L\'écart Euribor 12 mois − dépôt BCE (' + (e12 != null && dep != null ? '+' + Math.round((e12 - dep) * 100) + ' bp' : '—') + ') est la mesure directe de ce que le marché price en hausses à un an.' + (e3Stale ? ' <span style="color:#B45309">⚠ Ici en <strong>moyenne mensuelle</strong> (' + yields.euribor_3m.date + ') : la BCE ne publie pas le fixing quotidien, et la série quotidienne de la Banque de France s\'arrête en 2024. Le fixing du jour est typiquement un peu plus haut.</span>' : ''),
-        use: '<strong>pour lire un structuré :</strong> sous-jacent direct des <strong>floaters</strong> et des <strong>range accrual Euribor</strong> — le coupon tombe si l\'Euribor reste dans un corridor. Et c\'est ton <strong>point mort</strong> : quand tu hésites entre placer maintenant ou attendre, l\'écart Euribor − dépôt BCE te dit ce que le marché price déjà, donc ce que tu dois battre pour que l\'attente rapporte.'
+        n: 3, color: '#0284C7', title: 'L\'interbancaire à terme — Euribor', who: 'base ACT/360' + (e3Stale ? ' · ⚠ moyenne mensuelle ' + yields.euribor_3m.date : ''),
+        chips: V(P(e12), (e12 != null && dep != null) ? BPs((e12 - dep) * 100) + ' vs BCE' : '') + '<i style="color:' + BG.textMuted + '">3 m ' + P(e3) + ' · 6 m ' + P(e6) + '</i>',
+        body: 'Contrairement à l\'€STR qui est du jour le jour, l\'Euribor engage sur 3, 6 ou 12 mois. Il contient donc <strong>l\'anticipation des décisions BCE</strong> sur la période, <strong>plus une prime de risque bancaire et de liquidité</strong>. L\'écart Euribor 12 mois − dépôt BCE (' + (e12 != null && dep != null ? BPs((e12 - dep) * 100) : '—') + ') mesure directement ce que le marché price en hausses à un an.' + (e3Stale ? ' <span style="color:#B45309">⚠ Ici en moyenne mensuelle : la BCE ne publie pas le fixing quotidien, et la série quotidienne de la Banque de France s\'arrête en 2024. Le fixing du jour est typiquement un peu plus haut.</span>' : ''),
+        use: 'sous-jacent direct des <strong>floaters</strong> et des <strong>range accrual Euribor</strong> — le coupon tombe si l\'Euribor reste dans un corridor. Et c\'est ton <strong>point mort</strong> : quand tu hésites entre placer maintenant ou attendre, cet écart dit ce que le marché price déjà, donc ce que l\'attente doit battre.'
       });
 
-      // ── Étage 4 : les swaps (l'étage manquant)
-      var swMissing = (ois10 == null && cms10 == null);
-      var swChips = '';
-      if (ois2 != null || ois5 != null || ois10 != null) swChips += chip('OIS 2a', P(ois2)) + chip('OIS 5a', P(ois5)) + chip('OIS 10a', P(ois10));
-      if (cms2 != null || cms10 != null) swChips += chip('CMS 2a', P(cms2)) + chip('CMS 10a', P(cms10));
-      if (!swChips) swChips = chip('OIS', 'à saisir', true) + chip('CMS 10 ans', 'à saisir', true);
-      if (swAsOf) swChips += chip('au', swAsOf);
+      var swChips = swMissing ? V('à saisir', '', '#B45309')
+        : V(P(cms10), '2 ans ' + P(cms2)) + '<i style="color:' + BG.textMuted + '">' + (swSrc || '') + (swAsOf ? ' · ' + swAsOf : '') + '</i>';
       html += rung({
-        n: 4, color: swMissing ? '#B45309' : '#0F766E', title: 'Les swaps — OIS, IRS, CMS', who: swMissing ? '· ÉTAGE MANQUANT' : '· ' + (swSrc || 'source externe'),
+        n: 4, color: swMissing ? '#B45309' : '#0F766E', title: 'Les swaps — OIS, IRS, CMS', who: swMissing ? '⚠ étage manquant' : 'la courbe qui price tes produits',
         chips: swChips,
         body: 'Un swap échange un taux fixe contre un taux variable. La <strong>courbe swap</strong> est <strong>la vraie courbe sans risque euro — c\'est elle que ta banque utilise pour te coter un produit, pas l\'OAT</strong>. Le <strong>CMS</strong> (Constant Maturity Swap) est simplement cette courbe lue au point 2 ou 10 ans, relevée à chaque date de constatation : c\'est le sous-jacent direct des range accrual et des steepeners.' +
               (swMissing ? ' <br><strong style="color:#B45309">Courbe absente</strong> — à saisir dans <code style="font-size:10px;background:' + BG.input + ';padding:1px 5px;border-radius:3px">data/market/swaps-manual.json</code> depuis l\'écran de ta conseillère.'
-                         : ' <br>Source : <strong>EIOPA</strong>, qui publie chaque mois la courbe swap euro pour Solvabilité II — gratuite et officielle. La BCE et la Banque de France ne publient, elles, aucune courbe swap (vérifié). Fiable jusqu\'à 20 ans ; une saisie manuelle plus fraîche prend le dessus si tu en renseignes une.') +
+                         : ' <br>Source : <strong>EIOPA</strong>, qui publie chaque mois la courbe swap euro pour Solvabilité II — gratuite et officielle. La BCE et la Banque de France ne publient, elles, aucune courbe swap (vérifié). Fiable jusqu\'à 20 ans ; une saisie manuelle plus fraîche prend le dessus.') +
               ((cms10 != null && t10 != null) ? ' <br><strong>L\'écart qui compte : swap 10 ans ' + P(cms10) + ' contre OAT France ' + P(t10) + ', soit ' + Math.round((t10 - cms10) * 100) + ' bp.</strong> Lire une barrière CMS sur le TEC te trompe donc de ' + Math.round((t10 - cms10) * 100) + ' bp — dans le sens qui fait conclure « coupon perdu » à tort.' : ''),
-        use: '<strong>pour lire un structuré :</strong> c\'est l\'étage où se price le produit. Le coupon qu\'on te propose se compare à <em>ce</em> taux pour savoir ce que tu es payé en échange du risque et de l\'option que tu vends. Et toute barrière indexée CMS se lit ici, jamais sur le TEC.'
+        use: 'c\'est l\'étage où se price le produit. Le coupon qu\'on te propose se compare à <em>ce</em> taux pour savoir ce que tu es payé en échange du risque et de l\'option que tu vends. Et toute barrière indexée CMS se lit ici, jamais sur le TEC.'
       });
 
+      html += rung({
+        n: 5, color: '#047857', title: 'Le souverain — TEC France', who: 'base ACT/ACT · zone euro AAA en regard',
+        chips: V(P(t10), (t10 != null && a10 != null) ? BPs((t10 - a10) * 100) + ' vs AAA' : '', '#B45309') + '<i style="color:' + BG.textMuted + '">2 a ' + P(t2) + ' · 5 a ' + P(t5) + '</i>',
+        body: 'Le <strong>TEC</strong> (Taux de l\'Échéance Constante, Banque de France) est le rendement d\'une OAT théorique d\'exactement 2, 5 ou 10 ans. Il ajoute à l\'anticipation de taux une <strong>prime de terme</strong> et une <strong>prime de risque France</strong>. La courbe <strong>zone euro AAA</strong> affichée à côté ne retient que les États les mieux notés, essentiellement l\'Allemagne : c\'est le vrai « sans risque » souverain euro. L\'écart entre les deux' + (t10 != null && a10 != null ? ' — <strong>' + Math.round((t10 - a10) * 100) + ' bp à 10 ans</strong> —' : '') + ' <em>est</em> le spread OAT-Bund. Les deux séries sont affichées séparément pour ne jamais les confondre.',
+        use: 'c\'est le <strong>test de l\'émetteur</strong>. Un EMTN de banque française qui paie <em>moins</em> que l\'OAT de même durée te fait prendre un risque bancaire, une illiquidité et souvent un aléa de rappel — pour un rendement inférieur à celui de l\'État. C\'est aussi le sous-jacent des <strong>TARN TEC 10</strong> : leur barrière se lit ici, et nulle part ailleurs.'
+      });
+
+      // ── Le constat CMS, visible sans clic ───────────────────────────────────
       if (cmsProd && cms10 != null) {
-        // La donnée existe : on la confronte directement à la barrière du produit.
-        var _bar = null, _barName = '';
+        var _bar = null;
         try {
           var _all = [].concat((window.app && app.state && app.state.portfolio) || [], (window.app && app.state && app.state.products) || []);
           for (var _j = 0; _j < _all.length; _j++) {
             if ((_all[_j].name || '') !== cmsProd) continue;
             var _cp = _all[_j].capitalProtection || {}, _co = _all[_j].coupon || {};
             _bar = parseFloat(_co.trigger != null ? _co.trigger : _cp.barrierCoupon);
-            _barName = (_co.trigger != null) ? 'barrière de coupon' : 'barrière de coupon';
             break;
           }
         } catch (e) {}
-        var _gap = (!isNaN(_bar) && _bar != null) ? Math.round((cms10 - _bar) * 100) : null;
+        var _gap = (_bar != null && !isNaN(_bar)) ? Math.round((cms10 - _bar) * 100) : null;
         var _tone = (_gap == null) ? '#0F766E' : (Math.abs(_gap) <= 15 ? '#B45309' : (_gap <= 0 ? '#047857' : '#B91C1C'));
-        html += '<div style="background:' + BG.section + ';border:1px solid ' + _tone + ';border-left:5px solid ' + _tone + ';border-radius:8px;padding:11px 14px;font-size:11.5px;line-height:1.65;color:' + BG.text + '">';
+        html += '<div style="margin-top:9px;background:' + BG.section + ';border:1px solid ' + _tone + ';border-left:5px solid ' + _tone + ';border-radius:8px;padding:11px 14px;font-size:11.5px;line-height:1.65;color:' + BG.text + '">';
         html += '<strong>📌 ' + cmsProd + '</strong> <span style="font-size:10px;color:' + BG.textMuted + '">(' + cmsWhere + ')</span><br>';
         if (_gap != null) {
-          html += 'Sa ' + _barName + ' est à <strong>' + P(_bar) + '</strong>. Le <strong>CMS 10 ans est à ' + P(cms10) + '</strong> : ' +
+          html += 'Barrière de coupon <strong>' + P(_bar) + '</strong> · CMS 10 ans <strong>' + P(cms10) + '</strong> → ' +
             (Math.abs(_gap) <= 15
-              ? '<strong style="color:' + _tone + '">' + Math.abs(_gap) + ' bp seulement ' + (_gap > 0 ? 'au-dessus' : 'en dessous') + ' — le produit est sur le fil.</strong> Un mouvement de quelques points de base fait basculer le coupon.'
-              : (_gap <= 0 ? '<strong style="color:' + _tone + '">' + Math.abs(_gap) + ' bp sous la barrière : condition remplie aujourd\'hui.</strong>' : '<strong style="color:' + _tone + '">' + _gap + ' bp au-dessus : pas de coupon aux niveaux actuels.</strong>')) + '<br>';
-          html += '<span style="color:' + BG.textDim + '">Jugé au TEC 10 (' + P(t10) + '), l\'écart aurait paru de ' + Math.round((t10 - _bar) * 100) + ' bp — soit une lecture fausse de ' + Math.round((t10 - cms10) * 100) + ' bp. C\'est exactement l\'erreur que la substitution CMS→TEC produisait.</span>';
+              ? '<strong style="color:' + _tone + '">' + Math.abs(_gap) + ' bp ' + (_gap > 0 ? 'au-dessus' : 'en dessous') + ', le produit est sur le fil.</strong>'
+              : (_gap <= 0 ? '<strong style="color:' + _tone + '">' + Math.abs(_gap) + ' bp sous la barrière, condition remplie.</strong>' : '<strong style="color:' + _tone + '">' + _gap + ' bp au-dessus, pas de coupon aux niveaux actuels.</strong>')) + '<br>';
+          html += '<span style="color:' + BG.textDim + ';font-size:11px">Jugé au TEC 10 (' + P(t10) + '), l\'écart aurait paru de ' + Math.round((t10 - _bar) * 100) + ' bp — une lecture fausse de ' + Math.round((t10 - cms10) * 100) + ' bp.</span>';
         } else {
-          html += 'Indexé sur le CMS 10 ans, à <strong>' + P(cms10) + '</strong> aujourd\'hui. Barrière non renseignée dans la fiche produit — à compléter pour que le suivi fonctionne.';
+          html += 'Indexé sur le CMS 10 ans, à <strong>' + P(cms10) + '</strong>. Barrière non renseignée dans la fiche — à compléter pour que le suivi fonctionne.';
         }
         html += '</div>';
-      } else if (cmsProd && cms10 == null) {
-        html += '<div style="background:#FFFBEB;border:1px solid #F59E0B;border-radius:8px;padding:11px 14px;font-size:11.5px;line-height:1.6;color:#78350F">';
-        html += '<strong>⚠ Conséquence directe.</strong> « ' + cmsProd + ' » (' + cmsWhere + ') est indexé sur le CMS, et aucune donnée CMS n\'existe dans l\'app : ce produit ne peut pas être suivi. Ne pas le juger au TEC 10 (' + P(t10) + ') — le CMS est un <em>taux de swap</em>, le TEC un <em>rendement d\'État français</em>. Avec la prime de risque française actuelle, l\'OAT se traite nettement au-dessus du swap : conclure « barrière franchie » sur le TEC alors que le CMS est plusieurs dizaines de bp plus bas serait une erreur de lecture.';
-        html += '</div>';
       }
 
-      // ── Étage 5 : le souverain
-      html += rung({
-        n: 5, color: '#047857', title: 'Le souverain — TEC France & zone euro AAA', who: '· base ACT/ACT',
-        chips: chip('TEC 2', P(t2)) + chip('TEC 5', P(t5)) + chip('TEC 10', P(t10)) +
-               ((t10 != null && a10 != null) ? chip('prime France', '+' + Math.round((t10 - a10) * 100) + ' bp', true) : ''),
-        body: 'Le <strong>TEC</strong> (Taux de l\'Échéance Constante, Banque de France) est le rendement d\'une OAT théorique d\'exactement 2, 5 ou 10 ans. Il ajoute à l\'anticipation de taux une <strong>prime de terme</strong> (immobiliser son argent longtemps) et une <strong>prime de risque France</strong>. La courbe <strong>zone euro AAA</strong> affichée à côté ne retient que les États les mieux notés, essentiellement l\'Allemagne : c\'est le vrai « sans risque » souverain euro. L\'écart entre les deux' + (t10 != null && a10 != null ? ' — <strong>' + Math.round((t10 - a10) * 100) + ' bp à 10 ans</strong> —' : '') + ' <em>est</em> le spread OAT-Bund. Les deux séries sont affichées séparément pour ne jamais les confondre.',
-        use: '<strong>pour lire un structuré :</strong> c\'est le <strong>test de l\'émetteur</strong>. Un EMTN de banque française qui paie <em>moins</em> que l\'OAT de même durée te fait prendre un risque bancaire, une illiquidité et souvent un aléa de rappel — pour un rendement inférieur à celui de l\'État. C\'est aussi le sous-jacent des <strong>TARN TEC 10</strong> : leur barrière se lit ici, et nulle part ailleurs.'
-      });
-
-      html += '</div>';
-
-      // ── Résumé : l'empilement des primes
-      if (dep != null && e12 != null && t10 != null) {
-        html += '<div style="margin-top:11px;background:' + BG.row1 + ';border:1px solid ' + BG.border + ';border-radius:8px;padding:12px 14px">';
-        html += '<div style="font-size:11.5px;font-weight:700;color:' + BG.text + ';margin-bottom:7px">L\'empilement, en une ligne</div>';
-        var steps = [['Plancher BCE', dep, '#7C3AED'], ['+ anticipation 1 an', e12, '#0284C7'], ['+ terme & risque France 10 ans', t10, '#047857']];
-        html += '<div style="display:flex;align-items:stretch;gap:6px;flex-wrap:wrap">';
-        steps.forEach(function (st, i) {
-          html += '<div style="flex:1;min-width:130px;padding:9px 11px;background:' + BG.section + ';border:1px solid ' + BG.border + ';border-top:3px solid ' + st[2] + ';border-radius:6px">';
-          html += '<div style="font-size:9.5px;color:' + BG.textMuted + '">' + st[0] + '</div>';
-          html += '<div style="font-family:var(--mono,ui-monospace,monospace);font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;color:' + BG.text + '">' + P(st[1]) + '</div>';
-          if (i > 0) html += '<div style="font-size:10px;color:' + st[2] + ';font-weight:700">+' + Math.round((st[1] - steps[i - 1][1]) * 100) + ' bp</div>';
-          html += '</div>';
-        });
-        html += '</div>';
-        html += '<div style="margin-top:8px;font-size:11px;line-height:1.6;color:' + BG.textDim + '">Du plancher BCE au 10 ans français, <strong>' + Math.round((t10 - dep) * 100) + ' bp</strong> : ' + Math.round((e12 - dep) * 100) + ' bp d\'anticipation de politique monétaire, puis ' + Math.round((t10 - e12) * 100) + ' bp de terme et de risque souverain. Tout produit qu\'on te propose se juge à l\'étage où son capital est réellement immobilisé — pas un étage plus bas.</div>';
-        html += '</div>';
-      }
-
-      // ── Ce que le marché price DÉJÀ : forwards instantanés BCE (vrai consensus, pas une hypothèse)
+      // ── Ce que le marché price déjà : forwards instantanés BCE ──────────────
       (function () {
         var fw = (_data.rates && _data.rates.forwards) || {};
-        var keys = ['fwd_1y', 'fwd_2y', 'fwd_3y', 'fwd_5y', 'fwd_10y'];
-        var pts = keys.map(function (k) { return fw[k]; }).filter(function (o) { return o && o.current != null; });
-        if (pts.length < 3) return;
+        var pts = ['fwd_1y', 'fwd_2y', 'fwd_3y', 'fwd_5y', 'fwd_10y'].map(function (k) { return fw[k]; }).filter(function (o) { return o && o.current != null; });
+        if (pts.length < 3 || estr == null) return;
         var f1 = fw.fwd_1y ? parseFloat(fw.fwd_1y.current) : null;
-        var peak = pts.reduce(function (a, b) { return parseFloat(b.current) > parseFloat(a.current) ? b : a; });
-        html += '<div style="margin-top:11px;background:' + BG.section + ';border:1px solid ' + BG.border + ';border-left:5px solid #4338CA;border-radius:8px;padding:12px 14px">';
-        html += '<div style="display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:8px">';
-        html += '<span style="font-size:12.5px;font-weight:700;color:' + BG.text + '">🔭 Ce que le marché price déjà</span>';
-        html += '<span style="font-size:10px;color:' + BG.textMuted + '">Forwards instantanés, courbe BCE zone euro AAA' + (pts[0].date ? ' · ' + pts[0].date : '') + '</span></div>';
-        html += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:9px">';
-        if (estr != null) {
-          html += '<div style="padding:8px 11px;background:' + BG.row1 + ';border:1px solid ' + BG.border + ';border-radius:6px;min-width:92px">' +
-            '<div style="font-size:9.5px;color:' + BG.textMuted + '">aujourd\'hui</div>' +
-            '<div style="font-family:var(--mono,ui-monospace,monospace);font-size:16px;font-weight:700;font-variant-numeric:tabular-nums;color:' + BG.text + '">' + P(estr) + '</div>' +
-            '<div style="font-size:9.5px;color:' + BG.textMuted + '">€STR</div></div>';
-        }
+        var f3 = fw.fwd_3y ? parseFloat(fw.fwd_3y.current) : null;
+        html += '<div style="margin-top:9px;background:' + BG.section + ';border:1px solid ' + BG.border + ';border-left:5px solid #4338CA;border-radius:8px;padding:12px 14px">';
+        html += '<div style="display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:8px"><span style="font-size:12.5px;font-weight:700;color:' + BG.text + '">🔭 Ce que le marché price déjà</span><span style="font-size:10px;color:' + BG.textMuted + '">Forwards instantanés BCE' + (pts[0].date ? ' · ' + pts[0].date : '') + '</span></div>';
+        html += '<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px">';
+        html += '<div style="padding:7px 10px;background:' + BG.row1 + ';border-radius:5px;min-width:78px"><div style="font-size:9.5px;color:' + BG.textMuted + '">aujourd\'hui</div><div style="font-family:var(--mono,ui-monospace,monospace);font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;color:' + BG.text + '">' + P(estr) + '</div></div>';
         pts.forEach(function (o) {
-          var v = parseFloat(o.current), d = (estr != null) ? Math.round((v - estr) * 100) : null;
-          html += '<div style="padding:8px 11px;background:' + BG.section + ';border:1px solid ' + BG.border + ';border-top:3px solid #4338CA;border-radius:6px;min-width:92px">' +
+          var v = parseFloat(o.current), d = Math.round((v - estr) * 100);
+          html += '<div style="padding:7px 10px;background:' + BG.section + ';border:1px solid ' + BG.border + ';border-top:3px solid #4338CA;border-radius:5px;min-width:78px">' +
             '<div style="font-size:9.5px;color:' + BG.textMuted + '">dans ' + o.horizon_years + ' an' + (o.horizon_years > 1 ? 's' : '') + '</div>' +
-            '<div style="font-family:var(--mono,ui-monospace,monospace);font-size:16px;font-weight:700;font-variant-numeric:tabular-nums;color:' + BG.text + '">' + P(v) + '</div>' +
-            (d != null ? '<div style="font-size:9.5px;font-weight:700;color:' + (d >= 0 ? '#4338CA' : '#B91C1C') + '">' + (d >= 0 ? '+' : '−') + Math.abs(d) + ' bp</div>' : '') + '</div>';
+            '<div style="font-family:var(--mono,ui-monospace,monospace);font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;color:' + BG.text + '">' + P(v) + '</div>' +
+            '<div style="font-size:9.5px;font-weight:700;color:#4338CA">' + BPs(d) + '</div></div>';
         });
         html += '</div>';
-        html += '<div style="font-size:11.5px;line-height:1.6;color:' + BG.textDim + '">';
-        html += 'Le <strong>forward instantané</strong> répond à une seule question : <em>quel taux court le marché anticipe-t-il dans X années ?</em> Ce n\'est pas une prévision maison, c\'est ce qui est déjà payé aujourd\'hui dans les prix. ';
-        if (f1 != null && estr != null) html += 'À un an, le marché price <strong>' + P(f1) + '</strong> contre <strong>' + P(estr) + '</strong> aujourd\'hui : <strong>' + Math.round((f1 - estr) * 100) + ' bp de hausse sont déjà intégrés</strong>, soit environ ' + ((f1 - estr) / 0.25).toFixed(1).replace('.', ',') + ' hausses de 25 bp. ';
-        html += 'Conséquence pratique : <strong>attendre pour placer ne rapporte que si la hausse dépasse ce niveau.</strong> Une hausse conforme au forward est déjà dans le prix du CAT qu\'on te propose aujourd\'hui — tu ne gagnes rien à la « voir venir ».';
-        html += '</div>';
-        html += '<div style="margin-top:7px;font-size:10.5px;color:' + BG.textMuted + '">Sommet de courbe : <strong>' + P(parseFloat(peak.current)) + ' dans ' + peak.horizon_years + ' an' + (peak.horizon_years > 1 ? 's' : '') + '</strong>' + (cms10 == null ? ' · Attention : courbe <strong>AAA</strong> (proxy OIS). La vraie courbe OIS, celle qui price tes structurés, reste à saisir à l\'étage 4.' : '') + '</div>';
+        html += '<div style="font-size:11.5px;line-height:1.6;color:' + BG.textDim + '">Pas une prévision maison : ce qui est <strong>déjà payé</strong> dans les prix d\'aujourd\'hui. ';
+        if (f1 != null) html += 'À un an, le marché price <strong>' + P(f1) + '</strong> contre ' + P(estr) + ' aujourd\'hui — <strong>' + Math.round((f1 - estr) * 100) + ' bp de hausse déjà intégrés</strong>. ';
+        if (f1 != null && f3 != null && Math.abs(f3 - f1) < 0.25) html += 'Et la courbe est <strong>plate au-delà d\'un an</strong> (' + P(f3) + ' à 3 ans) : un pic puis un plateau, pas un cycle qui continue. ';
+        html += '<strong>Attendre ne rapporte que si la hausse dépasse ce niveau.</strong></div>';
         html += '</div>';
       })();
+
       html += '</div>';
     })();
 
