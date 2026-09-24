@@ -69,6 +69,38 @@
     return { rate: rate, bank: bank, dur: dur };
   }
 
+  // ═══ CONVENTIONS ═══════════════════════════════════════════════════════════
+  // Vérifié numériquement le 24/09/2026 : la « spot rate » publiée par la BCE est en
+  // COMPOSITION CONTINUE. Test — la moyenne des forwards instantanés sur [0,T] colle au
+  // SR publié à 0,5-2 bp près (résidu d'intégration), alors qu'elle s'en écarte de 6,1 à
+  // 6,8 bp de façon constante si l'on suppose le SR annuel. Comparer un taux de CAT
+  // (actuariel) à ce SR sans conversion surévalue donc la prime d'environ 4 bp.
+  function _actu(rCont) { return rCont == null ? null : (Math.exp(rCont / 100) - 1) * 100; }
+  // L'€STR est un taux au jour le jour en ACT/360 : capitalisé sur un an il ne vaut pas
+  // son niveau affiché (2,440 % → 2,505 %).
+  function _estrActu(r) { return r == null ? null : (Math.pow(1 + r / 100 / 360, 365) - 1) * 100; }
+
+  // ═══ RECALAGE DE LA COURBE SWAP ════════════════════════════════════════════
+  // EIOPA est mensuel. Comparer un swap du 31/08 à un TEC du jour fait passer le
+  // mouvement de marché de l'intervalle pour du spread. On décale donc chaque point de
+  // la variation observée sur la courbe AAA quotidienne de même maturité, entre la date
+  // EIOPA et aujourd'hui. Approximation assumée : le spread swap/AAA est supposé stable
+  // sur l'intervalle — bien plus juste que de ne rien faire.
+  function _swapAdj(months) {
+    var sc = _data.swapCurve || {}, scv = sc.swap_eur || {};
+    var yrs = months / 12, key = yrs + 'y';
+    var base = scv[key] != null ? parseFloat(scv[key]) : null;
+    if (base == null) return null;
+    var SC = (_data.rates && _data.rates.short_curve) || {};
+    var d = SC['curve_' + months + 'm'];
+    if (!d || !d.history || !sc.as_of) return { v: base, shift: 0, dated: sc.as_of, adjusted: false };
+    var then = null;
+    for (var i = 0; i < d.history.length; i++) { if (d.history[i].date <= sc.as_of) then = d.history[i].value; else break; }
+    if (then == null || d.current == null) return { v: base, shift: 0, dated: sc.as_of, adjusted: false };
+    var shift = parseFloat(d.current) - parseFloat(then);
+    return { v: base + shift, shift: shift * 100, dated: d.date, adjusted: true };
+  }
+
   function _render(container) {
     var r = _data.rates || {};
     var mi = _data.mi || {};
@@ -249,11 +281,16 @@
         if (scv[mat] != null) return { v: parseFloat(scv[mat]), src: 'eiopa' };
         return { v: null, src: null };
       };
-      var _c10 = _sw('10y', sw.cms && sw.cms['10y']), _c2 = _sw('2y', sw.cms && sw.cms['2y']);
-      var _o10 = _sw('10y', sw.swap_estr && sw.swap_estr['10y']), _o5 = _sw('5y', sw.swap_estr && sw.swap_estr['5y']), _o2 = _sw('2y', sw.swap_estr && sw.swap_estr['2y']);
-      var cms10 = _c10.v, cms2 = _c2.v, ois10 = _o10.v, ois5 = _o5.v, ois2 = _o2.v;
-      var swAsOf = sw.as_of || sc.as_of || null;
-      var swSrc = (_o10.src === 'manuel' || _c10.src === 'manuel') ? 'saisie manuelle' : (sc.source ? 'EIOPA' : null);
+      // La courbe EIOPA est mensuelle : on la recale sur la courbe AAA quotidienne de même
+      // maturité, sinon l'écart swap/OAT mesuré contiendrait le mouvement de marché de
+      // l'intervalle. Une saisie manuelle, elle, est déjà à sa date et n'est pas touchée.
+      var sAdj10 = _swapAdj(120), sAdj24 = _swapAdj(24);
+      var _c10 = (sw.cms && sw.cms['10y'] != null) ? { v: parseFloat(sw.cms['10y']), src: 'manuel' } : (sAdj10 ? { v: sAdj10.v, src: 'eiopa' } : { v: null });
+      var _c2 = (sw.cms && sw.cms['2y'] != null) ? { v: parseFloat(sw.cms['2y']), src: 'manuel' } : (sAdj24 ? { v: sAdj24.v, src: 'eiopa' } : { v: null });
+      var cms10 = _c10.v, cms2 = _c2.v, ois10 = cms10, ois5 = (_swapAdj(60) || {}).v, ois2 = cms2;
+      var swShift = (sAdj10 && sAdj10.adjusted) ? sAdj10.shift : null;
+      var swAsOf = sw.as_of || (sAdj10 && sAdj10.adjusted ? sAdj10.dated : sc.as_of) || null;
+      var swSrc = (_c10.src === 'manuel') ? 'saisie manuelle' : (sc.source ? (swShift != null ? 'EIOPA, recalé' : 'EIOPA') : null);
       var swMissing = (ois10 == null && cms10 == null);
 
       if (dep == null || t10 == null) return;
@@ -305,11 +342,17 @@
       html += '<div style="font-size:11px;color:' + BG.textDim + ';margin-bottom:12px">Les taux de cette page ne mesurent pas la même chose. Chaque étage ajoute une prime au précédent : c\'est cet écart qui se négocie. <span style="color:' + BG.textMuted + '">Cliquez un étage pour le détail.</span></div>';
 
       // ── HERO : l'empilement en une barre ────────────────────────────────────
+      // Toutes les bornes sur la MÊME convention (actuarielle) et la MÊME date (aujourd'hui,
+      // swap recalé) : enchaîner un €STR ACT/360, un Euribor mensuel et un swap du 31/08
+      // faisait passer des écarts de convention et de date pour des primes de marché.
+      var _sc12 = (_data.rates && _data.rates.short_curve && _data.rates.short_curve.curve_12m) || null;
+      var m12 = _sc12 && _sc12.current != null ? _actu(parseFloat(_sc12.current)) : null;
       var anchors = [];
-      if (estr != null) anchors.push({ v: estr, lab: 'Base — €STR au jour le jour', col: '#0891B2', short: '€STR' });
-      if (e12 != null) anchors.push({ v: e12, lab: 'anticipation BCE à 1 an', col: '#4338CA', short: 'Euribor 12 m' });
-      if (cms10 != null) anchors.push({ v: cms10, lab: 'terme, de 1 an à 10 ans', col: '#0F766E', short: 'Swap 10 ans' });
-      anchors.push({ v: t10, lab: 'risque & terme France', col: '#047857', short: 'OAT 10 ans' });
+      var estrA0 = _estrActu(estr);
+      if (estrA0 != null) anchors.push({ v: estrA0, lab: 'Base — €STR capitalisé sur 1 an', col: '#0891B2' });
+      if (m12 != null) anchors.push({ v: m12, lab: 'anticipation BCE à 1 an', col: '#4338CA' });
+      if (cms10 != null) anchors.push({ v: cms10, lab: 'terme, de 1 an à 10 ans (swap)', col: '#0F766E' });
+      anchors.push({ v: t10, lab: 'risque & terme France', col: '#047857' });
       if (anchors.length >= 3) {
         var top = anchors[anchors.length - 1].v;
         html += '<div style="background:' + BG.section + ';border:1px solid ' + BG.border + ';border-radius:8px;padding:14px 15px;margin-bottom:11px">';
@@ -330,7 +373,7 @@
             '<span style="font-size:10.5px;color:' + BG.textDim + '">' + a.lab + '</span></div>';
         });
         html += '</div>';
-        html += '<div style="margin-top:9px;font-size:11px;line-height:1.6;color:' + BG.textDim + '">Lecture : sur les <strong style="color:' + BG.text + '">' + P(top) + '</strong> que rapporte l\'OAT française à 10 ans, <strong>' + P(anchors[0].v) + '</strong> ne sont que le prix de l\'argent au jour le jour. Le reste se gagne en acceptant successivement le risque de taux, la durée, puis le risque France — <strong>et chaque produit qu\'on te propose se juge à l\'étage où ton capital est réellement immobilisé, pas un étage plus bas.</strong></div>';
+        html += '<div style="margin-top:9px;font-size:11px;line-height:1.6;color:' + BG.textDim + '">Lecture : sur les <strong style="color:' + BG.text + '">' + P(top) + '</strong> que rapporte l\'OAT française à 10 ans, <strong>' + P(anchors[0].v) + '</strong> ne sont que le prix de l\'argent au jour le jour. <span style="color:' + BG.textMuted + '">Toutes les bornes sont ramenées à la même convention actuarielle et à la date du jour.</span> Le reste se gagne en acceptant successivement le risque de taux, la durée, puis le risque France — <strong>et chaque produit qu\'on te propose se juge à l\'étage où ton capital est réellement immobilisé, pas un étage plus bas.</strong></div>';
         html += '</div>';
       }
 
@@ -406,7 +449,9 @@
         chips: swChips,
         body: '<strong>Pourquoi c\'est la vraie courbe sans risque, et pas l\'OAT.</strong> Un swap ne prête aucun capital : seuls les intérêts s\'échangent, le nominal ne bouge jamais. Il n\'y a donc presque pas de risque de crédit dedans — alors qu\'acheter une OAT, c\'est prêter 100 € à l\'État français pendant dix ans. C\'est pour ça que le marché price avec le swap, et que l\'OAT se traite au-dessus.' +
               (swMissing ? ' <br><strong style="color:#B45309">Courbe absente</strong> — à saisir dans <code style="font-size:10px;background:' + BG.input + ';padding:1px 5px;border-radius:3px">data/market/swaps-manual.json</code> depuis l\'écran de ta conseillère.'
-                         : ' <br>Source : <strong>EIOPA</strong>, qui publie chaque mois la courbe swap euro pour Solvabilité II — gratuite et officielle. La BCE et la Banque de France ne publient, elles, aucune courbe swap (vérifié). Fiable jusqu\'à 20 ans ; une saisie manuelle plus fraîche prend le dessus.') +
+                         : ' <br>Source : <strong>EIOPA</strong>, qui publie chaque mois la courbe swap euro pour Solvabilité II — gratuite et officielle. La BCE et la Banque de France ne publient, elles, aucune courbe swap (vérifié).' +
+                           (swShift != null ? ' Publiée au ' + (sc.as_of || '—') + ', elle est <strong>recalée de ' + BPs(swShift) + '</strong> sur la variation de la courbe AAA quotidienne de même maturité depuis cette date : sans ce recalage, l\'écart avec l\'OAT du jour contiendrait le mouvement de marché de l\'intervalle au lieu du seul spread.' : '') +
+                           ' Une saisie manuelle plus fraîche prend le dessus.') +
               ((cms10 != null && t10 != null) ? ' <br><strong>L\'écart qui compte : swap 10 ans ' + P(cms10) + ' contre OAT France ' + P(t10) + ', soit ' + Math.round((t10 - cms10) * 100) + ' bp.</strong> Lire une barrière CMS sur le TEC te trompe donc de ' + Math.round((t10 - cms10) * 100) + ' bp — dans le sens qui fait conclure « coupon perdu » à tort.' : ''),
         use: 'c\'est l\'étage où se price le produit. Le coupon qu\'on te propose se compare à <em>ce</em> taux pour savoir ce que tu es payé en échange du risque et de l\'option que tu vends. Et toute barrière indexée CMS se lit ici, jamais sur le TEC.'
       });
@@ -503,13 +548,14 @@
       // références (swap au 31/08 ici, AAA au 22/09 là) donnait deux « marché » différents
       // à 12 mois sur la même page — illisible. Le swap reste la référence du LONG, dans
       // le bloc structurés, où sa granularité mensuelle ne gêne pas.
+      // Conventions alignées : un taux de CAT est annoncé en ACTUARIEL. La courbe BCE est
+      // en composition continue et l'€STR en ACT/360 au jour le jour — comparer sans
+      // convertir surévalue la prime d'environ 4 bp à 12 mois.
       var SCd = (_data.rates && _data.rates.short_curve) || {};
-      var cv = { 0: estr };
-      [['curve_3m', 3], ['curve_6m', 6], ['curve_9m', 9], ['curve_12m', 12], ['curve_24m', 24]].forEach(function (k) {
-        if (SCd[k[0]] && SCd[k[0]].current != null) cv[k[1]] = parseFloat(SCd[k[0]].current);
-      });
-      [['5y', 60], ['7y', 84], ['10y', 120]].forEach(function (k) {
-        if (scv[k[0]] != null) cv[k[1]] = parseFloat(scv[k[0]]);
+      var cv = { 0: _estrActu(estr) };
+      [['curve_3m', 3], ['curve_6m', 6], ['curve_9m', 9], ['curve_12m', 12], ['curve_24m', 24],
+       ['curve_60m', 60], ['curve_84m', 84], ['curve_120m', 120]].forEach(function (k) {
+        if (SCd[k[0]] && SCd[k[0]].current != null) cv[k[1]] = _actu(parseFloat(SCd[k[0]].current));
       });
       if (cv[12] == null) return;   // sans la courbe quotidienne, pas d'analyse CAT
       var mkeys = Object.keys(cv).map(Number).sort(function (a, b) { return a - b; });
@@ -551,14 +597,15 @@
 
       // ── La décomposition, sur la meilleure offre 12 mois
       if (best12) {
-        var antic = (best12.mr - estr) * 100, marge = best12.sp;
+        var estrA = _estrActu(estr);
+        var antic = (best12.mr - estrA) * 100, marge = best12.sp;
         html += '<div style="background:' + BG.section + ';border:1px solid ' + BG.border + ';border-radius:8px;padding:13px 15px;margin-bottom:11px">';
         html += '<div style="font-size:11.5px;font-weight:700;color:' + BG.text + ';margin-bottom:9px">D\'où viennent les ' + P(best12.r) + ' de <span style="color:#0F766E">' + best12.bank + ' à ' + best12.m + ' mois</span></div>';
         html += '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:stretch;margin-bottom:9px">';
         var parts = [
-          ['Taux du jour (€STR)', P(estr), '#0891B2', 'ce que vaut l\'argent au jour le jour'],
+          ['€STR capitalisé 1 an', P(estrA), '#0891B2', '2,44 % au jour le jour, ACT/360, composé'],
           ['+ hausses déjà pricées', BP(antic), '#4338CA', 'l\'anticipation BCE sur ' + best12.m + ' mois, déjà payée'],
-          ['+ marge de la banque', BP(marge), marge >= 20 ? '#047857' : marge >= 0 ? '#B45309' : '#B91C1C', 'la seule part négociable']
+          ['+ prime de la banque', BP(marge), marge >= 20 ? '#047857' : marge >= 0 ? '#B45309' : '#B91C1C', 'ce qu\'elle te paie au-dessus du sans-risque']
         ];
         parts.forEach(function (pt) {
           html += '<div style="flex:1;min-width:145px;padding:10px 12px;background:' + BG.row1 + ';border:1px solid ' + BG.border + ';border-top:3px solid ' + pt[2] + ';border-radius:6px">';
@@ -567,7 +614,7 @@
           html += '<div style="font-size:9.5px;color:' + BG.textMuted + ';line-height:1.4;margin-top:2px">' + pt[3] + '</div></div>';
         });
         html += '</div>';
-        html += '<div style="font-size:11.5px;line-height:1.6;color:' + BG.textDim + '"><strong style="color:' + BG.text + '">Ce que ça veut dire.</strong> Sur les ' + Math.round((best12.r - estr) * 100) + ' bp que ce CAT paie au-dessus du jour le jour, <strong>' + Math.round(antic) + ' bp sont l\'anticipation de hausse déjà intégrée</strong> et seulement <strong>' + Math.round(marge) + ' bp</strong> la marge de la banque. Une hausse BCE conforme aux attentes ne fera donc <em>pas</em> monter ce taux : elle est déjà dedans. Seule une hausse <em>au-delà</em> du forward, ou un rattrapage de marge, peut le bouger.</div>';
+        html += '<div style="font-size:11.5px;line-height:1.6;color:' + BG.textDim + '"><strong style="color:' + BG.text + '">Ce que ça veut dire.</strong> Sur les ' + Math.round((best12.r - estrA) * 100) + ' bp que ce CAT paie au-dessus du jour le jour, <strong>' + Math.round(antic) + ' bp sont l\'anticipation de hausse déjà intégrée</strong> et seulement <strong>' + Math.round(marge) + ' bp</strong> la prime propre à la banque — ce qu\'elle consent au-dessus du sans-risque pour capter ton dépôt, et non ce qu\'elle encaisse. Une hausse BCE conforme aux attentes ne fera donc <em>pas</em> monter ce taux : elle est déjà dedans. Seule une hausse <em>au-delà</em> du forward, ou un rattrapage de marge, peut le bouger.</div>';
         html += '</div>';
       }
 
@@ -695,10 +742,10 @@
       // ── Le tableau : chaque offre face au marché de même durée
       html += '<div style="background:' + BG.section + ';border:1px solid ' + BG.border + ';border-radius:8px;padding:13px 15px">';
       html += '<div style="font-size:11.5px;font-weight:700;color:' + BG.text + ';margin-bottom:3px">Chaque offre face au marché de même durée</div>';
-      html += '<div style="font-size:10.5px;color:' + BG.textMuted + ';margin-bottom:9px">L\'écart est la marge réelle de la banque — ce qu\'elle te paie <em>en plus</em> de ce que vaut l\'argent sur cette durée. C\'est le seul chiffre qui se négocie.</div>';
+      html += '<div style="font-size:10.5px;color:' + BG.textMuted + ';margin-bottom:9px">L\'écart est la <strong>prime</strong> que la banque te consent au-dessus du sans-risque de même durée — pas sa marge : c\'est ce qu\'elle <em>paie</em>, en échange de ton risque de crédit sur elle et de la valeur réglementaire de ton dépôt. C\'est le seul chiffre qui se négocie.</div>';
       html += '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px">';
       html += '<thead><tr style="background:' + BG.header + '">' +
-        ['Banque', 'Produit', 'Durée', 'Taux CAT', 'Marché', 'Marge'].map(function (h, i) {
+        ['Banque', 'Produit', 'Durée', 'Taux CAT', 'Sans risque', 'Prime'].map(function (h, i) {
           return '<th style="padding:6px 9px;text-align:' + (i < 3 ? 'left' : 'right') + ';font-size:9.5px;letter-spacing:.04em;text-transform:uppercase;color:' + BG.textDim + ';white-space:nowrap">' + h + '</th>';
         }).join('') + '</tr></thead><tbody>';
       offers.forEach(function (o, i) {
@@ -713,7 +760,7 @@
         html += '</tr>';
       });
       html += '</tbody></table></div>';
-      html += '<div style="margin-top:8px;font-size:10.5px;color:' + BG.textMuted + ';line-height:1.55">Référence : <strong>courbe quotidienne BCE des États zone euro notés AAA</strong> (série YC), aux maturités exactes de la grille — c\'est le rendement sans risque comparable sur la même durée. La marge est donc ce que ta banque paie <em>au-dessus</em> de ce sans-risque. Le progressif est exclu — il se compare à horizon de sortie, via la grille d\'équivalence de l\'onglet CAT.</div>';
+      html += '<div style="margin-top:8px;font-size:10.5px;color:' + BG.textMuted + ';line-height:1.55">Référence : <strong>courbe quotidienne BCE des États zone euro notés AAA</strong> (série YC), aux maturités exactes de la grille, <strong>convertie de la composition continue vers l\'actuariel</strong> pour être comparable à un taux de CAT. En deçà de 6 mois la courbe est mal contrainte (le modèle n\'utilise que des titres de plus de 3 mois) : les primes y sont à prendre avec réserve. Le progressif est exclu — il se compare à horizon de sortie, via la grille d\'équivalence de l\'onglet CAT.</div>';
 
       // ── L'anomalie de pente, si elle existe
       if (best12 && best24) {
@@ -801,10 +848,25 @@
       html += '</tbody></table></div>';
 
       // ── Le même arbitrage, en euros
-      var N = 100000, gain10 = (r10.bF1 - r10.bNow), coutAnnee = r10.spot;
+      // Attendre ne laisse pas l'argent oisif : il reste placé en CAT. Le coût de l'attente
+      // n'est donc PAS une année au taux long, mais l'écart entre ce que rapporterait le
+      // structuré et ce que rapporte le CAT pendant cette année. Mesurer autrement
+      // surévaluait le coût d'un facteur ~3.
+      var N = 100000, gain10 = (r10.bF1 - r10.bNow);
+      var catAlt = null;
+      try {
+        var _cut = new Date(Date.now() - 120 * 864e5).toISOString().slice(0, 10);
+        var _cr = ((_data.catRates && _data.catRates.rates) || []).filter(function (o) {
+          return parseInt(o.durationMonths, 10) === 12 && o.rateType !== 'progressif'
+            && !isNaN(parseFloat(o.rate)) && (o.date || '') >= _cut;
+        });
+        if (_cr.length) catAlt = Math.max.apply(null, _cr.map(function (o) { return parseFloat(o.rate); }));
+      } catch (e) {}
+      var hyp = (catAlt != null) ? catAlt + 1.37 : r10.spot;   // structuré supposé battre le CAT de 137 bp
+      var coutAnnee = (catAlt != null) ? (hyp - catAlt) : r10.spot;
       html += '<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">';
       [['Gain à attendre 1 an', _fmt(Math.round(N * gain10 / 100)) + ' €', PT(gain10) + ' de budget', '#B45309'],
-       ['Coût de l\'année perdue', _fmt(Math.round(N * coutAnnee / 100)) + ' €', 'une année au taux long', '#B91C1C']
+       ['Coût de l\'année perdue', _fmt(Math.round(N * coutAnnee / 100)) + ' €', (catAlt != null ? 'écart au CAT ' + P(catAlt) + ', pas au taux long' : 'une année au taux long'), '#B91C1C']
       ].forEach(function (c) {
         html += '<div style="flex:1;min-width:170px;padding:10px 12px;background:' + BG.row1 + ';border:1px solid ' + BG.border + ';border-top:3px solid ' + c[3] + ';border-radius:6px">';
         html += '<div style="font-size:9.5px;color:' + BG.textMuted + '">' + c[0] + '</div>';
@@ -812,7 +874,13 @@
         html += '<div style="font-size:9.5px;color:' + BG.textMuted + '">' + c[2] + '</div></div>';
       });
       html += '</div>';
-      html += '<div style="margin-top:9px;font-size:11.5px;line-height:1.65;color:' + BG.textDim + '"><strong style="color:' + BG.text + '">Verdict.</strong> Le marché price le taux à ' + r10.T + ' ans quasiment inchangé dans un an (' + P(r10.spot) + ' → ' + P(r10.f1) + '). Attendre une année entière n\'élargirait le budget option que de <strong>' + PT(gain10) + '</strong> — soit ' + _fmt(Math.round(N * gain10 / 100)) + ' € sur ' + _fmt(N) + ' € — pendant que l\'année perdue en coûterait <strong>' + _fmt(Math.round(N * coutAnnee / 100)) + ' €</strong>. <strong>Sur les taux, il n\'y a aucune raison d\'attendre</strong> : le long terme est déjà là où le marché l\'attend.</div>';
+      html += '<div style="margin-top:9px;font-size:11.5px;line-height:1.65;color:' + BG.textDim + '"><strong style="color:' + BG.text + '">Verdict.</strong> Le marché price le taux à ' + r10.T + ' ans quasiment inchangé dans un an (' + P(r10.spot) + ' → ' + P(r10.f1) + ') : attendre n\'élargirait le budget option que de <strong>' + PT(gain10) + '</strong>, soit ' + _fmt(Math.round(N * gain10 / 100)) + ' € sur ' + _fmt(N) + ' €. ';
+      if (catAlt != null) {
+        html += 'En face, l\'attente ne coûte pas une année de taux long — ton argent reste placé en CAT à ' + P(catAlt) + '. Elle coûte <strong>l\'écart entre le structuré et ce CAT</strong> : ' + _fmt(Math.round(N * coutAnnee / 100)) + ' € pour un produit qui rendrait ' + P(hyp) + '. <strong>Attendre reste perdant d\'environ ' + (coutAnnee / (gain10 || 0.01)).toFixed(1).replace('.', ',') + ' fois</strong> — mais seulement pour un produit qui bat le CAT.</div>';
+        html += '<div style="margin-top:8px;padding:9px 11px;background:' + BG.row1 + ';border-radius:6px;font-size:11px;line-height:1.6;color:' + BG.textDim + '"><strong style="color:' + BG.text + '">Le piège à éviter.</strong> Si l\'espérance du produit est <em>inférieure</em> à ' + P(catAlt) + ', le calcul n\'a plus de sens : la bonne réponse n\'est pas « attendre un an », c\'est <strong>ne pas l\'acheter du tout</strong>. Attendre suppose qu\'on achètera plus tard — à un prix que le forward annonce identique.</div>';
+      } else {
+        html += '<strong>Sur les taux, il n\'y a aucune raison d\'attendre.</strong></div>';
+      }
       html += '</div>';
 
       // ── Le vrai levier de timing : la volatilité
@@ -826,7 +894,7 @@
         html += '<span style="font-size:12.5px;font-weight:700;color:' + BG.text + '">⚡ Le seul vrai levier de timing : la volatilité</span>';
         html += '<span style="font-family:var(--mono,ui-monospace,monospace);font-size:15px;font-weight:700;color:' + vTone + '">VIX ' + vix.toFixed(0) + '</span>';
         if (vixTrend) html += '<span style="font-size:10px;color:' + BG.textMuted + '">' + vixTrend + '</span></div>';
-        html += '<div style="font-size:11.5px;line-height:1.65;color:' + BG.textDim + '">Un coupon de structuré a <strong>deux carburants</strong> : les taux (le budget option) et la volatilité (le prix auquel tu vends l\'option). Les taux sont stables et prévus stables — ils ne donnent aucun signal de timing. La volatilité, elle, bouge vite et ne se prévoit pas. ' + vSay + ' <strong>Sur un produit de taux pur (callable, TARN, range accrual), la volatilité actions ne joue pas : il n\'y a alors strictement rien à attendre.</strong></div>';
+        html += '<div style="font-size:11.5px;line-height:1.65;color:' + BG.textDim + '">Un coupon de structuré a <strong>deux carburants</strong> : les taux (le budget option) et la volatilité (le prix auquel tu vends l\'option). Les taux sont stables et prévus stables — ils ne donnent aucun signal de timing. La volatilité, elle, bouge vite et ne se prévoit pas. ' + vSay + ' <strong>Sur un produit de taux pur, la volatilité actions ne joue pas — mais la <em>volatilité de taux</em>, si.</strong> Un callable, c\'est toi qui vends à l\'émetteur une option de remboursement anticipé ; un TARN et un range accrual vendent eux aussi de l\'optionalité sur les taux. Plus cette volatilité est chère, plus le coupon offert doit être élevé. Dans un régime où la trajectoire BCE est incertaine, <strong>c\'est un levier de timing réel — et nous ne le mesurons pas</strong> : il faudrait les volatilités de swaptions, que nous n\'avons pas.</div>';
         html += '</div>';
       }
 
