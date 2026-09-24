@@ -801,7 +801,11 @@
           if (f1y1y != null) {
             var roll = f1y1y + best12.sp / 100;
             var chain = (Math.sqrt((1 + best12.r / 100) * (1 + roll / 100)) - 1) * 100;
-            html += '<br><br><strong>Le bon comparatif.</strong> Pas « 24 mois contre 12 mois » — mais 24 mois contre <em>12 mois puis renouvellement au taux que le marché price déjà</em>. Ce renouvellement ressort à ' + P(roll) + ' (forward 1 an dans 1 an, plus la même prime), soit une chaîne à <strong>' + P(chain) + '</strong> par an sur deux ans. Le 24 mois direct à ' + P(best24.r) + ' la bat de <strong>' + BP((best24.r - chain) * 100) + ' par an</strong> : l\'anomalie survit au test le plus exigeant.';
+            // Le point mort : le taux auquel le 12 mois devrait se renouveler dans un an
+            // pour que la chaîne 12+12 rattrape le 24 mois direct.
+            var breakeven = (Math.pow(1 + best24.r / 100, 2) / (1 + best12.r / 100) - 1) * 100;
+            html += '<br><br><strong>Dit autrement, et c\'est plus parlant.</strong> Prendre 12 mois aujourd\'hui, c\'est parier que tu pourras renouveler haut dans un an. <strong>Ce pari n\'est gagnant que si le 12 mois se renouvelle au-dessus de ' + P(breakeven) + '.</strong> Or le marché price ce renouvellement à ' + P(roll) + ' : il faudrait <strong>' + BP((breakeven - roll) * 100) + ' de plus</strong> que prévu, soit environ ' + Math.round((breakeven - roll) / 0.25) + ' hausses BCE supplémentaires — en plus des trois déjà payées.';
+            html += '<br><br><strong>Ce que tu abandonnes en allongeant</strong>, en échange : la liquidité, et justement la possibilité de profiter de ces hausses si elles arrivent. Le chiffre de ' + P(breakeven) + ' est là pour que tu puisses trancher toi-même — il ne dit pas que le 24 mois est meilleur, il dit à partir de quand il ne l\'est plus.';
           }
           html += '<br><br><strong>À vérifier avant d\'allonger :</strong> que le taux affiché ne soit pas <em>progressif</em> (le facial serait la dernière marche) ; les conditions et pénalités de sortie anticipée ; le plafond FGDR de 100 k€ par déposant et par banque — une offre isolée peut rémunérer un risque de crédit ; et ton besoin réel de liquidité sur l\'horizon, seul argument qui devrait trancher.';
           html += '</div>';
@@ -897,11 +901,15 @@
         });
         if (_cr.length) catAlt = Math.max.apply(null, _cr.map(function (o) { return parseFloat(o.rate); }));
       } catch (e) {}
-      var hyp = (catAlt != null) ? catAlt + 1.37 : r10.spot;   // structuré supposé battre le CAT de 137 bp
-      var coutAnnee = (catAlt != null) ? (hyp - catAlt) : r10.spot;
+      // La référence d'un produit qui immobilise 10 ans n'est pas un CAT 12 mois mais un
+      // placement souverain de même durée — liquide, sans risque émetteur. Le CAT reste
+      // affiché à titre de repère de court terme, pas de référence.
+      var ref10 = t10 != null ? t10 : r10.spot;
+      var hyp = ref10;
+      var coutAnnee = (catAlt != null) ? Math.max(0, hyp - catAlt) : r10.spot;
       html += '<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">';
       [['Gain à attendre 1 an', _fmt(Math.round(N * gain10 / 100)) + ' €', PT(gain10) + ' de budget', '#B45309'],
-       ['Coût de l\'année perdue', _fmt(Math.round(N * coutAnnee / 100)) + ' €', (catAlt != null ? 'écart au CAT ' + P(catAlt) + ', pas au taux long' : 'une année au taux long'), '#B91C1C']
+       ['Coût de l\'année perdue', _fmt(Math.round(N * coutAnnee / 100)) + ' €', (catAlt != null ? 'écart entre le produit et le CAT ' + P(catAlt) : 'une année au taux long'), '#B91C1C']
       ].forEach(function (c) {
         html += '<div style="flex:1;min-width:170px;padding:10px 12px;background:' + BG.row1 + ';border:1px solid ' + BG.border + ';border-top:3px solid ' + c[3] + ';border-radius:6px">';
         html += '<div style="font-size:9.5px;color:' + BG.textMuted + '">' + c[0] + '</div>';
@@ -911,8 +919,8 @@
       html += '</div>';
       html += '<div style="margin-top:9px;font-size:11.5px;line-height:1.65;color:' + BG.textDim + '"><strong style="color:' + BG.text + '">Verdict.</strong> Le marché price le taux à ' + r10.T + ' ans quasiment inchangé dans un an (' + P(r10.spot) + ' → ' + P(r10.f1) + ') : attendre n\'élargirait le budget option que de <strong>' + PT(gain10) + '</strong>, soit ' + _fmt(Math.round(N * gain10 / 100)) + ' € sur ' + _fmt(N) + ' €. ';
       if (catAlt != null) {
-        html += 'En face, l\'attente ne coûte pas une année de taux long — ton argent reste placé en CAT à ' + P(catAlt) + '. Elle coûte <strong>l\'écart entre le structuré et ce CAT</strong> : ' + _fmt(Math.round(N * coutAnnee / 100)) + ' € pour un produit qui rendrait ' + P(hyp) + '. <strong>Attendre est alors perdant d\'environ ' + (coutAnnee / (gain10 || 0.01)).toFixed(1).replace('.', ',') + ' fois</strong>. Attention : ce ' + P(hyp) + ' est le <strong>plafond</strong> — un émetteur ne peut pas verser plus que son propre coût de financement, frais et option de rappel déduits. C\'est donc un majorant, atteint seulement par un produit parfaitement pricé et sans frais ; le facteur 2,7 est un « au mieux », pas un résultat général.</div>';
-        html += '<div style="margin-top:8px;padding:9px 11px;background:' + BG.row1 + ';border-radius:6px;font-size:11px;line-height:1.6;color:' + BG.textDim + '"><strong style="color:' + BG.text + '">Le piège à éviter.</strong> Si l\'espérance du produit est <em>inférieure</em> à ' + P(catAlt) + ', le calcul n\'a plus de sens : la bonne réponse n\'est pas « attendre un an », c\'est <strong>ne pas l\'acheter du tout</strong>. Attendre suppose qu\'on achètera plus tard — à un prix que le forward annonce identique.</div>';
+        html += 'En face, l\'attente ne coûte pas une année de taux long — ton argent reste placé en CAT à ' + P(catAlt) + '. Elle coûte <strong>l\'écart entre le structuré et ce CAT</strong> : ' + _fmt(Math.round(N * coutAnnee / 100)) + ' € pour un produit qui rendrait ' + P(hyp) + ', c\'est-à-dire l\'OAT de même durée — <strong>la seule référence honnête pour un capital bloqué ' + r10.T + ' ans</strong>, puisqu\'elle est liquide et sans risque émetteur. <strong>Attendre est alors perdant d\'environ ' + (coutAnnee / (gain10 || 0.01)).toFixed(1).replace('.', ',') + ' fois</strong>. Attention : ce ' + P(hyp) + ' est le <strong>plafond</strong> — un émetteur ne peut pas verser plus que son propre coût de financement, frais et option de rappel déduits. C\'est donc un majorant, atteint seulement par un produit parfaitement pricé et sans frais ; le facteur 2,7 est un « au mieux », pas un résultat général.</div>';
+        html += '<div style="margin-top:8px;padding:9px 11px;background:' + BG.row1 + ';border-radius:6px;font-size:11px;line-height:1.6;color:' + BG.textDim + '"><strong style="color:' + BG.text + '">Le piège à éviter.</strong> Si l\'espérance du produit est <em>inférieure</em> à ' + P(catAlt) + ' — le CAT, sans blocage — le calcul n\'a plus de sens : la bonne réponse n\'est pas « attendre un an », c\'est <strong>ne pas l\'acheter du tout</strong>. Attendre suppose qu\'on achètera plus tard — à un prix que le forward annonce identique.</div>';
       } else {
         html += '<strong>Sur les taux, il n\'y a aucune raison d\'attendre.</strong></div>';
       }
