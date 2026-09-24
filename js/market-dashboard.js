@@ -101,6 +101,32 @@
     return { v: base + shift, shift: shift * 100, dated: d.date, adjusted: true };
   }
 
+  // ═══ LISIBILITÉ ════════════════════════════════════════════════════════════
+  // Chaque contre-expertise a ajouté une nuance juste, et l'ensemble est devenu un
+  // mur. Règle : la RÉPONSE d'abord, en une ligne ; le raisonnement derrière un clic.
+  function _fold(titre, verdict, tone, corps, ouvert) {
+    var h = '<details' + (ouvert ? ' open' : '') + ' style="border:1px solid ' + BG.border + ';border-left:4px solid ' + tone + ';border-radius:0 8px 8px 0;background:' + BG.section + ';margin-bottom:9px">';
+    h += '<summary style="list-style:none;cursor:pointer;display:flex;align-items:baseline;gap:11px;flex-wrap:wrap;padding:11px 14px;user-select:none">';
+    h += '<span style="font-size:12px;font-weight:700;color:' + BG.text + '">' + titre + '</span>';
+    h += '<span style="font-size:12px;font-weight:700;color:' + tone + '">' + verdict + '</span>';
+    h += '<span style="margin-left:auto;font-size:10.5px;color:' + BG.textMuted + '">pourquoi ›</span></summary>';
+    h += '<div style="padding:0 14px 13px">' + corps + '</div></details>';
+    return h;
+  }
+  // Bandeau de synthèse : les réponses seules, avant tout raisonnement.
+  function _synthese(titre, lignes) {
+    var h = '<div style="background:' + BG.section + ';border:1px solid ' + BG.border + ';border-radius:8px;padding:13px 15px;margin-bottom:11px">';
+    h += '<div style="font-size:11px;letter-spacing:.05em;text-transform:uppercase;font-weight:700;color:' + BG.textMuted + ';margin-bottom:9px">' + titre + '</div>';
+    lignes.forEach(function (l, i) {
+      h += '<div style="display:flex;align-items:baseline;gap:11px;flex-wrap:wrap;padding:7px 0' + (i ? ';border-top:1px solid ' + BG.border : '') + '">';
+      h += '<span style="flex:none;font-size:13px;font-weight:800;color:' + l[2] + ';min-width:38px">' + l[1] + '</span>';
+      h += '<span style="flex:1;min-width:190px;font-size:12px;line-height:1.5;color:' + BG.text + '">' + l[0] + '</span>';
+      if (l[3]) h += '<span style="font-family:var(--mono,ui-monospace,monospace);font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums;color:' + l[2] + '">' + l[3] + '</span>';
+      h += '</div>';
+    });
+    return h + '</div>';
+  }
+
   function _render(container) {
     var r = _data.rates || {};
     var mi = _data.mi || {};
@@ -611,6 +637,7 @@
 
       // ── La décomposition, sur la meilleure offre 12 mois
       if (best12) {
+var _mkA = html.length;
         var estrA = _estrActu(estr);
         var antic = (best12.mr - estrA) * 100, marge = best12.sp;
         html += '<div style="background:' + BG.section + ';border:1px solid ' + BG.border + ';border-radius:8px;padding:13px 15px;margin-bottom:11px">';
@@ -632,11 +659,13 @@
         html += '</div>';
       }
 
+var _mkA_html = html.slice(_mkA); html = html.slice(0, _mkA);
       var gridDrift = null, gridDateUsed = null;   // renseignés par le bloc « retard » ci-dessous
       // ── Où sera la grille dans un an ? Le forward 1 an dans 1 an ───────────
       // Ni le forward instantané (niveau du jour le jour dans 1 an) ni la moyenne sur
       // 12 mois ne répondent à cette question. Le 1y1y, si : c'est le taux à 1 an tel que
       // le marché le price dans 1 an. Reconstruit depuis les spots continus 1 et 2 ans.
+var _mkB = html.length;
       var f1y1y = null;
       (function () {
         var SC2 = (_data.rates && _data.rates.short_curve) || {};
@@ -733,8 +762,10 @@
         html += '</div>';
       })();
 
+var _mkB_html = html.slice(_mkB); html = html.slice(0, _mkB);
       // ── Attendre le prochain CAT ? Le point mort, en euros
       if (best12) {
+var _mkC = html.length;
         var mont = 300000;
         try { var mm = (window.app && app.state && app.state.deposits) ? null : null; } catch (e) {}
         var H = best12.m + 1;                                      // durée de l'offre + le mois d'attente
@@ -779,6 +810,8 @@
         html += '</div>';
       }
 
+var _mkC_html = html.slice(_mkC); html = html.slice(0, _mkC);
+      var _mkTable = html.length;
       // ── Le tableau : chaque offre face au marché de même durée
       html += '<div style="background:' + BG.section + ';border:1px solid ' + BG.border + ';border-radius:8px;padding:13px 15px">';
       // 30 lignes déroulées noyaient la décomposition et le verdict, qui sont l'essentiel.
@@ -809,8 +842,10 @@
       html += '</tbody></table></div>';
       html += '<div style="margin-top:8px;font-size:10.5px;color:' + BG.textMuted + ';line-height:1.55">Référence : <strong>courbe quotidienne BCE des États zone euro notés AAA</strong> (série YC), aux maturités exactes de la grille, <strong>convertie de la composition continue vers l\'actuariel</strong> pour être comparable à un taux de CAT. En deçà de 6 mois la courbe est mal contrainte (le modèle n\'utilise que des titres de plus de 3 mois) : les primes y sont à prendre avec réserve. Le progressif est exclu — il se compare à horizon de sortie, via la grille d\'équivalence de l\'onglet CAT.</div></details>';
 
+      var _mkTable_html = html.slice(_mkTable); html = html.slice(0, _mkTable);
       // ── L'anomalie de pente, si elle existe
       if (best12 && best24) {
+var _mkD = html.length;
         var catStep = (best24.r - best12.r) * 100, mktStep = (best24.mr - best12.mr) * 100;
         if (catStep - mktStep >= 15) {
           html += '<div style="margin-top:11px;background:#ECFDF5;border:1px solid #059669;border-left:5px solid #059669;border-radius:8px;padding:11px 14px;font-size:11.5px;line-height:1.65;color:#064E3B">';
@@ -830,7 +865,30 @@
           html += '</div>';
         }
       }
-      html += '</div></div>';
+var _mkD_html = html.slice(_mkD); html = html.slice(0, _mkD);
+      // ── Réassemblage : la réponse d'abord, le raisonnement derrière un clic ──
+      var L = [], G = '#047857', O = '#B45309', R = '#B91C1C';
+      if (best12) L.push(['Ton CAT paie-t-il le marché ?', best12.sp >= 5 ? 'OUI' : 'NON',
+        best12.sp >= 5 ? G : O, BP(best12.sp) + ' de prime']);
+      if (gridDrift != null) L.push(['Ta grille a-t-elle pris du retard ?', Math.abs(gridDrift) >= 12 ? 'OUI' : 'NON',
+        Math.abs(gridDrift) >= 12 ? O : G, BP(gridDrift) + ' de dérive']);
+      if (best12) L.push(['Faut-il attendre la grille du mois prochain ?', (gridDrift != null && Math.abs(gridDrift) >= 12) ? 'PEUT-ÊTRE' : 'NON',
+        (gridDrift != null && Math.abs(gridDrift) >= 12) ? O : G, 'place maintenant']);
+      if (typeof _mkD_html === 'string' && _mkD_html) L.push(['Allonger de 12 à 24 mois paie-t-il ?', 'OUI',
+        G, BP((best24.r - best12.r) * 100 - (best24.mr - best12.mr) * 100) + ' au-delà du marché']);
+      if (L.length) html += _synthese('Les réponses, avant le détail', L);
+
+      if (typeof _mkA_html === 'string' && _mkA_html)
+        html += _fold('💶 D\'où vient le taux qu\'on te propose', BP(best12.sp) + ' de prime, le reste est du marché', '#0F766E', _mkA_html);
+      if (typeof _mkB_html === 'string' && _mkB_html)
+        html += _fold('📅 Ta grille est-elle en retard ?', (gridDrift != null && Math.abs(gridDrift) >= 12) ? BP(gridDrift) + ' à réclamer' : 'non, elle est au prix du jour', (gridDrift != null && Math.abs(gridDrift) >= 12) ? '#B45309' : '#047857', _mkB_html);
+      if (typeof _mkC_html === 'string' && _mkC_html)
+        html += _fold('⏳ Attendre le mois prochain ?', 'non, le mois d\'intérêts serait perdu sec', '#047857', _mkC_html);
+      html += (_mkTable_html ? _mkTable_html + '</div>' : '');
+      if (typeof _mkD_html === 'string' && _mkD_html)
+        html += _fold('📈 Allonger à 24 mois ?', 'oui — mais seulement si tu n\'as pas besoin du cash', '#047857', _mkD_html);
+
+      html += '</div>';
     })();
 
     // ═══ LANCER UN STRUCTURÉ MAINTENANT OU ATTENDRE ? ═══
@@ -882,6 +940,7 @@
       html += '<div style="font-size:14px;font-weight:700;color:' + BG.text + ';margin-bottom:3px">🏗️ Lancer un structuré maintenant ou attendre ?</div>';
       html += '<div style="font-size:11px;color:' + BG.textDim + ';margin-bottom:12px">Un CAT se nourrit du segment 3-12 mois ; un structuré, du <strong>long terme</strong> — c\'est le taux à 5 ou 10 ans qui finance les coupons. La question se tranche donc sur une autre partie de la courbe, et la réponse n\'est pas la même.</div>';
 
+var _sA = html.length;
       // ── Le budget option, aujourd'hui vs dans un an
       html += '<div style="background:' + BG.section + ';border:1px solid ' + BG.border + ';border-radius:8px;padding:13px 15px;margin-bottom:11px">';
       html += '<div style="font-size:11.5px;font-weight:700;color:' + BG.text + ';margin-bottom:4px">Le budget option — ce qui finance tout produit à capital garanti</div>';
@@ -945,6 +1004,8 @@
       }
       html += '</div>';
 
+var _sA_html = html.slice(_sA); html = html.slice(0, _sA);
+var _sB = html.length;
       // ── Le vrai levier de timing : la volatilité
       if (vix != null) {
         var vTone = vix >= 26 ? '#047857' : vix >= 20 ? '#B45309' : '#B91C1C';
@@ -960,6 +1021,8 @@
         html += '</div>';
       }
 
+var _sB_html = html.slice(_sB); html = html.slice(0, _sB);
+var _sC = html.length;
       // ── La prime française : un budget élargi, à condition qu'il te soit reversé
       if (t10 != null && scv['10y'] != null) {
         var sw10 = parseFloat(scv['10y']), prime = (t10 - sw10) * 100;
@@ -971,6 +1034,25 @@
           html += '</div>';
         }
       }
+var _sC_html = html.slice(_sC); html = html.slice(0, _sC);
+      // ── Réassemblage : réponse d'abord, raisonnement derrière un clic ──
+      var LS = [];
+      LS.push(['Faut-il attendre pour lancer un structuré ?', 'NON', '#047857',
+        'attendre gagne ' + _fmt(Math.round(N * gain10 / 100)) + ' €, en coûte ' + _fmt(Math.round(N * coutAnnee / 100)) + ' €']);
+      if (vix != null) LS.push(['Les taux donnent-ils un signal de timing ?', 'NON', '#047857',
+        'seule la volatilité en donne']);
+      if (t10 != null && scv['10y'] != null && (t10 - parseFloat(scv['10y'])) * 100 >= 30)
+        LS.push(['La fenêtre est-elle favorable pour émettre ?', 'OUI', '#047857',
+          '+' + Math.round((t10 - parseFloat(scv['10y'])) * 100) + ' bp de prime française']);
+      html += _synthese('Les réponses, avant le détail', LS);
+
+      if (typeof _sA_html === 'string' && _sA_html)
+        html += _fold('🧮 Le budget option', 'attendre un an ne l\'élargit que de ' + PT(gain10), '#0F766E', _sA_html);
+      if (typeof _sB_html === 'string' && _sB_html)
+        html += _fold('⚡ Le vrai levier de timing', 'la volatilité, pas les taux', '#B45309', _sB_html);
+      if (typeof _sC_html === 'string' && _sC_html)
+        html += _fold('🇫🇷 La prime française', 'elle élargit le budget — vérifie qu\'elle te revient', '#047857', _sC_html);
+
       html += '</div>';
     })();
 
