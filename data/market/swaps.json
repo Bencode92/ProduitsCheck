@@ -1,7 +1,7 @@
 {
   "source": "EIOPA Risk-Free Rate term structures (courbe swap EUR, SWP_LLP)",
   "source_url": "https://www.eiopa.europa.eu/tools-and-data/risk-free-interest-rate-term-structures_en",
-  "fetched_at": "2026-09-24T20:19:14.885492+00:00",
+  "fetched_at": "2026-09-25T12:22:22.446652+00:00",
   "as_of": "2026-08-31",
   "frequency": "mensuelle (publiée ~5 jours après la fin du mois)",
   "credit_risk_adjustment_bps": 10.0,
