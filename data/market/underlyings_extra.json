@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-28T22:28:26.690052",
+  "timestamp": "2026-09-29T13:29:00.875980",
   "version": "1.1",
   "tickers": {
     "ACWI": {
@@ -29,7 +29,7 @@
       "vol_3y": 30.71,
       "max_dd_3y": 26.83,
       "beta": 2.07,
-      "last_close": 107.558,
+      "last_close": 107.56,
       "data_points": 519
     },
     "DIA": {
