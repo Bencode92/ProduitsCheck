@@ -21,8 +21,17 @@
   // Grille en vigueur. Chaque offre retenue porte `_previous` (l'entrée qu'elle
   // remplace) et `_deltaBp` (l'écart en points de base), pour que les écrans
   // puissent dire « +40 bp depuis la grille précédente » sans refaire le calcul.
-  window._catLatestRates = function (rates) {
-    if (!Array.isArray(rates)) return [];
+  // Accepte soit un tableau d'offres, soit l'objet du fichier { rates, history } —
+  // auquel cas l'historique est joint, uniquement pour calculer les écarts.
+  function _flatten(input) {
+    if (Array.isArray(input)) return input;
+    if (input && Array.isArray(input.rates)) return input.rates.concat(Array.isArray(input.history) ? input.history : []);
+    return [];
+  }
+
+  window._catLatestRates = function (input) {
+    var rates = _flatten(input);
+    if (!rates.length) return [];
     var byKey = {};
     rates.forEach(function (o) {
       if (!o || o.durationMonths == null) return;
@@ -46,8 +55,9 @@
   };
 
   // Historique complet d'un produit, du plus récent au plus ancien.
-  window._catRateHistory = function (rates, offer) {
-    if (!Array.isArray(rates) || !offer) return [];
+  window._catRateHistory = function (input, offer) {
+    var rates = _flatten(input);
+    if (!rates.length || !offer) return [];
     var k = _key(offer);
     return rates.filter(function (o) { return _key(o) === k; })
                 .sort(function (x, y) { return String(y.date || '').localeCompare(String(x.date || '')); });

@@ -58,7 +58,7 @@
     try {
       if (typeof catManager !== 'undefined' && catManager.rates && Array.isArray(catManager.rates.rates)) {
         var best = null;
-        ((typeof window._catLatestRates === 'function') ? window._catLatestRates(catManager.rates.rates) : catManager.rates.rates).forEach(function(r) {
+        ((typeof window._catLatestRates === 'function') ? window._catLatestRates(catManager.rates) : catManager.rates.rates).forEach(function(r) {
           if (r.source === 'web scan') return;
           var v = parseFloat(r.rate) || 0; if (v <= 0) return;
           if (!best || v > best.v) best = { v: v, bank: r.bank || r.banque || '', dur: r.durationMonths || r.duration || null };
@@ -644,8 +644,8 @@
       // Offres CAT récentes, taux fixe uniquement (le progressif se compare à horizon de sortie,
       // pas à maturité — il a sa propre grille d'équivalence).
       // Le fichier conserve l'historique des grilles ; on ne compare que celle en vigueur.
-      var rawAll = (_data.catRates && _data.catRates.rates) || [];
-      var raw = (typeof window._catLatestRates === 'function') ? window._catLatestRates(rawAll) : rawAll;
+      var rawAll = _data.catRates || {};
+      var raw = (typeof window._catLatestRates === 'function') ? window._catLatestRates(rawAll) : (rawAll.rates || []);
       var cutoff = new Date(Date.now() - 120 * 864e5).toISOString().slice(0, 10);
       var offers = [];
       raw.forEach(function (o) {
@@ -1035,8 +1035,8 @@ var _sA = html.length;
       var catAlt = null;
       try {
         var _cut = new Date(Date.now() - 120 * 864e5).toISOString().slice(0, 10);
-        var _all = (_data.catRates && _data.catRates.rates) || [];
-        var _cr = ((typeof window._catLatestRates === 'function') ? window._catLatestRates(_all) : _all).filter(function (o) {
+        var _all = _data.catRates || {};
+        var _cr = ((typeof window._catLatestRates === 'function') ? window._catLatestRates(_all) : (_all.rates || [])).filter(function (o) {
           return parseInt(o.durationMonths, 10) === 12 && o.rateType !== 'progressif'
             && !isNaN(parseFloat(o.rate)) && (o.date || '') >= _cut;
         });
