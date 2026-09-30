@@ -216,7 +216,10 @@
 
   // ── Rendu ─────────────────────────────────────────────────────────
   window._renderCATHorizonGrid = function(rates) {
-    const list = (rates || []).filter(r => r.productType !== 'parts-sociales' && (parseFloat(r.rate) || 0) > 0);
+    // Une seule grille par banque : la plus récente. Sans ça, une banque qui vient de
+    // republier apparaît deux fois, à deux taux — et la comparaison ne veut plus rien dire.
+    const src = (typeof window._catLatestRates === 'function') ? window._catLatestRates(rates || []) : (rates || []);
+    const list = src.filter(r => r.productType !== 'parts-sociales' && (parseFloat(r.rate) || 0) > 0);
     if (list.length < 2) return '';
     const banks = new Set(list.map(r => r.bankId));
     const multiBank = banks.size > 1;

@@ -58,7 +58,7 @@
     try {
       if (typeof catManager !== 'undefined' && catManager.rates && Array.isArray(catManager.rates.rates)) {
         var best = null;
-        catManager.rates.rates.forEach(function(r) {
+        ((typeof window._catLatestRates === 'function') ? window._catLatestRates(catManager.rates.rates) : catManager.rates.rates).forEach(function(r) {
           if (r.source === 'web scan') return;
           var v = parseFloat(r.rate) || 0; if (v <= 0) return;
           if (!best || v > best.v) best = { v: v, bank: r.bank || r.banque || '', dur: r.durationMonths || r.duration || null };
@@ -643,7 +643,9 @@
 
       // Offres CAT récentes, taux fixe uniquement (le progressif se compare à horizon de sortie,
       // pas à maturité — il a sa propre grille d'équivalence).
-      var raw = (_data.catRates && _data.catRates.rates) || [];
+      // Le fichier conserve l'historique des grilles ; on ne compare que celle en vigueur.
+      var rawAll = (_data.catRates && _data.catRates.rates) || [];
+      var raw = (typeof window._catLatestRates === 'function') ? window._catLatestRates(rawAll) : rawAll;
       var cutoff = new Date(Date.now() - 120 * 864e5).toISOString().slice(0, 10);
       var offers = [];
       raw.forEach(function (o) {
@@ -652,7 +654,7 @@
         var m = parseInt(o.durationMonths, 10), r = parseFloat(o.rate);
         if (!m || isNaN(r)) return;
         var mr = market(m);
-        offers.push({ bank: o.bankName || o.bankId, prod: o.productName || '', m: m, r: r, mr: mr, sp: (r - mr) * 100, date: o.date || '' });
+        offers.push({ bank: o.bankName || o.bankId, prod: o.productName || '', m: m, r: r, mr: mr, sp: (r - mr) * 100, date: o.date || '', dBp: (o._deltaBp != null ? o._deltaBp : null), prevDate: (o._previous ? o._previous.date : null) });
       });
       if (offers.length < 4) return;
       offers.sort(function (a, b) { return a.m - b.m || b.r - a.r; });
@@ -796,6 +798,31 @@ var _mkB = html.length;
       })();
 
 var _mkB_html = html.slice(_mkB); html = html.slice(0, _mkB);
+      // ── Une banque a-t-elle bougé indépendamment du marché ? ────────────────
+      // Angle mort du test de dérive : il mesure le mouvement du MARCHÉ depuis
+      // l'édition d'une grille, et ne voit pas une banque qui choisit d'être plus
+      // généreuse. Cas réel du 01/10/2026 : CIC +40 bp quand le marché faisait +2 bp.
+      (function () {
+        var moved = offers.filter(function (o) { return o.dBp != null && Math.abs(o.dBp) >= 10; });
+        if (!moved.length) return;
+        var byBank = {};
+        moved.forEach(function (o) {
+          var b = byBank[o.bank] || (byBank[o.bank] = { n: 0, max: 0, date: o.date, prev: o.prevDate });
+          b.n++; if (Math.abs(o.dBp) > Math.abs(b.max)) b.max = o.dBp;
+        });
+        var names = Object.keys(byBank);
+        var mktMove = (gridDrift != null) ? Math.abs(gridDrift) : null;
+        html += '<div style="background:' + BG.section + ';border:1px solid ' + BG.border + ';border-left:5px solid #7C3AED;border-radius:8px;padding:12px 14px;margin-bottom:11px">';
+        html += '<div style="font-size:11.5px;font-weight:700;color:' + BG.text + ';margin-bottom:6px">🔄 Une banque a rebattu sa grille</div>';
+        html += '<div style="font-size:11.5px;line-height:1.65;color:' + BG.textDim + '">';
+        names.forEach(function (n) {
+          var b = byBank[n];
+          html += '<strong>' + n + '</strong> a republié le ' + b.date + (b.prev ? ' (précédente : ' + b.prev + ')' : '') + ' — jusqu\'à <strong style="color:' + (b.max > 0 ? '#047857' : '#B91C1C') + '">' + BP(b.max) + '</strong> sur ' + b.n + ' produit' + (b.n > 1 ? 's' : '') + '. ';
+        });
+        if (mktMove != null) html += '<br>Sur la même période, le marché n\'a bougé que de <strong>' + BP(gridDrift) + '</strong> : <strong style="color:' + BG.text + '">ce n\'est donc pas un rattrapage, c\'est une décision commerciale.</strong> ';
+        html += 'Le test de dérive ci-dessus ne peut pas l\'anticiper — il mesure le marché, pas l\'appétit d\'une banque pour les dépôts. C\'est le seul cas où attendre une nouvelle grille paie, et il ne se prévoit pas.</div></div>';
+      })();
+
       // ── Attendre le prochain CAT ? Le point mort, en euros
       if (best12) {
 var _mkC = html.length;
@@ -858,7 +885,7 @@ var _mkC_html = html.slice(_mkC); html = html.slice(0, _mkC);
       html += '<div style="font-size:10.5px;color:' + BG.textMuted + ';margin:9px 0">L\'écart est la <strong>prime</strong> que la banque te consent au-dessus du sans-risque de même durée — pas sa marge : c\'est ce qu\'elle <em>paie</em>, en échange de ton risque de crédit sur elle et de la valeur réglementaire de ton dépôt. C\'est le seul chiffre qui se négocie.</div>';
       html += '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px">';
       html += '<thead><tr style="background:' + BG.header + '">' +
-        ['Banque', 'Produit', 'Durée', 'Taux CAT', 'Sans risque', 'Prime'].map(function (h, i) {
+        ['Banque', 'Produit', 'Durée', 'Taux CAT', 'Sans risque', 'Prime', 'vs grille préc.'].map(function (h, i) {
           return '<th style="padding:6px 9px;text-align:' + (i < 3 ? 'left' : 'right') + ';font-size:9.5px;letter-spacing:.04em;text-transform:uppercase;color:' + BG.textDim + ';white-space:nowrap">' + h + '</th>';
         }).join('') + '</tr></thead><tbody>';
       offers.forEach(function (o, i) {
@@ -870,6 +897,7 @@ var _mkC_html = html.slice(_mkC); html = html.slice(0, _mkC);
         html += '<td style="padding:5px 9px;text-align:right;font-family:var(--mono,ui-monospace,monospace);font-variant-numeric:tabular-nums;font-weight:700;color:' + BG.text + '">' + P(o.r) + '</td>';
         html += '<td style="padding:5px 9px;text-align:right;font-family:var(--mono,ui-monospace,monospace);font-variant-numeric:tabular-nums;color:' + BG.textMuted + '">' + P(o.mr) + '</td>';
         html += '<td style="padding:5px 9px;text-align:right;font-family:var(--mono,ui-monospace,monospace);font-variant-numeric:tabular-nums;font-weight:700;color:' + col + ';white-space:nowrap">' + BP(o.sp) + '</td>';
+        html += '<td style="padding:5px 9px;text-align:right;font-family:var(--mono,ui-monospace,monospace);font-variant-numeric:tabular-nums;white-space:nowrap;color:' + (o.dBp == null ? BG.textMuted : (o.dBp > 0 ? '#047857' : o.dBp < 0 ? '#B91C1C' : BG.textMuted)) + '">' + (o.dBp == null ? '—' : BP(o.dBp)) + '</td>';
         html += '</tr>';
       });
       html += '</tbody></table></div>';
@@ -1007,7 +1035,8 @@ var _sA = html.length;
       var catAlt = null;
       try {
         var _cut = new Date(Date.now() - 120 * 864e5).toISOString().slice(0, 10);
-        var _cr = ((_data.catRates && _data.catRates.rates) || []).filter(function (o) {
+        var _all = (_data.catRates && _data.catRates.rates) || [];
+        var _cr = ((typeof window._catLatestRates === 'function') ? window._catLatestRates(_all) : _all).filter(function (o) {
           return parseInt(o.durationMonths, 10) === 12 && o.rateType !== 'progressif'
             && !isNaN(parseFloat(o.rate)) && (o.date || '') >= _cut;
         });
