@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-09-16T13:06:14.463Z",
+  "lastUpdated": "2026-10-01",
   "rates": [
     {
       "bankId": "bnpp",
@@ -1325,6 +1325,224 @@
       "notice": null,
       "productName": "CAT Fixe 24 mois",
       "calculationBase": null,
+      "minAmount": null,
+      "maxAmount": null,
+      "category": null,
+      "source": "confirmed",
+      "confidence": "high"
+    },
+    {
+      "bankId": "cic",
+      "bankName": "CIC",
+      "durationMonths": 2,
+      "rate": 2.7,
+      "productType": "cat",
+      "date": "2026-10-01",
+      "rateType": "fixe",
+      "rateSchedule": [],
+      "earlyExitSchedule": [
+        {
+          "period": "Mois 1-2",
+          "penalty": "Pas de pénalité"
+        }
+      ],
+      "withdrawalConditions": "Pas de pénalité entre 1 et 2 mois",
+      "notice": null,
+      "productName": "CAT Fixe 2 mois",
+      "calculationBase": "exact/365",
+      "minAmount": null,
+      "maxAmount": null,
+      "category": null,
+      "source": "confirmed",
+      "confidence": "high"
+    },
+    {
+      "bankId": "cic",
+      "bankName": "CIC",
+      "durationMonths": 3,
+      "rate": 3.1,
+      "productType": "cat",
+      "date": "2026-10-01",
+      "rateType": "fixe",
+      "rateSchedule": [],
+      "earlyExitSchedule": [
+        {
+          "period": "Sortie anticipée",
+          "penalty": "Pas de rémunération"
+        }
+      ],
+      "withdrawalConditions": "Pas de rémunération si sortie anticipée",
+      "notice": null,
+      "productName": "CAT Fixe 3 mois",
+      "calculationBase": "exact/365",
+      "minAmount": null,
+      "maxAmount": null,
+      "category": null,
+      "source": "confirmed",
+      "confidence": "high"
+    },
+    {
+      "bankId": "cic",
+      "bankName": "CIC",
+      "durationMonths": 6,
+      "rate": 3.1,
+      "productType": "cat",
+      "date": "2026-10-01",
+      "rateType": "fixe",
+      "rateSchedule": [],
+      "earlyExitSchedule": [
+        {
+          "period": "Mois 1-3",
+          "penalty": "Pas de rémunération"
+        },
+        {
+          "period": "Mois 4-6",
+          "penalty": "50% Tx de souscription"
+        }
+      ],
+      "withdrawalConditions": "Pas de rémun. mois 1-3, 50% tx souscription mois 4-6",
+      "notice": null,
+      "productName": "CAT Fixe 6 mois",
+      "calculationBase": "exact/365",
+      "minAmount": null,
+      "maxAmount": null,
+      "category": null,
+      "source": "confirmed",
+      "confidence": "high"
+    },
+    {
+      "bankId": "cic",
+      "bankName": "CIC",
+      "durationMonths": 12,
+      "rate": 3.25,
+      "productType": "cat",
+      "date": "2026-10-01",
+      "rateType": "fixe",
+      "rateSchedule": [],
+      "earlyExitSchedule": [
+        {
+          "period": "Mois 1-3",
+          "penalty": "Pas de rémunération"
+        },
+        {
+          "period": "Mois 4-12",
+          "penalty": "50% Tx de souscription"
+        }
+      ],
+      "withdrawalConditions": "Pas de rémun. mois 1-3, 50% tx souscription mois 4-12",
+      "notice": null,
+      "productName": "CAT Fixe 12 mois",
+      "calculationBase": "exact/365",
+      "minAmount": null,
+      "maxAmount": null,
+      "category": null,
+      "source": "confirmed",
+      "confidence": "high"
+    },
+    {
+      "bankId": "cic",
+      "bankName": "CIC",
+      "durationMonths": 18,
+      "rate": 3.4,
+      "productType": "cat",
+      "date": "2026-10-01",
+      "rateType": "progressif",
+      "rateSchedule": [
+        {
+          "fromMonth": 1,
+          "toMonth": 6,
+          "rate": 3.1,
+          "earlyRate": 1.55,
+          "label": "Semestre 1"
+        },
+        {
+          "fromMonth": 7,
+          "toMonth": 12,
+          "rate": 3.3,
+          "earlyRate": 3.1,
+          "label": "Semestre 2"
+        },
+        {
+          "fromMonth": 13,
+          "toMonth": 18,
+          "rate": 3.81,
+          "earlyRate": 3.3,
+          "label": "Semestre 3"
+        }
+      ],
+      "earlyExitSchedule": [
+        {
+          "period": "Avant fin semestre 1",
+          "penalty": "50% du taux de la période"
+        },
+        {
+          "period": "Avant fin semestre 2",
+          "penalty": "Taux de la période précédente"
+        },
+        {
+          "period": "Avant fin semestre 3",
+          "penalty": "Taux de la période précédente"
+        }
+      ],
+      "withdrawalConditions": "Préavis 32j. Retrait S1: 50% taux, S2-S3: taux période précédente",
+      "notice": "32 jours",
+      "productName": "CAT Progressif 18 mois",
+      "calculationBase": "exact/365",
+      "minAmount": null,
+      "maxAmount": null,
+      "category": null,
+      "source": "confirmed",
+      "confidence": "high"
+    },
+    {
+      "bankId": "cic",
+      "bankName": "CIC",
+      "durationMonths": 36,
+      "rate": 3.6,
+      "productType": "cat",
+      "date": "2026-10-01",
+      "rateType": "progressif",
+      "rateSchedule": [
+        {
+          "fromMonth": 1,
+          "toMonth": 12,
+          "rate": 3.1,
+          "earlyRate": 1.55,
+          "label": "Année 1"
+        },
+        {
+          "fromMonth": 13,
+          "toMonth": 24,
+          "rate": 3.6,
+          "earlyRate": 3.1,
+          "label": "Année 2"
+        },
+        {
+          "fromMonth": 25,
+          "toMonth": 36,
+          "rate": 4.11,
+          "earlyRate": 3.6,
+          "label": "Année 3"
+        }
+      ],
+      "earlyExitSchedule": [
+        {
+          "period": "Avant fin année 1",
+          "penalty": "50% du taux de la période"
+        },
+        {
+          "period": "Avant fin année 2",
+          "penalty": "Taux de la période précédente"
+        },
+        {
+          "period": "Avant fin année 3",
+          "penalty": "Taux de la période précédente"
+        }
+      ],
+      "withdrawalConditions": "Préavis 32j. Retrait A1: 50% taux, A2-A3: taux période précédente",
+      "notice": "32 jours",
+      "productName": "CAT Progressif 36 mois",
+      "calculationBase": "exact/365",
       "minAmount": null,
       "maxAmount": null,
       "category": null,
