@@ -1259,10 +1259,31 @@ window.handleJSONPasteImport = async function(context, bankId) {
     }
     app.render();
   } catch(e) {
-    console.error('[UI V3.1] JSON parse error:', e);
-    showToast('JSON invalide: ' + e.message, 'error');
+    // Ce try englobe l'analyse du JSON ET l'enregistrement distant. Un échec
+    // d'écriture (token GitHub expiré → 401) sortait donc sous l'étiquette
+    // « JSON invalide », ce qui envoie chercher le problème au mauvais endroit.
+    console.error('[UI V3.1] import error:', e);
+    showToast(_importErrorMessage(e), 'error');
   }
 };
+
+// Traduit une panne d'import en message qui désigne la vraie cause.
+function _importErrorMessage(e) {
+  var m = String((e && e.message) || e || '');
+  if (/\b401\b|Bad credentials/i.test(m))
+    return '🔑 Token GitHub refusé (401) — ton JSON est valide, c\'est l\'ENREGISTREMENT qui échoue. Le token vit côté serveur, dans le Worker Cloudflare : il a expiré ou été révoqué, et doit y être renouvelé. Rien à corriger dans le JSON.';
+  if (/\b403\b/.test(m))
+    return '🔑 GitHub refuse l\'écriture (403) — droits insuffisants sur le dépôt, ou quota atteint.';
+  if (/\b404\b/.test(m))
+    return '📁 Chemin introuvable sur GitHub (404) — banque ou dossier inexistant.';
+  if (/\b409\b/.test(m))
+    return '⚠ Conflit GitHub (409) — le fichier a changé entre-temps. Recharge la page et réessaie.';
+  if (/GitHub|fetch|network|Failed to fetch/i.test(m))
+    return '🌐 Enregistrement impossible : ' + m + ' (le JSON, lui, est valide).';
+  if (e instanceof SyntaxError || /JSON|Unexpected token|position \d/i.test(m))
+    return '📄 JSON invalide : ' + m;
+  return '❌ Import impossible : ' + m;
+}
 
 function showManualEntryModal(context, bankId) {
   const modal = document.getElementById('modal');

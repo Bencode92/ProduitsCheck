@@ -342,8 +342,8 @@ window.handleJSONImport = function() {
         showToast('✅ JSON importé — vérifiez tous les champs puis Enregistrez', 'success');
 
     } catch(e) {
-        console.error('[EditModal V2.0] JSON parse error:', e);
-        showToast('JSON invalide: ' + e.message, 'error');
+        console.error('[EditModal V2.0] import error:', e);
+        showToast(typeof _importErrorMessage === 'function' ? _importErrorMessage(e) : ('JSON invalide: ' + e.message), 'error');
     }
 };
 
