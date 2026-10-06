@@ -277,6 +277,41 @@
     if (srcDeps.length) S.cash = srcAmount;
     A = S.cash; const A0 = A;
     let h = `<div class="section"><div class="section-header"><div class="section-title"><span class="dot" style="background:#0EA5E9"></span>🧭 Replacer une échéance, et quel CAT arbitrer</div><span style="font-size:10px;color:var(--text-dim)">courbe du ${cv.date || '?'} · TEC10 ${cv.tec10 != null ? fmtP(cv.tec10) : '—'} · meilleur CAT ${fmtP(todayRate(12).rate)} (12 m)</span></div>`;
+    // ── Bandeau de pilotage, repris du bloc « Optimisation » supprimé ──────────
+    // Recalculé ici depuis le même moteur que les badges et la section B
+    // (_catTauxRestant), au lieu d'être lu dans _lastOptimizerResult : c'est ce qui
+    // garantit que l'en-tête, le tableau et les cartes disent le même chiffre.
+    (function () {
+      const act = catManager.deposits.filter(d => d.status === 'active' && d.productType === 'cat'
+        && d.maturityDate && new Date(d.maturityDate) > now);
+      if (!act.length) return;
+      let capital = 0, interets = 0, nArb = 0, gainArb = 0;
+      act.forEach(d => {
+        const mt = parseFloat(d.amount) || 0;
+        const tr = (typeof window._catTauxRestant === 'function') ? window._catTauxRestant(d) : null;
+        if (!tr) return;
+        capital += mt; interets += mt * tr.taux / 100;
+        const off = (typeof window._catMeilleureOffre === 'function') ? window._catMeilleureOffre(Math.round(tr.jours / 30.44)) : null;
+        if (off && off.rate > tr.taux) {
+          const g = mt * (off.rate - tr.taux) / 100 * (tr.jours / 365);
+          const cs = (typeof window._catCoutSortie === 'function') ? (window._catCoutSortie(d).cout || 0) : 0;
+          if (g - cs > 300) { nArb++; gainArb += g - cs; }
+        }
+      });
+      if (!capital) return;
+      const pond = interets / capital * 100;
+      const kpi = (lab, val, sub, col) => `<div style="background:var(--bg-card);padding:11px 12px;text-align:center">
+        <div style="font-size:9px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted)">${lab}</div>
+        <div style="font-size:19px;font-weight:800;font-family:var(--mono);margin-top:3px;color:${col}">${val}</div>
+        <div style="font-size:10px;color:var(--text-dim)">${sub}</div></div>`;
+      h += `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:12px">`
+        + kpi('Rendement en cours', '+' + fmtE(interets) + '<span style="font-size:11px">/an</span>', fmtP(pond) + ' sur ' + fmtE(capital), 'var(--green)')
+        + kpi('Après IS (25 %)', '+' + fmtE(interets * 0.75) + '<span style="font-size:11px">/an</span>', fmtP(pond * 0.75) + ' net', 'var(--cyan)')
+        + kpi('À récupérer', gainArb > 0 ? '+' + fmtE(gainArb) : '✅', gainArb > 0 ? 'sur la durée restante, net de pénalités' : 'rien à arbitrer', gainArb > 0 ? 'var(--orange)' : 'var(--text-dim)')
+        + kpi('Périmètre', String(act.length), nArb ? nArb + ' à arbitrer' : 'tous à garder', 'var(--text-bright)')
+        + `</div>`;
+    })();
+
     if (maturing.length) {
       h += `<div style="padding:10px 12px;border:1px solid rgba(232,93,4,0.35);border-radius:8px;background:rgba(232,93,4,0.05);margin-bottom:10px"><div style="font-size:11px;font-weight:700;color:var(--orange);margin-bottom:6px">📅 Échéances à replacer (échues ou sous 90 jours) — coche celles que tu replaces, le montant suit</div><div style="display:flex;flex-wrap:wrap;gap:6px">`;
       maturing.forEach(d => { const days = Math.round((new Date(d.maturityDate) - now) / DAY), on = S.sourceIds.includes(d.id);
