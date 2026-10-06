@@ -595,7 +595,7 @@
     "exitCondition": "notice",
     "exitPenalty": "Aucun intérêt si retrait dans le mois de souscription",
     "autoRenew": false,
-    "status": "active",
+    "status": "archived",
     "entity": "cameleons",
     "entityName": "Caméleons",
     "sourceFile": "CAT CONQUETE 09.2024.PDF.pdf",
@@ -603,7 +603,16 @@
     "id": "pl_mmyv18bm_t5j",
     "createdDate": "2026-03-20",
     "maturityDate": "2026-09-18",
-    "estimatedInterest": 8592.12
+    "estimatedInterest": 8592.12,
+    "archived": {
+      "date": "2026-09-18",
+      "reason": "maturite",
+      "reasonLabel": "Maturité",
+      "interestReceived": 8592.12,
+      "capitalReturned": 150000.0,
+      "renewedInto": "pl_1a1108eb110_cic36",
+      "renewedIntoLabel": "CAT Progressif 36 mois · CIC"
+    }
   },
   {
     "productType": "cat",
@@ -693,7 +702,7 @@
     "exitCondition": "notice",
     "exitPenalty": "Aucun intérêt si retrait dans le mois de souscription",
     "autoRenew": false,
-    "status": "active",
+    "status": "archived",
     "entity": "cameleons",
     "entityName": "Caméleons",
     "sourceFile": "CAT CONQUETE 09.2024.PDF.pdf",
@@ -701,7 +710,16 @@
     "id": "pl_mmyv18bm_jx8",
     "createdDate": "2026-03-20",
     "maturityDate": "2026-09-18",
-    "estimatedInterest": 8592.12
+    "estimatedInterest": 8592.12,
+    "archived": {
+      "date": "2026-09-18",
+      "reason": "maturite",
+      "reasonLabel": "Maturité",
+      "interestReceived": 8592.12,
+      "capitalReturned": 150000.0,
+      "renewedInto": "pl_1a1108eb110_cic36",
+      "renewedIntoLabel": "CAT Progressif 36 mois · CIC"
+    }
   },
   {
     "productType": "cat",
@@ -955,5 +973,70 @@
     "estimatedInterest": 900,
     "entity": "cameleons",
     "entityName": "Cam."
+  },
+  {
+    "productType": "cat",
+    "bankId": "cic",
+    "bankName": "CIC",
+    "productName": "CAT Progressif 36 mois",
+    "amount": 300000,
+    "rate": 3.603,
+    "rateType": "progressif",
+    "durationMonths": 36,
+    "startDate": "2026-10-06",
+    "maturityDate": "2029-10-05",
+    "interestPayment": "maturity",
+    "exitCondition": "notice",
+    "autoRenew": false,
+    "exitPenalty": "Sortie libre à chaque échéance annuelle sans frais ni préavis ; hors échéance : préavis 32 j, rémunération à 50 % du taux en an 1, puis au taux de la période précédente",
+    "status": "active",
+    "id": "pl_1a1108eb110_cic36",
+    "createdDate": "2026-10-06",
+    "estimatedInterest": 33637.0,
+    "entity": "cameleons",
+    "entityName": "Caméleons",
+    "rateSchedule": [
+      {
+        "from": "2026-10-06",
+        "to": "2027-10-05",
+        "rate": 3.1,
+        "earlyRate": 1.55,
+        "label": "An 1"
+      },
+      {
+        "from": "2027-10-06",
+        "to": "2028-10-05",
+        "rate": 3.6,
+        "earlyRate": 3.1,
+        "label": "An 2"
+      },
+      {
+        "from": "2028-10-06",
+        "to": "2029-10-05",
+        "rate": 4.11,
+        "earlyRate": 3.6,
+        "label": "An 3"
+      }
+    ],
+    "noticeDays": 32,
+    "exitFreeAtPeriodEnd": true,
+    "earlyExitSchedule": [
+      {
+        "period": "Au cours de l'année 1",
+        "penalty": "50 % du taux de la période"
+      },
+      {
+        "period": "Au cours de l'année 2",
+        "penalty": "Taux de la période précédente (3,10 %)"
+      },
+      {
+        "period": "Au cours de l'année 3",
+        "penalty": "Taux de la période précédente (3,60 %)"
+      }
+    ],
+    "calculationBase": "exact/365",
+    "reviewDate": "2027-10-06",
+    "reviewNote": "Sortie libre sans préavis à chaque anniversaire. Vérifier alors la grille CIC du moment et le marché 2 ans : le palier an 2 (3,60 %) doit rester au-dessus.",
+    "sourceNote": "Remploi des 2 Optiplus Conquête BP de 150 k€ échus le 18/09/2026. Grille CIC du 01/10/2026."
   }
 ]
