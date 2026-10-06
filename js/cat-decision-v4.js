@@ -383,12 +383,29 @@
     arbs.sort((a, b) => b.gain - a.gain);
     const toDo = arbs.filter(a => a.bestKey !== 'keep' && a.gain > 50);
     const held = _rateProducts().filter(p => (parseFloat(p.investedAmount) || 0) > 0);
+    // Le taux qui décide : la moyenne des paliers RESTANTS, calculée par le module
+    // partagé — pas une seconde implémentation qui dirait autre chose.
+    const _colsRestant = (d) => {
+      const tr = (typeof window._catTauxRestant === 'function') ? window._catTauxRestant(d) : null;
+      if (!tr) return '<td colspan="3" style="padding:5px 6px;color:var(--text-dim)">—</td>';
+      const mois = Math.round(tr.jours / 30.44);
+      const off = (typeof window._catMeilleureOffre === 'function') ? window._catMeilleureOffre(mois) : null;
+      const pc = x => (Math.round(x * 100) / 100).toFixed(2).replace('.', ',') + '%';
+      const mieux = off && off.rate > tr.taux;
+      return `<td style="padding:5px 6px;text-align:right;font-family:var(--mono);font-weight:700">${pc(tr.taux)}`
+        + `<div style="font-size:9px;color:var(--text-dim);font-weight:400">${fmtE(parseFloat(d.amount) || 0)}</div></td>`
+        + `<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:var(--text-muted)">${mois} m</td>`
+        + `<td style="padding:5px 6px;text-align:right;font-family:var(--mono);color:${mieux ? 'var(--orange)' : 'var(--text-dim)'}">${off ? pc(off.rate) : '—'}`
+        + `<div style="font-size:9px;color:var(--text-dim)">${off ? (off.bank + ' ' + off.months + ' m') : ''}</div></td>`;
+    };
+
     h += `<div style="font-size:13px;font-weight:700;color:var(--text-bright);margin-bottom:4px">B · Mes CAT : lesquels arbitrer (à ${H} mois, vue « ${view.label} »)</div>`;
     if (!toDo.length) h += `<div style="font-size:11px;color:var(--green);margin-bottom:8px">✅ Aucun arbitrage payant dans ta vue : tous tes CAT sont à garder.</div>`;
     else {
-      h += `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px;min-width:720px"><thead><tr style="border-bottom:1px solid var(--border)"><th style="text-align:left;padding:5px 6px;color:var(--text-muted)">Contrat</th><th style="text-align:left;padding:5px 6px;color:var(--text-muted)">À faire</th><th style="text-align:right;padding:5px 6px;color:var(--text-muted)">Gain vs garder</th><th style="text-align:right;padding:5px 6px;color:var(--text-muted)">Si baisse / si hausse</th><th style="text-align:left;padding:5px 6px;color:var(--text-muted)">Fiabilité</th></tr></thead><tbody>`;
+      h += `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px;min-width:720px"><thead><tr style="border-bottom:1px solid var(--border)"><th style="text-align:left;padding:5px 6px;color:var(--text-muted)">Contrat</th><th style="text-align:right;padding:5px 6px;color:var(--text-muted)" title="Taux moyen des paliers RESTANTS — ce que le produit paiera encore, pas ce qu'il a payé">Taux restant</th><th style="text-align:right;padding:5px 6px;color:var(--text-muted)">Reste</th><th style="text-align:right;padding:5px 6px;color:var(--text-muted)">Alternative</th><th style="text-align:left;padding:5px 6px;color:var(--text-muted)">À faire</th><th style="text-align:right;padding:5px 6px;color:var(--text-muted)">Gain vs garder</th><th style="text-align:right;padding:5px 6px;color:var(--text-muted)">Si baisse / si hausse</th><th style="text-align:left;padding:5px 6px;color:var(--text-muted)">Fiabilité</th></tr></thead><tbody>`;
       toDo.forEach(a => {
         h += `<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 6px"><strong>${a.d.productName || 'CAT'}</strong><div style="font-size:9px;color:var(--text-dim)">${a.d.bankName || ''} · ${a.d.entityName || ''} · ${fmtE(parseFloat(a.d.amount) || 0)}${a.d.maturityDate ? ' · éch. ' + formatDate(a.d.maturityDate) : ''}</div></td>
+          ${_colsRestant(a.d)}
           <td style="padding:5px 6px">${labelsOpt[a.bestKey]}<div style="font-size:9px;color:var(--text-dim)">${a.pv[a.bestKey].label}</div></td>
           <td style="padding:5px 6px;text-align:right;font-family:var(--mono);font-weight:700;color:var(--green)">+${fmtE(a.gain)}</td>
           <td style="padding:5px 6px;text-align:right;font-family:var(--mono);font-size:10px;color:var(--text-muted)">${(a.gainLo >= 0 ? '+' : '−') + fmtE(Math.abs(a.gainLo))} / ${(a.gainHi >= 0 ? '+' : '−') + fmtE(Math.abs(a.gainHi))}</td>

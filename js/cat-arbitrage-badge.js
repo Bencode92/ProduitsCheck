@@ -73,6 +73,13 @@
     return { cout: 0, connu: false };
   }
 
+  // Exposé pour que Décision v4 affiche le même taux que la carte — un seul calcul,
+  // une seule vérité. C'est ce qui permet de supprimer le bloc « Optimisation », qui
+  // tirait ses propres chiffres et contredisait celui-ci.
+  window._catTauxRestant = function (d) { return _tauxRestant(d, new Date()); };
+  window._catMeilleureOffre = _meilleureOffre;
+  window._catCoutSortie = function (d) { return _coutSortie(d, new Date(), null); };
+
   if (typeof renderPlacementCard !== 'function') return;
   var _orig = renderPlacementCard;
   renderPlacementCard = function (d) {

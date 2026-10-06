@@ -224,8 +224,14 @@ renderCAT = function(container) {
 
   statsRow.outerHTML = dashHTML;
 
-  // Inject optimizer
-  if (typeof renderOptimizerDashboard === 'function') {
+  // Bloc « ⚡ Optimisation » retiré de la page : il répondait à la même question que
+  // « 🧭 Replacer une échéance, et quel CAT arbitrer », avec sa propre méthode — et
+  // les deux se contredisaient sur les mêmes contrats (CATIP : « attendre échéance,
+  // arbitrer perdrait 1 640 € » d'un côté, « sortir, +2 619 € » de l'autre). Ses
+  // colonnes utiles (montant, taux restant, durée, alternative) sont passées dans la
+  // section B de Décision v4, qui lit le même calcul que les cartes de placement.
+  // La fonction reste disponible : window._catShowLegacyOptimizer = true la réaffiche.
+  if (window._catShowLegacyOptimizer && typeof renderOptimizerDashboard === 'function') {
     const optimizerHTML = renderOptimizerDashboard();
     if (optimizerHTML) {
       const allSections = container.querySelectorAll('.section');
