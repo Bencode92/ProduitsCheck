@@ -29,9 +29,28 @@
     return [];
   }
 
-  window._catLatestRates = function (input) {
+  // Une grille vieille de six mois n'est pas une offre, c'est un souvenir. Sans ce
+  // filtre, le comparateur proposait « 3,60 % chez HSBC » d'après une grille d'avril
+  // comme meilleure offre du jour, et le test d'arbitrage s'appuyait dessus.
+  var PEREMPTION_JOURS = 150;
+
+  window._catStaleDays = function (o) {
+    if (!o || !o.date) return null;
+    var d = new Date(o.date); if (isNaN(d)) return null;
+    return Math.floor((Date.now() - d.getTime()) / 86400000);
+  };
+
+  // options.includeStale : garder les grilles périmées (vue « toutes les banques »).
+  window._catLatestRates = function (input, options) {
     var rates = _flatten(input);
     if (!rates.length) return [];
+    if (!(options && options.includeStale)) {
+      var frais = rates.filter(function (o) {
+        var age = window._catStaleDays(o);
+        return age == null || age <= PEREMPTION_JOURS;
+      });
+      if (frais.length) rates = frais;
+    }
     var byKey = {};
     rates.forEach(function (o) {
       if (!o || o.durationMonths == null) return;
@@ -49,6 +68,7 @@
         var prev = older[0], d = (parseFloat(win.rate) - parseFloat(prev.rate));
         if (!isNaN(d)) { win._previous = prev; win._deltaBp = Math.round(d * 100); }
       }
+      win._ageDays = window._catStaleDays(win);
       out.push(win);
     });
     return out;
