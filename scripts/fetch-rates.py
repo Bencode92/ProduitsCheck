@@ -121,6 +121,7 @@ SHORT_CURVE = {
     # Points longs : servent à RECALER la courbe swap EIOPA, qui est mensuelle. Sans eux,
     # on compare un swap du 31/08 à un TEC du jour — et l'écart mesuré intègre le mouvement
     # de marché entre les deux dates au lieu du seul spread souverain/swap.
+    "curve_36m": {"m": 36, "code": "SR_3Y"},
     "curve_60m": {"m": 60, "code": "SR_5Y"},
     "curve_84m": {"m": 84, "code": "SR_7Y"},
     "curve_120m": {"m": 120, "code": "SR_10Y"},
