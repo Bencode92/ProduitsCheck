@@ -1,6 +1,6 @@
 {
   "source": "ECB + Banque de France (TEC) + Twelve Data",
-  "fetched_at": "2026-10-26T13:38:57.133065+00:00",
+  "fetched_at": "2026-10-26T21:29:42.444823+00:00",
   "yields": {
     "oat_fr_10y": {
       "current": 3.369,
@@ -24875,11 +24875,23 @@
       "date": "2026-10-23",
       "name": "Forward instantané 2 ans"
     },
+    "fwd_3y": {
+      "horizon_years": 3,
+      "current": 3.144,
+      "date": "2026-10-23",
+      "name": "Forward instantané 3 ans"
+    },
     "fwd_5y": {
       "horizon_years": 5,
       "current": 3.337,
       "date": "2026-10-23",
       "name": "Forward instantané 5 ans"
+    },
+    "fwd_10y": {
+      "horizon_years": 10,
+      "current": 3.857,
+      "date": "2026-10-23",
+      "name": "Forward instantané 10 ans"
     }
   },
   "short_curve": {
