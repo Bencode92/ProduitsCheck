@@ -1189,7 +1189,7 @@
     "minInvestment": 100000,
     "_couponProbability": 94.7,
     "_bsRendementNet": 6.35,
-    "guaranteedYears": 0,
+    "guaranteedYears": 2,
     "decrementPct": null,
     "actualDividendYield": null,
     "grading": {
@@ -1391,7 +1391,10 @@
       "couponOK": false,
       "date": "2026-06-09",
       "note": "auto-taux (TEC10)"
-    }
+    },
+    "strikeDate": "2026-04-28",
+    "strikeDateNote": "Déduite de l'échéance du 28/04/2036 (10 ans) — à confirmer sur l'avis d'opéré / final terms XS3340532707",
+    "maturityDate": "2036-04-28"
   },
   {
     "name": "SOLUTION COURT TERME BOOSTÉE SUR PANIER D'ACTIONS (ByCam)",
