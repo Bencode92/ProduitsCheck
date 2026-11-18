@@ -551,13 +551,13 @@
     "tracking": {
       "history": [
         {
-          "date": "2026-08-28",
-          "level": 98.7,
+          "date": "2026-11-18",
+          "level": 94,
           "year": 1
         }
       ],
-      "level": 98.7,
-      "date": "2026-08-28",
+      "level": 94,
+      "date": "2026-11-18",
       "note": ""
     },
     "envelope": "cameleons",
@@ -845,12 +845,12 @@
           "ref": "TEC10"
         }
       ],
-      "level": 4.48,
+      "level": 4.913,
       "date": "2026-06-09",
       "note": "auto-taux (TEC10)",
       "refLabel": "TEC10",
       "trigger": 4.4,
-      "marginToTrigger": -0.08,
+      "marginToTrigger": -0.51,
       "couponOK": false
     },
     "envelope": "cameleons",
@@ -1384,11 +1384,11 @@
           "ref": "TEC10"
         }
       ],
-      "level": 4.48,
+      "level": 4.913,
       "refLabel": "TEC10",
       "trigger": 4.6,
-      "marginToTrigger": 0.12,
-      "couponOK": true,
+      "marginToTrigger": -0.31,
+      "couponOK": false,
       "date": "2026-06-09",
       "note": "auto-taux (TEC10)"
     }
