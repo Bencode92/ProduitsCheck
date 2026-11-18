@@ -382,14 +382,14 @@ function _renderPortfolioSummaryTable(state) {
                         dbtn.innerHTML = '🗑️ Supprimer en lot'; dbtn.title = 'Sélectionner plusieurs produits et les supprimer d\'un coup';
                         dbtn.onclick = function() { window.openBulkDelete(); };
                         var dref = header.querySelector('.btn.primary') || header.querySelector('.btn');
-                        if (dref) header.insertBefore(dbtn, dref); else header.appendChild(dbtn);
+                        if (dref) dref.parentNode.insertBefore(dbtn, dref); else header.appendChild(dbtn);
                     }
                     if (t.indexOf('Portefeuille') >= 0 && !header.querySelector('.btn-track-rates') && typeof window.refreshRateTracking === 'function') {
                         var tbtn = document.createElement('button'); tbtn.className = 'btn btn-track-rates'; tbtn.style.cssText = 'margin-right:8px;white-space:nowrap';
                         tbtn.innerHTML = '📈 Suivi taux'; tbtn.title = 'Met à jour le niveau des produits de taux (TEC10/Euribor) vs leur trigger';
                         tbtn.onclick = function() { window.refreshRateTracking(); };
                         var rref = header.querySelector('.btn.primary') || header.querySelector('.btn');
-                        if (rref) header.insertBefore(tbtn, rref); else header.appendChild(tbtn);
+                        if (rref) rref.parentNode.insertBefore(tbtn, rref); else header.appendChild(tbtn);
                     }
                     if (t.indexOf('Portefeuille') >= 0 && !header.querySelector('.btn-regrade-all')) {
                         if (typeof window.batchReGradeAll === 'function') {
@@ -400,7 +400,7 @@ function _renderPortfolioSummaryTable(state) {
                                 var btn = document.createElement('button'); btn.className = 'btn btn-regrade-all'; btn.style.cssText = 'margin-right:8px;white-space:nowrap';
                                 btn.innerHTML = '\ud83d\udd04 Actualiser tout (' + total + ')'; btn.onclick = function() { window.batchReGradeAll(); };
                                 var ref = header.querySelector('.btn-struct-opt') || header.querySelector('.btn.primary') || header.querySelector('.btn');
-                                if (ref) header.insertBefore(btn, ref); else header.appendChild(btn);
+                                if (ref) ref.parentNode.insertBefore(btn, ref); else header.appendChild(btn);
                             }
                         }
                     }
@@ -409,7 +409,7 @@ function _renderPortfolioSummaryTable(state) {
                         pdbtn.innerHTML = '🗑️ Supprimer en lot'; pdbtn.title = 'Sélectionner plusieurs produits et les supprimer d\'un coup';
                         pdbtn.onclick = function() { window.openBulkDelete(); };
                         var pdref = header.querySelector('.btn.primary') || header.querySelector('.btn');
-                        if (pdref) header.insertBefore(pdbtn, pdref); else header.appendChild(pdbtn);
+                        if (pdref) pdref.parentNode.insertBefore(pdbtn, pdref); else header.appendChild(pdbtn);
                     }
                     if (t.indexOf('Propositions') >= 0 && !header.querySelector('.btn-grade-all')) {
                         var ungraded = Object.values(state.proposals || {}).flat().filter(function(p) { return !p.grading; });
@@ -431,7 +431,7 @@ function _renderPortfolioSummaryTable(state) {
                                 }).catch(function(e) { showToast('Erreur: ' + e.message, 'error'); });
                             };
                             var addBtn = header.querySelector('.btn.primary');
-                            if (addBtn) header.insertBefore(gbtn, addBtn);
+                            if (addBtn) addBtn.parentNode.insertBefore(gbtn, addBtn);
                         }
                     }
                 });

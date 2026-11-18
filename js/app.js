@@ -20,8 +20,10 @@ class StructBoard {
       const portfolio = await github.readFile(`${CONFIG.DATA_PATH}/portfolio.json`);
       this.state.portfolio = portfolio || [];
       const proposals = {};
-      for (const bank of BANKS) {
-        const bankData = await github.readFile(`${CONFIG.DATA_PATH}/banks/${bank.id}/index.json`);
+      // Les 18 index lus en parallèle (une banque sans produit répond 404, c'est normal) : ~3 s de moins au démarrage.
+      const indexes = await Promise.all(BANKS.map(bank => github.readFile(`${CONFIG.DATA_PATH}/banks/${bank.id}/index.json`)));
+      for (const [i, bank] of BANKS.entries()) {
+        const bankData = indexes[i];
         if (bankData && bankData.products && bankData.products.length > 0) {
           const fullProducts = [];
           for (const summary of bankData.products) {

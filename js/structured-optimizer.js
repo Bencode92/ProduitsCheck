@@ -480,7 +480,7 @@ function renderStructOptimizerDashboard() {
                         btn.innerHTML = '\ud83d\udcca Optimiser';
                         btn.onclick = showStructuredOptimizer;
                         var addBtn = header.querySelector('.btn-regrade-all') || header.querySelector('.btn.primary') || header.querySelector('.btn');
-                        if (addBtn) header.insertBefore(btn, addBtn);
+                        if (addBtn) addBtn.parentNode.insertBefore(btn, addBtn);
                         else header.appendChild(btn);
                     }
                 });
