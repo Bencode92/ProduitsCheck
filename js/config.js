@@ -8,12 +8,56 @@ const CONFIG = {
   DATA_PATH: 'data',
   BRANCH: 'main',
   AI_ENDPOINT: 'https://studyforge-proxy.benoit-comas.workers.dev',
-  AI_MODEL: 'claude-opus-4-8',
-  AI_MODEL_FALLBACK: 'claude-sonnet-4-5',
+  AI_MODEL: 'claude-sonnet-4-6',
+  AI_MODEL_FALLBACK: 'claude-haiku-4-5',
   PDFJS_CDN: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174',
   // Twelve Data via Cloudflare Worker proxy (API key stays in env vars)
   TWELVE_DATA_PROXY: 'https://studyforge-proxy.benoit-comas.workers.dev/twelvedata',
 };
+
+// Le Worker est fermé aux anonymes depuis le 27/10/2026 : tout appel (IA, Twelve Data, enregistrement GitHub) doit
+// porter le jeton d'équipe, et le relais Claude n'accepte que sonnet-4-6 / haiku-4-5, ≤ 6 messages, ≤ 16 000 tokens.
+// Un seul point d'entrée ici plutôt que dans chacun des ~20 appels : le jeton est demandé une fois et gardé
+// dans ce navigateur ; refusé (401) → oublié, redemandé au prochain appel.
+(function () {
+  var CLE = 'cameleons_auth_token';
+  var MODELE_OK = /^claude-(sonnet-4-6|haiku-4-5)/;
+  var _fetch = window.fetch.bind(window);
+  function lire() { try { return localStorage.getItem(CLE) || ''; } catch (e) { return ''; } }
+  function jeton() {
+    var t = lire();
+    if (!t) {
+      t = (window.prompt('Jeton d\'équipe Caméléons (le même que dans l\'outil bordereaux) — demandé une seule fois :') || '').trim();
+      if (t) { try { localStorage.setItem(CLE, t); } catch (e) {} }
+    }
+    return t;
+  }
+  window.fetch = function (input, init) {
+    var url = typeof input === 'string' ? input : (input && input.url) || '';
+    if (url.indexOf(CONFIG.AI_ENDPOINT) !== 0) return _fetch(input, init);
+    init = Object.assign({}, init || {});
+    var h = new Headers(init.headers || {});
+    h.set('X-Auth-Token', jeton());
+    init.headers = h;
+    if ((init.method || 'GET').toUpperCase() === 'POST' && typeof init.body === 'string' && url.replace(/\/+$/, '') === CONFIG.AI_ENDPOINT) {
+      try {
+        var b = JSON.parse(init.body);
+        if (b.model && !MODELE_OK.test(b.model)) b.model = /haiku/.test(b.model) ? 'claude-haiku-4-5' : 'claude-sonnet-4-6';
+        if (b.max_tokens > 16000) b.max_tokens = 16000;
+        if (Array.isArray(b.messages) && b.messages.length > 6) {
+          var m = b.messages.slice(-6);
+          while (m.length && m[0].role !== 'user') m.shift();
+          b.messages = m;
+        }
+        init.body = JSON.stringify(b);
+      } catch (e) {}
+    }
+    return _fetch(url, init).then(function (res) {
+      if (res.status === 401) { try { localStorage.removeItem(CLE); } catch (e) {} }
+      return res;
+    });
+  };
+})();
 
 const MY_ENTITIES = [
   // riskTolerant / guaranteedOnly = politique de placement portée par l'entité (plus de "=== 'bycam'" en dur).
