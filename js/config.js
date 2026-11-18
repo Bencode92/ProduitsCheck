@@ -39,6 +39,7 @@ const CONFIG = {
     var h = new Headers(init.headers || {});
     h.set('X-Auth-Token', jeton());
     init.headers = h;
+    init.cache = 'no-store'; // une ancienne réponse « 410 Route fermée » restait servie par le cache du navigateur
     if ((init.method || 'GET').toUpperCase() === 'POST' && typeof init.body === 'string' && url.replace(/\/+$/, '') === CONFIG.AI_ENDPOINT) {
       try {
         var b = JSON.parse(init.body);
