@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-11-26T00:53:08.880333",
+  "timestamp": "2026-11-26T17:23:41.889244",
   "version": "1.1",
   "tickers": {
     "ACWI": {
@@ -23,13 +23,13 @@
       "data_points": 519
     },
     "CARZ": {
-      "perf_ytd": 3.9,
+      "perf_ytd": 3.89,
       "perf_1y": 12.36,
-      "perf_3m": -21.24,
+      "perf_3m": -21.25,
       "vol_3y": 32.48,
       "max_dd_3y": 35.0,
       "beta": 1.96,
-      "last_close": 83.2938,
+      "last_close": 83.29,
       "data_points": 519
     },
     "DIA": {
